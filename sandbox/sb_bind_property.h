@@ -105,6 +105,14 @@ namespace Sandbox {
 				Sandbox::Bind::GetPropertyPtrData(&Class::Name), \
 				{{}}, } ,
 #define SB_BIND_ZERO_PROPERTY { 0,0,0,0,{{}},{{}} },
+
+/// gcc bug #21853 workaround
+#if 1
+#define SB_CAST_VOID_TO_MEMBER_PTR(Type,ptr) *static_cast<Ptr*>(const_cast<void*>(ptr))
+#else
+#define SB_CAST_VOID_TO_MEMBER_PTR(Type,ptr) *static_cast<const Ptr*>(ptr)
+#endif
+
 		template <typename T,typename Prop> struct PropertyGetHelper<Prop(T::*)()const> {
 			typedef Prop(T::*FuncPtr)()const;
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -115,7 +123,7 @@ namespace Sandbox {
 		template <typename T,typename Prop> struct PropertyGetHelper<Prop T::*> {
 			typedef Prop T::*Ptr;
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
-				Ptr ptr = *static_cast<const Ptr*> (funcp);
+				Ptr ptr = SB_CAST_VOID_TO_MEMBER_PTR(Ptr,funcp);
 				hpr->PushValue(static_cast<T*>(obj)->*ptr);
 			}
 		};
@@ -129,7 +137,7 @@ namespace Sandbox {
 		template <typename T,typename Prop> struct PropertySetHelper<Prop T::*> {
 			typedef Prop T::*Ptr;
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
-				Ptr ptr = *static_cast<const Ptr*> (funcp);
+				Ptr ptr = SB_CAST_VOID_TO_MEMBER_PTR(Ptr,funcp);
 				(static_cast<T*>(obj)->*ptr) = hpr->GetArgument(0,ArgumentTag<Prop>());
 			}
 		};
