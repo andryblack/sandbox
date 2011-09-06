@@ -10,9 +10,17 @@
 #include "sb_lua.h"
 
 extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
+#include "../lua/src/lua.h"
+#include "../lua/src/lauxlib.h"
+	LUALIB_API int (luaopen_base) (lua_State *L);
+	LUALIB_API int (luaopen_table) (lua_State *L);
+	LUALIB_API int (luaopen_io) (lua_State *L);
+	LUALIB_API int (luaopen_os) (lua_State *L);
+	LUALIB_API int (luaopen_string) (lua_State *L);
+	LUALIB_API int (luaopen_math) (lua_State *L);
+	LUALIB_API int (luaopen_debug) (lua_State *L);
+	LUALIB_API int (luaopen_package) (lua_State *L);
+	LUALIB_API void (luaL_openlibs) (lua_State *L); 
 }
 
 #include <ghl_types.h>
@@ -131,7 +139,23 @@ namespace Sandbox {
 		m_helper = LuaHelperPtr(new LuaHelper());
 		m_helper->lua = this;
 		
-		luaL_openlibs(m_state);
+		
+		static const luaL_Reg lualibs[] = {
+			{"", luaopen_base},
+			//{LUA_LOADLIBNAME, luaopen_package},
+			{"table", luaopen_table},
+			{"string", luaopen_string},
+			{"math", luaopen_math},
+			{"debug", luaopen_debug},
+			{NULL, NULL}
+		};
+		
+		for (const luaL_Reg *lib = lualibs; lib->func; lib++) {
+			lua_pushcfunction(m_state, lib->func);
+			lua_pushstring(m_state, lib->name);
+			lua_call(m_state, 1, 0);
+		}
+		
 		static const luaL_Reg base_funcs_impl[] = {
 			{"dofile", lua_dofile_func},
 			//{"loadfile", luaB_loadfile},

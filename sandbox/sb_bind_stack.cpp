@@ -11,8 +11,8 @@
 #include "sb_bind_class.h"
 
 extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
+#include "../lua/src/lua.h"
+#include "../lua/src/lauxlib.h"
 }
 
 #ifdef _MSC_VER
@@ -143,6 +143,9 @@ namespace Sandbox {
 		int StackHelper::GetArgument(int indx,const ArgumentTag<int>& ) const {
 			return int(lua_tonumber(m_L, indx+m_base_index));
 		}
+		GHL::UInt32 StackHelper::GetArgument(int indx,const ArgumentTag<GHL::UInt32>& ) const {
+			return GHL::UInt32(lua_tonumber(m_L, indx+m_base_index));
+		}
 		size_t StackHelper::GetArgument(int indx,const ArgumentTag<size_t>& ) const {
 			return size_t(lua_tonumber(m_L, indx+m_base_index));
 		}
@@ -153,6 +156,9 @@ namespace Sandbox {
 			return lua_tostring(m_L,indx+m_base_index);
 		}
 		void StackHelper::PushValue(int v) const {
+			lua_pushnumber(m_L, v);
+		}
+		void StackHelper::PushValue(GHL::UInt32 v) const {
 			lua_pushnumber(m_L, v);
 		}
 		void StackHelper::PushValue(size_t v) const {

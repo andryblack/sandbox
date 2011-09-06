@@ -14,6 +14,7 @@
 #include "sb_traits.h"
 #include "sb_inplace_string.h"
 #include <string>
+#include <ghl_types.h>
 
 struct lua_State;
 
@@ -79,6 +80,7 @@ namespace Sandbox {
 			}
 			bool GetArgument(int indx,const ArgumentTag<bool>& ) const;
 			int GetArgument(int indx,const ArgumentTag<int>& ) const;
+			GHL::UInt32 GetArgument(int indx,const ArgumentTag<GHL::UInt32>& ) const;
 			size_t GetArgument(int indx,const ArgumentTag<size_t>& ) const;
 			float GetArgument(int indx,const ArgumentTag<float>& ) const;
 			const char* GetArgument(int indx,const ArgumentTag<const char*>& ) const;
@@ -105,6 +107,7 @@ namespace Sandbox {
 					push_null();
 			}
 			void PushValue(int v) const;
+			void PushValue(GHL::UInt32 v) const;
 			void PushValue(size_t v) const;
 			void PushValue(float v) const;
 			void PushValue(const char* v) const;

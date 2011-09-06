@@ -51,9 +51,8 @@
 #include "sb_container_viewport.h"
 
 extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
+#include "../lua/src/lua.h"
+#include "../lua/src/lauxlib.h"
 }
 
 #include <iostream>

@@ -17,7 +17,6 @@
 #include "lua.h"
 
 #include "lauxlib.h"
-#include "lualib.h"
 
 
 /* macro to `unsign' a character */
@@ -858,7 +857,7 @@ static void createmetatable (lua_State *L) {
 ** Open string library
 */
 LUALIB_API int luaopen_string (lua_State *L) {
-  luaL_register(L, LUA_STRLIBNAME, strlib);
+  luaL_register(L, "string", strlib);
 #if defined(LUA_COMPAT_GFIND)
   lua_getfield(L, -1, "gmatch");
   lua_setfield(L, -2, "gfind");

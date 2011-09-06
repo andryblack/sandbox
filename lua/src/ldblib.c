@@ -15,8 +15,10 @@
 #include "lua.h"
 
 #include "lauxlib.h"
-#include "lualib.h"
 
+#ifndef lua_assert
+#define lua_assert(x)
+#endif
 
 
 static int db_getregistry (lua_State *L) {
@@ -391,7 +393,7 @@ static const luaL_Reg dblib[] = {
 
 
 LUALIB_API int luaopen_debug (lua_State *L) {
-  luaL_register(L, LUA_DBLIBNAME, dblib);
+  luaL_register(L, "debug", dblib);
   return 1;
 }
 
