@@ -1,1 +1,7 @@
 build/.obj
+projects/ios/build*
+lib
+projects/ios/chipmunk.xcodeproj/*.mode1v3
+projects/ios/chipmunk.xcodeproj/*.pbxuser
+projects/ios/lua.xcodeproj/*.mode1v3
+projects/ios/lua.xcodeproj/*.pbxuser
