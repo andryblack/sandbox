@@ -66,13 +66,20 @@ namespace Sandbox {
 		} 
 		return TexturePtr(new Texture(texture));
 	}
-	
 	GHL::Image* Resources::LoadImage(const char* filename) {
 		std::string fn = m_base_path + filename;
 		GHL::DataStream* ds = m_vfs->OpenFile(fn.c_str());
 		if (!ds) {
-			std::cout << "[RESOURCES] error opening file " << fn << std::endl;
-			return 0;
+			std::string file = fn+".png";
+			ds = m_vfs->OpenFile( file.c_str() );
+			if ( !ds ) {
+				file = fn+".tga";
+				ds = m_vfs->OpenFile( file.c_str() );
+				if ( !ds ) {
+					std::cout << "[RESOURCES] error opening file " << fn << std::endl;
+					return 0;
+				}
+			}
 		}
 		GHL::Image* img = m_image->Decode(ds);
 		if (!img) {
