@@ -105,6 +105,7 @@ namespace Sandbox {
 		m_lua->SetValue(m_main_scene, "main.scene", "Sandbox::Scene");
 		m_main_thread = new ThreadsMgr();
 		m_lua->SetValue(m_main_thread, "main.thread", "Sandbox::ThreadsMgr");
+		OnLoaded();
 		m_lua->DoFile("main.lua");
 		return true;
 	}

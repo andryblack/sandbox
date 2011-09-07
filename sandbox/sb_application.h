@@ -32,6 +32,10 @@ namespace Sandbox {
 			m_resources_base_path = path;
 		}
 		virtual void BindModules( Lua* lua ) {}
+		virtual void OnLoaded() {}
+		GHL::System* GetSystem() const { return m_system;}
+		Lua* GetLua() const { return m_lua;}
+		ThreadsMgr* GetThreads() const { return m_main_thread;}
 	private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
