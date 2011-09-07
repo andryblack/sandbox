@@ -63,6 +63,7 @@ namespace Sandbox {
 		bool IsStatic() const;
 	protected:
 		explicit Body( cpBody* external ); 
+		cpBody* get_body() const { return m_body;}
 	private:
 		Body(const Body&);
 		Body& operator = (const Body&);
