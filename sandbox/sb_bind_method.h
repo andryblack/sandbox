@@ -116,10 +116,10 @@ namespace Sandbox {
 			typedef void(T::*FuncPtr)();
 			enum { isConst = 0,retValues = 0 };
 			static void ConstructInplace(const StackHelper* hpr) {
-				hpr->PushValue(T());
+				new (hpr->push_object_raw()) T();
 			}
 			static void ConstructInPtr(const StackHelper* hpr) {
-				hpr->PushValue(shared_ptr<T>(new T()));
+				new (hpr->push_object_shared_ptr()) shared_ptr<T>(new T());
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* /*hpr*/) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -150,10 +150,10 @@ namespace Sandbox {
 			typedef void(T::*FuncPtr)(Arg);
 			enum { isConst = 0,retValues = 0 };
 			static void ConstructInplace(const StackHelper* hpr) {
-				hpr->PushValue(T(hpr->GetArgument(0,ArgumentTag<Arg>())));
+				new (hpr->push_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg>()));
 			}
 			static void ConstructInPtr(const StackHelper* hpr) {
-				hpr->PushValue(shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg>()))));
+				new (hpr->push_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg>())));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -184,12 +184,12 @@ namespace Sandbox {
 			typedef void(T::*FuncPtr)(Arg1,Arg2);
 			enum { isConst = 0,retValues = 0 };
 			static void ConstructInplace(const StackHelper* hpr) {
-				hpr->PushValue(T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
-							 hpr->GetArgument(1,ArgumentTag<Arg2>())));
+				new (hpr->push_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+							 hpr->GetArgument(1,ArgumentTag<Arg2>()));
 			}
 			static void ConstructInPtr(const StackHelper* hpr) {
-				hpr->PushValue(shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
-											   hpr->GetArgument(1,ArgumentTag<Arg2>()))));
+				new (hpr->push_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+											   hpr->GetArgument(1,ArgumentTag<Arg2>())));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -202,12 +202,12 @@ namespace Sandbox {
 			typedef void(T::*FuncPtr)(Arg1,Arg2)const;
 			enum { isConst = 1,retValues = 0 };
 			static void ConstructInplace(const StackHelper* hpr) {
-				hpr->PushValue(T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
-								 hpr->GetArgument(1,ArgumentTag<Arg2>())));
+				new (hpr->push_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+								 hpr->GetArgument(1,ArgumentTag<Arg2>()));
 			}
 			static void ConstructInPtr(const StackHelper* hpr) {
-				hpr->PushValue(shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
-												   hpr->GetArgument(1,ArgumentTag<Arg2>()))));
+				new (hpr->push_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+												   hpr->GetArgument(1,ArgumentTag<Arg2>())));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -243,14 +243,14 @@ namespace Sandbox {
 			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3);
 			enum { isConst = 0,retValues = 0 };
 			static void ConstructInplace(const StackHelper* hpr) {
-				hpr->PushValue(T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				new (hpr->push_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 							 hpr->GetArgument(1,ArgumentTag<Arg2>()),
-							 hpr->GetArgument(2,ArgumentTag<Arg3>())));
+							 hpr->GetArgument(2,ArgumentTag<Arg3>()));
 			}
 			static void ConstructInPtr(const StackHelper* hpr) {
-				hpr->PushValue(shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				new (hpr->push_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											   hpr->GetArgument(1,ArgumentTag<Arg2>()),
-											   hpr->GetArgument(2,ArgumentTag<Arg3>()))));
+											   hpr->GetArgument(2,ArgumentTag<Arg3>())));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -290,16 +290,16 @@ namespace Sandbox {
 			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4);
 			enum { isConst = 0,retValues = 0 };
 			static void ConstructInplace(const StackHelper* hpr) {
-				hpr->PushValue(T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				new (hpr->push_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 							 hpr->GetArgument(1,ArgumentTag<Arg2>()),
 							 hpr->GetArgument(2,ArgumentTag<Arg3>()),
-							 hpr->GetArgument(3,ArgumentTag<Arg4>())));
+							 hpr->GetArgument(3,ArgumentTag<Arg4>()));
 			}
 			static void ConstructInPtr(const StackHelper* hpr) {
-				hpr->PushValue(shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				new (hpr->push_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											   hpr->GetArgument(1,ArgumentTag<Arg2>()),
 											   hpr->GetArgument(2,ArgumentTag<Arg3>()),
-											   hpr->GetArgument(3,ArgumentTag<Arg4>()))));
+											   hpr->GetArgument(3,ArgumentTag<Arg4>())));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -342,18 +342,18 @@ namespace Sandbox {
 			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5);
 			enum { isConst = 0,retValues = 0 };
 			static void ConstructInplace(const StackHelper* hpr) {
-				hpr->PushValue(T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				new (hpr->push_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 							 hpr->GetArgument(1,ArgumentTag<Arg2>()),
 							 hpr->GetArgument(2,ArgumentTag<Arg3>()),
 							 hpr->GetArgument(3,ArgumentTag<Arg4>()),
-							 hpr->GetArgument(4,ArgumentTag<Arg5>())));
+							 hpr->GetArgument(4,ArgumentTag<Arg5>()));
 			}
 			static void ConstructInPtr(const StackHelper* hpr) {
-				hpr->PushValue(shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				new (hpr->push_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											   hpr->GetArgument(1,ArgumentTag<Arg2>()),
 											   hpr->GetArgument(2,ArgumentTag<Arg3>()),
 											   hpr->GetArgument(3,ArgumentTag<Arg4>()),
-											   hpr->GetArgument(4,ArgumentTag<Arg5>()))));
+											   hpr->GetArgument(4,ArgumentTag<Arg5>())));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
