@@ -88,6 +88,7 @@ namespace Sandbox {
 	}
 	///
 	bool GHL_CALL Application::Load() {
+		ConfigureDevice( m_system );
 		m_graphics = new Graphics();
 		m_resources = new Resources(m_vfs,m_render,m_image_decoder);
 		std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);

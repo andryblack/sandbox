@@ -33,6 +33,7 @@ namespace Sandbox {
 		}
 		virtual void BindModules( Lua* lua ) {}
 		virtual void OnLoaded() {}
+		virtual void ConfigureDevice(GHL::System* system) {}
 		GHL::System* GetSystem() const { return m_system;}
 		Lua* GetLua() const { return m_lua;}
 		ThreadsMgr* GetThreads() const { return m_main_thread;}
