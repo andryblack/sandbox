@@ -111,7 +111,14 @@ namespace Sandbox {
 			const PropertyInfo* propertys;
 		};
 		
-		
+		namespace ClassDefaults {
+			static const ConstructorInfo constructorInfo = { 
+				0,0, 0 
+			};
+			static const MethodInfo methods[] = {SB_BIND_ZERO_METHOD};
+			static const PropertyInfo propertys[] = {SB_BIND_ZERO_PROPERTY};
+		}
+
 		
 #define SB_BIND_BEGIN_RAW_CLASS( Name ) static const Sandbox::Bind::ClassInfo classInfo = SB_BIND_CLASS_RAW(Name);
 #define SB_BIND_BEGIN_EXTERN_CLASS( Name ) static const Sandbox::Bind::ClassInfo classInfo = SB_BIND_CLASS_EXTERN(Name);
@@ -127,17 +134,13 @@ namespace Sandbox {
 #define SB_BIND_SHARED_CONSTRUCTOR_( Name , Signature , RealSignature ) static const Sandbox::Bind::ConstructorInfo constructorInfo = { \
 			#Name#Signature,0, &Sandbox::Bind::MethodHelper<void(Name::*)RealSignature>::ConstructInPtr \
 		};
-#define SB_BIND_NO_CONSTRUCTOR static const Sandbox::Bind::ConstructorInfo constructorInfo = { \
-			0,0, 0 \
-		};
 #define SB_BIND_BEGIN_METHODS static const Sandbox::Bind::MethodInfo methods[] = {
 #define SB_BIND_END_METHODS SB_BIND_ZERO_METHOD };
-#define SB_BIND_NO_METHODS	static const Sandbox::Bind::MethodInfo* methods = 0;		
 #define SB_BIND_BEGIN_PROPERTYS static const Sandbox::Bind::PropertyInfo propertys[] = {
 #define SB_BIND_END_PROPERTYS SB_BIND_ZERO_PROPERTY };
-#define SB_BIND_NO_PROPERTYS	static const Sandbox::Bind::PropertyInfo* propertys = 0;
 
-#define SB_BIND_END_CLASS static const Sandbox::Bind::ClassBind bind = { &classInfo,&constructorInfo, methods,propertys };
+#define SB_BIND_END_CLASS static const Sandbox::Bind::ClassBind bind = { &classInfo,&constructorInfo, methods,propertys }; 
+		
 		
 		enum StoreType {
 			STORE_RAW,

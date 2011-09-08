@@ -15,11 +15,9 @@ namespace Sandbox {
 
 	namespace Chipmunk {
 		void Bind( Lua* lua ) {
+			SB_BIND_BEGIN_BIND
 			{
 				SB_BIND_BEGIN_SHARED_CLASS( Sandbox::Chipmunk::Shape )
-				SB_BIND_NO_CONSTRUCTOR
-				SB_BIND_BEGIN_METHODS
-				SB_BIND_END_METHODS
 				SB_BIND_BEGIN_PROPERTYS
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Shape, Sensor, GetSensor, SetSensor, bool )
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Shape, Elasticity, GetElasticity, SetElasticity, float )
@@ -61,8 +59,6 @@ namespace Sandbox {
 			{
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::CircleShape,Sandbox::Chipmunk::Shape)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::CircleShape, (Sandbox::Chipmunk::Body,float,Sandbox::Vector2f),(const Sandbox::Chipmunk::BodyPtr&, float,const Sandbox::Vector2f&))
-				SB_BIND_BEGIN_METHODS
-				SB_BIND_END_METHODS
 				SB_BIND_BEGIN_PROPERTYS
 				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::CircleShape, Radius, GetRadius, float )
 				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::CircleShape, Offset, GetOffset, Vector2f )
@@ -73,30 +69,18 @@ namespace Sandbox {
 			{
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::SegmentShape,Sandbox::Chipmunk::Shape)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::SegmentShape, (Sandbox::Chipmunk::Body,Sandbox::Vector2f,Sandbox::Vector2f,float),(const Sandbox::Chipmunk::BodyPtr&, const Sandbox::Vector2f&,const Sandbox::Vector2f&,float))
-				SB_BIND_BEGIN_METHODS
-				SB_BIND_END_METHODS
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
 			}
 			{
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::PolyShape,Sandbox::Chipmunk::Shape)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::PolyShape, (Sandbox::Chipmunk::Body, Sandbox::Vector2fList,Sandbox::Vector2f),(const Sandbox::Chipmunk::BodyPtr&, const std::vector<Vector2f>&,const Sandbox::Vector2f&))
-				SB_BIND_BEGIN_METHODS
-				SB_BIND_END_METHODS
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
 			}
 			{
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::BoxShape,Sandbox::Chipmunk::Shape)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::BoxShape, (Sandbox::Chipmunk::Body,float,float),(const Sandbox::Chipmunk::BodyPtr&, float,float))
-				SB_BIND_BEGIN_METHODS
-				SB_BIND_END_METHODS
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
 			}
@@ -121,11 +105,10 @@ namespace Sandbox {
 				SB_BIND_BEGIN_METHODS
 				SB_BIND_METHOD( Sandbox::Chipmunk::TransformAdapter, Sync, void() )
 				SB_BIND_END_METHODS
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
 			}
+			SB_BIND_END_BIND
 		}
 	}
 	

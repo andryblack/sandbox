@@ -251,11 +251,10 @@ namespace Sandbox {
 	};
 	
 	void Lua::RegisterSandboxObjects() {
+		SB_BIND_BEGIN_BIND
 		{
 			SB_BIND_BEGIN_RAW_CLASS(Sandbox::Recti)
 			SB_BIND_RAW_CONSTRUCTOR(Sandbox::Recti,(int,int,int,int))
-			SB_BIND_BEGIN_METHODS
-			SB_BIND_END_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RAW(Sandbox::Recti,x,int)
 			SB_BIND_PROPERTY_RAW(Sandbox::Recti,y,int)
@@ -309,33 +308,12 @@ namespace Sandbox {
 			SB_BIND_METHOD(Sandbox::Matrix4f,transform_point,Sandbox::Vector3f(Sandbox::Vector3f))
 			SB_BIND_OPERATOR_MUL(Sandbox::Matrix4f,mul,Sandbox::Matrix4f(Sandbox::Matrix4f))
 			SB_BIND_END_METHODS
-			SB_BIND_BEGIN_PROPERTYS
-			/*SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m00,matrix[0*4+0],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m01,matrix[0*4+1],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m02,matrix[0*4+2],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m03,matrix[0*4+3],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m10,matrix[1*4+0],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m11,matrix[1*4+1],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m12,matrix[1*4+2],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m13,matrix[1*4+3],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m20,matrix[2*4+0],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m21,matrix[2*4+1],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m22,matrix[2*4+2],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m23,matrix[2*4+3],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m30,matrix[3*4+0],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m31,matrix[3*4+1],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m32,matrix[3*4+2],float)
-			SB_BIND_PROPERTY_RAW_(Sandbox::Matrix4f,m33,matrix[3*4+3],float)
-			*/
-			SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{
 			SB_BIND_BEGIN_RAW_CLASS(Sandbox::Color)
 			SB_BIND_RAW_CONSTRUCTOR(Sandbox::Color,(float,float,float,float))
-			SB_BIND_BEGIN_METHODS
-			SB_BIND_END_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RAW(Sandbox::Color,r,float)
 			SB_BIND_PROPERTY_RAW(Sandbox::Color,g,float)
@@ -356,14 +334,11 @@ namespace Sandbox {
 			SB_BIND_METHOD(Sandbox::Vector2fList,size,size_t())
 			SB_BIND_METHOD(Sandbox::Vector2fList,add,void(Sandbox::Vector2f))
 			SB_BIND_END_METHODS
-			SB_BIND_BEGIN_PROPERTYS
-			SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{
 			SB_BIND_BEGIN_SHARED_CLASS(Sandbox::Texture)
-			SB_BIND_NO_CONSTRUCTOR
 			SB_BIND_BEGIN_METHODS
 			SB_BIND_METHOD(Sandbox::Texture,SetFiltered,void(bool))
 			SB_BIND_END_METHODS
@@ -376,21 +351,17 @@ namespace Sandbox {
 		}
 		{
 			SB_BIND_BEGIN_SHARED_CLASS(Sandbox::ShaderFloatUniform)
-			SB_BIND_NO_CONSTRUCTOR
 			SB_BIND_BEGIN_METHODS
 			SB_BIND_METHOD(Sandbox::ShaderFloatUniform,SetValue,void(float))
 			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{
 			SB_BIND_BEGIN_SHARED_CLASS(Sandbox::Shader)
-			SB_BIND_NO_CONSTRUCTOR
 			SB_BIND_BEGIN_METHODS
 			SB_BIND_METHOD(Sandbox::Shader,GetFloatUniform,Sandbox::ShaderFloatUniform(const char*))
 			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
@@ -421,8 +392,6 @@ namespace Sandbox {
 			SB_BIND_METHOD(Sandbox::Font,AddGlypth,void(Sandbox::Image,const char*,float))
 			SB_BIND_METHOD(Sandbox::Font,AddKerningPair,void(const char*,const char*,float))
 			SB_BIND_END_METHODS
-			SB_BIND_BEGIN_PROPERTYS
-			SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 			
@@ -437,19 +406,14 @@ namespace Sandbox {
 		}
 		{
 			SB_BIND_BEGIN_SHARED_CLASS(Sandbox::Event)
-			SB_BIND_NO_CONSTRUCTOR
 			SB_BIND_BEGIN_METHODS
 			SB_BIND_METHOD(Sandbox::Event,Emmit,void())
 			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::LuaEvent,Sandbox::Event)
-			SB_BIND_NO_CONSTRUCTOR
-			SB_BIND_NO_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this);
 			get_table("Sandbox.LuaEvent.");
@@ -463,8 +427,6 @@ namespace Sandbox {
 		
 		{
 			SB_BIND_BEGIN_SHARED_CLASS(Sandbox::Object)
-			SB_BIND_NO_CONSTRUCTOR
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::Object,Visible,GetVisible,SetVisible,bool)
 			SB_BIND_END_PROPERTYS
@@ -474,7 +436,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Sprite,Sandbox::Object)
 			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::Sprite,())
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::Sprite,Image,GetImage,SetImage,Sandbox::Image)
 			SB_BIND_PROPERTY_RW(Sandbox::Sprite,Pos,GetPos,SetPos,Sandbox::Vector2f)
@@ -485,7 +446,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Label,Sandbox::Object)
 			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::Label,())
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::Label,Font,GetFont,SetFont,Sandbox::Font)
 			SB_BIND_PROPERTY_RW(Sandbox::Label,Pos,GetPos,SetPos,Sandbox::Vector2f)
@@ -504,7 +464,6 @@ namespace Sandbox {
 			SB_BIND_METHOD(Sandbox::Container,RemoveObject,void(Sandbox::Object))
 			SB_BIND_METHOD(Sandbox::Container,Clear,void())
 			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
@@ -521,7 +480,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerBlend,Sandbox::Container)
 			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerBlend,())
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerBlend,Mode,GetMode,SetMode,Sandbox::BlendMode)
 			SB_BIND_END_PROPERTYS
@@ -530,8 +488,6 @@ namespace Sandbox {
 		}
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerVisible,Sandbox::Container)
-			SB_BIND_NO_CONSTRUCTOR
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerVisible,Invert,GetInvert,SetInvert,bool)
 			SB_BIND_END_PROPERTYS
@@ -541,7 +497,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerShader,Sandbox::Container)
 			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerShader,())
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerShader,Shader,GetShader,SetShader,Sandbox::Shader)
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerShader,Enabled,GetEnabled,SetEnabled,bool)
@@ -552,7 +507,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerTransform,Sandbox::Container)
 			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerTransform,())
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerTransform,Translate,GetTranslate,SetTranslate,Sandbox::Vector2f)
 			SB_BIND_PROPERTY_WO(Sandbox::ContainerTransform,Scale,SetScale,float)
@@ -566,7 +520,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerTransform3d,Sandbox::Container)
 			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerTransform3d,())
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerTransform3d,ProjectionMatrix,GetProjectionMatrix,SetProjectionMatrix,Sandbox::Matrix4f)
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerTransform3d,ViewMatrix,GetViewMatrix,SetViewMatrix,Sandbox::Matrix4f)
@@ -577,7 +530,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerViewport,Sandbox::Container)
 			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerViewport,())
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerViewport,Viewport,Get,Set,Sandbox::Recti)
 			SB_BIND_END_PROPERTYS
@@ -587,7 +539,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerColor,Sandbox::Container)
 			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerColor,())
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerColor,Color,GetColor,SetColor,Sandbox::Color)
 			SB_BIND_PROPERTY_RW(Sandbox::ContainerColor,Alpha,GetAlpha,SetAlpha,float)
@@ -597,8 +548,6 @@ namespace Sandbox {
 		}
 		{
 			SB_BIND_BEGIN_EXTERN_CLASS(Sandbox::Scene)
-			SB_BIND_NO_CONSTRUCTOR
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::Scene,Root,GetRoot,SetRoot,Sandbox::Object)
 			SB_BIND_END_PROPERTYS
@@ -607,22 +556,16 @@ namespace Sandbox {
 		}
 		{
 			SB_BIND_BEGIN_EXTERN_CLASS(Sandbox::Resources)
-			SB_BIND_NO_CONSTRUCTOR
 			SB_BIND_BEGIN_METHODS
 			SB_BIND_METHOD(Sandbox::Resources,GetTexture,Sandbox::Texture(const char*))
 			SB_BIND_METHOD(Sandbox::Resources,GetImage,Sandbox::Image(const char*))
 			SB_BIND_METHOD(Sandbox::Resources,GetShader,Sandbox::Shader(const char*,const char*))
 			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{
 			SB_BIND_BEGIN_SHARED_CLASS(Sandbox::Thread)
-			SB_BIND_NO_CONSTRUCTOR
-			SB_BIND_BEGIN_METHODS
-			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
@@ -660,10 +603,6 @@ namespace Sandbox {
 		}
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::LuaThread,Sandbox::Thread)
-			SB_BIND_NO_CONSTRUCTOR
-			SB_BIND_BEGIN_METHODS
-			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 			get_table("Sandbox.LuaThread.");
@@ -682,7 +621,6 @@ namespace Sandbox {
 			SB_BIND_METHOD(Sandbox::ThreadsMgr,RemoveThread,void(Sandbox::Thread))
 			SB_BIND_METHOD(Sandbox::ThreadsMgr,Clear,void())
 			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
@@ -705,11 +643,9 @@ namespace Sandbox {
 		}
 		{
 			SB_BIND_BEGIN_SHARED_CLASS(Sandbox::Controller)
-			SB_BIND_NO_CONSTRUCTOR
 			SB_BIND_BEGIN_METHODS
 			SB_BIND_METHOD(Sandbox::Controller,Set,void(float))
 			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
@@ -722,23 +658,18 @@ namespace Sandbox {
 			SB_BIND_METHOD(Sandbox::ControllerSplit,RemoveController,void(Sandbox::Controller))
 			SB_BIND_METHOD(Sandbox::ControllerSplit,Clear,void())
 			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerBidirect,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerBidirect,(Sandbox::Controller),(const Sandbox::ControllerPtr&))
-			SB_BIND_BEGIN_METHODS
-			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerPhase,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerPhase,(Sandbox::Controller),(const Sandbox::ControllerPtr&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerPhase,Phase,GetPhase,SetPhase,float)
 			SB_BIND_END_PROPERTYS
@@ -748,7 +679,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerElastic,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerElastic,(Sandbox::Controller),(const Sandbox::ControllerPtr&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerElastic,Hard,GetHard,SetHard,float)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerElastic,End,GetEnd,SetEnd,float)
@@ -764,14 +694,12 @@ namespace Sandbox {
 			SB_BIND_BEGIN_METHODS
 			SB_BIND_METHOD(Sandbox::ControllerMap,SetPoint,void(float,float))
 			SB_BIND_END_METHODS
-			SB_BIND_NO_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerTranslate,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerTranslate,(Sandbox::ContainerTransform),(const Sandbox::ContainerTransformPtr&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerTranslate,Begin,GetBegin,SetBegin,Sandbox::Vector2f)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerTranslate,End,GetEnd,SetEnd,Sandbox::Vector2f)
@@ -782,7 +710,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerScale,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerScale,(Sandbox::ContainerTransform),(const Sandbox::ContainerTransformPtr&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerScale,Begin,GetBegin,SetBegin,float)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerScale,End,GetEnd,SetEnd,float)
@@ -793,7 +720,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerScaleX,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerScaleX,(Sandbox::ContainerTransform),(const Sandbox::ContainerTransformPtr&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerScaleX,Begin,GetBegin,SetBegin,float)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerScaleX,End,GetEnd,SetEnd,float)
@@ -804,7 +730,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerScaleY,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerScaleY,(Sandbox::ContainerTransform),(const Sandbox::ContainerTransformPtr&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerScaleY,Begin,GetBegin,SetBegin,float)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerScaleY,End,GetEnd,SetEnd,float)
@@ -815,7 +740,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerAngle,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerAngle,(Sandbox::ContainerTransform),(const Sandbox::ContainerTransformPtr&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerAngle,Begin,GetBegin,SetBegin,float)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerAngle,End,GetEnd,SetEnd,float)
@@ -826,7 +750,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerColor,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerColor,(Sandbox::ContainerColor),(const Sandbox::ContainerColorPtr&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerColor,Begin,GetBegin,SetBegin,Sandbox::Color)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerColor,End,GetEnd,SetEnd,Sandbox::Color)
@@ -837,7 +760,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerAlpha,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerAlpha,(Sandbox::ContainerColor),(const Sandbox::ContainerColorPtr&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerAlpha,Begin,GetBegin,SetBegin,float)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerAlpha,End,GetEnd,SetEnd,float)
@@ -848,7 +770,6 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ControllerShaderFloatUniform,Sandbox::Controller)
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ControllerShaderFloatUniform,(Sandbox::ShaderFloatUniform),(const shared_ptr<Sandbox::ShaderFloatUniform>&))
-			SB_BIND_NO_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerShaderFloatUniform,Begin,GetBegin,SetBegin,float)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerShaderFloatUniform,End,GetEnd,SetEnd,float)
@@ -856,6 +777,6 @@ namespace Sandbox {
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
-		
+		SB_BIND_END_BIND
 	}
 }

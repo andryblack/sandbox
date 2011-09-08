@@ -14,6 +14,8 @@
 #include "sb_bind_enum.h"
 #include "sb_lua.h"
 
+#define SB_BIND_BEGIN_BIND { using namespace ::Sandbox::Bind::ClassDefaults;(void)constructorInfo;(void)methods;(void)propertys;
 #define SB_BIND(lua) lua->Bind(&bind);
+#define SB_BIND_END_BIND }
 
 #endif /*SB_BIND_H*/

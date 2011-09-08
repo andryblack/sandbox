@@ -41,15 +41,14 @@ namespace Sandbox {
 	}
 	
 	void Accelerometer::Bind( Lua* lua ) {
+		SB_BIND_BEGIN_BIND
 		SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Accelerometer,Sandbox::Thread)
-		SB_BIND_NO_CONSTRUCTOR
-		SB_BIND_BEGIN_METHODS
-		SB_BIND_END_METHODS
 		SB_BIND_BEGIN_PROPERTYS
 		SB_BIND_PROPERTY_RO(Sandbox::Accelerometer,Data,GetData,Sandbox::Vector3f)
 		SB_BIND_END_PROPERTYS
 		SB_BIND_END_CLASS
 		SB_BIND(lua)
+		SB_BIND_END_BIND
 	}
 	
 }

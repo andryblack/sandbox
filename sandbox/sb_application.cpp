@@ -69,11 +69,9 @@ namespace Sandbox {
 		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
 			base_path+="/";
 		m_lua->SetBasePath(base_path.c_str());
+		SB_BIND_BEGIN_BIND
 		{
 			SB_BIND_BEGIN_RAW_CLASS( GHL::Settings )
-			SB_BIND_NO_CONSTRUCTOR
-			SB_BIND_BEGIN_METHODS
-			SB_BIND_END_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RAW(GHL::Settings,width,GHL::UInt32)
 			SB_BIND_PROPERTY_RAW(GHL::Settings,height,GHL::UInt32)
@@ -82,6 +80,7 @@ namespace Sandbox {
 			SB_BIND_END_CLASS
 			SB_BIND(m_lua)
 		}
+		SB_BIND_END_BIND
 		m_lua->SetValue(settings, "settings", "GHL::Settings");
 		BindModules( m_lua );
 		m_lua->DoFile("settings.lua");
