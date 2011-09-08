@@ -44,7 +44,7 @@ namespace Sandbox {
 			bool is_null(int indx) const;
 			void push_null() const;
 			template <class T> void _PushValue(const T& v , const IsNotEnumTag<T>&  ) const {
-				new (push_object_raw()) T(v);
+				new (new_object_raw()) T(v);
 			}
 			template <class T> void _PushValue(T v , const IsEnumTag<T>&   ) const {
 				PushValue(static_cast<int> (v));
@@ -53,8 +53,8 @@ namespace Sandbox {
 			explicit StackHelper(lua_State* L,int base_index,const char* signature) : m_L(L),m_base_index(base_index),m_signature(signature) {}
 			static ObjectData*  check_object_type(lua_State* L,int indx,const char* type,bool derived);
 			static void* get_object_ptr(lua_State* L,int indx,const ClassInfo* name);
-			void* push_object_raw() const;
-			void* push_object_shared_ptr() const;
+			void* new_object_raw() const;
+			void* new_object_shared_ptr() const;
 			static void rawgetfield (lua_State *L, int idx, const char *key);
 			static void rawsetfield (lua_State *L, int idx, const char *key);
 			template <class T> shared_ptr<T> GetArgument(int indx,const ArgumentTag<const shared_ptr<T>&>& ) const {
@@ -101,7 +101,7 @@ namespace Sandbox {
 			}
 			template <class T> void PushValue(const shared_ptr<T>& v) const {
 				if (v)
-					new (push_object_shared_ptr()) shared_ptr<T>(v);
+					new (new_object_shared_ptr()) shared_ptr<T>(v);
 				else
 					push_null();
 			}

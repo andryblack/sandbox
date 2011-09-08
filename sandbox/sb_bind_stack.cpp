@@ -208,7 +208,7 @@ namespace Sandbox {
 			}
 			lua_setmetatable(L, -2);
 		}
-		void* StackHelper::push_object_shared_ptr() const {
+		void* StackHelper::new_object_shared_ptr() const {
 			lua_State* L = m_L;
 			std::string type = get_ret_type(m_signature).str();
 			/// getting metatable
@@ -232,7 +232,7 @@ namespace Sandbox {
 			lua_remove(L, -2);
 			return (block+1);
 		} 
-		void* StackHelper::push_object_raw() const {
+		void* StackHelper::new_object_raw() const {
 			lua_State* L = m_L;
 			std::string type = get_ret_type(m_signature).str();
 			/// getting metatable
