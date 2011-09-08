@@ -23,10 +23,6 @@ LUALIB_API void (luaL_setn) (lua_State *L, int t, int n);
 #define luaL_setn(L,i,j)        ((void)0)  /* no op! */
 #endif
 
-#if defined(LUA_COMPAT_OPENLIB)
-#define luaI_openlib	luaL_openlib
-#endif
-
 
 /* extra error code for `luaL_load' */
 #define LUA_ERRFILE     (LUA_ERRERR+1)
@@ -74,12 +70,9 @@ LUALIB_API int (luaL_checkoption) (lua_State *L, int narg, const char *def,
 LUALIB_API int (luaL_ref) (lua_State *L, int t);
 LUALIB_API void (luaL_unref) (lua_State *L, int t, int ref);
 
-LUALIB_API int (luaL_loadfile) (lua_State *L, const char *filename);
 LUALIB_API int (luaL_loadbuffer) (lua_State *L, const char *buff, size_t sz,
                                   const char *name);
 LUALIB_API int (luaL_loadstring) (lua_State *L, const char *s);
-
-LUALIB_API lua_State *(luaL_newstate) (void);
 
 
 LUALIB_API const char *(luaL_gsub) (lua_State *L, const char *s, const char *p,
@@ -107,9 +100,6 @@ LUALIB_API const char *(luaL_findtable) (lua_State *L, int idx,
 #define luaL_optlong(L,n,d)	((long)luaL_optinteger(L, (n), (d)))
 
 #define luaL_typename(L,i)	lua_typename(L, lua_type(L,(i)))
-
-#define luaL_dofile(L, fn) \
-	(luaL_loadfile(L, fn) || lua_pcall(L, 0, LUA_MULTRET, 0))
 
 #define luaL_dostring(L, s) \
 	(luaL_loadstring(L, s) || lua_pcall(L, 0, LUA_MULTRET, 0))

@@ -83,13 +83,13 @@
 ** In Windows, any exclamation mark ('!') in the path is replaced by the
 ** path of the directory of the executable file of the current process.
 */
-#define LUA_LDIR	"!\\lua\\"
-#define LUA_CDIR	"!\\"
-#define LUA_PATH_DEFAULT  \
-		".\\?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?\\init.lua;" \
-		             LUA_CDIR"?.lua;"  LUA_CDIR"?\\init.lua"
-#define LUA_CPATH_DEFAULT \
-	".\\?.dll;"  LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll"
+//#define LUA_LDIR	"!\\lua\\"
+//#define LUA_CDIR	"!\\"
+//#define LUA_PATH_DEFAULT  \
+//		".\\?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?\\init.lua;" \
+//		             LUA_CDIR"?.lua;"  LUA_CDIR"?\\init.lua"
+//#define LUA_CPATH_DEFAULT \
+//	".\\?.dll;"  LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll"
 
 #else
 /*#define LUA_ROOT	"/usr/local/"*/
@@ -109,9 +109,9 @@
 ** and is not Windows. (On Windows Lua automatically uses "\".)
 */
 #if defined(_WIN32)
-#define LUA_DIRSEP	"\\"
+//#define LUA_DIRSEP	"\\"
 #else
-#define LUA_DIRSEP	"/"
+//#define LUA_DIRSEP	"/"
 #endif
 
 
@@ -127,10 +127,10 @@
 ** characters. (E.g., if one of those characters is a common character
 ** in file/directory names.) Probably you do not need to change them.
 */
-#define LUA_PATHSEP	";"
-#define LUA_PATH_MARK	"?"
-#define LUA_EXECDIR	"!"
-#define LUA_IGMARK	"-"
+//#define LUA_PATHSEP	";"
+//#define LUA_PATH_MARK	"?"
+//#define LUA_EXECDIR	"!"
+//#define LUA_IGMARK	"-"
 
 
 /*
@@ -251,14 +251,16 @@
 ** CHANGE it to undefined as soon as your programs use only '...' to
 ** access vararg parameters (instead of the old 'arg' table).
 */
-#define LUA_COMPAT_VARARG
+#undef LUA_COMPAT_VARARG
+//#define LUA_COMPAT_VARARG
 
 /*
 @@ LUA_COMPAT_MOD controls compatibility with old math.mod function.
 ** CHANGE it to undefined as soon as your programs use 'math.fmod' or
 ** the new '%' operator instead of 'math.mod'.
 */
-#define LUA_COMPAT_MOD
+#undef LUA_COMPAT_MOD
+//#define LUA_COMPAT_MOD
 
 /*
 @@ LUA_COMPAT_LSTR controls compatibility with old long string nesting
@@ -273,7 +275,8 @@
 ** CHANGE it to undefined as soon as you rename 'string.gfind' to
 ** 'string.gmatch'.
 */
-#define LUA_COMPAT_GFIND
+#undef LUA_COMPAT_GFIND
+//#define LUA_COMPAT_GFIND
 
 /*
 @@ LUA_COMPAT_OPENLIB controls compatibility with old 'luaL_openlib'
@@ -281,7 +284,8 @@
 ** CHANGE it to undefined as soon as you replace to 'luaL_register'
 ** your uses of 'luaL_openlib'
 */
-#define LUA_COMPAT_OPENLIB
+#undef LUA_COMPAT_OPENLIB
+//#define LUA_COMPAT_OPENLIB
 
 
 
@@ -553,50 +557,6 @@ union luai_Cast { double l_d; long l_l; };
 
 
 
-/*
-@@ lua_popen spawns a new process connected to the current one through
-@* the file streams.
-** CHANGE it if you have a way to implement it in your system.
-*/
-#if defined(LUA_USE_POPEN)
-
-#define lua_popen(L,c,m)	((void)L, fflush(NULL), popen(c,m))
-#define lua_pclose(L,file)	((void)L, (pclose(file) != -1))
-
-#elif defined(LUA_WIN)
-
-#define lua_popen(L,c,m)	((void)L, _popen(c,m))
-#define lua_pclose(L,file)	((void)L, (_pclose(file) != -1))
-
-#else
-
-#define lua_popen(L,c,m)	((void)((void)c, m),  \
-		luaL_error(L, LUA_QL("popen") " not supported"), (FILE*)0)
-#define lua_pclose(L,file)		((void)((void)L, file), 0)
-
-#endif
-
-/*
-@@ LUA_DL_* define which dynamic-library system Lua should use.
-** CHANGE here if Lua has problems choosing the appropriate
-** dynamic-library system for your platform (either Windows' DLL, Mac's
-** dyld, or Unix's dlopen). If your system is some kind of Unix, there
-** is a good chance that it has dlopen, so LUA_DL_DLOPEN will work for
-** it.  To use dlopen you also need to adapt the src/Makefile (probably
-** adding -ldl to the linker options), so Lua does not select it
-** automatically.  (When you change the makefile to add -ldl, you must
-** also add -DLUA_USE_DLOPEN.)
-** If you do not want any kind of dynamic library, undefine all these
-** options.
-** By default, _WIN32 gets LUA_DL_DLL and MAC OS X gets LUA_DL_DYLD.
-*/
-#if defined(LUA_USE_DLOPEN)
-#define LUA_DL_DLOPEN
-#endif
-
-#if defined(LUA_WIN)
-#define LUA_DL_DLL
-#endif
 
 
 /*

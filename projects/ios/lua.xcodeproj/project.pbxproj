@@ -108,7 +108,7 @@
 		A47726B91413D79C006A9887 /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lzio.h; sourceTree = "<group>"; };
 		AA747D9E0F9514B9006C5449 /* lua_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lua_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		D2AAC07E0554694100DB518D /* liblua-Debug-iphonesimulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "liblua-Debug-iphonesimulator.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC07E0554694100DB518D /* liblua-Debug-iphoneos.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "liblua-Debug-iphoneos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,7 +126,7 @@
 		034768DFFF38A50411DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D2AAC07E0554694100DB518D /* liblua-Debug-iphonesimulator.a */,
+				D2AAC07E0554694100DB518D /* liblua-Debug-iphoneos.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -263,7 +263,7 @@
 			);
 			name = lua;
 			productName = lua;
-			productReference = D2AAC07E0554694100DB518D /* liblua-Debug-iphonesimulator.a */;
+			productReference = D2AAC07E0554694100DB518D /* liblua-Debug-iphoneos.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */

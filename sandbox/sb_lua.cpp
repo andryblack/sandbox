@@ -14,13 +14,9 @@ extern "C" {
 #include "../lua/src/lauxlib.h"
 	LUALIB_API int (luaopen_base) (lua_State *L);
 	LUALIB_API int (luaopen_table) (lua_State *L);
-	LUALIB_API int (luaopen_io) (lua_State *L);
-	LUALIB_API int (luaopen_os) (lua_State *L);
 	LUALIB_API int (luaopen_string) (lua_State *L);
 	LUALIB_API int (luaopen_math) (lua_State *L);
 	LUALIB_API int (luaopen_debug) (lua_State *L);
-	LUALIB_API int (luaopen_package) (lua_State *L);
-	LUALIB_API void (luaL_openlibs) (lua_State *L); 
 }
 
 #include <ghl_types.h>
@@ -142,7 +138,6 @@ namespace Sandbox {
 		
 		static const luaL_Reg lualibs[] = {
 			{"", luaopen_base},
-			//{LUA_LOADLIBNAME, luaopen_package},
 			{"table", luaopen_table},
 			{"string", luaopen_string},
 			{"math", luaopen_math},
@@ -158,7 +153,6 @@ namespace Sandbox {
 		
 		static const luaL_Reg base_funcs_impl[] = {
 			{"dofile", lua_dofile_func},
-			//{"loadfile", luaB_loadfile},
 			{"print", lua_print_func},
 			{NULL, NULL}
 		};
