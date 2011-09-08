@@ -73,6 +73,7 @@ namespace Sandbox {
 		friend class CircleShape;
 		friend class PolyShape;
 		friend class SegmentShape;
+		friend class BoxShape;
 	};
 	typedef shared_ptr<Body> BodyPtr;
 	
@@ -81,12 +82,17 @@ namespace Sandbox {
 		virtual ~Shape();
 		float GetFriction() const;
 		void SetFriction(float f);
+		bool GetSensor() const;
+		void SetSensor(bool s);
+		float GetElasticity() const;
+		void SetElasticity(float e);
 	protected:
 		Shape();
 		void SetShape( cpShape* shape );
 	private:
 		Shape(const Shape&);
 		Shape& operator = (const Shape&);
+	protected:
 		cpShape*	m_shape;
 		friend class Space;
 	};
@@ -98,6 +104,8 @@ namespace Sandbox {
 		~Space();
 		void SetGravity( const Vector2f& g );
 		Vector2f GetGravity() const;
+		int GetIterations() const;
+		void SetIterations(int i);
 		void AddBody(const BodyPtr& body);
 		void RemoveBody(const BodyPtr& body);
 		void AddShape(const ShapePtr& shape);
@@ -123,6 +131,8 @@ namespace Sandbox {
 	class CircleShape : public Shape {
 	public:
 		CircleShape( const BodyPtr& body, float radius, const Vector2f& pos ); 
+		Vector2f GetOffset() const;
+		float	GetRadius() const;
 	};
 	
 	class SegmentShape : public Shape {
@@ -133,6 +143,10 @@ namespace Sandbox {
 	class PolyShape : public Shape {
 	public:
 		PolyShape( const BodyPtr& body, const std::vector<Vector2f>& points, const Vector2f& offset );
+	};
+	class BoxShape : public Shape {
+	public:
+		BoxShape( const BodyPtr& body, float w, float h);
 	};
 	
 	class Constraint {

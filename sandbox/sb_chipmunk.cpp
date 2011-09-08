@@ -60,6 +60,12 @@ namespace Sandbox {
 		cpVect v = cpSpaceGetGravity(m_space);
 		return Vector2f( v.x, v.y );
 	}
+	int Space::GetIterations() const {
+		return cpSpaceGetIterations(m_space);
+	}
+	void Space::SetIterations(int i) {
+		cpSpaceSetIterations(m_space, i);
+	}
 	void Space::AddBody(const BodyPtr& body) {
 		if (add(m_bodys,body))
 			cpSpaceAddBody(m_space, body->m_body);
@@ -109,10 +115,30 @@ namespace Sandbox {
 	void Shape::SetFriction(float f) {
 		cpShapeSetFriction(m_shape, f);
 	}
+	bool Shape::GetSensor() const {
+		return cpShapeGetSensor(m_shape);
+	}
+	void Shape::SetSensor(bool s) {
+		cpShapeSetSensor(m_shape, s?cpTrue:cpFalse);
+	}
 	
-	
+	float Shape::GetElasticity() const {
+		return cpShapeGetElasticity(m_shape);
+	}
+	void Shape::SetElasticity(float e) {
+		cpShapeSetElasticity(m_shape, e);
+	}
+		
+		
 	CircleShape::CircleShape( const BodyPtr& body, float radius, const Vector2f& pos ) {
 		SetShape(cpCircleShapeNew(body->m_body,radius,cpv(pos.x,pos.y)));
+	}
+	Vector2f CircleShape::GetOffset() const {
+		cpVect v = cpCircleShapeGetOffset(m_shape);
+		return Vector2f(v.x,v.y);
+	}
+	float	CircleShape::GetRadius() const {
+		return cpCircleShapeGetRadius(m_shape);
 	}
 	
 	PolyShape::PolyShape( const BodyPtr& body, const std::vector<Vector2f>& points, const Vector2f& offset ) {
@@ -127,6 +153,11 @@ namespace Sandbox {
 	SegmentShape::SegmentShape( const BodyPtr& body, const Vector2f& a,const Vector2f& b,float radius) {
 		SetShape(cpSegmentShapeNew(body->m_body,cpv(a.x,a.y),cpv(b.x,b.y),radius));
 	}
+		
+	BoxShape::BoxShape( const BodyPtr& body, float w, float h ) {
+		SetShape(cpBoxShapeNew(body->m_body, w, h));
+	}
+		
 	
 	Body::Body( float mass, float inertia ) {
 		m_body = cpBodyNew(mass, inertia);

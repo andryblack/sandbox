@@ -21,6 +21,8 @@ namespace Sandbox {
 				SB_BIND_BEGIN_METHODS
 				SB_BIND_END_METHODS
 				SB_BIND_BEGIN_PROPERTYS
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Shape, Sensor, GetSensor, SetSensor, bool )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Shape, Elasticity, GetElasticity, SetElasticity, float )
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Shape, Friction, GetFriction, SetFriction, float )
 				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
@@ -62,6 +64,8 @@ namespace Sandbox {
 				SB_BIND_BEGIN_METHODS
 				SB_BIND_END_METHODS
 				SB_BIND_BEGIN_PROPERTYS
+				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::CircleShape, Radius, GetRadius, float )
+				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::CircleShape, Offset, GetOffset, Vector2f )
 				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
@@ -87,6 +91,16 @@ namespace Sandbox {
 				SB_BIND( lua );
 			}
 			{
+				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::BoxShape,Sandbox::Chipmunk::Shape)
+				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::BoxShape, (Sandbox::Chipmunk::Body,float,float),(const Sandbox::Chipmunk::BodyPtr&, float,float))
+				SB_BIND_BEGIN_METHODS
+				SB_BIND_END_METHODS
+				SB_BIND_BEGIN_PROPERTYS
+				SB_BIND_END_PROPERTYS
+				SB_BIND_END_CLASS
+				SB_BIND( lua );
+			}
+			{
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::Space, Sandbox::Thread )
 				SB_BIND_SHARED_CONSTRUCTOR( Sandbox::Chipmunk::Space, () )
 				SB_BIND_BEGIN_METHODS
@@ -95,6 +109,7 @@ namespace Sandbox {
 				SB_BIND_END_METHODS
 				SB_BIND_BEGIN_PROPERTYS
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Space, Gravity, GetGravity, SetGravity, Sandbox::Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Space, Iterations, GetIterations, SetIterations, int )
 				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::Space, StaticBody, GetStaticBody, Sandbox::Chipmunk::Body )
 				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
