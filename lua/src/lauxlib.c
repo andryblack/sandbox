@@ -225,7 +225,10 @@ LUALIB_API int luaL_callmeta (lua_State *L, int obj, const char *event) {
   return 1;
 }
 
-
+LUALIB_API void (luaL_register) (lua_State *L, const char *libname,
+								              const luaL_Reg *l) {
+	luaI_openlib(L, libname, l, 0);
+}
 
 
 static int libsize (const luaL_Reg *l) {
