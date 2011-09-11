@@ -294,6 +294,15 @@ namespace Sandbox {
 		m_render->SetViewport(rect.x, rect.y, rect.w, rect.h);
 	}
 	
+	void Graphics::SetClipRect(const Recti& rect) {
+		Flush();
+		m_clip_rect = rect;
+		if (m_clip_rect==m_viewport) {
+			m_render->SetupScisor( false );
+		} else {
+			m_render->SetupScisor( true, rect.x,rect.y, rect.w,rect.h);
+		}
+	}
 		
 		
 	void Graphics::BeginScene(GHL::Render* render) {
@@ -315,6 +324,7 @@ namespace Sandbox {
 											float(render->GetHeight()),0,-10,10));
 		SetViewMatrix(Matrix4f::identity());
 		SetViewport(Recti(0,0,render->GetWidth(),render->GetHeight()));
+		SetClipRect(GetViewport());
 	}
 	void Graphics::EndScene() {
 		sb_assert( (m_render!=0) && "scene not started" );

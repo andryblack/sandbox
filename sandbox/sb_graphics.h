@@ -54,7 +54,9 @@ namespace Sandbox {
 		/// viewport
 		const Recti& GetViewport() const { return m_viewport;}
 		void SetViewport(const Recti& rect);
-		
+		/// clip 
+		const Recti& GetClipRect() const { return m_clip_rect;}
+		void SetClipRect(const Recti& rect);
 		/// global color
 		const Color& GetColor() const { return m_color;}
 		void SetColor(const Color& color) { m_color = color;}
@@ -106,6 +108,7 @@ namespace Sandbox {
 		Matrix4f	m_projection_matrix;
 		Matrix4f	m_view_matrix;
 		Recti		m_viewport;
+		Recti		m_clip_rect;
 		Color		m_color;
 		BlendMode	m_blend_mode;
 		TexturePtr  m_texture;
