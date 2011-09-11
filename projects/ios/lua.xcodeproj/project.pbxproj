@@ -54,7 +54,6 @@
 		A47726E61413D79C006A9887 /* lvm.h in Headers */ = {isa = PBXBuildFile; fileRef = A47726B71413D79C006A9887 /* lvm.h */; };
 		A47726E71413D79C006A9887 /* lzio.c in Sources */ = {isa = PBXBuildFile; fileRef = A47726B81413D79C006A9887 /* lzio.c */; };
 		A47726E81413D79C006A9887 /* lzio.h in Headers */ = {isa = PBXBuildFile; fileRef = A47726B91413D79C006A9887 /* lzio.h */; };
-		AA747D9F0F9514B9006C5449 /* lua_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* lua_Prefix.pch */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
@@ -106,7 +105,6 @@
 		A47726B71413D79C006A9887 /* lvm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lvm.h; sourceTree = "<group>"; };
 		A47726B81413D79C006A9887 /* lzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lzio.c; sourceTree = "<group>"; };
 		A47726B91413D79C006A9887 /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lzio.h; sourceTree = "<group>"; };
-		AA747D9E0F9514B9006C5449 /* lua_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lua_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D2AAC07E0554694100DB518D /* liblua-Debug-iphoneos.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "liblua-Debug-iphoneos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -135,7 +133,6 @@
 			isa = PBXGroup;
 			children = (
 				A477268A1413D79C006A9887 /* src */,
-				32C88DFF0371C24200C91783 /* Other Sources */,
 				0867D69AFE84028FC02AAC07 /* Frameworks */,
 				034768DFFF38A50411DB9C8B /* Products */,
 			);
@@ -148,14 +145,6 @@
 				AACBBE490F95108600F1A2B1 /* Foundation.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		32C88DFF0371C24200C91783 /* Other Sources */ = {
-			isa = PBXGroup;
-			children = (
-				AA747D9E0F9514B9006C5449 /* lua_Prefix.pch */,
-			);
-			name = "Other Sources";
 			sourceTree = "<group>";
 		};
 		A477268A1413D79C006A9887 /* src */ = {
@@ -220,7 +209,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA747D9F0F9514B9006C5449 /* lua_Prefix.pch in Headers */,
 				A47726BB1413D79C006A9887 /* lapi.h in Headers */,
 				A47726BD1413D79C006A9887 /* lauxlib.h in Headers */,
 				A47726C01413D79C006A9887 /* lcode.h in Headers */,
@@ -338,8 +326,8 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = lua_Prefix.pch;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "lua-$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 			};
@@ -352,8 +340,8 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				DSTROOT = /tmp/lua.dst;
 				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = lua_Prefix.pch;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "lua-$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 			};
