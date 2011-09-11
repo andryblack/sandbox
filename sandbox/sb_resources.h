@@ -51,6 +51,8 @@ namespace Sandbox {
 		const std::string& GetBasePath() const { return m_base_path;}
 		
 		shared_ptr<Atlaser> CreateAtlaser(int w, int h);
+		
+		TexturePtr CreateTexture( GHL::UInt32 w, GHL::UInt32 h, const GHL::Byte* data);
 	private:
 		GHL::VFS* m_vfs;
 		GHL::Render* m_render;
