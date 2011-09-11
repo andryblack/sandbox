@@ -39,7 +39,15 @@ namespace Sandbox {
 		m_base_path = path;
 	}
 
-	
+	GHL::DataStream* Resources::OpenFile(const char* filename) {
+		std::string fn = m_base_path + filename;
+		GHL::DataStream* ds = m_vfs->OpenFile(fn.c_str());
+		if (!ds) {
+			std::cout << "[RESOURCES] Failed open file " << filename << std::endl;
+			std::cout << "[RESOURCES] full path : " << fn << std::endl;
+		}
+		return ds;
+	}
 	
 	TexturePtr Resources::CreateTexture( int w,int h, bool alpha,bool fill) {
 		GHL::TextureFormat tfmt;

@@ -23,6 +23,7 @@ namespace GHL {
 	struct ImageDecoder;
 	struct VertexShader;
 	struct FragmentShader;
+	struct DataStream;
 }
 namespace Sandbox {
 	
@@ -36,6 +37,7 @@ namespace Sandbox {
 		~Resources();
 		
 		void SetBasePath(const char* path);
+		GHL::DataStream* OpenFile(const char* fn);
 		
 		TexturePtr GetTexture(const char* filename);
 		ImagePtr GetImage(const char* filename);
