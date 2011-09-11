@@ -62,7 +62,6 @@
 		A477277D1413DBA5006A9887 /* cpSweep1D.c in Sources */ = {isa = PBXBuildFile; fileRef = A47727461413DBA5006A9887 /* cpSweep1D.c */; };
 		A477277E1413DBA5006A9887 /* cpVect.c in Sources */ = {isa = PBXBuildFile; fileRef = A47727471413DBA5006A9887 /* cpVect.c */; };
 		A477277F1413DBA5006A9887 /* prime.h in Headers */ = {isa = PBXBuildFile; fileRef = A47727481413DBA5006A9887 /* prime.h */; };
-		AA747D9F0F9514B9006C5449 /* chipmunk_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* chipmunk_Prefix.pch */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
@@ -122,9 +121,8 @@
 		A47727461413DBA5006A9887 /* cpSweep1D.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpSweep1D.c; sourceTree = "<group>"; };
 		A47727471413DBA5006A9887 /* cpVect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpVect.c; sourceTree = "<group>"; };
 		A47727481413DBA5006A9887 /* prime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prime.h; sourceTree = "<group>"; };
-		AA747D9E0F9514B9006C5449 /* chipmunk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		D2AAC07E0554694100DB518D /* libchipmunk-Debug-iphonesimulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libchipmunk-Debug-iphonesimulator.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC07E0554694100DB518D /* libchipmunk-Debug-iphoneos.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libchipmunk-Debug-iphoneos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,7 +140,7 @@
 		034768DFFF38A50411DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D2AAC07E0554694100DB518D /* libchipmunk-Debug-iphonesimulator.a */,
+				D2AAC07E0554694100DB518D /* libchipmunk-Debug-iphoneos.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -165,7 +163,6 @@
 				A47727261413DBA5006A9887 /* cpSpatialIndex.h */,
 				A47727271413DBA5006A9887 /* cpVect.h */,
 				A47727281413DBA5006A9887 /* src */,
-				32C88DFF0371C24200C91783 /* Other Sources */,
 				0867D69AFE84028FC02AAC07 /* Frameworks */,
 				034768DFFF38A50411DB9C8B /* Products */,
 			);
@@ -178,14 +175,6 @@
 				AACBBE490F95108600F1A2B1 /* Foundation.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		32C88DFF0371C24200C91783 /* Other Sources */ = {
-			isa = PBXGroup;
-			children = (
-				AA747D9E0F9514B9006C5449 /* chipmunk_Prefix.pch */,
-			);
-			name = "Other Sources";
 			sourceTree = "<group>";
 		};
 		A47727131413DBA5006A9887 /* constraints */ = {
@@ -261,7 +250,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA747D9F0F9514B9006C5449 /* chipmunk_Prefix.pch in Headers */,
 				A47727491413DBA5006A9887 /* chipmunk.h in Headers */,
 				A477274A1413DBA5006A9887 /* chipmunk_ffi.h in Headers */,
 				A477274B1413DBA5006A9887 /* chipmunk_private.h in Headers */,
@@ -308,7 +296,7 @@
 			);
 			name = chipmunk;
 			productName = chipmunk;
-			productReference = D2AAC07E0554694100DB518D /* libchipmunk-Debug-iphonesimulator.a */;
+			productReference = D2AAC07E0554694100DB518D /* libchipmunk-Debug-iphoneos.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -386,8 +374,8 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = chipmunk_Prefix.pch;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "chipmunk-$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				USER_HEADER_SEARCH_PATHS = "";
@@ -400,8 +388,8 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				DSTROOT = /tmp/chipmunk.dst;
 				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = chipmunk_Prefix.pch;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "chipmunk-$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				USER_HEADER_SEARCH_PATHS = "";
