@@ -124,12 +124,19 @@ namespace Sandbox {
 		m_render->BeginScene(0);
 		m_render->Clear(0,0,0,0);
 		m_graphics->BeginScene(m_render);
-		m_main_scene->Draw(*m_graphics);
 		DrawFrame(*m_graphics);
 		m_graphics->EndScene();
 		DrawDebugInfo();
 		m_render->EndScene();
 		return true;
+	}
+	
+	void Application::DrawScene() const {
+		m_main_scene->Draw(*m_graphics);
+	}
+	
+	void Application::DrawFrame(Graphics& g) const {
+		DrawScene();
 	}
 	
 	void Application::DrawDebugInfo() {

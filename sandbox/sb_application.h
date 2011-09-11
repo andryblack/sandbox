@@ -23,7 +23,7 @@ namespace Sandbox {
 		Application();
 		virtual ~Application();
 		virtual void Update(float dt) {}
-		virtual void DrawFrame(Graphics& g) const {}
+		virtual void DrawFrame(Graphics& g) const;
 		virtual bool LoadResources(Resources& res) { return true;}
 		void SetLuaBasePath(const char* path) {
 			m_lua_base_path = path;
@@ -35,8 +35,13 @@ namespace Sandbox {
 		virtual void OnLoaded() {}
 		virtual void ConfigureDevice(GHL::System* system) {}
 		GHL::System* GetSystem() const { return m_system;}
+		GHL::VFS* GetVFS() const { return m_vfs;}
+		GHL::Render* GetRender() const { return m_render;}
 		Lua* GetLua() const { return m_lua;}
 		ThreadsMgr* GetThreads() const { return m_main_thread;}
+		Resources* GetResources() const { return m_resources;}
+		
+		void DrawScene() const;
 	private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
