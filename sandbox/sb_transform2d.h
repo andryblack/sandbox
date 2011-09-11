@@ -37,6 +37,16 @@ namespace Sandbox {
         Transform2d& translate(float x,float y) {
             return translate(Vector2f(x,y));
         }
+		Transform2d translated(float x,float y) const {
+			Transform2d res(*this);
+			res.translate(x,y);
+			return res;
+		}
+		Transform2d translated(const Vector2f& pos) const {
+			Transform2d res(*this);
+			res.translate(pos);
+			return res;
+		}
         Transform2d& rotate(float _a) {
             float a = float(M_PI) * _a / 180.0f;
             float c = ::cosf(a);
