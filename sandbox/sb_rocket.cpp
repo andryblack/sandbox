@@ -86,17 +86,24 @@ namespace Sandbox {
 	
 	class SystemInterfaceImpl : public ::Rocket::Core::SystemInterface {
 	public:
-		SystemInterfaceImpl() {
+		explicit SystemInterfaceImpl(GHL::System* system) : m_system(system) {
 			m_time = 0;
 		}
 		virtual float GetElapsedTime() {
 			return 0.000001f * m_time;
-		};
+		}
+		virtual void ActivateKeyboard() {
+			m_system->ShowKeyboard();
+		}
+		virtual void DeactivateKeyboard() {
+			m_system->HideKeyboard();
+		}
 		void Tick( GHL::UInt32 ticks ) {
 			m_time += ticks;
 		}
 	private:
 		GHL::UInt32	m_time;
+		GHL::System* m_system;
 	};
 	
 	static inline GHL::Vertex convert_verex( const ::Rocket::Core::Vertex v) {
@@ -233,28 +240,12 @@ namespace Sandbox {
 		}
 	};
 	
-	class TextFocusEventListener : public Rocket::Core::EventListener {
-	public:
-		explicit TextFocusEventListener( GHL::System* system ) : m_system(system) {
-		}
-		virtual void 	ProcessEvent (Rocket::Core::Event &event) {
-			if (event.GetType()=="keyboard") {
-				if (event.GetParameter<int>("show",0)!=0)
-					m_system->ShowKeyboard();
-				else 
-					m_system->HideKeyboard();
-			}
-		}
-	private:
-		GHL::System*	m_system;
-	};
 	
 	struct RocketLib::Data {
 		FileInterfaceImpl file;
 		SystemInterfaceImpl system;
 		RenderInterfaceImpl render;
-		TextFocusEventListener focusListener;
-		Data( Resources* resources, GHL::System* system ) : file(resources),render(resources),focusListener(system) {
+		Data( Resources* resources, GHL::System* system ) : file(resources),render(resources),system(system) {
 		}
 	};
 	
@@ -281,7 +272,6 @@ namespace Sandbox {
 																						   resources->GetRender()->GetWidth(), 
 																						   resources->GetRender()->GetHeight())),
 									 &RocketDestroyHelper<Rocket::Core::Context>::destroy );
-		m_context->AddEventListener("keyboard",&(m_data->focusListener));
 #ifdef SB_DEBUG
 		Rocket::Debugger::Initialise(m_context.get());
 #endif
