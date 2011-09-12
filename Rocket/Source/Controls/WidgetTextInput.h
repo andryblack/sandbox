@@ -222,6 +222,7 @@ private:
 	Rocket::Core::Vector2f cursor_position;
 	Rocket::Core::Vector2f cursor_size;
 	Core::Geometry cursor_geometry;
+	bool cursor_showed;
 };
 
 }

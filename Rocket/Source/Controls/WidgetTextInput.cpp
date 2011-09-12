@@ -38,6 +38,8 @@ const float CURSOR_BLINK_TIME = 0.7f;
 
 WidgetTextInput::WidgetTextInput(ElementFormControl* _parent) : internal_dimensions(0, 0), scroll_offset(0, 0), cursor_position(0, 0), cursor_size(0, 0), cursor_geometry(_parent), selection_geometry(_parent)
 {
+	cursor_showed = false;
+	
 	parent = _parent;
 	parent->SetProperty("white-space", "pre");
 	parent->SetProperty("overflow", "hidden");
@@ -625,8 +627,11 @@ int WidgetTextInput::CalculateCharacterIndex(int line_index, float position)
 // Shows or hides the cursor.
 void WidgetTextInput::ShowCursor(bool show, bool move_to_cursor)
 {
+	bool send_event = false;
 	if (show)
 	{
+		send_event = true;
+		cursor_showed = true;
 		cursor_visible = true;
 		cursor_timer = CURSOR_BLINK_TIME;
 		last_update_time = Core::GetSystemInterface()->GetElapsedTime();
@@ -652,9 +657,17 @@ void WidgetTextInput::ShowCursor(bool show, bool move_to_cursor)
 	}
 	else
 	{
+		if (cursor_showed)
+			send_event = true;
+		cursor_showed = false;
 		cursor_visible = false;
 		cursor_timer = -1;
 		last_update_time = 0;
+	}
+	if (send_event) {
+		Rocket::Core::Dictionary dict;
+		dict.Set<int>("show",int(show?1:0));
+		parent->DispatchEvent("keyboard",dict,true);
 	}
 }
 

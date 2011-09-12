@@ -16,7 +16,7 @@
 #include <Rocket/Controls.h>
 #include <ghl_data_stream.h>
 #include <ghl_vfs.h>
-#include <ghl_render.h>
+#include <ghl_system.h>
 #include <string>
 #include <iostream>
 #include "sb_graphics.h"
@@ -233,11 +233,28 @@ namespace Sandbox {
 		}
 	};
 	
+	class TextFocusEventListener : public Rocket::Core::EventListener {
+	public:
+		explicit TextFocusEventListener( GHL::System* system ) : m_system(system) {
+		}
+		virtual void 	ProcessEvent (Rocket::Core::Event &event) {
+			if (event.GetType()=="keyboard") {
+				if (event.GetParameter<int>("show",0)!=0)
+					m_system->ShowKeyboard();
+				else 
+					m_system->HideKeyboard();
+			}
+		}
+	private:
+		GHL::System*	m_system;
+	};
+	
 	struct RocketLib::Data {
 		FileInterfaceImpl file;
 		SystemInterfaceImpl system;
 		RenderInterfaceImpl render;
-		Data( Resources* resources ) : file(resources),render(resources) {
+		TextFocusEventListener focusListener;
+		Data( Resources* resources, GHL::System* system ) : file(resources),render(resources),focusListener(system) {
 		}
 	};
 	
@@ -250,8 +267,10 @@ namespace Sandbox {
 		}
 	};
 	
-	RocketLib::RocketLib( Resources* resources ) {
-		m_data = new Data( resources);
+	
+	
+	RocketLib::RocketLib( Resources* resources, GHL::System* system ) {
+		m_data = new Data( resources,system);
 		::Rocket::Core::SetFileInterface( &(m_data->file) );
 		::Rocket::Core::SetSystemInterface( &(m_data->system) );
 		::Rocket::Core::SetRenderInterface( &(m_data->render) );
@@ -262,6 +281,7 @@ namespace Sandbox {
 																						   resources->GetRender()->GetWidth(), 
 																						   resources->GetRender()->GetHeight())),
 									 &RocketDestroyHelper<Rocket::Core::Context>::destroy );
+		m_context->AddEventListener("keyboard",&(m_data->focusListener));
 #ifdef SB_DEBUG
 		Rocket::Debugger::Initialise(m_context.get());
 #endif
@@ -312,6 +332,23 @@ namespace Sandbox {
 			return 1;
 		return 0;
 	}
+	static inline Rocket::Core::Input::KeyIdentifier convert_key( GHL::Key key ) {
+		using namespace GHL;
+		using namespace Rocket::Core::Input;
+		switch (key) {
+			case KEY_BACKSPACE: return KI_BACK;
+			case KEY_ENTER:	return KI_RETURN;
+			case KEY_LEFT:	return KI_LEFT;
+			case KEY_RIGHT:	return KI_RIGHT;
+			case KEY_UP:	return KI_UP;
+			case KEY_DOWN:	return KI_DOWN;
+			case KEY_C:		return KI_C;
+			case KEY_V:		return KI_V;
+			default:
+				break;
+		}
+		return KI_UNKNOWN;
+	}
 	
 	void RocketLib::OnMouseDown( GHL::MouseButton key, int x,int y, GHL::UInt32 mods) {
 		m_context->ProcessMouseMove( x,y, convert_modifiers(mods) ); 
@@ -323,6 +360,15 @@ namespace Sandbox {
 	void RocketLib::OnMouseUp( GHL::MouseButton key, int x,int y, GHL::UInt32 mods) {
 		m_context->ProcessMouseMove( x,y, convert_modifiers(mods) );
 		m_context->ProcessMouseButtonUp( convert_mouse_button(key), convert_modifiers(mods) );
+	}
+	void RocketLib::OnKeyDown( GHL::Key key, GHL::UInt32 mods ) {
+		m_context->ProcessKeyDown( convert_key(key) , convert_modifiers(mods) );
+	}
+	void RocketLib::OnKeyUp( GHL::Key key, GHL::UInt32 mods ) {
+		m_context->ProcessKeyUp( convert_key(key) , convert_modifiers(mods) );
+	}
+	void RocketLib::OnChar( GHL::UInt32 ch ) {
+		m_context->ProcessTextInput( ch );
 	}
 	
 	void RocketLib::SetDebuggerVisible( bool v) {

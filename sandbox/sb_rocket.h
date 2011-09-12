@@ -22,6 +22,9 @@ namespace Rocket {
 	}
 }
 
+namespace GHL {
+	struct System;
+}
 namespace Sandbox {
 	
 	
@@ -34,7 +37,7 @@ namespace Sandbox {
 	
 	class RocketLib {
 	public:
-		explicit RocketLib( Resources* resources);
+		explicit RocketLib( Resources* resources, GHL::System* system);
 		~RocketLib();
 		void Draw( Graphics& g ) const;
 		RocketDocumentPtr LoadDocument( const char* file );
@@ -43,6 +46,9 @@ namespace Sandbox {
 		void OnMouseDown( GHL::MouseButton key, int x,int y, GHL::UInt32 mods);
 		void OnMouseMove( int x,int y, GHL::UInt32 mods );
 		void OnMouseUp( GHL::MouseButton key, int x,int y, GHL::UInt32 mods);
+		void OnKeyDown( GHL::Key key, GHL::UInt32 mods ) ;
+		void OnKeyUp( GHL::Key key, GHL::UInt32 mods ) ;
+		void OnChar( GHL::UInt32 ch ) ;
 		RocketContextPtr GetContext() { return m_context; }
 		void SetDebuggerVisible( bool v );
 		bool GetDebuggerVisible() const;
