@@ -1,3 +1,6 @@
 [submodule "Rocket"]
 	path = Rocket
 	url = git@github.com:andryblack/libRocket.git
+[submodule "chipmunk"]
+	path = chipmunk
+	url = git@github.com:andryblack/Chipmunk-Physics.git
