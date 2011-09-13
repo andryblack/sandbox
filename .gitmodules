@@ -4,3 +4,6 @@
 [submodule "chipmunk"]
 	path = chipmunk
 	url = git@github.com:andryblack/Chipmunk-Physics.git
+[submodule "freetype"]
+	path = freetype
+	url = git://git.sv.gnu.org/freetype/freetype2.git

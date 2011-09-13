@@ -338,7 +338,7 @@ namespace Sandbox {
 				break;
 		}
 		return KI_UNKNOWN;
-	}
+	} 
 	
 	void RocketLib::OnMouseDown( GHL::MouseButton key, int x,int y, GHL::UInt32 mods) {
 		m_context->ProcessMouseMove( x,y, convert_modifiers(mods) ); 
