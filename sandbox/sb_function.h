@@ -380,6 +380,13 @@ namespace Sandbox {
 								Res(Obj::*func)(),O* arg1) {
         return bind_first(function<Res(Obj*)>(func),arg1);
     }
+	template <class Res,class Obj,class O>
+	inline function<Res()> bind(
+								Res(Obj::*func)(),const shared_ptr<O>& o) {
+        typedef impl::ptr_functor_handler<function<Res()>,Res(Obj::*)(),O> handler;
+        typedef typename function<Res()>::impl_type impl_type;
+        return function<Res()>( std::auto_ptr< impl_type >(  new handler(func,o))  );
+    }
     template <class Res,class Obj,class O>
 	inline function<Res()> bind(
 								Res(Obj::*func)()const,const O* arg1) {
@@ -392,6 +399,7 @@ namespace Sandbox {
         typedef typename function<Res()>::impl_type impl_type;
         return function<Res()>( std::auto_ptr< impl_type >(  new handler(func,o))  );
     }
+	
 	
 	
 	

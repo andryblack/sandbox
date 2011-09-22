@@ -132,7 +132,7 @@ namespace Sandbox {
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
-				hpr->PushValue((static_cast<T*>(obj)->*func)());
+				Pusher<Ret>::Push(hpr,(static_cast<T*>(obj)->*func)());
 			}
 		};
 		template <typename T,typename Ret> struct MethodHelper<Ret(T::*)()const> {
@@ -141,7 +141,7 @@ namespace Sandbox {
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
-				hpr->PushValue((static_cast<T*>(obj)->*func)());
+				Pusher<Ret>::Push(hpr,(static_cast<T*>(obj)->*func)());
 			}
 		};
 		/// implement 1 args
@@ -166,7 +166,7 @@ namespace Sandbox {
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
-				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg>())));
+				Pusher<Ret>::Push(hpr,(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg>())));
 			}
 		};
 		template <typename T,typename Ret,typename Arg> struct MethodHelper<Ret(T::*)(Arg)const> {
@@ -175,7 +175,7 @@ namespace Sandbox {
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
-				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg>())));
+				Pusher<Ret>::Push(hpr,(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg>())));
 			}
 		};
 		/// implement 2 args
@@ -221,7 +221,7 @@ namespace Sandbox {
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
-				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				Pusher<Ret>::Push(hpr,(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 															 hpr->GetArgument(1,ArgumentTag<Arg2>())));
 			}
 		};
@@ -232,7 +232,7 @@ namespace Sandbox {
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
-				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				Pusher<Ret>::Push(hpr,(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 															 hpr->GetArgument(1,ArgumentTag<Arg2>())));
 			}
 		};
@@ -266,7 +266,7 @@ namespace Sandbox {
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
-				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				Pusher<Ret>::Push(hpr,(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 															 hpr->GetArgument(1,ArgumentTag<Arg2>()),
 															 hpr->GetArgument(2,ArgumentTag<Arg3>())));
 			}
@@ -278,7 +278,7 @@ namespace Sandbox {
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
-				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+				Pusher<Ret>::Push(hpr,(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 															 hpr->GetArgument(1,ArgumentTag<Arg2>()),
 															 hpr->GetArgument(2,ArgumentTag<Arg3>())));
 			}
@@ -390,6 +390,143 @@ namespace Sandbox {
 															 hpr->GetArgument(2,ArgumentTag<Arg3>()),
 															 hpr->GetArgument(3,ArgumentTag<Arg4>()),
 															 hpr->GetArgument(4,ArgumentTag<Arg5>())));
+			}
+		};
+		
+		
+		
+		
+		/// implement 6 args
+		template <typename T,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5,typename Arg6> 
+		struct MethodHelper<void(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6)> {
+			typedef void RetType;
+			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6);
+			enum { isConst = 0,retValues = 0 };
+			static void ConstructInplace(const StackHelper* hpr) {
+				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+											  hpr->GetArgument(1,ArgumentTag<Arg2>()),
+											  hpr->GetArgument(2,ArgumentTag<Arg3>()),
+											  hpr->GetArgument(3,ArgumentTag<Arg4>()),
+											  hpr->GetArgument(4,ArgumentTag<Arg5>()),
+											  hpr->GetArgument(5,ArgumentTag<Arg6>()));
+			}
+			static void ConstructInPtr(const StackHelper* hpr) {
+				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+																	   hpr->GetArgument(1,ArgumentTag<Arg2>()),
+																	   hpr->GetArgument(2,ArgumentTag<Arg3>()),
+																	   hpr->GetArgument(3,ArgumentTag<Arg4>()),
+																	   hpr->GetArgument(4,ArgumentTag<Arg5>()),
+																	   hpr->GetArgument(5,ArgumentTag<Arg6>())));
+			}
+			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
+				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
+				(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+											  hpr->GetArgument(1,ArgumentTag<Arg2>()),
+											  hpr->GetArgument(2,ArgumentTag<Arg3>()),
+											  hpr->GetArgument(3,ArgumentTag<Arg4>()),
+											  hpr->GetArgument(4,ArgumentTag<Arg5>()),
+											  hpr->GetArgument(5,ArgumentTag<Arg6>()));
+			}
+		};
+		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5,typename Arg6> 
+		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6)> {
+			typedef Ret RetType;
+			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6);
+			enum { isConst = 0,retValues = 1 };
+			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
+				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
+				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+															 hpr->GetArgument(1,ArgumentTag<Arg2>()),
+															 hpr->GetArgument(2,ArgumentTag<Arg3>()),
+															 hpr->GetArgument(3,ArgumentTag<Arg4>()),
+															 hpr->GetArgument(4,ArgumentTag<Arg5>()),
+															 hpr->GetArgument(5,ArgumentTag<Arg6>())));
+			}
+		};
+		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5,typename Arg6> 
+		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6)const> {
+			typedef Ret RetType;
+			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6)const;
+			enum { isConst = 1,retValues = 1 };
+			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
+				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
+				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+															 hpr->GetArgument(1,ArgumentTag<Arg2>()),
+															 hpr->GetArgument(2,ArgumentTag<Arg3>()),
+															 hpr->GetArgument(3,ArgumentTag<Arg4>()),
+															 hpr->GetArgument(4,ArgumentTag<Arg5>()),
+															 hpr->GetArgument(5,ArgumentTag<Arg6>())));
+			}
+		};
+		
+		/// implement 7 args
+		template <typename T,typename Arg1,typename Arg2,typename Arg3,typename Arg4,
+					typename Arg5,typename Arg6,typename Arg7> 
+		struct MethodHelper<void(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7)> {
+			typedef void RetType;
+			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7);
+			enum { isConst = 0,retValues = 0 };
+			static void ConstructInplace(const StackHelper* hpr) {
+				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+											  hpr->GetArgument(1,ArgumentTag<Arg2>()),
+											  hpr->GetArgument(2,ArgumentTag<Arg3>()),
+											  hpr->GetArgument(3,ArgumentTag<Arg4>()),
+											  hpr->GetArgument(4,ArgumentTag<Arg5>()),
+											  hpr->GetArgument(5,ArgumentTag<Arg6>()),
+											  hpr->GetArgument(6,ArgumentTag<Arg7>()));
+			}
+			static void ConstructInPtr(const StackHelper* hpr) {
+				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+																	   hpr->GetArgument(1,ArgumentTag<Arg2>()),
+																	   hpr->GetArgument(2,ArgumentTag<Arg3>()),
+																	   hpr->GetArgument(3,ArgumentTag<Arg4>()),
+																	   hpr->GetArgument(4,ArgumentTag<Arg5>()),
+																	   hpr->GetArgument(5,ArgumentTag<Arg6>()),
+																	   hpr->GetArgument(6,ArgumentTag<Arg7>())));
+			}
+			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
+				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
+				(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+											  hpr->GetArgument(1,ArgumentTag<Arg2>()),
+											  hpr->GetArgument(2,ArgumentTag<Arg3>()),
+											  hpr->GetArgument(3,ArgumentTag<Arg4>()),
+											  hpr->GetArgument(4,ArgumentTag<Arg5>()),
+											  hpr->GetArgument(5,ArgumentTag<Arg6>()),
+											  hpr->GetArgument(6,ArgumentTag<Arg7>()));
+			}
+		};
+		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4,
+					typename Arg5,typename Arg6,typename Arg7> 
+		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7)> {
+			typedef Ret RetType;
+			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7);
+			enum { isConst = 0,retValues = 1 };
+			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
+				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
+				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+															 hpr->GetArgument(1,ArgumentTag<Arg2>()),
+															 hpr->GetArgument(2,ArgumentTag<Arg3>()),
+															 hpr->GetArgument(3,ArgumentTag<Arg4>()),
+															 hpr->GetArgument(4,ArgumentTag<Arg5>()),
+															 hpr->GetArgument(5,ArgumentTag<Arg6>()),
+															 hpr->GetArgument(6,ArgumentTag<Arg7>())));
+			}
+		};
+		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4,
+					typename Arg5,typename Arg6,typename Arg7> 
+		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7)const> {
+			typedef Ret RetType;
+			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7)const;
+			enum { isConst = 1,retValues = 1 };
+			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
+				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
+				hpr->PushValue((static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+															 hpr->GetArgument(1,ArgumentTag<Arg2>()),
+															 hpr->GetArgument(2,ArgumentTag<Arg3>()),
+															 hpr->GetArgument(3,ArgumentTag<Arg4>()),
+															 hpr->GetArgument(4,ArgumentTag<Arg5>()),
+															 hpr->GetArgument(5,ArgumentTag<Arg6>()),
+															 hpr->GetArgument(6,ArgumentTag<Arg7>())));
 			}
 		};
 		

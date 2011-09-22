@@ -27,10 +27,16 @@ namespace Sandbox {
 		template <class T> struct IsEnumTag{};
 		template <class T> struct IsNotEnumTag{};
 		
+		template <class T> struct IsStringTag{
+			static T to( const char* v ) {
+				return v;
+			}
+		};
 				
 		template <class T> struct ArgumentTag : public SelectType<IsEnum<T>::Result,IsEnumTag<T>,IsNotEnumTag<T> >::Result{ 
 		};
 
+		template <> struct ArgumentTag<const char*> : public IsStringTag<const char*>{};
 
 		
 		class StackHelper {
@@ -49,14 +55,16 @@ namespace Sandbox {
 			template <class T> void _PushValue(T v , const IsEnumTag<T>&   ) const {
 				PushValue(static_cast<int> (v));
 			}
+			const char* get_string(int indx) const;
 		public:
-			explicit StackHelper(lua_State* L,int base_index,const char* signature) : m_L(L),m_base_index(base_index),m_signature(signature) {}
+	explicit StackHelper(lua_State* L,int base_index,const char* signature) : m_L(L),m_base_index(base_index),m_signature(signature) {}
 			static ObjectData*  check_object_type(lua_State* L,int indx,const char* type,bool derived);
 			static void* get_object_ptr(lua_State* L,int indx,const ClassInfo* name);
 			void* new_object_raw() const;
 			void* new_object_shared_ptr() const;
 			static void rawgetfield (lua_State *L, int idx, const char *key);
 			static void rawsetfield (lua_State *L, int idx, const char *key);
+			void push_string(const char* str) const;
 			template <class T> shared_ptr<T> GetArgument(int indx,const ArgumentTag<const shared_ptr<T>&>& ) const {
 				shared_ptr<T> res;
 				if (!is_null(indx)) get_shared_ptr(indx,&res);
@@ -67,15 +75,16 @@ namespace Sandbox {
 				if (!is_null(indx)) get_shared_ptr(indx,&res);
 				return res;
 			}
-			template <class T> const T& GetArgument(int indx,const ArgumentTag<const T&>& ) const {
+			template <class T> const T& GetArgument(int indx,const IsNotEnumTag<const T&>& ) const {
 				return *static_cast<T*> (get_ptr(indx));
 			}
-			/*template <class T> T GetArgument(int indx,const ArgumentTag<T>& ) const {
-				return *static_cast<T*> (get_ptr(indx));
-			}*/
 			template <class T>
 			T GetArgument(int indx,const IsEnumTag<T>& ) const {
 				return static_cast<T>(GetArgument(indx,ArgumentTag<int>()));
+			}
+			template <class T>
+			T GetArgument(int indx,const IsStringTag<T>& ) const {
+				return IsStringTag<T>::to(get_string(indx));
 			}
 			bool GetArgument(int indx,const ArgumentTag<bool>& ) const;
 			int GetArgument(int indx,const ArgumentTag<int>& ) const;
@@ -115,6 +124,11 @@ namespace Sandbox {
 			void PushValue(bool v) const;
 		};
 		
+		template <class T> struct Pusher {
+			static void Push( const StackHelper* helper, typename type_traits<T>::parameter_type t) {
+				helper->PushValue(t);
+			}
+		};
 		
 	}
 }

@@ -153,7 +153,13 @@ namespace Sandbox {
 			return float(lua_tonumber(m_L, indx+m_base_index));
 		}
 		const char* StackHelper::GetArgument(int indx,const ArgumentTag<const char*>& ) const {
+			return get_string(indx);
+		}
+		const char* StackHelper::get_string(int indx) const {
 			return lua_tostring(m_L,indx+m_base_index);
+		}
+		void StackHelper::push_string(const char* str) const {
+			lua_pushstring(m_L, str);
 		}
 		void StackHelper::PushValue(int v) const {
 			lua_pushnumber(m_L, v);
@@ -167,11 +173,11 @@ namespace Sandbox {
 		void StackHelper::PushValue(float v) const {
 			lua_pushnumber(m_L, v);
 		}
-		void StackHelper::PushValue(const char* v) const {
-			lua_pushstring(m_L, v);
+		void StackHelper::PushValue(const char* str) const {
+			lua_pushstring(m_L, str);
 		}
-		void StackHelper::PushValue(const std::string& v) const {
-			lua_pushstring(m_L, v.c_str());
+		void StackHelper::PushValue(const std::string& str) const {
+			lua_pushstring(m_L, str.c_str());
 		}
 		void StackHelper::PushValue(const InplaceString& v) const {
 			lua_pushlstring(m_L,v.begin(),v.length());

@@ -31,7 +31,15 @@ namespace Sandbox {
 		
 		
 		
-		
+		template <class T,class P> inline PropertyData GetPropertyGetFuncData(P (T::*func)()) {
+			union InlUnion {
+				P (T::*func)();
+				PropertyData data;
+			} inl_union;
+			sb_assert( sizeof(func)<=sizeof( inl_union.data.data ) );
+			inl_union.func = func;	
+			return inl_union.data;
+		}
 		template <class T,class P> inline PropertyData GetPropertyGetFuncData(P (T::*func)() const) {
 			union InlUnion {
 				P (T::*func)() const;
@@ -74,6 +82,11 @@ namespace Sandbox {
 				Sandbox::Bind::GetPropertySetFunc(&Class::Set), \
 				Sandbox::Bind::GetPropertyGetFuncData(&Class::Get), \
 				Sandbox::Bind::GetPropertySetFuncData(&Class::Set), } ,
+#define SB_BIND_PROPERTY_RW_(Class,Name,GetPtr,SetPtr,Type) { #Name,#Type"("#Type")", \
+				Sandbox::Bind::GetPropertyGetFunc(GetPtr), \
+				Sandbox::Bind::GetPropertySetFunc(SetPtr), \
+				Sandbox::Bind::GetPropertyGetFuncData(GetPtr), \
+				Sandbox::Bind::GetPropertySetFuncData(SetPtr), } ,
 #define SB_BIND_PROPERTY_RO(Class,Name,Get,Type) { #Name,#Type, \
 				Sandbox::Bind::GetPropertyGetFunc(&Class::Get), \
 				0, \
@@ -113,18 +126,25 @@ namespace Sandbox {
 #define SB_CAST_VOID_TO_MEMBER_PTR(Type,ptr) *static_cast<const Ptr*>(ptr)
 #endif
 
+		template <typename T,typename Prop> struct PropertyGetHelper<Prop(T::*)()> {
+			typedef Prop(T::*FuncPtr)();
+			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
+				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
+				Pusher<Prop>::Push(hpr,(static_cast<T*>(obj)->*func)());
+			}
+		};
 		template <typename T,typename Prop> struct PropertyGetHelper<Prop(T::*)()const> {
 			typedef Prop(T::*FuncPtr)()const;
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
-				hpr->PushValue((static_cast<T*>(obj)->*func)());
+				Pusher<Prop>::Push(hpr,(static_cast<T*>(obj)->*func)());
 			}
 		};
 		template <typename T,typename Prop> struct PropertyGetHelper<Prop T::*> {
 			typedef Prop T::*Ptr;
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				Ptr ptr = SB_CAST_VOID_TO_MEMBER_PTR(Ptr,funcp);
-				hpr->PushValue(static_cast<T*>(obj)->*ptr);
+				Pusher<Prop>::Push(hpr,static_cast<T*>(obj)->*ptr);
 			}
 		};
 		template <typename T,typename Prop> struct PropertySetHelper<void(T::*)(Prop)> {

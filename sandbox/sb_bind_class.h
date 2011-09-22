@@ -96,7 +96,16 @@ namespace Sandbox {
 			0,0,0, \
 			0, \
 			0 \
-		}	
+		}
+#define SB_BIND_SUBCLASS_EXTERN(Name,Parent) { \
+			#Name, \
+			#Parent, \
+			0, \
+			0, \
+			0,0,0, \
+			0, \
+			0 \
+		}
 		
 		struct ConstructorInfo {
 			const char* signature;
@@ -122,6 +131,7 @@ namespace Sandbox {
 		
 #define SB_BIND_BEGIN_RAW_CLASS( Name ) static const Sandbox::Bind::ClassInfo classInfo = SB_BIND_CLASS_RAW(Name);
 #define SB_BIND_BEGIN_EXTERN_CLASS( Name ) static const Sandbox::Bind::ClassInfo classInfo = SB_BIND_CLASS_EXTERN(Name);
+#define SB_BIND_BEGIN_EXTERN_SUBCLASS( Name , Parent ) static const Sandbox::Bind::ClassInfo classInfo = SB_BIND_SUBCLASS_EXTERN(Name,Parent);
 #define SB_BIND_BEGIN_SHARED_CLASS( Name ) static const Sandbox::Bind::ClassInfo classInfo = SB_BIND_CLASS_SHARED(Name);
 #define SB_BIND_BEGIN_SHARED_SUBCLASS( Name , Parent ) static const Sandbox::Bind::ClassInfo classInfo = SB_BIND_SUBCLASS_SHARED(Name,Parent);
 		
