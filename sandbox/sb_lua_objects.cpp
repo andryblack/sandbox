@@ -96,29 +96,18 @@ namespace Sandbox {
 	
 	class LuaEvent : public Event {
 	public:
-		explicit LuaEvent(LuaHelperWeakPtr ptr) : m_lua(ptr), m_ref(LUA_NOREF) {}
+		explicit LuaEvent(LuaHelperWeakPtr ptr) : m_ref(ptr) {}
 		~LuaEvent() {
-			if (LuaHelperPtr lua = m_lua.lock()) {
-				UnsetFunction(lua->lua->GetVM());
-			}
 		}
 		void SetFunction(lua_State* L) {
-			sb_assert(m_ref==LUA_NOREF);
-			m_ref = lua_ref(L,true);
-			sb_assert(m_ref!=LUA_NOREF);
-		}
-		void UnsetFunction(lua_State* L) {
-			sb_assert(m_ref!=LUA_NOREF);
-			lua_unref(L,m_ref);
-			m_ref = LUA_NOREF;
+			m_ref.SetObject(L);
 		}
 		void Emmit() {
-			if (m_ref!=LUA_NOREF) {
-				if ( LuaHelperPtr lua = m_lua.lock()) {
+			if (m_ref.Valid()) {
+				if ( LuaHelperPtr lua = m_ref.GetHelper()) {
 					lua_State* L = lua->lua->GetVM();
 					sb_assert(L);
-					sb_assert(m_ref!=LUA_NOREF);
-					lua_getref(L,m_ref);
+					m_ref.GetObject(L);
 					sb_assert(lua_isfunction(L,-1));
 					int res = lua_pcall(L, 0, 0, 0);
 					if (res) {
@@ -149,42 +138,25 @@ namespace Sandbox {
 			return 1;
 		}
 	private:
-		LuaHelperWeakPtr m_lua;
-		int	m_ref;
+		LuaReference	m_ref;
 	};
 	
 	
 	class LuaThread : public Thread {
 	public:
-		explicit LuaThread(LuaHelperWeakPtr ptr) : m_lua(ptr), m_ref(LUA_NOREF) {}
+		explicit LuaThread(LuaHelperWeakPtr ptr) : m_ref(ptr) {}
 		~LuaThread() {
-			if (m_ref!=LUA_NOREF) {
-				if (LuaHelperPtr lua = m_lua.lock()) {
-					UnsetThread(lua->lua->GetVM());
-				}
-			}
 		}
 		void SetThread(lua_State* L) {
-			sb_assert(m_ref==LUA_NOREF);
 			sb_assert(lua_isthread(L,-1));
-			m_ref = lua_ref(L,true);
-			sb_assert(m_ref!=LUA_NOREF);
-		}
-		int GetId() const {
-			return m_ref;
-		}
-		void UnsetThread(lua_State* L) {
-			sb_assert(m_ref!=LUA_NOREF);
-			lua_unref(L,m_ref);
-			m_ref = LUA_NOREF;
+			m_ref.SetObject( L );
 		}
 		bool Update(float dt) {
-			if (m_ref!=LUA_NOREF) {
-				if ( LuaHelperPtr lua = m_lua.lock()) {
+			if (m_ref.Valid()) {
+				if ( LuaHelperPtr lua = m_ref.GetHelper()) {
 					lua_State* L = lua->lua->GetVM();
 					sb_assert(L);
-					sb_assert(m_ref!=LUA_NOREF);
-					lua_getref(L,m_ref);
+					m_ref.GetObject(L);
 					if (!lua_isthread(L,-1)) {
 						std::cout << "[LuaThread] not thread :" << luaL_typename(L,-1) << std::endl;
 						sb_assert(lua_isthread(L,-1));
@@ -246,8 +218,7 @@ namespace Sandbox {
 			return 1;
 		}
 	private:
-		LuaHelperWeakPtr m_lua;
-		int	m_ref;
+		LuaReference m_ref;
 	};
 	
 	void Lua::RegisterSandboxObjects() {
@@ -343,6 +314,7 @@ namespace Sandbox {
 			SB_BIND_METHOD(Sandbox::Texture,SetFiltered,void(bool))
 			SB_BIND_END_METHODS
 			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_PROPERTY_WO(Sandbox::Texture,Filtered,SetFiltered,bool)
 			SB_BIND_PROPERTY_RO(Sandbox::Texture,Width,GetWidth,float)
 			SB_BIND_PROPERTY_RO(Sandbox::Texture,Height,GetHeight,float)
 			SB_BIND_END_PROPERTYS

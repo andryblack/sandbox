@@ -18,6 +18,7 @@
 #include <string>
 
 #include <ghl_types.h>
+#include <ghl_data_stream.h>
 
 struct lua_State;
 
@@ -37,6 +38,47 @@ namespace Sandbox {
 	};
 	typedef shared_ptr<LuaHelper> LuaHelperPtr;
 	typedef weak_ptr<LuaHelper> LuaHelperWeakPtr;
+	class LuaReference {
+	public:
+		explicit LuaReference( const LuaHelperWeakPtr& ptr );
+		~LuaReference();
+		void SetObject( lua_State* state );
+		void UnsetObject( lua_State* state );
+		void GetObject( lua_State* state );
+		LuaHelperPtr GetHelper() const { return m_lua.lock();}
+		const LuaHelperWeakPtr& GetHelperPtr() const { return m_lua;}
+		bool Valid() const;
+	private:
+		LuaHelperWeakPtr m_lua;
+		int	m_ref;
+	};
+	class LuaEnvironment;
+	typedef shared_ptr<LuaEnvironment> LuaEnvironmentPtr;
+
+	class LuaFunction {
+	public:
+		LuaFunction( const LuaHelperWeakPtr& ptr );
+		void Call();
+		LuaEnvironmentPtr GetEnv();
+	private:
+		LuaReference	m_ref;
+	};
+	typedef shared_ptr<LuaFunction> LuaFunctionPtr;
+	
+	class LuaEnvironment {
+	public:
+		LuaEnvironment( const LuaHelperWeakPtr& ptr ,int indx=0);
+		~LuaEnvironment();
+		void GetEnv( lua_State* state );
+		LuaFunctionPtr LoadFunction( const char* content );
+		LuaFunctionPtr LoadFunction( const char* name, GHL::DataStream* stream );
+	private:
+		LuaReference	m_ref;
+	};
+	
+	
+	
+	
 	class Lua {
 	public:
 		explicit Lua(GHL::VFS* vfs);
@@ -56,6 +98,12 @@ namespace Sandbox {
 			Bind::StackHelper stck(GetVM(),0,type);
 			stck.template PushValuePtr<T>(obj);
 			register_object(name);
+		}
+		template <class T>
+		void SetValue(const LuaEnvironmentPtr& env, T* obj,const char* name,const char* type) {
+			Bind::StackHelper stck(GetVM(),0,type);
+			stck.template PushValuePtr<T>(obj);
+			register_object(env,name);
 		}
 		template <class T>
 		void SetValue(const shared_ptr<T>& obj,const char* name,const char* type) {
@@ -87,6 +135,8 @@ namespace Sandbox {
 		LuaHelperWeakPtr GetHelper() const { return m_helper;}
 		
 		GHL::UInt32 GetMemoryUsed() const { return m_mem_use;} 
+		
+		LuaEnvironmentPtr CreateEnvironment();
 	private:
 		lua_State*	m_state;
 		LuaHelperPtr m_helper;
@@ -94,10 +144,12 @@ namespace Sandbox {
 		std::string m_base_path;
 		void RegisterSandboxObjects();
 		void register_object(const char* name);
+		void register_object(const LuaEnvironmentPtr& env, const char* name);
 		
 		bool load_file(lua_State*,const char* name);
 		static int lua_dofile_func (lua_State *L);
 		const char* get_table(const char* str);
+		const char* get_table(const LuaEnvironmentPtr& env,const char* str);
 		bool call(const char* str,int args);
 		void do_call(const char* str,int args);
 		static void *lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
