@@ -81,6 +81,15 @@ namespace Sandbox {
 			Sandbox::Bind::GetCallMethodFunc((FullSignature)(&Class::operator+)), \
 			Sandbox::Bind::WriteMethodFunc((FullSignature)(&Class::operator+)) \
 		},
+#define SB_BIND_OPERATOR_SUB_( Class,Signature,FullSignature ) { \
+			"__sub", \
+			#Signature, \
+			Sandbox::Bind::GetMethodIsConst((FullSignature)(&Class::operator-)), \
+			Sandbox::Bind::GetMethodRet((FullSignature)(&Class::operator-)), \
+			Sandbox::Bind::GetCallMethodFunc((FullSignature)(&Class::operator-)), \
+			Sandbox::Bind::WriteMethodFunc((FullSignature)(&Class::operator-)) \
+},
+		
 #define SB_BIND_OPERATOR_MUL_( Class,Signature,FullSignature ) { \
 			"__mul", \
 			#Signature, \

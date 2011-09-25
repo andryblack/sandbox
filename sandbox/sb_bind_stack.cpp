@@ -26,6 +26,13 @@ namespace Sandbox {
 			InplaceString res(sign);
 			return InplaceString(res.begin(),res.find('('));
 		}
+		static inline InplaceString strip_spaces( const InplaceString& str ) {
+			const char* beg = str.begin();
+			const char* end = str.end();
+			while (::isspace(*beg)) beg++;
+			while (end>beg && ::isspace(*(end-1))) end--;
+			return InplaceString( beg,end);
+		}
 		static inline InplaceString get_arg_type(const char* sign,int num) {
 			InplaceString res(sign);
 			res = InplaceString(res.find('('),res.rfind(')'));
@@ -34,7 +41,7 @@ namespace Sandbox {
 				res = InplaceString(res.find(','),res.end());
 				if (*res.begin()==',') res = InplaceString(res.begin()+1,res.end());
 			}
-			return InplaceString(res.begin(),res.find(','));
+			return strip_spaces(InplaceString(res.begin(),res.find(',')));
 		}
 		
 		// Convenience functions: like lua_getfield and lua_setfield, but raw
