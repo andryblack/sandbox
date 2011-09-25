@@ -34,6 +34,9 @@ namespace Sandbox {
 		void SetParent(Container* parent);
 		Container* m_parent;
 		bool	m_visible;
+		/// not copyable
+		Object( const Object& );
+		Object& operator = (const Object&);
 	};
 	typedef shared_ptr<Object> ObjectPtr;
 }
