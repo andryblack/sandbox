@@ -43,9 +43,7 @@ namespace Sandbox {
 			return res;
 		}
 		Transform2d translated(const Vector2f& pos) const {
-			Transform2d res(*this);
-			res.translate(pos);
-			return res;
+			return Transform2d(*this).translate(pos);
 		}
         Transform2d& rotate(float _a) {
             float a = float(M_PI) * _a / 180.0f;
@@ -54,6 +52,10 @@ namespace Sandbox {
             m*=Matrix2f(c,s,-s,c);
             return *this;
         }
+		Transform2d rotated(float a) const {
+			Transform2d res(*this);
+			return Transform2d(*this).rotate(a);
+		}
         Transform2d& scale(float s) {
             m*=Matrix2f(s,0,0,s);
             return *this;
