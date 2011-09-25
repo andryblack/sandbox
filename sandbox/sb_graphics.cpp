@@ -228,6 +228,80 @@ namespace Sandbox {
 		
 	}
 	
+	void Graphics::BeginDrawLines() {
+		bool flush = false;
+		if (m_texture) {
+            flush = true;
+        } else if (m_ptype!=GHL::PRIMITIVE_TYPE_LINES) {
+            flush = true;
+        }
+        if (flush) {
+            Flush();
+        }
+		m_texture = TexturePtr();
+        m_ptype = GHL::PRIMITIVE_TYPE_LINES;
+	}
+	void Graphics::DrawLine(const Vector2f& from, const Vector2f& to) {
+		sb_assert( (m_render!=0) && "scene not started" );
+		BeginDrawLines();
+		GHL::UInt32 clr = m_color.hw();
+		GHL::UInt16 base = m_vertexes.size();
+		m_indexes.push_back(base+0);
+		m_indexes.push_back(base+1);
+		m_primitives++;
+		appendVertex(from.x, from.y, 0, 0, clr);
+		appendVertex(to.x,to.y,0,0,clr);
+	}
+	void Graphics::DrawLine(const Vector2f& from, const Vector2f& to,const Color& clr_) {
+		sb_assert( (m_render!=0) && "scene not started" );
+		BeginDrawLines();
+		GHL::UInt32 clr = (m_color*clr_).hw();
+		GHL::UInt16 base = m_vertexes.size();
+		m_indexes.push_back(base+0);
+		m_indexes.push_back(base+1);
+		m_primitives++;
+		appendVertex(from.x, from.y, 0, 0, clr);
+		appendVertex(to.x,to.y,0,0,clr);
+	}
+	
+	void Graphics::BeginDrawCircle() {
+		Flush();
+		m_texture = TexturePtr();
+        m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
+	}
+	void Graphics::DrawCircle(const Vector2f& pos, float r) {
+		sb_assert( (m_render!=0) && "scene not started" );
+		BeginDrawCircle();
+		GHL::UInt32 clr = m_color.hw();
+		DrawCircle(pos,r,clr);
+		Flush();
+	}
+	void Graphics::DrawCircle(const Vector2f& pos, float r,const Color& clr_) {
+		sb_assert( (m_render!=0) && "scene not started" );
+		BeginDrawCircle();
+		GHL::UInt32 clr = (m_color*clr_).hw(); 
+		DrawCircle(pos,r,clr);
+		Flush();
+	}
+	void Graphics::DrawCircle(const Vector2f& pos, float r,GHL::UInt32 clr) {
+		size_t subdivs = int(2*M_PI*r)/5;
+		if (subdivs<8) subdivs = 8;
+		const float step = M_PI*2/subdivs;
+		GHL::UInt16 base = m_vertexes.size();
+		for (size_t i=0;i<subdivs;i++) {
+			m_indexes.push_back(base+i);
+		}
+		m_indexes.push_back(base);
+		float a = 0;
+		for (size_t i=0;i<subdivs;i++) {
+			float x = pos.x + r * sinf(a);
+			float y = pos.y + r * cosf(a);
+			a+=step;
+			appendVertex(x, y, 0, 0, clr);
+		}
+		m_primitives+=subdivs;
+	}
+	
 	
 	void Graphics::DrawBuffer(const TexturePtr& texture,GHL::PrimitiveType prim,
 					const std::vector<GHL::Vertex>& vertices,

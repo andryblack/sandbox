@@ -85,6 +85,18 @@ namespace Sandbox {
             DrawImage(img,pos.x,pos.y,clr,scale);
         }
         /// @}
+		
+		/// draw lines
+		/// @{
+		void DrawLine(const Vector2f& from, const Vector2f& to);
+		void DrawLine(const Vector2f& from, const Vector2f& to,const Color& clr);
+		/// @}
+		
+		/// draw circles
+		/// @{
+		void DrawCircle(const Vector2f& pos, float r);
+		void DrawCircle(const Vector2f& pos, float r,const Color& clr);
+		/// @}
 
 	
 		void DrawBuffer(const TexturePtr& texture,GHL::PrimitiveType prim,
@@ -119,6 +131,9 @@ namespace Sandbox {
 		std::vector<GHL::UInt16> m_indexes;
 	
 		void BeginDrawImage(const ImagePtr& img);
+		void BeginDrawLines();
+		void BeginDrawCircle();
+		void DrawCircle(const Vector2f& pos, float r,GHL::UInt32 clr);
 		inline void appendVertex(float x,float y,float tx,float ty,GHL::UInt32 color=0xffffffff) {
 			m_vertexes.push_back(GHL::Vertex());
 			GHL::Vertex& v(m_vertexes.back());
