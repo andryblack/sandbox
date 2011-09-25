@@ -130,6 +130,7 @@ namespace Sandbox {
 			m_time_cum += dt;
 			static const float static_step = 1.0f / 60.0f;
 			size_t steps = size_t( m_time_cum / static_step );
+			if (steps>5) steps = 5;
 			if ( steps ) {
 				for (size_t i=0;i<steps;i++) {
 					cpSpaceStep(m_space, static_step );

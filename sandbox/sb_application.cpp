@@ -118,6 +118,8 @@ namespace Sandbox {
 			m_frames_time = 0;
 			m_frames = 0;
 		}
+		if (usecs>100000)
+			usecs=100000;
 		float dt = float(usecs)/1000000.0f;
 		m_main_thread->Update(dt);
 		Update(dt);
