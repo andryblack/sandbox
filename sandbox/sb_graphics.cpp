@@ -264,6 +264,39 @@ namespace Sandbox {
 		appendVertex(to.x,to.y,0,0,clr);
 	}
 	
+	void Graphics::DrawLineStrip(const std::vector<Vector2f>& points) {
+		sb_assert( (m_render!=0) && "scene not started" );
+		Flush();
+		m_texture = TexturePtr();
+        m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
+		GHL::UInt32 clr = m_color.hw();
+		GHL::UInt16 base = m_vertexes.size();
+		for (size_t i=0;i<points.size();i++) {
+			m_indexes.push_back(base+i);
+		}
+		for (size_t i=0;i<points.size();i++) {
+			appendVertex(points[i].x, points[i].y, 0, 0, clr);
+		}
+		m_primitives = points.size()-1;
+		Flush();
+	}
+	void Graphics::DrawLineStrip(const std::vector<Vector2f>& points,const Color& clr_) {
+		sb_assert( (m_render!=0) && "scene not started" );
+		Flush();
+		m_texture = TexturePtr();
+        m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
+		GHL::UInt32 clr = (m_color*clr_).hw();
+		GHL::UInt16 base = m_vertexes.size();
+		for (size_t i=0;i<points.size();i++) {
+			m_indexes.push_back(base+i);
+		}
+		for (size_t i=0;i<points.size();i++) {
+			appendVertex(points[i].x, points[i].y, 0, 0, clr);
+		}
+		m_primitives = points.size()-1;
+		Flush();
+	}
+	
 	void Graphics::BeginDrawCircle() {
 		Flush();
 		m_texture = TexturePtr();

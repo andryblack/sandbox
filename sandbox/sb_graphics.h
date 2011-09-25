@@ -92,6 +92,12 @@ namespace Sandbox {
 		void DrawLine(const Vector2f& from, const Vector2f& to,const Color& clr);
 		/// @}
 		
+		/// draw line strips
+		/// @{
+		void DrawLineStrip(const std::vector<Vector2f>& points);
+		void DrawLineStrip(const std::vector<Vector2f>& points,const Color& clr);
+		/// @}
+		
 		/// draw circles
 		/// @{
 		void DrawCircle(const Vector2f& pos, float r);
