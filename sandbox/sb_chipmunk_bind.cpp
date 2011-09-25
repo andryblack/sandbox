@@ -106,13 +106,14 @@ namespace Sandbox {
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::PinJoint,Sandbox::Chipmunk::Constraint)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::PinJoint, (Sandbox::Chipmunk::Body,
 																		   Sandbox::Chipmunk::Body,
-																		   Vector2f,Vector2f
+																		   Sandbox::Vector2f,
+																		   Sandbox::Vector2f
 																		   ),(const Sandbox::Chipmunk::BodyPtr&,
 																			  const Sandbox::Chipmunk::BodyPtr&,
 																			  const Vector2f&,const Vector2f&))
 				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::PinJoint, Anchr1, GetAnchr1,SetAnchr1, Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::PinJoint, Anchr2, GetAnchr2,SetAnchr2, Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::PinJoint, Anchr1, GetAnchr1,SetAnchr1, Sandbox::Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::PinJoint, Anchr2, GetAnchr2,SetAnchr2, Sandbox::Vector2f )
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::PinJoint, Dist, GetDist,SetDist, float )
 				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
@@ -122,13 +123,14 @@ namespace Sandbox {
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::SlideJoint,Sandbox::Chipmunk::Constraint)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::SlideJoint, (Sandbox::Chipmunk::Body,
 																		   Sandbox::Chipmunk::Body,
-																		   Vector2f,Vector2f,float,float
+																		   Sandbox::Vector2f,
+																			 Sandbox::Vector2f,float,float
 																		   ),(const Sandbox::Chipmunk::BodyPtr&,
 																			  const Sandbox::Chipmunk::BodyPtr&,
 																			  const Vector2f&,const Vector2f&,float,float))
 				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::SlideJoint, Anchr1, GetAnchr1,SetAnchr1, Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::SlideJoint, Anchr2, GetAnchr2,SetAnchr2, Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::SlideJoint, Anchr1, GetAnchr1,SetAnchr1, Sandbox::Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::SlideJoint, Anchr2, GetAnchr2,SetAnchr2, Sandbox::Vector2f )
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::SlideJoint, Min, GetMin,SetMin, float )
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::SlideJoint, MAx, GetMax,SetMax, float )
 				SB_BIND_END_PROPERTYS
@@ -139,13 +141,14 @@ namespace Sandbox {
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::PivotJoint,Sandbox::Chipmunk::Constraint)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::PivotJoint, (Sandbox::Chipmunk::Body,
 																		   Sandbox::Chipmunk::Body,
-																		   Vector2f,Vector2f
+																		   Sandbox::Vector2f,
+																			 Sandbox::Vector2f
 																		   ),(const Sandbox::Chipmunk::BodyPtr&,
 																			  const Sandbox::Chipmunk::BodyPtr&,
 																			  const Vector2f&,const Vector2f&))
 				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::PivotJoint, Anchr1, GetAnchr1,SetAnchr1, Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::PivotJoint, Anchr2, GetAnchr2,SetAnchr2, Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::PivotJoint, Anchr1, GetAnchr1,SetAnchr1, Sandbox::Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::PivotJoint, Anchr2, GetAnchr2,SetAnchr2, Sandbox::Vector2f )
 				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
@@ -154,15 +157,17 @@ namespace Sandbox {
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::GrooveJoint,Sandbox::Chipmunk::Constraint)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::GrooveJoint, (Sandbox::Chipmunk::Body,
 																			 Sandbox::Chipmunk::Body,
-																			 Vector2f,Vector2f,Vector2f
+																			 Sandbox::Vector2f,
+																			  Sandbox::Vector2f,
+																			  Sandbox::Vector2f
 																			 ),(const Sandbox::Chipmunk::BodyPtr&,
 																				const Sandbox::Chipmunk::BodyPtr&,
 																				const Vector2f&,const Vector2f&,
 																				const Vector2f&))
 				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::GrooveJoint, GrooveA, GetGrooveA,SetGrooveA, Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::GrooveJoint, GrooveB, GetGrooveB,SetGrooveB, Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::GrooveJoint, Anchr2, GetAnchr2,SetAnchr2, Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::GrooveJoint, GrooveA, GetGrooveA,SetGrooveA, Sandbox::Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::GrooveJoint, GrooveB, GetGrooveB,SetGrooveB, Sandbox::Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::GrooveJoint, Anchr2, GetAnchr2,SetAnchr2, Sandbox::Vector2f )
 				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
@@ -171,15 +176,16 @@ namespace Sandbox {
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::DampedSpring,Sandbox::Chipmunk::Constraint)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::DampedSpring, (Sandbox::Chipmunk::Body,
 																			 Sandbox::Chipmunk::Body,
-																			 Vector2f,Vector2f,
+																			 Sandbox::Vector2f,
+																			   Sandbox::Vector2f,
 																			 float,float,float
 																			 ),(const Sandbox::Chipmunk::BodyPtr&,
 																				const Sandbox::Chipmunk::BodyPtr&,
 																				const Vector2f&,const Vector2f&,
 																				float,float,float))
 				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::DampedSpring, Anchr1, GetAnchr1,SetAnchr1, Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::DampedSpring, Anchr2, GetAnchr2,SetAnchr2, Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::DampedSpring, Anchr1, GetAnchr1,SetAnchr1, Sandbox::Vector2f )
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::DampedSpring, Anchr2, GetAnchr2,SetAnchr2, Sandbox::Vector2f )
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::DampedSpring, RestLength, GetRestLength,SetRestLength, float )
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::DampedSpring, Stiffness, GetStiffness,SetStiffness, float )
 				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::DampedSpring, Damping, GetDamping,SetDamping, float )
