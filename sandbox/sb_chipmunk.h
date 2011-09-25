@@ -14,6 +14,7 @@
 #include "sb_vector2.h"
 #include "sb_thread.h"
 #include "sb_container_transform.h"
+#include "sb_object.h"
 
 #include <vector>
 
@@ -27,8 +28,9 @@ namespace Sandbox {
 	namespace Chipmunk {
 	
 		class Shape;
+		class Space;
 		
-		class Body {
+		class Body : public enable_shared_from_this<Body>{
 		public:
 			Body(float mass,float inertia);
 			virtual ~Body();
@@ -78,7 +80,7 @@ namespace Sandbox {
 			StaticBody();
 		};
 			
-		class Shape {
+		class Shape : public enable_shared_from_this<Shape>{
 		public:
 			virtual ~Shape();
 			float GetFriction() const;
@@ -88,6 +90,8 @@ namespace Sandbox {
 			float GetElasticity() const;
 			void SetElasticity(float e);
 			
+			void set_space( Space* space) { m_space = space;}
+			Space* get_space() const { return m_space;}
 			cpShape* get_shape() const { return m_shape;}
 		protected:
 			Shape();
@@ -97,17 +101,18 @@ namespace Sandbox {
 			Shape& operator = (const Shape&);
 		protected:
 			cpShape*	m_shape;
+			Space* m_space;
 		};
 		typedef shared_ptr<Shape> ShapePtr;
 		
-		class Constraint {
+		class Constraint : public enable_shared_from_this<Constraint>{
 		private:
 			Constraint(const Constraint&);
 			Constraint& operator = (const Constraint&);
 		public:
 			~Constraint();
-			Body* GetA() const;
-			Body* GetB() const;
+			BodyPtr GetA() const;
+			BodyPtr GetB() const;
 			float GetMaxForce() const;
 			void SetMaxForce(float f);
 			float GetMaxBias() const;
@@ -144,6 +149,10 @@ namespace Sandbox {
 			Space& operator = (const Space&);
 			cpSpace*	m_space;
 			float	m_time_cum;
+			weak_ptr<Space>	m_this;
+			std::vector<BodyPtr>	m_bodies;
+			std::vector<ShapePtr>	m_shapes;
+			std::vector<ConstraintPtr>	m_constraints;
 		};
 		typedef shared_ptr<Space> SpacePtr;
 		
@@ -298,6 +307,17 @@ namespace Sandbox {
 		private:
 			ContainerTransformPtr	m_transform;
 			BodyPtr		m_body;
+		};
+		
+		class DebugDraw	: public Object {
+		public:
+			explicit DebugDraw( const SpacePtr& space );
+			~DebugDraw();
+			void Draw( Graphics& g) const;
+		private:
+			struct Impl;
+			Impl*	m_impl;
+			SpacePtr	m_space;
 		};
 	
 	}

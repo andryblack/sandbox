@@ -292,6 +292,12 @@ namespace Sandbox {
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
 			}
+			{
+				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::DebugDraw, Sandbox::Object )
+				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::DebugDraw, (Sandbox::Chipmunk::Space),(const Sandbox::Chipmunk::SpacePtr&) )
+				SB_BIND_END_CLASS
+				SB_BIND( lua );
+			}
 			SB_BIND_END_BIND
 		}
 	}

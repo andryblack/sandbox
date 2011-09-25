@@ -10,10 +10,48 @@
 #include "sb_chipmunk.h"
 #include "../chipmunk/include/chipmunk/chipmunk.h"
 #include <algorithm>
+#include "sb_graphics.h"
 
 namespace Sandbox {
 	
 	namespace Chipmunk {
+		
+		template <class T> 
+		inline bool add( std::vector<T>& objects, const T& object ) {
+			typename std::vector<T>::iterator i = std::find(objects.begin(),objects.end(),object);
+			if (i==objects.end()) {
+				objects.push_back(object);
+				return true;
+			}
+			return false;
+		}
+		template <class T> 
+		inline bool remove( std::vector<T>& objects, const T& object ) {
+			typename std::vector<T>::iterator i = std::find(objects.begin(),objects.end(),object);
+			if (i!=objects.end()) {
+				objects.erase(i);
+				return true;
+			}
+			return false;
+		}
+		template <class T>
+		struct compare_object {
+			explicit compare_object(const T* raw_) : raw(raw_) {}
+			bool operator() ( const shared_ptr<T>& ptr) {
+				return ptr.get() == raw;
+			}
+			const T* raw;
+		};
+		template <class T> 
+		inline bool remove( std::vector<shared_ptr<T> >& objects, const T* object ) {
+			typename std::vector<shared_ptr<T> >::iterator i = std::find_if(objects.begin(),objects.end(),compare_object<T>(object));
+			if (i!=objects.end()) {
+				objects.erase(i);
+				return true;
+			}
+			return false;
+		}
+		
 		
 		static inline cpVect vect( const Vector2f& v) {
 			return cpv(v.x,v.y);
@@ -31,6 +69,15 @@ namespace Sandbox {
 		}
 		
 		Space::~Space() {
+			for (size_t i=0;i<m_bodies.size();i++) {
+				cpSpaceRemoveBody(m_space, m_bodies[i]->get_body());
+			}
+			for (size_t i=0;i<m_shapes.size();i++) {
+				cpSpaceRemoveShape(m_space, m_shapes[i]->get_shape());
+			}
+			for (size_t i=0;i<m_constraints.size();i++) {
+				cpSpaceRemoveConstraint(m_space, m_constraints[i]->get_constraint());
+			}
 			cpSpaceFree(m_space);
 		}
 		
@@ -47,22 +94,34 @@ namespace Sandbox {
 			cpSpaceSetIterations(m_space, i);
 		}
 		void Space::AddBody(const BodyPtr& body) {
-			cpSpaceAddBody(m_space, body->get_body());
+			if (add(m_bodies,body)) {
+				cpSpaceAddBody(m_space, body->get_body());
+			}
 		}
 		void Space::RemoveBody(const BodyPtr& body) {
-			cpSpaceRemoveBody(m_space, body->get_body());
+			if (remove(m_bodies,body)) {
+				cpSpaceRemoveBody(m_space, body->get_body());
+			}
 		}
 		void Space::AddShape(const ShapePtr& shape) {
-			cpSpaceAddShape(m_space, shape->get_shape());
+			if (add(m_shapes,shape)) {
+				shape->set_space( this );
+				cpSpaceAddShape(m_space, shape->get_shape());
+			}
 		}
 		void Space::RemoveShape( const ShapePtr& shape) {
-			cpSpaceRemoveShape(m_space, shape->get_shape());
+			if (remove(m_shapes,shape)) {
+				shape->set_space( 0 );
+				cpSpaceRemoveShape(m_space, shape->get_shape());
+			}
 		}
 		void Space::AddConstraint(const ConstraintPtr& constraint) {
-			cpSpaceAddConstraint(m_space, constraint->get_constraint());
+			if (add(m_constraints,constraint))
+				cpSpaceAddConstraint(m_space, constraint->get_constraint());
 		}
 		void Space::RemoveConstraint(const ConstraintPtr& constraint) {
-			cpSpaceRemoveConstraint(m_space, constraint->get_constraint());
+			if (remove(m_constraints,constraint))
+				cpSpaceRemoveConstraint(m_space, constraint->get_constraint());
 		}
 		void Space::Step( float dt ) {
 			cpSpaceStep(m_space, dt);
@@ -81,10 +140,12 @@ namespace Sandbox {
 		}
 		
 		
-		Shape::Shape() : m_shape(0) {
+		
+		Shape::Shape() : m_shape(0),m_space(0) {
 		}
 		
 		Shape::~Shape() {
+			std::cout << "[Chipmunk] Body::~Shape" << std::endl;
 			if(m_shape) cpShapeFree(m_shape);
 		}
 		
@@ -139,16 +200,30 @@ namespace Sandbox {
 			SetShape(cpBoxShapeNew(body->get_body(), w, h));
 		}
 		
-		Body::Body( float mass, float inertia ) {
+		Body::Body( float mass, float inertia )  {
 			m_body = cpBodyNew(mass, inertia);
 			cpBodySetUserData(m_body, this);
 		}
-		Body::Body(cpBody* b) :m_body(b){
+		Body::Body(cpBody* b) :m_body(b) {
 			cpBodySetUserData(m_body, this);
+		}
+		
+		static void FreeBodyShapeIteratorFunc(cpBody *body, cpShape *shape, void *data) {
+			Shape* shape_p = reinterpret_cast<Shape*>( cpShapeGetUserData(shape) );
+			if (shape_p) {
+				Space* space = shape_p->get_space();
+				if (space) {
+					space->RemoveShape(shape_p->shared_from_this());
+				}
+			}
 		}
 			
 		Body::~Body() {
-			cpBodyFree(m_body);
+			std::cout << "[Chipmunk] Body::~Body" << std::endl;
+			if (m_body) {
+				cpBodyEachShape(m_body, FreeBodyShapeIteratorFunc,0 );
+				cpBodyFree(m_body);
+			}
 		}
 		
 		float Body::GetMass() const {
@@ -254,14 +329,16 @@ namespace Sandbox {
 			cpConstraintFree(m_constraint);
 		}
 		
-		Body* Constraint::GetA() const {
+		BodyPtr Constraint::GetA() const {
 			void* d = cpBodyGetUserData(cpConstraintGetA(m_constraint));
-			return reinterpret_cast<Body*> (d);
+			Body* body = reinterpret_cast<Body*> (d);
+			return body ? body->shared_from_this() : BodyPtr();
 		}
 		
-		Body* Constraint::GetB() const {
+		BodyPtr Constraint::GetB() const {
 			void* d = cpBodyGetUserData(cpConstraintGetB(m_constraint));
-			return reinterpret_cast<Body*> (d);
+			Body* body = reinterpret_cast<Body*> (d);
+			return body ? body->shared_from_this() : BodyPtr();
 		}
 		
 		
@@ -533,6 +610,54 @@ namespace Sandbox {
 		bool TransformAdapter::Update(float ) {
 			Sync();
 			return false;
+		}
+		
+		
+		
+		
+		struct DebugDraw::Impl {
+			void Draw( Graphics& g, cpSpace* space ) const {
+				cpSpaceEachBody(space, &SpaceBodyIteratorFunc, &g);
+				cpSpaceEachShape(space, &SpaceShapeIteratorFunc, &g);	
+			}
+			static void SpaceBodyIteratorFunc(cpBody *body, void *data) {
+				Graphics* g = reinterpret_cast<Graphics*> (data);
+				Color c = g->GetColor();
+				g->SetColor(c*Color(1,0,0,1));
+				Transform2d tr = g->GetTransform();
+				g->SetTransform(tr.translated(vect(cpBodyGetPos(body))).rotated(cpBodyGetAngle(body)));
+				cpBodyEachShape(body, &BodyShapeIteratorFunc, g);
+				g->SetTransform(tr);
+				g->SetColor(c);
+			}
+			static void SpaceShapeIteratorFunc(cpShape *shape, void *data) {
+				Graphics* g = reinterpret_cast<Graphics*> (data);
+			}
+			static void BodyShapeIteratorFunc(cpBody *body, cpShape *shape, void *data) {
+				Graphics* g = reinterpret_cast<Graphics*> (data);
+				if (CP_CIRCLE_SHAPE==shape->klass_private->type) {
+					Vector2f pos = vect(cpCircleShapeGetOffset(shape));
+					float r = cpCircleShapeGetRadius(shape);
+					g->DrawCircle(pos,r);
+					g->DrawLine(pos, Vector2f(0,1)*r);
+				}
+			}
+		};
+		
+		
+		
+		DebugDraw::DebugDraw( const SpacePtr& space ) : m_space(space) {
+			m_impl = new Impl();
+		}
+		
+		DebugDraw::~DebugDraw() {
+			delete m_impl;
+		}
+		
+		void DebugDraw::Draw( Graphics& g ) const {
+			if ( m_space ) {
+				m_impl->Draw( g , m_space->get_space() );
+			}
 		}
 		
 	}
