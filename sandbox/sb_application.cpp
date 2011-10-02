@@ -28,6 +28,7 @@ namespace Sandbox {
 		m_fps = 0.0f;
 		m_main_scene = 0;
 		m_main_thread = 0;
+		m_clear_buffer = false;
 	}
 	
 	Application::~Application() {
@@ -124,7 +125,11 @@ namespace Sandbox {
 		m_main_thread->Update(dt);
 		Update(dt);
 		m_render->BeginScene(0);
-		m_render->Clear(0,0,0,0);
+		if (m_clear_buffer)
+			m_render->Clear(m_clear_color.r,
+							m_clear_color.g,
+							m_clear_color.b,
+							m_clear_color.a);
 		m_graphics->BeginScene(m_render);
 		DrawFrame(*m_graphics);
 		m_graphics->EndScene();
@@ -146,6 +151,11 @@ namespace Sandbox {
 		::snprintf(buf,128,"fps:%0.2f",m_fps);
 		m_render->SetProjectionMatrix(Matrix4f::ortho(0,m_render->GetWidth(),m_render->GetHeight(),0,-1,1).matrix);
 		m_render->DebugDrawText( 10, 10 , buf );
+	}
+	
+	void Application::SetClearColor(const Color& c) {
+		m_clear_buffer = true;
+		m_clear_color = c;
 	}
 	///
 	void GHL_CALL Application::OnKeyDown( GHL::Key key ) {

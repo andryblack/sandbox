@@ -42,6 +42,8 @@ namespace Sandbox {
 		Resources* GetResources() const { return m_resources;}
 		
 		void DrawScene() const;
+		
+		void SetClearColor(const Color& c);
 	private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -59,6 +61,9 @@ namespace Sandbox {
 		void DrawDebugInfo();
 		ThreadsMgr*		m_main_thread;
 		Scene*			m_main_scene;
+		
+		bool		m_clear_buffer;
+		Color		m_clear_color;
 	public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys );
