@@ -260,6 +260,7 @@ namespace Sandbox {
 			SB_BIND_METHOD(Sandbox::Vector3f,length,float())
 			SB_BIND_METHOD(Sandbox::Vector3f,unit,Sandbox::Vector3f())
 			SB_BIND_OPERATOR_ADD_(Sandbox::Vector3f,Sandbox::Vector3f(Sandbox::Vector3f),Sandbox::Vector3f(Sandbox::Vector3f::*)(const Sandbox::Vector3f&)const)
+			SB_BIND_OPERATOR_SUB_(Sandbox::Vector3f,Sandbox::Vector3f(Sandbox::Vector3f),Sandbox::Vector3f(Sandbox::Vector3f::*)(const Sandbox::Vector3f&)const)
 			SB_BIND_OPERATOR_MUL_(Sandbox::Vector3f,Sandbox::Vector3f(float),Sandbox::Vector3f(Sandbox::Vector3f::*)(float)const)
 			SB_BIND_END_METHODS
 			SB_BIND_BEGIN_PROPERTYS
