@@ -403,6 +403,7 @@
 					"CP_USE_DOUBLES=0",
 					"CP_USE_CGPOINTS=0",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../chipmunk/include/chipmunk;
@@ -425,6 +426,7 @@
 					"CP_USE_DOUBLES=0",
 					"CP_USE_CGPOINTS=0",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../chipmunk/include/chipmunk;
