@@ -15,6 +15,7 @@
 #include "sb_thread.h"
 #include "sb_container_transform.h"
 #include "sb_object.h"
+#include "sb_color.h"
 
 #include <vector>
 
@@ -309,15 +310,29 @@ namespace Sandbox {
 			BodyPtr		m_body;
 		};
 		
-		class DebugDraw	: public Object {
+		class DebugDrawImpl;
+		
+		class SpaceDebugDraw	: public Object {
 		public:
-			explicit DebugDraw( const SpacePtr& space );
-			~DebugDraw();
+			explicit SpaceDebugDraw( const SpacePtr& space );
+			~SpaceDebugDraw();
 			void Draw( Graphics& g) const;
 		private:
-			struct Impl;
-			Impl*	m_impl;
+			DebugDrawImpl*	m_impl;
 			SpacePtr	m_space;
+		};
+		
+		class BodyDebugDraw	: public Object {
+		public:
+			explicit BodyDebugDraw( const BodyPtr& body );
+			~BodyDebugDraw();
+			void Draw( Graphics& g) const;
+			void SetColor( const Color& c ) { m_color = c;}
+			const Color& GetColor() const { return m_color;}
+		private:
+			DebugDrawImpl*	m_impl;
+			BodyPtr	m_body;
+			Color	m_color;
 		};
 	
 	}

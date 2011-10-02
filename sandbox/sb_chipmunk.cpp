@@ -10,6 +10,7 @@
 #include "sb_chipmunk.h"
 #include "../chipmunk/include/chipmunk/chipmunk.h"
 #include <algorithm>
+#include <iostream>
 #include "sb_graphics.h"
 
 namespace Sandbox {
@@ -128,7 +129,7 @@ namespace Sandbox {
 		}
 		bool Space::Update( float dt ) {
 			m_time_cum += dt;
-			static const float static_step = 1.0f / 60.0f;
+			static const float static_step = 1.0f / 50.0f;
 			size_t steps = size_t( m_time_cum / static_step );
 			if (steps>5) steps = 5;
 			if ( steps ) {
@@ -616,23 +617,39 @@ namespace Sandbox {
 		
 		
 		
-		struct DebugDraw::Impl {
-			void Draw( Graphics& g, cpSpace* space ) const {
+		struct DebugDrawImpl {
+			static void Draw( Graphics& g, cpSpace* space )  {
 				cpSpaceEachBody(space, &SpaceBodyIteratorFunc, &g);
 				cpSpaceEachShape(space, &SpaceShapeIteratorFunc, &g);	
+				cpSpaceEachConstraint(space, &SpaceConstraintIteratorFunc, &g);
+			}
+			static void Draw( Graphics& g, cpBody* body , const Color& color)  {
+				Color c = g.GetColor();
+				g.SetColor(c*color);
+				Transform2d tr = g.GetTransform();
+				g.SetTransform(tr.translated(vect(cpBodyGetPos(body))).rotated(cpBodyGetAngle(body)));
+				cpBodyEachShape(body, &BodyShapeIteratorFunc, &g);
+				g.SetTransform(tr);
+				g.SetColor(c);
 			}
 			static void SpaceBodyIteratorFunc(cpBody *body, void *data) {
 				Graphics* g = reinterpret_cast<Graphics*> (data);
-				Color c = g->GetColor();
-				g->SetColor(c*Color(1,0,0,1));
-				Transform2d tr = g->GetTransform();
-				g->SetTransform(tr.translated(vect(cpBodyGetPos(body))).rotated(cpBodyGetAngle(body)));
-				cpBodyEachShape(body, &BodyShapeIteratorFunc, g);
-				g->SetTransform(tr);
-				g->SetColor(c);
+				Draw(*g,body,Color(1,0,0,1));
+			}
+			static void SpaceConstraintIteratorFunc(cpConstraint *constraint, void *data) {
+				Graphics* g = reinterpret_cast<Graphics*> (data);
+				cpBody* A = cpConstraintGetA(constraint);
+				cpBody* B = cpConstraintGetB(constraint);
+				Vector2f posA = vect(cpBodyGetPos(A));
+				Vector2f posB = vect(cpBodyGetPos(B));
+				g->DrawLine(posA,posB,Color(0,1,0,1));
 			}
 			static void SpaceShapeIteratorFunc(cpShape *shape, void *data) {
-				Graphics* g = reinterpret_cast<Graphics*> (data);
+				//Graphics* g = reinterpret_cast<Graphics*> (data);
+				cpBody* b = cpShapeGetBody(shape);
+				if (b && cpBodyIsStatic(b)) {
+					BodyShapeIteratorFunc(b,shape,data);
+				}
 			}
 			static void BodyShapeIteratorFunc(cpBody *body, cpShape *shape, void *data) {
 				Graphics* g = reinterpret_cast<Graphics*> (data);
@@ -641,25 +658,50 @@ namespace Sandbox {
 					float r = cpCircleShapeGetRadius(shape);
 					g->DrawCircle(pos,r);
 					g->DrawLine(pos, Vector2f(0,1)*r);
-				}
+				} else if (CP_POLY_SHAPE==shape->klass_private->type) {
+					size_t cnt = cpPolyShapeGetNumVerts(shape);
+					std::vector<Vector2f> points;
+					for (size_t i=0;i<cnt;i++) {
+						points.push_back(vect(cpPolyShapeGetVert(shape, i)));
+					}
+					points.push_back(points.front());
+					g->DrawLineStrip(points);
+				} 
 			}
 		};
 		
 		
 		
-		DebugDraw::DebugDraw( const SpacePtr& space ) : m_space(space) {
-			m_impl = new Impl();
+		SpaceDebugDraw::SpaceDebugDraw( const SpacePtr& space ) : m_space(space) {
+			m_impl = new DebugDrawImpl();
 		}
 		
-		DebugDraw::~DebugDraw() {
+		SpaceDebugDraw::~SpaceDebugDraw() {
 			delete m_impl;
 		}
 		
-		void DebugDraw::Draw( Graphics& g ) const {
+		void SpaceDebugDraw::Draw( Graphics& g ) const {
 			if ( m_space ) {
 				m_impl->Draw( g , m_space->get_space() );
 			}
 		}
+		
+		
+		BodyDebugDraw::BodyDebugDraw( const BodyPtr& body ) : m_body(body) {
+			m_impl = new DebugDrawImpl();
+		}
+		
+		BodyDebugDraw::~BodyDebugDraw() {
+			delete m_impl;
+		}
+		
+		void BodyDebugDraw::Draw( Graphics& g ) const {
+			if ( m_body ) {
+				m_impl->Draw( g , m_body->get_body() , m_color);
+			}
+		}
+		
+	
 		
 	}
 }

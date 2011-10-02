@@ -299,8 +299,17 @@ namespace Sandbox {
 				SB_BIND( lua );
 			}
 			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::DebugDraw, Sandbox::Object )
-				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::DebugDraw, (Sandbox::Chipmunk::Space),(const Sandbox::Chipmunk::SpacePtr&) )
+				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::SpaceDebugDraw, Sandbox::Object )
+				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::SpaceDebugDraw, (Sandbox::Chipmunk::Space),(const Sandbox::Chipmunk::SpacePtr&) )
+				SB_BIND_END_CLASS
+				SB_BIND( lua );
+			}
+			{
+				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::BodyDebugDraw, Sandbox::Object )
+				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::BodyDebugDraw, (Sandbox::Chipmunk::Body),(const Sandbox::Chipmunk::BodyPtr&) )
+				SB_BIND_BEGIN_PROPERTYS
+				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::BodyDebugDraw, Color, GetColor,SetColor,Sandbox::Color)
+				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
 			}
