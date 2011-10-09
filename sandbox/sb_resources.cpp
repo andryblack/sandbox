@@ -98,12 +98,14 @@ namespace Sandbox {
 		ds->Release();
 		return img;
 	}
-	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h, const GHL::Byte* data) {
-		GHL::Texture* texture = m_render->CreateTexture(next_pot(w),next_pot(h),GHL::TEXTURE_FORMAT_RGBA,false);
-		texture->SetData(0,0,w,h,data);
+	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,bool alpha, const GHL::Byte* data) {
+		GHL::Texture* texture = m_render->CreateTexture(next_pot(w),next_pot(h),alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,false);
+		if (data) texture->SetData(0,0,w,h,data);
 		TexturePtr ptr(new Texture(texture));
 		return ptr;
 	}
+	
+	
 	TexturePtr Resources::GetTexture(const char* filename) {
 		
 #ifdef SB_RESOURCES_CACHE

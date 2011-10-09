@@ -52,7 +52,7 @@ namespace Sandbox {
 		
 		shared_ptr<Atlaser> CreateAtlaser(int w, int h);
 		
-		TexturePtr CreateTexture( GHL::UInt32 w, GHL::UInt32 h, const GHL::Byte* data);
+		TexturePtr CreateTexture( GHL::UInt32 w, GHL::UInt32 h, bool alpha, const GHL::Byte* data);
 	private:
 		GHL::VFS* m_vfs;
 		GHL::Render* m_render;
