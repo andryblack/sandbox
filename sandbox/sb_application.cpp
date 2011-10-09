@@ -81,8 +81,17 @@ namespace Sandbox {
 			SB_BIND_END_CLASS
 			SB_BIND(m_lua)
 		}
+		{
+			SB_BIND_BEGIN_EXTERN_CLASS( GHL::Application )
+			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
+			SB_BIND(m_lua)
+		}
 		SB_BIND_END_BIND
+		
 		m_lua->SetValue(settings, "settings", "GHL::Settings");
+		m_lua->SetValue(this, "application", "GHL::Application");
 		BindModules( m_lua );
 		m_lua->DoFile("settings.lua");
 	}
