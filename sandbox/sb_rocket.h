@@ -34,10 +34,11 @@ namespace Sandbox {
 	
 	class Graphics;
 	class Resources;
+	class Lua; 
 	
 	class RocketLib {
 	public:
-		explicit RocketLib( Resources* resources, GHL::System* system);
+		explicit RocketLib( Resources* resources, GHL::System* system, Lua* lua);
 		~RocketLib();
 		void Draw( Graphics& g ) const;
 		RocketDocumentPtr LoadDocument( const char* file );

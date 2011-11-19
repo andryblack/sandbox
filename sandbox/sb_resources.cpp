@@ -49,7 +49,7 @@ namespace Sandbox {
 		return ds;
 	}
 	
-	TexturePtr Resources::CreateTexture( int w,int h, bool alpha,bool fill) {
+	TexturePtr Resources::InternalCreateTexture( int w,int h, bool alpha,bool fill) {
 		GHL::TextureFormat tfmt;
 		if (alpha) {
 			tfmt = GHL::TEXTURE_FORMAT_RGBA;
@@ -191,7 +191,7 @@ namespace Sandbox {
 		GHL::UInt32 imgH = img->GetHeight();
 		GHL::UInt32 texW = next_pot(imgW);
 		GHL::UInt32 texH = next_pot(imgH);
-		TexturePtr texture = CreateTexture(texW, texH, ImageHaveAlpha(img), (texW!=imgW)||(texH!=imgH));
+		TexturePtr texture = InternalCreateTexture(texW, texH, ImageHaveAlpha(img), (texW!=imgW)||(texH!=imgH));
 		if (!texture || !ConvertImage(img,texture)) {
 			std::cout << "[RESOURCES] failed load image " << filename << std::endl;
 			img->Release();

@@ -61,7 +61,7 @@ namespace Sandbox {
 		
 		friend class Atlaser;
 		
-		TexturePtr CreateTexture( int w,int h, bool alpha,bool fill);
+		TexturePtr InternalCreateTexture( int w,int h, bool alpha,bool fill);
 		GHL::Image* LoadImage(const char* file);
 		bool ImageHaveAlpha(const GHL::Image* img) const;
 		bool ConvertImage(GHL::Image* img,const TexturePtr& tex) const;

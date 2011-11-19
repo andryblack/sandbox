@@ -14,6 +14,7 @@
 #include <Rocket/Core/Context.h>
 #include <Rocket/Debugger.h>
 #include <Rocket/Controls.h>
+#include <Rocket/Core/Factory.h>
 #include <ghl_data_stream.h>
 #include <ghl_vfs.h>
 #include <ghl_system.h>
@@ -21,8 +22,30 @@
 #include <iostream>
 #include "sb_graphics.h"
 #include "sb_resources.h"
+#include "sb_lua.h"
+#include "sb_bind.h"
 
 namespace Sandbox {
+	
+	namespace Bind {
+		template <> struct Pusher<Rocket::Core::String> {
+			static void Push( const StackHelper* helper, const Rocket::Core::String& t) {
+				helper->push_string(t.CString());
+			}
+		};
+		template <> struct Pusher<const Rocket::Core::String&> {
+			static void Push( const StackHelper* helper, const Rocket::Core::String& t) {
+				helper->push_string(t.CString());
+			}
+		};
+		template <> struct IsStringTag<Rocket::Core::String>{
+			static Rocket::Core::String to( const char* v ) {
+				return Rocket::Core::String(v);
+			}
+		};
+		template <> struct ArgumentTag<const Rocket::Core::String&> : public IsStringTag<Rocket::Core::String>{};
+		template <> struct ArgumentTag<Rocket::Core::String> : public IsStringTag<Rocket::Core::String>{};
+	}
 	
 	struct RocketFile {
 		GHL::DataStream* ds;
@@ -83,6 +106,36 @@ namespace Sandbox {
 		Resources*	m_resources;
 	};
 	
+	struct InvertDataStream : public GHL::DataStream {
+		Rocket::Core::Stream* stream;
+		InvertDataStream( Rocket::Core::Stream* stream ) : stream(stream) {
+		}
+		/// read data
+		virtual GHL::UInt32 GHL_CALL Read(GHL::Byte* dest,GHL::UInt32 bytes) {
+			return stream->Read( dest, bytes );
+		}
+		/// write data
+		virtual GHL::UInt32 GHL_CALL Write(const GHL::Byte* src,GHL::UInt32 bytes) {
+			return 0;
+		}
+		/// tell
+		virtual GHL::UInt32 GHL_CALL Tell() const {
+			return 0;
+		}
+		/// seek
+		virtual	bool GHL_CALL Seek(GHL::Int32 offset,GHL::FileSeekType st) {
+			return false;
+		}
+		/// End of file
+		virtual bool GHL_CALL Eof() const {
+			return stream->IsEOS();
+		}
+		/// release stream
+		virtual void GHL_CALL Release() {
+			delete this;
+		}
+	};
+
 	
 	class SystemInterfaceImpl : public ::Rocket::Core::SystemInterface {
 	public:
@@ -170,7 +223,7 @@ namespace Sandbox {
 		/// @param[in] source_dimensions The dimensions, in pixels, of the source data.
 		/// @return True if the texture generation succeeded and the handle is valid, false if not.
 		virtual bool GenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions) {
-			TexturePtr texture = m_resources->CreateTexture(source_dimensions.x,source_dimensions.y,source);
+			TexturePtr texture = m_resources->CreateTexture(source_dimensions.x,source_dimensions.y,true,(GHL::Byte*)source);
 			if (texture) {
 				RocketTexture* holder = new RocketTexture();
 				holder->texture = texture;
@@ -239,13 +292,125 @@ namespace Sandbox {
 			m_graphics->SetTransform(transform);
 		}
 	};
+	class ElementDocument : public Rocket::Core::ElementDocument {
+	public:
+		ElementDocument( const Rocket::Core::String& tag , const LuaEnvironmentPtr& env) : Rocket::Core::ElementDocument(tag),m_env(env) {
+		}
+		virtual void LoadScript(Rocket::Core::Stream* stream, const Rocket::Core::String& source_name) {
+			std::cout << "[Rocket] ElementDocument load script" << std::endl;
+			InvertDataStream ds(stream);
+			LuaFunctionPtr f = m_env->LoadFunction( source_name.Empty() ? "inline" : source_name.CString(), &ds );
+			if (f) f->Call();
+		}
+		const LuaEnvironmentPtr& GetEnvironment() const { return m_env;}
+		virtual Rocket::Core::ScriptObject GetScriptObject() const
+		{
+			return const_cast<void*>(reinterpret_cast<const void*> (&m_env));
+		}
+	private:
+		LuaEnvironmentPtr	m_env;
+	};
+	
+	class ElementDocumentInstancer : public Rocket::Core::ElementInstancer {
+	public:
+		ElementDocumentInstancer( Lua* lua ) : m_lua(lua) {
+		}
+		/// Instances an element given the tag name and attributes.
+		/// @param[in] parent The element the new element is destined to be parented to.
+		/// @param[in] tag The tag of the element to instance.
+		/// @param[in] attributes Dictionary of attributes.
+		virtual Rocket::Core::Element* InstanceElement(Rocket::Core::Element* parent, const Rocket::Core::String& tag, const Rocket::Core::XMLAttributes& attributes) {
+			LuaEnvironmentPtr env = m_lua->CreateEnvironment();
+			ElementDocument* doc = new ElementDocument( tag , env );
+			m_lua->SetValue( env,  doc, "document", "Rocket::Core::ElementDocument" );
+			return doc;
+		}
+		/// Releases an element instanced by this instancer.
+		/// @param[in] element The element to release.
+		virtual void ReleaseElement(Rocket::Core::Element* element) {
+			delete element;
+		}
+		// Release the instancer.
+		virtual void Release() {
+		
+		}
+	private:
+		Lua*	m_lua;
+	};
+	
+	class EventListener : public Rocket::Core::EventListener {
+	public:
+		EventListener( const Rocket::Core::String& code, Lua* lua ) : m_code(code),m_lua(lua) {
+		}
+		/// Process the incoming Event
+		virtual void ProcessEvent(Rocket::Core::Event& event) {
+			std::cout << "[Rocket] lua event : " << m_code.CString() << std::endl;
+			Rocket::Core::Element* element = event.GetTargetElement();
+			if (!m_function) {
+				Rocket::Core::ElementDocument* doc = element->GetOwnerDocument();
+				if (doc) {
+					LuaEnvironmentPtr* env = reinterpret_cast<LuaEnvironmentPtr*>(doc->GetScriptObject());
+					if (env) {
+						m_function = (*env)->LoadFunction( m_code.CString() );
+					}
+				}
+			}
+			if (m_function) {
+				if (element) {
+					m_lua->SetValue( m_function->GetEnv(),element,"self","Rocket::Core::Element" );
+				}
+				m_function->Call();
+			}
+		}
+		
+		/// Called when the listener has been attached to a new Element
+		virtual void OnAttach(Rocket::Core::Element* element)
+		{
+			
+		}
+		
+		/// Called when the listener has been detached from a Element
+		virtual void OnDetach(Rocket::Core::Element* element)
+		{
+			m_function = LuaFunctionPtr();
+		}
+	private:
+		Rocket::Core::String	m_code;
+		LuaFunctionPtr		m_function;
+		Lua* m_lua;
+	};
+	
+	/// event listener instancer for lua binding
+	class EventListenerInstancer : public Rocket::Core::EventListenerInstancer {
+	public:
+		EventListenerInstancer( Lua* lua ) : m_lua(lua) {
+		}
+		/// Instance an event listener object.
+		/// @param value Value of the event.
+		virtual Rocket::Core::EventListener* InstanceEventListener(const Rocket::Core::String& value) {
+			return new EventListener(value,m_lua);
+		}
+		
+		/// Releases this event listener instancer.
+		virtual void Release() {
+		}
+	private:
+		Lua* m_lua;
+	};
 	
 	
 	struct RocketLib::Data {
 		FileInterfaceImpl file;
 		SystemInterfaceImpl system;
 		RenderInterfaceImpl render;
-		Data( Resources* resources, GHL::System* system ) : file(resources),render(resources),system(system) {
+		EventListenerInstancer eventListenerInstancer;
+		ElementDocumentInstancer elementDocumentInstancer;
+		Data( Resources* resources, GHL::System* system,Lua* lua ) 
+			: file(resources)
+			,render(resources)
+			,system(system)
+			,eventListenerInstancer(lua)
+			,elementDocumentInstancer(lua) {
 		}
 	};
 	
@@ -260,13 +425,87 @@ namespace Sandbox {
 	
 	
 	
-	RocketLib::RocketLib( Resources* resources, GHL::System* system ) {
-		m_data = new Data( resources,system);
+	RocketLib::RocketLib( Resources* resources, GHL::System* system, Lua* lua ) {
+		m_data = new Data( resources,system,lua);
 		::Rocket::Core::SetFileInterface( &(m_data->file) );
 		::Rocket::Core::SetSystemInterface( &(m_data->system) );
 		::Rocket::Core::SetRenderInterface( &(m_data->render) );
+		::Rocket::Core::Factory::RegisterEventListenerInstancer( &(m_data->eventListenerInstancer) );
 		::Rocket::Core::Initialise();
 		::Rocket::Controls::Initialise();
+		::Rocket::Core::Factory::RegisterElementInstancer("body",  &(m_data->elementDocumentInstancer));
+		
+		SB_BIND_BEGIN_BIND
+		{
+			SB_BIND_BEGIN_EXTERN_CLASS(Rocket::Core::Element)
+			SB_BIND_BEGIN_METHODS
+			SB_BIND_METHOD(Rocket::Core::Element,Focus,bool())
+			SB_BIND_METHOD(Rocket::Core::Element,Blur,void())
+			SB_BIND_METHOD(Rocket::Core::Element,Click,void())
+			SB_BIND_METHOD(Rocket::Core::Element,ScrollIntoView,void(bool))
+			SB_BIND_METHOD(Rocket::Core::Element,HasChildNodes,bool())
+			SB_BIND_METHOD(Rocket::Core::Element,GetElementById,Rocket::Core::Element(Rocket::Core::String))
+			SB_BIND_METHOD(Rocket::Core::Element,UpdateLayout,void())
+			SB_BIND_END_METHODS
+			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,IsVisible,IsVisible,bool)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,ZIndex,GetZIndex,float)
+			/// DOM
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,TagName,GetTagName,Rocket::Core::String)
+			SB_BIND_PROPERTY_RW(Rocket::Core::Element,Id,GetId,SetId,Rocket::Core::String)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,AbsoluteLeft,GetAbsoluteLeft,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,AbsoluteTop,GetAbsoluteTop,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,ClientLeft,GetClientLeft,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,ClientTop,GetClientLeft,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,ClientWidth,GetClientWidth,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,ClientHeight,GetClientHeight,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,OffsetLeft,GetOffsetLeft,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,OffsetTop,GetOffsetLeft,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,OffsetWidth,GetOffsetWidth,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,OffsetHeight,GetOffsetHeight,float)
+			SB_BIND_PROPERTY_RW(Rocket::Core::Element,ScrollLeft,GetScrollLeft,SetScrollLeft,float)
+			SB_BIND_PROPERTY_RW(Rocket::Core::Element,ScrollTop,GetScrollTop,SetScrollTop,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,ScrollWidth,GetScrollWidth,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,ScrollHeight,GetScrollHeight,float)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,ParentNode,GetParentNode,Rocket::Core::Element)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,NextSibling,GetNextSibling,Rocket::Core::Element)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,PreviousSibling,GetPreviousSibling,Rocket::Core::Element)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,FirstChild,GetFirstChild,Rocket::Core::Element)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,LastChild,GetLastChild,Rocket::Core::Element)
+			SB_BIND_PROPERTY_RO(Rocket::Core::Element,OwnerDocument,GetOwnerDocument,Rocket::Core::ElementDocument)
+			SB_BIND_PROPERTY_RW_(Rocket::Core::Element,InnerRML,
+								static_cast<Rocket::Core::String(Rocket::Core::Element::*)()const>(&Rocket::Core::Element::GetInnerRML),
+								&Rocket::Core::Element::SetInnerRML,Rocket::Core::String) 
+			SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
+			SB_BIND(lua)
+		}
+		
+		{
+			SB_BIND_BEGIN_EXTERN_SUBCLASS(Rocket::Core::ElementDocument,Rocket::Core::Element)
+			SB_BIND_BEGIN_METHODS
+			SB_BIND_METHOD(Rocket::Core::ElementDocument,Show,void(Rocket::Core::ElementDocument::FocusFlags))
+			SB_BIND_METHOD(Rocket::Core::ElementDocument,Hide,void())
+			SB_BIND_METHOD(Rocket::Core::ElementDocument,Close,void())
+			SB_BIND_END_METHODS
+			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_PROPERTY_RW(Rocket::Core::ElementDocument,Title,GetTitle,SetTitle,Rocket::Core::String)
+			SB_BIND_PROPERTY_RO(Rocket::Core::ElementDocument,SourceURL,GetSourceURL,Rocket::Core::String)
+			SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
+			SB_BIND(lua)
+		}
+		{
+			SB_BIND_BEGIN_ENUM(Rocket::Core::ElementDocument::FocusFlags)
+			SB_BIND_ENUM_ITEM(NONE,Rocket::Core::ElementDocument)
+			SB_BIND_ENUM_ITEM(FOCUS,Rocket::Core::ElementDocument)
+			SB_BIND_ENUM_ITEM(MODAL,Rocket::Core::ElementDocument)
+			SB_BIND_END_ENUM
+			SB_BIND(lua)
+		}
+		SB_BIND_END_BIND
+		
+		
 		m_context = RocketContextPtr( ::Rocket::Core::CreateContext("main",
 																	Rocket::Core::Vector2i(
 																						   resources->GetRender()->GetWidth(), 
@@ -275,6 +514,7 @@ namespace Sandbox {
 #ifdef SB_DEBUG
 		Rocket::Debugger::Initialise(m_context.get());
 #endif
+		
 	};
 	
 	void RocketLib::SetBasePath( const char* path ) {
