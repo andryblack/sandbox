@@ -3,7 +3,7 @@
 	url = git@github.com:lloydw/libRocket.git
 [submodule "chipmunk"]
 	path = chipmunk
-	url = git@github.com:andryblack/Chipmunk-Physics.git
+	url = git@github.com:slembcke/Chipmunk-Physics.git
 [submodule "freetype"]
 	path = freetype
 	url = git://git.sv.gnu.org/freetype/freetype2.git
