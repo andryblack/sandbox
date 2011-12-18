@@ -8,7 +8,7 @@ cd `dirname $0`
 # mkdir Chipmunk-iPhone
 
 # build fat library
-xcodebuild -project chipmunk.xcodeproj -sdk iphoneos4.3 -configuration Release -target chipmunk && \
-xcodebuild -project chipmunk.xcodeproj -sdk iphoneos4.3 -configuration Debug -target chipmunk && \
-xcodebuild -project chipmunk.xcodeproj -sdk iphonesimulator4.3 -configuration Release -target chipmunk && \ 
-xcodebuild -project chipmunk.xcodeproj -sdk iphonesimulator4.3 -configuration Debug -target chipmunk 
+xcodebuild -project chipmunk.xcodeproj -sdk iphoneos -configuration Release -target chipmunk && \
+xcodebuild -project chipmunk.xcodeproj -sdk iphoneos -configuration Debug -target chipmunk && \
+xcodebuild -project chipmunk.xcodeproj -sdk iphonesimulator -configuration Release -target chipmunk && \ 
+xcodebuild -project chipmunk.xcodeproj -sdk iphonesimulator -configuration Debug -target chipmunk 

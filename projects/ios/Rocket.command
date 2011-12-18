@@ -5,17 +5,27 @@ cd `dirname $0`
 #rm -Rf build-Rocket
 
 # build fat library
-xcodebuild -project Rocket.xcodeproj -sdk iphoneos4.3 -configuration Release -target RocketCore 
-xcodebuild -project Rocket.xcodeproj -sdk iphoneos4.3 -configuration Debug -target RocketCore 
-xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator4.3 -configuration Release -target RocketCore 
-xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator4.3 -configuration Debug -target RocketCore 
+xcodebuild -project Rocket.xcodeproj -sdk iphoneos -configuration Release -target RocketCore 
+xcodebuild -project Rocket.xcodeproj -sdk iphoneos -configuration Debug -target RocketCore 
+xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator -configuration Release -target RocketCore 
+xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator -configuration Debug -target RocketCore 
+lipo ../../lib/libRocketCore-Debug-iphoneos.a ../../lib/libRocketCore-Debug-iphonesimulator.a -create -output ../../lib/libRocketCore_d.a && \
+lipo ../../lib/libRocketCore-Release-iphoneos.a ../../lib/libRocketCore-Release-iphonesimulator.a -create -output ../../lib/libRocketCore.a && \
+rm -f ../../lib/libRocketCore-*
 
-xcodebuild -project Rocket.xcodeproj -sdk iphoneos4.3 -configuration Release -target RocketDebugger
-xcodebuild -project Rocket.xcodeproj -sdk iphoneos4.3 -configuration Debug -target RocketDebugger
-xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator4.3 -configuration Release -target RocketDebugger
-xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator4.3 -configuration Debug -target RocketDebugger 
+xcodebuild -project Rocket.xcodeproj -sdk iphoneos -configuration Release -target RocketDebugger
+xcodebuild -project Rocket.xcodeproj -sdk iphoneos -configuration Debug -target RocketDebugger
+xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator -configuration Release -target RocketDebugger
+xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator -configuration Debug -target RocketDebugger 
+lipo ../../lib/libRocketDebugger-Debug-iphoneos.a ../../lib/libRocketDebugger-Debug-iphonesimulator.a -create -output ../../lib/libRocketDebugger_d.a && \
+lipo ../../lib/libRocketDebugger-Release-iphoneos.a ../../lib/libRocketDebugger-Release-iphonesimulator.a -create -output ../../lib/libRocketDebugger.a && \
+rm -f ../../lib/libRocketDebugger-*
 
-xcodebuild -project Rocket.xcodeproj -sdk iphoneos4.3 -configuration Release -target RocketControls
-xcodebuild -project Rocket.xcodeproj -sdk iphoneos4.3 -configuration Debug -target RocketControls
-xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator4.3 -configuration Release -target RocketControls
-xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator4.3 -configuration Debug -target RocketControls 
+xcodebuild -project Rocket.xcodeproj -sdk iphoneos -configuration Release -target RocketControls
+xcodebuild -project Rocket.xcodeproj -sdk iphoneos -configuration Debug -target RocketControls
+xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator -configuration Release -target RocketControls
+xcodebuild -project Rocket.xcodeproj -sdk iphonesimulator -configuration Debug -target RocketControls 
+
+lipo ../../lib/libRocketControls-Debug-iphoneos.a ../../lib/libRocketControls-Debug-iphonesimulator.a -create -output ../../lib/libRocketControls_d.a && \
+lipo ../../lib/libRocketControls-Release-iphoneos.a ../../lib/libRocketControls-Release-iphonesimulator.a -create -output ../../lib/libRocketControls.a && \
+rm -f ../../lib/libRocketControls-*
