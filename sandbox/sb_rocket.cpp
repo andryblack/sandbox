@@ -387,7 +387,8 @@ namespace Sandbox {
 		}
 		/// Instance an event listener object.
 		/// @param value Value of the event.
-		virtual Rocket::Core::EventListener* InstanceEventListener(const Rocket::Core::String& value) {
+        virtual Rocket::Core::EventListener* InstanceEventListener(const Rocket::Core::String& value,
+                                                                   Rocket::Core::Element* element) {
 			return new EventListener(value,m_lua);
 		}
 		
