@@ -762,8 +762,8 @@
 		A40EB0BE141B6D5000C005B1 /* Plugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Plugin.h; sourceTree = "<group>"; };
 		A40EB0BF141B6D5000C005B1 /* SystemInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SystemInterface.cpp; sourceTree = "<group>"; };
 		A40EB0C0141B6D5000C005B1 /* SystemInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemInterface.h; sourceTree = "<group>"; };
-		A40EB83A141B8C5700C005B1 /* libRocketDebugger-Debug-iphonesimulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libRocketDebugger-Debug-iphonesimulator.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A40EB967141B8C5C00C005B1 /* libRocketControls-Debug-iphonesimulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libRocketControls-Debug-iphonesimulator.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A40EB83A141B8C5700C005B1 /* libRocketDebugger-Debug-iphonesimulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libRocketDebugger-Debug-iphonesimulator.a"; path = "libRocketDebugger-Debug-iphoneos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A40EB967141B8C5C00C005B1 /* libRocketControls-Debug-iphonesimulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libRocketControls-Debug-iphonesimulator.a"; path = "libRocketControls-Debug-iphoneos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4362B24141E93860034AD49 /* Clipboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Clipboard.h; sourceTree = "<group>"; };
 		A4362B25141E93860034AD49 /* Controls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controls.h; sourceTree = "<group>"; };
 		A4362B26141E93860034AD49 /* DataFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataFormatter.h; sourceTree = "<group>"; };
@@ -877,7 +877,7 @@
 		A4362BE8141E9E9C0034AD49 /* FileInterfaceDefault.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileInterfaceDefault.cpp; sourceTree = "<group>"; };
 		A4362BE9141E9E9C0034AD49 /* FileInterfaceDefault.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileInterfaceDefault.h; sourceTree = "<group>"; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		D2AAC07E0554694100DB518D /* libRocketCore-Debug-iphonesimulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libRocketCore-Debug-iphonesimulator.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC07E0554694100DB518D /* libRocketCore-Debug-iphonesimulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libRocketCore-Debug-iphonesimulator.a"; path = "libRocketCore-Debug-iphoneos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2046,6 +2046,10 @@
 				CONFIGURATION_BUILD_DIR = ../../lib;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					ROCKET_DEBUG,
+					STATIC_LIB,
+				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -2056,7 +2060,6 @@
 				);
 				OBJROOT = "build-Rocket";
 				OTHER_LDFLAGS = "-ObjC";
-				PREBINDING = NO;
 				SDKROOT = iphoneos;
 				SYMROOT = ../../lib;
 			};
@@ -2069,6 +2072,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CONFIGURATION_BUILD_DIR = ../../lib;
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_PREPROCESSOR_DEFINITIONS = STATIC_LIB;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -2079,7 +2083,6 @@
 				);
 				OBJROOT = "build-Rocket";
 				OTHER_LDFLAGS = "-ObjC";
-				PREBINDING = NO;
 				SDKROOT = iphoneos;
 				SYMROOT = ../../lib;
 			};

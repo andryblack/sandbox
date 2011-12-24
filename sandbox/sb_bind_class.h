@@ -119,6 +119,7 @@ namespace Sandbox {
 			const MethodInfo* methods;
 			const PropertyInfo* propertys;
 		};
+        void register_type(lua_State* L,const ClassBind* bind);
 		
 		namespace ClassDefaults {
 			static const ConstructorInfo constructorInfo = { 

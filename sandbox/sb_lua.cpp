@@ -244,7 +244,7 @@ namespace Sandbox {
 	
 	// traceback function, adapted from lua.c
 	// when a runtime error occurs, this will append the call stack to the error message
-	int traceback (lua_State *L)
+	static int traceback (lua_State *L)
 	{
 		// look up Lua's 'debug.traceback' function
 		lua_getglobal(L, "debug");

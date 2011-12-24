@@ -13,7 +13,8 @@
 namespace Sandbox {
 
 	namespace Bind {
-		
+        
+        
 		struct EnumItem {
 			const char* name;
 			int value;
@@ -23,6 +24,8 @@ namespace Sandbox {
 			const char* name;
 			const EnumItem* items;
 		};
+		
+        void register_enum(lua_State* L,const EnumBind* info);
 		
 #define SB_BIND_BEGIN_ENUM(Name) static const char* name = #Name; \
 		static const Sandbox::Bind::EnumItem items[] = { 
