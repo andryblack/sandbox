@@ -19,14 +19,16 @@
 #include <ghl_vfs.h>
 #include <ghl_system.h>
 #include <string>
-#include <iostream>
 #include "sb_graphics.h"
 #include "sb_resources.h"
 #include "sb_lua.h"
 #include "sb_bind.h"
+#include "sb_log.h"
 
 namespace Sandbox {
 	
+    static const char* MODULE = "Sandbox:Rocket";
+    
 	namespace Bind {
 		template <> struct Pusher<Rocket::Core::String> {
 			static void Push( const StackHelper* helper, const Rocket::Core::String& t) {
@@ -297,7 +299,7 @@ namespace Sandbox {
 		ElementDocument( const Rocket::Core::String& tag , const LuaEnvironmentPtr& env) : Rocket::Core::ElementDocument(tag),m_env(env) {
 		}
 		virtual void LoadScript(Rocket::Core::Stream* stream, const Rocket::Core::String& source_name) {
-			std::cout << "[Rocket] ElementDocument load script" << std::endl;
+			LogInfo(MODULE) << "ElementDocument load script";
 			InvertDataStream ds(stream);
 			LuaFunctionPtr f = m_env->LoadFunction( source_name.Empty() ? "inline" : source_name.CString(), &ds );
 			if (f) f->Call();
@@ -344,7 +346,7 @@ namespace Sandbox {
 		}
 		/// Process the incoming Event
 		virtual void ProcessEvent(Rocket::Core::Event& event) {
-			std::cout << "[Rocket] lua event : " << m_code.CString() << std::endl;
+			LogDebug(MODULE) << "[Rocket] lua event : " << m_code.CString();
 			Rocket::Core::Element* element = event.GetTargetElement();
 			if (!m_function) {
 				Rocket::Core::ElementDocument* doc = element->GetOwnerDocument();

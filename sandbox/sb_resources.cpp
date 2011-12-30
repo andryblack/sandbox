@@ -15,14 +15,16 @@
 #include <ghl_texture.h>
 #include <ghl_image.h>
 #include <ghl_shader.h>
-#include <iostream>
 
 #include "sb_atlaser.h"
+
+#include "sb_log.h"
 
 
 
 namespace Sandbox {
 
+    static const char* MODULE = "Sandbox:Resources";
 	
 	
 	
@@ -43,8 +45,8 @@ namespace Sandbox {
 		std::string fn = m_base_path + filename;
 		GHL::DataStream* ds = m_vfs->OpenFile(fn.c_str());
 		if (!ds) {
-			std::cout << "[RESOURCES] Failed open file " << filename << std::endl;
-			std::cout << "[RESOURCES] full path : " << fn << std::endl;
+			LogError(MODULE) << "Failed open file " << filename;
+			LogError(MODULE) << "full path : " << fn;
 		}
 		return ds;
 	}
@@ -84,7 +86,7 @@ namespace Sandbox {
 				file = fn+".tga";
 				ds = m_vfs->OpenFile( file.c_str() );
 				if ( !ds ) {
-					std::cout << "[RESOURCES] error opening file " << fn << std::endl;
+					LogError(MODULE) <<"error opening file " << fn;
 					return 0;
 				}
 			}
@@ -92,7 +94,7 @@ namespace Sandbox {
 		GHL::Image* img = m_image->Decode(ds);
 		if (!img) {
 			ds->Release();
-			std::cout << "[RESOURCES] error decoding file " << filename << std::endl;
+			LogError(MODULE) <<"error decoding file " << filename;
 			return 0;
 		}
 		ds->Release();
@@ -125,7 +127,7 @@ namespace Sandbox {
 			tfmt = GHL::TEXTURE_FORMAT_RGBA;
 		} else {
 			img->Release();
-			std::cout << "[RESOURCES] unsupported format file " << filename << std::endl;
+			LogError(MODULE) <<"unsupported format file " << filename;
 			return TexturePtr();
 		}
 		GHL::Texture* texture = m_render->CreateTexture(next_pot(img->GetWidth()),next_pot(img->GetHeight()),tfmt,false);
@@ -142,15 +144,15 @@ namespace Sandbox {
 		}
 		
 		if (texture->GetWidth()!=img->GetWidth() || texture->GetHeight()!=img->GetHeight()) {
-			std::cout << "[RESOURCES] Warning image " << filename << " NPOT " << 
+			LogWarning(MODULE) << "image " << filename << " NPOT " << 
 				img->GetWidth() << "x" << img->GetHeight() << " -> " <<
-				texture->GetWidth() << "x" << texture->GetHeight() << std::endl;
+				texture->GetWidth() << "x" << texture->GetHeight();
 			GHL::Byte* data = new GHL::Byte[ bpp*texture->GetWidth()*texture->GetHeight() ];
 			std::fill(data,data+bpp*texture->GetWidth()*texture->GetHeight(),0);
 			texture->SetData(0,0,texture->GetWidth(),texture->GetHeight(),data);
 			delete [] data;
 		} else {
-			std::cout << "[RESOURCES] Loaded image : " << filename << " " << img->GetWidth() << "x" << img->GetHeight() << std::endl;
+			LogInfo(MODULE) << "Loaded image : " << filename << " " << img->GetWidth() << "x" << img->GetHeight() ;
 		}
 		
 		img->Convert(ifmt);
@@ -176,7 +178,7 @@ namespace Sandbox {
 		else if (tfmt==GHL::TEXTURE_FORMAT_RGBA) {
 			ifmt = GHL::IMAGE_FORMAT_RGBA;
 		} else {
-			std::cout << "[RESOURCES] unexpected texture format" << std::endl;
+			LogError(MODULE) <<  "unexpected texture format";
 			return false;
 		}
 
@@ -193,7 +195,7 @@ namespace Sandbox {
 		GHL::UInt32 texH = next_pot(imgH);
 		TexturePtr texture = InternalCreateTexture(texW, texH, ImageHaveAlpha(img), (texW!=imgW)||(texH!=imgH));
 		if (!texture || !ConvertImage(img,texture)) {
-			std::cout << "[RESOURCES] failed load image " << filename << std::endl;
+			LogError(MODULE) << "failed load image " << filename;
 			img->Release();
 			return ImagePtr();
 		}
@@ -228,13 +230,13 @@ namespace Sandbox {
 			std::string filename = m_base_path+vfilename;
 			GHL::DataStream* ds = m_vfs->OpenFile(filename.c_str());
 			if (!ds) {
-				std::cout << "[RESOURCES] error opening file " << filename << std::endl;
+				LogError(MODULE) << "error opening file " << filename;
 				return ShaderPtr();
 			}
 			vs = m_render->CreateVertexShader(ds);
 			ds->Release();
 			if (!vs) {
-				std::cout << "[RESOURCES] error loading shader " << vfilename << std::endl;
+				LogError(MODULE) << "error loading shader " << vfilename;
 				//return ShaderPtr();
 			}
 #ifdef SB_RESOURCES_CACHE
@@ -245,13 +247,13 @@ namespace Sandbox {
 			std::string filename = m_base_path+ffilename;
 			GHL::DataStream* ds = m_vfs->OpenFile(filename.c_str());
 			if (!ds) {
-				std::cout << "[RESOURCES] error opening file " << filename << std::endl;
+				LogError(MODULE) << "error opening file " << filename;
 				return ShaderPtr();
 			}
 			fs = m_render->CreateFragmentShader(ds);
 			ds->Release();
 			if (!fs) {
-				std::cout << "[RESOURCES] error loading shader " << ffilename << std::endl;
+				LogError(MODULE) << "error loading shader " << ffilename;
 				//return ShaderPtr();
 			}
 #ifdef SB_RESOURCES_CACHE
@@ -260,7 +262,7 @@ namespace Sandbox {
 		}
 		GHL::ShaderProgram* sp = m_render->CreateShaderProgram(vs,fs);
 		if (!sp) {
-			std::cout << "[RESOURCES] error creating shader program from " << vfilename << " , " << ffilename << std::endl;
+			LogError(MODULE) << "error creating shader program from " << vfilename << " , " << ffilename ;
 			//return ShaderPtr();
 		}
 		ShaderPtr res( new Shader(sp) );

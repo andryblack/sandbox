@@ -23,14 +23,16 @@ extern "C" {
 #include <ghl_data_stream.h>
 #include <ghl_vfs.h>
 #include <algorithm>
-#include <iostream>
 
 #include "sb_inplace_string.h"
 #include "sb_bind.h"
 #include "sb_event.h"
+#include "sb_log.h"
 
 namespace Sandbox {
 	
+    static const char* MODULE = "Sanbox:Lua";
+    
 	
 	LuaReference::LuaReference( const LuaHelperWeakPtr& ptr ) : m_lua(ptr),m_ref(LUA_NOREF) {
 	}
@@ -80,8 +82,8 @@ namespace Sandbox {
 		return LuaEnvironmentPtr();
 	}
 	static int lua_error_function( lua_State* L ) {
-		std::cout << "error exec inline function" << std::endl;
-		std::cout << lua_tostring(L, -1) << std::endl;
+		LogError(MODULE) << "error exec inline function" ;
+		LogError(MODULE) << lua_tostring(L, -1) ;
 		/// remove error from stack
 		lua_pop(L,1);
 		return 0;
@@ -151,7 +153,8 @@ namespace Sandbox {
 			if (LuaHelperPtr lua = m_ref.GetHelper()) {
 				lua_State* L = lua->lua->GetVM();
 				if (lua_load(L, &lua_string_read_func,&content, "inline")!=0) {
-					std::cout << "[LUA] Failed to load inline : '" << content << "'" << std::endl << lua_tostring(L, -1) << std::endl;
+					LogError(MODULE) << "Failed to load inline : '" << content << "'";
+                    LogError(MODULE) << lua_tostring(L, -1) ;
 					lua_pop(L,1);
 				} else {
 					m_ref.GetObject( L );
@@ -170,7 +173,8 @@ namespace Sandbox {
 				lua_read_data data = {stream,{}};
 				int res = lua_load(L,&lua_read_func,&data,name);
 				if (res!=0) {
-					std::cout << "[LUA] Failed to load script: " << name << std::endl << lua_tostring(L, -1) << std::endl;
+					LogError(MODULE)<<"Failed to load script: " << name ;
+                    LogError(MODULE)<< lua_tostring(L, -1) ;
 					lua_pop(L,1);
 				} else {
 					m_ref.GetObject( L );
@@ -183,10 +187,11 @@ namespace Sandbox {
 	}
 	
 	static int lua_print_func (lua_State *L) {
-		  int n = lua_gettop(L);  /* number of arguments */
-		  int i;
-		  lua_getglobal(L, "tostring");
-		  for (i=1; i<=n; i++) {
+        int n = lua_gettop(L);  /* number of arguments */
+        int i;
+        lua_getglobal(L, "tostring");
+        LogInfo log_info(MODULE);
+        for (i=1; i<=n; i++) {
 		    const char *s;
 		    lua_pushvalue(L, -1);  /* function to be called */
 		    lua_pushvalue(L, i);   /* value to print */
@@ -195,12 +200,11 @@ namespace Sandbox {
 		    if (s == NULL)
 		      return luaL_error(L, LUA_QL("tostring") " must return a string to "
 		                           LUA_QL("print"));
-			  if (i>1) std::cout << "\t";
-			  std::cout << s;  
+			  if (i>1) log_info << "\t";
+			  log_info << s;  
 		    lua_pop(L, 1);  /* pop result */
 		  }
-		std::cout << std::endl;
-		  return 0;
+      	  return 0;
 		}
 		
 	
@@ -262,7 +266,7 @@ namespace Sandbox {
 		lua_pushvalue(L, 1);  /* pass error message */
 		lua_pushinteger(L, 2);  /* skip this function and traceback */
 		lua_call(L, 2, 1);  /* call debug.traceback */
-		std::cout << "[LUA] trap" << std::flush << std::endl;
+		LogError(MODULE)<<"trap";
 		exit(1);
 	}
 	
@@ -307,11 +311,11 @@ namespace Sandbox {
 	}
 	
 	Lua::~Lua() {
-		std::cout << "[LUA] Close" << std::endl;
+		LogDebug(MODULE) <<  "Close";
 		m_helper = LuaHelperPtr();
 		lua_close(m_state);
 		m_helper = LuaHelperPtr();
-		std::cout << "[LUA] after close memory in use : " << m_mem_use << std::endl;
+		LogDebug(MODULE) << "after close memory in use : " << m_mem_use;
 	}
 	
 	Lua* Lua::GetPtr(lua_State* L) {
@@ -336,17 +340,18 @@ namespace Sandbox {
 		std::string filename = m_base_path + fn;
 		GHL::DataStream* ds = m_vfs->OpenFile(filename.c_str());
 		if (!ds) {
-			std::cout << "[LUA] error opening file " << filename << std::endl;
+			LogWarning(MODULE) << "error opening file " << filename;
 			return false;
 		}
 		lua_read_data data = {ds,{}};
 		int res = lua_load(L,&lua_read_func,&data,fn);
 		ds->Release();
 		if (res!=0) {
-			std::cout << "[LUA] Failed to load script: " << filename << std::endl << lua_tostring(m_state, -1) << std::endl;
+			LogError(MODULE) << "Failed to load script: " << filename;
+            LogError(MODULE) << lua_tostring(m_state, -1) ;
 			return false;
 		} else {
-			std::cout << "[LUA] Loaded script: " << fn << std::endl;
+			LogInfo(MODULE) << "Loaded script: " << fn;
 		}
 		return true;
 	}
@@ -354,7 +359,8 @@ namespace Sandbox {
 	bool Lua::call(const char* str,int args) {
 		int res = lua_pcall(m_state, args, 0, 0);
 		if (res) {
-			std::cout << "[LUA] Failed to script call : " << str << std::endl << lua_tostring(m_state, -1) << std::endl;
+			LogError(MODULE) << "Failed to script call : " << str;
+            LogError(MODULE) << lua_tostring(m_state, -1) ;
 			return false;
 		}
 		return true;
@@ -421,7 +427,7 @@ namespace Sandbox {
 		} else {
 			/// remove table and field
 			lua_pop(L,2);
-			std::cout << "[LUA] not found function " << func << std::endl;
+			LogError(MODULE) <<  "not found function " << func;
 		}
 	}
 	

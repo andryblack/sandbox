@@ -12,8 +12,10 @@
 
 namespace Sandbox {
 	
+    static const char* MODULE = "Sanbox:Graphics";
 	
 	Graphics::Graphics() {
+        (void)MODULE;
 		m_render = 0;
 		m_fake_tex_white = 0;
 		m_vertexes.reserve(512);
@@ -106,7 +108,7 @@ namespace Sandbox {
                                                m_primitives);
         m_batches++;
 #ifdef PRINT_BATCHES
-        std::cout << "batch " << m_data->primitives << std::endl;
+        LogDebug(MODULE) << "batch " << m_data->primitives;
 #endif
         m_vertexes.clear();
 		m_indexes.clear();

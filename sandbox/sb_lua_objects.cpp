@@ -50,12 +50,12 @@
 #include "sb_rect.h"
 #include "sb_container_viewport.h"
 
+#include "sb_log.h"
+
 extern "C" {
 #include "../lua/src/lua.h"
 #include "../lua/src/lauxlib.h"
 }
-
-#include <iostream>
 
 #include <cstdio>
 #ifdef _MSC_VER
@@ -94,9 +94,10 @@ namespace Sandbox {
 		return 1;
 	}
 	
-	class LuaEvent : public Event {
+    static const char* const LuaEventModule = "Sanbox:LuaEvent";
+  	class LuaEvent : public Event {
 	public:
-		explicit LuaEvent(LuaHelperWeakPtr ptr) : m_ref(ptr) {}
+        explicit LuaEvent(LuaHelperWeakPtr ptr) : m_ref(ptr) {}
 		~LuaEvent() {
 		}
 		void SetFunction(lua_State* L) {
@@ -111,10 +112,11 @@ namespace Sandbox {
 					sb_assert(lua_isfunction(L,-1));
 					int res = lua_pcall(L, 0, 0, 0);
 					if (res) {
-						std::cout << "[LuaEvent] Failed script event emmit  " << std::endl << lua_tostring(L, -1) << std::endl;
+						LogError(LuaEventModule) << " Failed script event emmit  " ;
+                        LogError(LuaEventModule) << lua_tostring(L, -1) ;
 					}
 				} else {
-					std::cout << "[LuaEvent] call emmit on released script" << std::endl;
+					LogError(LuaEventModule) <<" call emmit on released script" ;
 				}
 			}
 		}
@@ -141,7 +143,7 @@ namespace Sandbox {
 		LuaReference	m_ref;
 	};
 	
-	
+	static const char* const LuaThreadModule = "Sanbox:LuaThread";
 	class LuaThread : public Thread {
 	public:
 		explicit LuaThread(LuaHelperWeakPtr ptr) : m_ref(ptr) {}
@@ -158,8 +160,9 @@ namespace Sandbox {
 					sb_assert(L);
 					m_ref.GetObject(L);
 					if (!lua_isthread(L,-1)) {
-						std::cout << "[LuaThread] not thread :" << luaL_typename(L,-1) << std::endl;
+						LogError(LuaThreadModule) << "not thread :" << luaL_typename(L,-1);
 						sb_assert(lua_isthread(L,-1));
+                        return false;
 					} 
 					lua_State* th = lua_tothread(L, -1);
 					lua_pushnumber(th, dt);
@@ -169,10 +172,11 @@ namespace Sandbox {
 						return false;
 					}
 					if (res) {
-						std::cout << "[LuaThread] Failed script resume  " << std::endl << lua_tostring(th, -1) << std::endl;
+						LogError(LuaThreadModule) << "Failed script resume  " ;
+                        LogError(LuaThreadModule) << lua_tostring(th, -1) ;
 					}
 				} else {
-					std::cout << "[LuaThread] update on released script" << std::endl;
+					LogError(LuaThreadModule) << "update on released script";
 				}
 			}
 			return true;
@@ -204,7 +208,8 @@ namespace Sandbox {
 				e->SetThread(main_state);				/// (1) func
 			} else {
 				if (res!=0) {
-					std::cout << "[LuaThread] Failed thread run  " << std::endl << lua_tostring(thL, -1) << std::endl;
+					LogError(LuaThreadModule) <<"Failed thread run  ";
+                    LogError(LuaThreadModule) << lua_tostring(thL, -1);
 				}
 				lua_pop(main_state,1);					/// (1) func
 			}

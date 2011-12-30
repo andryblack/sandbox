@@ -10,10 +10,12 @@
 #include "sb_chipmunk.h"
 #include "../chipmunk/include/chipmunk/chipmunk.h"
 #include <algorithm>
-#include <iostream>
 #include "sb_graphics.h"
+#include "sb_log.h"
 
 namespace Sandbox {
+
+    static const char* MODULE = "Sandbox:Chipmunk";
 	
 	namespace Chipmunk {
 		
@@ -147,7 +149,7 @@ namespace Sandbox {
 		}
 		
 		Shape::~Shape() {
-			std::cout << "[Chipmunk] Body::~Shape" << std::endl;
+			LogDebug(MODULE) << "Body::~Shape";
 			if(m_shape) cpShapeFree(m_shape);
 		}
 		
@@ -221,7 +223,7 @@ namespace Sandbox {
 		}
 			
 		Body::~Body() {
-			std::cout << "[Chipmunk] Body::~Body" << std::endl;
+			LogDebug(MODULE) << "Body::~Body";
 			if (m_body) {
 				cpBodyEachShape(m_body, FreeBodyShapeIteratorFunc,0 );
 				cpBodyFree(m_body);
