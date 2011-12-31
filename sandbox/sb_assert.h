@@ -17,9 +17,9 @@ inline void sb_terminate() /*__attribute__((noreturn)) */{
     ::abort();
 }
 #define sb_assert( COND ) do { if (!(COND)) { \
-	::Sandbox::LogError() << "assert :" << #COND; \
-	::Sandbox::LogError() << "in function :" << __FUNCTION__ ; \
-	::Sandbox::LogError() << "at : " << __FILE__ << " " << __LINE__ << " " << #COND;\
+	::Sandbox::LogError("assert") << "assert :" << #COND; \
+	::Sandbox::LogError("assert") << "in function :" << __FUNCTION__ ; \
+	::Sandbox::LogError("assert") << "at : " << __FILE__ << " " << __LINE__ << " " << #COND;\
 	sb_terminate();} } while (false)
 #else
 	///// release build
