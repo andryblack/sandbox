@@ -18,7 +18,7 @@ namespace GHL {
 }
 
 namespace Sandbox {
-	
+	 
 	class Lua;
 	
 	class Accelerometer : public Thread {
