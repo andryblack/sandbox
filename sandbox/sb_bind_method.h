@@ -135,6 +135,9 @@ namespace Sandbox {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
 				(static_cast<T*>(obj)->*func)();
 			}
+            static void Call(const StackHelper* hpr,int addArgs) { 
+                hpr->CallVoid(addArgs);
+			}
 		};
 		template <typename T,typename Ret> struct MethodHelper<Ret(T::*)()> {
 			typedef Ret RetType;
@@ -220,6 +223,19 @@ namespace Sandbox {
 				(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											  hpr->GetArgument(1,ArgumentTag<Arg2>()));
 			}
+            static void Call(const StackHelper* hpr,int addArgs,Arg1 a1,Arg2 a2) { 
+                {
+                    std::string argType = hpr->get_arg_type(0).str();
+                    StackHelper hpr1(hpr->GetState(),1,argType.c_str());
+                    hpr1.PushValue(a1);
+                }
+                {
+                    std::string argType = hpr->get_arg_type(1).str();
+                    StackHelper hpr1(hpr->GetState(),1,argType.c_str());
+                    hpr1.PushValue(a2);
+                }
+                hpr->CallVoid(addArgs+2);
+			}
 		};
 		template <typename T,typename Arg1,typename Arg2> struct MethodHelper<void(T::*)(Arg1,Arg2)const> {
 			typedef void RetType;
@@ -285,6 +301,24 @@ namespace Sandbox {
 				(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											  hpr->GetArgument(1,ArgumentTag<Arg2>()),
 											  hpr->GetArgument(2,ArgumentTag<Arg3>()));
+			}
+            static void Call(const StackHelper* hpr,int addArgs,Arg1 a1,Arg2 a2,Arg3 a3) { 
+                {
+                    std::string argType = hpr->get_arg_type(0).str();
+                    StackHelper hpr1(hpr->GetState(),1,argType.c_str());
+                    hpr1.PushValue(a1);
+                }
+                {
+                    std::string argType = hpr->get_arg_type(1).str();
+                    StackHelper hpr1(hpr->GetState(),1,argType.c_str());
+                    hpr1.PushValue(a2);
+                }
+                {
+                    std::string argType = hpr->get_arg_type(2).str();
+                    StackHelper hpr1(hpr->GetState(),1,argType.c_str());
+                    hpr1.PushValue(a3);
+                }
+                hpr->CallVoid(addArgs+3);
 			}
 		};
 		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3> 

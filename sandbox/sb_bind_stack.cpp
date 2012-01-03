@@ -381,7 +381,10 @@ namespace Sandbox {
        }
         
         void StackHelper::CallVoid(int numArgs) const {
-            lua_pcall(m_L, numArgs, 0, 0);
+            int res = lua_pcall(m_L, numArgs, 0, 0);
+            if (res) {
+                LogError(MODULE) << "Failed StackHelper::CallVoid : " << lua_tostring(m_L, -1);
+            }
         }
 	}
 }

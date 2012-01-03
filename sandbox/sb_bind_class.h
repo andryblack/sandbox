@@ -175,7 +175,6 @@ namespace Sandbox {
 #define SB_BIND_END_CLASS static const Sandbox::Bind::ClassBind bind = { &classInfo,&constructorInfo, methods,propertys }; 
 		
         
-        
 #define SB_BIND_BEGIN_EXTENSIBLE( Name ) class Name##Proxy : public Name { \
         public: \
             Name##Proxy () : Name(  ) , m_state(0), m_ref(0) {}   /* only empty crts */ \
@@ -197,11 +196,32 @@ namespace Sandbox {
             }; \
             return &constructorInfo; \
         }
-#define SB_BIND_EXTENSIBLE_METHOD_VOID(Class,Method,Signature,ArgsSignature,args ) \
+#define SB_BIND_EXTENSIBLE_METHOD_VOID_A1(Class,Method,Signature,ArgsSignature,a1 ) \
         void Method ArgsSignature { \
             if (Sandbox::Bind::get_extensible_method_by_reference(m_state,m_ref,#Class"Proxy",#Method)) {\
                 Sandbox::Bind::StackHelper hpr(m_state,1,#Signature);\
-                Sandbox::Bind::MethodHelper<void(Class##Proxy::*)ArgsSignature>::Call(&hpr,1,args); \
+                Sandbox::Bind::MethodHelper<void(Class##Proxy::*)ArgsSignature>::Call(&hpr,1,a1); \
+            } \
+        }
+#define SB_BIND_EXTENSIBLE_METHOD_VOID_A2(Class,Method,Signature,ArgsSignature,a1,a2 ) \
+        void Method ArgsSignature { \
+            if (Sandbox::Bind::get_extensible_method_by_reference(m_state,m_ref,#Class"Proxy",#Method)) {\
+                Sandbox::Bind::StackHelper hpr(m_state,1,#Signature);\
+                Sandbox::Bind::MethodHelper<void(Class##Proxy::*)ArgsSignature>::Call(&hpr,1,a1,a2); \
+            } \
+        }
+#define SB_BIND_EXTENSIBLE_METHOD_VOID_A3(Class,Method,Signature,ArgsSignature,a1,a2,a3 ) \
+        void Method ArgsSignature { \
+            if (Sandbox::Bind::get_extensible_method_by_reference(m_state,m_ref,#Class"Proxy",#Method)) {\
+                Sandbox::Bind::StackHelper hpr(m_state,1,#Signature);\
+                Sandbox::Bind::MethodHelper<void(Class##Proxy::*)ArgsSignature>::Call(&hpr,1,a1,a2,a3); \
+            } \
+        }
+#define SB_BIND_EXTENSIBLE_METHOD_VOID_NA(Class,Method,Signature) \
+        void Method () { \
+            if (Sandbox::Bind::get_extensible_method_by_reference(m_state,m_ref,#Class"Proxy",#Method)) {\
+                Sandbox::Bind::StackHelper hpr(m_state,1,#Signature);\
+                Sandbox::Bind::MethodHelper<void(Class##Proxy::*)()>::Call(&hpr,1); \
             } \
         }
 #define SB_BIND_END_EXTENSIBLE( Name ) \

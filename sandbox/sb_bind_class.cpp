@@ -146,6 +146,45 @@ namespace Sandbox {
             lua_rawset(L, lua_upvalueindex(1));
             return 0;
         }
+        
+        static int extensible_table_newindexer( lua_State* L ) {
+            lua_getmetatable(L, 1);
+			
+			do {
+				// Look for the key in the __propset metafield
+				StackHelper::rawgetfield(L, -1, "__propset");
+				if (!lua_isnil(L, -1))
+				{
+					lua_pushvalue(L, 2);
+					lua_rawget(L, -2);
+					// If we got a non-nil result, call it
+					if (!lua_isnil(L, -1))
+					{
+						sb_assert(lua_isfunction(L, -1));
+						lua_pushvalue(L, 1);
+						lua_pushvalue(L, 3);
+						lua_call(L, 2, 0);
+						return 0;
+					}
+					lua_pop(L, 1);
+				}
+				lua_pop(L, 1);
+				
+				// Look for a __parent metafield; if it doesn't exist, error;
+				// otherwise, repeat the lookup on it.
+				StackHelper::rawgetfield(L, -1, "__parent");
+				if (lua_isnil(L, -1))
+				{
+                    lua_pop(L, 2);
+					break;
+				}
+				lua_remove(L, -2);
+			} while (true);
+            lua_pushvalue(L, 2);
+            lua_pushvalue(L, 3);
+            lua_rawset(L, 1);
+            return 0;
+        }
 		
 		/*
 		 * Newindex variant for properties of objects, which passes the
@@ -348,6 +387,7 @@ namespace Sandbox {
             int top = lua_gettop(L);
             (void)top;
             create_static_table(L);
+            
             if (lua_isstring(L, lua_upvalueindex(1))) {
                 const char* name = lua_tostring( L, lua_upvalueindex(1));
                 lookup_static_table(L, name);
@@ -426,6 +466,10 @@ namespace Sandbox {
             luaL_getmetatable(L, newClassInfo->parent);
             StackHelper::rawsetfield(L, -2, "__parent");
 			
+            lua_pushcclosure(L, &extensible_table_newindexer,0);
+			StackHelper::rawsetfield(L, -2, "__newindex");
+            
+
             create_const_metatable(L, newClassInfo);    /// CMT, MT, hold
 			sb_assert( lua_gettop(L)==(top+3) );
 			 {
