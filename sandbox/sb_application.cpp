@@ -9,6 +9,8 @@
 
 #include "sb_application.h"
 #include "sb_bind.h"
+#include "sb_touch_info.h"
+
 #include <ghl_settings.h>
 #include <ghl_vfs.h>
 
@@ -82,16 +84,16 @@ namespace Sandbox {
 			SB_BIND(m_lua)
 		}
 		{
-			SB_BIND_BEGIN_EXTERN_CLASS( GHL::Application )
+			SB_BIND_BEGIN_EXTERN_CLASS( Sandbox::Application )
 			SB_BIND_BEGIN_PROPERTYS
-			SB_BIND_END_PROPERTYS
+            SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(m_lua)
 		}
 		SB_BIND_END_BIND
 		
 		m_lua->SetValue(settings, "settings", "GHL::Settings");
-		m_lua->SetValue(this, "application", "GHL::Application");
+		m_lua->SetValue(this, "application", "Sandbox::Application");
 		BindModules( m_lua );
 		m_lua->DoFile("settings.lua");
 	}
@@ -107,14 +109,14 @@ namespace Sandbox {
 		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
 			base_path+="/";
 		m_resources->SetBasePath(base_path.c_str());
-		m_lua->SetValue(m_resources, "main.resources", "Sandbox::Resources");
+		m_lua->SetValue(m_resources, "application.resources", "Sandbox::Resources");
 		m_lua->DoFile("load.lua");
 		if (!LoadResources(*m_resources))
 			return false;
 		m_main_scene = new Scene();
-		m_lua->SetValue(m_main_scene, "main.scene", "Sandbox::Scene");
+		m_lua->SetValue(m_main_scene, "application.scene", "Sandbox::Scene");
 		m_main_thread = new ThreadsMgr();
-		m_lua->SetValue(m_main_thread, "main.thread", "Sandbox::ThreadsMgr");
+		m_lua->SetValue(m_main_thread, "application.thread", "Sandbox::ThreadsMgr");
 		OnLoaded();
 		m_lua->DoFile("main.lua");
 		return true;
@@ -177,13 +179,16 @@ namespace Sandbox {
 	}
 	///
 	void GHL_CALL Application::OnMouseDown( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) {
+        m_main_scene->HandleTouch( TouchInfo(TouchInfo::BEGIN,Vector2f(x,y)) );
 	}
 	///
 	void GHL_CALL Application::OnMouseMove( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) {
-	}
+        m_main_scene->HandleTouch( TouchInfo(TouchInfo::MOVE,Vector2f(x,y)) );
+    }
 	///
 	void GHL_CALL Application::OnMouseUp( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) {
-	}
+        m_main_scene->HandleTouch( TouchInfo(TouchInfo::END,Vector2f(x,y)) );
+    }
 	///
 	void GHL_CALL Application::OnDeactivated() {
 	}

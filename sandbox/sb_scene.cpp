@@ -17,4 +17,9 @@ namespace Sandbox {
 		if (m_root) m_root->DoDraw(g);
 	}
 
+    bool Scene::HandleTouch( const TouchInfo& touch ) {
+        if (m_root) return m_root->HandleTouch( touch );
+        return false;
+    }
+    
 }

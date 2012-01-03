@@ -11,11 +11,22 @@
 
 namespace Sandbox {
 
-	ObjectProxy::ObjectProxy(const function<void(Graphics&)>& func) : Object(), m_func(func) {
+	ObjectDrawProxy::ObjectDrawProxy(const function<void(Graphics&)>& func) : Object(), m_func(func) {
 	}
 	
-	void ObjectProxy::Draw(Graphics& g) const {
+	void ObjectDrawProxy::Draw(Graphics& g) const {
 		if (m_func) m_func(g);
 	}
 	
+    
+    ObjectTouchProxy::ObjectTouchProxy(const TouchFunc& func) : m_touch_func( func ) {
+        
+    }
+    
+    /// self mouse handling implementation
+    bool ObjectTouchProxy::HandleTouch( const TouchInfo& touch ) {
+        if (m_touch_func) return m_touch_func( touch );
+        return false;
+    }
+
 }

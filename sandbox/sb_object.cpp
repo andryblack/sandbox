@@ -24,4 +24,8 @@ namespace Sandbox {
 	void Object::SetParent(Container* parent) {
 		m_parent = parent;
 	}
+    
+    bool Object::HandleTouch( const TouchInfo& touch ) {
+        return false;
+    }
 }

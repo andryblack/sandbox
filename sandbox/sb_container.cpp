@@ -48,11 +48,20 @@ namespace Sandbox {
 	}
 	
 	void Container::Draw(Graphics& g) const {
-		DrawContent(g);
+		DrawChilds(g);
 	}
-	void Container::DrawContent(Graphics& g) const {
-		for (std::vector<ObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();i++) {
+	void Container::DrawChilds(Graphics& g) const {
+		for (std::vector<ObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();++i) {
 			(*i)->DoDraw(g);
 		}
 	}
+    bool Container::HandleTouch(const Sandbox::TouchInfo &touch) {
+        return HandleChilds(touch);
+    }
+    bool Container::HandleChilds( const TouchInfo& touch ) {
+        for (std::vector<ObjectPtr>::reverse_iterator i = m_objects.rbegin();i!=m_objects.rend();++i) {
+			if ( (*i)->HandleTouch(touch) ) return true;
+		}
+        return false;
+    }
 }

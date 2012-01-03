@@ -23,7 +23,7 @@ namespace Sandbox {
 		Transform2d tr = old;
 		tr.translate(m_translate).rotate(m_angle).scale(m_scale_x,m_scale_y);
 		g.SetTransform(tr);
-		DrawContent(g);
+		DrawChilds(g);
 		g.SetTransform(old);
 	}
 }

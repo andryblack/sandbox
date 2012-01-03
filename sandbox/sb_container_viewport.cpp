@@ -31,12 +31,12 @@ namespace Sandbox {
 			}
 			Recti old = g.GetViewport();
 			g.SetViewport(m_rect);
-			DrawContent(g);
+			DrawChilds(g);
 			g.SetViewport(old);
 			if (m_set_ortho)
 				g.SetProjectionMatrix(oldM);
 		} else {
-			DrawContent(g);
+			DrawChilds(g);
 		}
 	}
 	

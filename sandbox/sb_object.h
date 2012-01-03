@@ -16,17 +16,31 @@ namespace Sandbox {
 	
 	class Graphics;
 	class Container;
+    class TouchInfo;
 
 	class Object {
 	public:
 		Object();
 		virtual ~Object();
+		/// self drawing implementation
 		virtual void Draw(Graphics& g) const = 0;
+        /// visible
 		void SetVisible(bool v) { m_visible = v;}
 		bool GetVisible() const { return m_visible;}
-		void DoDraw(Graphics& g) const {
+        
+        /// draw
+        void DoDraw(Graphics& g) const {
 			if (m_visible) Draw(g);
 		}
+        
+        /// self mouse handling implementation
+        virtual bool HandleTouch( const TouchInfo& touch );
+        
+        /// mouse handling
+        bool DoHandleTouch( const TouchInfo& touch ) {
+            if (m_visible) return HandleTouch( touch );
+            return false;
+        }
 	protected:
 		friend class Container;
 		Container* GetParent() const { return m_parent;}

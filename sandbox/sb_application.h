@@ -31,6 +31,7 @@ namespace Sandbox {
 		void SetResourcesBasePath( const char* path ) {
 			m_resources_base_path = path;
 		}
+        /// bind Lua modules
 		virtual void BindModules( Lua* lua ) {}
 		virtual void OnLoaded() {}
 		virtual void ConfigureDevice(GHL::System* system) {}

@@ -16,7 +16,7 @@ namespace Sandbox {
 	
 	void ContainerVisible::Draw(Graphics& g) const {
 		if (m_func && (m_func()!=m_invert))
-			DrawContent(g);
+			DrawChilds(g);
 	}
 
 }

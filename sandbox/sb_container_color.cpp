@@ -23,7 +23,7 @@ namespace Sandbox {
 		if (m_color.a>1.0f/256) {
 			Color old = g.GetColor();
 			g.SetColor(old*m_color);
-			DrawContent(g);
+			DrawChilds(g);
 			g.SetColor(old);
 		}
 	}

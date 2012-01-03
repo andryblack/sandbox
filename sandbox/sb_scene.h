@@ -18,7 +18,11 @@ namespace Sandbox {
 	
 	class Scene {
 	public:
+        /// draw scene
 		void Draw(Graphics& g) const;
+        /// handle touch
+        bool HandleTouch( const TouchInfo& touch );
+        
 		void SetRoot(const ObjectPtr& obj) { m_root = obj;}
 		const ObjectPtr& GetRoot() const { return m_root;}
 	private:
