@@ -16,6 +16,17 @@
 
 namespace Sandbox {
 	
+    static void format_memory( char* buf, size_t size, GHL::UInt32 mem,const char* caption ) {
+        if ( mem > 1024*1024 ) {
+            ::snprintf(buf, size, "%s: %0.2fM", caption,float(mem)/(1024*1024));
+        } else if ( mem > 1024 ) {
+            ::snprintf(buf, size, "%s: %0.2fK", caption,float(mem)/(1024));
+        }
+        else {
+            ::snprintf(buf, size, "%s: %0.2fb", caption,float(mem));
+        }
+    }
+    
 	Application::Application() {
 		m_system = 0;
 		m_vfs = 0;
@@ -162,6 +173,8 @@ namespace Sandbox {
 		::snprintf(buf,128,"fps:%0.2f",m_fps);
 		m_render->SetProjectionMatrix(Matrix4f::ortho(0,m_render->GetWidth(),m_render->GetHeight(),0,-1,1).matrix);
 		m_render->DebugDrawText( 10, 10 , buf );
+        format_memory(buf,128,m_lua->GetMemoryUsed(),"lua");
+        m_render->DebugDrawText( 10, 20 , buf );
 	}
 	
 	void Application::SetClearColor(const Color& c) {
