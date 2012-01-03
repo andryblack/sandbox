@@ -190,7 +190,7 @@ namespace Sandbox {
         int n = lua_gettop(L);  /* number of arguments */
         int i;
         lua_getglobal(L, "tostring");
-        LogInfo log_info(MODULE);
+        LogInfo log_info("Lua:Scripts");
         for (i=1; i<=n; i++) {
 		    const char *s;
 		    lua_pushvalue(L, -1);  /* function to be called */
@@ -450,10 +450,15 @@ namespace Sandbox {
 	namespace Bind {
 		void register_enum(lua_State* L,const EnumBind* info);
 		void register_type(lua_State* L,const ClassBind* bind);
+        void register_extensible_type(lua_State* L,const ExtensibleClassBind* bind);
 	}
 	
 	void Lua::Bind(const Bind::ClassBind* info) {
 		register_type(GetVM(),info);
+	}
+    
+    void Lua::Bind(const Bind::ExtensibleClassBind* info) {
+		register_extensible_type(GetVM(),info);
 	}
 	
 	void Lua::Bind(const Bind::EnumBind* info) {

@@ -9,6 +9,7 @@
 
 #include "sb_bind_stack.h"
 #include "sb_bind_class.h"
+#include "sb_log.h"
 
 extern "C" {
 #include "../lua/src/lua.h"
@@ -22,6 +23,9 @@ extern "C" {
 
 namespace Sandbox {
 	namespace Bind {
+        
+        static const char* MODULE = "Sandbox:Bind";
+        
 		static inline InplaceString get_ret_type(const char* sign) {
 			InplaceString res(sign);
 			return InplaceString(res.begin(),res.find('('));
@@ -33,8 +37,8 @@ namespace Sandbox {
 			while (end>beg && ::isspace(*(end-1))) end--;
 			return InplaceString( beg,end);
 		}
-		static inline InplaceString get_arg_type(const char* sign,int num) {
-			InplaceString res(sign);
+		InplaceString StackHelper::get_arg_type(int num) const {
+			InplaceString res(m_signature);
 			res = InplaceString(res.find('('),res.rfind(')'));
 			if (*res.begin()=='(') res = InplaceString(res.begin()+1,res.end());
 			for (int i=0;i<num;i++) {
@@ -67,8 +71,23 @@ namespace Sandbox {
 				indx += lua_gettop(L) + 1;
 			
 			// Check that the thing on the stack is indeed a userdata
-			if (!lua_isuserdata(L, indx))
-				luaL_typerror(L, indx, type);
+            
+            if (!lua_isuserdata(L, indx)) {
+                lua_pushvalue(L, indx);
+                while (lua_istable(L, -1)) {
+                    rawgetfield(L, -1, "__parent");
+                    lua_remove(L, -2);
+                    if ( lua_isuserdata(L, -1) )  {
+                        ObjectData* data = check_object_type(L,-1,type,derived);
+                        lua_pop(L, 1);
+                        return data;
+                    }
+                }
+                lua_pop(L, 1);
+                luaL_typerror(L, indx, type);
+                return 0;
+            }
+            
 			
 			// Lookup the given name in the registry
 			luaL_getmetatable(L, type);
@@ -235,10 +254,10 @@ namespace Sandbox {
 			lua_pushstring(L, "__bind");
 			 lua_rawget(L, -2);
 			 sb_assert(lua_islightuserdata(L,-1));
-			 const ClassBind* bind = reinterpret_cast<const ClassBind*> (lua_touserdata(L, -1));
+			 const ClassInfo* bind = reinterpret_cast<const ClassInfo*> (lua_touserdata(L, -1));
 			 lua_pop(L,1);
 			 
-			ObjectData *block = reinterpret_cast<ObjectData*>(lua_newuserdata(L, sizeof(ObjectData)+bind->info->ptr_size));
+			ObjectData *block = reinterpret_cast<ObjectData*>(lua_newuserdata(L, sizeof(ObjectData)+bind->ptr_size));
 			block->store_type = STORE_SHARED;
 			lua_pushvalue(L, -2);
 			lua_setmetatable(L, -2);
@@ -259,10 +278,10 @@ namespace Sandbox {
 			lua_pushstring(L, "__bind");
 			lua_rawget(L, -2);
 			sb_assert(lua_islightuserdata(L,-1));
-			const ClassBind* bind = reinterpret_cast<const ClassBind*> (lua_touserdata(L, -1));
+			const ClassInfo* bind = reinterpret_cast<const ClassInfo*> (lua_touserdata(L, -1));
 			lua_pop(L,1);
 			
-			ObjectData *block = reinterpret_cast<ObjectData*>(lua_newuserdata(L, sizeof(ObjectData)+bind->info->obj_size));
+			ObjectData *block = reinterpret_cast<ObjectData*>(lua_newuserdata(L, sizeof(ObjectData)+bind->obj_size));
 			block->store_type = STORE_RAW;
 			lua_pushvalue(L, -2);
 			lua_setmetatable(L, -2);
@@ -270,20 +289,15 @@ namespace Sandbox {
 			return block+1;
 		}
 		void* StackHelper::get_ptr(int indx) const {
-			std::string type = get_arg_type(m_signature,indx).str();
+			std::string type = get_arg_type(indx).str();
 			ObjectData* data = check_object_type(m_L, indx+m_base_index, type.c_str(), false); /// @todo
 			if (data->store_type == STORE_RAW) return data+1;
 			if (data->store_type == STORE_RAW_PTR) return *reinterpret_cast<void**>(data+1);
 			/// @todo shared
 			return 0;
 		}
-		void StackHelper::get_shared_ptr(int indx,void* to) const {
-			std::string type = get_arg_type(m_signature,indx).str();
-			indx+=m_base_index;
-			lua_State* L = m_L;
-			if (!lua_isuserdata(L, indx))
-				luaL_typerror(L, indx, type.c_str());
-			ObjectData* data = reinterpret_cast<ObjectData*>(lua_touserdata(L, indx));
+        static void get_shared_ptr_impl(lua_State* L,int indx,void* to, const std::string& type) {
+            ObjectData* data = reinterpret_cast<ObjectData*>(lua_touserdata(L, indx));
 			if (data->store_type != STORE_SHARED) {
 				luaL_typerror(L, indx, type.c_str());
 				return;
@@ -292,16 +306,16 @@ namespace Sandbox {
 			luaL_getmetatable(L, type.c_str());
 			sb_assert(lua_istable(L,-1));
 			// Lookup the metatable of the given userdata
-			lua_getmetatable(L, indx);
+			lua_getmetatable(L, indx>0 ? indx : indx-1);
 			sb_assert(lua_istable(L,-1));
 			lua_pushstring(L, "__bind");
 			lua_rawget(L, -2);
 			sb_assert(lua_islightuserdata(L,-1));
-			const ClassBind* bind = reinterpret_cast<const ClassBind*> (lua_touserdata(L, -1));
+			const ClassInfo* bind = reinterpret_cast<const ClassInfo*> (lua_touserdata(L, -1));
 			lua_pop(L,1);
-			const char* getted_name = bind->info->name;
+			const char* getted_name = bind->name;
 			static const size_t buff_size = sizeof(shared_ptr<int>);
-			sb_assert(buff_size>=bind->info->ptr_size);
+			sb_assert(buff_size>=bind->ptr_size);
 			char buf1[buff_size];
 			char buf2[buff_size];
 			void* ptr_data = data+1;
@@ -309,15 +323,15 @@ namespace Sandbox {
 			void* cp_ptr = 0;
 			while (true) {
 				if (lua_rawequal(L, -1, -2)) {
-					bind->info->copy_ptr(ptr_data,to);
+					bind->copy_ptr(ptr_data,to);
 					if (cp_ptr) {
-						bind->info->destruct_ptr(cp_ptr,0);
+						bind->destruct_ptr(cp_ptr,0);
 					}
 					lua_pop(L,2);
 					return;
 				}
 				// Look for the metatable's parent field
-				rawgetfield(L, -1, "__parent");
+				StackHelper::rawgetfield(L, -1, "__parent");
 				if (!lua_istable(L, -1))
 				{
 					lua_pop(L,1);
@@ -328,20 +342,46 @@ namespace Sandbox {
 					luaL_argerror(L, indx, buffer);
 					return;
 				}
-				bind->info->cast_ptr(ptr_data,to_ptr);
+				bind->cast_ptr(ptr_data,to_ptr);
 				ptr_data = to_ptr;
 				if (to_ptr == buf1) to_ptr = buf2; else to_ptr=buf1;
 				if (cp_ptr) {
-					bind->info->destruct_ptr(cp_ptr,0);
+					bind->destruct_ptr(cp_ptr,0);
 				}
 				cp_ptr = ptr_data;
 				lua_remove(L, -2);
 				lua_pushstring(L, "__bind");
 				lua_rawget(L, -2);
 				sb_assert(lua_islightuserdata(L,-1));
-				bind = reinterpret_cast<const ClassBind*> (lua_touserdata(L, -1));
+				bind = reinterpret_cast<const ClassInfo*> (lua_touserdata(L, -1));
 				lua_pop(L,1);
 			}
-		}
+        }
+		void StackHelper::get_shared_ptr(int indx,void* to) const {
+			std::string type = get_arg_type(indx).str();
+			
+            indx+=m_base_index;
+			lua_State* L = m_L;
+            if (!lua_isuserdata(L, indx)) {
+                lua_pushvalue(L, indx);
+                while (lua_istable(L, -1)) {
+                    rawgetfield(L, -1, "__parent");
+                    lua_remove(L, -2);
+                    if ( lua_isuserdata(L, -1) )  {
+                        get_shared_ptr_impl(L,-1, to,type);
+                        lua_pop(L, 1);
+                        return;
+                    }
+                }
+                lua_pop(L, 1);
+                luaL_typerror(L, indx, type.c_str());
+                return;
+            }
+            get_shared_ptr_impl(L,indx, to,type);
+       }
+        
+        void StackHelper::CallVoid(int numArgs) const {
+            lua_pcall(m_L, numArgs, 0, 0);
+        }
 	}
 }

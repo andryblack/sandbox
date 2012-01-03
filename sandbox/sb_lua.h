@@ -31,6 +31,7 @@ namespace Sandbox {
 	namespace Bind {
 		struct ClassBind;
 		struct EnumBind;
+        struct ExtensibleClassBind;
 	}
 	class Lua;
 	struct LuaHelper {
@@ -131,6 +132,7 @@ namespace Sandbox {
 			do_call(func,2);
 		}
 		void Bind(const Bind::ClassBind* info);
+        void Bind(const Bind::ExtensibleClassBind* info);
 		void Bind(const Bind::EnumBind* info);
 		LuaHelperWeakPtr GetHelper() const { return m_helper;}
 		

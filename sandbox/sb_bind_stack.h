@@ -58,6 +58,8 @@ namespace Sandbox {
 			const char* get_string(int indx) const;
 		public:
 	explicit StackHelper(lua_State* L,int base_index,const char* signature) : m_L(L),m_base_index(base_index),m_signature(signature) {}
+            lua_State* GetState() const { return m_L; }
+            InplaceString get_arg_type(int num) const;
 			static ObjectData*  check_object_type(lua_State* L,int indx,const char* type,bool derived);
 			static void* get_object_ptr(lua_State* L,int indx,const ClassInfo* name);
 			void* new_object_raw() const;
@@ -122,6 +124,8 @@ namespace Sandbox {
 			void PushValue(const std::string& v) const;
 			void PushValue(const InplaceString& v) const;
 			void PushValue(bool v) const;
+            
+            void CallVoid(int numArgs) const;
 		};
 		
 		template <class T> struct Pusher {

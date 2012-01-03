@@ -39,8 +39,8 @@ namespace Sandbox {
 			void* (*get_ptr)(void*);
 			void (*copy_ptr)(void*,void*);
 			void (*cast_ptr)(void*,void*);
-			const size_t obj_size;
-			const size_t ptr_size;
+            size_t obj_size;
+			size_t ptr_size;
 		};
 		template <class T>
 		struct SharedPtrHelper {
@@ -56,6 +56,8 @@ namespace Sandbox {
 				new (to) shared_ptr<U>(x);
 			}
 		};
+        
+        
 		
 #define SB_BIND_CLASS_SHARED(Name) { \
 			#Name, \
@@ -112,6 +114,16 @@ namespace Sandbox {
 			void (*raw)(const StackHelper*);
 			void (*ptr)(const StackHelper*);
 		};
+        template <typename Signature>
+        struct ClassConstructHelper {
+            typedef typename MethodHelper<Signature>::ObjectType ObjectType;
+            static void ConstructRaw(const StackHelper* hpr) {
+                MethodHelper<Signature>::ConstructInplace(hpr->new_object_raw(),hpr);
+            }
+            static void ConstructPtr(const StackHelper* hpr) {
+                new (hpr->new_object_shared_ptr() ) shared_ptr<ObjectType>( MethodHelper<Signature>::Construct( hpr ));
+            }
+        };
 		
 		struct ClassBind {
 			const ClassInfo* info;
@@ -120,6 +132,16 @@ namespace Sandbox {
 			const PropertyInfo* propertys;
 		};
         void register_type(lua_State* L,const ClassBind* bind);
+        
+        struct ExtensibleClassBind {
+            const ClassInfo* info;
+			const ConstructorInfo* constructor;
+            typedef void (*update_reference_func)( void* obj, lua_State* L);
+            update_reference_func   update_ref_func;
+        };
+        void register_extensible_type(lua_State* L,const ExtensibleClassBind* bind);
+        int register_extensible_reference(lua_State* L, int ref, const char* name);
+        bool get_extensible_method_by_reference(lua_State* L, int ref, const char* name, const char* method);
 		
 		namespace ClassDefaults {
 			static const ConstructorInfo constructorInfo = { 
@@ -137,13 +159,13 @@ namespace Sandbox {
 #define SB_BIND_BEGIN_SHARED_SUBCLASS( Name , Parent ) static const Sandbox::Bind::ClassInfo classInfo = SB_BIND_SUBCLASS_SHARED(Name,Parent);
 		
 #define SB_BIND_RAW_CONSTRUCTOR( Name , Signature ) static const Sandbox::Bind::ConstructorInfo constructorInfo = { \
-			#Name#Signature,&Sandbox::Bind::MethodHelper<void(Name::*)Signature>::ConstructInplace, 0 \
+			#Name#Signature,&Sandbox::Bind::ClassConstructHelper<void(Name::*)Signature>::ConstructRaw, 0 \
 		};
 #define SB_BIND_SHARED_CONSTRUCTOR( Name , Signature ) static const Sandbox::Bind::ConstructorInfo constructorInfo = { \
-			#Name#Signature,0, &Sandbox::Bind::MethodHelper<void(Name::*)Signature>::ConstructInPtr \
+			#Name#Signature,0, &Sandbox::Bind::ClassConstructHelper<void(Name::*)Signature>::ConstructPtr \
 		};
 #define SB_BIND_SHARED_CONSTRUCTOR_( Name , Signature , RealSignature ) static const Sandbox::Bind::ConstructorInfo constructorInfo = { \
-			#Name#Signature,0, &Sandbox::Bind::MethodHelper<void(Name::*)RealSignature>::ConstructInPtr \
+			#Name#Signature,0, &Sandbox::Bind::ClassConstructHelper<void(Name::*)RealSignature>::ConstructPtr \
 		};
 #define SB_BIND_BEGIN_METHODS static const Sandbox::Bind::MethodInfo methods[] = {
 #define SB_BIND_END_METHODS SB_BIND_ZERO_METHOD };
@@ -152,6 +174,52 @@ namespace Sandbox {
 
 #define SB_BIND_END_CLASS static const Sandbox::Bind::ClassBind bind = { &classInfo,&constructorInfo, methods,propertys }; 
 		
+        
+        
+#define SB_BIND_BEGIN_EXTENSIBLE( Name ) class Name##Proxy : public Name { \
+        public: \
+            Name##Proxy () : Name(  ) , m_state(0), m_ref(0) {}   /* only empty crts */ \
+            void update_reference( lua_State* state ) { \
+                m_state = state; \
+                m_ref = Sandbox::Bind::register_extensible_reference( m_state,m_ref, #Name"Proxy"); \
+            } \
+            static void update_reference_s( void* obj, lua_State* L) {\
+                reinterpret_cast<Name##Proxy*>(obj)->update_reference(L); \
+            }\
+        protected: \
+        static void Constructor(const Sandbox::Bind::StackHelper* hpr) { \
+            Name##Proxy* raw = new Name##Proxy(); \
+            new (hpr->new_object_shared_ptr()) Sandbox::shared_ptr<Name##Proxy>(raw); \
+        } \
+        static const Sandbox::Bind::ConstructorInfo* GetConstructorInfo() { \
+            static const Sandbox::Bind::ConstructorInfo constructorInfo = { \
+            #Name"Proxy()",0, &Name##Proxy::Constructor \
+            }; \
+            return &constructorInfo; \
+        }
+#define SB_BIND_EXTENSIBLE_METHOD_VOID(Class,Method,Signature,ArgsSignature,args ) \
+        void Method ArgsSignature { \
+            if (Sandbox::Bind::get_extensible_method_by_reference(m_state,m_ref,#Class"Proxy",#Method)) {\
+                Sandbox::Bind::StackHelper hpr(m_state,1,#Signature);\
+                Sandbox::Bind::MethodHelper<void(Class##Proxy::*)ArgsSignature>::Call(&hpr,1,args); \
+            } \
+        }
+#define SB_BIND_END_EXTENSIBLE( Name ) \
+        public: \
+            static void Register( Sandbox::Lua* lua ) { \
+                static const Sandbox::Bind::ClassInfo class_info = SB_BIND_SUBCLASS_SHARED( Name##Proxy, Name); \
+                static const Sandbox::Bind::ExtensibleClassBind info = { \
+                    &class_info, GetConstructorInfo(), &Name##Proxy::update_reference_s }; \
+                lua->Bind( &info ); \
+            } \
+        private: \
+            lua_State*  m_state;\
+            int m_ref;\
+        }; 
+
+         
+#define SB_BIND_BIND_EXTENSIBLE( Name , luaPtr) \
+        Name##Proxy::Register( luaPtr );
 		
 		enum StoreType {
 			STORE_RAW,

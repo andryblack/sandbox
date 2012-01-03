@@ -122,13 +122,14 @@ namespace Sandbox {
 		/// implement 0 args
 		template <typename T> struct MethodHelper<void(T::*)()> {
 			typedef void RetType;
+            typedef T   ObjectType;
 			typedef void(T::*FuncPtr)();
 			enum { isConst = 0,retValues = 0 };
-			static void ConstructInplace(const StackHelper* hpr) {
-				new (hpr->new_object_raw()) T();
+			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+				return new (ptr) T();
 			}
-			static void ConstructInPtr(const StackHelper* hpr) {
-				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T());
+            static T* Construct(const StackHelper* hpr) {
+				return new T();
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* /*hpr*/) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -137,6 +138,7 @@ namespace Sandbox {
 		};
 		template <typename T,typename Ret> struct MethodHelper<Ret(T::*)()> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)();
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -146,6 +148,7 @@ namespace Sandbox {
 		};
 		template <typename T,typename Ret> struct MethodHelper<Ret(T::*)()const> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)()const;
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -156,21 +159,31 @@ namespace Sandbox {
 		/// implement 1 args
 		template <typename T,typename Arg> struct MethodHelper<void(T::*)(Arg)> {
 			typedef void RetType;
+            typedef T   ObjectType;
 			typedef void(T::*FuncPtr)(Arg);
 			enum { isConst = 0,retValues = 0 };
-			static void ConstructInplace(const StackHelper* hpr) {
-				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg>()));
+			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+				return new (ptr) T(hpr->GetArgument(0,ArgumentTag<Arg>()));
 			}
-			static void ConstructInPtr(const StackHelper* hpr) {
-				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg>())));
+			static T* Construct(const StackHelper* hpr) {
+				return new T(hpr->GetArgument(0,ArgumentTag<Arg>()));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
 				(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg>()));
 			}
+            static void Call(const StackHelper* hpr,int addArgs,Arg a1) { 
+                {
+                    std::string argType = hpr->get_arg_type(0).str();
+                    StackHelper hpr1(hpr->GetState(),1,argType.c_str());
+                    hpr1.PushValue(a1);
+                }
+                hpr->CallVoid(addArgs+1);
+			}
 		};
 		template <typename T,typename Ret,typename Arg> struct MethodHelper<Ret(T::*)(Arg)> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg);
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -180,6 +193,7 @@ namespace Sandbox {
 		};
 		template <typename T,typename Ret,typename Arg> struct MethodHelper<Ret(T::*)(Arg)const> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg)const;
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -190,15 +204,16 @@ namespace Sandbox {
 		/// implement 2 args
 		template <typename T,typename Arg1,typename Arg2> struct MethodHelper<void(T::*)(Arg1,Arg2)> {
 			typedef void RetType;
+            typedef T   ObjectType;
 			typedef void(T::*FuncPtr)(Arg1,Arg2);
 			enum { isConst = 0,retValues = 0 };
-			static void ConstructInplace(const StackHelper* hpr) {
-				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+				return new (ptr) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 							 hpr->GetArgument(1,ArgumentTag<Arg2>()));
 			}
-			static void ConstructInPtr(const StackHelper* hpr) {
-				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
-											   hpr->GetArgument(1,ArgumentTag<Arg2>())));
+			static T* Construct(const StackHelper* hpr) {
+				return new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+											   hpr->GetArgument(1,ArgumentTag<Arg2>()));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -208,15 +223,16 @@ namespace Sandbox {
 		};
 		template <typename T,typename Arg1,typename Arg2> struct MethodHelper<void(T::*)(Arg1,Arg2)const> {
 			typedef void RetType;
+            typedef T   ObjectType;
 			typedef void(T::*FuncPtr)(Arg1,Arg2)const;
 			enum { isConst = 1,retValues = 0 };
-			static void ConstructInplace(const StackHelper* hpr) {
-				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+				return new (ptr) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 								 hpr->GetArgument(1,ArgumentTag<Arg2>()));
 			}
-			static void ConstructInPtr(const StackHelper* hpr) {
-				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
-												   hpr->GetArgument(1,ArgumentTag<Arg2>())));
+			static T* Construct(const StackHelper* hpr) {
+				return new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+												   hpr->GetArgument(1,ArgumentTag<Arg2>()));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -226,6 +242,7 @@ namespace Sandbox {
 		};
 		template <typename T,typename Ret,typename Arg1,typename Arg2> struct MethodHelper<Ret(T::*)(Arg1,Arg2)> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2);
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -237,6 +254,7 @@ namespace Sandbox {
 		template <typename T,typename Ret,typename Arg1,typename Arg2> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2)const> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2)const;
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -249,17 +267,18 @@ namespace Sandbox {
 		template <typename T,typename Arg1,typename Arg2,typename Arg3> 
 		struct MethodHelper<void(T::*)(Arg1,Arg2,Arg3)> {
 			typedef void RetType;
+            typedef T   ObjectType;
 			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3);
 			enum { isConst = 0,retValues = 0 };
-			static void ConstructInplace(const StackHelper* hpr) {
-				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+				return new (ptr) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 							 hpr->GetArgument(1,ArgumentTag<Arg2>()),
 							 hpr->GetArgument(2,ArgumentTag<Arg3>()));
 			}
-			static void ConstructInPtr(const StackHelper* hpr) {
-				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* Construct(const StackHelper* hpr) {
+				return new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											   hpr->GetArgument(1,ArgumentTag<Arg2>()),
-											   hpr->GetArgument(2,ArgumentTag<Arg3>())));
+											   hpr->GetArgument(2,ArgumentTag<Arg3>()));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -271,6 +290,7 @@ namespace Sandbox {
 		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3)> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3);
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -283,6 +303,7 @@ namespace Sandbox {
 		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3)const> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3)const;
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -296,19 +317,20 @@ namespace Sandbox {
 		template <typename T,typename Arg1,typename Arg2,typename Arg3,typename Arg4> 
 		struct MethodHelper<void(T::*)(Arg1,Arg2,Arg3,Arg4)> {
 			typedef void RetType;
+            typedef T   ObjectType;
 			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4);
 			enum { isConst = 0,retValues = 0 };
-			static void ConstructInplace(const StackHelper* hpr) {
-				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+				return new (ptr) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 							 hpr->GetArgument(1,ArgumentTag<Arg2>()),
 							 hpr->GetArgument(2,ArgumentTag<Arg3>()),
 							 hpr->GetArgument(3,ArgumentTag<Arg4>()));
 			}
-			static void ConstructInPtr(const StackHelper* hpr) {
-				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* Construct(void* ptr,const StackHelper* hpr) {
+				return new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											   hpr->GetArgument(1,ArgumentTag<Arg2>()),
 											   hpr->GetArgument(2,ArgumentTag<Arg3>()),
-											   hpr->GetArgument(3,ArgumentTag<Arg4>())));
+											   hpr->GetArgument(3,ArgumentTag<Arg4>()));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -321,6 +343,7 @@ namespace Sandbox {
 		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4)> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4);
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -334,6 +357,7 @@ namespace Sandbox {
 		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4)const> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4)const;
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -348,21 +372,22 @@ namespace Sandbox {
 		template <typename T,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5> 
 		struct MethodHelper<void(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5)> {
 			typedef void RetType;
+            typedef T   ObjectType;
 			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5);
 			enum { isConst = 0,retValues = 0 };
-			static void ConstructInplace(const StackHelper* hpr) {
-				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+				return new (ptr) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 							 hpr->GetArgument(1,ArgumentTag<Arg2>()),
 							 hpr->GetArgument(2,ArgumentTag<Arg3>()),
 							 hpr->GetArgument(3,ArgumentTag<Arg4>()),
 							 hpr->GetArgument(4,ArgumentTag<Arg5>()));
 			}
-			static void ConstructInPtr(const StackHelper* hpr) {
-				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* Construct(const StackHelper* hpr) {
+				return new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											   hpr->GetArgument(1,ArgumentTag<Arg2>()),
 											   hpr->GetArgument(2,ArgumentTag<Arg3>()),
 											   hpr->GetArgument(3,ArgumentTag<Arg4>()),
-											   hpr->GetArgument(4,ArgumentTag<Arg5>())));
+											   hpr->GetArgument(4,ArgumentTag<Arg5>()));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -376,6 +401,7 @@ namespace Sandbox {
 		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5)> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5);
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -390,6 +416,7 @@ namespace Sandbox {
 		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5)const> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5)const;
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -409,23 +436,24 @@ namespace Sandbox {
 		template <typename T,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5,typename Arg6> 
 		struct MethodHelper<void(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6)> {
 			typedef void RetType;
+            typedef T   ObjectType;
 			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6);
 			enum { isConst = 0,retValues = 0 };
-			static void ConstructInplace(const StackHelper* hpr) {
-				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+				return new (ptr) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											  hpr->GetArgument(1,ArgumentTag<Arg2>()),
 											  hpr->GetArgument(2,ArgumentTag<Arg3>()),
 											  hpr->GetArgument(3,ArgumentTag<Arg4>()),
 											  hpr->GetArgument(4,ArgumentTag<Arg5>()),
 											  hpr->GetArgument(5,ArgumentTag<Arg6>()));
 			}
-			static void ConstructInPtr(const StackHelper* hpr) {
-				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* Construct(const StackHelper* hpr) {
+				return new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 																	   hpr->GetArgument(1,ArgumentTag<Arg2>()),
 																	   hpr->GetArgument(2,ArgumentTag<Arg3>()),
 																	   hpr->GetArgument(3,ArgumentTag<Arg4>()),
 																	   hpr->GetArgument(4,ArgumentTag<Arg5>()),
-																	   hpr->GetArgument(5,ArgumentTag<Arg6>())));
+																	   hpr->GetArgument(5,ArgumentTag<Arg6>()));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -440,6 +468,7 @@ namespace Sandbox {
 		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5,typename Arg6> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6)> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6);
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -455,6 +484,7 @@ namespace Sandbox {
 		template <typename T,typename Ret,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5,typename Arg6> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6)const> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6)const;
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -473,10 +503,11 @@ namespace Sandbox {
 					typename Arg5,typename Arg6,typename Arg7> 
 		struct MethodHelper<void(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7)> {
 			typedef void RetType;
+            typedef T   ObjectType;
 			typedef void(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7);
 			enum { isConst = 0,retValues = 0 };
-			static void ConstructInplace(const StackHelper* hpr) {
-				new (hpr->new_object_raw()) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+				return new (ptr) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											  hpr->GetArgument(1,ArgumentTag<Arg2>()),
 											  hpr->GetArgument(2,ArgumentTag<Arg3>()),
 											  hpr->GetArgument(3,ArgumentTag<Arg4>()),
@@ -484,14 +515,14 @@ namespace Sandbox {
 											  hpr->GetArgument(5,ArgumentTag<Arg6>()),
 											  hpr->GetArgument(6,ArgumentTag<Arg7>()));
 			}
-			static void ConstructInPtr(const StackHelper* hpr) {
-				new (hpr->new_object_shared_ptr()) shared_ptr<T>(new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
+			static T* Construct(const StackHelper* hpr) {
+				return new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 																	   hpr->GetArgument(1,ArgumentTag<Arg2>()),
 																	   hpr->GetArgument(2,ArgumentTag<Arg3>()),
 																	   hpr->GetArgument(3,ArgumentTag<Arg4>()),
 																	   hpr->GetArgument(4,ArgumentTag<Arg5>()),
 																	   hpr->GetArgument(5,ArgumentTag<Arg6>()),
-																	   hpr->GetArgument(6,ArgumentTag<Arg7>())));
+																	   hpr->GetArgument(6,ArgumentTag<Arg7>()));
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
@@ -508,6 +539,7 @@ namespace Sandbox {
 					typename Arg5,typename Arg6,typename Arg7> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7)> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7);
 			enum { isConst = 0,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
@@ -525,6 +557,7 @@ namespace Sandbox {
 					typename Arg5,typename Arg6,typename Arg7> 
 		struct MethodHelper<Ret(T::*)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7)const> {
 			typedef Ret RetType;
+            typedef T   ObjectType;
 			typedef Ret(T::*FuncPtr)(Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Arg7)const;
 			enum { isConst = 1,retValues = 1 };
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
