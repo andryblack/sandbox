@@ -84,6 +84,13 @@ namespace Sandbox {
             calc_derivatives(0);
         m_length+=len;
 		return len;
+    } 
+    
+    void   TCBSpline2d::erase_last() {
+        if (m_points.size() < 3) return;
+        m_length -= m_points.back().len;
+        m_points.pop_back();
+        calc_derivatives(m_points.size()-1);
     }
 
     void TCBSpline2d::clear() {

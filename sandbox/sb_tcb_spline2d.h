@@ -7,7 +7,9 @@
 #define SB_TCB_SPLINE2D_H
 
 #include "sb_vector2.h"
+#include "sb_shared_ptr.h"
 #include <vector>
+
 
 namespace Sandbox {
 
@@ -41,6 +43,7 @@ namespace Sandbox {
 
         Vector2f get(float t) const;
         float add(const Vector2f& point);
+        void   erase_last();
 
         void clear();
 
@@ -56,5 +59,7 @@ namespace Sandbox {
         
         static void Register( Lua* lua );
     };
+    
+    typedef shared_ptr<TCBSpline2d> TCBSpline2dPtr;
 }
 #endif // SB_TCB_SPLINE2D_H

@@ -268,6 +268,7 @@ namespace Sandbox {
 	
 	void Graphics::DrawLineStrip(const std::vector<Vector2f>& points) {
 		sb_assert( (m_render!=0) && "scene not started" );
+        if (points.size()<2) return;
 		Flush();
 		m_texture = TexturePtr();
         m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
@@ -284,6 +285,7 @@ namespace Sandbox {
 	}
 	void Graphics::DrawLineStrip(const std::vector<Vector2f>& points,const Color& clr_) {
 		sb_assert( (m_render!=0) && "scene not started" );
+        if (points.size()<2) return;
 		Flush();
 		m_texture = TexturePtr();
         m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
