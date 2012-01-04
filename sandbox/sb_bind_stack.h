@@ -80,6 +80,9 @@ namespace Sandbox {
 			template <class T> const T& GetArgument(int indx,const IsNotEnumTag<const T&>& ) const {
 				return *static_cast<T*> (get_ptr(indx));
 			}
+            template <class T> T* GetArgument(int indx,const ArgumentTag<T*>& ) const {
+				return static_cast<T*> (get_ptr(indx));
+			}
 			template <class T>
 			T GetArgument(int indx,const IsEnumTag<T>& ) const {
 				return static_cast<T>(GetArgument(indx,ArgumentTag<int>()));

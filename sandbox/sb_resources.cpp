@@ -76,6 +76,43 @@ namespace Sandbox {
 		} 
 		return TexturePtr(new Texture(texture));
 	}
+    bool Resources::LoadImageSubdivs(const char* filename, std::vector<Image>& output) {
+        GHL::Image* img = LoadImage(filename);
+        if (!img) return false;
+        GHL::UInt32 w = img->GetWidth();
+        GHL::UInt32 h = img->GetHeight();
+        GHL::UInt32 y = 0;
+        while ( y < h ) {
+            GHL::UInt32 oh = h - y;
+            GHL::UInt32 ph = oh <= 16 ? oh : prev_pot( oh );
+            GHL::UInt32 iph = ph > oh ? oh : ph;
+            GHL::UInt32 x = 0;
+            while ( x < w ) {
+                GHL::UInt32 ow = w - x;
+                GHL::UInt32 pw = ow <= 16 ? ow : prev_pot( ow );
+                GHL::UInt32 ipw = pw > ow ? ow : pw;
+                TexturePtr texture = InternalCreateTexture(pw, ph, ImageHaveAlpha(img), false);
+                if (!texture || !ConvertImage(img,texture)) {
+                    LogError(MODULE) << "failed load subdiv image " << filename;
+                    img->Release();
+                    return false;
+                }
+                GHL::Image* subimg = img->SubImage(x, y, ipw, iph);
+                if (!subimg) {
+                    LogError(MODULE) << "failed load subdiv image " << filename;
+                    img->Release();
+                    return false;
+                }
+                texture->GetNative()->SetData(0,0,ipw,iph,subimg->GetData());
+                subimg->Release();
+                output.push_back(Image(texture,0,0,float(ipw),float(iph)));
+                output.back().SetHotspot(Vector2f(-float(x),-float(y)));
+                x+=ipw;
+            }
+            y+=iph;
+        }
+        return true;
+    }
 	GHL::Image* Resources::LoadImage(const char* filename) {
 		std::string fn = m_base_path + filename;
 		GHL::DataStream* ds = m_vfs->OpenFile(fn.c_str());

@@ -37,6 +37,10 @@ namespace Sandbox {
         val++;
         return val;
     }
+    inline unsigned int prev_pot(unsigned int val) {
+        unsigned int next =  next_pot( val );
+        return next == val ? val : next / 2;
+    }
 }
 
 #endif /*SB_MATH_H*/

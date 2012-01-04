@@ -49,6 +49,7 @@
 #include "sb_animation.h"
 #include "sb_rect.h"
 #include "sb_container_viewport.h"
+#include "sb_background.h"
 
 #include "sb_log.h"
 
@@ -422,16 +423,23 @@ namespace Sandbox {
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
-		{
-			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Label,Sandbox::Object)
-			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::Label,())
+        {
+			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Sprite,Sandbox::Object)
+			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::Sprite,())
 			SB_BIND_BEGIN_PROPERTYS
-			SB_BIND_PROPERTY_RW(Sandbox::Label,Font,GetFont,SetFont,Sandbox::Font)
-			SB_BIND_PROPERTY_RW(Sandbox::Label,Pos,GetPos,SetPos,Sandbox::Vector2f)
-			SB_BIND_PROPERTY_RW(Sandbox::Label,Text,GetText,SetText,const char*)
-			SB_BIND_PROPERTY_RW(Sandbox::Label,Align,GetAlign,SetAlign,Sandbox::FontAlign)
+			SB_BIND_PROPERTY_RW(Sandbox::Sprite,Image,GetImage,SetImage,Sandbox::Image)
+			SB_BIND_PROPERTY_RW(Sandbox::Sprite,Pos,GetPos,SetPos,Sandbox::Vector2f)
 			SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
+			SB_BIND(this)
+		}
+		{
+			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Background,Sandbox::Object)
+			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::Background,())
+			SB_BIND_BEGIN_METHODS
+            SB_BIND_METHOD_(Sandbox::Background, Load, bool(const char*,Sandbox::Resources),&Sandbox::Background::Load)
+            SB_BIND_END_METHODS
+            SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{

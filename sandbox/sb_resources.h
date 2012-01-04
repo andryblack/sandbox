@@ -41,7 +41,7 @@ namespace Sandbox {
 		
 		TexturePtr GetTexture(const char* filename);
 		ImagePtr GetImage(const char* filename);
-		
+		bool LoadImageSubdivs(const char* filename, std::vector<Image>& output);
 		
 		ShaderPtr GetShader(const char* vfn,const char* ffn);
 		
