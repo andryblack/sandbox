@@ -118,6 +118,8 @@ namespace Sandbox {
         }
 		
         T* operator -> () const { sb_assert(ptr);return ptr; }
+        
+        T & operator*() const { sb_assert(ptr);return *ptr; }
 		
         bool operator == (const int val) const {
             sb_assert(val==0);

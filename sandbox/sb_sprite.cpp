@@ -20,7 +20,8 @@ namespace Sandbox {
 	}
 	
 	void Sprite::Draw(Graphics& g) const {
-		g.DrawImage(m_image,m_pos);
+        if (m_image)
+            g.DrawImage(*m_image,m_pos);
 	}
 
 }

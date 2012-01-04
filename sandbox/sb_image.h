@@ -42,7 +42,7 @@ namespace Sandbox {
         /// set hotspot ( relative to real size )
         const Vector2f& GetHotspot() const { return m_hotspot;}
 		
-        void SetHotspot(float x,float y);
+        void SetHotspot( const Vector2f& hs );
 		
         float GetWidth() const { return m_width;}
         float GetHeight() const { return m_height;}
@@ -81,9 +81,8 @@ namespace Sandbox {
         m_height = h;
     }
 	
-	inline void Image::SetHotspot(float x,float y) {
-		m_hotspot.x = x;
-		m_hotspot.y = y;
+	inline void Image::SetHotspot(const Vector2f& hs) {
+		m_hotspot = hs;
 		if (m_texture!=0) {
             float tw = m_texture->GetWidth();
             float th = m_texture->GetHeight();

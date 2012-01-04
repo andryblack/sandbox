@@ -349,7 +349,6 @@ namespace Sandbox {
 			SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::Image,(Sandbox::Texture,float,float,float,float),(Sandbox::TexturePtr,float,float,float,float))
 			SB_BIND_BEGIN_METHODS
 			SB_BIND_METHOD(Sandbox::Image,SetSize,void(float,float))
-			SB_BIND_METHOD(Sandbox::Image,SetHotspot,void(float,float))
 			SB_BIND_END_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RO(Sandbox::Image,TextureX,GetTextureX,float)
@@ -359,7 +358,8 @@ namespace Sandbox {
 			SB_BIND_PROPERTY_RO(Sandbox::Image,Width,GetWidth,float)
 			SB_BIND_PROPERTY_RO(Sandbox::Image,Height,GetHeight,float)
 			SB_BIND_PROPERTY_RO(Sandbox::Image,Texture,GetTexture,Sandbox::Texture)
-			SB_BIND_END_PROPERTYS
+			SB_BIND_PROPERTY_RW(Sandbox::Image,Hotspot,GetHotspot,SetHotspot,Sandbox::Vector2f)
+            SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}

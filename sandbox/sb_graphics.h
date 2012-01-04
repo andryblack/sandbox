@@ -72,16 +72,16 @@ namespace Sandbox {
 		/// draw image
 		/// @{
 
-		void DrawImage(const ImagePtr& img,float x,float y);
-		void DrawImage(const ImagePtr& img,float x,float y,const Color& clr);
-		void DrawImage(const ImagePtr& img,float x,float y,const Color& clr,float scale);
-        void DrawImage(const ImagePtr& img,const Vector2f& pos) {
+		void DrawImage(const Image& img,float x,float y);
+		void DrawImage(const Image& img,float x,float y,const Color& clr);
+		void DrawImage(const Image& img,float x,float y,const Color& clr,float scale);
+        void DrawImage(const Image& img,const Vector2f& pos) {
             DrawImage(img,pos.x,pos.y);
         }
-		void DrawImage(const ImagePtr& img,const Vector2f& pos,const Color& clr) {
+		void DrawImage(const Image& img,const Vector2f& pos,const Color& clr) {
             DrawImage(img,pos.x,pos.y,clr);
         }
-		void DrawImage(const ImagePtr& img,const Vector2f& pos,const Color& clr,float scale) {
+		void DrawImage(const Image& img,const Vector2f& pos,const Color& clr,float scale) {
             DrawImage(img,pos.x,pos.y,clr,scale);
         }
         /// @}
@@ -136,7 +136,7 @@ namespace Sandbox {
 		std::vector<GHL::Vertex> m_vertexes;
 		std::vector<GHL::UInt16> m_indexes;
 	
-		void BeginDrawImage(const ImagePtr& img);
+		void BeginDrawImage(const Image& img);
 		void BeginDrawLines();
 		void BeginDrawCircle();
 		void DrawCircle(const Vector2f& pos, float r,GHL::UInt32 clr);

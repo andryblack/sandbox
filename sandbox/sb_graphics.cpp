@@ -115,8 +115,8 @@ namespace Sandbox {
 		m_primitives = 0;
 	}
 	
-	void Graphics::BeginDrawImage(const ImagePtr& img) {
-        TexturePtr texture = img->GetTexture();
+	void Graphics::BeginDrawImage(const Image& img) {
+        TexturePtr texture = img.GetTexture();
         bool flush = false;
 		if (m_texture!=texture) {
             flush = true;
@@ -149,16 +149,13 @@ namespace Sandbox {
 		m_primitives+=2;
 	}
 	
-	void Graphics::DrawImage(const ImagePtr& _img,float x,float y) {
+	void Graphics::DrawImage(const Image& img,float x,float y) {
 		sb_assert( (m_render!=0) && "scene not started" );
-        if (!_img) return;
-        BeginDrawImage(_img);
-		/// small speedup
-		const Image* img = _img.get();
-        x-=img->GetHotspot().x;
-        y-=img->GetHotspot().y;
-		const float w = img->GetWidth();
-		const float h = img->GetHeight();
+        BeginDrawImage(img);
+		x-=img.GetHotspot().x;
+        y-=img.GetHotspot().y;
+		const float w = img.GetWidth();
+		const float h = img.GetHeight();
 		
         appendQuad();
 		
@@ -166,25 +163,22 @@ namespace Sandbox {
 		
         {
             appendVertex(x,y,
-                                 img->GetTextureX(),img->GetTextureY(),clr);
+                                 img.GetTextureX(),img.GetTextureY(),clr);
             appendVertex(x+w,y,
-                                 img->GetTextureX()+img->GetTextureW(),img->GetTextureY(),clr);
+                                 img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
             appendVertex(x,y+h,
-                                 img->GetTextureX(),img->GetTextureY()+img->GetTextureH(),clr);
+                                 img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
             appendVertex(x+w,y+h,
-                                 img->GetTextureX()+img->GetTextureW(),img->GetTextureY()+img->GetTextureH(),clr);
+                                 img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
         } 
 	}
-	void Graphics::DrawImage(const ImagePtr& _img,float x,float y,const Color& _clr) {
+	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr) {
 		sb_assert( (m_render!=0) && "scene not started" );
-        if (!_img) return;
-        BeginDrawImage(_img);
-		/// small speedup
-		const Image* img = _img.get();
-        x-=img->GetHotspot().x;
-        y-=img->GetHotspot().y;
-		const float w = img->GetWidth();
-		const float h = img->GetHeight();
+        BeginDrawImage(img);
+        x-=img.GetHotspot().x;
+        y-=img.GetHotspot().y;
+		const float w = img.GetWidth();
+		const float h = img.GetHeight();
 		
         appendQuad();
 		
@@ -192,26 +186,23 @@ namespace Sandbox {
 		
         {
             appendVertex(x,y,
-						 img->GetTextureX(),img->GetTextureY(),clr);
+						 img.GetTextureX(),img.GetTextureY(),clr);
             appendVertex(x+w,y,
-						 img->GetTextureX()+img->GetTextureW(),img->GetTextureY(),clr);
+						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
             appendVertex(x,y+h,
-						 img->GetTextureX(),img->GetTextureY()+img->GetTextureH(),clr);
+						 img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
             appendVertex(x+w,y+h,
-						 img->GetTextureX()+img->GetTextureW(),img->GetTextureY()+img->GetTextureH(),clr);
+						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
         } 
 		
 	}
-	void Graphics::DrawImage(const ImagePtr& _img,float x,float y,const Color& _clr,float scale) {
+	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr,float scale) {
 		sb_assert( (m_render!=0) && "scene not started" );
-        if (!_img) return;
-        BeginDrawImage(_img);
-		/// small speedup
-		const Image* img = _img.get();
-        x-=img->GetHotspot().x*scale;
-        y-=img->GetHotspot().y*scale;
-		const float w = img->GetWidth()*scale;
-		const float h = img->GetHeight()*scale;
+        BeginDrawImage(img);
+		x-=img.GetHotspot().x*scale;
+        y-=img.GetHotspot().y*scale;
+		const float w = img.GetWidth()*scale;
+		const float h = img.GetHeight()*scale;
 		
         appendQuad();
 		
@@ -219,13 +210,13 @@ namespace Sandbox {
 		
         {
             appendVertex(x,y,
-						 img->GetTextureX(),img->GetTextureY(),clr);
+						 img.GetTextureX(),img.GetTextureY(),clr);
             appendVertex(x+w,y,
-						 img->GetTextureX()+img->GetTextureW(),img->GetTextureY(),clr);
+						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
             appendVertex(x,y+h,
-						 img->GetTextureX(),img->GetTextureY()+img->GetTextureH(),clr);
+						 img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
             appendVertex(x+w,y+h,
-						 img->GetTextureX()+img->GetTextureW(),img->GetTextureY()+img->GetTextureH(),clr);
+						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
         } 
 		
 	}

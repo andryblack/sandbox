@@ -45,8 +45,9 @@ namespace Sandbox {
 		Transform2d translated(const Vector2f& pos) const {
 			return Transform2d(*this).translate(pos);
 		}
+        /// rotate, radians
         Transform2d& rotate(float _a) {
-            float a = float(M_PI) * _a / 180.0f;
+            float a = _a;
             float c = ::cosf(a);
             float s = ::sinf(a);
             m*=Matrix2f(c,s,-s,c);

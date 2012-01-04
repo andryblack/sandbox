@@ -172,7 +172,7 @@ namespace Sandbox {
 				const Glypth* gl = get_glypth(ch);
 				if (gl) {
 					pos.x+=getKerning(prev,ch);
-					g.DrawImage(gl->img, pos);
+					g.DrawImage(*(gl->img), pos);
 					pos.x+=gl->asc;
 				}
 				prev=gl;
