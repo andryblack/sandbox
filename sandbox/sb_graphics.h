@@ -111,7 +111,7 @@ namespace Sandbox {
 		/// @brief flush batches
 		void Flush();
 		/// @brief end draw scene
-		void EndScene();
+		size_t EndScene();
 
 		/// get "native" render
 		GHL::Render* BeginNative();

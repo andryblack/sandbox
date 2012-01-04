@@ -437,7 +437,7 @@ namespace Sandbox {
 		SetViewport(Recti(0,0,render->GetWidth(),render->GetHeight()));
 		SetClipRect(GetViewport());
 	}
-	void Graphics::EndScene() {
+	size_t Graphics::EndScene() {
 		sb_assert( (m_render!=0) && "scene not started" );
 		Flush();
 		m_render->SetTexture(0,0);
@@ -445,6 +445,7 @@ namespace Sandbox {
 		m_texture = TexturePtr();
 		m_shader = ShaderPtr();
 		m_render = 0;
+        return m_batches;
 	}
 	
 	

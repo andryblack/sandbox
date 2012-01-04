@@ -65,6 +65,8 @@ namespace Sandbox {
 		
 		bool		m_clear_buffer;
 		Color		m_clear_color;
+        
+        float       m_batches;
 	public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys );

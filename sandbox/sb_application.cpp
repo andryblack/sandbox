@@ -18,12 +18,12 @@ namespace Sandbox {
 	
     static void format_memory( char* buf, size_t size, GHL::UInt32 mem,const char* caption ) {
         if ( mem > 1024*1024 ) {
-            ::snprintf(buf, size, "%s: %0.2fM", caption,float(mem)/(1024*1024));
+            ::snprintf(buf, size, "%s:%0.2fM", caption,float(mem)/(1024*1024));
         } else if ( mem > 1024 ) {
-            ::snprintf(buf, size, "%s: %0.2fK", caption,float(mem)/(1024));
+            ::snprintf(buf, size, "%s:%0.2fK", caption,float(mem)/(1024));
         }
         else {
-            ::snprintf(buf, size, "%s: %0.2fb", caption,float(mem));
+            ::snprintf(buf, size, "%s:%0.2fb", caption,float(mem));
         }
     }
     
@@ -42,6 +42,7 @@ namespace Sandbox {
 		m_main_scene = 0;
 		m_main_thread = 0;
 		m_clear_buffer = false;
+        m_batches = 0.0f;
 	}
 	
 	Application::~Application() {
@@ -156,7 +157,8 @@ namespace Sandbox {
 							m_clear_color.a);
 		m_graphics->BeginScene(m_render);
 		DrawFrame(*m_graphics);
-		m_graphics->EndScene();
+		size_t batches = m_graphics->EndScene();
+        m_batches = m_batches * 0.875f + 0.125f*batches;    /// interpolate 4 frames
 		DrawDebugInfo();
 		m_render->EndScene();
 		return true;
@@ -176,7 +178,9 @@ namespace Sandbox {
 		m_render->SetProjectionMatrix(Matrix4f::ortho(0,m_render->GetWidth(),m_render->GetHeight(),0,-1,1).matrix);
 		m_render->DebugDrawText( 10, 10 , buf );
         format_memory(buf,128,m_lua->GetMemoryUsed(),"lua");
-        m_render->DebugDrawText( 10, 20 , buf );
+        m_render->DebugDrawText( 10, 21 , buf );
+        ::snprintf(buf,128,"batches:%0.2f",m_batches);
+        m_render->DebugDrawText( 10, 32 , buf );
 	}
 	
 	void Application::SetClearColor(const Color& c) {
