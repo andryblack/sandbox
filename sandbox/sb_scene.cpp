@@ -18,8 +18,11 @@ namespace Sandbox {
 	}
 
     bool Scene::HandleTouch( const TouchInfo& touch ) {
-        if (m_root) return m_root->HandleTouch( touch );
+        if (m_root) return m_root->DoHandleTouch( touch );
         return false;
     }
     
+    void Scene::Update( float dt ) {
+        if (m_root) m_root->DoUpdate(dt);
+    }
 }

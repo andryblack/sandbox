@@ -144,6 +144,8 @@ namespace Sandbox {
 		if (usecs>100000)
 			usecs=100000;
 		float dt = float(usecs)/1000000.0f;
+        if (m_main_scene)
+            m_main_scene->Update(dt);
 		m_main_thread->Update(dt);
 		Update(dt);
 		m_render->BeginScene(0);

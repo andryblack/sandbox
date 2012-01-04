@@ -27,9 +27,11 @@ namespace Sandbox {
         
         /// self mouse handling implementation
         bool HandleTouch( const TouchInfo& touch );
+        void Update( float dt );
 	protected:
         bool HandleChilds( const TouchInfo& touch );
 		void DrawChilds(Graphics& g) const;
+        void UpdateChilds( float dt );
 		std::vector<ObjectPtr> m_objects;
 	};
 	typedef shared_ptr<Container> ContainerPtr;

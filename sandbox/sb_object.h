@@ -24,6 +24,8 @@ namespace Sandbox {
 		virtual ~Object();
 		/// self drawing implementation
 		virtual void Draw(Graphics& g) const = 0;
+        /// self update object
+        virtual void Update( float dt ) {(void)dt;}
         /// visible
 		void SetVisible(bool v) { m_visible = v;}
 		bool GetVisible() const { return m_visible;}
@@ -32,6 +34,11 @@ namespace Sandbox {
         void DoDraw(Graphics& g) const {
 			if (m_visible) Draw(g);
 		}
+        
+        /// update
+        void DoUpdate( float dt ) {
+            if (m_visible) Update(dt);
+        }
         
         /// self mouse handling implementation
         virtual bool HandleTouch( const TouchInfo& touch );

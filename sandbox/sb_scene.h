@@ -22,6 +22,8 @@ namespace Sandbox {
 		void Draw(Graphics& g) const;
         /// handle touch
         bool HandleTouch( const TouchInfo& touch );
+        /// update
+        void Update( float dt );
         
 		void SetRoot(const ObjectPtr& obj) { m_root = obj;}
 		const ObjectPtr& GetRoot() const { return m_root;}

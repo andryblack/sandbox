@@ -62,10 +62,22 @@ namespace Sandbox {
         /// copy, for allow scene modifications
         std::vector<ObjectPtr> childs = m_objects;
         for (std::vector<ObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
-			if ( (*i)->HandleTouch(touch) ) {
+			if ( (*i)->DoHandleTouch(touch) ) {
                 return true;
             }
 		}
         return false;
+    }
+    
+    void Container::Update( float dt ) {
+        UpdateChilds(dt);
+    }
+    
+    void Container::UpdateChilds( float dt ) {
+        /// copy, for allow scene modifications
+        std::vector<ObjectPtr> childs = m_objects;
+        for (std::vector<ObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
+			(*i)->DoUpdate(dt);
+		}
     }
 }
