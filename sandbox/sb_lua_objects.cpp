@@ -50,6 +50,7 @@
 #include "sb_rect.h"
 #include "sb_container_viewport.h"
 #include "sb_background.h"
+#include "sb_particles.h"
 
 #include "sb_log.h"
 
@@ -765,5 +766,6 @@ namespace Sandbox {
 			SB_BIND(this)
 		}
 		SB_BIND_END_BIND
+        ParticlesSystem::Bind(this);
 	}
 }

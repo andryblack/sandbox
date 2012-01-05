@@ -330,6 +330,46 @@ namespace Sandbox {
 		m_primitives+=subdivs;
 	}
 	
+    void Graphics::DrawParticles( const std::vector<Particle>& particles,
+                       const std::vector<const Image*>& images ) {
+        if (particles.empty()) return;
+        if (images.empty()) return;
+        
+        sb_assert( (m_render!=0) && "scene not started" );
+        const Image* prev_image = 0;
+        for ( size_t i=0;i<particles.size();i++) {
+            const Particle& p = particles[i];
+        
+            const Image* _img = images[ p.image % images.size() ];
+            if (!_img) continue;
+            
+            const Image& img = *_img;
+            if (prev_image!=_img)
+                BeginDrawImage(img);
+            
+            const float x = p.pos.x - img.GetHotspot().x * p.scale;
+            const float y = p.pos.y - img.GetHotspot().y * p.scale;
+            const float w = img.GetWidth() * p.scale;
+            const float h = img.GetHeight() * p.scale;
+            
+            appendQuad();
+            
+            GHL::UInt32 clr = (m_color * p.color).hw();
+            
+            {
+                appendVertex(x,y,
+                             img.GetTextureX(),img.GetTextureY(),clr);
+                appendVertex(x+w,y,
+                             img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+                appendVertex(x,y+h,
+                             img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+                appendVertex(x+w,y+h,
+                             img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+            } 
+
+        }
+    }
+
 	
 	void Graphics::DrawBuffer(const TexturePtr& texture,GHL::PrimitiveType prim,
 					const std::vector<GHL::Vertex>& vertices,

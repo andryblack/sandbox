@@ -82,6 +82,7 @@ namespace Sandbox {
 				Sandbox::Bind::GetPropertySetFunc(&Class::Set), \
 				Sandbox::Bind::GetPropertyGetFuncData(&Class::Get), \
 				Sandbox::Bind::GetPropertySetFuncData(&Class::Set), } ,
+#define SB_BIND_PROPERTY_RW_DEF(Class,Name,Type) SB_BIND_PROPERTY_RW(Class,Name,Get##Name,Set##Name,Type)        
 #define SB_BIND_PROPERTY_RW_(Class,Name,GetPtr,SetPtr,Type) { #Name,#Type"("#Type")", \
 				Sandbox::Bind::GetPropertyGetFunc(GetPtr), \
 				Sandbox::Bind::GetPropertySetFunc(SetPtr), \

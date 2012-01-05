@@ -16,6 +16,7 @@
 #include "sb_shader.h"
 #include "sb_matrix4.h"
 #include "sb_rect.h"
+#include "sb_particle.h"
 
 #include <ghl_render.h>
 #include <vector>
@@ -104,6 +105,9 @@ namespace Sandbox {
 		void DrawCircle(const Vector2f& pos, float r,const Color& clr);
 		/// @}
 
+        /// draw particles
+        void DrawParticles( const std::vector<Particle>& particles,
+                           const std::vector<const Image*>& images );
 	
 		void DrawBuffer(const TexturePtr& texture,GHL::PrimitiveType prim,
 						const std::vector<GHL::Vertex>& vertices,

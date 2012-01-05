@@ -240,6 +240,23 @@ namespace Sandbox {
 			}
 			lua_setmetatable(L, -2);
 		}
+        void StackHelper::push_object_ptr(const void* v) const {
+            lua_State* L = m_L;
+			std::string type = "const ";
+            type+=get_ret_type(m_signature).str();
+			ObjectData *block = reinterpret_cast<ObjectData*>(lua_newuserdata(L, sizeof(ObjectData)+sizeof(void*)));
+			block->store_type = STORE_RAW_PTR;
+			*reinterpret_cast<const void**>(block+1) = v;
+			/// getting metatable
+			luaL_getmetatable(L, type.c_str());
+			if (!lua_istable(L,-1)) {
+				lua_pop(L,1);
+				luaL_error(L, "attempt to push ptr to unknown type const %s",
+						   type.c_str());
+				return;
+			}
+			lua_setmetatable(L, -2);
+        }
 		void* StackHelper::new_object_shared_ptr() const {
 			lua_State* L = m_L;
 			std::string type = get_ret_type(m_signature).str();
@@ -379,6 +396,26 @@ namespace Sandbox {
             }
             get_shared_ptr_impl(L,indx, to,type);
        }
+        
+        bool StackHelper::begin_read_map(int indx) const {
+            if (!lua_istable(m_L,m_base_index+indx)) return false;
+            lua_pushnil(m_L);
+            return true;
+        }
+        bool StackHelper::get_map_argument(int index) const {
+            if (lua_next(m_L, m_base_index+index)==0) return false;
+            if (!lua_isstring(m_L, -2)) {
+                lua_pop(m_L, 2);
+                return false;
+            }
+            return true;
+        }
+        void StackHelper::end_get_map_argument() const {
+            lua_pop(m_L, 1); // pop value
+        }
+        void StackHelper::end_read_map() const {
+            
+        }
         
         void StackHelper::CallVoid(int numArgs) const {
             int res = lua_pcall(m_L, numArgs, 0, 0);

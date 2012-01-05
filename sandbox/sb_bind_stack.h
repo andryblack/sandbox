@@ -14,6 +14,7 @@
 #include "sb_traits.h"
 #include "sb_inplace_string.h"
 #include <string>
+#include <map>
 #include <ghl_types.h>
 
 struct lua_State;
@@ -47,6 +48,7 @@ namespace Sandbox {
 			void* get_ptr(int indx) const;
 			void get_shared_ptr(int indx,void* to) const;
 			void push_object_ptr(void* v) const;
+            void push_object_ptr(const void* v) const;
 			bool is_null(int indx) const;
 			void push_null() const;
 			template <class T> void _PushValue(const T& v , const IsNotEnumTag<T>&  ) const {
@@ -56,6 +58,10 @@ namespace Sandbox {
 				PushValue(static_cast<int> (v));
 			}
 			const char* get_string(int indx) const;
+            bool begin_read_map(int indx) const;
+            bool get_map_argument(int index) const;
+            void end_get_map_argument() const;
+            void end_read_map() const;
 		public:
 	explicit StackHelper(lua_State* L,int base_index,const char* signature) : m_L(L),m_base_index(base_index),m_signature(signature) {}
             lua_State* GetState() const { return m_L; }
@@ -75,6 +81,25 @@ namespace Sandbox {
 			template <class T> shared_ptr<T> GetArgument(int indx,const ArgumentTag<shared_ptr<T> >& ) const {
 				shared_ptr<T> res;
 				if (!is_null(indx)) get_shared_ptr(indx,&res);
+				return res;
+			}
+            template <class T> std::map<std::string,T> GetArgument(int indx,const ArgumentTag<const std::map<std::string,T>&>& ) const {
+				std::map<std::string,T> res;
+                std::string   type = get_arg_type(indx).str();
+                size_t p1 = type.find('<' );
+                sb_assert(p1!=type.npos);
+                type.replace(p1, 1, "(");
+                size_t p2 = type.find('>',p1);
+                sb_assert(p2!=type.npos);
+                 type.replace(p2, 1, ")");
+                if (begin_read_map(indx)) {
+                    while (get_map_argument(indx)) {
+                        StackHelper hpr(m_L,-1,type.c_str());
+                        res[hpr.get_string(-1)]=hpr.GetArgument(0,ArgumentTag<T>());
+                        end_get_map_argument();
+                    }
+                    end_read_map();
+                }
 				return res;
 			}
 			template <class T> const T& GetArgument(int indx,const IsNotEnumTag<const T&>& ) const {

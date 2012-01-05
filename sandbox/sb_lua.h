@@ -100,6 +100,12 @@ namespace Sandbox {
 			stck.template PushValuePtr<T>(obj);
 			register_object(name);
 		}
+        template <class T>
+		void SetValue(const T* obj,const char* name,const char* type) {
+			Bind::StackHelper stck(GetVM(),0,type);
+			stck.PushValue(obj);
+			register_object(name);
+		}
 		template <class T>
 		void SetValue(const LuaEnvironmentPtr& env, T* obj,const char* name,const char* type) {
 			Bind::StackHelper stck(GetVM(),0,type);
