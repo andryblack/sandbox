@@ -39,6 +39,7 @@ namespace Sandbox {
         size_t size() const { return m_points.size();}
 
         const Vector2f& point(size_t i) const { return m_points[i].pos;}
+        float poin_length(size_t i) const { return m_points[i].len; }
         void set_point(size_t i,const Vector2f& pos);
 
         Vector2f get(float t) const;
