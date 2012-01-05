@@ -115,6 +115,7 @@ namespace Sandbox {
 
   
    
+            Matrix2f &inverse();
 
    
             /// \brief Copy assignment operator.
@@ -254,6 +255,17 @@ namespace Sandbox {
             return *this;
     }
 
+    inline Matrix2f &Matrix2f::inverse() 
+    {
+        float det = matrix[0*2+0]*matrix[1*2+1] - matrix[0*2+1]*matrix[1*2+0];
+        std::swap(matrix[0*2+0],matrix[1*2+1]);
+        float idet = 1.0f / det;
+        matrix[0*2+0]*=idet;
+        matrix[0*2+1]*=-idet;
+        matrix[1*2+0]*=-idet;
+        matrix[1*2+1]*=idet;
+        return *this;
+    }
   
 
 

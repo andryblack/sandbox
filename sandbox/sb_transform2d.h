@@ -29,7 +29,10 @@ namespace Sandbox {
             m = Matrix2f::identity();
             v = Vector2f(0.0f,0.0f);
         }
-		
+		void inverse() {
+            m.inverse();
+            /// v ???
+        }
         Transform2d& translate(const Vector2f& pos) {
             v+=m*pos;
             return *this;
