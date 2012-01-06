@@ -78,6 +78,12 @@ namespace Sandbox {
         instance.cicle_time = GetCicleTime();
     }
     void ParticlesController::Update( ParticlesInstance& instance, float dt) {
+        if (instance.finished) {
+            if (!instance.particles.empty()) {
+                instance.particles.clear();
+            }
+            return;
+        }
         instance.time+=dt;
         float startTime = 1.0f - (instance.cicle_time) / m_cicle_time;
         instance.cicle_time-=dt;
@@ -125,6 +131,13 @@ namespace Sandbox {
                     Emmit( instance, base_index+i, startTime );
                     startTime+=emissionStep;
                 }
+            } 
+        }
+        if (!instance.started) {
+            if ( instance.particles.empty() ) {
+                instance.finished = true;
+                if (instance.complete_event)
+                    instance.complete_event->Emmit();
             }
         }
     }
@@ -137,6 +150,7 @@ namespace Sandbox {
         }
         m_instance.time = 0.0f;
         m_instance.started = true;
+        m_instance.finished = false;
     }
     
     void ParticlesSystem::Draw(Sandbox::Graphics &g) const {
@@ -149,7 +163,7 @@ namespace Sandbox {
     }
     
     void ParticlesSystem::Update( float dt ) {
-        if (m_controller) {
+        if (m_controller && !m_instance.finished) {
             m_controller->Update(m_instance, dt);
         }
     }

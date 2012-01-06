@@ -12,6 +12,7 @@
 #include "sb_object.h"
 #include "sb_image.h"
 #include "sb_particle.h"
+#include "sb_event.h"
 
 #include <map>
 
@@ -24,7 +25,9 @@ namespace Sandbox {
         float   time;
         float   cicle_time;
         bool    started;
+        bool    finished;
         Vector2f    pos;
+        EventPtr    complete_event;
     };
   
     typedef void (*GeneratorFunc)( Particle& p, float* vars, const float* args, float cicle );
@@ -93,6 +96,8 @@ namespace Sandbox {
         
         void SetPosition( const Sandbox::Vector2f& pos ) { m_instance.pos = pos; }
         const Vector2f& GetPosition() const { return m_instance.pos; }
+        
+        void SetCompleteEvent( const EventPtr& evnt ) { m_instance.complete_event = evnt; }
     private:
         ParticlesControllerPtr  m_controller;
         ParticlesInstance   m_instance;
