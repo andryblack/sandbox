@@ -28,6 +28,7 @@ extern "C" {
 #include "sb_bind.h"
 #include "sb_event.h"
 #include "sb_log.h"
+#include "sb_resources.h"
 
 namespace Sandbox {
 	
@@ -91,10 +92,15 @@ namespace Sandbox {
 	void LuaFunction::Call() {
 		if (m_ref.Valid()) {
 			if (LuaHelperPtr lua = m_ref.GetHelper()) {
-				lua_pushcclosure(lua->lua->GetVM(), &lua_error_function, 0);
-				m_ref.GetObject(lua->lua->GetVM());
-				lua_pcall(lua->lua->GetVM(), 0, 0, -2);
-			}
+                lua_State* L = lua->lua->GetVM();
+#ifdef SB_DEBUG
+                int top = lua_gettop(L);
+#endif
+				lua_pushcclosure(L, &lua_error_function, 0);
+				m_ref.GetObject(L);
+				lua_pcall(L, 0, 0, -2);
+                sb_assert(top==lua_gettop(L));
+     		}
 		}
 	}
 	
@@ -227,7 +233,67 @@ namespace Sandbox {
 		}
 		return ptr;
 	}
-	
+	int Lua::lua_require_func( lua_State* _L ) {
+        if (!lua_isstring(_L, 1)) {
+            luaL_argerror(_L, 1, "string expected");
+            return 1;
+        }
+        const char* filename = lua_tostring(_L, 1);
+        int n = lua_gettop(_L);
+        Lua* l = Lua::GetPtr(_L);
+        if (!l) {
+            lua_pushstring(_L, "not found global state");
+			lua_error(_L);
+            return 1;
+        }
+        lua_State* L = l->GetVM();
+        lua_getglobal(L, "package");
+        if (!lua_istable(L,-1)) {
+            lua_pop(L, 1);
+            lua_newtable(L);
+            lua_pushvalue(L, -1);
+            lua_setglobal(L, "package");
+        }
+        lua_getfield(L, -1, "loaded");
+        if (!lua_istable(L, -1)) {
+            lua_pop(L, 1);
+            lua_newtable(L);
+            lua_pushvalue(L, -1);
+            lua_setfield(L, -3, "loaded");
+        }
+        lua_getfield(L, -1, filename);
+        if (lua_isnil(L, -1)) {
+            lua_pop(L,1);
+            if (l) {
+                if (!l->load_file(L,(l->m_base_path+filename+".lua").c_str())) {
+                    lua_pushstring(L, "error loading file");
+                    lua_error(L);
+                } else {
+                    lua_pushboolean(L, 1);
+                    lua_setfield(L, -3, filename);
+                    lua_call(L, 0, 0);
+                }
+            } 
+        }
+        /// cleanup
+        lua_pop( L, lua_gettop(L)-n );
+		return 0;
+    }
+    int Lua::lua_loadfile_func(lua_State* L) {
+        Lua* l = Lua::GetPtr(L);
+		if (l) {
+			if (!l->load_file(L,lua_tostring(L,1))) {
+				lua_pushstring(L, "error loading file");
+				lua_pushnil(L);
+                return 2;
+			} 
+		} else {
+			lua_pushstring(L, "not found state");
+			lua_pushnil(L);
+            return 2;
+		}
+        return 1;
+    }
 	int Lua::lua_dofile_func (lua_State *L) {
 		int n = lua_gettop(L);
 		Lua* l = Lua::GetPtr(L);
@@ -239,7 +305,7 @@ namespace Sandbox {
 				lua_call(L, 0, LUA_MULTRET);
 			}
 		} else {
-			lua_pushstring(L, "not fund state");
+			lua_pushstring(L, "not found state");
 			lua_error(L);
 		}
 		return lua_gettop(L)-n;
@@ -251,7 +317,7 @@ namespace Sandbox {
 	static int traceback (lua_State *L)
 	{
 		// look up Lua's 'debug.traceback' function
-		lua_getglobal(L, "debug");
+        lua_getglobal(L, "debug");
 		if (!lua_istable(L, -1))
 		{
 			lua_pop(L, 1);
@@ -263,15 +329,30 @@ namespace Sandbox {
 			lua_pop(L, 2);
 			return 1;
 		}
-		lua_pushvalue(L, 1);  /* pass error message */
+		if (lua_isstring(L,1))
+            lua_pushvalue(L, 1);  /* pass error message */
+        else 
+            lua_pushstring(L, "error");
 		lua_pushinteger(L, 2);  /* skip this function and traceback */
 		lua_call(L, 2, 1);  /* call debug.traceback */
-		LogError(MODULE)<<"trap";
-		exit(1);
+ 		return 1;
 	}
+    
+    static int at_panic_func(lua_State* L) {
+        LogError(MODULE) << "--- panic ---";
+        if (!lua_isstring(L, -1)){
+            lua_pushstring(L, "unknown");
+        }
+        lua_pushcclosure(L, &traceback, 0);
+        lua_pcall(L, 1, 1, 0);
+        LogError(MODULE) << "--- panic ---";
+        LogError(MODULE) << lua_tostring(L, -1);
+        exit(1);
+        return 0;
+    }
 	
 	
-	Lua::Lua(GHL::VFS* vfs) : m_vfs(vfs) {
+	Lua::Lua(Resources* resources) : m_resources(resources) {
 	
 		m_mem_use = 0;
 		
@@ -298,6 +379,8 @@ namespace Sandbox {
 		static const luaL_Reg base_funcs_impl[] = {
 			{"dofile", lua_dofile_func},
 			{"print", lua_print_func},
+            {"require",lua_require_func},
+            {"loadfile",lua_loadfile_func},
 			{NULL, NULL}
 		};
 		luaL_register(m_state, "_G", base_funcs_impl);
@@ -305,7 +388,7 @@ namespace Sandbox {
 		lua_setglobal(m_state, "g_luaState");
 		
 		
-		lua_atpanic(m_state, &traceback);
+		lua_atpanic(m_state, &at_panic_func);
 		
 		RegisterSandboxObjects();
 	}
@@ -337,17 +420,16 @@ namespace Sandbox {
 	}
 	
 	bool Lua::load_file(lua_State* L,const char* fn) {
-		std::string filename = m_base_path + fn;
-		GHL::DataStream* ds = m_vfs->OpenFile(filename.c_str());
-		if (!ds) {
-			LogWarning(MODULE) << "error opening file " << filename;
+		GHL::DataStream* ds = m_resources->OpenFile(fn);
+        if (!ds) {
+			LogWarning(MODULE) << "error opening file " << fn;
 			return false;
 		}
 		lua_read_data data = {ds,{}};
 		int res = lua_load(L,&lua_read_func,&data,fn);
 		ds->Release();
 		if (res!=0) {
-			LogError(MODULE) << "Failed to load script: " << filename;
+			LogError(MODULE) << "Failed to load script: " << fn;
             LogError(MODULE) << lua_tostring(m_state, -1) ;
 			return false;
 		} else {
@@ -356,17 +438,23 @@ namespace Sandbox {
 		return true;
 	}
 	
-	bool Lua::call(const char* str,int args) {
-		int res = lua_pcall(m_state, args, 0, 0);
+    bool Lua::pcall(lua_State* L,int args, int rets) {
+        lua_pushcclosure(L, &traceback, 0);
+        lua_insert(L, -args-2);
+		int res = lua_pcall(L, args, rets, -args-2);
 		if (res) {
-			LogError(MODULE) << "Failed to script call : " << str;
-            LogError(MODULE) << lua_tostring(m_state, -1) ;
+			LogError(MODULE) << "pcall : " << res;
+            LogError(MODULE) << lua_tostring(L, -1) ;
 			return false;
 		}
+        lua_remove(L, -rets-1);
 		return true;
+    }
+	bool Lua::call(const char* str,int args) {
+        return pcall(m_state,args,0);
 	}
 	bool Lua::DoFile(const char* fn) {
-		if (!load_file(GetVM(),fn)) return false;
+		if (!load_file(GetVM(),(m_base_path+fn).c_str())) return false;
 		return call(fn,0);
 	}
 	

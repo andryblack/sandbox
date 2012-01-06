@@ -28,6 +28,8 @@ namespace GHL {
 }
 namespace Sandbox {
 	
+    class Resources;
+    
 	namespace Bind {
 		struct ClassBind;
 		struct EnumBind;
@@ -82,7 +84,7 @@ namespace Sandbox {
 	
 	class Lua {
 	public:
-		explicit Lua(GHL::VFS* vfs);
+		explicit Lua(Resources* vfs);
 		~Lua();
 		void SetBasePath(const char* path);
 		bool DoFile(const char* fn);
@@ -148,16 +150,19 @@ namespace Sandbox {
 	private:
 		lua_State*	m_state;
 		LuaHelperPtr m_helper;
-		GHL::VFS*	m_vfs;
+        Resources*  m_resources;
 		std::string m_base_path;
 		void RegisterSandboxObjects();
 		void register_object(const char* name);
 		void register_object(const LuaEnvironmentPtr& env, const char* name);
 		
 		bool load_file(lua_State*,const char* name);
-		static int lua_dofile_func (lua_State *L);
+        static int lua_loadfile_func(lua_State* L);
+		static int lua_dofile_func(lua_State *L);
+        static int lua_require_func(lua_State* L);
 		const char* get_table(const char* str);
 		const char* get_table(const LuaEnvironmentPtr& env,const char* str);
+        static bool pcall(lua_State* L,int args, int rets);
 		bool call(const char* str,int args);
 		void do_call(const char* str,int args);
 		static void *lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
@@ -165,7 +170,7 @@ namespace Sandbox {
 		GHL::Byte* alloc(size_t size);
 		void free(GHL::Byte* data,size_t size);
 		void resize(GHL::Byte* data,size_t osize,size_t nsize);
-	};
+    };
 }
 
 #endif /*SB_LUA_H*/

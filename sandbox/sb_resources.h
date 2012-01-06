@@ -33,8 +33,10 @@ namespace Sandbox {
 
 	class Resources {
 	public:
-		Resources(GHL::VFS* vfs,GHL::Render* render,GHL::ImageDecoder* image);
+		Resources(GHL::VFS* vfs);
 		~Resources();
+        
+        void Init(GHL::Render* render,GHL::ImageDecoder* image);
 		
 		void SetBasePath(const char* path);
 		GHL::DataStream* OpenFile(const char* fn);

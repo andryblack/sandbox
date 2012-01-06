@@ -28,11 +28,15 @@ namespace Sandbox {
 	
 	
 	
-	Resources::Resources(GHL::VFS* vfs,GHL::Render* render,GHL::ImageDecoder* image) :
-		m_vfs(vfs),m_render(render),m_image(image) {
+	Resources::Resources(GHL::VFS* vfs) :
+		m_vfs(vfs),m_render(0),m_image(0) {
 			
 	}
 	
+    void Resources::Init(GHL::Render* render,GHL::ImageDecoder* image) {
+        m_render = render;
+        m_image = image;
+    }
 	Resources::~Resources() {
 		
 	} 
@@ -52,6 +56,10 @@ namespace Sandbox {
 	}
 	
 	TexturePtr Resources::InternalCreateTexture( int w,int h, bool alpha,bool fill) {
+        if (!m_render) {
+            LogError(MODULE) << "render not initialized";
+            return TexturePtr();
+        }
 		GHL::TextureFormat tfmt;
 		if (alpha) {
 			tfmt = GHL::TEXTURE_FORMAT_RGBA;
@@ -114,6 +122,10 @@ namespace Sandbox {
         return true;
     }
 	GHL::Image* Resources::LoadImage(const char* filename) {
+        if (!m_image) {
+            LogError(MODULE) << "image decoder not initialized";
+            return 0;
+        }
 		std::string fn = m_base_path + filename;
 		GHL::DataStream* ds = m_vfs->OpenFile(fn.c_str());
 		if (!ds) {

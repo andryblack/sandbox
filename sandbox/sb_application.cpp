@@ -43,6 +43,8 @@ namespace Sandbox {
 		m_main_thread = 0;
 		m_clear_buffer = false;
         m_batches = 0.0f;
+        SetResourcesBasePath("data");
+        SetLuaBasePath("scripts");
 	}
 	
 	Application::~Application() {
@@ -76,15 +78,25 @@ namespace Sandbox {
 	///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
 		sb_assert( m_vfs );
-		m_lua = new Lua(m_vfs);
-		std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);
+        m_resources = new Resources(m_vfs);
+		
+        std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);
 		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
 			base_path+="/";
-		base_path+=m_lua_base_path;
+		base_path+=m_resources_base_path;
+		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
+			base_path+="/";
+		m_resources->SetBasePath(base_path.c_str());
+		
+        
+        m_lua = new Lua(m_resources);
+        
+		base_path=m_lua_base_path;
 		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
 			base_path+="/";
 		m_lua->SetBasePath(base_path.c_str());
-		SB_BIND_BEGIN_BIND
+		
+        SB_BIND_BEGIN_BIND
 		{
 			SB_BIND_BEGIN_RAW_CLASS( GHL::Settings )
 			SB_BIND_BEGIN_PROPERTYS
@@ -113,15 +125,8 @@ namespace Sandbox {
 	bool GHL_CALL Application::Load() {
 		ConfigureDevice( m_system );
 		m_graphics = new Graphics();
-		m_resources = new Resources(m_vfs,m_render,m_image_decoder);
-		std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);
-		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
-			base_path+="/";
-		base_path+=m_resources_base_path;
-		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
-			base_path+="/";
-		m_resources->SetBasePath(base_path.c_str());
-		m_lua->SetValue(m_resources, "application.resources", "Sandbox::Resources");
+		m_resources->Init(m_render, m_image_decoder);
+        m_lua->SetValue(m_resources, "application.resources", "Sandbox::Resources");
 		m_lua->DoFile("load.lua");
 		if (!LoadResources(*m_resources))
 			return false;
