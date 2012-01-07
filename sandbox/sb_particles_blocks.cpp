@@ -72,6 +72,29 @@ namespace Sandbox {
         {"min","max"}
     };
     
+    static void ranndom_image_generator( Particle& p, float* vars, const float* args, float cicle ) {
+        p.image = rand()%static_cast<int>(args[0]);
+    }
+    static const ParticleProcessorBlock random_image_processor = { 
+        1,0,
+        &ranndom_image_generator,
+        0,
+        {"amount"}
+    };
+
+    
+    static bool gravity_accept_processor(Particle& p, float* vars, const float* args, float dt, float cicle) {
+        p.speed.x+=args[0]*dt;
+        p.speed.y+=args[1]*dt;
+        return false;
+    }
+    static const ParticleProcessorBlock apply_gravity_processor = { 
+        2,0,
+        0,
+        &gravity_accept_processor,
+        {"x","y"}
+    };
+    
     static void scale_accept_generator( Particle& p, float* vars, const float* args, float cicle ) {
         vars[0] = randf(args[0],args[1]);
     }
@@ -92,6 +115,8 @@ namespace Sandbox {
         BindProcessor(lua, "ApplySpeed", &apply_speed_processor);
         BindProcessor(lua, "RandomScale", &random_scale_processor);
         BindProcessor(lua, "ScaleSpeed", &scale_speed_processor);
+        BindProcessor(lua, "RandomImage", &random_image_processor);
+        BindProcessor(lua, "ApplyGravity", &apply_gravity_processor);
     }
     
 

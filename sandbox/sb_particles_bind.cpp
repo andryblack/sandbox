@@ -40,9 +40,11 @@ namespace Sandbox {
             SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ParticlesSystem, Sandbox::Object)
             SB_BIND_SHARED_CONSTRUCTOR_(Sandbox::ParticlesSystem, (Sandbox::ParticlesController),(const Sandbox::ParticlesControllerPtr&))
             SB_BIND_BEGIN_METHODS
+            SB_BIND_METHOD(Sandbox::ParticlesSystem, Stop, void())
             SB_BIND_END_METHODS
             SB_BIND_BEGIN_PROPERTYS
             SB_BIND_PROPERTY_RW(Sandbox::ParticlesSystem, Position, GetPosition, SetPosition, Sandbox::Vector2f)
+            SB_BIND_PROPERTY_WO(Sandbox::ParticlesSystem, CompleteEvent, SetCompleteEvent, Sandbox::Event)
             SB_BIND_END_PROPERTYS
             SB_BIND_END_CLASS
             SB_BIND(lua)

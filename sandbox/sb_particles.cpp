@@ -93,7 +93,7 @@ namespace Sandbox {
                 instance.started = false;
                 emmit_amount = 0;
             } else {
-                Start( instance );
+                if (instance.started) Start( instance );
             }
         }
         std::vector<Particle>::iterator it = instance.particles.begin();
@@ -166,6 +166,10 @@ namespace Sandbox {
         if (m_controller && !m_instance.finished) {
             m_controller->Update(m_instance, dt);
         }
+    }
+    
+    void ParticlesSystem::Stop() {
+        m_instance.started = false;
     }
     
         

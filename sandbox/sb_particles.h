@@ -69,10 +69,12 @@ namespace Sandbox {
         
         void GetImages( std::vector<const Image*>& images );
         
-        void Update( ParticlesInstance& instance, float dt);
+        virtual void Update( ParticlesInstance& instance, float dt);
         void Start( ParticlesInstance& instance );
         
-        void Emmit( ParticlesInstance& instance, size_t indx, float time ) const;
+        virtual void Emmit( ParticlesInstance& instance, 
+                   size_t indx, 
+                   float time ) const;
     private:
         size_t  m_max_amount;
         float   m_emission_speed;
@@ -98,6 +100,8 @@ namespace Sandbox {
         const Vector2f& GetPosition() const { return m_instance.pos; }
         
         void SetCompleteEvent( const EventPtr& evnt ) { m_instance.complete_event = evnt; }
+        
+        void Stop();
     private:
         ParticlesControllerPtr  m_controller;
         ParticlesInstance   m_instance;
