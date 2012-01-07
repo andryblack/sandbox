@@ -47,7 +47,7 @@ namespace Sandbox {
         0,0,
         0,
         &speed_accept_processor,
-        {}
+        {0}
     };
 
     

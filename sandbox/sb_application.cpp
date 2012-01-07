@@ -14,6 +14,10 @@
 #include <ghl_settings.h>
 #include <ghl_vfs.h>
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
 namespace Sandbox {
 	
     static void format_memory( char* buf, size_t size, GHL::UInt32 mem,const char* caption ) {

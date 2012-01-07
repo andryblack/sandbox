@@ -172,9 +172,11 @@ namespace Sandbox {
 		GHL::UInt32 StackHelper::GetArgument(int indx,const ArgumentTag<GHL::UInt32>& ) const {
 			return GHL::UInt32(lua_tonumber(m_L, indx+m_base_index));
 		}
+#ifndef _MSC_VER
 		size_t StackHelper::GetArgument(int indx,const ArgumentTag<size_t>& ) const {
 			return size_t(lua_tonumber(m_L, indx+m_base_index));
 		}
+#endif
 		float StackHelper::GetArgument(int indx,const ArgumentTag<float>& ) const {
 			return float(lua_tonumber(m_L, indx+m_base_index));
 		}
@@ -193,9 +195,11 @@ namespace Sandbox {
 		void StackHelper::PushValue(GHL::UInt32 v) const {
 			lua_pushnumber(m_L, v);
 		}
+#ifndef _MSC_VER
 		void StackHelper::PushValue(size_t v) const {
 			lua_pushnumber(m_L, v);
 		}
+#endif
 		void StackHelper::PushValue(float v) const {
 			lua_pushnumber(m_L, v);
 		}

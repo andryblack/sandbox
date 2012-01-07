@@ -119,7 +119,9 @@ namespace Sandbox {
 			bool GetArgument(int indx,const ArgumentTag<bool>& ) const;
 			int GetArgument(int indx,const ArgumentTag<int>& ) const;
 			GHL::UInt32 GetArgument(int indx,const ArgumentTag<GHL::UInt32>& ) const;
+#ifndef _MSC_VER
 			size_t GetArgument(int indx,const ArgumentTag<size_t>& ) const;
+#endif
 			float GetArgument(int indx,const ArgumentTag<float>& ) const;
 			const char* GetArgument(int indx,const ArgumentTag<const char*>& ) const;
 			
@@ -146,7 +148,9 @@ namespace Sandbox {
 			}
 			void PushValue(int v) const;
 			void PushValue(GHL::UInt32 v) const;
+#ifndef _MSC_VER
 			void PushValue(size_t v) const;
+#endif
 			void PushValue(float v) const;
 			void PushValue(const char* v) const;
 			void PushValue(const std::string& v) const;

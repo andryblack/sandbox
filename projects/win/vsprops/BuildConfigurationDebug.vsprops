@@ -10,7 +10,7 @@
 		Optimization="0"
 		MinimalRebuild="true"
 		BasicRuntimeChecks="3"
-		RuntimeLibrary="3"
+		RuntimeLibrary="1"
 		DebugInformationFormat="3"
 		BufferSecurityCheck="true"
 		PreprocessorDefinitions="WIN32;_DEBUG"		
