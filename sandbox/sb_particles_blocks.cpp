@@ -108,6 +108,21 @@ namespace Sandbox {
         &scale_accept_processor,
         {"min","max"}
     };
+    
+    
+    static void circle_generator( Particle& p, float* vars, const float* args, float cicle ) {
+        Vector2f dir = Vector2f(0,1).rotate(cicle*M_PI*2*args[0]);
+        p.pos+=dir*randf(args[1],args[2]);
+        p.speed+=dir*randf(args[3],args[4]);
+    }
+   
+    static const ParticleProcessorBlock circle_processor = { 
+        5,0,
+        &circle_generator,
+        0,
+        {"cicles","r_min","r_max","speed_min","speed_max"}
+    };
+    
     void ParticlesSystem::BindBuiltins( Lua* lua ) {
         BindProcessor(lua, "AlphaFade", &alfa_fade_processor);
         BindProcessor(lua, "RandomPos", &random_pos_processor);
@@ -117,6 +132,7 @@ namespace Sandbox {
         BindProcessor(lua, "ScaleSpeed", &scale_speed_processor);
         BindProcessor(lua, "RandomImage", &random_image_processor);
         BindProcessor(lua, "ApplyGravity", &apply_gravity_processor);
+        BindProcessor(lua, "Circle", &circle_processor);
     }
     
 

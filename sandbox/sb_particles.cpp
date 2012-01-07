@@ -130,6 +130,8 @@ namespace Sandbox {
                 for (int i=0;i<emmit_amount;i++) {
                     Emmit( instance, base_index+i, startTime );
                     startTime+=emissionStep;
+                    if (startTime>1.0f)
+                        startTime-=1.0f;
                 }
             } 
         }
