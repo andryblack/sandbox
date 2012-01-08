@@ -7,8 +7,12 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		RuntimeLibrary="2"
+		RuntimeLibrary="0"
 		DebugInformationFormat="3"
+		BufferSecurityCheck="false"
+		EnableFunctionLevelLinking="true"
+		EnableIntrinsicFunctions="true"
+		Optimization="2"
 	/>
 	<Tool
 		Name="VCLinkerTool"
