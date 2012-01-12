@@ -242,14 +242,6 @@ namespace Sandbox {
             typedef T   ObjectType;
 			typedef void(T::*FuncPtr)(Arg1,Arg2)const;
 			enum { isConst = 1,retValues = 0 };
-			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
-				return new (ptr) T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
-								 hpr->GetArgument(1,ArgumentTag<Arg2>()));
-			}
-			static T* Construct(const StackHelper* hpr) {
-				return new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
-												   hpr->GetArgument(1,ArgumentTag<Arg2>()));
-			}
 			static void Call(void* obj,const void* funcp,const StackHelper* hpr) {
 				FuncPtr func = *static_cast<const FuncPtr*> (funcp);
 				(static_cast<T*>(obj)->*func)(hpr->GetArgument(0,ArgumentTag<Arg1>()),
@@ -360,7 +352,7 @@ namespace Sandbox {
 							 hpr->GetArgument(2,ArgumentTag<Arg3>()),
 							 hpr->GetArgument(3,ArgumentTag<Arg4>()));
 			}
-			static T* Construct(void* ptr,const StackHelper* hpr) {
+			static T* Construct(const StackHelper* hpr) {
 				return new T(hpr->GetArgument(0,ArgumentTag<Arg1>()),
 											   hpr->GetArgument(1,ArgumentTag<Arg2>()),
 											   hpr->GetArgument(2,ArgumentTag<Arg3>()),

@@ -318,6 +318,8 @@ namespace Sandbox {
 			return 0;
 		}
         static void get_shared_ptr_impl(lua_State* L,int indx,void* to, const std::string& type) {
+            int top = lua_gettop(L);
+            (void)top;
             ObjectData* data = reinterpret_cast<ObjectData*>(lua_touserdata(L, indx));
 			if (data->store_type != STORE_SHARED) {
 				luaL_typerror(L, indx, type.c_str());
@@ -348,7 +350,8 @@ namespace Sandbox {
 					if (cp_ptr) {
 						bind->destruct_ptr(cp_ptr,0);
 					}
-					lua_pop(L,2);
+                    lua_pop(L,2);
+					sb_assert(top==lua_gettop(L));
 					return;
 				}
 				// Look for the metatable's parent field

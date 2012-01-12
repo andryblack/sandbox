@@ -121,7 +121,8 @@ namespace Sandbox {
                 MethodHelper<Signature>::ConstructInplace(hpr->new_object_raw(),hpr);
             }
             static void ConstructPtr(const StackHelper* hpr) {
-                new (hpr->new_object_shared_ptr() ) shared_ptr<ObjectType>( MethodHelper<Signature>::Construct( hpr ));
+                typename MethodHelper<Signature>::ObjectType* raw = MethodHelper<Signature>::Construct( hpr );
+                new (hpr->new_object_shared_ptr() ) shared_ptr<ObjectType>( raw );
             }
         };
 		
