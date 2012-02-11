@@ -602,19 +602,13 @@ namespace Sandbox {
 		}
 		
 		
-		TransformAdapter::TransformAdapter( const BodyPtr& body, const ContainerTransformPtr& transform ) {
+		TransformAdapter::TransformAdapter( const BodyPtr& body ) {
 			m_body = body;
-			m_transform = transform;
 		}
 		
-		void TransformAdapter::Sync() {
-			m_transform->SetTranslate( m_body->GetPos() );
-			m_transform->SetAngle( m_body->GetAngle() );
-		}
-		
-		bool TransformAdapter::Update(float ) {
-			Sync();
-			return false;
+		void TransformAdapter::Update(float ) {
+            SetTranslate( m_body->GetPos() );
+            SetAngle( m_body->GetAngle() );
 		}
 		
 		

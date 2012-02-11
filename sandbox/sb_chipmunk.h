@@ -300,13 +300,11 @@ namespace Sandbox {
 			void SetRate(float r);
 		};
 		
-		class TransformAdapter : public Thread {
+		class TransformAdapter : public ContainerTransform {
 		public:
-			TransformAdapter( const BodyPtr& body, const ContainerTransformPtr& transform);
-			void Sync();
-			bool Update(float);
+			explicit TransformAdapter( const BodyPtr& body );
+			void Update(float dt);
 		private:
-			ContainerTransformPtr	m_transform;
 			BodyPtr		m_body;
 		};
 		

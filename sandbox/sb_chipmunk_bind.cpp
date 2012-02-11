@@ -290,10 +290,9 @@ namespace Sandbox {
 				SB_BIND( lua );
 			}
 			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::TransformAdapter, Sandbox::Thread )
-				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::TransformAdapter, (Sandbox::Chipmunk::Body,Sandbox::ContainerTransform),(const Sandbox::Chipmunk::BodyPtr&,const Sandbox::ContainerTransformPtr&) )
+				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::TransformAdapter, Sandbox::ContainerTransform )
+				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::TransformAdapter, (Sandbox::Chipmunk::Body),(const Sandbox::Chipmunk::BodyPtr&) )
 				SB_BIND_BEGIN_METHODS
-				SB_BIND_METHOD( Sandbox::Chipmunk::TransformAdapter, Sync, void() )
 				SB_BIND_END_METHODS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
