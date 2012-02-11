@@ -61,7 +61,7 @@ namespace Sandbox {
 		}
 		
 		static inline Vector2f vect( const cpVect& v) {
-			return Vector2f(v.x,v.y);
+			return Vector2f(float(v.x),float(v.y));
 		}
 	
 		
@@ -188,12 +188,13 @@ namespace Sandbox {
 		}
 		
 		PolyShape::PolyShape( const BodyPtr& body, const std::vector<Vector2f>& points, const Vector2f& offset ) {
-			cpVect v[points.size()];
+			cpVect* v = new cpVect[points.size()];
 			for (size_t i=0;i<points.size();i++) {
 				v[i].x = points[i].x;
 				v[i].y = points[i].y;
 			}
 			SetShape(cpPolyShapeNew(body->get_body(),points.size(),v,cpv(offset.x,offset.y)));
+			delete [] v;
 		}
 		
 		SegmentShape::SegmentShape( const BodyPtr& body, const Vector2f& a,const Vector2f& b,float radius) {

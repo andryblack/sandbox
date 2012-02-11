@@ -184,7 +184,10 @@ namespace Sandbox {
 	void Application::DrawDebugInfo() {
 		char buf[128];
 		::snprintf(buf,128,"fps:%0.2f",m_fps);
-		m_render->SetProjectionMatrix(Matrix4f::ortho(0,m_render->GetWidth(),m_render->GetHeight(),0,-1,1).matrix);
+		m_render->SetProjectionMatrix(Matrix4f::ortho(0.0f,
+			float(m_render->GetWidth()),
+			float(m_render->GetHeight())
+			,0.0f,-1.0f,1.0f).matrix);
 		m_render->DebugDrawText( 10, 10 , buf );
         format_memory(buf,128,m_lua->GetMemoryUsed(),"lua");
         m_render->DebugDrawText( 10, 21 , buf );
@@ -207,15 +210,15 @@ namespace Sandbox {
 	}
 	///
 	void GHL_CALL Application::OnMouseDown( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) {
-        m_main_scene->HandleTouch( TouchInfo(TouchInfo::BEGIN,Vector2f(x,y)) );
+        m_main_scene->HandleTouch( TouchInfo(TouchInfo::BEGIN,Vector2f(float(x),float(y))) );
 	}
 	///
 	void GHL_CALL Application::OnMouseMove( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) {
-        m_main_scene->HandleTouch( TouchInfo(TouchInfo::MOVE,Vector2f(x,y)) );
+        m_main_scene->HandleTouch( TouchInfo(TouchInfo::MOVE,Vector2f(float(x),float(y))) );
     }
 	///
 	void GHL_CALL Application::OnMouseUp( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) {
-        m_main_scene->HandleTouch( TouchInfo(TouchInfo::END,Vector2f(x,y)) );
+        m_main_scene->HandleTouch( TouchInfo(TouchInfo::END,Vector2f(float(x),float(y))) );
     }
 	///
 	void GHL_CALL Application::OnDeactivated() {
