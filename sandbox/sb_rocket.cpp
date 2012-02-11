@@ -428,14 +428,14 @@ namespace Sandbox {
 		FileInterfaceImpl file;
 		SystemInterfaceImpl system;
 		RenderInterfaceImpl render;
-		EventListenerInstancer eventListenerInstancer;
-		ElementDocumentInstancer elementDocumentInstancer;
+		EventListenerInstancer* eventListenerInstancer;
+		ElementDocumentInstancer* elementDocumentInstancer;
 		Data( Resources* resources, GHL::System* system,Lua* lua ) 
 			: file(resources)
 			,render(resources)
 			,system(system)
-			,eventListenerInstancer(lua)
-			,elementDocumentInstancer(lua) {
+			,eventListenerInstancer(new EventListenerInstancer(lua))
+			,elementDocumentInstancer(new ElementDocumentInstancer(lua)) {
 		}
 	};
 	
@@ -455,10 +455,10 @@ namespace Sandbox {
 		::Rocket::Core::SetFileInterface( &(m_data->file) );
 		::Rocket::Core::SetSystemInterface( &(m_data->system) );
 		::Rocket::Core::SetRenderInterface( &(m_data->render) );
-		::Rocket::Core::Factory::RegisterEventListenerInstancer( &(m_data->eventListenerInstancer) );
+		::Rocket::Core::Factory::RegisterEventListenerInstancer( (m_data->eventListenerInstancer) );
 		::Rocket::Core::Initialise();
 		::Rocket::Controls::Initialise();
-		::Rocket::Core::Factory::RegisterElementInstancer("body",  &(m_data->elementDocumentInstancer));
+		::Rocket::Core::Factory::RegisterElementInstancer("body",  (m_data->elementDocumentInstancer));
 		
 		SB_BIND_BEGIN_BIND
 		{
@@ -568,7 +568,10 @@ namespace Sandbox {
 	
 	RocketLib::~RocketLib() {
 		m_context = RocketContextPtr();
+		::Rocket::Core::Factory::Shutdown();
 		::Rocket::Core::Shutdown();
+		m_data->eventListenerInstancer->RemoveReference();
+		m_data->elementDocumentInstancer->RemoveReference();
 		delete m_data;
 	}
 	
