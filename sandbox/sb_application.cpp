@@ -122,6 +122,14 @@ namespace Sandbox {
 		
 		m_lua->SetValue(settings, "settings", "GHL::Settings");
 		m_lua->SetValue(this, "application", "Sandbox::Application");
+        
+#ifdef GHL_PLATFORM_IOS
+        m_lua->SetValue("iOS", "platform.os", "const char*");
+#elif GHL_PLATFORM_MAC
+        m_lua->SetValue("OSX", "platform.os", "const char*");
+#elif GHL_PLATFORM_WIN
+        m_lua->SetValue("WIN32", "platform.os", "const char*");
+#endif
 		BindModules( m_lua );
 		m_lua->DoFile("settings.lua");
 	}
