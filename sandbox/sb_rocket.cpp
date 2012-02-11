@@ -112,6 +112,9 @@ namespace Sandbox {
 		Rocket::Core::Stream* stream;
 		InvertDataStream( Rocket::Core::Stream* stream ) : stream(stream) {
 		}
+        ~InvertDataStream() {
+            
+        }
 		/// read data
 		virtual GHL::UInt32 GHL_CALL Read(GHL::Byte* dest,GHL::UInt32 bytes) {
 			return stream->Read( dest, bytes );
@@ -136,6 +139,9 @@ namespace Sandbox {
 		virtual void GHL_CALL Release() {
 			delete this;
 		}
+        virtual void GHL_CALL AddRef() {
+            
+        }
 	};
 
 	
@@ -156,6 +162,22 @@ namespace Sandbox {
 		void Tick( GHL::UInt32 ticks ) {
 			m_time += ticks;
 		}
+        virtual bool LogMessage(::Rocket::Core::Log::Type type, const ::Rocket::Core::String& message) {
+            GHL::LogLevel level = GHL::LOG_LEVEL_INFO;
+            if ( type==::Rocket::Core::Log::LT_ERROR ) {
+                level = GHL::LOG_LEVEL_ERROR;
+            } else if ( type==::Rocket::Core::Log::LT_ASSERT ) {
+                level = GHL::LOG_LEVEL_FATAL;
+            } else if ( type==::Rocket::Core::Log::LT_WARNING ) {
+                level = GHL::LOG_LEVEL_WARNING;
+            } else if ( type==::Rocket::Core::Log::LT_INFO ) {
+                level = GHL::LOG_LEVEL_INFO;
+            } else if ( type==::Rocket::Core::Log::LT_DEBUG ) {
+                level = GHL::LOG_LEVEL_DEBUG;
+            } 
+            Logger(level,MODULE) << message.CString();
+            return true;
+        }
 	private:
 		GHL::UInt32	m_time;
 		GHL::System* m_system;
