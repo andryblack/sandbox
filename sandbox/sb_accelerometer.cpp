@@ -20,6 +20,7 @@ namespace Sandbox {
 		bool enable = true;
 		m_system->SetDeviceState( GHL::DEVICE_STATE_ACCELEROMETER_ENABLED, &enable );
 		enable_count++;
+        m_actual = false;
 		Update(0);
 	}
 	Accelerometer::~Accelerometer() {
@@ -37,6 +38,7 @@ namespace Sandbox {
 			m_data.x = data[0];
 			m_data.y = data[1];
 			m_data.z = data[2];
+            m_actual = true;
 		}
 		return false;
 	}
