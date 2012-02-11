@@ -125,9 +125,13 @@ namespace Sandbox {
         
 #ifdef GHL_PLATFORM_IOS
         m_lua->SetValue("iOS", "platform.os", "const char*");
-#elif GHL_PLATFORM_MAC
+#endif
+
+#ifdef GHL_PLATFORM_MAC
         m_lua->SetValue("OSX", "platform.os", "const char*");
-#elif GHL_PLATFORM_WIN
+#endif
+
+#ifdef GHL_PLATFORM_WIN
         m_lua->SetValue("WIN32", "platform.os", "const char*");
 #endif
 		BindModules( m_lua );
