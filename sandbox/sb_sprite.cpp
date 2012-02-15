@@ -24,5 +24,10 @@ namespace Sandbox {
             g.DrawImage(*m_image,m_pos);
 	}
 
+    void ColorizedSprite::Draw(Graphics& g) const {
+        if (m_image)
+            g.DrawImage(*m_image,m_pos,m_color);
+    }
+    
 }
 

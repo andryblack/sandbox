@@ -56,13 +56,13 @@ namespace Sandbox {
 		}
 	}
     bool Container::HandleTouch(const Sandbox::TouchInfo &touch) {
-        return HandleChilds(touch);
+        return HandleChilds(touch,true);
     }
-    bool Container::HandleChilds( const TouchInfo& touch ) {
+    bool Container::HandleChilds( const TouchInfo& touch, bool firstResponse ) {
         /// copy, for allow scene modifications
         std::vector<ObjectPtr> childs = m_objects;
         for (std::vector<ObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
-			if ( (*i)->DoHandleTouch(touch) ) {
+			if ( (*i)->DoHandleTouch(touch) && firstResponse) {
                 return true;
             }
 		}

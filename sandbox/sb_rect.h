@@ -10,6 +10,8 @@
 #ifndef SB_RECT_H
 #define SB_RECT_H
 
+#include "sb_vector2.h"
+
 namespace Sandbox {
 	
 	template <class T>
@@ -23,6 +25,15 @@ namespace Sandbox {
 		bool operator == (const Rect& r) const {
 			return (x==r.x) && (y==r.y) && (w==r.w) && (h==r.h);
 		}
+        
+        bool PointInside( const Vector2f& pos ) const {
+            return (pos.x>=x) && (pos.y>=y) &&
+            (pos.x<(x+w)) && (pos.y<(y+h));
+        }
+        
+        Vector2f GetTopLeft() const {
+            return Vector2f( x,y );
+        }
 	};
 	
 	typedef Rect<float> Rectf;

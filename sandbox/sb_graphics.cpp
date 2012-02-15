@@ -93,6 +93,13 @@ namespace Sandbox {
 		}
 		
 	}
+    
+    /// clear scene
+    void Graphics::Clear( const Color& clr ) {
+        sb_assert( (m_render!=0) && "scene not started" );
+        Flush();
+        m_render->Clear(clr.r, clr.g, clr.b, clr.a);
+    }
 	
 	void Graphics::Flush() {
 		sb_assert( (m_render!=0) && "scene not started" );

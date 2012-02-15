@@ -41,6 +41,9 @@ namespace Sandbox {
 		
 		/// @brief begin draw scene
 		void BeginScene(GHL::Render* render);
+        
+        /// clear scene
+        void Clear( const Color& clr );
 
 		/// global transform
 		const Transform2d& GetTransform() const { return m_transform;}

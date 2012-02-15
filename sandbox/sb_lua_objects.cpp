@@ -12,6 +12,7 @@
 #include "sb_bind.h"
 
 #include "sb_vector2.h"
+#include "sb_rect.h"
 #include "sb_vector3.h"
 #include "sb_matrix4.h"
 #include "sb_resources.h"
@@ -51,6 +52,8 @@
 #include "sb_container_viewport.h"
 #include "sb_background.h"
 #include "sb_particles.h"
+#include "sb_clear_scene.h"
+#include "sb_widget.h"
 
 #include "sb_log.h"
 
@@ -260,20 +263,34 @@ namespace Sandbox {
 			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
-		{
-			SB_BIND_BEGIN_RAW_CLASS(Sandbox::Vector3f)
-			SB_BIND_RAW_CONSTRUCTOR(Sandbox::Vector3f,(float,float,float))
+        {
+			SB_BIND_BEGIN_RAW_CLASS(Sandbox::Vector2f)
+			SB_BIND_RAW_CONSTRUCTOR(Sandbox::Vector2f,(float,float))
 			SB_BIND_BEGIN_METHODS
-			SB_BIND_METHOD(Sandbox::Vector3f,length,float())
-			SB_BIND_METHOD(Sandbox::Vector3f,unit,Sandbox::Vector3f())
-			SB_BIND_OPERATOR_ADD_(Sandbox::Vector3f,Sandbox::Vector3f(Sandbox::Vector3f),Sandbox::Vector3f(Sandbox::Vector3f::*)(const Sandbox::Vector3f&)const)
-			SB_BIND_OPERATOR_SUB_(Sandbox::Vector3f,Sandbox::Vector3f(Sandbox::Vector3f),Sandbox::Vector3f(Sandbox::Vector3f::*)(const Sandbox::Vector3f&)const)
-			SB_BIND_OPERATOR_MUL_(Sandbox::Vector3f,Sandbox::Vector3f(float),Sandbox::Vector3f(Sandbox::Vector3f::*)(float)const)
+			SB_BIND_METHOD(Sandbox::Vector2f,length,float())
+			SB_BIND_METHOD(Sandbox::Vector2f,unit,Sandbox::Vector2f())
+			SB_BIND_METHOD(Sandbox::Vector2f,normal,Sandbox::Vector2f())
+			SB_BIND_OPERATOR_ADD_(Sandbox::Vector2f,Sandbox::Vector2f(Sandbox::Vector2f),Sandbox::Vector2f(Sandbox::Vector2f::*)(const Sandbox::Vector2f&)const)
+			SB_BIND_OPERATOR_SUB_(Sandbox::Vector2f,Sandbox::Vector2f(Sandbox::Vector2f),Sandbox::Vector2f(Sandbox::Vector2f::*)(const Sandbox::Vector2f&)const)
+			SB_BIND_OPERATOR_MUL_(Sandbox::Vector2f,Sandbox::Vector2f(float),Sandbox::Vector2f(Sandbox::Vector2f::*)(float)const)
 			SB_BIND_END_METHODS
 			SB_BIND_BEGIN_PROPERTYS
-			SB_BIND_PROPERTY_RAW(Sandbox::Vector3f,x,float)
-			SB_BIND_PROPERTY_RAW(Sandbox::Vector3f,y,float)
-			SB_BIND_PROPERTY_RAW(Sandbox::Vector3f,z,float)
+			SB_BIND_PROPERTY_RAW(Sandbox::Vector2f,x,float)
+			SB_BIND_PROPERTY_RAW(Sandbox::Vector2f,y,float)
+			SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
+			SB_BIND(this)
+		}
+		{
+			SB_BIND_BEGIN_RAW_CLASS(Sandbox::Rectf)
+			SB_BIND_RAW_CONSTRUCTOR(Sandbox::Rectf,(float,float,float,float))
+			SB_BIND_BEGIN_METHODS
+			SB_BIND_END_METHODS
+			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_PROPERTY_RAW(Sandbox::Rectf,x,float)
+			SB_BIND_PROPERTY_RAW(Sandbox::Rectf,y,float)
+			SB_BIND_PROPERTY_RAW(Sandbox::Rectf,w,float)
+            SB_BIND_PROPERTY_RAW(Sandbox::Rectf,h,float)
 			SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
@@ -425,11 +442,19 @@ namespace Sandbox {
 			SB_BIND(this)
 		}
         {
-			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Sprite,Sandbox::Object)
-			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::Sprite,())
+			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ColorizedSprite,Sandbox::Sprite)
+			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ColorizedSprite,())
 			SB_BIND_BEGIN_PROPERTYS
-			SB_BIND_PROPERTY_RW(Sandbox::Sprite,Image,GetImage,SetImage,Sandbox::Image)
-			SB_BIND_PROPERTY_RW(Sandbox::Sprite,Pos,GetPos,SetPos,Sandbox::Vector2f)
+			SB_BIND_PROPERTY_RW(Sandbox::ColorizedSprite,Color,GetColor,SetColor,Sandbox::Color)
+			SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
+			SB_BIND(this)
+		}
+        {
+			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ClearScene,Sandbox::Object)
+			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ClearScene,())
+			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_PROPERTY_RW(Sandbox::ClearScene,Color,GetColor,SetColor,Sandbox::Color)
 			SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
@@ -441,6 +466,18 @@ namespace Sandbox {
             SB_BIND_METHOD_(Sandbox::Background, Load, bool(const char*,Sandbox::Resources),&Sandbox::Background::Load)
             SB_BIND_END_METHODS
             SB_BIND_END_CLASS
+			SB_BIND(this)
+		}
+        {
+			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Label,Sandbox::Object)
+			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::Label,())
+			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_PROPERTY_RW(Sandbox::Label,Font,GetFont,SetFont,Sandbox::Font)
+			SB_BIND_PROPERTY_RW(Sandbox::Label,Pos,GetPos,SetPos,Sandbox::Vector2f)
+            SB_BIND_PROPERTY_RW(Sandbox::Label,Text,GetText,SetText,const char*)
+            SB_BIND_PROPERTY_RW(Sandbox::Label,Align,GetAlign,SetAlign,Sandbox::FontAlign)
+			SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
 			SB_BIND(this)
 		}
 		{
@@ -761,6 +798,27 @@ namespace Sandbox {
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerShaderFloatUniform,Begin,GetBegin,SetBegin,float)
 			SB_BIND_PROPERTY_RW(Sandbox::ControllerShaderFloatUniform,End,GetEnd,SetEnd,float)
+			SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
+			SB_BIND(this)
+		}
+        {
+			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Widget,Sandbox::Container)
+			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::Widget,())
+			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_PROPERTY_RW(Sandbox::Widget,Rect,GetRect,SetRect,Sandbox::Rectf)
+            SB_BIND_PROPERTY_RW(Sandbox::Widget,Active,GetActive,SetActive,bool)
+			SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
+			SB_BIND(this)
+		}
+        {
+			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::TouchButtonWidget,Sandbox::Widget)
+			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::TouchButtonWidget,())
+			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_PROPERTY_WO(Sandbox::TouchButtonWidget,ActivateEvent,SetActivateEvent,Sandbox::Event)
+            SB_BIND_PROPERTY_WO(Sandbox::TouchButtonWidget,DeactivateEvent,SetDeactivateEvent,Sandbox::Event)
+            SB_BIND_PROPERTY_WO(Sandbox::TouchButtonWidget,TouchUpInsideEvent,SetTouchUpInsideEvent,Sandbox::Event)
 			SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)

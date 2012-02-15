@@ -29,7 +29,7 @@ namespace Sandbox {
         bool HandleTouch( const TouchInfo& touch );
         void Update( float dt );
 	protected:
-        bool HandleChilds( const TouchInfo& touch );
+        bool HandleChilds( const TouchInfo& touch,bool firstResponse );
 		void DrawChilds(Graphics& g) const;
         void UpdateChilds( float dt );
 		std::vector<ObjectPtr> m_objects;

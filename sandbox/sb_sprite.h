@@ -13,6 +13,7 @@
 #include "sb_vector2.h"
 #include "sb_image.h"
 #include "sb_object.h"
+#include "sb_color.h"
 
 namespace Sandbox {
 	
@@ -25,11 +26,20 @@ namespace Sandbox {
 		void SetPos(const Vector2f& pos) { m_pos=pos;}
 		const Vector2f& GetPos() const { return m_pos;}
 		virtual void Draw( Graphics& g ) const;
-	private:
+	protected:
 		ImagePtr m_image;
 		Vector2f m_pos;
 	};
 	typedef shared_ptr<Sprite> SpritePtr;
-	
+    
+    class ColorizedSprite : public Sprite {
+    public:
+        virtual void Draw( Graphics& g ) const;
+        void SetColor( const Color& color ) { m_color = color; }
+        const Color& GetColor() const { return m_color; }
+    private:
+        Color   m_color;
+    };
+    
 }
 #endif /*SB_SPRITE_H*/
