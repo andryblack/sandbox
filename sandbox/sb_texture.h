@@ -18,17 +18,30 @@ namespace Sandbox {
 	class Texture {
 	private:
 		GHL::Texture* m_texture;
+        GHL::UInt32 m_original_w;
+        GHL::UInt32 m_original_h;
 	public:
-		explicit Texture(GHL::Texture* texture) : 
-			m_texture(texture){}
+		explicit Texture(GHL::Texture* texture, GHL::UInt32 w=0, GHL::UInt32 h=0) : 
+			m_texture(texture),m_original_w(w),m_original_h(h){
+            if (m_texture) {
+                if (m_original_w==0) m_original_w = m_texture->GetWidth();
+                if (m_original_h==0) m_original_h = m_texture->GetHeight();
+            }
+        }
 		~Texture() { if (m_texture) m_texture->Release();}
 		const GHL::Texture* Present() const { return m_texture;}
 		void SetFiltered(bool f) { 
 			m_texture->SetMinFilter(f?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
 			m_texture->SetMagFilter(f?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
 		}
+        void SetTiled(bool t) {
+			m_texture->SetWrapModeU(t?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
+			m_texture->SetWrapModeV(t?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
+        }
 		float GetWidth() const { return float(m_texture->GetWidth());}
 		float GetHeight() const { return float(m_texture->GetHeight());}
+        float GetOriginalWidth() const { return float(m_original_w); }
+        float GetOriginalHeight() const { return float(m_original_h); }
 		GHL::Texture* GetNative() const { return m_texture;}
 	};
 	typedef shared_ptr<Texture> TexturePtr;

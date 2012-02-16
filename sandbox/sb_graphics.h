@@ -89,6 +89,9 @@ namespace Sandbox {
             DrawImage(img,pos.x,pos.y,clr,scale);
         }
         /// @}
+        
+        /// fill rect by pattern
+        void FillRect( const TexturePtr& texture, const Rectf& rect);
 		
 		/// draw lines
 		/// @{

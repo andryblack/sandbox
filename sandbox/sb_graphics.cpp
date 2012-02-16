@@ -100,6 +100,47 @@ namespace Sandbox {
         Flush();
         m_render->Clear(clr.r, clr.g, clr.b, clr.a);
     }
+    
+    /// fill rect by pattern
+    void Graphics::FillRect( const TexturePtr& texture, const Rectf& rect) {
+        sb_assert( (m_render!=0) && "scene not started" );
+        bool flush = false;
+		if (m_texture!=texture) {
+            flush = true;
+        } else if (m_ptype!=GHL::PRIMITIVE_TYPE_TRIANGLES) {
+            flush = true;
+        }
+        if (flush) {
+            Flush();
+        }
+		
+        m_texture = texture;
+        m_ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
+        
+        
+        appendQuad();
+		
+		GHL::UInt32 clr = (m_color).hw();
+		
+        const float itw = 1.0f / texture->GetWidth();
+        const float ith = 1.0f / texture->GetHeight();
+        
+        const float tx = rect.x * itw;
+        const float ty = rect.y * ith;
+        const float tw = rect.w * itw;
+        const float th = rect.h * ith;
+        
+        {
+            appendVertex(rect.x,rect.y,
+                         tx,ty,clr);
+            appendVertex(rect.x+rect.w,rect.y,
+                         tx+tw,ty,clr);
+            appendVertex(rect.x,rect.y+rect.h,
+                         tx,ty+th,clr);
+            appendVertex(rect.x+rect.w,rect.y+rect.h,
+                         tx+tw,ty+th,clr);
+        } 
+    }
 	
 	void Graphics::Flush() {
 		sb_assert( (m_render!=0) && "scene not started" );

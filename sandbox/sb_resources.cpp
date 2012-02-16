@@ -207,7 +207,7 @@ namespace Sandbox {
 		img->Convert(ifmt);
 		
 		texture->SetData(0,0,img->GetWidth(),img->GetHeight(),img->GetData());
-		TexturePtr ptr(new Texture(texture));
+		TexturePtr ptr(new Texture(texture,img->GetWidth(),img->GetHeight()));
 		img->Release();
 #ifdef SB_RESOURCES_CACHE
 		m_textures[filename]=ptr;
@@ -236,21 +236,13 @@ namespace Sandbox {
 	}
 	
 	ImagePtr Resources::GetImage(const char* filename) {
-		GHL::Image* img = LoadImage(filename);
-		if (!img) return ImagePtr();
-		GHL::UInt32 imgW = img->GetWidth();
-		GHL::UInt32 imgH = img->GetHeight();
-		GHL::UInt32 texW = next_pot(imgW);
-		GHL::UInt32 texH = next_pot(imgH);
-		TexturePtr texture = InternalCreateTexture(texW, texH, ImageHaveAlpha(img), (texW!=imgW)||(texH!=imgH));
-		if (!texture || !ConvertImage(img,texture)) {
-			LogError(MODULE) << "failed load image " << filename;
-			img->Release();
-			return ImagePtr();
-		}
-		texture->GetNative()->SetData(0,0,imgW,imgH,img->GetData());
-		img->Release();
-		return ImagePtr(new Image(texture,0,0,float(imgW),float(imgH)));
+        TexturePtr texture = GetTexture( filename );
+        if (!texture) {
+            return ImagePtr();
+        }
+		float imgW = texture->GetOriginalWidth();
+		float imgH = texture->GetOriginalHeight();
+		return ImagePtr(new Image(texture,0,0,imgW,imgH));
 	}
 	
 	ShaderPtr Resources::GetShader(const char* vfn,const char* ffn) {

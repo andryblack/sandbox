@@ -54,6 +54,7 @@
 #include "sb_particles.h"
 #include "sb_clear_scene.h"
 #include "sb_widget.h"
+#include "sb_fill_rect.h"
 
 #include "sb_log.h"
 
@@ -341,6 +342,7 @@ namespace Sandbox {
 			SB_BIND_END_METHODS
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_WO(Sandbox::Texture,Filtered,SetFiltered,bool)
+            SB_BIND_PROPERTY_WO(Sandbox::Texture,Tiled,SetTiled,bool)
 			SB_BIND_PROPERTY_RO(Sandbox::Texture,Width,GetWidth,float)
 			SB_BIND_PROPERTY_RO(Sandbox::Texture,Height,GetHeight,float)
 			SB_BIND_END_PROPERTYS
@@ -455,6 +457,16 @@ namespace Sandbox {
 			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ClearScene,())
 			SB_BIND_BEGIN_PROPERTYS
 			SB_BIND_PROPERTY_RW(Sandbox::ClearScene,Color,GetColor,SetColor,Sandbox::Color)
+			SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
+			SB_BIND(this)
+		}
+        {
+			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::FillRect,Sandbox::Object)
+			SB_BIND_SHARED_CONSTRUCTOR(Sandbox::FillRect,())
+			SB_BIND_BEGIN_PROPERTYS
+			SB_BIND_PROPERTY_RW(Sandbox::FillRect,Texture,GetTexture,SetTexture,Sandbox::Texture)
+            SB_BIND_PROPERTY_RW(Sandbox::FillRect,Rect,GetRect,SetRect,Sandbox::Rectf)
 			SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)

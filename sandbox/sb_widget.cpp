@@ -8,12 +8,20 @@
 
 #include "sb_widget.h"
 #include "sb_touch_info.h"
+#include "sb_graphics.h"
 
 namespace Sandbox {
     
     Widget::Widget() {
         m_inside = false;
         m_active = true;
+    }
+    
+    void Widget::Draw(Graphics& g) const {
+        Transform2d tr = g.GetTransform();
+        g.SetTransform(tr.translated(m_rect.GetTopLeft()));
+        Container::Draw(g);
+        g.SetTransform(tr);
     }
     
     bool Widget::HandleTouch( const TouchInfo& touch ) {

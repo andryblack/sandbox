@@ -23,6 +23,7 @@ namespace Sandbox {
         void SetRect( const Rectf& rect) { m_rect = rect; }
         void SetActive( bool a ) { m_active = a;}
         bool GetActive() const { return m_active; }
+        void Draw(Graphics& g) const;
     protected:
         virtual void OnTouchEnter() {}
         virtual void OnTouchLeave() {}

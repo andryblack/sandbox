@@ -27,7 +27,7 @@ namespace GHL {
 }
 namespace Sandbox {
 	
-//#define SB_RESOURCES_CACHE
+#define SB_RESOURCES_CACHE
 	
 	class Atlaser;
 
