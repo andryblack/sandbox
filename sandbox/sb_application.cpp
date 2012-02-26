@@ -13,6 +13,7 @@
 
 #include <ghl_settings.h>
 #include <ghl_vfs.h>
+#include <ghl_sound.h>
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -47,6 +48,8 @@ namespace Sandbox {
 		m_main_thread = 0;
 		m_clear_buffer = false;
         m_batches = 0.0f;
+        m_sound_enabled = true;
+        m_music_enabled = true;
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
 	}
@@ -114,6 +117,8 @@ namespace Sandbox {
 		{
 			SB_BIND_BEGIN_EXTERN_CLASS( Sandbox::Application )
 			SB_BIND_BEGIN_PROPERTYS
+            SB_BIND_PROPERTY_RW(Sandbox::Application, SoundEnabled, GetSoundEnabled, SetSoundEnabled, bool)
+            SB_BIND_PROPERTY_RW(Sandbox::Application, MusicEnabled, GetMusicEnabled, SetMusicEnabled, bool)
             SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(m_lua)
@@ -121,7 +126,7 @@ namespace Sandbox {
 		SB_BIND_END_BIND
 		
 		m_lua->SetValue(settings, "settings", "GHL::Settings");
-		m_lua->SetValue(this, "application", "Sandbox::Application");
+		m_lua->SetValue(this, "application.app", "Sandbox::Application");
         
 #ifdef GHL_PLATFORM_IOS
         m_lua->SetValue("iOS", "platform.os", "const char*");
@@ -211,6 +216,32 @@ namespace Sandbox {
 		m_clear_buffer = true;
 		m_clear_color = c;
 	}
+    
+    void Application::SetSoundEnabled( bool e ) {
+        m_sound_enabled = e;
+        if (m_sound) {
+            /// @todo
+        }
+    }
+    
+    bool Application::GetSoundEnabled() const {
+        return m_sound_enabled;
+    }
+    
+    void Application::SetMusicEnabled( bool e ) {
+        m_music_enabled = e;
+        if (m_sound) {
+            if (m_music_enabled)
+                m_sound->Music_Play(true);
+            else
+                m_sound->Music_Stop();
+        }
+    }
+    
+    bool Application::GetMusicEnabled() const {
+        return m_music_enabled;
+    }
+    
 	///
 	void GHL_CALL Application::OnKeyDown( GHL::Key key ) {
 	}

@@ -45,6 +45,12 @@ namespace Sandbox {
 		void DrawScene() const;
 		
 		void SetClearColor(const Color& c);
+        
+        void SetSoundEnabled( bool e );
+        bool GetSoundEnabled() const;
+        
+        void SetMusicEnabled( bool e );
+        bool GetMusicEnabled() const;
 	private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -67,6 +73,9 @@ namespace Sandbox {
 		Color		m_clear_color;
         
         float       m_batches;
+        
+        bool    m_sound_enabled;
+        bool    m_music_enabled;
 	public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys );
