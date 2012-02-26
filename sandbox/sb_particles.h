@@ -38,7 +38,7 @@ namespace Sandbox {
         const size_t  num_vars;
         GeneratorFunc   generator;
         ProcessorFunc   processor;
-        const char* names[];
+        const char** names;
     };
     typedef const ParticleProcessorBlock* ParticleProcessorBlockPtr;
     
