@@ -165,6 +165,9 @@ namespace Sandbox {
 #define SB_BIND_SHARED_CONSTRUCTOR( Name , Signature ) static const Sandbox::Bind::ConstructorInfo constructorInfo = { \
 			#Name#Signature,0, &Sandbox::Bind::ClassConstructHelper<void(Name::*)Signature>::ConstructPtr \
 		};
+#define SB_BIND_SHARED_CUSTOM_CONSTRUCTOR( Name , ptr ) static const Sandbox::Bind::ConstructorInfo constructorInfo = { \
+        #Name,0,ptr \
+    };
 #define SB_BIND_SHARED_CONSTRUCTOR_( Name , Signature , RealSignature ) static const Sandbox::Bind::ConstructorInfo constructorInfo = { \
 			#Name#Signature,0, &Sandbox::Bind::ClassConstructHelper<void(Name::*)RealSignature>::ConstructPtr \
 		};

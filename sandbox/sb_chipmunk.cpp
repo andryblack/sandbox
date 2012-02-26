@@ -69,19 +69,24 @@ namespace Sandbox {
 		Space::Space() {
 			m_time_cum = 0.0f;
 			m_space = cpSpaceNew();
+            cpSpaceSetUserData(m_space, this);
 		}
 		
 		Space::~Space() {
+            m_postprocess_collisions.clear();
 			for (size_t i=0;i<m_bodies.size();i++) {
 				cpSpaceRemoveBody(m_space, m_bodies[i]->get_body());
 			}
+            m_bodies.clear();
 			for (size_t i=0;i<m_shapes.size();i++) {
 				cpSpaceRemoveShape(m_space, m_shapes[i]->get_shape());
 			}
+            m_shapes.clear();
 			for (size_t i=0;i<m_constraints.size();i++) {
 				cpSpaceRemoveConstraint(m_space, m_constraints[i]->get_constraint());
 			}
 			cpSpaceFree(m_space);
+            LogDebug(MODULE) << "Space::~Space";
 		}
 		
 		void Space::SetGravity(const Vector2f& g) {
@@ -137,24 +142,70 @@ namespace Sandbox {
 			if ( steps ) {
 				for (size_t i=0;i<steps;i++) {
 					cpSpaceStep(m_space, static_step );
+                    for (std::vector<collision>::iterator i=m_postprocess_collisions.begin();
+                         i!=m_postprocess_collisions.end();++i) {
+                        process_collision(*i);
+                    }
+                    m_postprocess_collisions.clear();
 				}
 				m_time_cum -= static_step * steps;
 			}
-			return false;
+    		return false;
 		}
-		
+        void Space::process_collision( const collision& c ) {
+            c.handler->Handle(c.a, c.b);
+        }
+        int Space::collision_begin(cpArbiter *arb, struct cpSpace *space, void *data) {
+            CollisionHandler* h = static_cast<CollisionHandler*>(data);
+            if (!h) return 0;
+            cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
+            Space* _this = static_cast<Space*>(cpSpaceGetUserData(space));
+            Shape* sa = static_cast<Shape*>(cpShapeGetUserData(a));
+            Shape* sb = static_cast<Shape*>(cpShapeGetUserData(b));
+            CollisionHandlerPtr handler = h->shared_from_this();
+            if (sa && sb)
+                _this->add_collision_postprocess( collision(handler,
+                                                            sa->shared_from_this(),
+                                                            sb->shared_from_this()) );
+            return 1;
+        }
+        CollisionHandler::CollisionHandler( int a, int b ) : m_collision_a(a), m_collision_b(b) {
+            
+        }
+		void Space::AddCollisionHandler(const CollisionHandlerPtr& handler ) {
+            if (add(m_collision_handlers,handler)) {
+                cpSpaceAddCollisionHandler(m_space, 
+                                           handler->GetCollisionTypeA(), 
+                                           handler->GetCollisionTypeB(), 
+                                           &Space::collision_begin, 
+                                           0, 0, 0, 
+                                           handler.get());
+            }
+        }
+        
+        void Space::RemoveCollisionHandler( const CollisionHandlerPtr& handler ) {
+            if (remove(m_collision_handlers,handler)) {
+                cpSpaceRemoveCollisionHandler(m_space, handler->GetCollisionTypeA(), 
+                                              handler->GetCollisionTypeB());
+            }
+        }
 		
 		
 		Shape::Shape() : m_shape(0),m_space(0) {
 		}
 		
 		Shape::~Shape() {
-			LogDebug(MODULE) << "Body::~Shape";
-			if(m_shape) cpShapeFree(m_shape);
+			LogDebug(MODULE) << "Shape::~Shape";
+			if(m_shape) {
+                cpShapeSetUserData(m_shape, 0);
+                cpShapeFree(m_shape);
+            }
 		}
 		
 		void Shape::SetShape(cpShape* shape) {
 			m_shape = shape;
+            if (m_shape)
+                cpShapeSetUserData(m_shape, this);
 		}
 		float Shape::GetFriction() const {
 			return cpShapeGetFriction(m_shape);
@@ -175,7 +226,15 @@ namespace Sandbox {
 		void Shape::SetElasticity(float e) {
 			cpShapeSetElasticity(m_shape, e);
 		}
-			
+        
+        int Shape::GetCollisionType() const {
+            return cpShapeGetCollisionType( m_shape );
+        }
+        void Shape::SetCollisionType( int type ) {
+            cpShapeSetCollisionType( m_shape, type );
+        }
+        
+       	
 			
 		CircleShape::CircleShape( const BodyPtr& body, float radius, const Vector2f& pos ) {
 			SetShape(cpCircleShapeNew(body->get_body(),radius,vect(pos)));
@@ -186,8 +245,11 @@ namespace Sandbox {
 		float	CircleShape::GetRadius() const {
 			return cpCircleShapeGetRadius(m_shape);
 		}
+        
+        
 		
-		PolyShape::PolyShape( const BodyPtr& body, const std::vector<Vector2f>& points, const Vector2f& offset ) {
+		PolyShape::PolyShape( const BodyPtr& body, const std::vector<Vector2f>& points, const Vector2f& offset )
+        {
 			cpVect* v = new cpVect[points.size()];
 			for (size_t i=0;i<points.size();i++) {
 				v[i].x = points[i].x;
@@ -604,11 +666,13 @@ namespace Sandbox {
 		
 		TransformAdapter::TransformAdapter( const BodyPtr& body ) {
 			m_body = body;
+            m_apply_rotate = true;
 		}
 		
 		void TransformAdapter::Update(float ) {
             SetTranslate( m_body->GetPos() );
-            SetAngle( m_body->GetAngle() );
+            if (m_apply_rotate)
+                SetAngle( m_body->GetAngle() );
 		}
 		
 		

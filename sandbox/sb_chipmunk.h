@@ -23,6 +23,7 @@ struct cpSpace;
 struct cpShape;
 struct cpBody;
 struct cpConstraint;
+struct cpArbiter;
 
 namespace Sandbox {
 	
@@ -90,6 +91,8 @@ namespace Sandbox {
 			void SetSensor(bool s);
 			float GetElasticity() const;
 			void SetElasticity(float e);
+            int GetCollisionType() const;
+            void SetCollisionType( int type );
 			
 			void set_space( Space* space) { m_space = space;}
 			Space* get_space() const { return m_space;}
@@ -100,7 +103,7 @@ namespace Sandbox {
 		private:
 			Shape(const Shape&);
 			Shape& operator = (const Shape&);
-		protected:
+       protected:
 			cpShape*	m_shape;
 			Space* m_space;
 		};
@@ -127,7 +130,19 @@ namespace Sandbox {
 		};
 		typedef shared_ptr<Constraint> ConstraintPtr;
 		
-		class Space : public Thread {
+        class CollisionHandler : public enable_shared_from_this<CollisionHandler>{
+        public:
+            CollisionHandler( int a, int b );
+            int GetCollisionTypeA() const { return m_collision_a; }
+            int GetCollisionTypeB() const { return m_collision_b; }
+            virtual void Handle( const ShapePtr& a, const ShapePtr& b ) = 0;
+        private:
+            int m_collision_a;
+            int m_collision_b;
+        };
+        typedef shared_ptr<CollisionHandler> CollisionHandlerPtr;
+        
+		class Space : public Thread, public enable_shared_from_this<Space> {
 		public:
 			Space();
 			~Space();
@@ -143,6 +158,8 @@ namespace Sandbox {
 			void RemoveConstraint(const ConstraintPtr& constraint);
 			void Step( float dt );
 			bool Update( float dt );
+            void AddCollisionHandler( const CollisionHandlerPtr& handler );
+            void RemoveCollisionHandler( const CollisionHandlerPtr& handler );
 			
 			cpSpace* get_space() const { return m_space;}
 		private:
@@ -154,7 +171,22 @@ namespace Sandbox {
 			std::vector<BodyPtr>	m_bodies;
 			std::vector<ShapePtr>	m_shapes;
 			std::vector<ConstraintPtr>	m_constraints;
-		};
+            static int collision_begin(cpArbiter *arb, struct cpSpace *space, void *data);
+            struct collision {
+                CollisionHandlerPtr handler;
+                ShapePtr a;
+                ShapePtr b;
+                collision(const CollisionHandlerPtr& _handler, 
+                          const ShapePtr& _a,
+                          const ShapePtr& _b) : handler(_handler),a(_a),b(_b) {}
+            };
+            std::vector<collision>  m_postprocess_collisions;
+            void add_collision_postprocess( const collision& c ) {
+                m_postprocess_collisions.push_back( c );
+            }
+            void process_collision( const collision& c );
+            std::vector<CollisionHandlerPtr> m_collision_handlers;
+       };
 		typedef shared_ptr<Space> SpacePtr;
 		
 		
@@ -304,8 +336,12 @@ namespace Sandbox {
 		public:
 			explicit TransformAdapter( const BodyPtr& body );
 			void Update(float dt);
+            
+            void SetApplyRotate( bool apply ) { m_apply_rotate = apply; }
+            bool GetApplyRotate() const { return m_apply_rotate;}
 		private:
 			BodyPtr		m_body;
+            bool    m_apply_rotate;
 		};
 		
 		class DebugDrawImpl;
