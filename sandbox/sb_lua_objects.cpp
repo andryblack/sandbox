@@ -55,6 +55,7 @@
 #include "sb_clear_scene.h"
 #include "sb_widget.h"
 #include "sb_fill_rect.h"
+#include "sb_touch_info.h"
 
 #include "sb_log.h"
 
@@ -230,6 +231,126 @@ namespace Sandbox {
 		}
 	private:
 		LuaReference m_ref;
+	};
+    
+    
+    
+    static const char* const LuaWidgetModule = "Sanbox:LuaWidget";
+    class LuaWidget : public Widget {
+	public:
+        explicit LuaWidget(LuaHelperWeakPtr ptr) : m_ref(ptr) {}
+		~LuaWidget() {
+		}
+		void SetObject(lua_State* L) {
+			m_ref.SetObject(L);
+		}
+		bool HandleTouchInside(const TouchInfo& touch) {
+			if (m_ref.Valid()) {
+				if ( LuaHelperPtr lua = m_ref.GetHelper()) {
+					lua_State* L = lua->lua->GetVM();
+					sb_assert(L);
+					m_ref.GetObject(L);
+					sb_assert(lua_istable(L,-1));
+                    lua_getfield(L, -1, "HandleTouchInside");
+                    if (!lua_isfunction(L, -1)) {
+                        lua_pop(L, 2);
+                        return false;
+                    }
+                    lua_pushvalue(L, -2);
+                    Bind::StackHelper stck(L,0,"Sandbox::TouchInfo");
+                    stck.PushValue(touch);
+					int res = lua_pcall(L, 2, 1, 0);
+					if (res) {
+						LogError(LuaWidgetModule) << " Failed call HandleTouchInside  " ;
+                        LogError(LuaWidgetModule) << lua_tostring(L, -1) ;
+					} else {
+                        if (!lua_isboolean(L, -1)) {
+                            LogError(LuaWidgetModule) << " HandleTouchInside need bool result " ;
+                        } else {
+                            bool res = lua_toboolean(L, -1);
+                            lua_pop(L, 2);
+                            return res;
+                        }
+                    }
+				} else {
+					LogError(LuaEventModule) <<" call HandleTouchInside on released script" ;
+				}
+			}
+            return false;
+		}
+        void OnTouchEnter() {
+			if (m_ref.Valid()) {
+				if ( LuaHelperPtr lua = m_ref.GetHelper()) {
+					lua_State* L = lua->lua->GetVM();
+					sb_assert(L);
+					m_ref.GetObject(L);
+					sb_assert(lua_istable(L,-1));
+                    lua_getfield(L, -1, "OnTouchEnter");
+                    if (!lua_isfunction(L, -1)) {
+                        lua_pop(L, 2);
+                        return ;
+                    }
+                    lua_pushvalue(L, -2);
+                    int res = lua_pcall(L, 1, 0, 0);
+					if (res) {
+						LogError(LuaWidgetModule) << " Failed call OnTouchEnter  " ;
+                        LogError(LuaWidgetModule) << lua_tostring(L, -1) ;
+					} else {
+                       
+                    }
+				} else {
+					LogError(LuaEventModule) <<" call OnTouchEnter on released script" ;
+				}
+			}
+            return ;
+		}
+        void OnTouchLeave() {
+			if (m_ref.Valid()) {
+				if ( LuaHelperPtr lua = m_ref.GetHelper()) {
+					lua_State* L = lua->lua->GetVM();
+					sb_assert(L);
+					m_ref.GetObject(L);
+					sb_assert(lua_istable(L,-1));
+                    lua_getfield(L, -1, "OnTouchLeave");
+                    if (!lua_isfunction(L, -1)) {
+                        lua_pop(L, 2);
+                        return ;
+                    }
+                    lua_pushvalue(L, -2);
+                    int res = lua_pcall(L, 1, 0, 0);
+					if (res) {
+						LogError(LuaWidgetModule) << " Failed call OnTouchLeave  " ;
+                        LogError(LuaWidgetModule) << lua_tostring(L, -1) ;
+					} else {
+                        
+                    }
+				} else {
+					LogError(LuaEventModule) <<" call OnTouchLeave on released script" ;
+				}
+			}
+            return ;
+		}
+		static int constructor_func(lua_State* L) {
+			if (!lua_istable(L,2)) {
+				char buf[128];
+				::snprintf(buf,127,"table expected, got %s",luaL_typename(L, 2));
+				luaL_argerror(L, 2, buf);
+				return 0;
+			}
+ 			Lua* lua = Lua::GetPtr(L);
+			lua_State* main_state = lua->GetVM();
+			shared_ptr<LuaWidget> e = shared_ptr<LuaWidget>(new LuaWidget(lua->GetHelper()));
+			lua_pushvalue(L, 2);
+			if (main_state!=L) {
+				lua_xmove(L, main_state, 1);
+			}
+			e->SetObject(main_state);
+			Bind::StackHelper hpr(L,0,"Sandbox::LuaWidget");
+			hpr.PushValue(e);
+			return 1;
+		}
+	private:
+		LuaReference	m_ref;
 	};
 	
 	void Lua::RegisterSandboxObjects() {
@@ -823,6 +944,37 @@ namespace Sandbox {
 			SB_BIND_END_PROPERTYS
 			SB_BIND_END_CLASS
 			SB_BIND(this)
+		}
+        {
+			SB_BIND_BEGIN_ENUM(Sandbox::TouchInfo::Type)
+			SB_BIND_ENUM_ITEM(BEGIN,Sandbox::TouchInfo)
+			SB_BIND_ENUM_ITEM(MOVE,Sandbox::TouchInfo)
+			SB_BIND_ENUM_ITEM(END,Sandbox::TouchInfo)
+			SB_BIND_END_ENUM
+			SB_BIND(this)
+		}
+        {
+			SB_BIND_BEGIN_RAW_CLASS(Sandbox::TouchInfo)
+			SB_BIND_BEGIN_METHODS
+			SB_BIND_END_METHODS
+            SB_BIND_BEGIN_PROPERTYS
+            SB_BIND_PROPERTY_RO(Sandbox::TouchInfo, Type, GetType, Sandbox::TouchInfo::Type)
+            SB_BIND_PROPERTY_RO(Sandbox::TouchInfo, Position, GetPosition, Sandbox::Vector2f)
+            SB_BIND_END_PROPERTYS
+			SB_BIND_END_CLASS
+			SB_BIND(this)
+		}
+        {
+			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::LuaWidget,Sandbox::Widget)
+			SB_BIND_END_CLASS
+			SB_BIND(this)
+			get_table("Sandbox.LuaWidget.");
+			sb_assert(lua_istable(m_state,-1));
+			luaL_getmetatable(m_state, "Sandbox::LuaWidget");
+			sb_assert(lua_istable(m_state,-1));
+			lua_pushcclosure(m_state,&LuaWidget::constructor_func, 1);
+			Bind::StackHelper::rawsetfield(m_state, -2, "__call");
+			lua_pop(m_state, 1);
 		}
         {
 			SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::TouchButtonWidget,Sandbox::Widget)
