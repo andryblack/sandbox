@@ -10,6 +10,7 @@
 #include "sb_chipmunk_bind.h"
 #include "sb_chipmunk.h"
 #include "sb_bind.h"
+#include "sb_log.h"
 
 extern "C" {
 #include "../lua/src/lua.h"
