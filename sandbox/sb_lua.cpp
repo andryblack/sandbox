@@ -450,7 +450,7 @@ namespace Sandbox {
         lua_remove(L, -rets-1);
 		return true;
     }
-	bool Lua::call(const char* str,int args) {
+	bool Lua::call(const char*,int args) {
         return pcall(m_state,args,0);
 	}
 	bool Lua::DoFile(const char* fn) {

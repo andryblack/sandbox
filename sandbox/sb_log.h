@@ -29,7 +29,7 @@ namespace Sandbox {
     
     class EmptyLogger {
         template <class T>
-        EmptyLogger& operator << (const T& val) {
+        EmptyLogger& operator << (const T& ) {
             return *this;
         }
     };

@@ -54,8 +54,8 @@ namespace Sandbox {
                 const Vector2f g1 = (cur - prev) * (1.0f + m_bias);
                 const Vector2f g2 = (next - cur) * (1.0f - m_bias);
                 const Vector2f g3 = g2 - g1;
-                m_points[indx].ra = (g1 + g3 * ( 0.5 * (1.0f + m_continuity))) * (1.0f - m_tension);
-                m_points[indx].rb = (g1 + g3 * ( 0.5 * (1.0f - m_continuity))) * (1.0f - m_tension);
+                m_points[indx].ra = (g1 + g3 * ( 0.5f * (1.0f + m_continuity))) * (1.0f - m_tension);
+                m_points[indx].rb = (g1 + g3 * ( 0.5f * (1.0f - m_continuity))) * (1.0f - m_tension);
             } else {
                 m_points[indx].ra = ((cur - prev)*1.5f - m_points[indx-1].rb*0.5f) * (1.0f - m_tension);
                 m_points[indx].rb = cur - prev;

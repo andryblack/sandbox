@@ -179,15 +179,15 @@ namespace Sandbox {
         m_ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
     }
 	
-	void Graphics::appendTriangle(int i1,int i2,int i3) {
-		GHL::UInt16 base = m_vertexes.size();
+	void Graphics::appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3) {
+		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+i1);
 		m_indexes.push_back(base+i2);
 		m_indexes.push_back(base+i3);
 		m_primitives++;
 	}
 	void Graphics::appendQuad() {
-		GHL::UInt16 base = m_vertexes.size();
+		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+0);
 		m_indexes.push_back(base+1);
 		m_indexes.push_back(base+2);
@@ -286,7 +286,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
 		BeginDrawLines();
 		GHL::UInt32 clr = m_color.hw();
-		GHL::UInt16 base = m_vertexes.size();
+		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+0);
 		m_indexes.push_back(base+1);
 		m_primitives++;
@@ -297,7 +297,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
 		BeginDrawLines();
 		GHL::UInt32 clr = (m_color*clr_).hw();
-		GHL::UInt16 base = m_vertexes.size();
+		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+0);
 		m_indexes.push_back(base+1);
 		m_primitives++;
@@ -312,8 +312,8 @@ namespace Sandbox {
 		m_texture = TexturePtr();
         m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
 		GHL::UInt32 clr = m_color.hw();
-		GHL::UInt16 base = m_vertexes.size();
-		for (size_t i=0;i<points.size();i++) {
+		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
+		for (GHL::UInt16 i=0;i<static_cast<GHL::UInt16>(points.size());i++) {
 			m_indexes.push_back(base+i);
 		}
 		for (size_t i=0;i<points.size();i++) {
@@ -329,8 +329,8 @@ namespace Sandbox {
 		m_texture = TexturePtr();
         m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
 		GHL::UInt32 clr = (m_color*clr_).hw();
-		GHL::UInt16 base = m_vertexes.size();
-		for (size_t i=0;i<points.size();i++) {
+		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
+		for (GHL::UInt16 i=0;i<static_cast<GHL::UInt16>(points.size());i++) {
 			m_indexes.push_back(base+i);
 		}
 		for (size_t i=0;i<points.size();i++) {
@@ -362,9 +362,9 @@ namespace Sandbox {
 	void Graphics::DrawCircle(const Vector2f& pos, float r,GHL::UInt32 clr) {
 		size_t subdivs = int(2*M_PI*r)/5;
 		if (subdivs<8) subdivs = 8;
-		const float step = M_PI*2/subdivs;
-		GHL::UInt16 base = m_vertexes.size();
-		for (size_t i=0;i<subdivs;i++) {
+		const float step = static_cast<float>(M_PI*2/subdivs);
+		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
+		for (GHL::UInt16 i=0;i<subdivs;i++) {
 			m_indexes.push_back(base+i);
 		}
 		m_indexes.push_back(base);

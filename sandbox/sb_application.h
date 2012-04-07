@@ -22,9 +22,9 @@ namespace Sandbox {
 	protected:
 		Application();
 		virtual ~Application();
-		virtual void Update(float dt) {}
+		virtual void Update(float) {}
 		virtual void DrawFrame(Graphics& g) const;
-		virtual bool LoadResources(Resources& res) { return true;}
+		virtual bool LoadResources(Resources&) { return true;}
 		void SetLuaBasePath(const char* path) {
 			m_lua_base_path = path;
 		}
@@ -32,9 +32,9 @@ namespace Sandbox {
 			m_resources_base_path = path;
 		}
         /// bind Lua modules
-		virtual void BindModules( Lua* lua ) {}
+		virtual void BindModules( Lua* ) {}
 		virtual void OnLoaded() {}
-		virtual void ConfigureDevice(GHL::System* system) {}
+		virtual void ConfigureDevice(GHL::System*) {}
 		GHL::System* GetSystem() const { return m_system;}
 		GHL::VFS* GetVFS() const { return m_vfs;}
 		GHL::Render* GetRender() const { return m_render;}

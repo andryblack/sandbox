@@ -275,7 +275,7 @@ namespace Sandbox {
 			cpBodySetUserData(m_body, this);
 		}
 		
-		static void FreeBodyShapeIteratorFunc(cpBody *body, cpShape *shape, void *data) {
+		static void FreeBodyShapeIteratorFunc(cpBody *, cpShape *shape, void *) {
 			Shape* shape_p = reinterpret_cast<Shape*>( cpShapeGetUserData(shape) );
 			if (shape_p) {
 				Space* space = shape_p->get_space();
@@ -712,7 +712,7 @@ namespace Sandbox {
 					BodyShapeIteratorFunc(b,shape,data);
 				}
 			}
-			static void BodyShapeIteratorFunc(cpBody *body, cpShape *shape, void *data) {
+			static void BodyShapeIteratorFunc(cpBody *, cpShape *shape, void *data) {
 				Graphics* g = reinterpret_cast<Graphics*> (data);
 				if (CP_CIRCLE_SHAPE==shape->klass_private->type) {
 					Vector2f pos = vect(cpCircleShapeGetOffset(shape));

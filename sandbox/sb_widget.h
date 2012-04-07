@@ -27,7 +27,7 @@ namespace Sandbox {
     protected:
         virtual void OnTouchEnter() {}
         virtual void OnTouchLeave() {}
-        virtual bool HandleTouchInside(const TouchInfo& touch) { return false; }
+        virtual bool HandleTouchInside(const TouchInfo&) { return false; }
     private:
         bool    m_active;
         Rectf   m_rect;

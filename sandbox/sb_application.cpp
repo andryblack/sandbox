@@ -194,7 +194,7 @@ namespace Sandbox {
 		m_main_scene->Draw(*m_graphics);
 	}
 	
-	void Application::DrawFrame(Graphics& g) const {
+	void Application::DrawFrame(Graphics&) const {
 		DrawScene();
 	}
 	
@@ -231,10 +231,12 @@ namespace Sandbox {
     void Application::SetMusicEnabled( bool e ) {
         m_music_enabled = e;
         if (m_sound) {
+            /*
             if (m_music_enabled)
                 m_sound->Music_Play(true);
             else
                 m_sound->Music_Stop();
+             */
         }
     }
     
@@ -243,24 +245,24 @@ namespace Sandbox {
     }
     
 	///
-	void GHL_CALL Application::OnKeyDown( GHL::Key key ) {
+	void GHL_CALL Application::OnKeyDown( GHL::Key ) {
 	}
 	///
-	void GHL_CALL Application::OnKeyUp( GHL::Key key ) {
+	void GHL_CALL Application::OnKeyUp( GHL::Key ) {
 	}
 	///
-	void GHL_CALL Application::OnChar( GHL::UInt32 ch ) {
+	void GHL_CALL Application::OnChar( GHL::UInt32 ) {
 	}
 	///
-	void GHL_CALL Application::OnMouseDown( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) {
+	void GHL_CALL Application::OnMouseDown( GHL::MouseButton, GHL::Int32 x, GHL::Int32 y) {
         m_main_scene->HandleTouch( TouchInfo(TouchInfo::BEGIN,Vector2f(float(x),float(y))) );
 	}
 	///
-	void GHL_CALL Application::OnMouseMove( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) {
+	void GHL_CALL Application::OnMouseMove( GHL::MouseButton, GHL::Int32 x, GHL::Int32 y) {
         m_main_scene->HandleTouch( TouchInfo(TouchInfo::MOVE,Vector2f(float(x),float(y))) );
     }
 	///
-	void GHL_CALL Application::OnMouseUp( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) {
+	void GHL_CALL Application::OnMouseUp( GHL::MouseButton, GHL::Int32 x, GHL::Int32 y) {
         m_main_scene->HandleTouch( TouchInfo(TouchInfo::END,Vector2f(float(x),float(y))) );
     }
 	///

@@ -25,7 +25,7 @@ namespace Sandbox {
 		m_parent = parent;
 	}
     
-    bool Object::HandleTouch( const TouchInfo& touch ) {
+    bool Object::HandleTouch( const TouchInfo& ) {
         return false;
     }
 }

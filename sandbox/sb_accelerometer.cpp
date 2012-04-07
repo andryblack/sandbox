@@ -32,7 +32,7 @@ namespace Sandbox {
 			}
 		}
 	}
-	bool Accelerometer::Update( float dt ) {
+	bool Accelerometer::Update( float ) {
 		float data[3];
 		if (m_system->GetDeviceData( GHL::DEVICE_DATA_ACCELEROMETER, data )) {
 			m_data.x = data[0];

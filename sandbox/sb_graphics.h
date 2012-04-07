@@ -162,7 +162,7 @@ namespace Sandbox {
 			v.tx = tx;
 			v.ty = ty;
 		}
-		void appendTriangle(int i1,int i2,int i3);
+		void appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3);
 		void appendQuad();
 		size_t m_batches;
 	};

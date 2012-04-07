@@ -71,7 +71,7 @@ extern "C" {
 
 namespace Sandbox {
 
-	inline static GHL::Byte conv_hex_char(GHL::Byte c) {
+	inline static int conv_hex_char(int c) {
 		if ( (c>='0')&&(c<='9')) return c-'0';
 		if ( (c>='a')&&(c<='f')) return (c-'a')+0xa;
 		if ( (c>='A')&&(c<='F')) return (c-'A')+0xa;
@@ -79,7 +79,7 @@ namespace Sandbox {
 	}
 	
 	inline static GHL::Byte conv_hex(const char* str) {
-		return (conv_hex_char(*str++)<<4) | conv_hex_char(*str);
+		return static_cast<GHL::Byte>((conv_hex_char(*str++)<<4) | conv_hex_char(*str));
 	}
 
 	static int lua_color_from_string_func(lua_State* L) {

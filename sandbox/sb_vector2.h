@@ -138,7 +138,7 @@ namespace Sandbox {
 			/// \return reference to this object
 			Vector2f &rotate(float angle);
     
-            float dir() const { return atan2(x,-y);}
+            float dir() const { return atan2f(x,-y);}
         
     /// \}
     /// \name Operators

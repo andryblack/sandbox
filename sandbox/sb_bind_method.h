@@ -125,10 +125,10 @@ namespace Sandbox {
             typedef T   ObjectType;
 			typedef void(T::*FuncPtr)();
 			enum { isConst = 0,retValues = 0 };
-			static T* ConstructInplace(void* ptr,const StackHelper* hpr) {
+			static T* ConstructInplace(void* ptr,const StackHelper*) {
 				return new (ptr) T();
 			}
-            static T* Construct(const StackHelper* hpr) {
+            static T* Construct(const StackHelper*) {
 				return new T();
 			}
 			static void Call(void* obj,const void* funcp,const StackHelper* /*hpr*/) {

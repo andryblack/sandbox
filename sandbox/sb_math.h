@@ -19,6 +19,8 @@ namespace Sandbox {
 	using std::sqrt;
 	using std::floor;
 	
+    static const float fPI = 3.14159265358979323846f;
+    
 	template <typename T> 
 	inline T interpolate(T begin,T end,float k) {
 		return end * k + begin * (1.0f-k);

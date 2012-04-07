@@ -31,7 +31,7 @@ namespace Sandbox {
     class ObjectTouchProxy : public Object {
 	public:
         typedef function<bool(TouchInfo)> TouchFunc;
-        void Draw(Graphics& g) const {}
+        void Draw(Graphics&) const {}
 		explicit ObjectTouchProxy(const TouchFunc& func);
 		
         /// self mouse handling implementation
