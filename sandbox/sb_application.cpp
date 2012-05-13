@@ -62,6 +62,9 @@ namespace Sandbox {
 		delete m_graphics;
 	}
 	
+    void GHL_CALL Application::Initialize() {
+        
+    }
 	///
 	void GHL_CALL Application::SetSystem( GHL::System* sys ) {
 		m_system = sys;

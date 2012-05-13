@@ -142,7 +142,7 @@ namespace Sandbox {
 		TexturePtr  m_texture;
 		ShaderPtr	m_shader;
 		GHL::PrimitiveType	m_ptype;
-        GHL::UInt32 m_primitives;
+        size_t      m_primitives;
 		std::vector<GHL::Vertex> m_vertexes;
 		std::vector<GHL::UInt16> m_indexes;
 	

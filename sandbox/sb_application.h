@@ -89,6 +89,8 @@ namespace Sandbox {
 		virtual void GHL_CALL SetSound( GHL::Sound* sound) ;
 		///
 		virtual void GHL_CALL FillSettings( GHL::Settings* settings );
+        //
+        virtual void GHL_CALL Initialize();
 		///
 		virtual bool GHL_CALL Load() ;
 		///

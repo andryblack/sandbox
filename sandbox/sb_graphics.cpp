@@ -27,12 +27,13 @@ namespace Sandbox {
 			m_fake_tex_white->Release();
 		m_fake_tex_white = 0;
 	}
-	
+    
+    	
 	void Graphics::Load(GHL::Render* render) {
 		if (!m_fake_tex_white) {
-			m_fake_tex_white = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,false);
-			GHL::Byte tex[4] = {0xff,0xff,0xff,0xff};
-			m_fake_tex_white->SetData(0,0,1,1,tex,0);
+            GHL::Data* data = GHL_CreateData(4,true,0xff);
+			m_fake_tex_white = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,data);
+			data->Release();
 		}
 	}
 	
@@ -153,7 +154,7 @@ namespace Sandbox {
 											&m_vertexes.front(),
                                            static_cast<GHL::UInt32>(m_vertexes.size()),
                                                &m_indexes.front(),
-                                               m_primitives);
+                                           GHL::UInt32(m_primitives));
         m_batches++;
 #ifdef PRINT_BATCHES
         LogDebug(MODULE) << "batch " << m_data->primitives;

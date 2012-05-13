@@ -15,6 +15,7 @@
 #include <ghl_texture.h>
 #include <ghl_image.h>
 #include <ghl_shader.h>
+#include <ghl_data.h>
 
 #include "sb_atlaser.h"
 
@@ -25,7 +26,6 @@
 namespace Sandbox {
 
     static const char* MODULE = "Sandbox:Resources";
-	
 	
 	
 	Resources::Resources(GHL::VFS* vfs) :
@@ -61,27 +61,20 @@ namespace Sandbox {
             return TexturePtr();
         }
 		GHL::TextureFormat tfmt;
+		int bpp = 4;
 		if (alpha) {
 			tfmt = GHL::TEXTURE_FORMAT_RGBA;
+			bpp = 4;
 		} else {
 			tfmt = GHL::TEXTURE_FORMAT_RGB;
-		}
-		GHL::Texture* texture = m_render->CreateTexture(w,h,tfmt,false);
-		tfmt = texture->GetFormat();
-		size_t bpp = 4;
-		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
 			bpp = 3;
-		}
-		else if (tfmt==GHL::TEXTURE_FORMAT_RGBA) {
-			bpp = 4;
-		}
-		
-		if (fill) {
-			GHL::Byte* data = new GHL::Byte[ bpp*texture->GetWidth()*texture->GetHeight() ];
-			std::fill(data,data+bpp*texture->GetWidth()*texture->GetHeight(),0);
-			texture->SetData(0,0,texture->GetWidth(),texture->GetHeight(),data);
-			delete [] data;
-		} 
+        }
+        GHL::Data* data = 0;
+        if ( fill ) {
+            data = GHL_CreateData( bpp*w*h , true , 0 );
+        }
+		GHL::Texture* texture = m_render->CreateTexture(w,h,tfmt,data);
+		if (data) data->Release();
 		return TexturePtr(new Texture(texture));
 	}
     bool Resources::LoadImageSubdivs(const char* filename, std::vector<Image>& output) {
@@ -149,9 +142,14 @@ namespace Sandbox {
 		ds->Release();
 		return img;
 	}
-	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,bool alpha, const GHL::Byte* data) {
-		GHL::Texture* texture = m_render->CreateTexture(next_pot(w),next_pot(h),alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,false);
-		if (data) texture->SetData(0,0,w,h,data);
+	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,bool alpha, const GHL::Data* data) {
+        GHL::UInt32 tw = next_pot( w );
+        GHL::UInt32 th = next_pot( h );
+        bool setData = ( tw == w ) && ( th == h );
+		GHL::Texture* texture = m_render->CreateTexture(tw,
+                                                        th,alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,
+                                                        setData ? data : 0);
+		if (data && !setData) texture->SetData(0,0,w,h,data);
 		TexturePtr ptr(new Texture(texture));
 		return ptr;
 	}
@@ -170,19 +168,25 @@ namespace Sandbox {
 			return TexturePtr();
 		}
 		GHL::TextureFormat tfmt;
+        int bpp = 4;
 		if (img->GetFormat()==GHL::IMAGE_FORMAT_RGB) {
 			tfmt = GHL::TEXTURE_FORMAT_RGB;
+            bpp = 3;
 		} else if (img->GetFormat()==GHL::IMAGE_FORMAT_RGBA) {
 			tfmt = GHL::TEXTURE_FORMAT_RGBA;
+            bpp = 4;
 		} else {
 			img->Release();
 			LogError(MODULE) <<"unsupported format file " << filename;
 			return TexturePtr();
 		}
-		GHL::Texture* texture = m_render->CreateTexture(next_pot(img->GetWidth()),next_pot(img->GetHeight()),tfmt,false);
+		GHL::UInt32 tw = next_pot( img->GetWidth() );
+        GHL::UInt32 th = next_pot( img->GetHeight() );
+        bool setData = ( tw == img->GetWidth() ) && ( th == img->GetHeight() );
+		GHL::Data* fillData = setData ? 0 : GHL_CreateData(bpp*tw*th,true,0);
+        GHL::Texture* texture = m_render->CreateTexture(tw,th,tfmt,setData ? img->GetData() : fillData);
 		tfmt = texture->GetFormat();
 		GHL::ImageFormat ifmt;
-		size_t bpp = 4;
 		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
 			ifmt = GHL::IMAGE_FORMAT_RGB;
 			bpp = 3;
@@ -192,21 +196,16 @@ namespace Sandbox {
 			bpp = 4;
 		}
 		
-		if (texture->GetWidth()!=img->GetWidth() || texture->GetHeight()!=img->GetHeight()) {
-			LogWarning(MODULE) << "image " << filename << " NPOT " << 
+		if (!setData) {
+            fillData->Release();
+            LogWarning(MODULE) << "image " << filename << " NPOT " << 
 				img->GetWidth() << "x" << img->GetHeight() << " -> " <<
-				texture->GetWidth() << "x" << texture->GetHeight();
-			GHL::Byte* data = new GHL::Byte[ bpp*texture->GetWidth()*texture->GetHeight() ];
-			std::fill(data,data+bpp*texture->GetWidth()*texture->GetHeight(),0);
-			texture->SetData(0,0,texture->GetWidth(),texture->GetHeight(),data);
-			delete [] data;
-		} else {
+				tw << "x" << th;
+            img->Convert(ifmt);
+            texture->SetData(0,0,img->GetWidth(),img->GetHeight(),img->GetData());
+        } else {
 			LogInfo(MODULE) << "Loaded image : " << filename << " " << img->GetWidth() << "x" << img->GetHeight() ;
-		}
-		
-		img->Convert(ifmt);
-		
-		texture->SetData(0,0,img->GetWidth(),img->GetHeight(),img->GetData());
+        }
 		TexturePtr ptr(new Texture(texture,img->GetWidth(),img->GetHeight()));
 		img->Release();
 #ifdef SB_RESOURCES_CACHE
