@@ -11,15 +11,16 @@
 #define SB_THREAD_H
 
 #include "sb_shared_ptr.h"
+#include "sb_notcopyable.h"
 
 namespace Sandbox {
 	
-	class Thread {
+	class Thread : public NotCopyable {
 	public:
 		virtual ~Thread() {}
 		virtual bool Update(float dt) = 0;
 	};
-	typedef shared_ptr<Thread> ThreadPtr;
+	typedef sb::shared_ptr<Thread> ThreadPtr;
 	
 }
 

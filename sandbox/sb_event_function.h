@@ -17,11 +17,11 @@ namespace Sandbox {
 	
 	class EventFunction : public Event {
 	public:
-		explicit EventFunction( const function<void()>& f);
+		explicit EventFunction( const sb::function<void()>& f);
 		virtual void Emmit();
-		static EventPtr Create( const function<void()>& f);
+		static EventPtr Create( const sb::function<void()>& f);
 	private:
-		function<void()>	m_func;
+		sb::function<void()>	m_func;
 	};
 }
 

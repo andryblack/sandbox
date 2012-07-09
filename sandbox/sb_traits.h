@@ -9,6 +9,8 @@
 #include "sb_meta_utils.h"
 
 namespace Sandbox {
+    
+    namespace sb {
 
     namespace implementation {
 
@@ -261,6 +263,7 @@ namespace Sandbox {
 		enum { Result = false, };
 	};
 	
+    }
 }
 
 #endif // SB_TRAITS_H

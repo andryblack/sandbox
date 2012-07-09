@@ -28,7 +28,7 @@ namespace Sandbox {
         static const char* const LuaChipmunkModule = "Sanbox:LuaChipmunk";
         class LuaCollisionHandler : public CollisionHandler {
         public:
-            explicit LuaCollisionHandler(LuaHelperWeakPtr ptr,int a,int b) : CollisionHandler(a,b), m_ref(ptr) {}
+            explicit LuaCollisionHandler(LuaHelperWeakPtr ptr,long a,long b) : CollisionHandler(a,b), m_ref(ptr) {}
             ~LuaCollisionHandler() {
             }
             void SetFunction(lua_State* L) {
@@ -61,12 +61,12 @@ namespace Sandbox {
                     luaL_argerror(L, 2, "a");
                     return;
                 }
-                int a = lua_tointeger(L, 2);
+                long a = lua_tointeger(L, 2);
                 if (!lua_isnumber(L, 3)) {
                     luaL_argerror(L, 3, "b");
                     return;
                 }
-                int b = lua_tointeger(L, 3);
+                long b = lua_tointeger(L, 3);
                 if (!lua_isfunction(L,4)) {
                     char buf[128];
                     ::snprintf(buf,127,"function expected, got %s",luaL_typename(L, 2));
@@ -81,7 +81,7 @@ namespace Sandbox {
                     lua_xmove(L, main_state, 1);
                 }
                 raw->SetFunction(main_state);
-                new (hpr->new_object_shared_ptr() ) shared_ptr<LuaCollisionHandler>( raw );
+                new (hpr->new_object_shared_ptr() ) sb::shared_ptr<LuaCollisionHandler>( raw );
                 return;
             }
         private:

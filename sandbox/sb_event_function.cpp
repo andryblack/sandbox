@@ -13,14 +13,14 @@
 namespace Sandbox {
 	
 	
-	EventFunction::EventFunction( const function<void()>& f) : m_func(f) {
+	EventFunction::EventFunction( const sb::function<void()>& f) : m_func(f) {
 	}
 
 	void EventFunction::Emmit() {
 		if (m_func) m_func();
 	}
 	
-	EventPtr EventFunction::Create(const function<void()>& f) {
+	EventPtr EventFunction::Create(const sb::function<void()>& f) {
 		return EventPtr( new EventFunction(f) );
 	}
 

@@ -32,7 +32,7 @@ namespace Sandbox {
 		class Shape;
 		class Space;
 		
-		class Body : public enable_shared_from_this<Body>{
+		class Body : public sb::enable_shared_from_this<Body>{
 		public:
 			Body(float mass,float inertia);
 			virtual ~Body();
@@ -75,14 +75,14 @@ namespace Sandbox {
 			Body& operator = (const Body&);
 			cpBody*	m_body;
 		};
-		typedef shared_ptr<Body> BodyPtr;
+		typedef sb::shared_ptr<Body> BodyPtr;
 		
 		class StaticBody : public Body {
 		public:
 			StaticBody();
 		};
 			
-		class Shape : public enable_shared_from_this<Shape>{
+		class Shape : public sb::enable_shared_from_this<Shape>{
 		public:
 			virtual ~Shape();
 			float GetFriction() const;
@@ -91,7 +91,7 @@ namespace Sandbox {
 			void SetSensor(bool s);
 			float GetElasticity() const;
 			void SetElasticity(float e);
-            int GetCollisionType() const;
+            long GetCollisionType() const;
             void SetCollisionType( int type );
 			
 			void set_space( Space* space) { m_space = space;}
@@ -107,9 +107,9 @@ namespace Sandbox {
 			cpShape*	m_shape;
 			Space* m_space;
 		};
-		typedef shared_ptr<Shape> ShapePtr;
+		typedef sb::shared_ptr<Shape> ShapePtr;
 		
-		class Constraint : public enable_shared_from_this<Constraint>{
+		class Constraint : public sb::enable_shared_from_this<Constraint>{
 		private:
 			Constraint(const Constraint&);
 			Constraint& operator = (const Constraint&);
@@ -128,21 +128,21 @@ namespace Sandbox {
 			explicit Constraint( cpConstraint* c);
 			cpConstraint*	m_constraint;
 		};
-		typedef shared_ptr<Constraint> ConstraintPtr;
+		typedef sb::shared_ptr<Constraint> ConstraintPtr;
 		
-        class CollisionHandler : public enable_shared_from_this<CollisionHandler>{
+        class CollisionHandler : public sb::enable_shared_from_this<CollisionHandler>{
         public:
-            CollisionHandler( int a, int b );
-            int GetCollisionTypeA() const { return m_collision_a; }
-            int GetCollisionTypeB() const { return m_collision_b; }
+            CollisionHandler( long a, long b );
+            long GetCollisionTypeA() const { return m_collision_a; }
+            long GetCollisionTypeB() const { return m_collision_b; }
             virtual void Handle( const ShapePtr& a, const ShapePtr& b ) = 0;
         private:
-            int m_collision_a;
-            int m_collision_b;
+            long m_collision_a;
+            long m_collision_b;
         };
-        typedef shared_ptr<CollisionHandler> CollisionHandlerPtr;
+        typedef sb::shared_ptr<CollisionHandler> CollisionHandlerPtr;
         
-		class Space : public Thread, public enable_shared_from_this<Space> {
+		class Space : public Thread, public sb::enable_shared_from_this<Space> {
 		public:
 			Space();
 			~Space();
@@ -167,7 +167,7 @@ namespace Sandbox {
 			Space& operator = (const Space&);
 			cpSpace*	m_space;
 			float	m_time_cum;
-			weak_ptr<Space>	m_this;
+			sb::weak_ptr<Space>	m_this;
 			std::vector<BodyPtr>	m_bodies;
 			std::vector<ShapePtr>	m_shapes;
 			std::vector<ConstraintPtr>	m_constraints;
@@ -187,7 +187,7 @@ namespace Sandbox {
             void process_collision( const collision& c );
             std::vector<CollisionHandlerPtr> m_collision_handlers;
        };
-		typedef shared_ptr<Space> SpacePtr;
+		typedef sb::shared_ptr<Space> SpacePtr;
 		
 		
 		

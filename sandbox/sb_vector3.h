@@ -83,9 +83,6 @@ namespace Sandbox {
             /// \return reference to this object
             Vector3f &normalize();
 
-			/// \brief Return normalized vector with some dir
-			///
-			Vector2f unit() const { Vector2f res(*this); res.normalize(); return res; }
 		
             /// \brief Dot products this vector with an other vector.
             ///
@@ -210,18 +207,7 @@ namespace Sandbox {
 
     inline float Vector3f::length() const {return std::sqrt(x*x+y*y+z*z);}
 
-    inline Vector3f &Vector3f::normalize()
-    {
-            float f = length();
-            if (f!=0)
-            {
-                    x /= f;
-                    y /= f;
-                    z /= f;
-            }
-            return *this;
-    }
-
+    
     inline Vector3f Vector3f::normalize(const Vector3f& vector)
     {
             Vector3f dest(vector);
@@ -297,8 +283,7 @@ namespace Sandbox {
 
 
 
-    inline Vector2f::Vector2f(const Vector3f &copy) { x = copy.x; y= copy.y; }
-
+   
 
 }
 

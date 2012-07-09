@@ -19,7 +19,7 @@ namespace Sandbox {
 		virtual ~Controller() {}
 		virtual void Set(float k) = 0;
 	};
-	typedef shared_ptr<Controller> ControllerPtr;
+	typedef sb::shared_ptr<Controller> ControllerPtr;
 	
 	template <class T,class Setter ,class Obj> class LinearController : public Controller {
 	public:

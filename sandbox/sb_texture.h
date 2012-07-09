@@ -11,11 +11,12 @@
 #define SB_TEXTURE_H
 
 #include "sb_shared_ptr.h"
+#include "sb_notcopyable.h"
 #include <ghl_texture.h>
 
 namespace Sandbox {
 	
-	class Texture {
+	class Texture : public NotCopyable {
 	private:
 		GHL::Texture* m_texture;
         GHL::UInt32 m_original_w;
@@ -44,7 +45,7 @@ namespace Sandbox {
         float GetOriginalHeight() const { return float(m_original_h); }
 		GHL::Texture* GetNative() const { return m_texture;}
 	};
-	typedef shared_ptr<Texture> TexturePtr;
+	typedef sb::shared_ptr<Texture> TexturePtr;
 }
 
 #endif /*SB_TEXTURE_H*/

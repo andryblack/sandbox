@@ -13,8 +13,8 @@
 #include "sb_image.h"
 #include "sb_shader.h"
 #include "sb_atlaser.h"
-#include <map>
-#include <string>
+#include "sb_string.h"
+#include "sb_map.h"
 
 namespace GHL {
 	struct VFS;
@@ -43,7 +43,7 @@ namespace Sandbox {
 		
 		TexturePtr GetTexture(const char* filename);
 		ImagePtr GetImage(const char* filename);
-		bool LoadImageSubdivs(const char* filename, std::vector<Image>& output);
+		bool LoadImageSubdivs(const char* filename, sb::vector<Image>& output);
 		
 		ShaderPtr GetShader(const char* vfn,const char* ffn);
 		
@@ -52,7 +52,7 @@ namespace Sandbox {
 		GHL::VFS* GetVFS() { return m_vfs;}
 		const std::string& GetBasePath() const { return m_base_path;}
 		
-		shared_ptr<Atlaser> CreateAtlaser(int w, int h);
+        sb::shared_ptr<Atlaser> CreateAtlaser(int w, int h);
 		
 		TexturePtr CreateTexture( GHL::UInt32 w, 
                                  GHL::UInt32 h, 
@@ -71,10 +71,10 @@ namespace Sandbox {
 		bool ImageHaveAlpha(const GHL::Image* img) const;
 		bool ConvertImage(GHL::Image* img,const TexturePtr& tex) const;
 #ifdef SB_RESOURCES_CACHE
-		std::map<std::string,weak_ptr<Texture> > m_textures;
-		std::map<std::string,GHL::VertexShader*> m_vshaders;
-		std::map<std::string,GHL::FragmentShader*> m_fshaders;
-		std::map<std::string,weak_ptr<Shader> > m_shaders;
+		sb::map<sb::string,sb::weak_ptr<Texture> > m_textures;
+		sb::map<sb::string,GHL::VertexShader*> m_vshaders;
+		sb::map<sb::string,GHL::FragmentShader*> m_fshaders;
+		sb::map<sb::string,sb::weak_ptr<Shader> > m_shaders;
 #endif
 	};
 }

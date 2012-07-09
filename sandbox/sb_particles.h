@@ -13,6 +13,7 @@
 #include "sb_image.h"
 #include "sb_particle.h"
 #include "sb_event.h"
+#include "sb_vector.h"
 
 #include <map>
 
@@ -21,7 +22,7 @@ namespace Sandbox {
     class Lua;
     
     struct ParticlesInstance {
-        std::vector<Particle>   particles;
+        sb::vector<Particle>   particles;
         float   time;
         float   cicle_time;
         bool    started;
@@ -85,7 +86,7 @@ namespace Sandbox {
         std::vector<ParticleProcessorBlockPtr> m_processors;
         float   m_particle_ttl;
     };
-    typedef shared_ptr<ParticlesController> ParticlesControllerPtr;
+    typedef sb::shared_ptr<ParticlesController> ParticlesControllerPtr;
     
     class ParticlesSystem : public Object {
     public:
@@ -107,7 +108,7 @@ namespace Sandbox {
         ParticlesInstance   m_instance;
         static void BindBuiltins( Lua* lua );
     };
-    typedef shared_ptr<ParticlesSystem> ParticlesSystemPtr;
+    typedef sb::shared_ptr<ParticlesSystem> ParticlesSystemPtr;
 }
 
 

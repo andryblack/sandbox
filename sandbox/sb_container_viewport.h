@@ -36,7 +36,7 @@ namespace Sandbox {
 		Recti m_rect;
 		bool  m_set_ortho;
 	};
-	typedef shared_ptr<ContainerViewport> ContainerViewportPtr;
+	typedef sb::shared_ptr<ContainerViewport> ContainerViewportPtr;
 	
 }
 

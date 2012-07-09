@@ -30,7 +30,7 @@ namespace Sandbox {
 	private:
 		Color	m_color;
 	};
-	typedef shared_ptr<ContainerColor> ContainerColorPtr;
+	typedef sb::shared_ptr<ContainerColor> ContainerColorPtr;
 }
 
 #endif /*SB_CONTAINER_COLOR_H*/

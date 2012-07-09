@@ -15,7 +15,8 @@ namespace Sandbox {
 	using std::cos;
 	using std::asin;
 	using std::acos;
-	
+    using std::atan2;
+    
 	using std::sqrt;
 	using std::floor;
 	

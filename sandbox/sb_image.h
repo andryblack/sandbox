@@ -51,7 +51,7 @@ namespace Sandbox {
         void SetSize(float w,float h);
     };
 	
-    typedef shared_ptr<Image> ImagePtr;
+    typedef sb::shared_ptr<Image> ImagePtr;
 	
 	
 	inline Image::Image()

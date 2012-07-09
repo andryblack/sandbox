@@ -61,6 +61,6 @@ namespace Sandbox {
         static void Register( Lua* lua );
     };
     
-    typedef shared_ptr<TCBSpline2d> TCBSpline2dPtr;
+    typedef sb::shared_ptr<TCBSpline2d> TCBSpline2dPtr;
 }
 #endif // SB_TCB_SPLINE2D_H

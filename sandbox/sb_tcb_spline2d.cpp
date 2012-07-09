@@ -5,7 +5,7 @@
 
 #include "sb_tcb_spline2d.h"
 #include "sb_bind.h"
-#include <cassert>
+#include "sb_assert.h"
 
 namespace Sandbox {
     
@@ -32,7 +32,7 @@ namespace Sandbox {
     }
 
     Vector2f TCBSpline2d::get(float t) const {
-        assert(!m_points.empty());
+        sb_assert(!m_points.empty());
 		if (m_points.size()==1) return m_points.front().pos;
         for (size_t i=1;i<m_points.size();i++) {
             if (t<m_points[i].len) {

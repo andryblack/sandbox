@@ -19,18 +19,18 @@ namespace Sandbox {
 	class ObjectDrawProxy : public Object {
 	public:
   
-		explicit ObjectDrawProxy(const function<void(Graphics&)>& func);
+		explicit ObjectDrawProxy(const sb::function<void(Graphics&)>& func);
 		void Draw(Graphics& g) const;
         
   	private:
-		function<void(Graphics&)> m_func;
+		sb::function<void(Graphics&)> m_func;
 	};
-	typedef shared_ptr<ObjectDrawProxy> ObjectDrawProxyPtr;
+	typedef sb::shared_ptr<ObjectDrawProxy> ObjectDrawProxyPtr;
     
     
     class ObjectTouchProxy : public Object {
 	public:
-        typedef function<bool(TouchInfo)> TouchFunc;
+        typedef sb::function<bool(TouchInfo)> TouchFunc;
         void Draw(Graphics&) const {}
 		explicit ObjectTouchProxy(const TouchFunc& func);
 		
@@ -39,7 +39,7 @@ namespace Sandbox {
 	private:
         TouchFunc   m_touch_func;
   	};
-	typedef shared_ptr<ObjectTouchProxy> ObjectTouchProxyPtr;
+	typedef sb::shared_ptr<ObjectTouchProxy> ObjectTouchProxyPtr;
 }
 
 #endif /*SB_OBJECT_PROXY_H*/

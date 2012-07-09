@@ -11,7 +11,8 @@
 #define SB_CONTAINER_H
 
 #include "sb_object.h"
-#include <vector>
+#include "sb_vector.h"
+
 namespace Sandbox {
 
 	class Container : public Object {
@@ -32,9 +33,9 @@ namespace Sandbox {
         bool HandleChilds( const TouchInfo& touch,bool firstResponse );
 		void DrawChilds(Graphics& g) const;
         void UpdateChilds( float dt );
-		std::vector<ObjectPtr> m_objects;
+		sb::vector<SceneObjectPtr> m_objects;
 	};
-	typedef shared_ptr<Container> ContainerPtr;
+	typedef sb::shared_ptr<Container> ContainerPtr;
 }
 
 #endif /*SB_CONTAINER_H*/

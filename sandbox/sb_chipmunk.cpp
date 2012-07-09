@@ -40,14 +40,14 @@ namespace Sandbox {
 		template <class T>
 		struct compare_object {
 			explicit compare_object(const T* raw_) : raw(raw_) {}
-			bool operator() ( const shared_ptr<T>& ptr) {
+			bool operator() ( const sb::shared_ptr<T>& ptr) {
 				return ptr.get() == raw;
 			}
 			const T* raw;
 		};
 		template <class T> 
-		inline bool remove( std::vector<shared_ptr<T> >& objects, const T* object ) {
-			typename std::vector<shared_ptr<T> >::iterator i = std::find_if(objects.begin(),objects.end(),compare_object<T>(object));
+		inline bool remove( std::vector<sb::shared_ptr<T> >& objects, const T* object ) {
+			typename std::vector<sb::shared_ptr<T> >::iterator i = std::find_if(objects.begin(),objects.end(),compare_object<T>(object));
 			if (i!=objects.end()) {
 				objects.erase(i);
 				return true;
@@ -169,7 +169,7 @@ namespace Sandbox {
                                                             sb->shared_from_this()) );
             return 1;
         }
-        CollisionHandler::CollisionHandler( int a, int b ) : m_collision_a(a), m_collision_b(b) {
+        CollisionHandler::CollisionHandler( long a, long b ) : m_collision_a(a), m_collision_b(b) {
             
         }
 		void Space::AddCollisionHandler(const CollisionHandlerPtr& handler ) {
@@ -208,7 +208,7 @@ namespace Sandbox {
                 cpShapeSetUserData(m_shape, this);
 		}
 		float Shape::GetFriction() const {
-			return cpShapeGetFriction(m_shape);
+			return float(cpShapeGetFriction(m_shape));
 		}
 		void Shape::SetFriction(float f) {
 			cpShapeSetFriction(m_shape, f);
@@ -221,13 +221,13 @@ namespace Sandbox {
 		}
 		
 		float Shape::GetElasticity() const {
-			return cpShapeGetElasticity(m_shape);
+			return float(cpShapeGetElasticity(m_shape));
 		}
 		void Shape::SetElasticity(float e) {
 			cpShapeSetElasticity(m_shape, e);
 		}
         
-        int Shape::GetCollisionType() const {
+        long Shape::GetCollisionType() const {
             return cpShapeGetCollisionType( m_shape );
         }
         void Shape::SetCollisionType( int type ) {
@@ -243,7 +243,7 @@ namespace Sandbox {
 			return vect(cpCircleShapeGetOffset(m_shape));
 		}
 		float	CircleShape::GetRadius() const {
-			return cpCircleShapeGetRadius(m_shape);
+			return float(cpCircleShapeGetRadius(m_shape));
 		}
         
         
@@ -255,7 +255,7 @@ namespace Sandbox {
 				v[i].x = points[i].x;
 				v[i].y = points[i].y;
 			}
-			SetShape(cpPolyShapeNew(body->get_body(),points.size(),v,cpv(offset.x,offset.y)));
+			SetShape(cpPolyShapeNew(body->get_body(),int(points.size()),v,cpv(offset.x,offset.y)));
 			delete [] v;
 		}
 		
@@ -294,13 +294,13 @@ namespace Sandbox {
 		}
 		
 		float Body::GetMass() const {
-			return cpBodyGetMass(m_body);
+			return float(cpBodyGetMass(m_body));
 		}
 		void Body::SetMass(float m) {
 			cpBodySetMass(m_body, m);
 		}
 		float Body::GetMoment() const {
-			return cpBodyGetMoment(m_body);
+			return float(cpBodyGetMoment(m_body));
 		}
 		void Body::SetMoment(float i) {
 			cpBodySetMoment(m_body, i);
@@ -716,14 +716,14 @@ namespace Sandbox {
 				Graphics* g = reinterpret_cast<Graphics*> (data);
 				if (CP_CIRCLE_SHAPE==shape->klass_private->type) {
 					Vector2f pos = vect(cpCircleShapeGetOffset(shape));
-					float r = cpCircleShapeGetRadius(shape);
+					float r = float(cpCircleShapeGetRadius(shape));
 					g->DrawCircle(pos,r);
 					g->DrawLine(pos, Vector2f(0,1)*r);
 				} else if (CP_POLY_SHAPE==shape->klass_private->type) {
 					size_t cnt = cpPolyShapeGetNumVerts(shape);
 					std::vector<Vector2f> points;
 					for (size_t i=0;i<cnt;i++) {
-						points.push_back(vect(cpPolyShapeGetVert(shape, i)));
+						points.push_back(vect(cpPolyShapeGetVert(shape, int(i))));
 					}
 					points.push_back(points.front());
 					g->DrawLineStrip(points);

@@ -19,13 +19,13 @@ namespace Sandbox {
 		
 		
 		struct LinearControllerSetUniformFloat {
-			static void SetValue( const shared_ptr<ShaderFloatUniform>& tr,float s) {
+			static void SetValue( const sb::shared_ptr<ShaderFloatUniform>& tr,float s) {
 				tr->SetValue(s);
 			}
 		};
 	}
 	
-	typedef LinearController<float,Impl::LinearControllerSetUniformFloat,shared_ptr<ShaderFloatUniform> > ControllerShaderFloatUniform;
+	typedef LinearController<float,Impl::LinearControllerSetUniformFloat,sb::shared_ptr<ShaderFloatUniform> > ControllerShaderFloatUniform;
 }
 
 #endif /*SB_CONTROLLERS_SHADER_H*/

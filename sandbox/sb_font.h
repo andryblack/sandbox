@@ -13,7 +13,7 @@
 #include "sb_image.h"
 #include <ghl_types.h>
 #include "sb_vector2.h"
-#include <vector>
+#include "sb_vector.h"
 
 
 namespace Sandbox {
@@ -46,12 +46,12 @@ namespace Sandbox {
 			float	asc;
 			std::vector<Kerning> kerning;
 		};
-		std::vector<Glypth> m_glypths;
+		sb::vector<Glypth> m_glypths;
 		const Glypth* get_glypth(GHL::UInt16 code) const;
 		float getKerning(const Glypth* g,GHL::UInt16 to) const;
 	};
 	
-	typedef shared_ptr<Font> FontPtr;
+	typedef sb::shared_ptr<Font> FontPtr;
 
 }
 

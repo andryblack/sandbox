@@ -11,6 +11,7 @@
 
 #include "sb_object.h"
 #include "sb_image.h"
+#include "sb_vector.h"
 
 namespace Sandbox {
     
@@ -22,7 +23,7 @@ namespace Sandbox {
         bool Load( const char* file, Resources* res );
         void Draw( Graphics& g ) const;
     private:
-        std::vector<Image>  m_images;
+        sb::vector<Image>  m_images;
     };
     
 }

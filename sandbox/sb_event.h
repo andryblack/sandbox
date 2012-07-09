@@ -20,7 +20,7 @@ namespace Sandbox {
 		virtual void Emmit() = 0;
 	protected:
 	};
-	typedef shared_ptr<Event> EventPtr;
+	typedef sb::shared_ptr<Event> EventPtr;
 	
 }
 

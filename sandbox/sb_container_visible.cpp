@@ -11,7 +11,7 @@
 
 namespace Sandbox {
 
-	ContainerVisible::ContainerVisible(const function<bool()>& func) : m_func(func),m_invert(false) {
+	ContainerVisible::ContainerVisible(const sb::function<bool()>& func) : m_func(func),m_invert(false) {
 	}
 	
 	void ContainerVisible::Draw(Graphics& g) const {

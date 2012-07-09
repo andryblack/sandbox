@@ -30,7 +30,7 @@ namespace Sandbox {
 		ImagePtr m_image;
 		Vector2f m_pos;
 	};
-	typedef shared_ptr<Sprite> SpritePtr;
+	typedef sb::shared_ptr<Sprite> SpritePtr;
     
     class ColorizedSprite : public Sprite {
     public:

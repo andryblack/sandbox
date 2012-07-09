@@ -37,7 +37,7 @@ namespace Sandbox {
 		float		m_scale_y;
 		float		m_angle;
 	};
-	typedef shared_ptr<ContainerTransform> ContainerTransformPtr;
+	typedef sb::shared_ptr<ContainerTransform> ContainerTransformPtr;
 }
 
 #endif /*SB_CONTAINER_TRANSFORM_H*/

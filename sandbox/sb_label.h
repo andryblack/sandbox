@@ -13,7 +13,7 @@
 #include "sb_object.h"
 #include "sb_font.h"
 #include "sb_vector2.h"
-#include <string>
+#include "sb_string.h"
 
 namespace Sandbox {
 	
@@ -34,9 +34,9 @@ namespace Sandbox {
 		Vector2f	m_pos;
 		FontPtr		m_font;
 		FontAlign	m_align;
-		std::string	m_text;
+		sb::string	m_text;
 	};
-	typedef shared_ptr<Label> LabelPtr;
+	typedef sb::shared_ptr<Label> LabelPtr;
 }
 
 #endif /*SB_LABEL_H*/

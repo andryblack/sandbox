@@ -11,7 +11,7 @@
 #define SB_INPLACE_STRING_H
 
 #include <cstring>
-#include <string>
+#include "sb_string.h"
 #include "sb_assert.h"
 
 namespace Sandbox {
@@ -30,7 +30,7 @@ namespace Sandbox {
 		size_t length() const { return m_end ? m_end-m_begin : 0 ;}
 		const char* begin() const { return m_begin;}
 		const char* end() const { return m_end;}
-		const char* find(char c) { const char* str_ = m_begin ; while ( (str_!=m_end) && (*str_!=c)) {str_++;} return str_; }
+		const char* find(char c) const { const char* str_ = m_begin ; while ( (str_!=m_end) && (*str_!=c)) {str_++;} return str_; }
 		const char* find(const char* any) { 
 			const char* str_ = m_begin ; 
 			InplaceString d(any);
@@ -49,7 +49,7 @@ namespace Sandbox {
 		bool operator != (const InplaceString& str_) const { return !(str_==*this);}
 		bool operator != (const char* str_) const { return !(*this==str_);}
 		
-		std::string str() const { return std::string(begin(),end());}
+		sb::string str() const { return sb::string(begin(),end());}
 	};
 }
 #endif /*SB_INPLACE_STRING_H*/

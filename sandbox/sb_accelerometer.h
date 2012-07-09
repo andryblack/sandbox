@@ -35,7 +35,7 @@ namespace Sandbox {
 		Vector3f		m_data;
         bool            m_actual;
 	};
-	typedef shared_ptr<Accelerometer> AccelerometerPtr;
+	typedef sb::shared_ptr<Accelerometer> AccelerometerPtr;
 }
 
 #endif /*SB_ACCELEROMETER_H_INCLUDED*/

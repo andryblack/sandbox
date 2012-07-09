@@ -158,7 +158,7 @@ namespace Sandbox {
 	TexturePtr Resources::GetTexture(const char* filename) {
 		
 #ifdef SB_RESOURCES_CACHE
-		weak_ptr<Texture> al = m_textures[filename];
+        sb::weak_ptr<Texture> al = m_textures[filename];
 		if (TexturePtr tex = al.lock()) {
 			return tex;
 		}
@@ -249,7 +249,7 @@ namespace Sandbox {
 		std::string ffilename = ffn;
 #ifdef SB_RESOURCES_CACHE
 		std::string name = vfilename+"+"+ffilename;
-		weak_ptr<Shader> al = m_shaders[name];
+        sb::weak_ptr<Shader> al = m_shaders[name];
 		if (ShaderPtr sh = al.lock()) {
 			return sh;
 		}
@@ -313,8 +313,8 @@ namespace Sandbox {
 	}
 	
 	
-	shared_ptr<Atlaser> Resources::CreateAtlaser(int w,int h) {
-		return shared_ptr<Atlaser>(new Atlaser(this,w,h));
+    sb::shared_ptr<Atlaser> Resources::CreateAtlaser(int w,int h) {
+		return sb::shared_ptr<Atlaser>(new Atlaser(this,w,h));
 	}
 	
 }

@@ -13,7 +13,7 @@
 #include "sb_sprite.h"
 #include "sb_thread.h"
 #include "sb_event.h"
-#include <vector>
+#include "sb_vector.h"
 
 namespace Sandbox {
 	
@@ -34,11 +34,11 @@ namespace Sandbox {
 		size_t GetLoopFrame() const { return m_loop_frame;}
 		void SetLoopFrame(size_t f) { m_loop_frame = f;}
 	private:
-		std::vector<ImagePtr> m_images;
+		sb::vector<ImagePtr> m_images;
 		size_t	m_loop_frame;
 		float	m_speed;
 	};
-	typedef shared_ptr<AnimationData> AnimationDataPtr;
+	typedef sb::shared_ptr<AnimationData> AnimationDataPtr;
 	
 	class Animation : public Thread {
 	public:

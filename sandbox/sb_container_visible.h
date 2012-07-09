@@ -17,15 +17,15 @@ namespace Sandbox {
 	
 	class ContainerVisible : public Container {
 	public:
-		explicit ContainerVisible(const function<bool()>& func);
+		explicit ContainerVisible(const sb::function<bool()>& func);
 		void Draw(Graphics& g) const;
 		bool GetInvert() const { return m_invert;}
 		void SetInvert(bool i) { m_invert = i;}
 	private:
-		function<bool()>	m_func;
+		sb::function<bool()>	m_func;
 		bool	m_invert;
 	};
-	typedef shared_ptr<ContainerVisible> ContainerVisiblePtr;
+	typedef sb::shared_ptr<ContainerVisible> ContainerVisiblePtr;
 }
 
 #endif /*SB_CONTAINER_VISIBLE_H*/

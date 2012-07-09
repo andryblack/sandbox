@@ -13,7 +13,7 @@ namespace Sandbox {
 
     template <typename T> struct base_function_traits {
         enum { is_valid = false};
-        enum { is_member = type_traits<T>::is_member_function_pointer };
+        enum { is_member = sb::type_traits<T>::is_member_function_pointer };
     };
 
     template <typename T> struct function_traits;

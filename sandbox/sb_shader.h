@@ -11,9 +11,10 @@
 #define SB_SHADER_H
 
 #include "sb_shared_ptr.h"
-#include <map>
-#include <vector>
-#include <string>
+#include "sb_notcopyable.h"
+#include "sb_vector.h"
+#include "sb_string.h"
+#include "sb_map.h"
 
 namespace GHL {
 	struct ShaderProgram;
@@ -22,14 +23,14 @@ namespace GHL {
 }
 namespace Sandbox {
 	
-	class ShaderUniform {
+	class ShaderUniform : public NotCopyable {
 	public:
 		virtual void DoSet() = 0;
 	protected:
 		explicit ShaderUniform(GHL::ShaderUniform* uniform) : m_uniform(uniform) {}
 		GHL::ShaderUniform* m_uniform;
 	};
-	typedef shared_ptr<ShaderUniform> ShaderUniformPtr;
+	typedef sb::shared_ptr<ShaderUniform> ShaderUniformPtr;
 	
 	class ShaderFloatUniform : public ShaderUniform {
 	public:
@@ -39,20 +40,22 @@ namespace Sandbox {
 	private:
 		float m_value;
 	};
+    typedef sb::shared_ptr<ShaderFloatUniform> ShaderFloatUniformPtr;
+    
 	class Shader {
 	public:
 		explicit Shader( GHL::ShaderProgram* prg);
 		~Shader();
 		void Set(GHL::Render* r);
-		shared_ptr<ShaderFloatUniform> GetFloatUniform(const char* name);
+		ShaderFloatUniformPtr GetFloatUniform(const char* name);
 	private:
 		GHL::ShaderProgram* m_program;
-		std::vector<ShaderUniformPtr> m_uniforms;
+		sb::vector<ShaderUniformPtr> m_uniforms;
 		void SetUniforms();
-		std::map<std::string,shared_ptr<ShaderFloatUniform> > m_float_uniforms;
+		sb::map<sb::string,ShaderFloatUniformPtr > m_float_uniforms;
 	};
 	
-	typedef shared_ptr<Shader> ShaderPtr;
+	typedef sb::shared_ptr<Shader> ShaderPtr;
 }
 
 #endif /*SB_SADER_H*/
