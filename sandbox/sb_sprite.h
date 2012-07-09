@@ -12,12 +12,12 @@
 
 #include "sb_vector2.h"
 #include "sb_image.h"
-#include "sb_object.h"
+#include "sb_scene_object.h"
 #include "sb_color.h"
 
 namespace Sandbox {
 	
-	class Sprite : public Object {
+	class Sprite : public SceneObject {
 	public:
 		Sprite();
 		~Sprite();

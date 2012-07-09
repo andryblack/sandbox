@@ -8,24 +8,24 @@
  */
 
 
-#include "sb_object.h"
+#include "sb_scene_object.h"
 #include "sb_assert.h"
 
 namespace Sandbox {
 
 
-	Object::Object() : m_parent(0) ,m_visible(true){
+	SceneObject::SceneObject() : m_parent(0) ,m_visible(true){
 	}
 	
-	Object::~Object() {
+	SceneObject::~SceneObject() {
 		sb_assert(m_parent==0);
 	}
 	
-	void Object::SetParent(Container* parent) {
+	void SceneObject::SetParent(Container* parent) {
 		m_parent = parent;
 	}
     
-    bool Object::HandleTouch( const TouchInfo& ) {
+    bool SceneObject::HandleTouch( const TouchInfo& ) {
         return false;
     }
 }

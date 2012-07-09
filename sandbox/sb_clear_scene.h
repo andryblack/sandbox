@@ -9,12 +9,12 @@
 #ifndef YinYang_sb_clear_scene_h
 #define YinYang_sb_clear_scene_h
 
-#include "sb_object.h"
+#include "sb_scene_object.h"
 #include "sb_color.h"
 
 namespace Sandbox {
     
-    class ClearScene : public Object {
+    class ClearScene : public SceneObject {
     public:
         
         void Draw( Graphics& g ) const;

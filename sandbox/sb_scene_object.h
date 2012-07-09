@@ -1,16 +1,16 @@
 /*
- *  sb_object.h
- *  SR
+ *  sb_scene_object.h
  *
  *  Created by Андрей Куницын on 08.02.11.
  *  Copyright 2011 andryblack. All rights reserved.
  *
  */
 
-#ifndef SB_OBJECT_H
-#define SB_OBJECT_H
+#ifndef SB_SCENE_OBJECT_H
+#define SB_SCENE_OBJECT_H
 
 #include "sb_shared_ptr.h"
+#include "sb_notcopyable.h"
 
 namespace Sandbox {
 	
@@ -18,10 +18,10 @@ namespace Sandbox {
 	class Container;
     class TouchInfo;
 
-	class Object {
+	class SceneObject : public NotCopyable {
 	public:
-		Object();
-		virtual ~Object();
+		SceneObject();
+		virtual ~SceneObject();
 		/// self drawing implementation
 		virtual void Draw(Graphics& g) const = 0;
         /// self update object
@@ -55,11 +55,8 @@ namespace Sandbox {
 		void SetParent(Container* parent);
 		Container* m_parent;
 		bool	m_visible;
-		/// not copyable
-		Object( const Object& );
-		Object& operator = (const Object&);
 	};
-	typedef shared_ptr<Object> ObjectPtr;
+	typedef sb::shared_ptr<SceneObject> SceneObjectPtr;
 }
 
-#endif /*SB_OBJECT_H*/
+#endif /*SB_SCENE_OBJECT_H*/

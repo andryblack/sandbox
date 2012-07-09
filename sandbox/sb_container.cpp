@@ -17,14 +17,14 @@ namespace Sandbox {
 	}
 	
 	Container::~Container() {
-		for (std::vector<ObjectPtr>::iterator i = m_objects.begin();i!=m_objects.end();i++) {
+		for (std::vector<SceneObjectPtr>::iterator i = m_objects.begin();i!=m_objects.end();i++) {
 			(*i)->SetParent(0);
 		}
 	}
 	void Container::Reserve(size_t size) {
 		m_objects.reserve(size);
 	}
-	void Container::AddObject(const ObjectPtr& o) {
+	void Container::AddObject(const SceneObjectPtr& o) {
 		sb_assert(o && "null object");
 		if (Container* c=o->GetParent()) {
 			c->RemoveObject(o);
@@ -32,9 +32,9 @@ namespace Sandbox {
 		o->SetParent(this);
 		m_objects.push_back(o);
 	}
-	void Container::RemoveObject(const ObjectPtr& obj) {
+	void Container::RemoveObject(const SceneObjectPtr& obj) {
 		sb_assert( obj && "null object");
-		std::vector<ObjectPtr>::iterator i = std::find(m_objects.begin(),m_objects.end(),obj);
+		std::vector<SceneObjectPtr>::iterator i = std::find(m_objects.begin(),m_objects.end(),obj);
 		if (i!=m_objects.end()) {
 			(*i)->SetParent(0);
 			m_objects.erase(i);
@@ -51,7 +51,7 @@ namespace Sandbox {
 		DrawChilds(g);
 	}
 	void Container::DrawChilds(Graphics& g) const {
-		for (std::vector<ObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();++i) {
+		for (std::vector<SceneObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();++i) {
 			(*i)->DoDraw(g);
 		}
 	}
@@ -60,8 +60,8 @@ namespace Sandbox {
     }
     bool Container::HandleChilds( const TouchInfo& touch, bool firstResponse ) {
         /// copy, for allow scene modifications
-        std::vector<ObjectPtr> childs = m_objects;
-        for (std::vector<ObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
+        std::vector<SceneObjectPtr> childs = m_objects;
+        for (std::vector<SceneObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
 			if ( (*i)->DoHandleTouch(touch) && firstResponse) {
                 return true;
             }
@@ -75,8 +75,8 @@ namespace Sandbox {
     
     void Container::UpdateChilds( float dt ) {
         /// copy, for allow scene modifications
-        std::vector<ObjectPtr> childs = m_objects;
-        for (std::vector<ObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
+        std::vector<SceneObjectPtr> childs = m_objects;
+        for (std::vector<SceneObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
 			(*i)->DoUpdate(dt);
 		}
     }

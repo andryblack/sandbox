@@ -11,7 +11,7 @@
 
 namespace Sandbox {
 
-	ObjectDrawProxy::ObjectDrawProxy(const function<void(Graphics&)>& func) : Object(), m_func(func) {
+	ObjectDrawProxy::ObjectDrawProxy(const sb::function<void(Graphics&)>& func) : SceneObject(), m_func(func) {
 	}
 	
 	void ObjectDrawProxy::Draw(Graphics& g) const {

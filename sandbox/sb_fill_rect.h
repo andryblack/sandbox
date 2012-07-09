@@ -9,13 +9,13 @@
 #ifndef YinYang_sb_fill_rect_h
 #define YinYang_sb_fill_rect_h
 
-#include "sb_object.h"
+#include "sb_scene_object.h"
 #include "sb_texture.h"
 #include "sb_rect.h"
 
 namespace Sandbox {
     
-    class FillRect : public Object {
+    class FillRect : public SceneObject {
     public:
         virtual void Draw( Graphics& g ) const;
         

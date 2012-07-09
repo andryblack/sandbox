@@ -10,14 +10,14 @@
 #ifndef SB_LABEL_H
 #define SB_LABEL_H
 
-#include "sb_object.h"
+#include "sb_scene_object.h"
 #include "sb_font.h"
 #include "sb_vector2.h"
 #include "sb_string.h"
 
 namespace Sandbox {
 	
-	class Label : public Object {
+	class Label : public SceneObject {
 	public:
 		Label();
 		~Label();

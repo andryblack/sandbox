@@ -10,20 +10,20 @@
 #ifndef SB_CONTAINER_H
 #define SB_CONTAINER_H
 
-#include "sb_object.h"
+#include "sb_scene_object.h"
 #include "sb_vector.h"
 
 namespace Sandbox {
 
-	class Container : public Object {
+	class Container : public SceneObject {
 	public:
 		Container();
 		~Container();
 		
 		void Reserve(size_t size);
 		void Draw(Graphics& g) const;
-		void AddObject(const ObjectPtr& o);
-		void RemoveObject(const ObjectPtr& obj);
+		void AddObject(const SceneObjectPtr& o);
+		void RemoveObject(const SceneObjectPtr& obj);
 		void Clear();
         
         /// self mouse handling implementation

@@ -10,7 +10,7 @@
 #ifndef SB_SCENE_H
 #define SB_SCENE_H
 
-#include "sb_object.h"
+#include "sb_scene_object.h"
 
 namespace Sandbox {
 	
@@ -25,10 +25,10 @@ namespace Sandbox {
         /// update
         void Update( float dt );
         
-		void SetRoot(const ObjectPtr& obj) { m_root = obj;}
-		const ObjectPtr& GetRoot() const { return m_root;}
+		void SetRoot(const SceneObjectPtr& obj) { m_root = obj;}
+		const SceneObjectPtr& GetRoot() const { return m_root;}
 	private:
-		ObjectPtr	m_root;
+		SceneObjectPtr	m_root;
 	};
 }
 #endif /*SB_SCENE_H*/

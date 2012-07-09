@@ -14,7 +14,7 @@
 #include "sb_vector2.h"
 #include "sb_thread.h"
 #include "sb_container_transform.h"
-#include "sb_object.h"
+#include "sb_scene_object.h"
 #include "sb_color.h"
 
 #include <vector>
@@ -346,7 +346,7 @@ namespace Sandbox {
 		
 		class DebugDrawImpl;
 		
-		class SpaceDebugDraw	: public Object {
+		class SpaceDebugDraw	: public SceneObject {
 		public:
 			explicit SpaceDebugDraw( const SpacePtr& space );
 			~SpaceDebugDraw();
@@ -356,7 +356,7 @@ namespace Sandbox {
 			SpacePtr	m_space;
 		};
 		
-		class BodyDebugDraw	: public Object {
+		class BodyDebugDraw	: public SceneObject {
 		public:
 			explicit BodyDebugDraw( const BodyPtr& body );
 			~BodyDebugDraw();

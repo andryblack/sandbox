@@ -10,13 +10,13 @@
 #ifndef SB_OBJECT_PROXY_H
 #define SB_OBJECT_PROXY_H
 
-#include "sb_object.h"
+#include "sb_scene_object.h"
 #include "sb_function.h"
 #include "sb_vector2.h"
 
 namespace Sandbox {
 	
-	class ObjectDrawProxy : public Object {
+	class ObjectDrawProxy : public SceneObject {
 	public:
   
 		explicit ObjectDrawProxy(const sb::function<void(Graphics&)>& func);
@@ -28,7 +28,7 @@ namespace Sandbox {
 	typedef sb::shared_ptr<ObjectDrawProxy> ObjectDrawProxyPtr;
     
     
-    class ObjectTouchProxy : public Object {
+    class ObjectTouchProxy : public SceneObject {
 	public:
         typedef sb::function<bool(TouchInfo)> TouchFunc;
         void Draw(Graphics&) const {}

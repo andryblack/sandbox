@@ -9,7 +9,7 @@
 #ifndef pairs_sb_particles_h
 #define pairs_sb_particles_h
 
-#include "sb_object.h"
+#include "sb_scene_object.h"
 #include "sb_image.h"
 #include "sb_particle.h"
 #include "sb_event.h"
@@ -88,7 +88,7 @@ namespace Sandbox {
     };
     typedef sb::shared_ptr<ParticlesController> ParticlesControllerPtr;
     
-    class ParticlesSystem : public Object {
+    class ParticlesSystem : public SceneObject {
     public:
         explicit ParticlesSystem(const ParticlesControllerPtr& controller);
         void Draw( Graphics& g ) const;
