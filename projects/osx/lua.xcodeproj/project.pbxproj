@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A454A0901530CEF0009BA3B7 /* lbitlib.c in Sources */ = {isa = PBXBuildFile; fileRef = A454A0871530CEF0009BA3B7 /* lbitlib.c */; };
+		A454A0911530CEF0009BA3B7 /* lcorolib.c in Sources */ = {isa = PBXBuildFile; fileRef = A454A0881530CEF0009BA3B7 /* lcorolib.c */; };
+		A454A0921530CEF0009BA3B7 /* lctype.c in Sources */ = {isa = PBXBuildFile; fileRef = A454A0891530CEF0009BA3B7 /* lctype.c */; };
+		A454A0931530CEF0009BA3B7 /* lctype.h in Headers */ = {isa = PBXBuildFile; fileRef = A454A08A1530CEF0009BA3B7 /* lctype.h */; };
+		A454A0941530CEF0009BA3B7 /* linit.c in Sources */ = {isa = PBXBuildFile; fileRef = A454A08B1530CEF0009BA3B7 /* linit.c */; };
+		A454A0951530CEF0009BA3B7 /* liolib.c in Sources */ = {isa = PBXBuildFile; fileRef = A454A08C1530CEF0009BA3B7 /* liolib.c */; };
+		A454A0961530CEF0009BA3B7 /* loadlib.c in Sources */ = {isa = PBXBuildFile; fileRef = A454A08D1530CEF0009BA3B7 /* loadlib.c */; };
+		A454A0971530CEF0009BA3B7 /* loslib.c in Sources */ = {isa = PBXBuildFile; fileRef = A454A08E1530CEF0009BA3B7 /* loslib.c */; };
+		A454A0981530CEF0009BA3B7 /* lualib.h in Headers */ = {isa = PBXBuildFile; fileRef = A454A08F1530CEF0009BA3B7 /* lualib.h */; };
 		A47726BA1413D79C006A9887 /* lapi.c in Sources */ = {isa = PBXBuildFile; fileRef = A477268B1413D79C006A9887 /* lapi.c */; };
 		A47726BB1413D79C006A9887 /* lapi.h in Headers */ = {isa = PBXBuildFile; fileRef = A477268C1413D79C006A9887 /* lapi.h */; };
 		A47726BC1413D79C006A9887 /* lauxlib.c in Sources */ = {isa = PBXBuildFile; fileRef = A477268D1413D79C006A9887 /* lauxlib.c */; };
@@ -58,6 +67,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A454A0871530CEF0009BA3B7 /* lbitlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lbitlib.c; sourceTree = "<group>"; };
+		A454A0881530CEF0009BA3B7 /* lcorolib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lcorolib.c; sourceTree = "<group>"; };
+		A454A0891530CEF0009BA3B7 /* lctype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lctype.c; sourceTree = "<group>"; };
+		A454A08A1530CEF0009BA3B7 /* lctype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lctype.h; sourceTree = "<group>"; };
+		A454A08B1530CEF0009BA3B7 /* linit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = linit.c; sourceTree = "<group>"; };
+		A454A08C1530CEF0009BA3B7 /* liolib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = liolib.c; sourceTree = "<group>"; };
+		A454A08D1530CEF0009BA3B7 /* loadlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = loadlib.c; sourceTree = "<group>"; };
+		A454A08E1530CEF0009BA3B7 /* loslib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = loslib.c; sourceTree = "<group>"; };
+		A454A08F1530CEF0009BA3B7 /* lualib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lualib.h; sourceTree = "<group>"; };
 		A477268B1413D79C006A9887 /* lapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lapi.c; sourceTree = "<group>"; };
 		A477268C1413D79C006A9887 /* lapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lapi.h; sourceTree = "<group>"; };
 		A477268D1413D79C006A9887 /* lauxlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lauxlib.c; sourceTree = "<group>"; };
@@ -150,6 +168,15 @@
 		A477268A1413D79C006A9887 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				A454A0871530CEF0009BA3B7 /* lbitlib.c */,
+				A454A0881530CEF0009BA3B7 /* lcorolib.c */,
+				A454A0891530CEF0009BA3B7 /* lctype.c */,
+				A454A08A1530CEF0009BA3B7 /* lctype.h */,
+				A454A08B1530CEF0009BA3B7 /* linit.c */,
+				A454A08C1530CEF0009BA3B7 /* liolib.c */,
+				A454A08D1530CEF0009BA3B7 /* loadlib.c */,
+				A454A08E1530CEF0009BA3B7 /* loslib.c */,
+				A454A08F1530CEF0009BA3B7 /* lualib.h */,
 				A477268B1413D79C006A9887 /* lapi.c */,
 				A477268C1413D79C006A9887 /* lapi.h */,
 				A477268D1413D79C006A9887 /* lauxlib.c */,
@@ -231,6 +258,8 @@
 				A47726E41413D79C006A9887 /* lundump.h in Headers */,
 				A47726E61413D79C006A9887 /* lvm.h in Headers */,
 				A47726E81413D79C006A9887 /* lzio.h in Headers */,
+				A454A0931530CEF0009BA3B7 /* lctype.h in Headers */,
+				A454A0981530CEF0009BA3B7 /* lualib.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,6 +341,13 @@
 				A47726E31413D79C006A9887 /* lundump.c in Sources */,
 				A47726E51413D79C006A9887 /* lvm.c in Sources */,
 				A47726E71413D79C006A9887 /* lzio.c in Sources */,
+				A454A0901530CEF0009BA3B7 /* lbitlib.c in Sources */,
+				A454A0911530CEF0009BA3B7 /* lcorolib.c in Sources */,
+				A454A0921530CEF0009BA3B7 /* lctype.c in Sources */,
+				A454A0941530CEF0009BA3B7 /* linit.c in Sources */,
+				A454A0951530CEF0009BA3B7 /* liolib.c in Sources */,
+				A454A0961530CEF0009BA3B7 /* loadlib.c in Sources */,
+				A454A0971530CEF0009BA3B7 /* loslib.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
