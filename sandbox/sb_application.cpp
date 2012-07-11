@@ -37,10 +37,10 @@ SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     
-    void register_math( luabind::LuaRegistrator& lua );
-    void register_resources( luabind::LuaRegistrator& lua );
-	void register_scene( luabind::LuaRegistrator& lua );
-	void register_controller( luabind::LuaRegistrator& lua );
+    void register_math( lua_State* lua );
+    void register_resources( lua_State* lua );
+	void register_scene( lua_State* lua );
+	void register_controller( lua_State* lua );
 	
     static void format_memory( char* buf, size_t size, GHL::UInt32 mem,const char* caption ) {
         if ( mem > 1024*1024 ) {
@@ -84,10 +84,10 @@ namespace Sandbox {
 	}
     
     void Application::BindModules( LuaVM* lua) {
-        register_math(lua->GetRegistrator());
-        register_resources(lua->GetRegistrator());
-        register_scene(lua->GetRegistrator());
-        register_controller(lua->GetRegistrator());
+        register_math(lua->GetVM());
+        register_resources(lua->GetVM());
+        register_scene(lua->GetVM());
+        register_controller(lua->GetVM());
     }
 	
     void GHL_CALL Application::Initialize() {
@@ -134,9 +134,9 @@ namespace Sandbox {
 			base_path+="/";
 		m_lua->SetBasePath(base_path.c_str());
 		
-        m_lua->GetRegistrator().extern_klass<Sandbox::Application>();
+        luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
         luabind::SetValue(m_lua->GetVM(), "application.app", this);
-        m_lua->GetRegistrator().raw_klass<GHL::Settings>();
+        luabind::RawClass<GHL::Settings>(m_lua->GetVM());
         luabind::SetValue(m_lua->GetVM(), "settings", settings);
 		
 #ifdef GHL_PLATFORM_IOS

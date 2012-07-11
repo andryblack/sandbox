@@ -198,20 +198,20 @@ namespace Sandbox {
 	namespace Chipmunk {
         
 		void Bind( LuaVM* lua ) {
-            lua->GetRegistrator().klass<Shape>();
-            lua->GetRegistrator().klass<Body>();
-            lua->GetRegistrator().klass<StaticBody>();
-            lua->GetRegistrator().klass<CircleShape>();
-            lua->GetRegistrator().klass<SegmentShape>();
-            lua->GetRegistrator().klass<PolyShape>();
-            lua->GetRegistrator().klass<BoxShape>();
-            lua->GetRegistrator().klass<Space>();
-            lua->GetRegistrator().klass<TransformAdapter>();
-            lua->GetRegistrator().klass<SpaceDebugDraw>();
-            lua->GetRegistrator().klass<BodyDebugDraw>();
-            lua->GetRegistrator().klass<Constraint>();
-            lua->GetRegistrator().klass<CollisionHandler>();
-            lua->GetRegistrator().klass<LuaCollisionHandler>();
+            luabind::Class<Shape>(lua->GetVM());
+            luabind::Class<Body>(lua->GetVM());
+            luabind::Class<StaticBody>(lua->GetVM());
+            luabind::Class<CircleShape>(lua->GetVM());
+            luabind::Class<SegmentShape>(lua->GetVM());
+            luabind::Class<PolyShape>(lua->GetVM());
+            luabind::Class<BoxShape>(lua->GetVM());
+            luabind::Class<Space>(lua->GetVM());
+            luabind::Class<TransformAdapter>(lua->GetVM());
+            luabind::Class<SpaceDebugDraw>(lua->GetVM());
+            luabind::Class<BodyDebugDraw>(lua->GetVM());
+            luabind::Class<Constraint>(lua->GetVM());
+            luabind::Class<CollisionHandler>(lua->GetVM());
+            luabind::Class<LuaCollisionHandler>(lua->GetVM());
             
             
 #if 0

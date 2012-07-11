@@ -132,7 +132,7 @@ namespace Sandbox {
     }
   
     void TCBSpline2d::Register( LuaVM* lua ) {
-        lua->GetRegistrator().klass<TCBSpline2d>();
+        luabind::Class<TCBSpline2d>(lua->GetVM());
     }
     
 }

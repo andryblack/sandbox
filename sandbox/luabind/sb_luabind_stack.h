@@ -49,6 +49,7 @@ namespace Sandbox {
         void lua_set_metatable( lua_State* L, const data_holder& holder );
         void lua_set_value( lua_State* L, const char* path );
         void lua_get_create_table(lua_State* L,const char* name);
+        void lua_create_metatable(lua_State* L,const meta::type_info* info);
         
         template <class T>
         inline T* get_ptr( const meta::type_info* from, void* data ) {
@@ -390,26 +391,8 @@ static Type get( lua_State* L, int idx ); \
         LUABIND_DECLARE_RAW_STACK_TYPE(unsigned int)
         LUABIND_DECLARE_RAW_STACK_TYPE(const char*)
         
-        template <class T>
-        inline void SetValue( lua_State* L, const char* path, const sb::shared_ptr<T>& t ) {
-            stack<sb::shared_ptr<T> >::push(L,t);
-            lua_set_value( L, path );
-        }
-        template <class T>
-        inline void SetValue( lua_State* L, const char* path, typename sb::type_traits<T>::parameter_type t ) {
-            stack<T>::push(L,t);
-            lua_set_value( L, path );
-        }
-        inline void SetValue( lua_State* L, const char* path, const char* t ) {
-            stack<const char*>::push(L,t);
-            lua_set_value( L, path );
-        }
-        template <class T>
-        inline void SetValue( lua_State* L, const char* path, T* t ) {
-            stack<T*>::push(L,t);
-            lua_set_value( L, path );
-        }
         
+    
         class stack_cleaner : public NotCopyable {
         public:
             explicit stack_cleaner( lua_State* L );
@@ -418,8 +401,6 @@ static Type get( lua_State* L, int idx ); \
             lua_State* m_L;
             int     m_top;
         };
-
-    
     }
 }
 

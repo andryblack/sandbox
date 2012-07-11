@@ -295,26 +295,26 @@ SB_META_END_KLASS_BIND()
 namespace Sandbox {
     
 
-    void register_controller( luabind::LuaRegistrator& lua ) {
-        lua.klass<Thread>();
-        lua.klass<LuaThread>();
-        lua.klass<ThreadsMgr>();
-        lua.klass<Controller>();
-        lua.klass<Event>();
-        lua.klass<LuaEvent>();
-        lua.klass<Processor>();
-        lua.klass<ControllerSplit>();
-        lua.klass<ControllerAngle>();
-        lua.klass<ControllerScale>();
-        lua.klass<ControllerScaleX>();
-        lua.klass<ControllerScaleY>();
-        lua.klass<ControllerBidirect>();
-        lua.klass<ControllerPhase>();
-        lua.klass<ControllerMap>();
-        lua.klass<ControllerTranslate>();
-        lua.klass<ControllerElastic>();
-        lua.klass<ControllerColor>();
-        lua.klass<ControllerAlpha>();
+    void register_controller( lua_State* lua ) {
+        luabind::Class<Thread>(lua);
+        luabind::Class<LuaThread>(lua);
+        luabind::Class<ThreadsMgr>(lua);
+        luabind::Class<Controller>(lua);
+        luabind::Class<Event>(lua);
+        luabind::Class<LuaEvent>(lua);
+        luabind::Class<Processor>(lua);
+        luabind::Class<ControllerSplit>(lua);
+        luabind::Class<ControllerAngle>(lua);
+        luabind::Class<ControllerScale>(lua);
+        luabind::Class<ControllerScaleX>(lua);
+        luabind::Class<ControllerScaleY>(lua);
+        luabind::Class<ControllerBidirect>(lua);
+        luabind::Class<ControllerPhase>(lua);
+        luabind::Class<ControllerMap>(lua);
+        luabind::Class<ControllerTranslate>(lua);
+        luabind::Class<ControllerElastic>(lua);
+        luabind::Class<ControllerColor>(lua);
+        luabind::Class<ControllerAlpha>(lua);
     }
     
 }

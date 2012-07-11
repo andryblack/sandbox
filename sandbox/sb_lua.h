@@ -27,10 +27,6 @@ namespace GHL {
 
 namespace Sandbox {
     
-    namespace luabind {
-        class LuaRegistrator;
-    }
-	
     class Resources;
     
 	class LuaVM;
@@ -64,7 +60,6 @@ namespace Sandbox {
         GHL::UInt32 GetMemoryUsed() const { return m_mem_use;}
         
         lua_State* GetVM() { return m_L; }
-        luabind::LuaRegistrator& GetRegistrator();
         
         const LuaVMHelperPtr& GetHelper() const { return m_helper; }
         static LuaVM* GetInstance( lua_State* L ); 
@@ -80,7 +75,6 @@ namespace Sandbox {
 		void free(GHL::Byte* data,size_t size);
 		void resize(GHL::Byte* data,size_t osize,size_t nsize);
         static void* lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
-        luabind::LuaRegistrator*    m_registrator;
     };
 }
 

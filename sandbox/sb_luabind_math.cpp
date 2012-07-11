@@ -39,9 +39,9 @@ SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     
-    void register_math( luabind::LuaRegistrator& lua ) {
-        lua.raw_klass<Vector2f>();
-        lua.raw_klass<Vector3f>();
+    void register_math( lua_State* lua ) {
+        luabind::RawClass<Vector2f>(lua);
+        luabind::RawClass<Vector3f>(lua);
     }
     
 }

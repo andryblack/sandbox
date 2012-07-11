@@ -134,22 +134,22 @@ SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     
-    void register_scene( luabind::LuaRegistrator& lua ) {
-        lua.klass<SceneObject>();
-        lua.klass<Sprite>();
-        lua.klass<ColorizedSprite>();
-        lua.klass<ClearScene>();
-        lua.klass<FillRect>();
-        lua.klass<Background>();
-        lua.klass<Label>();
-        lua.klass<Container>();
-        lua.klass<Widget>();
-        lua.klass<TouchButtonWidget>();
-        lua.enumeration<BlendMode>();
-        lua.klass<ContainerBlend>();
-        lua.klass<ContainerTransform>();
-        lua.klass<ContainerColor>();
-        lua.extern_klass<Scene>();
+    void register_scene( lua_State* lua ) {
+        luabind::Class<SceneObject>(lua);
+        luabind::Class<Sprite>(lua);
+        luabind::Class<ColorizedSprite>(lua);
+        luabind::Class<ClearScene>(lua);
+        luabind::Class<FillRect>(lua);
+        luabind::Class<Background>(lua);
+        luabind::Class<Label>(lua);
+        luabind::Class<Container>(lua);
+        luabind::Class<Widget>(lua);
+        luabind::Class<TouchButtonWidget>(lua);
+        luabind::Enum<BlendMode>(lua);
+        luabind::Class<ContainerBlend>(lua);
+        luabind::Class<ContainerTransform>(lua);
+        luabind::Class<ContainerColor>(lua);
+        luabind::ExternClass<Scene>(lua);
     }
 
 #if 0

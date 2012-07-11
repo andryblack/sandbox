@@ -95,15 +95,15 @@ SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     
-    void register_resources( luabind::LuaRegistrator& lua ) {
-        lua.raw_klass<Color>();
-        lua.raw_klass<Rectf>();
-        lua.raw_klass<Recti>();
-        lua.klass<Font>();
-        lua.enumeration<FontAlign>();
-        lua.klass<Image>();
-        lua.extern_klass<Resources>();
-        lua.klass<Texture>();
+    void register_resources( lua_State* lua ) {
+        luabind::RawClass<Color>(lua);
+        luabind::RawClass<Rectf>(lua);
+        luabind::RawClass<Recti>(lua);
+        luabind::Class<Font>(lua);
+        luabind::Enum<FontAlign>(lua);
+        luabind::Class<Image>(lua);
+        luabind::ExternClass<Resources>(lua);
+        luabind::Class<Texture>(lua);
     }
     
     /*

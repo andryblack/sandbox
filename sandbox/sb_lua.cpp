@@ -117,8 +117,7 @@ namespace Sandbox {
     LuaVM::LuaVM( Resources* resources ) : 
         m_resources( resources ), 
         m_L(0),
-        m_mem_use(0),
-        m_registrator(0)
+        m_mem_use(0)
     {
         m_L = lua_newstate(&LuaVM::lua_alloc_func,this);
         m_helper = LuaVMHelperPtr( new LuaVMHelper() );
@@ -170,8 +169,6 @@ namespace Sandbox {
     }
     
     LuaVM::~LuaVM() {
-        if (m_registrator) 
-            delete m_registrator;
         if (m_L) {
             lua_pushnil(m_L);
             lua_setglobal(m_L, "LuaVM_instance");
@@ -225,13 +222,7 @@ namespace Sandbox {
 		return true;
     }
     
-    luabind::LuaRegistrator& LuaVM::GetRegistrator() {
-        if (!m_registrator) {
-            m_registrator = new luabind::LuaRegistrator(m_L);
-        }
-        return *m_registrator;
-    }
-    
+   
     int LuaVM::lua_module_searcher(lua_State *L) {
         LuaVM* this_ = reinterpret_cast<LuaVM*>(lua_touserdata(L, lua_upvalueindex(1)));
         const char *name = luaL_checkstring(L, 1);

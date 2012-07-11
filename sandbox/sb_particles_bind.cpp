@@ -39,9 +39,9 @@ SB_META_END_KLASS_BIND()
 namespace Sandbox {
     
     void ParticlesSystem::Bind( LuaVM* lua ) {
-        lua->GetRegistrator().extern_klass<ParticleProcessorBlock>();
-        lua->GetRegistrator().klass<ParticlesController>();
-        lua->GetRegistrator().klass<ParticlesSystem>();
+        luabind::ExternClass<ParticleProcessorBlock>(lua->GetVM());
+        luabind::Class<ParticlesController>(lua->GetVM());
+        luabind::Class<ParticlesSystem>(lua->GetVM());
         BindBuiltins(lua);
     }
 

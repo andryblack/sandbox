@@ -49,6 +49,6 @@ namespace Sandbox {
 		return false;
 	}
 	void Accelerometer::Bind( LuaVM* lua ) {
-		lua->GetRegistrator().klass<Accelerometer>();
+        luabind::Class<Accelerometer>(lua->GetVM());
 	}
 }
