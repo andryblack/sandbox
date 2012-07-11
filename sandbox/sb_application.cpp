@@ -8,8 +8,9 @@
  */
 
 #include "sb_application.h"
-#include "sb_bind.h"
 #include "sb_touch_info.h"
+
+#include "luabind/sb_luabind.h"
 
 #include <ghl_settings.h>
 #include <ghl_vfs.h>
@@ -19,7 +20,27 @@
 #define snprintf _snprintf
 #endif
 
+
+SB_META_DECLARE_KLASS(GHL::Settings, void)
+SB_META_BEGIN_KLASS_BIND(GHL::Settings)
+SB_META_PROPERTY(width)
+SB_META_PROPERTY(height)
+SB_META_PROPERTY(fullscreen)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Application, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
+SB_META_PROPERTY_RW(SoundEnabled, GetSoundEnabled, SetSoundEnabled)
+SB_META_PROPERTY_RW(MusicEnabled, GetMusicEnabled, SetMusicEnabled)
+SB_META_END_KLASS_BIND()
+
+
 namespace Sandbox {
+    
+    void register_math( luabind::LuaRegistrator& lua );
+    void register_resources( luabind::LuaRegistrator& lua );
+	void register_scene( luabind::LuaRegistrator& lua );
+	void register_controller( luabind::LuaRegistrator& lua );
 	
     static void format_memory( char* buf, size_t size, GHL::UInt32 mem,const char* caption ) {
         if ( mem > 1024*1024 ) {
@@ -61,6 +82,13 @@ namespace Sandbox {
 		delete m_resources;
 		delete m_graphics;
 	}
+    
+    void Application::BindModules( LuaVM* lua) {
+        register_math(lua->GetRegistrator());
+        register_resources(lua->GetRegistrator());
+        register_scene(lua->GetRegistrator());
+        register_controller(lua->GetRegistrator());
+    }
 	
     void GHL_CALL Application::Initialize() {
         
@@ -99,65 +127,48 @@ namespace Sandbox {
 		m_resources->SetBasePath(base_path.c_str());
 		
         
-        m_lua = new Lua(m_resources);
+        m_lua = new LuaVM(m_resources);
         
 		base_path=m_lua_base_path;
 		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
 			base_path+="/";
 		m_lua->SetBasePath(base_path.c_str());
 		
-        SB_BIND_BEGIN_BIND
-		{
-			SB_BIND_BEGIN_RAW_CLASS( GHL::Settings )
-			SB_BIND_BEGIN_PROPERTYS
-			SB_BIND_PROPERTY_RAW(GHL::Settings,width,GHL::UInt32)
-			SB_BIND_PROPERTY_RAW(GHL::Settings,height,GHL::UInt32)
-			SB_BIND_PROPERTY_RAW(GHL::Settings,fullscreen,bool)
-			SB_BIND_END_PROPERTYS
-			SB_BIND_END_CLASS
-			SB_BIND(m_lua)
-		}
-		{
-			SB_BIND_BEGIN_EXTERN_CLASS( Sandbox::Application )
-			SB_BIND_BEGIN_PROPERTYS
-            SB_BIND_PROPERTY_RW(Sandbox::Application, SoundEnabled, GetSoundEnabled, SetSoundEnabled, bool)
-            SB_BIND_PROPERTY_RW(Sandbox::Application, MusicEnabled, GetMusicEnabled, SetMusicEnabled, bool)
-            SB_BIND_END_PROPERTYS
-			SB_BIND_END_CLASS
-			SB_BIND(m_lua)
-		}
-		SB_BIND_END_BIND
+        m_lua->GetRegistrator().extern_klass<Sandbox::Application>();
+        luabind::SetValue(m_lua->GetVM(), "application.app", this);
+        m_lua->GetRegistrator().raw_klass<GHL::Settings>();
+        luabind::SetValue(m_lua->GetVM(), "settings", settings);
 		
-		m_lua->SetValue(settings, "settings", "GHL::Settings");
-		m_lua->SetValue(this, "application.app", "Sandbox::Application");
-        
 #ifdef GHL_PLATFORM_IOS
-        m_lua->SetValue("iOS", "platform.os", "const char*");
+        luabind::SetValue(m_lua->GetVM(), "platform.os", "iOS");
 #endif
 
 #ifdef GHL_PLATFORM_MAC
-        m_lua->SetValue("OSX", "platform.os", "const char*");
+        luabind::SetValue(m_lua->GetVM(), "platform.os", "OSX");
 #endif
 
 #ifdef GHL_PLATFORM_WIN
-        m_lua->SetValue("WIN32", "platform.os", "const char*");
+        luabind::SetValue(m_lua->GetVM(), "platform.os", "WIN32");
 #endif
+        
 		BindModules( m_lua );
 		m_lua->DoFile("settings.lua");
+        
+        luabind::SetValue(m_lua->GetVM(), "settings", 0);
 	}
 	///
 	bool GHL_CALL Application::Load() {
 		ConfigureDevice( m_system );
 		m_graphics = new Graphics();
 		m_resources->Init(m_render, m_image_decoder);
-        m_lua->SetValue(m_resources, "application.resources", "Sandbox::Resources");
+        luabind::SetValue(m_lua->GetVM(), "application.resources", m_resources);
 		m_lua->DoFile("load.lua");
 		if (!LoadResources(*m_resources))
 			return false;
 		m_main_scene = new Scene();
-		m_lua->SetValue(m_main_scene, "application.scene", "Sandbox::Scene");
+        luabind::SetValue(m_lua->GetVM(), "application.scene", m_main_scene);
 		m_main_thread = new ThreadsMgr();
-		m_lua->SetValue(m_main_thread, "application.thread", "Sandbox::ThreadsMgr");
+        luabind::SetValue(m_lua->GetVM(), "application.thread", m_main_thread);
 		OnLoaded();
 		m_lua->DoFile("main.lua");
 		return true;

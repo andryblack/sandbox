@@ -9,7 +9,13 @@
 
 #include "sb_accelerometer.h"
 #include <ghl_system.h>
-#include "sb_bind.h"
+#include "luabind/sb_luabind.h"
+#include "sb_lua.h"
+
+SB_META_DECLARE_KLASS(Sandbox::Accelerometer, Sandbox::Thread)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Accelerometer)
+SB_META_PROPERTY_RO(Data,GetData)
+SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
 	
@@ -42,16 +48,7 @@ namespace Sandbox {
 		}
 		return false;
 	}
-	
-	void Accelerometer::Bind( Lua* lua ) {
-		SB_BIND_BEGIN_BIND
-		SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::Accelerometer,Sandbox::Thread)
-		SB_BIND_BEGIN_PROPERTYS
-		SB_BIND_PROPERTY_RO(Sandbox::Accelerometer,Data,GetData,Sandbox::Vector3f)
-		SB_BIND_END_PROPERTYS
-		SB_BIND_END_CLASS
-		SB_BIND(lua)
-		SB_BIND_END_BIND
+	void Accelerometer::Bind( LuaVM* lua ) {
+		lua->GetRegistrator().klass<Accelerometer>();
 	}
-	
 }

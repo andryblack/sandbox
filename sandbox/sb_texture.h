@@ -35,9 +35,15 @@ namespace Sandbox {
 			m_texture->SetMinFilter(f?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
 			m_texture->SetMagFilter(f?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
 		}
+        bool GetFiltered() const {
+            return m_texture->GetMagFilter() != GHL::TEX_FILTER_NEAR;
+        }
         void SetTiled(bool t) {
 			m_texture->SetWrapModeU(t?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
 			m_texture->SetWrapModeV(t?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
+        }
+        bool GetTiled() const {
+            return m_texture->GetWrapModeU() != GHL::TEX_WRAP_CLAMP;
         }
 		float GetWidth() const { return float(m_texture->GetWidth());}
 		float GetHeight() const { return float(m_texture->GetHeight());}

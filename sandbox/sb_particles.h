@@ -19,7 +19,7 @@
 
 namespace Sandbox {
     
-    class Lua;
+    class LuaVM;
     
     struct ParticlesInstance {
         sb::vector<Particle>   particles;
@@ -94,19 +94,20 @@ namespace Sandbox {
         void Draw( Graphics& g ) const;
         void Update( float dt );
         
-        static void Bind( Lua* lua );
-        static void BindProcessor( Lua* lua, const char* name,const ParticleProcessorBlock* block);
+        static void Bind( LuaVM* lua );
+        static void BindProcessor( LuaVM* lua, const char* name,const ParticleProcessorBlock* block);
         
         void SetPosition( const Sandbox::Vector2f& pos ) { m_instance.pos = pos; }
         const Vector2f& GetPosition() const { return m_instance.pos; }
         
         void SetCompleteEvent( const EventPtr& evnt ) { m_instance.complete_event = evnt; }
+        const EventPtr& GetCompleteEvent() const { return m_instance.complete_event; }
         
         void Stop();
     private:
         ParticlesControllerPtr  m_controller;
         ParticlesInstance   m_instance;
-        static void BindBuiltins( Lua* lua );
+        static void BindBuiltins( LuaVM* lua );
     };
     typedef sb::shared_ptr<ParticlesSystem> ParticlesSystemPtr;
 }

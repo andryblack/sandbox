@@ -9,13 +9,115 @@
 
 #include "sb_chipmunk_bind.h"
 #include "sb_chipmunk.h"
-#include "sb_bind.h"
+#include "luabind/sb_luabind.h"
+#include "sb_lua.h"
 #include "sb_log.h"
 
-extern "C" {
-#include "../lua/src/lua.h"
-#include "../lua/src/lauxlib.h"
-}
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::Shape, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::Shape)
+SB_META_PROPERTY_RW_DEF(Sensor)
+SB_META_PROPERTY_RW_DEF(Elasticity)
+SB_META_PROPERTY_RW_DEF(Friction)
+SB_META_PROPERTY_RW_DEF(CollisionType)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::Body, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::Body)
+SB_META_CONSTRUCTOR((float,float))
+SB_META_METHOD(Local2World)
+SB_META_METHOD(World2Local)
+SB_META_METHOD(ResetForces)
+SB_META_METHOD(Activate)
+SB_META_METHOD(Sleep)
+SB_META_METHOD(ApplyForce)
+SB_META_METHOD(ApplyImpulse)
+SB_META_PROPERTY_RW_DEF(Mass)
+SB_META_PROPERTY_RW_DEF(Moment)
+SB_META_PROPERTY_RW_DEF(Pos)
+SB_META_PROPERTY_RW_DEF(Vel)
+SB_META_PROPERTY_RW_DEF(Force)
+SB_META_PROPERTY_RW_DEF(Angle)
+SB_META_PROPERTY_RW_DEF(AngVel)
+SB_META_PROPERTY_RW_DEF(Torque)
+SB_META_PROPERTY_RO(Rot,GetRot)
+SB_META_PROPERTY_RW_DEF(VelLimit)
+SB_META_PROPERTY_RW_DEF(AngVelLimit)
+SB_META_PROPERTY_RO(IsSleeping,IsSleeping)
+SB_META_PROPERTY_RO(IsStatic,IsStatic)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::StaticBody, Sandbox::Chipmunk::Body)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::StaticBody)
+SB_META_CONSTRUCTOR(())
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::CircleShape, Sandbox::Chipmunk::Shape)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::CircleShape)
+SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&, float,const Sandbox::Vector2f&))
+SB_META_PROPERTY_RO(Radius,GetRadius)
+SB_META_PROPERTY_RO(Offset,GetOffset)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::SegmentShape, Sandbox::Chipmunk::Shape)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::SegmentShape)
+SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&, const Sandbox::Vector2f&,const Sandbox::Vector2f&,float))
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::PolyShape, Sandbox::Chipmunk::Shape)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::PolyShape)
+SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&,  const std::vector<Vector2f>&,const Sandbox::Vector2f&))
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::BoxShape, Sandbox::Chipmunk::Shape)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::BoxShape)
+SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&,  float,float))
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::Space, Sandbox::Thread)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::Space)
+SB_META_CONSTRUCTOR(())
+SB_META_METHOD(AddBody)
+SB_META_METHOD(AddShape)
+SB_META_METHOD(AddConstraint)
+SB_META_METHOD(AddCollisionHandler)
+SB_META_METHOD(RemoveBody)
+SB_META_METHOD(RemoveShape)
+SB_META_METHOD(RemoveConstraint)
+SB_META_METHOD(RemoveCollisionHandler)
+SB_META_PROPERTY_RW_DEF(Gravity)
+SB_META_PROPERTY_RW_DEF(Iterations)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::TransformAdapter, Sandbox::ContainerTransform)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::TransformAdapter)
+SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&))
+SB_META_PROPERTY_RW_DEF(ApplyRotate)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::SpaceDebugDraw, Sandbox::SceneObject)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::SpaceDebugDraw)
+SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::SpacePtr&))
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::BodyDebugDraw, Sandbox::SceneObject)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::BodyDebugDraw)
+SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&))
+SB_META_PROPERTY_RW_DEF(Color)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::Constraint, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::Constraint)
+SB_META_PROPERTY_RW_DEF(MaxForce)
+SB_META_PROPERTY_RW_DEF(MaxBias)
+SB_META_PROPERTY_RO(A,GetA)
+SB_META_PROPERTY_RO(B,GetB)
+SB_META_PROPERTY_RO(Impulse,GetImpulse)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::CollisionHandler, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::CollisionHandler)
+SB_META_END_KLASS_BIND()
 
 
 namespace Sandbox {
@@ -24,11 +126,10 @@ namespace Sandbox {
         
         
         
-        
         static const char* const LuaChipmunkModule = "Sanbox:LuaChipmunk";
         class LuaCollisionHandler : public CollisionHandler {
         public:
-            explicit LuaCollisionHandler(LuaHelperWeakPtr ptr,long a,long b) : CollisionHandler(a,b), m_ref(ptr) {}
+            explicit LuaCollisionHandler(LuaVMHelperWeakPtr ptr,long a,long b) : CollisionHandler(a,b), m_ref(ptr) {}
             ~LuaCollisionHandler() {
             }
             void SetFunction(lua_State* L) {
@@ -36,15 +137,13 @@ namespace Sandbox {
             }
             void Handle( const ShapePtr& a, const ShapePtr& b ) {
                 if (m_ref.Valid()) {
-                    if ( LuaHelperPtr lua = m_ref.GetHelper()) {
+                    if ( LuaVMHelperPtr lua = m_ref.GetHelper()) {
                         lua_State* L = lua->lua->GetVM();
                         sb_assert(L);
                         m_ref.GetObject(L);
                         sb_assert(lua_isfunction(L,-1));
-                        Bind::StackHelper stck_a(L,0,"Sandbox::Chipmunk::Shape");
-                        stck_a.PushValue(a);
-                        Bind::StackHelper stck_b(L,0,"Sandbox::Chipmunk::Shape");
-                        stck_a.PushValue(b);
+                        luabind::stack<ShapePtr>::push(L, a);
+                        luabind::stack<ShapePtr>::push(L, b);
                         int res = lua_pcall(L, 2, 0, 0);
                         if (res) {
                             LogError(LuaChipmunkModule) << " Failed script Handle  " ;
@@ -55,25 +154,23 @@ namespace Sandbox {
                     }
                 }            
             }
-            static void constructor_func(const Bind::StackHelper* hpr) {
-                lua_State* L = hpr->GetState();
+        public:
+            static int constructor_func(lua_State* L) {
                 if (!lua_isnumber(L, 2)) {
-                    luaL_argerror(L, 2, "a");
-                    return;
+                    luabind::lua_argerror(L, 2, "number",0);
+                    return 0;
                 }
                 long a = lua_tointeger(L, 2);
                 if (!lua_isnumber(L, 3)) {
-                    luaL_argerror(L, 3, "b");
-                    return;
+                    luabind::lua_argerror(L, 3, "number",0);
+                    return 0;
                 }
                 long b = lua_tointeger(L, 3);
                 if (!lua_isfunction(L,4)) {
-                    char buf[128];
-                    ::snprintf(buf,127,"function expected, got %s",luaL_typename(L, 2));
-                    luaL_argerror(L, 4, buf);
-                    return;
+                    luabind::lua_argerror(L, 4, "function",0);
+                    return 0;
                 }
-                Lua* lua = Lua::GetPtr(L);
+                LuaVM* lua = LuaVM::GetInstance(L);
                 LuaCollisionHandler* raw = new LuaCollisionHandler(lua->GetHelper(),a,b);
                 lua_State* main_state = lua->GetVM();
                 lua_pushvalue(L, 4);
@@ -81,29 +178,46 @@ namespace Sandbox {
                     lua_xmove(L, main_state, 1);
                 }
                 raw->SetFunction(main_state);
-                new (hpr->new_object_shared_ptr() ) sb::shared_ptr<LuaCollisionHandler>( raw );
-                return;
+                luabind::stack<sb::shared_ptr<LuaCollisionHandler> >::push(L, sb::shared_ptr<LuaCollisionHandler>( raw ));
+                return 1;
             }
         private:
             LuaReference	m_ref;
         };
+
+    }
+}
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::LuaCollisionHandler, Sandbox::Chipmunk::CollisionHandler)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::LuaCollisionHandler)
+bind(constructor(&Sandbox::Chipmunk::LuaCollisionHandler::constructor_func));
+SB_META_END_KLASS_BIND()
+
+namespace Sandbox {
+    
+	namespace Chipmunk {
         
-        
-		void Bind( Lua* lua ) {
+		void Bind( LuaVM* lua ) {
+            lua->GetRegistrator().klass<Shape>();
+            lua->GetRegistrator().klass<Body>();
+            lua->GetRegistrator().klass<StaticBody>();
+            lua->GetRegistrator().klass<CircleShape>();
+            lua->GetRegistrator().klass<SegmentShape>();
+            lua->GetRegistrator().klass<PolyShape>();
+            lua->GetRegistrator().klass<BoxShape>();
+            lua->GetRegistrator().klass<Space>();
+            lua->GetRegistrator().klass<TransformAdapter>();
+            lua->GetRegistrator().klass<SpaceDebugDraw>();
+            lua->GetRegistrator().klass<BodyDebugDraw>();
+            lua->GetRegistrator().klass<Constraint>();
+            lua->GetRegistrator().klass<CollisionHandler>();
+            lua->GetRegistrator().klass<LuaCollisionHandler>();
+            
+            
+#if 0
 			SB_BIND_BEGIN_BIND
             {
 				SB_BIND_BEGIN_SHARED_CLASS( Sandbox::Chipmunk::CollisionHandler )
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_CLASS( Sandbox::Chipmunk::Shape )
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Shape, Sensor, GetSensor, SetSensor, bool )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Shape, Elasticity, GetElasticity, SetElasticity, float )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Shape, Friction, GetFriction, SetFriction, float )
-                SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Shape, CollisionType, GetCollisionType, SetCollisionType, int )
-				SB_BIND_END_PROPERTYS
 				SB_BIND_END_CLASS
 				SB_BIND( lua );
 			}
@@ -113,82 +227,8 @@ namespace Sandbox {
                 SB_BIND_END_CLASS
                 SB_BIND( lua );
             }
-			{
-				SB_BIND_BEGIN_SHARED_CLASS( Sandbox::Chipmunk::Body )
-				SB_BIND_SHARED_CONSTRUCTOR( Sandbox::Chipmunk::Body,(float,float) )
-				SB_BIND_BEGIN_METHODS
-				SB_BIND_METHOD( Sandbox::Chipmunk::Body, Local2World, Sandbox::Vector2f(Sandbox::Vector2f) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Body, World2Local, Sandbox::Vector2f(Sandbox::Vector2f) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Body, ResetForces, void() )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Body, Activate, void() )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Body, Sleep, void() )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Body, ApplyForce, void(Sandbox::Vector2f,Sandbox::Vector2f) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Body, ApplyImpulse, void(Sandbox::Vector2f,Sandbox::Vector2f) )
-				SB_BIND_END_METHODS
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, Mass, GetMass, SetMass, float )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, Moment, GetMoment, SetMoment, float )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, Pos, GetPos, SetPos, Sandbox::Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, Vel, GetVel, SetVel, Sandbox::Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, Force, GetForce, SetForce, Sandbox::Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, Angle, GetAngle, SetAngle, float )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, AngVel, GetAngVel, SetAngVel, float )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, Torque, GetTorque, SetTorque, float )
-				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::Body, Rot, GetRot, Sandbox::Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, VelLimit, GetVelLimit, SetVelLimit, float )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Body, AngVelLimit, GetAngVelLimit, SetAngVelLimit, float )
-				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::Body, IsSleeping, IsSleeping, bool )
-				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::Body, IsStatic, IsStatic, bool )
-				SB_BIND_END_PROPERTYS
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::StaticBody,Sandbox::Chipmunk::Body )
-				SB_BIND_SHARED_CONSTRUCTOR( Sandbox::Chipmunk::StaticBody,() )
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::CircleShape,Sandbox::Chipmunk::Shape)
-				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::CircleShape, (Sandbox::Chipmunk::Body,float,Sandbox::Vector2f),(const Sandbox::Chipmunk::BodyPtr&, float,const Sandbox::Vector2f&))
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::CircleShape, Radius, GetRadius, float )
-				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::CircleShape, Offset, GetOffset, Vector2f )
-				SB_BIND_END_PROPERTYS
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::SegmentShape,Sandbox::Chipmunk::Shape)
-				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::SegmentShape, (Sandbox::Chipmunk::Body,Sandbox::Vector2f,Sandbox::Vector2f,float),(const Sandbox::Chipmunk::BodyPtr&, const Sandbox::Vector2f&,const Sandbox::Vector2f&,float))
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::PolyShape,Sandbox::Chipmunk::Shape)
-				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::PolyShape, (Sandbox::Chipmunk::Body, Sandbox::Vector2fList,Sandbox::Vector2f),(const Sandbox::Chipmunk::BodyPtr&, const std::vector<Vector2f>&,const Sandbox::Vector2f&))
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::BoxShape,Sandbox::Chipmunk::Shape)
-				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::BoxShape, (Sandbox::Chipmunk::Body,float,float),(const Sandbox::Chipmunk::BodyPtr&, float,float))
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_CLASS( Sandbox::Chipmunk::Constraint )
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::Constraint, A, GetA, Sandbox::Chipmnk::Body )
-				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::Constraint, B, GetB, Sandbox::Chipmnk::Body )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Constraint, MaxForce, GetMaxForce, SetMaxForce, float )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Constraint, MaxBias, GetMaxBias, SetMaxBias, float )
-				SB_BIND_PROPERTY_RO( Sandbox::Chipmunk::Constraint, Impulse, GetImpulse, float )
-				SB_BIND_END_PROPERTYS
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
+			
+						
 			{
 				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::PinJoint,Sandbox::Chipmunk::Constraint)
 				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::PinJoint, (Sandbox::Chipmunk::Body,
@@ -358,54 +398,13 @@ namespace Sandbox {
 			}
 			
 			
-			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::Space, Sandbox::Thread )
-				SB_BIND_SHARED_CONSTRUCTOR( Sandbox::Chipmunk::Space, () )
-				SB_BIND_BEGIN_METHODS
-				SB_BIND_METHOD( Sandbox::Chipmunk::Space, AddBody, void(Sandbox::Chipmunk::Body) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Space, AddShape, void(Sandbox::Chipmunk::Shape) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Space, AddConstraint, void(Sandbox::Chipmunk::Constraint) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Space, AddCollisionHandler, void(Sandbox::Chipmunk::CollisionHandler) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Space, RemoveBody, void(Sandbox::Chipmunk::Body) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Space, RemoveShape, void(Sandbox::Chipmunk::Shape) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Space, RemoveConstraint, void(Sandbox::Chipmunk::Constraint) )
-				SB_BIND_METHOD( Sandbox::Chipmunk::Space, RemoveCollisionHandler, void(Sandbox::Chipmunk::CollisionHandler) )
-				SB_BIND_END_METHODS
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Space, Gravity, GetGravity, SetGravity, Sandbox::Vector2f )
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::Space, Iterations, GetIterations, SetIterations, int )
-				SB_BIND_END_PROPERTYS
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::TransformAdapter, Sandbox::ContainerTransform )
-				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::TransformAdapter, (Sandbox::Chipmunk::Body),(const Sandbox::Chipmunk::BodyPtr&) )
-				SB_BIND_BEGIN_METHODS
-				SB_BIND_END_METHODS
-                SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::TransformAdapter, ApplyRotate, GetApplyRotate, SetApplyRotate, bool )
-				SB_BIND_END_PROPERTYS
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::SpaceDebugDraw, Sandbox::Object )
-				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::SpaceDebugDraw, (Sandbox::Chipmunk::Space),(const Sandbox::Chipmunk::SpacePtr&) )
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
-			{
-				SB_BIND_BEGIN_SHARED_SUBCLASS( Sandbox::Chipmunk::BodyDebugDraw, Sandbox::Object )
-				SB_BIND_SHARED_CONSTRUCTOR_( Sandbox::Chipmunk::BodyDebugDraw, (Sandbox::Chipmunk::Body),(const Sandbox::Chipmunk::BodyPtr&) )
-				SB_BIND_BEGIN_PROPERTYS
-				SB_BIND_PROPERTY_RW( Sandbox::Chipmunk::BodyDebugDraw, Color, GetColor,SetColor,Sandbox::Color)
-				SB_BIND_END_PROPERTYS
-				SB_BIND_END_CLASS
-				SB_BIND( lua );
-			}
+			
+			
 			SB_BIND_END_BIND
+#endif
+
 		}
+
 	}
 	
 }

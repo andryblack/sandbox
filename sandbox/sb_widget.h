@@ -37,8 +37,11 @@ namespace Sandbox {
     class TouchButtonWidget : public Widget {
     public:
         void SetActivateEvent( const EventPtr& e) { m_activate_event = e; }
+        const EventPtr& GetActivateEvent() const { return m_activate_event; }
         void SetDeactivateEvent( const EventPtr& e) { m_deactivate_event = e;}
+        const EventPtr& GetDeactivateEvent() const { return m_deactivate_event; }
         void SetTouchUpInsideEvent( const EventPtr& e) {m_touch_event = e;}
+        const EventPtr& GetTouchUpInsideEvent() const { return m_touch_event; }
     protected:
         virtual void OnTouchEnter();
         virtual void OnTouchLeave();

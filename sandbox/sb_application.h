@@ -19,7 +19,13 @@
 namespace Sandbox {
 	
 	class Application : public GHL::Application {
-	protected:
+    public:
+        void SetSoundEnabled( bool e );
+        bool GetSoundEnabled() const;
+        void SetMusicEnabled( bool e );
+        bool GetMusicEnabled() const;
+
+  	protected:
 		Application();
 		virtual ~Application();
 		virtual void Update(float) {}
@@ -32,13 +38,13 @@ namespace Sandbox {
 			m_resources_base_path = path;
 		}
         /// bind Lua modules
-		virtual void BindModules( Lua* ) {}
+		virtual void BindModules( LuaVM* );
 		virtual void OnLoaded() {}
 		virtual void ConfigureDevice(GHL::System*) {}
 		GHL::System* GetSystem() const { return m_system;}
 		GHL::VFS* GetVFS() const { return m_vfs;}
 		GHL::Render* GetRender() const { return m_render;}
-		Lua* GetLua() const { return m_lua;}
+		LuaVM* GetLua() const { return m_lua;}
 		ThreadsMgr* GetThreads() const { return m_main_thread;}
 		Resources* GetResources() const { return m_resources;}
 		
@@ -46,18 +52,14 @@ namespace Sandbox {
 		
 		void SetClearColor(const Color& c);
         
-        void SetSoundEnabled( bool e );
-        bool GetSoundEnabled() const;
         
-        void SetMusicEnabled( bool e );
-        bool GetMusicEnabled() const;
 	private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
 		GHL::Render*	m_render;
 		GHL::ImageDecoder*	m_image_decoder;
 		GHL::Sound*		m_sound;
-		Lua*			m_lua;
+		LuaVM*			m_lua;
 		Graphics*		m_graphics;
 		Resources*		m_resources;
 		std::string		m_lua_base_path;

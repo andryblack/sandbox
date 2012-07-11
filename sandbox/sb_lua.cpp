@@ -8,15 +8,12 @@
  */
 
 #include "sb_lua.h"
+#include "luabind/sb_luabind.h"
 
 extern "C" {
 #include "../lua/src/lua.h"
 #include "../lua/src/lauxlib.h"
-	LUALIB_API int (luaopen_base) (lua_State *L);
-	LUALIB_API int (luaopen_table) (lua_State *L);
-	LUALIB_API int (luaopen_string) (lua_State *L);
-	LUALIB_API int (luaopen_math) (lua_State *L);
-	LUALIB_API int (luaopen_debug) (lua_State *L);
+#include "../lua/src/lualib.h"
 }
 
 #include <ghl_types.h>
@@ -25,7 +22,6 @@ extern "C" {
 #include <algorithm>
 
 #include "sb_inplace_string.h"
-#include "sb_bind.h"
 #include "sb_event.h"
 #include "sb_log.h"
 #include "sb_resources.h"
@@ -35,10 +31,10 @@ namespace Sandbox {
     static const char* MODULE = "Sanbox:Lua";
     
 	
-	LuaReference::LuaReference( const LuaHelperWeakPtr& ptr ) : m_lua(ptr),m_ref(LUA_NOREF) {
+	LuaReference::LuaReference( const LuaVMHelperWeakPtr& ptr ) : m_lua(ptr),m_ref(LUA_NOREF) {
 	}
 	LuaReference::~LuaReference() {
-		if (LuaHelperPtr lua = m_lua.lock()) {
+		if (LuaVMHelperPtr lua = m_lua.lock()) {
 			UnsetObject(lua->lua->GetVM());
 		}
 	}
@@ -47,102 +43,20 @@ namespace Sandbox {
 	}
 	void LuaReference::SetObject( lua_State* state ) {
 		sb_assert(m_ref==LUA_NOREF);
-		m_ref = lua_ref(state,true);
+		m_ref = luaL_ref(state,LUA_REGISTRYINDEX);
 		sb_assert(m_ref!=LUA_NOREF);
 	}
 	void LuaReference::UnsetObject( lua_State* state ) {
 		sb_assert(m_ref!=LUA_NOREF);
-		lua_unref(state,m_ref);
+		luaL_unref(state,LUA_REGISTRYINDEX,m_ref);
 		m_ref = LUA_NOREF;
 	}
 	void LuaReference::GetObject( lua_State* state ) {
 		sb_assert(m_ref!=LUA_NOREF);
-		lua_getref(state,m_ref);
+        lua_rawgeti(state, LUA_REGISTRYINDEX, m_ref);
 	}
 		
-	
-	LuaFunction::LuaFunction( const LuaHelperWeakPtr& ptr ) : m_ref(ptr) {
-		if (LuaHelperPtr lua = m_ref.GetHelper()) {
-			sb_assert( lua_isfunction(lua->lua->GetVM(),-1) );
-			m_ref.SetObject(lua->lua->GetVM());
-		}
-	}
-	LuaEnvironmentPtr LuaFunction::GetEnv() {
-		if (m_ref.Valid()) {
-			if (LuaHelperPtr lua = m_ref.GetHelper()) {
-				lua_State* L = lua->lua->GetVM();
-				m_ref.GetObject(L);
-				sb_assert( lua_isfunction(L,-1) );
-				lua_getfenv(L, -1);
-				sb_assert( lua_istable(L,-1) );
-				LuaEnvironmentPtr env = LuaEnvironmentPtr(new LuaEnvironment(m_ref.GetHelperPtr(),-1));
-				lua_pop(L,1);
-				return env;
-			}
-		}
-		return LuaEnvironmentPtr();
-	}
-	static int lua_error_function( lua_State* L ) {
-		LogError(MODULE) << "error exec inline function" ;
-		LogError(MODULE) << lua_tostring(L, -1) ;
-		/// remove error from stack
-		lua_pop(L,1);
-		return 0;
-	}
-	void LuaFunction::Call() {
-		if (m_ref.Valid()) {
-			if (LuaHelperPtr lua = m_ref.GetHelper()) {
-                lua_State* L = lua->lua->GetVM();
-#ifdef SB_DEBUG
-                int top = lua_gettop(L);
-#endif
-				lua_pushcclosure(L, &lua_error_function, 0);
-				m_ref.GetObject(L);
-				lua_pcall(L, 0, 0, -2);
-                sb_assert(top==lua_gettop(L));
-     		}
-		}
-	}
-	
-	LuaEnvironment::LuaEnvironment( const LuaHelperWeakPtr& ptr,int indx ) : m_ref(ptr) {
-		if (LuaHelperPtr lua = m_ref.GetHelper()) {
-			lua_State* L = lua->lua->GetVM();
-			if (indx==0) {
-				lua_newtable(L);											// [1] t
-				lua_createtable(L, 0, 1); /* create new metatable */	// [2] mt t
-				lua_pushvalue(L, -1);									// [3] mt mt t
-				lua_setmetatable(L, -3);								// [2] mt t
-				lua_pushvalue(L, LUA_GLOBALSINDEX);						// [3] _G mt t
-				lua_setfield(L, -2, "__index");  /* mt.__index = _G */  // [2] mt t
-				lua_pop(L,1);
-			} else {
-				sb_assert( lua_istable(L,-1) );
-			}
-			m_ref.SetObject(lua->lua->GetVM());
-		}
-	}
-	
-	void LuaEnvironment::GetEnv( lua_State* state ) {
-		m_ref.GetObject(state);
-	}
-	
-	LuaEnvironment::~LuaEnvironment() {
-	}
-	
-	static const char * lua_string_read_func (lua_State* /*L*/,void *data,size_t *size) {
-		const char** d = reinterpret_cast<const char**> (data);
-		size_t need = *size;
-		const char* p = *d;
-		while (*p && need) {
-			need--;
-			p++;
-		}
-		*size = p-*d;
-		const char* res = *d;
-		*d = p;
-		return res;
-	}
-	
+    
 	struct lua_read_data {
 		GHL::DataStream* ds;
 		char buffer[512];
@@ -152,44 +66,6 @@ namespace Sandbox {
 		GHL::UInt32 readed = d->ds->Read(reinterpret_cast<GHL::Byte*>(d->buffer),512);
 		*size = readed;
 		return d->buffer;
-	}
-	
-	LuaFunctionPtr LuaEnvironment::LoadFunction( const char* content ) {
-		if (m_ref.Valid()) {
-			if (LuaHelperPtr lua = m_ref.GetHelper()) {
-				lua_State* L = lua->lua->GetVM();
-				if (lua_load(L, &lua_string_read_func,&content, "inline")!=0) {
-					LogError(MODULE) << "Failed to load inline : '" << content << "'";
-                    LogError(MODULE) << lua_tostring(L, -1) ;
-					lua_pop(L,1);
-				} else {
-					m_ref.GetObject( L );
-					lua_setfenv(L, -2);
-					return LuaFunctionPtr(new LuaFunction(m_ref.GetHelperPtr()) );
-				}
-			}
-		}
-		return LuaFunctionPtr();
-	}
-	
-	LuaFunctionPtr LuaEnvironment::LoadFunction( const char* name, GHL::DataStream* stream ) {
-		if (m_ref.Valid()) {
-			if (LuaHelperPtr lua = m_ref.GetHelper()) {
-				lua_State* L = lua->lua->GetVM();
-				lua_read_data data = {stream,{}};
-				int res = lua_load(L,&lua_read_func,&data,name);
-				if (res!=0) {
-					LogError(MODULE)<<"Failed to load script: " << name ;
-                    LogError(MODULE)<< lua_tostring(L, -1) ;
-					lua_pop(L,1);
-				} else {
-					m_ref.GetObject( L );
-					lua_setfenv(L, -2);
-					return LuaFunctionPtr(new LuaFunction(m_ref.GetHelperPtr()) );
-				}
-			}
-		}
-		return LuaFunctionPtr();
 	}
 	
 	static int lua_print_func (lua_State *L) {
@@ -210,13 +86,205 @@ namespace Sandbox {
 			  log_info << s;  
 		    lua_pop(L, 1);  /* pop result */
 		  }
+        lua_pop(L, 1); // func
       	  return 0;
-		}
+    }
 		
 	
-	void *Lua::lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize) {
+	
+	// traceback function, adapted from lua.c
+	// when a runtime error occurs, this will append the call stack to the error message
+	
+    
+    static int at_panic_func(lua_State* L) {
+        LogError(MODULE) << "--- panic ---";
+        if (!lua_isstring(L, -1)){
+            lua_pushstring(L, "unknown");
+        }
+        lua_pushcclosure(L, &luabind::lua_traceback, 0);
+        lua_pcall(L, 1, 1, 0);
+        LogError(MODULE) << "--- panic ---";
+        LogError(MODULE) << lua_tostring(L, -1);
+        exit(1);
+        return 0;
+    }
+	
+	
+	
+    ////////////////////////////////////////////////////////////
+    
+    
+    LuaVM::LuaVM( Resources* resources ) : 
+        m_resources( resources ), 
+        m_L(0),
+        m_mem_use(0),
+        m_registrator(0)
+    {
+        m_L = lua_newstate(&LuaVM::lua_alloc_func,this);
+        m_helper = LuaVMHelperPtr( new LuaVMHelper() );
+        m_helper->lua = this;
+        
+        static const luaL_Reg loadedlibs[] = {
+            {"_G", luaopen_base},
+            {LUA_LOADLIBNAME, luaopen_package},
+            {LUA_COLIBNAME, luaopen_coroutine},
+            {LUA_TABLIBNAME, luaopen_table},
+            //{LUA_IOLIBNAME, luaopen_io},
+            //{LUA_OSLIBNAME, luaopen_os},
+            {LUA_STRLIBNAME, luaopen_string},
+            {LUA_BITLIBNAME, luaopen_bit32},
+            {LUA_MATHLIBNAME, luaopen_math},
+            {LUA_DBLIBNAME, luaopen_debug},
+            {NULL, NULL}
+        };
+
+		const luaL_Reg *lib;
+        /* call open functions from 'loadedlibs' and set results to global table */
+        for (lib = loadedlibs; lib->func; lib++) {
+            luaL_requiref(m_L, lib->name, lib->func, 1);
+            lua_pop(m_L, 1);  /* remove lib */
+        }
+        
+        static const luaL_Reg base_funcs_impl[] = {
+			//{"dofile", lua_dofile_func},
+			{"print", lua_print_func},
+            //{"require",lua_require_func},
+            {"loadfile",lua_loadfile_func},
+			{NULL, NULL}
+		};
+        lua_rawgeti(m_L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+        lua_pushlightuserdata(m_L, this);
+        luaL_setfuncs(m_L,  base_funcs_impl,1);
+        lua_pop(m_L, 1);
+
+        lua_createtable(m_L, 1, 0);
+        lua_pushlightuserdata(m_L, this);
+        lua_pushcclosure(m_L, &LuaVM::lua_module_searcher, 1);
+        lua_rawseti(m_L,-2,1);
+        luabind::lua_set_value(m_L, "package.searchers");
+        
+        lua_pushlightuserdata(m_L,this);
+		lua_setglobal(m_L, "LuaVM_instance");
+        
+		lua_atpanic(m_L, &at_panic_func);
+    }
+    
+    LuaVM::~LuaVM() {
+        if (m_registrator) 
+            delete m_registrator;
+        if (m_L) {
+            lua_pushnil(m_L);
+            lua_setglobal(m_L, "LuaVM_instance");
+            m_helper = LuaVMHelperPtr();
+            lua_close(m_L);
+            m_L = 0;
+        }
+    }
+    
+    LuaVM* LuaVM::GetInstance( lua_State* L ) {
+        lua_getglobal(L, "LuaVM_instance");
+        LuaVM* this_ = lua_isuserdata(L, -1) ? reinterpret_cast<LuaVM*>(lua_touserdata(L, -1)) : 0;
+        lua_pop(L, 1);
+        return this_;
+    }
+    
+    void LuaVM::SetBasePath(const char *path) {
+        m_base_path = path;
+        if (!m_base_path.empty() && m_base_path[m_base_path.length()-1]!='/')
+            m_base_path += "/";
+    }
+    
+    bool LuaVM::DoFile(const char* fn) {
+        sb::string path = m_base_path + fn;
+        GHL::DataStream* ds = m_resources->OpenFile(path.c_str());
+        if (!ds) {
+			LogError(MODULE) << "error opening file " << fn;
+			return false;
+		}
+		lua_read_data data = {ds,{}};
+		int res = lua_load(m_L,&lua_read_func,&data,fn,0);
+		ds->Release();
+		if (res!=0) {
+			LogError(MODULE) << "Failed to load script: " << fn;
+            LogError(MODULE) << lua_tostring(m_L, -1) ;
+			return false;
+		} else {
+			LogInfo(MODULE) << "Loaded script: " << fn;
+            
+            lua_pushcclosure(m_L, &luabind::lua_traceback, 0);
+            lua_insert(m_L, -2);
+            int res = lua_pcall(m_L, 0, 0, -2);
+            if (res) {
+                LogError(MODULE) << "pcall : " << res;
+                LogError(MODULE) << lua_tostring(m_L, -1) ;
+                return false;
+            }
+            lua_remove(m_L, -1);
+		}
+        
+		return true;
+    }
+    
+    luabind::LuaRegistrator& LuaVM::GetRegistrator() {
+        if (!m_registrator) {
+            m_registrator = new luabind::LuaRegistrator(m_L);
+        }
+        return *m_registrator;
+    }
+    
+    int LuaVM::lua_module_searcher(lua_State *L) {
+        LuaVM* this_ = reinterpret_cast<LuaVM*>(lua_touserdata(L, lua_upvalueindex(1)));
+        const char *name = luaL_checkstring(L, 1);
+        sb::string path = this_->m_base_path + name + ".lua";
+        GHL::DataStream* ds = this_->m_resources->OpenFile(path.c_str());
+        if (!ds) {
+			LogError(MODULE) << "error opening module file " << name;
+			return 0;
+		}
+		lua_read_data data = {ds,{}};
+		int res = lua_load(L,&lua_read_func,&data,name,0);
+		ds->Release();
+		if (res!=0) {
+			LogError(MODULE) << "Failed to load module: " << name;
+            LogError(MODULE) << lua_tostring(L, -1) ;
+			return 0;
+		} 
+        lua_pushstring(L, name);
+        return 2;
+    }
+    int LuaVM::lua_loadfile_func(lua_State* L) {
+        const char *fname = luaL_optstring(L, 1, NULL);
+        //const char *mode = luaL_optstring(L, 2, NULL);
+        int env = !lua_isnone(L, 3);  /* 'env' parameter? */
+        if (!fname) {
+            lua_pushnil(L);
+            lua_pushstring(L, "file name not specified");
+            return 2;
+        }
+        LuaVM* this_ = reinterpret_cast<LuaVM*>(lua_touserdata(L, lua_upvalueindex(1)));
+        GHL::DataStream* ds = this_->m_resources->OpenFile(fname);
+        if (!ds) {
+            lua_pushnil(L);
+            lua_pushstring(L, "error opening file");
+            return 2;
+		}
+		lua_read_data data = {ds,{}};
+		int res = lua_load(L,&lua_read_func,&data,fname,0);
+		ds->Release();
+		if (res!=0) {
+            lua_pushnil(L);
+            lua_pushstring(L, "error loading file");
+            return 2;
+		} 
+        if ( env ) {  /* 'env' parameter? */
+            lua_pushvalue(L, 3);
+            lua_setupvalue(L, -2, 1);  /* set it as 1st upvalue of loaded chunk */
+        }
+        return 1;
+    }
+    void* LuaVM::lua_alloc_func(void *ud, void *_ptr, size_t osize,size_t nsize) {
 		GHL::Byte* ptr = reinterpret_cast<GHL::Byte*> (_ptr);
-		Lua* _this = static_cast<Lua*>(ud);    
+		LuaVM* _this = static_cast<LuaVM*>(ud);    
 		if (nsize == 0) {
 			if (ptr) _this->free(ptr,osize);
 			return NULL;
@@ -233,338 +301,20 @@ namespace Sandbox {
 		}
 		return ptr;
 	}
-	int Lua::lua_require_func( lua_State* _L ) {
-        if (!lua_isstring(_L, 1)) {
-            luaL_argerror(_L, 1, "string expected");
-            return 1;
-        }
-        const char* filename = lua_tostring(_L, 1);
-        int n = lua_gettop(_L);
-        Lua* l = Lua::GetPtr(_L);
-        if (!l) {
-            lua_pushstring(_L, "not found global state");
-			lua_error(_L);
-            return 1;
-        }
-        lua_State* L = l->GetVM();
-        lua_getglobal(L, "package");
-        if (!lua_istable(L,-1)) {
-            lua_pop(L, 1);
-            lua_newtable(L);
-            lua_pushvalue(L, -1);
-            lua_setglobal(L, "package");
-        }
-        lua_getfield(L, -1, "loaded");
-        if (!lua_istable(L, -1)) {
-            lua_pop(L, 1);
-            lua_newtable(L);
-            lua_pushvalue(L, -1);
-            lua_setfield(L, -3, "loaded");
-        }
-        lua_getfield(L, -1, filename);
-        if (lua_isnil(L, -1)) {
-            lua_pop(L,1);
-            if (l) {
-                if (!l->load_file(L,(l->m_base_path+filename+".lua").c_str())) {
-                    lua_pushstring(L, "error loading file");
-                    lua_error(L);
-                } else {
-                    lua_pushboolean(L, 1);
-                    lua_setfield(L, -3, filename);
-                    lua_call(L, 0, 0);
-                }
-            } 
-        }
-        /// cleanup
-        lua_pop( L, lua_gettop(L)-n );
-		return 0;
-    }
-    int Lua::lua_loadfile_func(lua_State* L) {
-        Lua* l = Lua::GetPtr(L);
-		if (l) {
-			if (!l->load_file(L,lua_tostring(L,1))) {
-				lua_pushstring(L, "error loading file");
-				lua_pushnil(L);
-                return 2;
-			} 
-		} else {
-			lua_pushstring(L, "not found state");
-			lua_pushnil(L);
-            return 2;
-		}
-        return 1;
-    }
-	int Lua::lua_dofile_func (lua_State *L) {
-		int n = lua_gettop(L);
-		Lua* l = Lua::GetPtr(L);
-		if (l) {
-			if (!l->load_file(L,lua_tostring(L,1))) {
-				lua_pushstring(L, "error loading file");
-				lua_error(L);
-			} else {
-				lua_call(L, 0, LUA_MULTRET);
-			}
-		} else {
-			lua_pushstring(L, "not found state");
-			lua_error(L);
-		}
-		return lua_gettop(L)-n;
-	}
-		
-	
-	// traceback function, adapted from lua.c
-	// when a runtime error occurs, this will append the call stack to the error message
-	static int traceback (lua_State *L)
-	{
-		// look up Lua's 'debug.traceback' function
-        lua_getglobal(L, "debug");
-		if (!lua_istable(L, -1))
-		{
-			lua_pop(L, 1);
-			return 1;
-		}
-		lua_getfield(L, -1, "traceback");
-		if (!lua_isfunction(L, -1))
-		{
-			lua_pop(L, 2);
-			return 1;
-		}
-		if (lua_isstring(L,1))
-            lua_pushvalue(L, 1);  /* pass error message */
-        else 
-            lua_pushstring(L, "error");
-		lua_pushinteger(L, 2);  /* skip this function and traceback */
-		lua_call(L, 2, 1);  /* call debug.traceback */
- 		return 1;
-	}
     
-    static int at_panic_func(lua_State* L) {
-        LogError(MODULE) << "--- panic ---";
-        if (!lua_isstring(L, -1)){
-            lua_pushstring(L, "unknown");
-        }
-        lua_pushcclosure(L, &traceback, 0);
-        lua_pcall(L, 1, 1, 0);
-        LogError(MODULE) << "--- panic ---";
-        LogError(MODULE) << lua_tostring(L, -1);
-        exit(1);
-        return 0;
-    }
-	
-	
-	Lua::Lua(Resources* resources) : m_resources(resources) {
-	
-		m_mem_use = 0;
-		
-		m_state = lua_newstate( &lua_alloc_func,this);
-		m_helper = LuaHelperPtr(new LuaHelper());
-		m_helper->lua = this;
-		
-		
-		static const luaL_Reg lualibs[] = {
-			{"", luaopen_base},
-			{"table", luaopen_table},
-			{"string", luaopen_string},
-			{"math", luaopen_math},
-			{"debug", luaopen_debug},
-			{NULL, NULL}
-		};
-		
-		for (const luaL_Reg *lib = lualibs; lib->func; lib++) {
-			lua_pushcfunction(m_state, lib->func);
-			lua_pushstring(m_state, lib->name);
-			lua_call(m_state, 1, 0);
-		}
-		
-		static const luaL_Reg base_funcs_impl[] = {
-			{"dofile", lua_dofile_func},
-			{"print", lua_print_func},
-            {"require",lua_require_func},
-            {"loadfile",lua_loadfile_func},
-			{NULL, NULL}
-		};
-		luaL_register(m_state, "_G", base_funcs_impl);
-		lua_pushlightuserdata(m_state,this);
-		lua_setglobal(m_state, "g_luaState");
-		
-		
-		lua_atpanic(m_state, &at_panic_func);
-		
-		RegisterSandboxObjects();
-	}
-	
-	Lua::~Lua() {
-		LogDebug(MODULE) <<  "Close";
-		m_helper = LuaHelperPtr();
-		lua_close(m_state);
-		m_helper = LuaHelperPtr();
-		LogDebug(MODULE) << "after close memory in use : " << m_mem_use;
-	}
-	
-	Lua* Lua::GetPtr(lua_State* L) {
-		lua_getglobal(L,"g_luaState");
-		if (lua_islightuserdata(L,-1)) {
-			Lua* l = reinterpret_cast<Lua*> (lua_touserdata(L,-1));
-			lua_pop(L,1);
-			return l;
-		}
-		return 0;
-	}
-	
-	LuaEnvironmentPtr Lua::CreateEnvironment() {
-		return LuaEnvironmentPtr( new LuaEnvironment( m_helper ) );
-	}
-
-	void Lua::SetBasePath(const char* path) {
-		m_base_path = path;
-	}
-	
-	bool Lua::load_file(lua_State* L,const char* fn) {
-		GHL::DataStream* ds = m_resources->OpenFile(fn);
-        if (!ds) {
-			LogWarning(MODULE) << "error opening file " << fn;
-			return false;
-		}
-		lua_read_data data = {ds,{}};
-		int res = lua_load(L,&lua_read_func,&data,fn);
-		ds->Release();
-		if (res!=0) {
-			LogError(MODULE) << "Failed to load script: " << fn;
-            LogError(MODULE) << lua_tostring(m_state, -1) ;
-			return false;
-		} else {
-			LogInfo(MODULE) << "Loaded script: " << fn;
-		}
-		return true;
-	}
-	
-    bool Lua::pcall(lua_State* L,int args, int rets) {
-        lua_pushcclosure(L, &traceback, 0);
-        lua_insert(L, -args-2);
-		int res = lua_pcall(L, args, rets, -args-2);
-		if (res) {
-			LogError(MODULE) << "pcall : " << res;
-            LogError(MODULE) << lua_tostring(L, -1) ;
-			return false;
-		}
-        lua_remove(L, -rets-1);
-		return true;
-    }
-	bool Lua::call(const char*,int args) {
-        return pcall(m_state,args,0);
-	}
-	bool Lua::DoFile(const char* fn) {
-		if (!load_file(GetVM(),(m_base_path+fn).c_str())) return false;
-		return call(fn,0);
-	}
-	
-	static const char* get_table_from( lua_State* L ,const char* name ) {
-		InplaceString str(name);
-		InplaceString tbl(str.begin(),str.find(".:"));
-		while (tbl!=str) {
-			lua_getfield(L, -1, tbl.str().c_str());
-			if (!lua_istable(L,-1)) {
-				lua_pop(L,1);
-				lua_newtable(L);
-				lua_pushvalue(L, -1);
-				lua_setfield(L, -3, tbl.str().c_str());
-			}
-			lua_remove(L, -2);
-			str = InplaceString(tbl.end()+1,str.end());
-			tbl = InplaceString(str.begin(),str.find(".:"));
-		}
-		return str.begin();
-	}
-	
-	const char* Lua::get_table(const char* name) {
-		lua_State* L = GetVM();
-		lua_getglobal(L,"_G");
-		sb_assert(lua_istable(L,-1));
-		return get_table_from(L,name);
-	}
-	const char* Lua::get_table(const LuaEnvironmentPtr& env,const char* name) {
-		lua_State* L = GetVM();
-		env->GetEnv(L);
-		sb_assert(lua_istable(L,-1));
-		return get_table_from(L,name);
-	}
-	
-	void Lua::Call(const char* func) {
-		do_call(func,0);
-	}
-	
-	void Lua::do_call(const char* func,int args) {
-		lua_State* L = GetVM();
-		const char* str = get_table(func);
-		lua_getfield(L, -1, str);
-		if (lua_isfunction(L,-1)) {
-			if ( (str!=func) && str[-1]==':') {
-				sb_assert(lua_istable(L,-2));
-				sb_assert(lua_isfunction(L,-1));
-				lua_pushvalue(L, -2); /// args tbl func tbl
-				for (int i=0;i<args;i++)
-					lua_pushvalue(L, (-4-i)-args+1+i);
-				call(func,1+args);
-			} else {
-				for (int i=0;i<args;i++)
-					lua_pushvalue(L, (-3-i)-args+1+i);
-				call(func,args);
-			}
-			// remove table
-			lua_pop(L,1+args);
-		} else {
-			/// remove table and field
-			lua_pop(L,2);
-			LogError(MODULE) <<  "not found function " << func;
-		}
-	}
-	
-	void Lua::register_object(const char* name) {
-		lua_State* L = GetVM();
-		const char* str = get_table(name);
-		lua_pushvalue(L, -2);
-		Bind::StackHelper::rawsetfield(L,-2,str);
-		lua_pop(L,2);
-	}
-	
-	void Lua::register_object(const LuaEnvironmentPtr& env, const char* name) {
-		lua_State* L = GetVM();
-		const char* str = get_table(env,name);
-		lua_pushvalue(L, -2);
-		Bind::StackHelper::rawsetfield(L,-2,str);
-		lua_pop(L,2);
-	}
-	
-	namespace Bind {
-		void register_enum(lua_State* L,const EnumBind* info);
-		void register_type(lua_State* L,const ClassBind* bind);
-        void register_extensible_type(lua_State* L,const ExtensibleClassBind* bind);
-	}
-	
-	void Lua::Bind(const Bind::ClassBind* info) {
-		register_type(GetVM(),info);
-	}
-    
-    void Lua::Bind(const Bind::ExtensibleClassBind* info) {
-		register_extensible_type(GetVM(),info);
-	}
-	
-	void Lua::Bind(const Bind::EnumBind* info) {
-		register_enum(GetVM(),info);
-	}
-	
-	GHL::Byte* Lua::alloc(size_t size) {
+    GHL::Byte* LuaVM::alloc(size_t size) {
 		m_mem_use+=GHL::UInt32(size);
 		return new GHL::Byte[size];
 	}
-	void Lua::free(GHL::Byte* data,size_t size) {
+	void LuaVM::free(GHL::Byte* data,size_t size) {
 		sb_assert(m_mem_use>=size);
 		m_mem_use-=GHL::UInt32(size);
 		delete [] (data);
 	}
-	void Lua::resize(GHL::Byte*,size_t osize,size_t nsize) {
+	void LuaVM::resize(GHL::Byte*,size_t osize,size_t nsize) {
 		sb_assert(m_mem_use>=osize);
 		m_mem_use-=GHL::UInt32(osize);
 		m_mem_use+=GHL::UInt32(nsize);
 	}
+    
 }

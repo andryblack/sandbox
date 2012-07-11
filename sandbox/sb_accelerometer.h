@@ -19,7 +19,7 @@ namespace GHL {
 
 namespace Sandbox {
 	 
-	class Lua;
+	class LuaVM;
 	
 	class Accelerometer : public Thread {
 	public:
@@ -27,7 +27,7 @@ namespace Sandbox {
 		~Accelerometer();
 		bool Update( float dt );
 		const Vector3f& GetData() const { return m_data;}
-		static void Bind( Lua* lua );
+		static void Bind( LuaVM* lua );
     protected:
         bool IsActual() const { return m_actual;} 
 	private:

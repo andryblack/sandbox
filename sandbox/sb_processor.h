@@ -31,6 +31,7 @@ namespace Sandbox {
 		void SetLoop(bool l) { m_loop = l;}
 		
 		void SetEndEvent(const EventPtr& e) { m_end_event = e;}
+        const EventPtr& GetEndEvent() const { return m_end_event; }
 		
 		float GetTime() const { return m_all_time;}
 		void SetTime(float t) { m_all_time = t;}

@@ -24,6 +24,7 @@ namespace Sandbox {
     
     bool Background::Load( const char* file, Resources* res ) {
         if (!res) return false;
+        if (!file ) return false;
         m_images.clear();
         return res->LoadImageSubdivs( file , m_images);
     }

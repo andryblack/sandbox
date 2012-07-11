@@ -4,8 +4,29 @@
  */
 
 #include "sb_tcb_spline2d.h"
-#include "sb_bind.h"
 #include "sb_assert.h"
+#include "luabind/sb_luabind.h"
+#include "sb_lua.h"
+
+SB_META_DECLARE_KLASS(Sandbox::TCBSpline2d, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::TCBSpline2d)
+SB_META_CONSTRUCTOR(())
+SB_META_METHOD(length)
+SB_META_METHOD(size)
+SB_META_METHOD(point)
+SB_META_METHOD(set_point)
+SB_META_METHOD(get)
+SB_META_METHOD(add)
+SB_META_METHOD(clear)
+SB_META_METHOD(set_tension)
+SB_META_METHOD(set_continuity)
+SB_META_METHOD(set_bias)
+SB_META_METHOD(angle)
+SB_META_METHOD(empty)
+SB_META_METHOD(back)
+SB_META_METHOD(front)
+SB_META_END_KLASS_BIND()
+
 
 namespace Sandbox {
     
@@ -109,30 +130,9 @@ namespace Sandbox {
     float TCBSpline2d::angle(float t) const {
         return (get(t+2.5f)-get(t-2.5f)).unit().dir();
     }
-    
-    void TCBSpline2d::Register( Lua* lua ) {
-        SB_BIND_BEGIN_BIND
-        {
-			SB_BIND_BEGIN_SHARED_CLASS(Sandbox::TCBSpline2d)
-            SB_BIND_BEGIN_METHODS
-			SB_BIND_METHOD(Sandbox::TCBSpline2d,length,float())
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,size,size_t())
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,point,Vector2f(size_t))
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,set_point,void(size_t,Vector2f))
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,get,Vector2f(float))
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,add,float(Vector2f))
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,clear,void())
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,set_tension,void(float))
-			SB_BIND_METHOD(Sandbox::TCBSpline2d,set_continuity,void(float))
-			SB_BIND_METHOD(Sandbox::TCBSpline2d,set_bias,void(float))
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,angle,float(float))
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,empty,bool())
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,back,Vector2f())
-            SB_BIND_METHOD(Sandbox::TCBSpline2d,front,Vector2f())
-			SB_BIND_END_METHODS
-			SB_BIND_END_CLASS
-			SB_BIND(lua)
-		}
-        SB_BIND_END_BIND
+  
+    void TCBSpline2d::Register( LuaVM* lua ) {
+        lua->GetRegistrator().klass<TCBSpline2d>();
     }
+    
 }

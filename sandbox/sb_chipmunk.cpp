@@ -230,7 +230,7 @@ namespace Sandbox {
         long Shape::GetCollisionType() const {
             return cpShapeGetCollisionType( m_shape );
         }
-        void Shape::SetCollisionType( int type ) {
+        void Shape::SetCollisionType( long type ) {
             cpShapeSetCollisionType( m_shape, type );
         }
         
@@ -307,7 +307,7 @@ namespace Sandbox {
 		}
 		Vector2f Body::GetPos() const {
 			cpVect p = cpBodyGetPos(m_body);
-			return Vector2f( p.x,p.y );
+			return Vector2f( float(p.x),float(p.y) );
 		}
 		void Body::SetPos(const Vector2f& pos){
 			cpBodySetPos(m_body, vect(pos));
@@ -325,19 +325,19 @@ namespace Sandbox {
 			cpBodySetForce(m_body, vect(force));
 		}
 		float Body::GetAngle() const {
-			return cpBodyGetAngle(m_body);
+			return float(cpBodyGetAngle(m_body));
 		}
 		void Body::SetAngle(float a) {
 			cpBodySetAngle(m_body, a);
 		}
 		float Body::GetAngVel() const {
-			return cpBodyGetAngVel(m_body);
+			return float(cpBodyGetAngVel(m_body));
 		}
 		void Body::SetAngVel(float v) {
 			cpBodySetAngVel(m_body, v);
 		}
 		float Body::GetTorque() const {
-			return cpBodyGetTorque(m_body);
+			return float(cpBodyGetTorque(m_body));
 		}
 		void Body::SetTorque(float t) {
 			cpBodySetTorque(m_body, t);
@@ -346,13 +346,13 @@ namespace Sandbox {
 			return vect(cpBodyGetRot(m_body));
 		}
 		float Body::GetVelLimit() const {
-			return cpBodyGetVelLimit(m_body);
+			return float(cpBodyGetVelLimit(m_body));
 		}
 		void Body::SetVelLimit(float v) {
 			cpBodySetVelLimit(m_body, v);
 		}
 		float Body::GetAngVelLimit() const {
-			return cpBodyGetAngVelLimit(m_body);
+			return float(cpBodyGetAngVelLimit(m_body));
 		}
 		void Body::SetAngVelLimit(float v) {
 			cpBodySetAngVelLimit(m_body, v);
@@ -410,19 +410,19 @@ namespace Sandbox {
 		
 		
 		float Constraint::GetMaxForce() const {
-			return cpConstraintGetMaxForce(m_constraint);
+			return float(cpConstraintGetMaxForce(m_constraint));
 		}
 		void Constraint::SetMaxForce(float f) {
 			cpConstraintSetMaxForce(m_constraint, f);
 		}
 		float Constraint::GetMaxBias() const {
-			return cpConstraintGetMaxBias(m_constraint);
+			return float(cpConstraintGetMaxBias(m_constraint));
 		}
 		void Constraint::SetMaxBias(float b) {
 			cpConstraintSetMaxBias(m_constraint, b);
 		}
 		float Constraint::GetImpulse() const {
-			return cpConstraintGetImpulse(m_constraint);
+			return float(cpConstraintGetImpulse(m_constraint));
 		}
 		
 		
@@ -446,7 +446,7 @@ namespace Sandbox {
 			cpPinJointSetAnchr2(m_constraint, vect(v));
 		}
 		float PinJoint::GetDist() const {
-			return cpPinJointGetDist(m_constraint);
+			return float(cpPinJointGetDist(m_constraint));
 		}
 		void PinJoint::SetDist(float d) {
 			cpPinJointSetDist(m_constraint, d);
@@ -472,13 +472,13 @@ namespace Sandbox {
 			cpSlideJointSetAnchr2(m_constraint, vect(v));
 		}
 		float SlideJoint::GetMin() const {
-			return cpSlideJointGetMin(m_constraint);
+			return float(cpSlideJointGetMin(m_constraint));
 		}
 		void SlideJoint::SetMin(float d) {
 			cpSlideJointSetMin(m_constraint, d);
 		}
 		float SlideJoint::GetMax() const {
-			return cpSlideJointGetMax(m_constraint);
+			return float(cpSlideJointGetMax(m_constraint));
 		}
 		void SlideJoint::SetMax(float d) {
 			cpSlideJointSetMax(m_constraint, d);
@@ -547,19 +547,19 @@ namespace Sandbox {
 			cpDampedSpringSetAnchr2(m_constraint, vect(v));
 		}
 		float DampedSpring::GetRestLength() const {
-			return cpDampedSpringGetRestLength(m_constraint);
+			return float(cpDampedSpringGetRestLength(m_constraint));
 		}
 		void DampedSpring::SetRestLength(float l) {
 			cpDampedSpringSetRestLength(m_constraint, l);
 		}
 		float DampedSpring::GetStiffness() const {
-			return cpDampedSpringGetStiffness(m_constraint);
+			return float(cpDampedSpringGetStiffness(m_constraint));
 		}
 		void DampedSpring::SetStiffness(float s) {
 			cpDampedSpringSetStiffness(m_constraint, s);
 		}
 		float DampedSpring::GetDamping() const {
-			return cpDampedSpringGetDamping(m_constraint);
+			return float(cpDampedSpringGetDamping(m_constraint));
 		}
 		void DampedSpring::SetDamping(float d) {
 			cpDampedSpringSetDamping(m_constraint, d);
@@ -572,19 +572,19 @@ namespace Sandbox {
 											 restAngle,stiffness,damping)) {
 		}
 		float DampedRotarySpring::GetRestAngle() const {
-			return cpDampedRotarySpringGetRestAngle(m_constraint);
+			return float(cpDampedRotarySpringGetRestAngle(m_constraint));
 		}
 		void DampedRotarySpring::SetRestAngle(float l) {
 			cpDampedRotarySpringSetRestAngle(m_constraint, l);
 		}
 		float DampedRotarySpring::GetStiffness() const {
-			return cpDampedRotarySpringGetStiffness(m_constraint);
+			return float(cpDampedRotarySpringGetStiffness(m_constraint));
 		}
 		void DampedRotarySpring::SetStiffness(float s) {
 			cpDampedRotarySpringSetStiffness(m_constraint, s);
 		}
 		float DampedRotarySpring::GetDamping() const {
-			return cpDampedRotarySpringGetDamping(m_constraint);
+			return float(cpDampedRotarySpringGetDamping(m_constraint));
 		}
 		void DampedRotarySpring::SetDamping(float d) {
 			cpDampedRotarySpringSetDamping(m_constraint, d);
@@ -596,13 +596,13 @@ namespace Sandbox {
 		: Constraint(cpRotaryLimitJointNew(a->get_body(), b->get_body(), min, max)) {
 		}
 		float RotaryLimitJoint::GetMin() const {
-			return cpRotaryLimitJointGetMin(m_constraint);
+			return float(cpRotaryLimitJointGetMin(m_constraint));
 		}
 		void RotaryLimitJoint::SetMin(float m) {
 			cpRotaryLimitJointSetMin(m_constraint, m);
 		}
 		float RotaryLimitJoint::GetMax() const {
-			return cpRotaryLimitJointGetMax(m_constraint);
+			return float(cpRotaryLimitJointGetMax(m_constraint));
 		}
 		void RotaryLimitJoint::SetMax(float m) {
 			cpRotaryLimitJointSetMax(m_constraint, m);
@@ -615,19 +615,19 @@ namespace Sandbox {
 		: Constraint(cpRatchetJointNew(a->get_body(), b->get_body(), phase, ratchet)) {
 		}
 		float RatchetJoint::GetAngle() const {
-			return cpRatchetJointGetAngle(m_constraint);
+			return float(cpRatchetJointGetAngle(m_constraint));
 		}
 		void RatchetJoint::SetAngle(float m) {
 			cpRatchetJointSetAngle(m_constraint, m);
 		}
 		float RatchetJoint::GetPhase() const {
-			return cpRatchetJointGetPhase(m_constraint);
+			return float(cpRatchetJointGetPhase(m_constraint));
 		}
 		void RatchetJoint::SetPhase(float m) {
 			cpRatchetJointSetPhase(m_constraint, m);
 		}
 		float RatchetJoint::GetRatchet() const {
-			return cpRatchetJointGetRatchet(m_constraint);
+			return float(cpRatchetJointGetRatchet(m_constraint));
 		}
 		void RatchetJoint::SetRatchet(float m) {
 			cpRatchetJointSetRatchet(m_constraint, m);
@@ -640,13 +640,13 @@ namespace Sandbox {
 		: Constraint(cpGearJointNew(a->get_body(), b->get_body(), phase, ratio)) {
 		}
 		float GearJoint::GetPhase() const {
-			return cpGearJointGetPhase(m_constraint);
+			return float(cpGearJointGetPhase(m_constraint));
 		}
 		void GearJoint::SetPhase(float m) {
 			cpGearJointSetPhase(m_constraint, m);
 		}
 		float GearJoint::GetRatio() const {
-			return cpGearJointGetRatio(m_constraint);
+			return float(cpGearJointGetRatio(m_constraint));
 		}
 		void GearJoint::SetRatio(float m) {
 			cpGearJointSetRatio(m_constraint, m);
@@ -657,7 +657,7 @@ namespace Sandbox {
 		: Constraint(cpSimpleMotorNew(a->get_body(), b->get_body(), rate)) {
 		}
 		float SimpleMotor::GetRate() const {
-			return cpSimpleMotorGetRate(m_constraint);
+			return float(cpSimpleMotorGetRate(m_constraint));
 		}
 		void SimpleMotor::SetRate(float r) {
 			cpSimpleMotorSetRate(m_constraint, r);
@@ -688,7 +688,7 @@ namespace Sandbox {
 				Color c = g.GetColor();
 				g.SetColor(c*color);
 				Transform2d tr = g.GetTransform();
-				g.SetTransform(tr.translated(vect(cpBodyGetPos(body))).rotated(cpBodyGetAngle(body)));
+				g.SetTransform(tr.translated(vect(cpBodyGetPos(body))).rotated(float(cpBodyGetAngle(body))));
 				cpBodyEachShape(body, &BodyShapeIteratorFunc, &g);
 				g.SetTransform(tr);
 				g.SetColor(c);

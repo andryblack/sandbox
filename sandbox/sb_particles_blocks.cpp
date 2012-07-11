@@ -106,7 +106,7 @@ namespace Sandbox {
     {"cicles","r_min","r_max","speed_min","speed_max"}
     BLOCK_END(circle_processor, 0, &circle_generator, 0)
         
-    void ParticlesSystem::BindBuiltins( Lua* lua ) {
+    void ParticlesSystem::BindBuiltins( LuaVM* lua ) {
         BindProcessor(lua, "AlphaFade", &alfa_fade_processor);
         BindProcessor(lua, "RandomPos", &random_pos_processor);
         BindProcessor(lua, "RandomDir", &random_dir_processor);

@@ -55,6 +55,7 @@ namespace Sandbox {
 		void ClearSprites();
 		
 		void SetEndEvent(const EventPtr& e) { m_end_event = e;}
+        const EventPtr& GetEndEvent() const { return m_end_event; }
 		
 		virtual bool Update(float dt);
 	private:

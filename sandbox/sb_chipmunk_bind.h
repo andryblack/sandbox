@@ -11,10 +11,10 @@
 
 namespace Sandbox {
 	
-	class Lua;
+	class LuaVM;
 	
 	namespace Chipmunk {
-		void Bind( Lua* lua );
+		void Bind( LuaVM* lua );
 	}
 }
 

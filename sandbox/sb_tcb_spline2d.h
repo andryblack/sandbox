@@ -13,7 +13,7 @@
 
 namespace Sandbox {
 
-    class Lua;
+    class LuaVM;
 
     class TCBSpline2d
     {
@@ -58,7 +58,7 @@ namespace Sandbox {
 		const Vector2f& back() const { return m_points.back().pos;}
 		const Vector2f& front() const { return m_points.front().pos;}
         
-        static void Register( Lua* lua );
+        static void Register( LuaVM* lua );
     };
     
     typedef sb::shared_ptr<TCBSpline2d> TCBSpline2dPtr;

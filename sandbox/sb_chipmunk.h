@@ -92,7 +92,7 @@ namespace Sandbox {
 			float GetElasticity() const;
 			void SetElasticity(float e);
             long GetCollisionType() const;
-            void SetCollisionType( int type );
+            void SetCollisionType( long type );
 			
 			void set_space( Space* space) { m_space = space;}
 			Space* get_space() const { return m_space;}
