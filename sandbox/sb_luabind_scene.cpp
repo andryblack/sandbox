@@ -19,6 +19,7 @@
 #include "sb_container_blend.h"
 #include "sb_container_transform.h"
 #include "sb_container_color.h"
+#include "sb_container_visible.h"
 #include "sb_scene.h"
 
 SB_META_DECLARE_KLASS(Sandbox::SceneObject, void)
@@ -93,6 +94,11 @@ SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Mode,GetMode,SetMode)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::ContainerVisible, Sandbox::Container)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerVisible)
+SB_META_PROPERTY_RW_DEF(Invert)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_KLASS(Sandbox::Widget, Sandbox::Container)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Widget)
 SB_META_CONSTRUCTOR(())
@@ -149,84 +155,8 @@ namespace Sandbox {
         luabind::Class<ContainerBlend>(lua);
         luabind::Class<ContainerTransform>(lua);
         luabind::Class<ContainerColor>(lua);
+        luabind::Class<ContainerVisible>(lua);
         luabind::ExternClass<Scene>(lua);
     }
 
-#if 0
-    
-    
-        
-    {
-        SB_BIND_BEGIN_ENUM(Sandbox::BlendMode)
-        SB_BIND_ENUM_ITEM(BLEND_MODE_COPY,Sandbox)
-        SB_BIND_ENUM_ITEM(BLEND_MODE_ALPHABLEND,Sandbox)
-        SB_BIND_ENUM_ITEM(BLEND_MODE_ADDITIVE,Sandbox)
-        SB_BIND_ENUM_ITEM(BLEND_MODE_ADDITIVE_ALPHA,Sandbox)
-        SB_BIND_ENUM_ITEM(BLEND_MODE_SCREEN,Sandbox)
-        SB_BIND_END_ENUM
-        SB_BIND(this)
-    }
-    {
-        SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerBlend,Sandbox::Container)
-        SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerBlend,())
-        SB_BIND_BEGIN_PROPERTYS
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerBlend,Mode,GetMode,SetMode,Sandbox::BlendMode)
-        SB_BIND_END_PROPERTYS
-        SB_BIND_END_CLASS
-        SB_BIND(this)
-    }
-    {
-        SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerVisible,Sandbox::Container)
-        SB_BIND_BEGIN_PROPERTYS
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerVisible,Invert,GetInvert,SetInvert,bool)
-        SB_BIND_END_PROPERTYS
-        SB_BIND_END_CLASS
-        SB_BIND(this)
-    }
-    {
-        SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerShader,Sandbox::Container)
-        SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerShader,())
-        SB_BIND_BEGIN_PROPERTYS
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerShader,Shader,GetShader,SetShader,Sandbox::Shader)
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerShader,Enabled,GetEnabled,SetEnabled,bool)
-        SB_BIND_END_PROPERTYS
-        SB_BIND_END_CLASS
-        SB_BIND(this)
-    }
-    {
-        SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerTransform,Sandbox::Container)
-        SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerTransform,())
-        SB_BIND_BEGIN_PROPERTYS
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerTransform,Translate,GetTranslate,SetTranslate,Sandbox::Vector2f)
-        SB_BIND_PROPERTY_WO(Sandbox::ContainerTransform,Scale,SetScale,float)
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerTransform,ScaleX,GetScaleX,SetScaleX,float)
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerTransform,ScaleY,GetScaleY,SetScaleY,float)
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerTransform,Angle,GetAngle,SetAngle,float)
-        SB_BIND_END_PROPERTYS
-        SB_BIND_END_CLASS
-        SB_BIND(this)
-    }
-    {
-        SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerTransform3d,Sandbox::Container)
-        SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerTransform3d,())
-        SB_BIND_BEGIN_PROPERTYS
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerTransform3d,ProjectionMatrix,GetProjectionMatrix,SetProjectionMatrix,Sandbox::Matrix4f)
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerTransform3d,ViewMatrix,GetViewMatrix,SetViewMatrix,Sandbox::Matrix4f)
-        SB_BIND_END_PROPERTYS
-        SB_BIND_END_CLASS
-        SB_BIND(this)
-    }
-    {
-        SB_BIND_BEGIN_SHARED_SUBCLASS(Sandbox::ContainerViewport,Sandbox::Container)
-        SB_BIND_SHARED_CONSTRUCTOR(Sandbox::ContainerViewport,())
-        SB_BIND_BEGIN_PROPERTYS
-        SB_BIND_PROPERTY_RW(Sandbox::ContainerViewport,Viewport,Get,Set,Sandbox::Recti)
-        SB_BIND_END_PROPERTYS
-        SB_BIND_END_CLASS
-        SB_BIND(this)
-    }
-    
-    
-
-#endif
 }

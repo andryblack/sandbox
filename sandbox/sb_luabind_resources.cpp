@@ -105,43 +105,5 @@ namespace Sandbox {
         luabind::ExternClass<Resources>(lua);
         luabind::Class<Texture>(lua);
     }
-    
-    /*
-     {
-     SB_BIND_BEGIN_RAW_CLASS(Sandbox::Color)
-     SB_BIND_RAW_CONSTRUCTOR(Sandbox::Color,(float,float,float,float))
-     SB_BIND_BEGIN_PROPERTYS
-     SB_BIND_PROPERTY_RAW(Sandbox::Color,r,float)
-     SB_BIND_PROPERTY_RAW(Sandbox::Color,g,float)
-     SB_BIND_PROPERTY_RAW(Sandbox::Color,b,float)
-     SB_BIND_PROPERTY_RAW(Sandbox::Color,a,float)
-     SB_BIND_END_PROPERTYS
-     SB_BIND_END_CLASS
-     SB_BIND(this)
-     lua_pushcclosure(GetVM(), &lua_color_from_string_func, 0);
-     register_object("Sandbox.Color.FromString");
-     }
-     
-     
-     {
-     SB_BIND_BEGIN_SHARED_CLASS(Sandbox::Texture)
-     SB_BIND_BEGIN_METHODS
-     SB_BIND_END_METHODS
-     SB_BIND_BEGIN_PROPERTYS
-     SB_BIND_PROPERTY_WO(Sandbox::Texture,Filtered,SetFiltered,bool)
-     SB_BIND_PROPERTY_WO(Sandbox::Texture,Tiled,SetTiled,bool)
-     SB_BIND_END_PROPERTYS
-     SB_BIND_END_CLASS
-     SB_BIND(this)
-     }
-    
-     {
-     SB_BIND_BEGIN_EXTERN_CLASS(Sandbox::Resources)
-     SB_BIND_BEGIN_METHODS
-     SB_BIND_METHOD(Sandbox::Resources,GetShader,Sandbox::Shader(const char*,const char*))
-     SB_BIND_END_METHODS
-     SB_BIND_END_CLASS
-     SB_BIND(this)
-     }
-     */
+
 }
