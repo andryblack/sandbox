@@ -31,30 +31,7 @@ namespace Sandbox {
     static const char* MODULE = "Sanbox:Lua";
     
 	
-	LuaReference::LuaReference( const LuaVMHelperWeakPtr& ptr ) : m_lua(ptr),m_ref(LUA_NOREF) {
-	}
-	LuaReference::~LuaReference() {
-		if (LuaVMHelperPtr lua = m_lua.lock()) {
-			UnsetObject(lua->lua->GetVM());
-		}
-	}
-	bool LuaReference::Valid() const {
-		return m_ref!=LUA_NOREF;
-	}
-	void LuaReference::SetObject( lua_State* state ) {
-		sb_assert(m_ref==LUA_NOREF);
-		m_ref = luaL_ref(state,LUA_REGISTRYINDEX);
-		sb_assert(m_ref!=LUA_NOREF);
-	}
-	void LuaReference::UnsetObject( lua_State* state ) {
-		sb_assert(m_ref!=LUA_NOREF);
-		luaL_unref(state,LUA_REGISTRYINDEX,m_ref);
-		m_ref = LUA_NOREF;
-	}
-	void LuaReference::GetObject( lua_State* state ) {
-		sb_assert(m_ref!=LUA_NOREF);
-        lua_rawgeti(state, LUA_REGISTRYINDEX, m_ref);
-	}
+	
 		
     
 	struct lua_read_data {
@@ -120,8 +97,6 @@ namespace Sandbox {
         m_mem_use(0)
     {
         m_L = lua_newstate(&LuaVM::lua_alloc_func,this);
-        m_helper = LuaVMHelperPtr( new LuaVMHelper() );
-        m_helper->lua = this;
         
         static const luaL_Reg loadedlibs[] = {
             {"_G", luaopen_base},
@@ -162,9 +137,6 @@ namespace Sandbox {
         lua_rawseti(m_L,-2,1);
         luabind::lua_set_value(m_L, "package.searchers");
         
-        lua_pushlightuserdata(m_L,this);
-		lua_setglobal(m_L, "LuaVM_instance");
-        
 		lua_atpanic(m_L, &at_panic_func);
         
         luabind::Initialize(m_L);
@@ -172,9 +144,7 @@ namespace Sandbox {
     
     LuaVM::~LuaVM() {
         if (m_L) {
-            lua_pushnil(m_L);
-            lua_setglobal(m_L, "LuaVM_instance");
-            m_helper = LuaVMHelperPtr();
+            luabind::Deinitialize(m_L);
             lua_close(m_L);
             m_L = 0;
         }

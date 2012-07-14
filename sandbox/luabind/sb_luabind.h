@@ -24,7 +24,31 @@ namespace Sandbox {
     
     namespace luabind {
         
+        struct LuaVMHelper {
+            lua_State* lua;
+        };
+        typedef sb::shared_ptr<LuaVMHelper> LuaVMHelperPtr;
+        typedef sb::weak_ptr<LuaVMHelper> LuaVMHelperWeakPtr;
+        class LuaReference {
+        public:
+            explicit LuaReference( const LuaVMHelperWeakPtr& ptr );
+            ~LuaReference();
+            void SetObject( lua_State* state );
+            void UnsetObject( lua_State* state );
+            void GetObject( lua_State* state );
+            LuaVMHelperPtr GetHelper() const { return m_lua.lock();}
+            const LuaVMHelperWeakPtr& GetHelperPtr() const { return m_lua;}
+            bool Valid() const;
+        private:
+            LuaVMHelperWeakPtr m_lua;
+            int	m_ref;
+        };
+        
+        LuaVMHelperPtr GetHelper( lua_State* L );
+        
+        
         void Initialize( lua_State* L );
+        void Deinitialize( lua_State* L );
         
         template <class T>
         inline void RawClass( lua_State* L ) {

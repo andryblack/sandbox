@@ -30,25 +30,7 @@ namespace Sandbox {
     class Resources;
     
 	class LuaVM;
-	struct LuaVMHelper {
-		LuaVM* lua;
-	};
-	typedef sb::shared_ptr<LuaVMHelper> LuaVMHelperPtr;
-	typedef sb::weak_ptr<LuaVMHelper> LuaVMHelperWeakPtr;
-	class LuaReference {
-	public:
-		explicit LuaReference( const LuaVMHelperWeakPtr& ptr );
-		~LuaReference();
-		void SetObject( lua_State* state );
-		void UnsetObject( lua_State* state );
-		void GetObject( lua_State* state );
-		LuaVMHelperPtr GetHelper() const { return m_lua.lock();}
-		const LuaVMHelperWeakPtr& GetHelperPtr() const { return m_lua;}
-		bool Valid() const;
-	private:
-		LuaVMHelperWeakPtr m_lua;
-		int	m_ref;
-	};
+	
 		
 	
     class LuaVM : public NotCopyable {
@@ -61,12 +43,10 @@ namespace Sandbox {
         
         lua_State* GetVM() { return m_L; }
         
-        const LuaVMHelperPtr& GetHelper() const { return m_helper; }
         static LuaVM* GetInstance( lua_State* L ); 
     private:
         Resources*  m_resources;
         lua_State*  m_L;
-        LuaVMHelperPtr m_helper;
         GHL::UInt32 m_mem_use;
         sb::string m_base_path;
 		GHL::Byte* alloc(size_t size);

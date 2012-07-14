@@ -12,6 +12,31 @@ namespace Sandbox {
     
     namespace luabind {
         
+        LuaReference::LuaReference( const LuaVMHelperWeakPtr& ptr ) : m_lua(ptr),m_ref(LUA_NOREF) {
+        }
+        LuaReference::~LuaReference() {
+            if (LuaVMHelperPtr lua = m_lua.lock()) {
+                UnsetObject(lua->lua);
+            }
+        }
+        bool LuaReference::Valid() const {
+            return m_ref!=LUA_NOREF;
+        }
+        void LuaReference::SetObject( lua_State* state ) {
+            sb_assert(m_ref==LUA_NOREF);
+            m_ref = luaL_ref(state,LUA_REGISTRYINDEX);
+            sb_assert(m_ref!=LUA_NOREF);
+        }
+        void LuaReference::UnsetObject( lua_State* state ) {
+            sb_assert(m_ref!=LUA_NOREF);
+            luaL_unref(state,LUA_REGISTRYINDEX,m_ref);
+            m_ref = LUA_NOREF;
+        }
+        void LuaReference::GetObject( lua_State* state ) {
+            sb_assert(m_ref!=LUA_NOREF);
+            lua_rawgeti(state, LUA_REGISTRYINDEX, m_ref);
+        }
+        
         static int lua_class_constructor_func( lua_State* L ) {
             int args_cnt = lua_gettop(L);
             
@@ -183,10 +208,37 @@ namespace Sandbox {
             return 1;
         }
         
+        LuaVMHelperPtr GetHelper( lua_State* L ) {
+            LuaVMHelperPtr res;
+            lua_getglobal(L, "__lua_vm_helper");
+            if ( lua_isuserdata(L, -1) ) {
+                LuaVMHelperPtr* helper = reinterpret_cast<LuaVMHelperPtr*>(lua_touserdata(L, -1));
+                res = *helper;
+            }
+            lua_pop(L, 1);
+            return res;
+        }
+        
         void Initialize( lua_State* L ) {
+            
+            void* data = lua_newuserdata(L, sizeof(LuaVMHelperPtr));
+            LuaVMHelperPtr* helper = new (data) LuaVMHelperPtr(new LuaVMHelper());
+            (*helper)->lua = L;
+            lua_setglobal(L, "__lua_vm_helper");
+            
             lua_pushcfunction(L, &lua_class_func);
             lua_setglobal(L, "class");
         }
         
+        void Deinitialize( lua_State* L ) {
+            lua_getglobal(L, "__lua_vm_helper");
+            if ( lua_isuserdata(L, -1) ) {
+                LuaVMHelperPtr* helper = reinterpret_cast<LuaVMHelperPtr*>(lua_touserdata(L, -1));
+                helper->~LuaVMHelperPtr();
+            }
+            lua_pop(L, 1);
+            lua_pushnil(L);
+            lua_setglobal(L, "__lua_vm_helper");
+        }
     }
 }

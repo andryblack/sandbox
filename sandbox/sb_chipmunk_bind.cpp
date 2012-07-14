@@ -129,7 +129,7 @@ namespace Sandbox {
         static const char* const LuaChipmunkModule = "Sanbox:LuaChipmunk";
         class LuaCollisionHandler : public CollisionHandler {
         public:
-            explicit LuaCollisionHandler(LuaVMHelperWeakPtr ptr,long a,long b) : CollisionHandler(a,b), m_ref(ptr) {}
+            explicit LuaCollisionHandler(luabind::LuaVMHelperWeakPtr ptr,long a,long b) : CollisionHandler(a,b), m_ref(ptr) {}
             ~LuaCollisionHandler() {
             }
             void SetFunction(lua_State* L) {
@@ -137,8 +137,8 @@ namespace Sandbox {
             }
             void Handle( const ShapePtr& a, const ShapePtr& b ) {
                 if (m_ref.Valid()) {
-                    if ( LuaVMHelperPtr lua = m_ref.GetHelper()) {
-                        lua_State* L = lua->lua->GetVM();
+                    if ( luabind::LuaVMHelperPtr lua = m_ref.GetHelper()) {
+                        lua_State* L = lua->lua;
                         sb_assert(L);
                         m_ref.GetObject(L);
                         sb_assert(lua_isfunction(L,-1));
@@ -170,9 +170,10 @@ namespace Sandbox {
                     luabind::lua_argerror(L, 4, "function",0);
                     return 0;
                 }
-                LuaVM* lua = LuaVM::GetInstance(L);
-                LuaCollisionHandler* raw = new LuaCollisionHandler(lua->GetHelper(),a,b);
-                lua_State* main_state = lua->GetVM();
+                luabind::LuaVMHelperPtr helper = luabind::GetHelper(L);
+                sb_assert(helper);
+                LuaCollisionHandler* raw = new LuaCollisionHandler(helper,a,b);
+                lua_State* main_state = helper->lua;
                 lua_pushvalue(L, 4);
                 if (main_state!=L) {
                     lua_xmove(L, main_state, 1);
@@ -182,7 +183,7 @@ namespace Sandbox {
                 return 1;
             }
         private:
-            LuaReference	m_ref;
+            luabind::LuaReference	m_ref;
         };
 
     }

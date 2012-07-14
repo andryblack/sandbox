@@ -8,7 +8,6 @@
 
 #include "luabind/sb_luabind.h"
 #include "meta/sb_meta.h"
-#include "sb_lua.h"
 #include "sb_thread.h"
 #include "sb_threads_mgr.h"
 #include "sb_processor.h"
@@ -145,7 +144,7 @@ namespace Sandbox {
   	class LuaEvent : public Event {
 	public:
 
-        explicit LuaEvent(LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
+        explicit LuaEvent(luabind::LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
 		~LuaEvent() {
 		}
 		void SetFunction(lua_State* L) {
@@ -153,8 +152,8 @@ namespace Sandbox {
 		}
 		void Emmit() {
 			if (m_ref.Valid()) {
-				if ( LuaVMHelperPtr lua = m_ref.GetHelper()) {
-					lua_State* L = lua->lua->GetVM();
+				if ( luabind::LuaVMHelperPtr lua = m_ref.GetHelper()) {
+					lua_State* L = lua->lua;
 					sb_assert(L);
 					m_ref.GetObject(L);
 					sb_assert(lua_isfunction(L,-1));
@@ -173,14 +172,14 @@ namespace Sandbox {
                 luabind::lua_argerror(L,2,"function",0);
 				return 0;
 			}
- 			LuaVM* lua = LuaVM::GetInstance(L);
-            if (!lua) {
+            luabind::LuaVMHelperPtr helper = luabind::GetHelper(L);
+            if (!helper) {
                 lua_pushstring(L, "error state");
                 lua_error(L);
                 return 0;
             }
-			lua_State* main_state = lua->GetVM();
-			sb::shared_ptr<LuaEvent> e = sb::shared_ptr<LuaEvent>(new LuaEvent(lua->GetHelper()));
+			lua_State* main_state = helper->lua;
+			sb::shared_ptr<LuaEvent> e = sb::shared_ptr<LuaEvent>(new LuaEvent(helper));
 			lua_pushvalue(L, 2);
 			if (main_state!=L) {
 				lua_xmove(L, main_state, 1);
@@ -190,14 +189,14 @@ namespace Sandbox {
 			return 1;
 		}
 	private:
-		LuaReference	m_ref;
+        luabind::LuaReference	m_ref;
 	};
 
     
     static const char* const LuaThreadModule = "Sanbox:LuaThread";
 	class LuaThread : public Thread {
 	public:
-		explicit LuaThread(LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
+		explicit LuaThread(luabind::LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
 		~LuaThread() {
 		}
 		void SetThread(lua_State* L) {
@@ -206,8 +205,8 @@ namespace Sandbox {
 		}
 		bool Update(float dt) {
 			if (m_ref.Valid()) {
-				if ( LuaVMHelperPtr lua = m_ref.GetHelper()) {
-					lua_State* L = lua->lua->GetVM();
+				if ( luabind::LuaVMHelperPtr lua = m_ref.GetHelper()) {
+					lua_State* L = lua->lua;
 					sb_assert(L);
 					m_ref.GetObject(L);
 					if (!lua_isthread(L,-1)) {
@@ -245,10 +244,11 @@ namespace Sandbox {
 				return 0;
 			}
 			//int stck_L = lua_gettop(L);
-			LuaVM* lua = LuaVM::GetInstance(L);
-			lua_State* main_state = lua->GetVM();
+            luabind::LuaVMHelperPtr helper = luabind::GetHelper(L);
+            sb_assert(helper);
+			lua_State* main_state = helper->lua;
 			sb_assert(lua_checkstack(main_state,3));
-			sb::shared_ptr<LuaThread> e = sb::shared_ptr<LuaThread>(new LuaThread(lua->GetHelper()));
+			sb::shared_ptr<LuaThread> e = sb::shared_ptr<LuaThread>(new LuaThread(helper));
 			//sb_assert(stck==lua_gettop(L));
 			lua_pushvalue(L, 2);						
 			if (main_state!=L) {
@@ -277,7 +277,7 @@ namespace Sandbox {
 			return 1;
 		}
 	private:
-		LuaReference m_ref;
+        luabind::LuaReference m_ref;
 	};
 
 }
