@@ -153,7 +153,7 @@ namespace Sandbox {
                 return;
             get_table( L, InplaceString(holder.info->name) );   /// obj mntbl
             sb_assert(lua_istable(L, -1));
-            lua_pushliteral(L, "metatable");
+            lua_pushliteral(L, "__metatable");
             lua_rawget(L, -2);                          /// obj mntbl mt
             sb_assert(lua_istable(L, -1));
             lua_setmetatable(L, -3);                    /// obj mntbl
@@ -294,7 +294,6 @@ namespace Sandbox {
         }
         
         
-        
         static int getter_indexer (lua_State *L)
 		{
             sb_assert(lua_isuserdata(L, 1));
@@ -307,7 +306,7 @@ namespace Sandbox {
 #endif
           	lua_getmetatable(L, 1);             /// mt
             do {
-                lua_pushliteral(L, "props");
+                lua_pushliteral(L, "__props");
                 lua_rawget(L, -2);                  /// mt props
                 sb_assert(lua_istable(L, -1));
                 
@@ -327,7 +326,7 @@ namespace Sandbox {
                 }
 				lua_pop(L, 2);                  /// mt 
                 
-                lua_pushliteral(L, "methods");
+                lua_pushliteral(L, "__methods");
                 lua_rawget(L, -2);                  /// mt methods
                 sb_assert(lua_istable(L, -1));
                 
@@ -344,7 +343,7 @@ namespace Sandbox {
 				lua_pop(L, 2);                  /// mt 
                 
                 
-				lua_pushliteral(L, "parent");
+				lua_pushliteral(L, "__parent");
                 lua_rawget(L, -2 );             /// mt prnt
 				if (lua_isnil(L, -1)) {
 					lua_pop(L, 2);
@@ -370,7 +369,7 @@ namespace Sandbox {
             sb_assert(lua_isuserdata(L, 1));
           	lua_getmetatable(L, 1);             /// mt
             do {
-                lua_pushliteral(L, "props");
+                lua_pushliteral(L, "__props");
                 lua_rawget(L, -2);                  /// mt props
                 sb_assert(lua_istable(L, -1));
                 
@@ -390,7 +389,7 @@ namespace Sandbox {
                     return 0;
                 }
 				lua_pop(L, 2);                  /// mt 
-				lua_pushliteral(L, "parent");
+				lua_pushliteral(L, "__parent");
                 lua_rawget(L, -2 );             /// mt prnt
 				if (lua_isnil(L, -1)) {
 					lua_pop(L, 2);
@@ -430,12 +429,14 @@ namespace Sandbox {
             lua_get_create_table( L, info->name );   /// mntbl
             sb_assert( lua_istable(L, -1));   
             lua_createtable(L, 0, 0);                     /// mntbl props
-            lua_setfield(L, -2, "props");                 /// mntbl 
+            lua_setfield(L, -2, "__props");                 /// mntbl 
+            lua_pushboolean(L, 1);                     
+            lua_setfield(L, -2, "__isnative");                 /// mntbl 
             lua_createtable(L, 0, 0);                     /// mntbl props
-            lua_setfield(L, -2, "methods");                 /// mntbl 
+            lua_setfield(L, -2, "__methods");                 /// mntbl 
             if (info->parent && info->parent!=meta::type<void>::info() ) {
                 lua_get_create_table(L,info->parent->name);
-                lua_setfield(L, -2, "parent");
+                lua_setfield(L, -2, "__parent");
             }
             lua_createtable(L, 0, 7);                     /// mntbl raw_ptr
             lua_pushcfunction(L, &destructor_func);               /// mntbl raw_ptr destructor_func
@@ -446,13 +447,13 @@ namespace Sandbox {
 			lua_setfield(L, -2, "__newindex");               /// mntbl raw_ptr
             lua_pushcfunction(L, &object_to_string);               /// mntbl raw_ptr object_to_string
 			lua_setfield(L, -2, "__tostring");               /// mntbl raw_ptr
-            lua_getfield(L, -2, "props");                 /// mntbl raw_ptr props
-            lua_setfield(L, -2, "props");                 /// mntbl raw_ptr
-            lua_getfield(L, -2, "methods");                 /// mntbl raw_ptr methods
-            lua_setfield(L, -2, "methods");                 /// mntbl raw_ptr
-            lua_getfield(L, -2, "parent");                 /// mntbl raw_ptr parent
-            lua_setfield(L, -2, "parent");                 /// mntbl raw_ptr
-            lua_setfield(L, -2, "metatable");               /// mntbl 
+            lua_getfield(L, -2, "__props");                 /// mntbl raw_ptr props
+            lua_setfield(L, -2, "__props");                 /// mntbl raw_ptr
+            lua_getfield(L, -2, "__methods");                 /// mntbl raw_ptr methods
+            lua_setfield(L, -2, "__methods");                 /// mntbl raw_ptr
+            lua_getfield(L, -2, "__parent");                 /// mntbl raw_ptr parent
+            lua_setfield(L, -2, "__parent");                 /// mntbl raw_ptr
+            lua_setfield(L, -2, "__metatable");               /// mntbl 
             lua_pushvalue(L, -1);
             lua_setmetatable(L, -2);
         }

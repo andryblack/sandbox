@@ -42,7 +42,7 @@ namespace Sandbox {
             void operator()( const meta::property_holder<T, U>& prop ) {
                 typedef typename meta::property_holder<T, U>::prop_ptr prop_ptr;
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "props");
+                lua_pushliteral(m_L, "__props");
                 lua_rawget(m_L, -2 );                 /// props
                 sb_assert(lua_istable(m_L, -1)); 
                 lua_createtable(m_L, 0, 2);                     /// props tbl
@@ -60,7 +60,7 @@ namespace Sandbox {
             template <class Getter>
             void operator()( const meta::property_holder_ro<T, Getter>& prop ) {
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "props");
+                lua_pushliteral(m_L, "__props");
                 lua_rawget(m_L, -2 );                 /// props
                 sb_assert(lua_istable(m_L, -1)); 
                 lua_createtable(m_L, 0, 2);                     /// props tbl
@@ -75,7 +75,7 @@ namespace Sandbox {
             template <class Getter,class Setter>
             void operator()( const meta::property_holder_rw<T, Getter, Setter>& prop ) {
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "props");
+                lua_pushliteral(m_L, "__props");
                 lua_rawget(m_L, -2 );                 /// props
                 sb_assert(lua_istable(m_L, -1)); 
                 lua_createtable(m_L, 0, 2);                     /// props tbl
@@ -95,7 +95,7 @@ namespace Sandbox {
             template <class Func>
             void operator()( const meta::method_holder<Func>& func ) {
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "methods");
+                lua_pushliteral(m_L, "__methods");
                 lua_rawget(m_L, -2 );                 /// methods
                 sb_assert(lua_istable(m_L, -1)); 
                 Func* ptr = 
@@ -108,7 +108,7 @@ namespace Sandbox {
             template <class Func>
             void operator()( const meta::operator_holder<Func>& func ) {
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "metatable");
+                lua_pushliteral(m_L, "__metatable");
                 lua_rawget(m_L, -2 );                 /// metatable
                 sb_assert(lua_istable(m_L, -1)); 
                 Func* ptr = 
@@ -155,6 +155,18 @@ namespace Sandbox {
                 (&stack<T>::get(L,1)->*ptr) = stack<U>::get(L,2);
                 return 0;
             }
+        protected:
+            static int init_func( lua_State* L ) {
+                int args_cnt = lua_gettop(L); 
+                lua_pushliteral(L, "__native");
+                lua_pushvalue(L, lua_upvalueindex(1));
+                for (int i=1;i<=args_cnt;i++) {
+                    lua_pushvalue(L, i);
+                }
+                lua_call(L, args_cnt, 1);
+                lua_rawset(L, 1);
+                return 0;
+            }
         };
         template <class T>
         class raw_klass_registrator : public klass_registrator<T> {
@@ -164,11 +176,15 @@ namespace Sandbox {
             template <typename Proto>
             void operator() ( const meta::constructor_holder<Proto>& ) {
                 sb_assert(lua_istable(this->m_L, -1)); 
-                lua_pushliteral(this->m_L, "__call");         /// mntbl name
+                lua_pushliteral(this->m_L, "__init");
                 constructor_func* ptr = 
                 reinterpret_cast<constructor_func*>(lua_newuserdata(this->m_L, sizeof(constructor_func)));    /// mntbl ud
                 *ptr = &constructor_helper<Proto,2>::template inplace<T>;
                 lua_pushcclosure(this->m_L, &raw_klass_registrator<T>::constructor, 1);   /// mntbl name ctr
+                lua_pushliteral(this->m_L, "__call");         /// mntbl name
+                lua_pushvalue(this->m_L, -2);
+                lua_rawset(this->m_L, -5);
+                lua_pushcclosure(this->m_L, &klass_registrator<T>::init_func, 1);
                 lua_rawset(this->m_L, -3);                    /// mntbl 
             }
         private:
@@ -196,12 +212,16 @@ namespace Sandbox {
             template <typename Proto>
             void operator() ( const meta::constructor_holder<Proto>& ) {
                 sb_assert(lua_istable(this->m_L, -1)); 
-                lua_pushliteral(this->m_L, "__call");         /// mntbl name
+                lua_pushliteral(this->m_L, "__init");
                 constructor_func* ptr = 
-                reinterpret_cast<constructor_func*>(lua_newuserdata(this->m_L, sizeof(constructor_func)));    /// mntbl ud
+                reinterpret_cast<constructor_func*>(lua_newuserdata(this->m_L, sizeof(constructor_func)));    /// mntbl in ud
                 *ptr = &constructor_helper<Proto,2>::template raw<T>;
-                lua_pushcclosure(this->m_L, &shared_klass_registrator<T>::constructor, 1);   /// mntbl name ctr
-                lua_rawset(this->m_L, -3);                    /// mntbl 
+                lua_pushcclosure(this->m_L, &shared_klass_registrator<T>::constructor, 1);   /// mntbl in ctr
+                lua_pushliteral(this->m_L, "__call");         /// mntbl in ctr name
+                lua_pushvalue(this->m_L, -2);                 /// mntbl in ctr name ctr
+                lua_rawset(this->m_L, -5);                    /// mntbl in ctr
+                lua_pushcclosure(this->m_L, &klass_registrator<T>::init_func, 1);   /// mntbl in initf
+                lua_rawset(this->m_L, -3);
             }
             void operator() ( const meta::constructor_ptr_holder<int(*)(lua_State*)>& hdr) {
                 sb_assert(lua_istable(this->m_L, -1)); 

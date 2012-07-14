@@ -166,6 +166,8 @@ namespace Sandbox {
 		lua_setglobal(m_L, "LuaVM_instance");
         
 		lua_atpanic(m_L, &at_panic_func);
+        
+        luabind::Initialize(m_L);
     }
     
     LuaVM::~LuaVM() {
@@ -276,7 +278,10 @@ namespace Sandbox {
     void* LuaVM::lua_alloc_func(void *ud, void *_ptr, size_t osize,size_t nsize) {
 		GHL::Byte* ptr = reinterpret_cast<GHL::Byte*> (_ptr);
 		LuaVM* _this = static_cast<LuaVM*>(ud);    
-		if (nsize == 0) {
+        if (!ptr) {
+            if (nsize)
+                return _this->alloc(nsize);
+        }else if (nsize == 0) {
 			if (ptr) _this->free(ptr,osize);
 			return NULL;
 		}

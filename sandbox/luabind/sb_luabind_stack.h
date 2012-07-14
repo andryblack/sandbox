@@ -126,22 +126,30 @@ namespace Sandbox {
                 new (data) T(val);
                 lua_set_metatable( L, *holder );
             }
+            static T& get_impl( lua_State* L, data_holder* holder,int idx ) {
+                if ( holder->is_const ) {
+                    lua_access_error( L, idx , holder->info->name );
+                    return *reinterpret_cast<T*>(0);
+                } 
+                T* res = get_object_ptr<T>(holder);
+                if (!res) {
+                    lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
+                }
+                return *res;
+            }
             static T& get( lua_State* L, int idx ) {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
-                    if ( holder->is_const ) {
-                        lua_access_error( L, idx , holder->info->name );
-                        return *reinterpret_cast<T*>(0);
-                    } 
-                    T* res = get_object_ptr<T>(holder);
-                    if (!res) {
-                        lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
-                    } else {
-                        return *res;
-                    }
-                    
+                    return get_impl(L, holder,idx);
                 } else if ( lua_istable(L, idx) ) {
-                    
+                    lua_pushliteral(L, "__native");
+                    lua_rawget(L, idx);
+                    if (lua_isuserdata(L, -1)) {
+                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
+                        lua_pop(L, 1);
+                        return get_impl(L, holder,idx);
+                    } 
+                    lua_pop(L, 1);
                 } 
                 lua_argerror( L, idx, meta::type<T>::info()->name, 0);
                 return *reinterpret_cast<T*>(0);
@@ -149,17 +157,26 @@ namespace Sandbox {
         };
         template <class T>
         struct stack<const T> {
+            static const T& get_impl( lua_State* L, data_holder* holder,int idx ) {
+                T* res = get_object_ptr<T>(holder);
+                if (!res) {
+                    lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
+                }
+                return *res;
+            }
             static const T& get( lua_State* L, int idx ) {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
-                    T* res = get_object_ptr<T>(holder);
-                    if (!res) {
-                        lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
-                    } else {
-                        return *res;
-                    }
+                    return get_impl(L, holder, idx);
                 } else if ( lua_istable(L, idx) ) {
-                    
+                    lua_pushliteral(L, "__native");
+                    lua_rawget(L, idx);
+                    if (lua_isuserdata(L, -1)) {
+                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
+                        lua_pop(L, 1);
+                        return get_impl(L, holder, idx);
+                    }
+                    lua_pop(L, 1);
                 }
                 lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
                 return *reinterpret_cast<T*>(0);
@@ -193,22 +210,30 @@ namespace Sandbox {
                     lua_pushnil(L);
                 }
             }
+            static T* get_impl( lua_State* L, data_holder* holder,int idx ) {
+                if ( holder->is_const ) {
+                    lua_access_error( L, idx , holder->info->name );
+                    return reinterpret_cast<T*>(0);
+                } 
+                T* res = get_object_ptr<T>(holder);
+                if (!res) {
+                    lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
+                } 
+                return res;
+            }
             static T* get( lua_State* L, int idx ) {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
-                    if ( holder->is_const ) {
-                        lua_access_error( L, idx , holder->info->name );
-                        return reinterpret_cast<T*>(0);
-                    } 
-                    T* res = get_object_ptr<T>(holder);
-                    if (!res) {
-                        lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
-                    } else {
-                        return res;
-                    }
-                    
+                    return get_impl(L, holder, idx);
                 } else if ( lua_istable(L, idx) ) {
-                    
+                    lua_pushliteral(L, "__native");
+                    lua_rawget(L, idx);
+                    if (lua_isuserdata(L, -1)) {
+                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
+                        lua_pop(L, 1);
+                        return get_impl(L, holder, idx);
+                    }
+                    lua_pop(L, 1);
                 } else if ( lua_isnil(L, idx) ) {
                     return reinterpret_cast<T*>(0);
                 }
@@ -235,18 +260,26 @@ namespace Sandbox {
                     lua_pushnil(L);
                 }
             }
+            static const T* get_impl( lua_State* L, data_holder* holder,int idx ) {
+                T* res = get_object_ptr<T>(holder);
+                if (!res) {
+                    lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
+                } 
+                return res;
+            }
             static const T* get( lua_State* L, int idx ) {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
-                    T* res = get_object_ptr<T>(holder);
-                    if (!res) {
-                        lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
-                    } else {
-                        return res;
-                    }
-                    
+                    return get_impl(L, holder, idx);                    
                 } else if ( lua_istable(L, idx) ) {
-                    
+                    lua_pushliteral(L, "__native");
+                    lua_rawget(L, idx);
+                    if (lua_isuserdata(L, -1)) {
+                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
+                        lua_pop(L, 1);
+                        return get_impl(L, holder, idx);
+                    }
+                    lua_pop(L, 1);
                 } else if ( lua_isnil(L, idx) ) {
                     return reinterpret_cast<T*>(0);
                 }
@@ -272,17 +305,29 @@ namespace Sandbox {
                     lua_pushnil(L);
                 }
             }
+            static sb::shared_ptr<T> get_impl( lua_State* L,  data_holder* holder, int idx ) {
+                if ( holder->type==data_holder::shared_ptr ) {
+                    sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);
+                    if ( ptr ) {
+                        return ptr;
+                    }
+                }
+                lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
+                return sb::shared_ptr<T>();
+            }
             static sb::shared_ptr<T> get( lua_State* L, int idx ) {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
-                    if ( holder->type==data_holder::shared_ptr ) {
-                        sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);
-                        if ( ptr ) {
-                            return ptr;
-                        }
-                    }
+                    return get_impl(L, holder, idx);
                 } else if ( lua_istable(L, idx) ) {
-                    
+                    lua_pushliteral(L, "__native");
+                    lua_rawget(L, idx);
+                    if (lua_isuserdata(L, -1)) {
+                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
+                        lua_pop(L, 1);
+                        return get_impl(L, holder, idx);
+                    }
+                    lua_pop(L, 1);
                 } else if ( lua_isnil(L, idx) ) {
                     return sb::shared_ptr<T>();
                 }

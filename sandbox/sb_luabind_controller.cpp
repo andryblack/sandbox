@@ -217,7 +217,7 @@ namespace Sandbox {
 					} 
 					lua_State* th = lua_tothread(L, -1);
 					lua_pushnumber(th, dt);
-					int res = lua_resume(th,L, 1);
+					int res = lua_resume(th,0, 1);
 					lua_pop(L,1);
 					if (res==LUA_YIELD) {
 						return false;
@@ -258,7 +258,7 @@ namespace Sandbox {
 			sb_assert(lua_isthread(main_state,-1));
 			lua_pushvalue(main_state, -2);				/// (3) func,th,func
 			lua_xmove(main_state, thL, 1);				/// (2) th,func
-			int res = lua_resume(thL,main_state, 0);
+			int res = lua_resume(thL,0, 0);
 			if (res==LUA_YIELD) {
 				e->SetThread(main_state);				/// (1) func
 			} else {

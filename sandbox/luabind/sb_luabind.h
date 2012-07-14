@@ -24,6 +24,7 @@ namespace Sandbox {
     
     namespace luabind {
         
+        void Initialize( lua_State* L );
         
         template <class T>
         inline void RawClass( lua_State* L ) {
