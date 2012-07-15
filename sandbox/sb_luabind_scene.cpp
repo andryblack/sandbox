@@ -21,6 +21,7 @@
 #include "sb_container_color.h"
 #include "sb_container_visible.h"
 #include "sb_scene.h"
+#include "sb_touch_info.h"
 
 SB_META_DECLARE_KLASS(Sandbox::SceneObject, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::SceneObject)
@@ -79,7 +80,7 @@ SB_META_METHOD(Clear)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::BlendMode,void);
-SB_META_BEGIN_ENUM_BIND(Sandbox::BlendMode)
+SB_META_BEGIN_ENUM_BIND(Sandbox::BlendMode,namespace Sandbox)
 SB_META_ENUM_ITEM(BLEND_MODE_COPY)
 SB_META_ENUM_ITEM(BLEND_MODE_ALPHABLEND)
 SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE)
@@ -104,6 +105,19 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::Widget)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Rect,GetRect,SetRect)
 SB_META_PROPERTY_RW(Active,GetActive,SetActive)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::TouchInfo::Type,void);
+SB_META_BEGIN_ENUM_BIND(Sandbox::TouchInfo::Type,Sandbox::TouchInfo)
+SB_META_ENUM_MEMBER_ITEM(BEGIN,Sandbox::TouchInfo::BEGIN)
+SB_META_ENUM_MEMBER_ITEM(MOVE,Sandbox::TouchInfo::MOVE)
+SB_META_ENUM_MEMBER_ITEM(END,Sandbox::TouchInfo::END)
+SB_META_END_ENUM_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::TouchInfo, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::TouchInfo)
+SB_META_PROPERTY_RO(Type,GetType)
+SB_META_PROPERTY_RO(Position,GetPosition)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::TouchButtonWidget, Sandbox::Widget)
@@ -140,6 +154,32 @@ SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     
+    class WidgetWrapper : public Widget , public luabind::wrapper {
+    public:
+    protected:
+        virtual void OnTouchEnter() { call("OnTouchEnter"); }
+        virtual void OnTouchLeave() { call("OnTouchLeave"); }
+        virtual bool HandleTouchInside(const TouchInfo& touch) { return call<bool,const TouchInfo&>("HandleTouchInside",touch); }
+    public:
+        void default_OnTouchEnter() { Widget::OnTouchEnter(); }
+        void default_OnTouchLeave() { Widget::OnTouchLeave(); }
+        bool default_HandleTouchInside(const TouchInfo& touch) { return Widget::HandleTouch(touch); }
+    };
+    
+}
+
+SB_META_DECLARE_KLASS(Sandbox::WidgetWrapper, Sandbox::Widget)
+SB_META_BEGIN_KLASS_BIND(Sandbox::WidgetWrapper)
+SB_META_CONSTRUCTOR(())
+bind( method("OnTouchEnter", &WidgetWrapper::default_OnTouchEnter));
+bind( method("OnTouchLeave", &WidgetWrapper::default_OnTouchLeave));
+bind( method("HandleTouchInside", &WidgetWrapper::default_HandleTouchInside));
+SB_META_END_KLASS_BIND()
+
+namespace Sandbox {
+    
+
+    
     void register_scene( lua_State* lua ) {
         luabind::Class<SceneObject>(lua);
         luabind::Class<Sprite>(lua);
@@ -149,7 +189,9 @@ namespace Sandbox {
         luabind::Class<Background>(lua);
         luabind::Class<Label>(lua);
         luabind::Class<Container>(lua);
-        luabind::Class<Widget>(lua);
+        luabind::RawClass<TouchInfo>(lua);
+        luabind::Enum<TouchInfo::Type>(lua);
+        luabind::ClassWrapper<Widget,WidgetWrapper>(lua);
         luabind::Class<TouchButtonWidget>(lua);
         luabind::Enum<BlendMode>(lua);
         luabind::Class<ContainerBlend>(lua);

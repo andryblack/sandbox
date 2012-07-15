@@ -49,7 +49,13 @@ namespace Sandbox {
         void lua_set_metatable( lua_State* L, const data_holder& holder );
         void lua_set_value( lua_State* L, const char* path );
         void lua_get_create_table(lua_State* L,const char* name);
-        void lua_create_metatable(lua_State* L,const meta::type_info* info);
+        void lua_create_metatable(lua_State* L);
+        void lua_register_metatable(lua_State* L,const meta::type_info* info);
+        void lua_register_enum_metatable(lua_State* L,const meta::type_info* info,lua_CFunction compare);
+        
+        class wrapper;
+        typedef wrapper* (*get_wrapper_func_t)(lua_State* st,int idx);
+        void lua_register_wrapper(lua_State* L,const meta::type_info* info,get_wrapper_func_t get_wrapeer_func);
         
         template <class T>
         inline T* get_ptr( const meta::type_info* from, void* data ) {
@@ -416,6 +422,20 @@ namespace Sandbox {
             }
         };
         
+        class lua_stack_check {
+        public:
+            explicit lua_stack_check(lua_State* L) {
+                m_L = L;
+                m_top = lua_gettop(L);
+            }
+            ~lua_stack_check() {
+                int top = lua_gettop(m_L);
+                sb_assert( top == m_top );
+            }
+        private:
+            lua_State* m_L;
+            int m_top;
+        };
         
 #define LUABIND_DECLARE_RAW_STACK_TYPE(Type) \
 template <> \
@@ -438,14 +458,6 @@ static Type get( lua_State* L, int idx ); \
         
         
     
-        class stack_cleaner : public NotCopyable {
-        public:
-            explicit stack_cleaner( lua_State* L );
-            ~stack_cleaner();
-        private:
-            lua_State* m_L;
-            int     m_top;
-        };
     }
 }
 

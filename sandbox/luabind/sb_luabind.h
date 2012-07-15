@@ -18,31 +18,14 @@
 
 #include "sb_luabind_stack.h"
 #include "impl/sb_luabind_registrators.h"
-
+#include "sb_luabind_ref.h"
+#include "sb_luabind_wrapper.h"
 
 namespace Sandbox {
     
     namespace luabind {
         
-        struct LuaVMHelper {
-            lua_State* lua;
-        };
-        typedef sb::shared_ptr<LuaVMHelper> LuaVMHelperPtr;
-        typedef sb::weak_ptr<LuaVMHelper> LuaVMHelperWeakPtr;
-        class LuaReference {
-        public:
-            explicit LuaReference( const LuaVMHelperWeakPtr& ptr );
-            ~LuaReference();
-            void SetObject( lua_State* state );
-            void UnsetObject( lua_State* state );
-            void GetObject( lua_State* state );
-            LuaVMHelperPtr GetHelper() const { return m_lua.lock();}
-            const LuaVMHelperWeakPtr& GetHelperPtr() const { return m_lua;}
-            bool Valid() const;
-        private:
-            LuaVMHelperWeakPtr m_lua;
-            int	m_ref;
-        };
+        
         
         LuaVMHelperPtr GetHelper( lua_State* L );
         
@@ -52,31 +35,46 @@ namespace Sandbox {
         
         template <class T>
         inline void RawClass( lua_State* L ) {
-            stack_cleaner clean_stack(L);
+            lua_stack_check sc(L);
             impl::raw_klass_registrator<T> kr(L);
-            lua_create_metatable(L,meta::type<T>::info());
+            lua_create_metatable(L);
             meta::bind_type<T>::bind( kr );
+            lua_register_metatable(L,meta::type<T>::info());
         }
         template <class T>
         inline void ExternClass( lua_State* L ) {
-            stack_cleaner clean_stack(L);
+            lua_stack_check sc(L);
             impl::klass_registrator<T> kr(L);
-            lua_create_metatable(L,meta::type<T>::info());
+            lua_create_metatable(L);
             meta::bind_type<T>::bind( kr );
+            lua_register_metatable(L,meta::type<T>::info());
         }
         template <class T>
         inline void Class( lua_State* L ) {
-            stack_cleaner clean_stack(L);
+            lua_stack_check sc(L);
             impl::shared_klass_registrator<T> kr(L);
-            lua_create_metatable(L,meta::type<T>::info());
+            lua_create_metatable(L);
             meta::bind_type<T>::bind( kr );
+            lua_register_metatable(L,meta::type<T>::info());
+        }
+        template <class T,class W>
+        inline void ClassWrapper( lua_State* L ) {
+            lua_stack_check sc(L);
+            Class<T>(L);
+            impl::shared_klass_registrator<W> kr(L);
+            lua_create_metatable(L);
+            meta::bind_type<W>::bind( kr );
+            lua_register_wrapper(L,meta::type<W>::info(),&wrapper_helper<W>::get_wrapper_func);
         }
         template <class T>
         inline void Enum( lua_State* L ) {
-            stack_cleaner clean_stack(L);
+            lua_stack_check sc(L);
             impl::enum_registrator<T> kr(L);
-            lua_create_metatable(L,meta::type<T>::info());
+            lua_create_metatable(L);
+            lua_register_enum_metatable(L,meta::type<T>::info(),&impl::enum_registrator<T>::compare_func);
+            lua_get_create_table(L, meta::type<T>::info()->name);
             meta::bind_type<T>::bind( kr );
+            lua_pop(L, 1);
         }
         
         

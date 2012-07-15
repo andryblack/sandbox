@@ -9,6 +9,7 @@
 #include "sb_luabind_stack.h"
 
 #include "sb_inplace_string.h"
+#include "sb_luabind_wrapper.h"
 
 namespace Sandbox {
     namespace luabind {
@@ -124,7 +125,7 @@ namespace Sandbox {
                 lua_pushvalue(L, -1);
                 lua_setglobal(L, first.c_str());
             }
-            if (*other==0) return;
+            if (other==name.end()) return;
             other+=count;
             if (other >= name.end()) return;
             InplaceString tail(other,name.end());
@@ -139,7 +140,7 @@ namespace Sandbox {
                     lua_setfield(L, -3, head.str().c_str());
                 }
                 lua_remove(L, -2);
-                if (*other==0) break;
+                if (other==name.end()) break;
                 tail = InplaceString(other+count,name.end());
             }
         }
@@ -169,6 +170,20 @@ namespace Sandbox {
                 get_create_table_impl<'.',1>(L, InplaceString(path,name));  /// val tbl
                 lua_pushvalue(L, -2);               /// val tbl val
                 lua_setfield(L, -2, name+1);        /// val tbl
+                lua_pop(L, 2);
+            }
+        }
+        
+        static void lua_set_metatable( lua_State* L, const char* path ) {
+            InplaceString full_path(path);
+            const char* name = full_path.rfind(':');
+            if ( name == path ) {
+                lua_setglobal(L, path);
+            } else {
+                name--;
+                get_create_table_impl<':',2>(L, InplaceString(path,name));  /// val tbl
+                lua_pushvalue(L, -2);               /// val tbl val
+                lua_setfield(L, -2, name+2);        /// val tbl
                 lua_pop(L, 2);
             }
         }
@@ -266,19 +281,6 @@ namespace Sandbox {
         const char* stack<const char*>::get( lua_State* L, int idx ) {
             return lua_tostring(L, idx);
         }
-        
-        
-        stack_cleaner::stack_cleaner( lua_State* L ) : m_L(L) {
-            m_top = lua_gettop(L);
-        }
-        
-        stack_cleaner::~stack_cleaner() {
-            int cnt = lua_gettop(m_L) - m_top;
-            sb_assert( cnt>=0 );
-            if (cnt > 0 ) {
-                lua_pop(m_L, cnt);
-            }
-        }
 
         
         
@@ -298,9 +300,9 @@ namespace Sandbox {
 		{
             sb_assert(lua_isuserdata(L, 1));
             /// debug
-#if 0
+#if 1
             data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, 1));
-            if (strcmp(holder->info->name,"Sandbox::Chipmunk::TransformAdapter")==0) {
+            if (strcmp(holder->info->name,"Sandbox::TouchInfo")==0) {
                 int a = 0;
             }
 #endif
@@ -321,7 +323,7 @@ namespace Sandbox {
                     sb_assert(lua_isfunction(L, -1));
                     lua_remove(L, -2);          /// get
                     lua_pushvalue(L, 1);        /// get obj
-                    lua_call(L, 1, 1);
+                    lua_pcall(L, 1, 1, 0);
                     return 1;
                 }
 				lua_pop(L, 2);                  /// mt 
@@ -425,8 +427,8 @@ namespace Sandbox {
             return 0;
         }
         
-        void lua_create_metatable(lua_State* L,const meta::type_info* info) {
-            lua_get_create_table( L, info->name );   /// mntbl
+        void lua_create_metatable(lua_State* L) {
+            lua_createtable(L, 0, 7);
             sb_assert( lua_istable(L, -1));   
             lua_createtable(L, 0, 0);                     /// mntbl props
             lua_setfield(L, -2, "__props");                 /// mntbl 
@@ -434,10 +436,6 @@ namespace Sandbox {
             lua_setfield(L, -2, "__isnative");                 /// mntbl 
             lua_createtable(L, 0, 0);                     /// mntbl props
             lua_setfield(L, -2, "__methods");                 /// mntbl 
-            if (info->parent && info->parent!=meta::type<void>::info() ) {
-                lua_get_create_table(L,info->parent->name);
-                lua_setfield(L, -2, "__parent");
-            }
             lua_createtable(L, 0, 7);                     /// mntbl raw_ptr
             lua_pushcfunction(L, &destructor_func);               /// mntbl raw_ptr destructor_func
 			lua_setfield(L, -2, "__gc");                  /// mntbl raw_ptr
@@ -451,12 +449,102 @@ namespace Sandbox {
             lua_setfield(L, -2, "__props");                 /// mntbl raw_ptr
             lua_getfield(L, -2, "__methods");                 /// mntbl raw_ptr methods
             lua_setfield(L, -2, "__methods");                 /// mntbl raw_ptr
+            lua_setfield(L, -2, "__metatable");               /// mntbl 
+        }
+        
+        static int init_func( lua_State* L ) {
+            int args_cnt = lua_gettop(L); 
+            lua_pushliteral(L, "__native");
+            lua_pushvalue(L, lua_upvalueindex(1));
+            for (int i=1;i<=args_cnt;i++) {
+                lua_pushvalue(L, i);
+            }
+            lua_call(L, args_cnt, 1);
+            lua_rawset(L, 1);
+            return 0;
+        }
+        
+        void lua_register_metatable(lua_State* L,const meta::type_info* info) {
+            if (info->parent && info->parent!=meta::type<void>::info() ) {
+                lua_get_create_table(L,info->parent->name);
+                lua_setfield(L, -2, "__parent");
+                lua_getfield(L, -1, "__metatable");
+                lua_getfield(L, -2, "__parent");                 /// mntbl raw_ptr parent
+                lua_setfield(L, -2, "__parent");                 /// mntbl raw_ptr
+                lua_pop(L, 1);
+            }
+ 
+            lua_getfield(L, -1, "__constructor");
+            if ( lua_isfunction(L, -1) ) {  /// mn fn
+                lua_pushvalue(L, -1);       /// mn fn fn
+                lua_pushcclosure(L, &init_func, 1); /// mn fn if
+                lua_setfield(L, -3, "__init");  /// mn fn
+                lua_createtable(L, 0, 1);   /// mn fn mt
+                lua_pushvalue(L, -2);       /// mn fn mt fn
+                lua_setfield(L, -2, "__call");/// mn fn mt
+                lua_setmetatable(L, -3);    /// mn fn
+            } 
+            lua_pop(L, 1);
+            
+            lua_set_metatable(L, info->name);
+        }
+        
+        
+        
+        void lua_register_enum_metatable(lua_State* L,const meta::type_info* info,lua_CFunction compare) {
+            sb_assert(info->parent==meta::type<void>::info());
+            lua_getfield(L, -1, "__metatable"); // mn mt
+            lua_pushcclosure(L, compare, 0);    // mn mt cmp
+            lua_setfield(L, -2,"__eq");         // mn mt
+            lua_pop(L, 1);                      // mn
+            lua_set_metatable(L, info->name);
+        }
+
+        
+        static int wrapper_init_func( lua_State* L ) {
+            int args_cnt = lua_gettop(L); 
+            lua_pushvalue(L, lua_upvalueindex(1));
+            get_wrapper_func_t get_wrapeer_func = *reinterpret_cast<get_wrapper_func_t*>(lua_touserdata(L, lua_upvalueindex(2)));
+            for (int i=1;i<=args_cnt;i++) {
+                lua_pushvalue(L, i);
+            }
+            lua_call(L, args_cnt, 1);
+            wrapper* w = get_wrapeer_func( L,-1 );
+            lua_pushliteral(L, "__native");
+            lua_pushvalue(L, -2);
+            lua_rawset(L, 1);
+            lua_pop(L, 1);
+            lua_pushvalue(L, 1);
+            w->SetObject(L);
+            return 0;
+        }
+        
+        void lua_register_wrapper(lua_State* L,const meta::type_info* info,get_wrapper_func_t get_wrapeer_func) {
+            lua_get_create_table(L,info->parent->name);
+            lua_setfield(L, -2, "__parent");
+            lua_getfield(L, -1, "__metatable");
             lua_getfield(L, -2, "__parent");                 /// mntbl raw_ptr parent
             lua_setfield(L, -2, "__parent");                 /// mntbl raw_ptr
-            lua_setfield(L, -2, "__metatable");               /// mntbl 
-            lua_pushvalue(L, -1);
-            lua_setmetatable(L, -2);
+            lua_pop(L, 1);
+            
+            lua_getfield(L, -1, "__constructor");
+            if ( lua_isfunction(L, -1) ) {  /// mn fn
+                void* data = lua_newuserdata(L, sizeof(get_wrapeer_func));
+                *reinterpret_cast<get_wrapper_func_t*>(data) = get_wrapeer_func;
+                lua_pushcclosure(L, &wrapper_init_func, 2); /// mn if
+                lua_setfield(L, -2, "__init");  /// mn fn
+            } else {
+                lua_pop(L, 1);
+                sb_assert( false );
+            }
+            lua_getfield(L, -1, "__parent");
+            lua_getfield(L, -2, "__init");
+            lua_setfield(L, -2, "__init");
+            lua_pop(L, 1);
+            
+            lua_set_metatable(L, info->name);
         }
+
 
     }
 }

@@ -25,12 +25,15 @@ namespace Sandbox {
         class enum_registrator : public registrator_base {
         public:
             explicit enum_registrator( lua_State* L ) : registrator_base(L) {}
-            template <class Type>
-            void operator()( const meta::static_value_holder<Type>& value ) {
+            void operator()( const meta::static_value_holder<T>& value ) {
                 sb_assert(lua_istable(m_L, -1)); 
                 lua_pushstring(m_L, value.name);
-                stack<Type>::push(m_L,value.value);
+                stack<T>::push(m_L,value.value);
                 lua_rawset(this->m_L, -3); 
+            }
+            static int compare_func( lua_State* L ) {
+                lua_pushboolean(L, (stack<T>::get(L,1)==stack<T>::get(L,2)) ? 1 : 0 );
+                return 1;
             }
         };
         
@@ -156,17 +159,7 @@ namespace Sandbox {
                 return 0;
             }
         protected:
-            static int init_func( lua_State* L ) {
-                int args_cnt = lua_gettop(L); 
-                lua_pushliteral(L, "__native");
-                lua_pushvalue(L, lua_upvalueindex(1));
-                for (int i=1;i<=args_cnt;i++) {
-                    lua_pushvalue(L, i);
-                }
-                lua_call(L, args_cnt, 1);
-                lua_rawset(L, 1);
-                return 0;
-            }
+            
         };
         template <class T>
         class raw_klass_registrator : public klass_registrator<T> {
@@ -176,15 +169,11 @@ namespace Sandbox {
             template <typename Proto>
             void operator() ( const meta::constructor_holder<Proto>& ) {
                 sb_assert(lua_istable(this->m_L, -1)); 
-                lua_pushliteral(this->m_L, "__init");
+                lua_pushliteral(this->m_L, "__constructor");         /// mntbl name
                 constructor_func* ptr = 
                 reinterpret_cast<constructor_func*>(lua_newuserdata(this->m_L, sizeof(constructor_func)));    /// mntbl ud
                 *ptr = &constructor_helper<Proto,2>::template inplace<T>;
                 lua_pushcclosure(this->m_L, &raw_klass_registrator<T>::constructor, 1);   /// mntbl name ctr
-                lua_pushliteral(this->m_L, "__call");         /// mntbl name
-                lua_pushvalue(this->m_L, -2);
-                lua_rawset(this->m_L, -5);
-                lua_pushcclosure(this->m_L, &klass_registrator<T>::init_func, 1);
                 lua_rawset(this->m_L, -3);                    /// mntbl 
             }
         private:
@@ -212,24 +201,20 @@ namespace Sandbox {
             template <typename Proto>
             void operator() ( const meta::constructor_holder<Proto>& ) {
                 sb_assert(lua_istable(this->m_L, -1)); 
-                lua_pushliteral(this->m_L, "__init");
+                lua_pushliteral(this->m_L, "__constructor");         /// mntbl in ctr name
                 constructor_func* ptr = 
                 reinterpret_cast<constructor_func*>(lua_newuserdata(this->m_L, sizeof(constructor_func)));    /// mntbl in ud
                 *ptr = &constructor_helper<Proto,2>::template raw<T>;
                 lua_pushcclosure(this->m_L, &shared_klass_registrator<T>::constructor, 1);   /// mntbl in ctr
-                lua_pushliteral(this->m_L, "__call");         /// mntbl in ctr name
-                lua_pushvalue(this->m_L, -2);                 /// mntbl in ctr name ctr
-                lua_rawset(this->m_L, -5);                    /// mntbl in ctr
-                lua_pushcclosure(this->m_L, &klass_registrator<T>::init_func, 1);   /// mntbl in initf
                 lua_rawset(this->m_L, -3);
             }
             void operator() ( const meta::constructor_ptr_holder<int(*)(lua_State*)>& hdr) {
                 sb_assert(lua_istable(this->m_L, -1)); 
-                lua_pushliteral(this->m_L, "__call");         /// mntbl name
+                lua_pushliteral(this->m_L, "__constructor");         /// mntbl name
                 lua_pushcclosure(this->m_L, hdr.func, 0);     /// mntbl name ctr
                 lua_rawset(this->m_L, -3);                    /// mntbl 
             }
-        private:
+        protected:
             typedef T* (*constructor_func)(lua_State*);
             static int constructor( lua_State* L ) {
                 data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
@@ -247,7 +232,8 @@ namespace Sandbox {
             }
         };
 
-    
+
+
     }}
 }
 

@@ -157,12 +157,13 @@ namespace Sandbox {
 #define SB_META_CONSTRUCTOR( args ) bind( constructor<void args>() );
         
 
-#define SB_META_BEGIN_ENUM_BIND(Klass)  \
+#define SB_META_BEGIN_ENUM_BIND(Klass,Namespace)  \
     namespace Sandbox { namespace meta { \
         template <> template <class U> void bind_type<Klass>::bind(U& bind) { \
-            typedef Klass ThisType;(void)bind; using Klass; \
+            typedef Klass ThisType;(void)bind; using Namespace; \
             static const struct { const char* name; Klass val; } items[] = { 
 #define SB_META_ENUM_ITEM( name ) { #name, name },
+#define SB_META_ENUM_MEMBER_ITEM( name, val ) { #name, val },
 #define SB_META_END_ENUM_BIND() \
             }; \
             for (size_t i=0;i<sizeof(items)/sizeof(items[0]);i++) { \
