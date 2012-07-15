@@ -13,6 +13,7 @@
 
 namespace Sandbox {
     namespace luabind {
+        static const char* const LuabindModule = "Sanbox:luabind";
         
         int lua_traceback (lua_State *L)
         {
@@ -86,6 +87,14 @@ namespace Sandbox {
             ::snprintf(buf, 128, "unregistered type '%s'", type);
             lua_pushstring(L, buf);
             lua_error(L);
+        }
+        
+        void lua_call_method(lua_State* L, int args, int ress, const char* name) {
+            int res = lua_pcall(L, args, ress, 0);
+            if (res) {
+                LogError(LuabindModule) << " Failed script call method '" << name << "'" ;
+                LogError(LuabindModule) << lua_tostring(L, -1) ;
+            }
         }
         
         static void get_table(lua_State* L,const InplaceString& name) {
@@ -300,7 +309,7 @@ namespace Sandbox {
 		{
             sb_assert(lua_isuserdata(L, 1));
             /// debug
-#if 1
+#if 0
             data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, 1));
             if (strcmp(holder->info->name,"Sandbox::TouchInfo")==0) {
                 int a = 0;
@@ -323,7 +332,7 @@ namespace Sandbox {
                     sb_assert(lua_isfunction(L, -1));
                     lua_remove(L, -2);          /// get
                     lua_pushvalue(L, 1);        /// get obj
-                    lua_pcall(L, 1, 1, 0);
+                    lua_call_method(L, 1, 1, "get");
                     return 1;
                 }
 				lua_pop(L, 2);                  /// mt 
@@ -387,7 +396,7 @@ namespace Sandbox {
                     lua_remove(L, -2);          /// set
                     lua_pushvalue(L, 1);        /// set obj
                     lua_pushvalue(L, 3);        /// set obj val
-                    lua_call(L, 2, 0);
+                    lua_call_method(L, 2, 0, "set");
                     return 0;
                 }
 				lua_pop(L, 2);                  /// mt 
@@ -459,7 +468,7 @@ namespace Sandbox {
             for (int i=1;i<=args_cnt;i++) {
                 lua_pushvalue(L, i);
             }
-            lua_call(L, args_cnt, 1);
+            lua_call_method(L, args_cnt, 1,"init_func");
             lua_rawset(L, 1);
             return 0;
         }
@@ -508,7 +517,7 @@ namespace Sandbox {
             for (int i=1;i<=args_cnt;i++) {
                 lua_pushvalue(L, i);
             }
-            lua_call(L, args_cnt, 1);
+            lua_call_method(L, args_cnt, 1, "wrapper_init_func");
             wrapper* w = get_wrapeer_func( L,-1 );
             lua_pushliteral(L, "__native");
             lua_pushvalue(L, -2);
@@ -540,7 +549,17 @@ namespace Sandbox {
             lua_getfield(L, -1, "__parent");
             lua_getfield(L, -2, "__init");
             lua_setfield(L, -2, "__init");
-            lua_pop(L, 1);
+            lua_getfield(L, -2, "__methods");
+            lua_pushnil(L);
+            while (lua_next(L, -2) != 0) {
+                /* uses 'key' (at index -2) and 'value' (at index -1) */
+                if (lua_isstring(L, -2))
+                    lua_setfield(L, -4, lua_tostring(L, -2));
+                else
+                /* removes 'value'; keeps 'key' for next iteration */
+                    lua_pop(L, 1);
+            }
+            lua_pop(L, 2);
             
             lua_set_metatable(L, info->name);
         }

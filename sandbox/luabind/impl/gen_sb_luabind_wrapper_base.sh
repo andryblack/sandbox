@@ -48,7 +48,7 @@ do
 		echo "					return;"
 		echo "				}"
 		echo "				m_self.push(L);"
-		echo "				lua_pcall(L,1,0,0);"
+		echo "				lua_call_method(L,1,0,name);"
 		echo "			}"
 
 		echo "			// res method void"
@@ -64,7 +64,7 @@ do
 		echo "					return R();"
 		echo "				}"
 		echo "				m_self.push(L);"
-		echo "				lua_pcall(L,1,1,0);"
+		echo "				lua_call_method(L,1,1,name);"
 		echo "				R res = stack<R>::get(L,-1);"
 		echo "				lua_pop(L,1);"
 		echo "				return res;"
@@ -84,7 +84,7 @@ do
 		echo "				}"
 		echo "				m_self.push(L);"
 		echo "				$call_args";
-		echo "				lua_pcall(L,1+$args,0,0);"
+		echo "				lua_call_method(L,1+$args,0,name);"
 		echo "			}"
 
 		echo "			// res method void"
@@ -101,7 +101,7 @@ do
 		echo "				}"
 		echo "				m_self.push(L);"
 		echo "				$call_args";
-		echo "				lua_pcall(L,1+$args,1,0);"
+		echo "				lua_call_method(L,1+$args,1,name);"
 		echo "				R res = stack<R>::get(L,-1);"
 		echo "				lua_pop(L,1);"
 		echo "				return res;"

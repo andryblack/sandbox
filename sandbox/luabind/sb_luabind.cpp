@@ -25,7 +25,7 @@ namespace Sandbox {
                 for (int i=2;i<=args_cnt;i++) {
                     lua_pushvalue(L, i);
                 }
-                lua_call(L, args_cnt, 0);
+                lua_call_method(L, args_cnt, 0, "__init");
             } else {
                 lua_pop(L, 1);
             }
@@ -120,7 +120,7 @@ namespace Sandbox {
                         lua_remove(L, -2);          /// set
                         lua_pushvalue(L, 1);        /// set obj
                         lua_pushvalue(L, 3);        /// set obj val
-                        lua_call(L, 2, 0);
+                        lua_call_method(L, 2, 0,"set");
                         return 0;
                     }
                     lua_pop(L, 2);                  /// mt 

@@ -52,6 +52,7 @@ namespace Sandbox {
         void lua_create_metatable(lua_State* L);
         void lua_register_metatable(lua_State* L,const meta::type_info* info);
         void lua_register_enum_metatable(lua_State* L,const meta::type_info* info,lua_CFunction compare);
+        void lua_call_method(lua_State* L, int args, int res, const char* name);
         
         class wrapper;
         typedef wrapper* (*get_wrapper_func_t)(lua_State* st,int idx);
