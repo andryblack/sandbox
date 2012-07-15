@@ -9,6 +9,8 @@
 
 #include "sb_container_blend.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::ContainerBlend, Sandbox::Container)
+
 namespace Sandbox {
 
 	ContainerBlend::ContainerBlend() : m_mode( BLEND_MODE_ALPHABLEND ) {

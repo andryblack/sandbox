@@ -15,6 +15,7 @@
 namespace Sandbox {
     
     class ClearScene : public SceneObject {
+        SB_META_OBJECT
     public:
         
         void Draw( Graphics& g ) const;

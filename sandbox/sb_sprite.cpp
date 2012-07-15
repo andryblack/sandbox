@@ -10,6 +10,8 @@
 #include "sb_sprite.h"
 #include "sb_graphics.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::Sprite, Sandbox::SceneObject)
+SB_META_DECLARE_OBJECT(Sandbox::ColorizedSprite, Sandbox::Sprite)
 
 namespace Sandbox {
 	

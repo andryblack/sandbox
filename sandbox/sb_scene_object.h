@@ -11,6 +11,7 @@
 
 #include "sb_shared_ptr.h"
 #include "sb_notcopyable.h"
+#include "meta/sb_meta.h"
 
 namespace Sandbox {
 	
@@ -18,9 +19,10 @@ namespace Sandbox {
 	class Container;
     class TouchInfo;
 
-	class SceneObject : public NotCopyable {
-	public:
-		SceneObject();
+	class SceneObject : public meta::object, public NotCopyable {
+	    SB_META_OBJECT
+    public:
+    	SceneObject();
 		virtual ~SceneObject();
 		/// self drawing implementation
 		virtual void Draw(Graphics& g) const = 0;

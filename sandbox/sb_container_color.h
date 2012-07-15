@@ -18,8 +18,9 @@ namespace Sandbox {
 	class Graphics;
 	
 	class ContainerColor : public Container {
-	public:
-		ContainerColor();
+        SB_META_OBJECT
+    public:
+        ContainerColor();
 		~ContainerColor();
 		void Draw(Graphics& g) const;
 		

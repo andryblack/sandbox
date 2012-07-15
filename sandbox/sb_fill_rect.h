@@ -16,6 +16,7 @@
 namespace Sandbox {
     
     class FillRect : public SceneObject {
+        SB_META_OBJECT
     public:
         virtual void Draw( Graphics& g ) const;
         

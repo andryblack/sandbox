@@ -10,6 +10,8 @@
 #include "sb_container_shader.h"
 #include "sb_graphics.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::ContainerShader, Sandbox::Container)
+
 namespace Sandbox {
 
 	ContainerShader::ContainerShader() : m_enabled(true){

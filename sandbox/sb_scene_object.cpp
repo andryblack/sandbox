@@ -11,6 +11,8 @@
 #include "sb_scene_object.h"
 #include "sb_assert.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::SceneObject, Sandbox::meta::object)
+
 namespace Sandbox {
 
 

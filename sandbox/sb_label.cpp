@@ -9,6 +9,8 @@
 
 #include "sb_label.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::Label, Sandbox::SceneObject)
+
 namespace Sandbox {
 
 	Label::Label() {

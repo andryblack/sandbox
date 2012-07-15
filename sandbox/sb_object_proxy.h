@@ -17,7 +17,8 @@
 namespace Sandbox {
 	
 	class ObjectDrawProxy : public SceneObject {
-	public:
+        SB_META_OBJECT
+    public:
   
 		explicit ObjectDrawProxy(const sb::function<void(Graphics&)>& func);
 		void Draw(Graphics& g) const;
@@ -29,7 +30,8 @@ namespace Sandbox {
     
     
     class ObjectTouchProxy : public SceneObject {
-	public:
+        SB_META_OBJECT
+    public:
         typedef sb::function<bool(TouchInfo)> TouchFunc;
         void Draw(Graphics&) const {}
 		explicit ObjectTouchProxy(const TouchFunc& func);

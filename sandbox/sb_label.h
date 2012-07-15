@@ -18,7 +18,8 @@
 namespace Sandbox {
 	
 	class Label : public SceneObject {
-	public:
+        SB_META_OBJECT
+    public:
 		Label();
 		~Label();
 		void Draw(Graphics& g) const;

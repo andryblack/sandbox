@@ -16,6 +16,7 @@
 namespace Sandbox {
     
     class Widget : public Container {
+        SB_META_OBJECT
     public:
         Widget();
         bool HandleTouch( const TouchInfo& touch );
@@ -35,6 +36,7 @@ namespace Sandbox {
     };
     
     class TouchButtonWidget : public Widget {
+        SB_META_OBJECT
     public:
         void SetActivateEvent( const EventPtr& e) { m_activate_event = e; }
         const EventPtr& GetActivateEvent() const { return m_activate_event; }

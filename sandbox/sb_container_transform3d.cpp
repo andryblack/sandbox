@@ -10,6 +10,8 @@
 #include "sb_container_transform3d.h"
 #include "sb_graphics.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::ContainerTransform3d, Sandbox::Container)
+
 namespace Sandbox {
 
 	ContainerTransform3d::ContainerTransform3d()  {

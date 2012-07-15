@@ -63,7 +63,10 @@ namespace Sandbox {
             Class<T>(L);
             impl::shared_klass_registrator<W> kr(L);
             lua_create_metatable(L);
-            meta::bind_type<W>::bind( kr );
+            {
+                lua_stack_check sc(L);
+                meta::bind_type<W>::bind( kr );
+            }
             lua_register_wrapper(L,meta::type<W>::info(),&wrapper_helper<W>::get_wrapper_func);
         }
         template <class T>

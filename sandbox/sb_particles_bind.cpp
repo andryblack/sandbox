@@ -26,7 +26,6 @@ SB_META_PROPERTY_RW_DEF(CicleTime)
 SB_META_PROPERTY_RW_DEF(ParticleTTL)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::ParticlesSystem, Sandbox::SceneObject)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ParticlesSystem)
 SB_META_CONSTRUCTOR((const Sandbox::ParticlesControllerPtr&))
 SB_META_METHOD(Stop)

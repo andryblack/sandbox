@@ -18,6 +18,7 @@ namespace Sandbox {
     class Resources;
     
     class Background : public SceneObject {
+        SB_META_OBJECT
     public:
         Background();
         bool Load( const char* file, Resources* res );

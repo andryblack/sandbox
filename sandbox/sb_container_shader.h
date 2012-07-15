@@ -16,8 +16,9 @@
 namespace Sandbox {
 	
 	class ContainerShader : public Container {
+        SB_META_OBJECT
 	public:
-		ContainerShader();
+        ContainerShader();
 		~ContainerShader();
 		
 		void Draw(Graphics& g) const;

@@ -23,6 +23,8 @@ extern "C" {
 #include "../../lua/src/lauxlib.h"
 }
 
+#include "sb_luabind_metatable.h"
+
 namespace Sandbox {
     
     namespace luabind {
@@ -46,28 +48,24 @@ namespace Sandbox {
             void    (*destructor)(void* data);
         };
         
-        void lua_set_metatable( lua_State* L, const data_holder& holder );
-        void lua_set_value( lua_State* L, const char* path );
-        void lua_get_create_table(lua_State* L,const char* name);
-        void lua_create_metatable(lua_State* L);
-        void lua_register_metatable(lua_State* L,const meta::type_info* info);
-        void lua_register_enum_metatable(lua_State* L,const meta::type_info* info,lua_CFunction compare);
         void lua_call_method(lua_State* L, int args, int res, const char* name);
         
         class wrapper;
-        typedef wrapper* (*get_wrapper_func_t)(lua_State* st,int idx);
-        void lua_register_wrapper(lua_State* L,const meta::type_info* info,get_wrapper_func_t get_wrapeer_func);
+        void lua_push_wrapper_value(lua_State* L,wrapper* wpr);
         
         template <class T>
         inline T* get_ptr( const meta::type_info* from, void* data ) {
             const meta::type_info* to = meta::type<T>::info();
-            do {
-                if ( from == to ) return reinterpret_cast<T*>(data);
-                data = from->downcast( data );
-                from = from->parent;
-            } while (from && to);
+            if ( from == to ) return reinterpret_cast<T*>(data);
+            size_t pi = 0;
+            while (from->parents && from->parents[pi].info) {
+                T* r = get_ptr<T>(from->parents[pi].info, from->parents[pi].downcast(data) );
+                if ( r ) return r;
+                pi++;
+            }
             return 0;
         }
+        
         template <class T>
         inline sb::shared_ptr<T> get_shared_ptr( const meta::type_info* from, void* data ) {
             const meta::type_info* to = meta::type<T>::info();
@@ -84,7 +82,7 @@ namespace Sandbox {
                     }
                     return res;
                 }
-                void (*destruct1)(void*) = from->downcast_shared( p1, p2 );
+                void (*destruct1)(void*) = from->parents[0].downcast_shared( p1, p2 );
                 if ( destruct ) {
                     destruct( p1 );
                 }
@@ -95,7 +93,7 @@ namespace Sandbox {
                 } else {
                     p2 = buf1;
                 }
-                from = from->parent;
+                from = from->parents[0].info;
             } while (from && to);
             return sb::shared_ptr<T>();
         }
@@ -117,6 +115,42 @@ namespace Sandbox {
                 sb_assert(false);
             }
             return res;
+        }
+        
+        template <class Type>
+        class has_meta_object_base
+        {
+            class yes { char m;};
+            class no { yes m[2];};
+            
+            template <typename U>
+            static no deduce(meta::object*);
+            static no deduce(...);
+            
+        public:
+            static const bool result = sizeof(yes) == sizeof(deduce((Type*)(0)));
+        };
+        
+        template<bool has>
+        class has_meta_object_base_hpr {
+        };
+        template <class T>
+        inline bool try_to_push_lua_object_impl( lua_State*,const T*,const has_meta_object_base_hpr<false>* ) {
+            return false;
+        }
+        template <class T>
+        inline bool try_to_push_lua_object_impl( lua_State* L,const T* v,const has_meta_object_base_hpr<true>* ) {
+            wrapper* w = get_ptr<wrapper>(v->get_meta_type(), v);
+            if ( w ) {
+                lua_push_wrapper_value(L,w);
+                return true;
+            }
+            return false;
+        }
+        template <class T>
+        inline bool try_to_push_lua_object( lua_State* L, const T* val, 
+                                    const has_meta_object_base_hpr<has_meta_object_base<T>::result>* v=0 ) {
+            return try_to_push_lua_object_impl(L,val,v);
         }
         
         template <class T>
@@ -203,6 +237,8 @@ namespace Sandbox {
         struct stack<T*> {
             static void push( lua_State* L, T* val ) {
                 if ( val ) {
+                    if (try_to_push_lua_object(L,val))
+                        return;
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
                                                                                          sizeof(data_holder)+
                                                                                          sizeof(T*)));
@@ -253,6 +289,8 @@ namespace Sandbox {
         struct stack<const T*> {
             static void push( lua_State* L, const T* val ) {
                 if ( val ) {
+                    if (try_to_push_lua_object(L,val))
+                        return;
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
                                                                                          sizeof(data_holder)+
                                                                                          sizeof(T*)));
@@ -298,20 +336,23 @@ namespace Sandbox {
         template <class T>
         struct stack<sb::shared_ptr<T> > {
             static void push( lua_State* L, const sb::shared_ptr<T>& val ) {
-                if ( val ) {
-                    data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
-                                                                                         sizeof(data_holder)+
-                                                                                         sizeof(sb::shared_ptr<T>)));
-                    holder->type = data_holder::shared_ptr;
-                    holder->is_const = false;
-                    holder->info = meta::type<T>::info();
-                    holder->destructor = &meta::destructor_helper<T>::shared;
-                    new (holder+1) sb::shared_ptr<T>(val);
-                    lua_set_metatable( L, *holder );
-                } else {
+                if (!val) {
                     lua_pushnil(L);
+                    return;
                 }
+                if (try_to_push_lua_object(L,val.get()))
+                    return;
+                data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
+                                                                                     sizeof(data_holder)+
+                                                                                     sizeof(sb::shared_ptr<T>)));
+                holder->type = data_holder::shared_ptr;
+                holder->is_const = false;
+                holder->info = meta::type<T>::info();
+                holder->destructor = &meta::destructor_helper<T>::shared;
+                new (holder+1) sb::shared_ptr<T>(val);
+                lua_set_metatable( L, *holder );
             }
+            
             static sb::shared_ptr<T> get_impl( lua_State* L,  data_holder* holder, int idx ) {
                 if ( holder->type==data_holder::shared_ptr ) {
                     sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);

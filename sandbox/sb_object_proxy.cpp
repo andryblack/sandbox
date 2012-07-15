@@ -9,6 +9,9 @@
 
 #include "sb_object_proxy.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::ObjectDrawProxy, Sandbox::SceneObject)
+SB_META_DECLARE_OBJECT(Sandbox::ObjectTouchProxy, Sandbox::SceneObject)
+
 namespace Sandbox {
 
 	ObjectDrawProxy::ObjectDrawProxy(const sb::function<void(Graphics&)>& func) : SceneObject(), m_func(func) {

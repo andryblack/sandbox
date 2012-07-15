@@ -11,6 +11,8 @@
 #include "sb_transform2d.h"
 #include "sb_graphics.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::ContainerTransform, Sandbox::Container)
+
 namespace Sandbox {
 	ContainerTransform::ContainerTransform() : m_scale_x(1.0f),m_scale_y(1.0f),m_angle(0.0f) {
 	}

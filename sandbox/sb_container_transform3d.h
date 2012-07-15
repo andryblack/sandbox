@@ -16,7 +16,8 @@
 namespace Sandbox {
 	
 	class ContainerTransform3d : public Container {
-	public:
+        SB_META_OBJECT
+   public:
 		ContainerTransform3d();
 		~ContainerTransform3d();
 		

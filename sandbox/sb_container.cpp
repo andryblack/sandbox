@@ -10,6 +10,8 @@
 #include "sb_container.h"
 #include <algorithm>
 
+SB_META_DECLARE_OBJECT(Sandbox::Container, Sandbox::SceneObject)
+
 namespace Sandbox {
 
 	Container::Container() {

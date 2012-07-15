@@ -8,6 +8,7 @@
  */
 
 #include "sb_container_visible.h"
+SB_META_DECLARE_OBJECT(Sandbox::ContainerVisible, Sandbox::Container)
 
 namespace Sandbox {
 

@@ -10,6 +10,8 @@
 #include "sb_graphics.h"
 #include "sb_log.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::ParticlesSystem, Sandbox::SceneObject)
+
 namespace Sandbox {
     
     static const char* MODULE = "Sandbox:Particles";

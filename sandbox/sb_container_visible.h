@@ -16,7 +16,8 @@
 namespace Sandbox {
 	
 	class ContainerVisible : public Container {
-	public:
+        SB_META_OBJECT
+    public:
 		explicit ContainerVisible(const sb::function<bool()>& func);
 		void Draw(Graphics& g) const;
 		bool GetInvert() const { return m_invert;}

@@ -16,7 +16,8 @@
 namespace Sandbox {
 	
 	class ContainerViewport : public Container {
-	public:
+        SB_META_OBJECT
+    public:
 		ContainerViewport();
 		~ContainerViewport();
 		

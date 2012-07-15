@@ -10,6 +10,9 @@
 #include "sb_touch_info.h"
 #include "sb_graphics.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::Widget, Sandbox::Container)
+SB_META_DECLARE_OBJECT(Sandbox::TouchButtonWidget, Sandbox::Widget)
+
 namespace Sandbox {
     
     Widget::Widget() {

@@ -18,7 +18,8 @@
 namespace Sandbox {
 	
 	class Sprite : public SceneObject {
-	public:
+        SB_META_OBJECT
+    public:
 		Sprite();
 		~Sprite();
 		void SetImage(const ImagePtr& img) { m_image = img;}
@@ -33,6 +34,7 @@ namespace Sandbox {
 	typedef sb::shared_ptr<Sprite> SpritePtr;
     
     class ColorizedSprite : public Sprite {
+        SB_META_OBJECT
     public:
         virtual void Draw( Graphics& g ) const;
         void SetColor( const Color& color ) { m_color = color; }

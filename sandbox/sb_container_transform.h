@@ -16,8 +16,9 @@
 namespace Sandbox {
 	
 	class ContainerTransform : public Container {
+        SB_META_OBJECT
 	public:
-		ContainerTransform();
+      	ContainerTransform();
 		~ContainerTransform();
 		
 		void Draw(Graphics& g) const;

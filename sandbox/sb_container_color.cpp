@@ -10,6 +10,8 @@
 #include "sb_container_color.h"
 #include "sb_graphics.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::ContainerColor, Sandbox::Container)
+
 namespace Sandbox {
 
 

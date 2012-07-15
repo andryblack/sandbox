@@ -9,6 +9,8 @@
 #include "sb_clear_scene.h"
 #include "sb_graphics.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::ClearScene, Sandbox::SceneObject)
+
 namespace Sandbox {
     
     

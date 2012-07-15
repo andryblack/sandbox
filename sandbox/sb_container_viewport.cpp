@@ -11,6 +11,8 @@
 #include "sb_graphics.h"
 #include "sb_matrix4.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::ContainerViewport, Sandbox::Container)
+
 namespace Sandbox {
 
 	ContainerViewport::ContainerViewport() {

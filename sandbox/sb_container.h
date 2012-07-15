@@ -16,8 +16,9 @@
 namespace Sandbox {
 
 	class Container : public SceneObject {
-	public:
-		Container();
+	    SB_META_OBJECT
+    public:
+    	Container();
 		~Container();
 		
 		void Reserve(size_t size);

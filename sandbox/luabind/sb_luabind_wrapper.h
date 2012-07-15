@@ -30,7 +30,7 @@ namespace Sandbox {
                 m_ref.GetObject(L);
             }
             WrapperHolder( ) : m_ref(LuaVMHelperWeakPtr()) {}
-            void SetObject(lua_State* L) {
+            void set(lua_State* L) {
                 m_ref.SetObject(L);
             }
         private:
@@ -40,8 +40,12 @@ namespace Sandbox {
         class wrapper : public impl::wrapper_base<WrapperHolder> {
         public:
             void SetObject(lua_State* L) {
-                m_self.SetObject(L);
+                m_self.set(L);
             }
+            void PushObject(lua_State* L) {
+                m_self.push(L);
+            }
+            static const meta::type_info* const* get_parents();
         };
         
         template <class T> struct wrapper_helper {
@@ -49,6 +53,34 @@ namespace Sandbox {
                 return stack<T*>::get(L,idx);
             }
         };
+        
+#define SB_META_DECLARE_BINDING_OBJECT_WRAPPER(Klass,Parent) \
+        namespace Sandbox { namespace meta { \
+            template <> const type_info* type<Klass>::info() {\
+                static const type_info_parent parents[] = { \
+                    { \
+                        type<Parent>::info(), \
+                        &cast_helper<Klass,Parent>::raw, \
+                        &cast_helper<Klass,Parent>::shared \
+                    }, \
+                    { \
+                        type<Sandbox::luabind::wrapper>::info(), \
+                        &cast_helper<Klass,Sandbox::luabind::wrapper>::raw, \
+                        &cast_helper<Klass,Sandbox::luabind::wrapper>::shared \
+                    }, \
+                    { 0, 0, 0 } \
+                };\
+                static const type_info ti = { \
+                    #Klass, \
+                    sizeof(Klass), \
+                    parents \
+                }; \
+                return &ti; \
+            } \
+        }} \
+        const Sandbox::meta::type_info* Klass::get_static_type_info() {\
+            return Sandbox::meta::type<Klass>::info(); \
+        }
     }
 }
 

@@ -89,6 +89,7 @@ namespace Sandbox {
     typedef sb::shared_ptr<ParticlesController> ParticlesControllerPtr;
     
     class ParticlesSystem : public SceneObject {
+        SB_META_OBJECT
     public:
         explicit ParticlesSystem(const ParticlesControllerPtr& controller);
         void Draw( Graphics& g ) const;

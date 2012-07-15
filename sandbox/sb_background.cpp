@@ -10,6 +10,8 @@
 #include "sb_resources.h"
 #include "sb_graphics.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::Background, Sandbox::SceneObject)
+
 namespace Sandbox {
     
     Background::Background() {

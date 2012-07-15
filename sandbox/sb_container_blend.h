@@ -16,8 +16,9 @@
 namespace Sandbox {
 	
 	class ContainerBlend : public Container {
-	public:
-		ContainerBlend();
+        SB_META_OBJECT
+    public:
+        ContainerBlend();
 		void Draw(Graphics& g) const;
 		void SetMode(BlendMode mode) { m_mode = mode;}
 		BlendMode GetMode() const { return m_mode;}
