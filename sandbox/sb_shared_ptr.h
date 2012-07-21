@@ -39,19 +39,28 @@ namespace Sandbox {
             
             
             template <class T> struct destroyer {
-                static void destroy(const void *d) {
-                    delete reinterpret_cast<const T*>(d);
+                void operator () (const T *d) {
+                    delete d;
                 }
             };
             
-            typedef void (*deleter_t)(const void*);
-            
-            struct counter_t {
-                counter_t(size_t refs_,size_t weaks_,deleter_t deleter_) :
-                refs(refs_),weaks(weaks_),deleter(deleter_) {}
+            struct counter_base {
+                counter_base(size_t refs_,size_t weaks_) :
+                refs(refs_),weaks(weaks_) {}
                 size_t refs;
                 size_t weaks;
-                deleter_t deleter;
+                virtual void destruct(const void*) = 0;
+                virtual ~counter_base() {}
+            };
+            
+            template <class T,class D>
+            struct counter_t : public counter_base{
+                counter_t(size_t refs_,size_t weaks_,D deleter_) :
+                counter_base(refs_,weaks_),deleter(deleter_) {}
+                size_t refs;
+                size_t weaks;
+                D deleter;
+                virtual void destruct(const void* v) { deleter(static_cast<const T*>(v)); }
             };
             
             struct static_cast_tag{};
@@ -71,14 +80,14 @@ namespace Sandbox {
         public:
             shared_ptr() : ptr(0), counter(0) {}
             template <class U>
-            explicit shared_ptr(U* ptr_) : ptr(ptr_),counter(ptr ? new implement::counter_t(1,0,&implement::destroyer<U>::destroy) : 0) {
+            explicit shared_ptr(U* ptr_) : ptr(ptr_),counter(ptr ? new implement::counter_t<U,implement::destroyer<U> >(1,0,implement::destroyer<U>() ) : 0) {
                 implement::shared_from_this_support(0,ptr,this);
             }
-            template <class U>
-            shared_ptr(U* ptr_,implement::deleter_t deleter) : ptr(ptr_),counter(ptr ? new implement::counter_t(1,0,deleter) : 0) {
+            template <class U,class D>
+            shared_ptr(U* ptr_,D deleter) : ptr(ptr_),counter(ptr ? new implement::counter_t<U,D>(1,0,deleter) : 0) {
                 implement::shared_from_this_support(0,ptr,this);
             }
-            shared_ptr(T* ptr_,implement::counter_t* counter_) : ptr(ptr_),counter(ptr ? counter_ : 0) {
+            shared_ptr(T* ptr_,implement::counter_base* counter_) : ptr(ptr_),counter(ptr ? counter_ : 0) {
                 if (this->counter)
                     this->counter->refs++;
             }
@@ -150,26 +159,28 @@ namespace Sandbox {
                 release();
             }
             
-            implement::counter_t* get_counter() const { return counter;}
+            implement::counter_base* get_counter() const { return counter;}
         private:
             void release() {
                 if (counter) {
                     sb_assert(counter->refs>0);
-                    if (counter->refs==1) {
-                        if (counter->deleter && ptr) counter->deleter(ptr);
+                    implement::counter_base* cntr = counter;
+                    counter = 0;
+                    if (cntr->refs==1) {
+                        T* obj = ptr;
+                        ptr = 0;
+                        if (obj) cntr->destruct(obj);
                     }
-                    if (--counter->refs==0) {
-                        if (counter->weaks==0) {
-                            delete counter;
+                    if (--cntr->refs==0) {
+                        if (cntr->weaks==0) {
+                            delete cntr;
                         }
                     }
                 }
-                ptr = 0;
-                counter = 0;
             }
             
             T* ptr;
-            implement::counter_t* counter;
+            implement::counter_base* counter;
         };
         
         
@@ -235,7 +246,7 @@ namespace Sandbox {
                 return shared_ptr<T>();
             }
             
-            implement::counter_t* get_counter() const { return counter;}
+            implement::counter_base* get_counter() const { return counter;}
             T* get_ptr() const { return ptr;}
         private:
             void release() {
@@ -252,7 +263,7 @@ namespace Sandbox {
             }
             
             T* ptr;
-            implement::counter_t* counter;
+            implement::counter_base* counter;
         };
         
         template <class T> class enable_shared_from_this {

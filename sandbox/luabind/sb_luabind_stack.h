@@ -42,10 +42,25 @@ namespace Sandbox {
             enum {
                 raw_data,
                 raw_ptr,
-                shared_ptr
+                shared_ptr,
+                wrapper_ptr
             } type;
             bool    is_const;
-            void    (*destructor)(void* data);
+            void    (*destructor)(data_holder* data);
+        };
+        struct wrapper_holder : data_holder {
+            bool (*lock)(wrapper_holder*,lua_State*,int idx);
+            void (*unlock)(wrapper_holder*);
+        };
+        
+        template <class T>
+        struct destructor_helper {
+            static void raw( data_holder* d ) {
+                meta::destructor_helper<T>::raw( d + 1 );
+            }
+            static void shared( data_holder* d ) {
+                meta::destructor_helper<T>::shared( d + 1 );
+            }
         };
         
         void lua_call_method(lua_State* L, int args, int res, const char* name);
@@ -69,38 +84,29 @@ namespace Sandbox {
         template <class T>
         inline sb::shared_ptr<T> get_shared_ptr( const meta::type_info* from, void* data ) {
             const meta::type_info* to = meta::type<T>::info();
-            char buf1[sizeof(sb::shared_ptr<T>)];
-            void (*destruct)(void*) = 0;
-            char buf2[sizeof(sb::shared_ptr<T>)];
-            void* p1 = data;
-            void* p2 = buf1;
-            do {
-                if ( from == to ) {
-                    sb::shared_ptr<T> res = *reinterpret_cast<sb::shared_ptr<T>*>(p1);
-                    if ( destruct ) {
-                        destruct( p1 );
-                    }
-                    return res;
-                }
-                void (*destruct1)(void*) = from->parents[0].downcast_shared( p1, p2 );
+            if ( from == to ) {
+                return *reinterpret_cast<sb::shared_ptr<T>*>(data);
+            }
+            char buf[sizeof(sb::shared_ptr<T>)];
+            size_t pi = 0;
+            while (from->parents && 
+                   from->parents[pi].info) {
+                void (*destruct)(void*) = from->parents[pi].downcast_shared( data, buf );
                 if ( destruct ) {
-                    destruct( p1 );
+                    sb::shared_ptr<T> res = get_shared_ptr<T>(from->parents[pi].info, buf);
+                    destruct(buf);
+                    if ( res ) {
+                        return res;
+                    }
                 }
-                destruct = destruct1;
-                p1 = p2;
-                if (p1 == buf1) {
-                    p2 = buf2;
-                } else {
-                    p2 = buf1;
-                }
-                from = from->parents[0].info;
-            } while (from && to);
+                pi++;
+            }
             return sb::shared_ptr<T>();
         }
 
         
         template <class T> 
-        inline T* get_object_ptr( data_holder* holder ) {
+        inline T* get_object_ptr( data_holder* holder , lua_State* L,int idx) {
             T* res = 0;
             const meta::type_info* info = holder->info;
             if ( holder->type == data_holder::raw_data ) {
@@ -109,6 +115,13 @@ namespace Sandbox {
                 res = get_ptr<T>(info, *reinterpret_cast<void**>(holder+1));
             } else if ( holder->type == data_holder::shared_ptr ) {
                 sb::shared_ptr<T> ptr = get_shared_ptr<T>(info,holder+1);
+                if (ptr)
+                    res = ptr.get();
+            } else if ( holder->type == data_holder::wrapper_ptr ) {
+                wrapper_holder* wrapper = reinterpret_cast<wrapper_holder*>(holder);
+                bool lock = wrapper->lock(wrapper,L,idx);
+                sb::shared_ptr<T> ptr = get_shared_ptr<T>(info,wrapper+1);
+                if (lock) wrapper->unlock(wrapper);
                 if (ptr)
                     res = ptr.get();
             } else {
@@ -123,8 +136,7 @@ namespace Sandbox {
             class yes { char m;};
             class no { yes m[2];};
             
-            template <typename U>
-            static no deduce(meta::object*);
+            static yes deduce(meta::object*);
             static no deduce(...);
             
         public:
@@ -140,7 +152,7 @@ namespace Sandbox {
         }
         template <class T>
         inline bool try_to_push_lua_object_impl( lua_State* L,const T* v,const has_meta_object_base_hpr<true>* ) {
-            wrapper* w = get_ptr<wrapper>(v->get_meta_type(), v);
+            wrapper* w = get_ptr<wrapper>(v->get_type_info(), const_cast<T*>(v));
             if ( w ) {
                 lua_push_wrapper_value(L,w);
                 return true;
@@ -162,7 +174,7 @@ namespace Sandbox {
                 holder->type = data_holder::raw_data;
                 holder->is_const = false;
                 holder->info = meta::type<T>::info();
-                holder->destructor = &meta::destructor_helper<T>::raw;
+                holder->destructor = &destructor_helper<T>::raw;
                 void* data = holder+1;
                 new (data) T(val);
                 lua_set_metatable( L, *holder );
@@ -172,7 +184,7 @@ namespace Sandbox {
                     lua_access_error( L, idx , holder->info->name );
                     return *reinterpret_cast<T*>(0);
                 } 
-                T* res = get_object_ptr<T>(holder);
+                T* res = get_object_ptr<T>(holder,L,idx);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 }
@@ -199,7 +211,7 @@ namespace Sandbox {
         template <class T>
         struct stack<const T> {
             static const T& get_impl( lua_State* L, data_holder* holder,int idx ) {
-                T* res = get_object_ptr<T>(holder);
+                T* res = get_object_ptr<T>(holder,L,idx);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 }
@@ -258,7 +270,7 @@ namespace Sandbox {
                     lua_access_error( L, idx , holder->info->name );
                     return reinterpret_cast<T*>(0);
                 } 
-                T* res = get_object_ptr<T>(holder);
+                T* res = get_object_ptr<T>(holder,L,idx);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 } 
@@ -306,7 +318,7 @@ namespace Sandbox {
                 }
             }
             static const T* get_impl( lua_State* L, data_holder* holder,int idx ) {
-                T* res = get_object_ptr<T>(holder);
+                T* res = get_object_ptr<T>(holder,L,idx);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 } 
@@ -348,7 +360,7 @@ namespace Sandbox {
                 holder->type = data_holder::shared_ptr;
                 holder->is_const = false;
                 holder->info = meta::type<T>::info();
-                holder->destructor = &meta::destructor_helper<T>::shared;
+                holder->destructor = &destructor_helper<T>::shared;
                 new (holder+1) sb::shared_ptr<T>(val);
                 lua_set_metatable( L, *holder );
             }
@@ -356,9 +368,13 @@ namespace Sandbox {
             static sb::shared_ptr<T> get_impl( lua_State* L,  data_holder* holder, int idx ) {
                 if ( holder->type==data_holder::shared_ptr ) {
                     sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);
-                    if ( ptr ) {
-                        return ptr;
-                    }
+                    return ptr;
+                } else if ( holder->type==data_holder::wrapper_ptr ) {
+                    wrapper_holder* wrapper = reinterpret_cast<wrapper_holder*>(holder);
+                    bool lock = wrapper->lock(wrapper,L,idx);
+                    sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,wrapper+1);
+                    if (lock) wrapper->unlock(wrapper);
+                    return ptr;
                 }
                 lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
                 return sb::shared_ptr<T>();

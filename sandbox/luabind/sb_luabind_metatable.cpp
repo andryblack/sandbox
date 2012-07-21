@@ -132,7 +132,7 @@ namespace Sandbox {
             if ( lua_isuserdata(L, 1 ) ) {
                 data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, 1));
                 if ( holder->destructor ) {
-                    holder->destructor( holder+1 );
+                    holder->destructor( holder );
                 }
             }
             return 0;
@@ -261,7 +261,9 @@ namespace Sandbox {
                 } else if ( holder->type == data_holder::raw_ptr ) {
                     res = *reinterpret_cast<void**>(holder+1);
                 } else if ( holder->type == data_holder::shared_ptr ) {
-                    res = *reinterpret_cast<void**>(holder+1); // hack
+                    res = *(reinterpret_cast<void**>(holder+1)+1); // hack
+                } else if ( holder->type == data_holder::wrapper_ptr ) {
+                    res = *(reinterpret_cast<void**>(holder+1)+2); // hack
                 }  
                 char buf[128];
                 snprintf(buf, 128, "object<%s>:%p",holder->info->name,res);
@@ -348,22 +350,26 @@ namespace Sandbox {
         static int wrapper_init_func( lua_State* L ) {
             int args_cnt = lua_gettop(L); 
             lua_pushvalue(L, lua_upvalueindex(1));
-            get_wrapper_func_t get_wrapeer_func = *reinterpret_cast<get_wrapper_func_t*>(lua_touserdata(L, lua_upvalueindex(2)));
             for (int i=1;i<=args_cnt;i++) {
                 lua_pushvalue(L, i);
             }
             lua_call_method(L, args_cnt, 1, "wrapper_init_func");
-            wrapper* w = get_wrapeer_func( L,-1 );
+            sb_assert(lua_isuserdata(L, -1));
+            wrapper_holder* wh = reinterpret_cast<wrapper_holder*>(lua_touserdata(L, -1));
+            sb_assert(wh->type==data_holder::wrapper_ptr);
+            wrapper* w = get_shared_ptr<wrapper>(wh->info, wh+1).get();
+            sb_assert(w);
             lua_pushliteral(L, "__native");
             lua_pushvalue(L, -2);
             lua_rawset(L, 1);
             lua_pop(L, 1);
             lua_pushvalue(L, 1);
             w->SetObject(L);
+            wh->unlock(wh);
             return 0;
         }
         
-        void lua_register_wrapper(lua_State* L,const meta::type_info* info,get_wrapper_func_t get_wrapeer_func) {
+        void lua_register_wrapper(lua_State* L,const meta::type_info* info) {
             lua_get_create_table(L,info->parents[0].info->name);
             lua_setfield(L, -2, "__parent");
             lua_getfield(L, -1, "__metatable");
@@ -373,9 +379,7 @@ namespace Sandbox {
             
             lua_getfield(L, -1, "__constructor");
             if ( lua_isfunction(L, -1) ) {  /// mn fn
-                void* data = lua_newuserdata(L, sizeof(get_wrapeer_func));
-                *reinterpret_cast<get_wrapper_func_t*>(data) = get_wrapeer_func;
-                lua_pushcclosure(L, &wrapper_init_func, 2); /// mn if
+                lua_pushcclosure(L, &wrapper_init_func, 1); /// mn if
                 lua_setfield(L, -2, "__init");  /// mn fn
             } else {
                 lua_pop(L, 1);
@@ -489,7 +493,7 @@ namespace Sandbox {
             lua_rawget(L, 1);
             if (lua_isuserdata(L, -1)) {
                 
-#if 1
+#if 0
                 data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
                 if (strcmp(holder->info->name,"Sandbox::WidgetWrapper")==0) {
                     int a = 0;
@@ -563,7 +567,9 @@ namespace Sandbox {
                     } else if ( holder->type == data_holder::raw_ptr ) {
                         res = *reinterpret_cast<void**>(holder+1);
                     } else if ( holder->type == data_holder::shared_ptr ) {
-                        res = *reinterpret_cast<void**>(holder+1); // hack
+                        res = *(reinterpret_cast<void**>(holder+1)+1); // hack
+                    } else if ( holder->type == data_holder::wrapper_ptr ) {
+                        res = *(reinterpret_cast<void**>(holder+1)+2); // hack
                     }  
                     snprintf(buf, 128, "lua_object<%s(%s:%p)>:%p",
                              lua_tostring(L,lua_upvalueindex(1)),

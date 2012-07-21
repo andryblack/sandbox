@@ -15,9 +15,7 @@ namespace Sandbox {
         LuaReference::LuaReference( const LuaVMHelperWeakPtr& ptr ) : m_lua(ptr),m_ref(LUA_NOREF) {
         }
         LuaReference::~LuaReference() {
-            if (LuaVMHelperPtr lua = m_lua.lock()) {
-                UnsetObject(lua->lua);
-            }
+            Reset();
         }
         bool LuaReference::Valid() const {
             return m_ref!=LUA_NOREF;
@@ -39,6 +37,12 @@ namespace Sandbox {
             sb_assert(m_ref!=LUA_NOREF);
             lua_rawgeti(state, LUA_REGISTRYINDEX, m_ref);
         }
-
+        void LuaReference::Reset() {
+            if (Valid()) {
+                if (LuaVMHelperPtr lua = m_lua.lock()) {
+                    UnsetObject(lua->lua);
+                }
+            }
+        }
     }
 }

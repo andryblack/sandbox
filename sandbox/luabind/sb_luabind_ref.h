@@ -31,6 +31,7 @@ namespace Sandbox {
             LuaVMHelperPtr GetHelper() const { return m_lua.lock();}
             const LuaVMHelperWeakPtr& GetHelperPtr() const { return m_lua;}
             bool Valid() const;
+            void Reset();
         private:
             LuaVMHelperWeakPtr m_lua;
             int	m_ref;

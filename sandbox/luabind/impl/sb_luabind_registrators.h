@@ -11,9 +11,13 @@
 
 #include "meta/sb_meta_bind.h"
 #include "sb_luabind_method.h"
+#include "../../sb_function.h"
+#include "../../sb_log.h"
 
 namespace Sandbox {
-	namespace luabind { namespace impl {
+	namespace luabind {
+    class wrapper;
+    namespace impl {
  
         class registrator_base {
         public:
@@ -185,13 +189,115 @@ namespace Sandbox {
                 holder->type = data_holder::raw_data;
                 holder->is_const = false;
                 holder->info = meta::type<T>::info();
-                holder->destructor = &meta::destructor_helper<T>::raw;
+                holder->destructor = &destructor_helper<T>::raw;
                 void* data = holder+1;
                 constructor_func func = *reinterpret_cast<constructor_func*>(lua_touserdata(L, lua_upvalueindex(1)));
                 (*func)(L,data);
                 lua_set_metatable( L, *holder );
                 return 1;
             }
+        };
+        
+        template <class Type>
+        class is_wrapper_helper
+        {
+            class yes { char m;};
+            class no { yes m[2];};
+            
+            static yes deduce(wrapper*);
+            static no deduce(...);
+            
+        public:
+            enum { result = sizeof(yes) == sizeof(deduce((Type*)(0))) };
+        };
+        template <class T,bool is_wrapper>
+        struct shared_klass_constructor_helper;
+        
+        template <class T> struct shared_klass_constructor_helper<T,false>{
+            typedef T* (*constructor_func)(lua_State*);
+            static int constructor( lua_State* L ) {
+                data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
+                                                                                     sizeof(data_holder)+
+                                                                                     sizeof(sb::shared_ptr<T>)));
+                holder->type = data_holder::shared_ptr;
+                holder->is_const = false;
+                holder->info = meta::type<T>::info();
+                holder->destructor = &destructor_helper<T>::shared;
+                void* data = holder+1;
+                constructor_func func = *reinterpret_cast<constructor_func*>(lua_touserdata(L, lua_upvalueindex(1)));
+                new (data) sb::shared_ptr<T>((*func)(L));
+                lua_set_metatable( L, *holder );
+                return 1;
+            }
+        };
+        template <class T> struct shared_klass_constructor_helper<T,true>{
+            typedef typename shared_klass_constructor_helper<T,false>::constructor_func constructor_func;
+            static bool wrapper_lock( wrapper_holder* w ,lua_State* L,int idx) {
+                //LogDebug() << "wrapper_lock " << w;
+                sb::shared_ptr<T>* obj_ptr = reinterpret_cast<sb::shared_ptr<T>*>(w+1);
+                if (!*obj_ptr) {
+                    sb::weak_ptr<T>* wek_ptr = reinterpret_cast<sb::weak_ptr<T>*>(obj_ptr+1);
+                    *obj_ptr = wek_ptr->lock();
+                }
+                if (*obj_ptr) {
+                    lua_pushvalue(L, idx);
+                    (*obj_ptr)->SetObject(L);
+                    return true;
+                }
+                return false;
+            }
+            static void wrapper_unlock( wrapper_holder* w ) {
+                //LogDebug() << "wrapper_unlock " << w;
+                sb::shared_ptr<T>* obj_ptr = reinterpret_cast<sb::shared_ptr<T>*>(w+1);
+                sb::shared_ptr<T> ref = *obj_ptr;
+                obj_ptr->reset();
+                (void)ref;
+            }
+            static void wrapper_deleter( wrapper_holder* w, const T* obj ) {
+                //LogDebug() << "wrapper_deleter " << w;
+                if (obj->MarkedDestroy()) {
+                    delete obj;
+                } else {
+                    sb::shared_ptr<T>* obj_ptr = reinterpret_cast<sb::shared_ptr<T>*>(w+1);
+                    sb::weak_ptr<T>* wek_ptr = reinterpret_cast<sb::weak_ptr<T>*>(obj_ptr+1);
+                    *obj_ptr = wek_ptr->lock();
+                    const_cast<T*>(obj)->ResetLuaRef();
+                }
+            }
+            static void wrapper_destructor( data_holder* h ) {
+                //LogDebug() << "wrapper_destructor " << h;
+                wrapper_holder* w = reinterpret_cast<wrapper_holder*>(h);
+                sb::shared_ptr<T>* obj_ptr = reinterpret_cast<sb::shared_ptr<T>*>(w+1);
+                sb::weak_ptr<T>* wek_ptr = reinterpret_cast<sb::weak_ptr<T>*>(obj_ptr+1);
+                T* obj = obj_ptr->get();
+                obj->MarkDestroy();
+                obj_ptr->~shared_ptr<T>();
+                wek_ptr->~weak_ptr<T>();
+            }
+            static int constructor( lua_State* L ) {
+                wrapper_holder* holder = reinterpret_cast<wrapper_holder*>(lua_newuserdata(L, 
+                                                                                           sizeof(wrapper_holder)+
+                                                                                           sizeof(sb::shared_ptr<T>)+
+                                                                                           sizeof(sb::weak_ptr<T>)));
+                holder->type = data_holder::wrapper_ptr;
+                holder->is_const = false;
+                holder->info = meta::type<T>::info();
+                holder->destructor = &shared_klass_constructor_helper<T,true>::wrapper_destructor;
+                holder->lock = &shared_klass_constructor_helper<T,true>::wrapper_lock;
+                holder->unlock = &shared_klass_constructor_helper<T,true>::wrapper_unlock;
+                void* data = holder+1;
+                constructor_func func = *reinterpret_cast<constructor_func*>(lua_touserdata(L, lua_upvalueindex(1)));
+                sb::shared_ptr<T>* obj_ptr = new (data) sb::shared_ptr<T>((*func)(L),
+                                                                          sb::bind(
+                                                                          &shared_klass_constructor_helper<T,true>::wrapper_deleter,
+                                                                                   holder,
+                                                                                   sb::placeholders::_1
+                                                                                   ));
+                new (obj_ptr+1) sb::weak_ptr<T>(*obj_ptr);
+                lua_set_metatable( L, *holder );
+                return 1;
+            }
+
         };
         template <class T>
         class shared_klass_registrator : public klass_registrator<T> {
@@ -202,10 +308,11 @@ namespace Sandbox {
             void operator() ( const meta::constructor_holder<Proto>& ) {
                 sb_assert(lua_istable(this->m_L, -1)); 
                 lua_pushliteral(this->m_L, "__constructor");         /// mntbl in ctr name
+                typedef typename shared_klass_constructor_helper<T,false>::constructor_func constructor_func;
                 constructor_func* ptr = 
                 reinterpret_cast<constructor_func*>(lua_newuserdata(this->m_L, sizeof(constructor_func)));    /// mntbl in ud
                 *ptr = &constructor_helper<Proto,2>::template raw<T>;
-                lua_pushcclosure(this->m_L, &shared_klass_registrator<T>::constructor, 1);   /// mntbl in ctr
+                lua_pushcclosure(this->m_L, &shared_klass_constructor_helper<T,is_wrapper_helper<T>::result>::constructor, 1);   /// mntbl in ctr
                 lua_rawset(this->m_L, -3);
             }
             void operator() ( const meta::constructor_ptr_holder<int(*)(lua_State*)>& hdr) {
@@ -216,20 +323,6 @@ namespace Sandbox {
             }
         protected:
             typedef T* (*constructor_func)(lua_State*);
-            static int constructor( lua_State* L ) {
-                data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
-                                                                                     sizeof(data_holder)+
-                                                                                     sizeof(sb::shared_ptr<T>)));
-                holder->type = data_holder::shared_ptr;
-                holder->is_const = false;
-                holder->info = meta::type<T>::info();
-                holder->destructor = &meta::destructor_helper<T>::shared;
-                void* data = holder+1;
-                constructor_func func = *reinterpret_cast<constructor_func*>(lua_touserdata(L, lua_upvalueindex(1)));
-                new (data) sb::shared_ptr<T>((*func)(L));
-                lua_set_metatable( L, *holder );
-                return 1;
-            }
         };
 
 

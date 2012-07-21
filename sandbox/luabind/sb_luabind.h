@@ -67,7 +67,7 @@ namespace Sandbox {
                 lua_stack_check sc(L);
                 meta::bind_type<W>::bind( kr );
             }
-            lua_register_wrapper(L,meta::type<W>::info(),&wrapper_helper<W>::get_wrapper_func);
+            lua_register_wrapper(L,meta::type<W>::info());
         }
         template <class T>
         inline void Enum( lua_State* L ) {

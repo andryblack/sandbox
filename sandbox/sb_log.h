@@ -36,35 +36,35 @@ namespace Sandbox {
     
     class LogError : public Logger {
     public:
-        LogError( const char* module) : Logger( GHL::LOG_LEVEL_ERROR,module) {
+        LogError( const char* module = 0) : Logger( GHL::LOG_LEVEL_ERROR,module) {
             
         }
     };
     
     class LogWarning : public Logger {
     public:
-        LogWarning( const char* module) : Logger( GHL::LOG_LEVEL_WARNING,module) {
+        LogWarning( const char* module = 0) : Logger( GHL::LOG_LEVEL_WARNING,module) {
             
         }
     };
 
     class LogInfo : public Logger {
     public:
-        LogInfo( const char* module) : Logger( GHL::LOG_LEVEL_INFO,module) {
+        LogInfo( const char* module = 0) : Logger( GHL::LOG_LEVEL_INFO,module) {
             
         }
     };
     
     class LogVerbose : public Logger {
     public:
-        LogVerbose( const char* module) : Logger( GHL::LOG_LEVEL_VERBOSE,module) {
+        LogVerbose( const char* module = 0) : Logger( GHL::LOG_LEVEL_VERBOSE,module) {
             
         }
     };
     
     class LogDebug : public Logger {
     public:
-        LogDebug( const char* module) : Logger( GHL::LOG_LEVEL_DEBUG,module) {
+        LogDebug( const char* module = 0) : Logger( GHL::LOG_LEVEL_DEBUG,module) {
             
         }
     };

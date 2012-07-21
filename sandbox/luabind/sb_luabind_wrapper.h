@@ -31,7 +31,12 @@ namespace Sandbox {
             }
             WrapperHolder( ) : m_ref(LuaVMHelperWeakPtr()) {}
             void set(lua_State* L) {
-                m_ref.SetObject(L);
+                if (!m_ref.Valid()) {
+                    m_ref.SetObject(L);
+                }
+            }
+            void reset() {
+                m_ref.Reset();
             }
         private:
             LuaReference    m_ref;
@@ -39,13 +44,26 @@ namespace Sandbox {
         
         class wrapper : public impl::wrapper_base<WrapperHolder> {
         public:
+            wrapper() : m_mark_destroy(false) {
+            }
+            void MarkDestroy(){
+                sb_assert(!m_mark_destroy);
+                m_mark_destroy = true;
+                m_self.reset();
+            }
+            bool MarkedDestroy() const { return m_mark_destroy; }
             void SetObject(lua_State* L) {
                 m_self.set(L);
             }
             void PushObject(lua_State* L) {
                 m_self.push(L);
             }
+            void ResetLuaRef() {
+                m_self.reset();
+            }
             static const meta::type_info* const* get_parents();
+        private:
+            bool    m_mark_destroy;
         };
         
         template <class T> struct wrapper_helper {
