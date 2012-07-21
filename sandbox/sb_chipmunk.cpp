@@ -214,7 +214,7 @@ namespace Sandbox {
 			cpShapeSetFriction(m_shape, f);
 		}
 		bool Shape::GetSensor() const {
-			return cpShapeGetSensor(m_shape);
+			return cpShapeGetSensor(m_shape)==cpTrue;
 		}
 		void Shape::SetSensor(bool s) {
 			cpShapeSetSensor(m_shape, s?cpTrue:cpFalse);
@@ -373,7 +373,7 @@ namespace Sandbox {
 			cpBodyApplyImpulse(m_body, vect(j), vect(r));
 		}
 		bool Body::IsSleeping() const {
-			return cpBodyIsSleeping(m_body);
+			return cpBodyIsSleeping(m_body)==cpTrue;
 		}
 		void Body::Activate() {
 			cpBodyActivate(m_body);
@@ -382,7 +382,7 @@ namespace Sandbox {
 			cpBodySleep(m_body);
 		}
 		bool Body::IsStatic() const{
-			return cpBodyIsStatic(m_body);
+			return cpBodyIsStatic(m_body)==cpTrue;
 		}
 
 		StaticBody::StaticBody() : Body(cpBodyNewStatic()){
@@ -678,7 +678,8 @@ namespace Sandbox {
 		
 		
 		
-		struct DebugDrawImpl {
+		class DebugDrawImpl {
+		public:
 			static void Draw( Graphics& g, cpSpace* space )  {
 				cpSpaceEachBody(space, &SpaceBodyIteratorFunc, &g);
 				cpSpaceEachShape(space, &SpaceShapeIteratorFunc, &g);	

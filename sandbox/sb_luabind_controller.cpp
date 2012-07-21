@@ -19,6 +19,10 @@
 #include "sb_controller_elastic.h"
 #include "sb_controllers_color.h"
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
 SB_META_DECLARE_KLASS(Sandbox::Thread, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Thread)
 SB_META_END_KLASS_BIND()

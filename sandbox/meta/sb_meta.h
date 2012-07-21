@@ -28,7 +28,7 @@ namespace Sandbox {
         struct type_info {
             const char* const name;
             size_t size;
-            const type_info_parent const* parents;
+            const type_info_parent* const parents;
         };
         
         class object {
@@ -93,7 +93,8 @@ namespace Sandbox {
                 return static_cast<Parent*>(reinterpret_cast<Klass*>(ptr));
             }
             static type_info_parent::shared_destruct shared( void* ptr1, void* ptr2 ) {
-                new (ptr2) sb::shared_ptr<Parent>( *reinterpret_cast<sb::shared_ptr<Klass>*>(ptr1) );
+				sb::shared_ptr<Klass> tmp = *reinterpret_cast<sb::shared_ptr<Klass>*>(ptr1);
+				::new( ptr2 ) sb::shared_ptr<Parent>( tmp );
                 return &destructor_helper<Parent>::shared;
             }
         };

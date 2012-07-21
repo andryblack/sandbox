@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="chipmunk"
 	ProjectGUID="{F30085AB-AEAC-4F5D-A56C-0F2487BE0376}"
 	RootNamespace="chipmunk"
@@ -288,6 +288,58 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\chipmunk.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\chipmunk_ffi.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\chipmunk_private.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\chipmunk_types.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\chipmunk_unsafe.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\cpArbiter.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\cpBB.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\cpBody.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\cpPolyShape.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\cpShape.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\cpSpace.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\cpSpatialIndex.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\chipmunk\include\chipmunk\cpVect.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

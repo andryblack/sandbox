@@ -84,8 +84,8 @@ namespace Sandbox {
 	inline void Image::SetHotspot(const Vector2f& hs) {
 		m_hotspot = hs;
 		if (m_texture!=0) {
-            float tw = m_texture->GetWidth();
-            float th = m_texture->GetHeight();
+			GHL::UInt32 tw = m_texture->GetWidth();
+            GHL::UInt32 th = m_texture->GetHeight();
 			m_hotspot.x *= m_width / (m_src_w * tw );
 			m_hotspot.y *= m_height / (m_src_h * th );
         }
@@ -95,8 +95,8 @@ namespace Sandbox {
         m_width = w;
         m_height = h;
 		if (m_texture!=0) {
-            float tw = m_texture->GetWidth();
-            float th = m_texture->GetHeight();
+			GHL::UInt32 tw = m_texture->GetWidth();
+            GHL::UInt32 th = m_texture->GetHeight();
 			m_hotspot.x *= m_width / (m_src_w * tw );
 			m_hotspot.y *= m_height / (m_src_h * th );
         }

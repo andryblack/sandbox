@@ -10,6 +10,11 @@
 #include "sb_luabind_stack.h"
 #include "sb_luabind_wrapper.h"
 #include "sb_inplace_string.h"
+#include "../sb_log.h"
+
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
 
 namespace Sandbox {
     namespace luabind {

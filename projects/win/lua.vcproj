@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="lua"
 	ProjectGUID="{F30085AB-AEAC-4F5D-A56C-0F2487BE0375}"
 	RootNamespace="lua"
@@ -186,11 +186,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\lua\src\lbitlib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\lua\src\lcode.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\lua\src\lcode.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\lua\src\lcorolib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\lua\src\lctype.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\lua\src\lctype.h"
 				>
 			</File>
 			<File
@@ -234,6 +250,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\lua\src\linit.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\lua\src\liolib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\lua\src\llex.c"
 				>
 			</File>
@@ -258,6 +282,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\lua\src\loadlib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\lua\src\lobject.c"
 				>
 			</File>
@@ -271,6 +299,10 @@
 			</File>
 			<File
 				RelativePath="..\..\lua\src\lopcodes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\lua\src\loslib.c"
 				>
 			</File>
 			<File
@@ -327,6 +359,10 @@
 			</File>
 			<File
 				RelativePath="..\..\lua\src\luaconf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\lua\src\lualib.h"
 				>
 			</File>
 			<File

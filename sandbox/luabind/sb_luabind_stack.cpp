@@ -10,6 +10,11 @@
 
 #include "sb_inplace_string.h"
 #include "sb_luabind_wrapper.h"
+#include "../sb_log.h"
+
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
 
 namespace Sandbox {
     namespace luabind {
@@ -104,7 +109,7 @@ namespace Sandbox {
         }
         
         bool stack<bool>::get( lua_State* L, int idx ) {
-            return lua_toboolean(L, idx);
+            return lua_toboolean(L, idx)!=0;
         }
         
         void stack<bool>::push( lua_State* L, bool val ) {

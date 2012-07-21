@@ -12,7 +12,7 @@
 /*
 ** if needed, includes windows header before everything else
 */
-#if defined(_WIN32)
+#if defined(LUA_DL_DLL)
 #include <windows.h>
 #endif
 
