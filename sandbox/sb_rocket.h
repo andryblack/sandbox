@@ -29,16 +29,16 @@ namespace Sandbox {
 	
 	
 	
-	typedef shared_ptr< ::Rocket::Core::Context > RocketContextPtr;
-	typedef shared_ptr< ::Rocket::Core::ElementDocument > RocketDocumentPtr;
+	typedef sb::shared_ptr< ::Rocket::Core::Context > RocketContextPtr;
+	typedef sb::shared_ptr< ::Rocket::Core::ElementDocument > RocketDocumentPtr;
 	
 	class Graphics;
 	class Resources;
-	class Lua; 
+	class LuaVM; 
 	
 	class RocketLib {
 	public:
-		explicit RocketLib( Resources* resources, GHL::System* system, Lua* lua);
+		explicit RocketLib( Resources* resources, GHL::System* system, LuaVM* lua);
 		~RocketLib();
 		void Draw( Graphics& g ) const;
 		RocketDocumentPtr LoadDocument( const char* file );
@@ -58,7 +58,7 @@ namespace Sandbox {
 		Data*	m_data;
 		RocketContextPtr	m_context;
 	};
-	typedef shared_ptr<RocketLib> RocketLibPtr;
+	typedef sb::shared_ptr<RocketLib> RocketLibPtr;
 }
 
 #endif /*SB_ROCKET_H_INCLUDED*/

@@ -22,33 +22,38 @@
 #include "sb_graphics.h"
 #include "sb_resources.h"
 #include "sb_lua.h"
-#include "sb_bind.h"
 #include "sb_log.h"
 
 namespace Sandbox {
 	
     static const char* MODULE = "Sandbox:Rocket";
     
-	namespace Bind {
-		template <> struct Pusher<Rocket::Core::String> {
-			static void Push( const StackHelper* helper, const Rocket::Core::String& t) {
-				helper->push_string(t.CString());
-			}
-		};
-		template <> struct Pusher<const Rocket::Core::String&> {
-			static void Push( const StackHelper* helper, const Rocket::Core::String& t) {
-				helper->push_string(t.CString());
-			}
-		};
-		template <> struct IsStringTag<Rocket::Core::String>{
-			static Rocket::Core::String to( const char* v ) {
-				return Rocket::Core::String(v);
-			}
-		};
-		template <> struct ArgumentTag<const Rocket::Core::String&> : public IsStringTag<Rocket::Core::String>{};
-		template <> struct ArgumentTag<Rocket::Core::String> : public IsStringTag<Rocket::Core::String>{};
-	}
 	
+    class ConstInlinedData : public GHL::Data {
+	protected:
+		const GHL::Byte*	m_buffer;
+		GHL::UInt32	m_size;
+	public:
+        /// ctr
+		ConstInlinedData( const GHL::Byte* data, GHL::UInt32 size ) : m_buffer( data ), m_size( size ) {
+			
+		}
+		/// add reference
+        virtual void GHL_CALL AddRef() const {
+		}
+        /// release reference
+        virtual void GHL_CALL Release() const {
+		}
+		/// Data size
+		virtual GHL::UInt32 GHL_CALL	GetSize() const { return m_size; }
+		/// Const data ptr
+		virtual const GHL::Byte* GHL_CALL	GetData() const { return m_buffer; }
+		/// set data
+		virtual void GHL_CALL	SetData( GHL::UInt32 , const GHL::Byte* , GHL::UInt32  ) {
+			
+		}
+	};
+    
 	struct RocketFile {
 		GHL::DataStream* ds;
 	};
@@ -84,7 +89,7 @@ namespace Sandbox {
 		// Reads data from a previously opened file.
 		virtual size_t Read(void* buffer, size_t size, ::Rocket::Core::FileHandle file) {
 			RocketFile* file_p = reinterpret_cast<RocketFile*> (file);
-			return file_p->ds->Read( (GHL::Byte*)buffer, size );
+			return file_p->ds->Read( (GHL::Byte*)buffer, GHL::UInt32(size) );
 		}
 		
 		// Seeks to a point in a previously opened file.
@@ -95,7 +100,7 @@ namespace Sandbox {
 				dir = GHL::F_SEEK_BEGIN;
 			else if (origin==SEEK_END)
 				dir = GHL::F_SEEK_END;
-			return file_p->ds->Seek( offset, dir );
+			return file_p->ds->Seek( GHL::Int32(offset), dir );
 		}
 		
 		// Returns the current position of the file pointer.
@@ -117,10 +122,10 @@ namespace Sandbox {
         }
 		/// read data
 		virtual GHL::UInt32 GHL_CALL Read(GHL::Byte* dest,GHL::UInt32 bytes) {
-			return stream->Read( dest, bytes );
+			return GHL::UInt32(stream->Read( dest, bytes ));
 		}
 		/// write data
-		virtual GHL::UInt32 GHL_CALL Write(const GHL::Byte* src,GHL::UInt32 bytes) {
+		virtual GHL::UInt32 GHL_CALL Write(const GHL::Byte* ,GHL::UInt32 ) {
 			return 0;
 		}
 		/// tell
@@ -128,7 +133,7 @@ namespace Sandbox {
 			return 0;
 		}
 		/// seek
-		virtual	bool GHL_CALL Seek(GHL::Int32 offset,GHL::FileSeekType st) {
+		virtual	bool GHL_CALL Seek(GHL::Int32 ,GHL::FileSeekType ) {
 			return false;
 		}
 		/// End of file
@@ -136,10 +141,10 @@ namespace Sandbox {
 			return stream->IsEOS();
 		}
 		/// release stream
-		virtual void GHL_CALL Release() {
+		virtual void GHL_CALL Release() const {
 			delete this;
 		}
-        virtual void GHL_CALL AddRef() {
+        virtual void GHL_CALL AddRef() const {
             
         }
 	};
@@ -247,7 +252,11 @@ namespace Sandbox {
 		/// @param[in] source_dimensions The dimensions, in pixels, of the source data.
 		/// @return True if the texture generation succeeded and the handle is valid, false if not.
 		virtual bool GenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions) {
-			TexturePtr texture = m_resources->CreateTexture(source_dimensions.x,source_dimensions.y,true,(GHL::Byte*)source);
+            ConstInlinedData data( (GHL::Byte*)source,source_dimensions.x*source_dimensions.y*4 );
+			TexturePtr texture = m_resources->CreateTexture(source_dimensions.x,
+                                                            source_dimensions.y,
+                                                            true,
+                                                            &data);
 			if (texture) {
 				RocketTexture* holder = new RocketTexture();
 				holder->texture = texture;
@@ -305,7 +314,7 @@ namespace Sandbox {
 			}
 			m_indexes.clear();
 			for (int i=0;i<num_indices;i++) {
-				m_indexes.push_back(indices[i]);
+				m_indexes.push_back(GHL::UInt16(indices[i]));
 			}
 			Transform2d transform = m_graphics->GetTransform();
 			m_graphics->SetTransform(transform.translated(translation.x,translation.y));
@@ -316,6 +325,7 @@ namespace Sandbox {
 			m_graphics->SetTransform(transform);
 		}
 	};
+    /*
 	class ElementDocument : public Rocket::Core::ElementDocument {
 	public:
 		ElementDocument( const Rocket::Core::String& tag , const LuaEnvironmentPtr& env) : Rocket::Core::ElementDocument(tag),m_env(env) {
@@ -333,8 +343,8 @@ namespace Sandbox {
 		}
 	private:
 		LuaEnvironmentPtr	m_env;
-	};
-	
+	};*/
+	/*
 	class ElementDocumentInstancer : public Rocket::Core::ElementInstancer {
 	public:
 		ElementDocumentInstancer( Lua* lua ) : m_lua(lua) {
@@ -360,8 +370,8 @@ namespace Sandbox {
 		}
 	private:
 		Lua*	m_lua;
-	};
-	
+	};*/
+	/*
 	class EventListener : public Rocket::Core::EventListener {
 	public:
 		EventListener( const Rocket::Core::String& code, Lua* lua ) : m_code(code),m_lua(lua) {
@@ -403,7 +413,8 @@ namespace Sandbox {
 		LuaFunctionPtr		m_function;
 		Lua* m_lua;
 	};
-	
+     */
+	/*
 	/// event listener instancer for lua binding
 	class EventListenerInstancer : public Rocket::Core::EventListenerInstancer {
 	public:
@@ -423,19 +434,20 @@ namespace Sandbox {
 		Lua* m_lua;
 	};
 	
-	
+	*/
 	struct RocketLib::Data {
 		FileInterfaceImpl file;
 		SystemInterfaceImpl system;
 		RenderInterfaceImpl render;
-		EventListenerInstancer* eventListenerInstancer;
-		ElementDocumentInstancer* elementDocumentInstancer;
-		Data( Resources* resources, GHL::System* system,Lua* lua ) 
+		//EventListenerInstancer* eventListenerInstancer;
+		//ElementDocumentInstancer* elementDocumentInstancer;
+		Data( Resources* resources, GHL::System* system,LuaVM* lua ) 
 			: file(resources)
 			,render(resources)
 			,system(system)
-			,eventListenerInstancer(new EventListenerInstancer(lua))
-			,elementDocumentInstancer(new ElementDocumentInstancer(lua)) {
+			//,eventListenerInstancer(new EventListenerInstancer(lua))
+			//,elementDocumentInstancer(new ElementDocumentInstancer(lua)) 
+        {
 		}
 	};
 	
@@ -450,16 +462,16 @@ namespace Sandbox {
 	
 	
 	
-	RocketLib::RocketLib( Resources* resources, GHL::System* system, Lua* lua ) {
+	RocketLib::RocketLib( Resources* resources, GHL::System* system, LuaVM* lua ) {
 		m_data = new Data( resources,system,lua);
 		::Rocket::Core::SetFileInterface( &(m_data->file) );
 		::Rocket::Core::SetSystemInterface( &(m_data->system) );
 		::Rocket::Core::SetRenderInterface( &(m_data->render) );
-		::Rocket::Core::Factory::RegisterEventListenerInstancer( (m_data->eventListenerInstancer) );
+		//::Rocket::Core::Factory::RegisterEventListenerInstancer( (m_data->eventListenerInstancer) );
 		::Rocket::Core::Initialise();
 		::Rocket::Controls::Initialise();
-		::Rocket::Core::Factory::RegisterElementInstancer("body",  (m_data->elementDocumentInstancer));
-		
+		//::Rocket::Core::Factory::RegisterElementInstancer("body",  (m_data->elementDocumentInstancer));
+#if 0
 		SB_BIND_BEGIN_BIND
 		{
 			SB_BIND_BEGIN_EXTERN_CLASS(Rocket::Core::Element)
@@ -529,7 +541,7 @@ namespace Sandbox {
 			SB_BIND(lua)
 		}
 		SB_BIND_END_BIND
-		
+#endif
 		
 		m_context = RocketContextPtr( ::Rocket::Core::CreateContext("main",
 																	Rocket::Core::Vector2i(
@@ -570,8 +582,8 @@ namespace Sandbox {
 		m_context = RocketContextPtr();
 		::Rocket::Core::Factory::Shutdown();
 		::Rocket::Core::Shutdown();
-		m_data->eventListenerInstancer->RemoveReference();
-		m_data->elementDocumentInstancer->RemoveReference();
+		//m_data->eventListenerInstancer->RemoveReference();
+		//m_data->elementDocumentInstancer->RemoveReference();
 		delete m_data;
 	}
 	
@@ -626,7 +638,7 @@ namespace Sandbox {
 		m_context->ProcessKeyUp( convert_key(key) , convert_modifiers(mods) );
 	}
 	void RocketLib::OnChar( GHL::UInt32 ch ) {
-		m_context->ProcessTextInput( ch );
+		m_context->ProcessTextInput( Rocket::Core::word(ch) );
 	}
 	
 	void RocketLib::SetDebuggerVisible( bool v) {
