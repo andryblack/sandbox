@@ -45,10 +45,10 @@ namespace Sandbox {
         bool GetTiled() const {
             return m_texture->GetWrapModeU() != GHL::TEX_WRAP_CLAMP;
         }
-		float GetWidth() const { return float(m_texture->GetWidth());}
-		float GetHeight() const { return float(m_texture->GetHeight());}
-        float GetOriginalWidth() const { return float(m_original_w); }
-        float GetOriginalHeight() const { return float(m_original_h); }
+		GHL::UInt32 GetWidth() const { return m_texture->GetWidth();}
+		GHL::UInt32 GetHeight() const { return m_texture->GetHeight();}
+        GHL::UInt32 GetOriginalWidth() const { return m_original_w; }
+        GHL::UInt32 GetOriginalHeight() const { return m_original_h; }
 		GHL::Texture* GetNative() const { return m_texture;}
 	};
 	typedef sb::shared_ptr<Texture> TexturePtr;

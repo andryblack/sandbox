@@ -127,8 +127,8 @@ namespace Sandbox {
 		GHL::Render* BeginNative();
 		void EndNative(GHL::Render* render);
 		
-		float GetScreenWidth() const { if (m_render) return float(m_render->GetWidth()); return 0.0f;}
-		float GetScreenHeight() const { if (m_render) return float(m_render->GetHeight()); return 0.0f;}
+        GHL::UInt32 GetScreenWidth() const { if (m_render) return m_render->GetWidth(); return 0;}
+		GHL::UInt32 GetScreenHeight() const { if (m_render) return m_render->GetHeight(); return 0;}
 	private:
 		GHL::Render* m_render;
 		GHL::Texture* m_fake_tex_white;
