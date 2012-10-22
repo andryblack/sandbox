@@ -12,6 +12,7 @@
 #include "sb_texture.h"
 #include "sb_image.h"
 #include "sb_font.h"
+#include "sb_bitmap_font.h"
 #include "sb_shader.h"
 #include "sb_color.h"
 #include "sb_rect.h"
@@ -76,13 +77,16 @@ SB_META_ENUM_ITEM(ALIGN_RIGHT)
 SB_META_ENUM_ITEM(ALIGN_CENTER)
 SB_META_END_ENUM_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::Font, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Font)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::BitmapFont)
 SB_META_CONSTRUCTOR(())
 SB_META_METHOD(Reserve)
 SB_META_METHOD(AddGlypth)
 SB_META_METHOD(AddKerningPair)
 SB_META_END_KLASS_BIND()
+
 
 SB_META_DECLARE_KLASS(Sandbox::Resources, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Resources)
@@ -100,6 +104,7 @@ namespace Sandbox {
         luabind::RawClass<Rectf>(lua);
         luabind::RawClass<Recti>(lua);
         luabind::Class<Font>(lua);
+        luabind::Class<BitmapFont>(lua);
         luabind::Enum<FontAlign>(lua);
         luabind::Class<Image>(lua);
         luabind::ExternClass<Resources>(lua);

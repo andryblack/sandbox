@@ -10,14 +10,15 @@
 #ifndef SB_FONT_H
 #define SB_FONT_H
 
-#include "sb_image.h"
-#include <ghl_types.h>
-#include "sb_vector2.h"
-#include "sb_vector.h"
+#include "sb_notcopyable.h"
+#include "sb_shared_ptr.h"
+#include "meta/sb_meta.h"
 
 
 namespace Sandbox {
 
+    struct Vector2f;
+    
 	enum FontAlign {
 		ALIGN_LEFT = 0,
 		ALIGN_RIGHT = 1,
@@ -26,29 +27,14 @@ namespace Sandbox {
 	
 	class Graphics;
 	
-	class Font {
+	class Font : public meta::object, public NotCopyable {
+        SB_META_OBJECT
 	public:
 		Font();
-		~Font();
-		void Reserve(size_t size);
-		void AddGlypth(const ImagePtr& img,const char* code,float asc);
-		void AddKerningPair(const char* from,const char* to,float offset);
-		void Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const;
-		float GetTextWidth(const char* text) const;
+		virtual ~Font();
+		virtual void Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const = 0;
+		virtual float GetTextWidth(const char* text) const = 0;
 	private:
-		struct Kerning {
-			GHL::UInt16 code;
-			float	offset;
-		};
-		struct Glypth {
-			GHL::UInt16 code;
-			ImagePtr img;
-			float	asc;
-			std::vector<Kerning> kerning;
-		};
-		sb::vector<Glypth> m_glypths;
-		const Glypth* get_glypth(GHL::UInt16 code) const;
-		float getKerning(const Glypth* g,GHL::UInt16 to) const;
 	};
 	
 	typedef sb::shared_ptr<Font> FontPtr;
