@@ -266,13 +266,16 @@ namespace Sandbox {
             }
             static void wrapper_destructor( data_holder* h ) {
                 //LogDebug() << "wrapper_destructor " << h;
+                typedef sb::shared_ptr<T> shared_ptr_type;
+                typedef sb::weak_ptr<T> weak_ptr_type;
+                
                 wrapper_holder* w = reinterpret_cast<wrapper_holder*>(h);
-                sb::shared_ptr<T>* obj_ptr = reinterpret_cast<sb::shared_ptr<T>*>(w+1);
-                sb::weak_ptr<T>* wek_ptr = reinterpret_cast<sb::weak_ptr<T>*>(obj_ptr+1);
+                shared_ptr_type* obj_ptr = reinterpret_cast<shared_ptr_type*>(w+1);
+                weak_ptr_type* wek_ptr = reinterpret_cast<weak_ptr_type*>(obj_ptr+1);
                 T* obj = obj_ptr->get();
                 obj->MarkDestroy();
-                obj_ptr->~shared_ptr<T>();
-                wek_ptr->~weak_ptr<T>();
+                obj_ptr->~shared_ptr_type();
+                wek_ptr->~weak_ptr_type();
             }
             static int constructor( lua_State* L ) {
                 wrapper_holder* holder = reinterpret_cast<wrapper_holder*>(lua_newuserdata(L, 

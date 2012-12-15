@@ -30,6 +30,11 @@ namespace Sandbox {
 		std::vector<ThreadPtr> m_added_threads;
 		std::vector<ThreadPtr> m_removed_threads;
 	};
+    
+    class PermanentThreadsMgr : public ThreadsMgr {
+    public:
+        bool Update(float dt);
+    };
 }
 
 #endif /*SB_THREADS_MGR_H*/

@@ -69,12 +69,13 @@ namespace Sandbox {
 			tfmt = GHL::TEXTURE_FORMAT_RGB;
 			bpp = 3;
         }
-        GHL::Data* data = 0;
+        GHL::Image* img = 0;
         if ( fill ) {
-            data = GHL_CreateData( bpp*w*h , true , 0 );
+            img = GHL_CreateImage(w, h, alpha ? GHL::IMAGE_FORMAT_RGBA : GHL::IMAGE_FORMAT_RGB);
+            img->Fill(0);
         }
-		GHL::Texture* texture = m_render->CreateTexture(w,h,tfmt,data);
-		if (data) data->Release();
+		GHL::Texture* texture = m_render->CreateTexture(w,h,tfmt,img);
+		if (img) img->Release();
 		return TexturePtr(new Texture(texture));
 	}
     bool Resources::LoadImageSubdivs(const char* filename, std::vector<Image>& output) {
@@ -104,7 +105,7 @@ namespace Sandbox {
                     img->Release();
                     return false;
                 }
-                texture->GetNative()->SetData(0,0,ipw,iph,subimg->GetData());
+                texture->GetNative()->SetData(0,0,subimg);
                 subimg->Release();
                 output.push_back(Image(texture,0,0,float(ipw),float(iph)));
                 output.back().SetHotspot(Vector2f(-float(x),-float(y)));
@@ -142,15 +143,15 @@ namespace Sandbox {
 		ds->Release();
 		return img;
 	}
-	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,bool alpha, const GHL::Data* data) {
+	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,bool alpha, const GHL::Image* data) {
         GHL::UInt32 tw = next_pot( w );
         GHL::UInt32 th = next_pot( h );
         bool setData = ( tw == w ) && ( th == h );
 		GHL::Texture* texture = m_render->CreateTexture(tw,
                                                         th,alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,
                                                         setData ? data : 0);
-		if (data && !setData) texture->SetData(0,0,w,h,data);
-		TexturePtr ptr(new Texture(texture));
+		if (data && !setData) texture->SetData(0,0,data);
+		TexturePtr ptr(new Texture(texture,w,h));
 		return ptr;
 	}
 	
@@ -183,8 +184,9 @@ namespace Sandbox {
 		GHL::UInt32 tw = next_pot( img->GetWidth() );
         GHL::UInt32 th = next_pot( img->GetHeight() );
         bool setData = ( tw == img->GetWidth() ) && ( th == img->GetHeight() );
-		GHL::Data* fillData = setData ? 0 : GHL_CreateData(bpp*tw*th,true,0);
-        GHL::Texture* texture = m_render->CreateTexture(tw,th,tfmt,setData ? img->GetData() : fillData);
+		GHL::Image* fillData = setData ? 0 : GHL_CreateImage(tw,th,img->GetFormat());
+        if (fillData) fillData->Fill(0);
+        GHL::Texture* texture = m_render->CreateTexture(tw,th,tfmt,setData ? img : fillData);
 		tfmt = texture->GetFormat();
 		GHL::ImageFormat ifmt;
 		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
@@ -202,7 +204,7 @@ namespace Sandbox {
 				img->GetWidth() << "x" << img->GetHeight() << " -> " <<
 				tw << "x" << th;
             img->Convert(ifmt);
-            texture->SetData(0,0,img->GetWidth(),img->GetHeight(),img->GetData());
+            texture->SetData(0,0,img);
         } else {
 			LogInfo(MODULE) << "Loaded image : " << filename << " " << img->GetWidth() << "x" << img->GetHeight() ;
         }
@@ -273,8 +275,13 @@ namespace Sandbox {
 				LogError(MODULE) << "error opening file " << filename;
 				return ShaderPtr();
 			}
-			vs = m_render->CreateVertexShader(ds);
-			ds->Release();
+            GHL::Data* dsd = GHL_ReadAllData( ds );
+            ds->Release();
+            if (!dsd) {
+                LogError(MODULE) << "error loading shader " << vfilename;
+            }
+			vs = m_render->CreateVertexShader(dsd);
+			dsd->Release();
 			if (!vs) {
 				LogError(MODULE) << "error loading shader " << vfilename;
 				//return ShaderPtr();
@@ -290,8 +297,13 @@ namespace Sandbox {
 				LogError(MODULE) << "error opening file " << filename;
 				return ShaderPtr();
 			}
-			fs = m_render->CreateFragmentShader(ds);
-			ds->Release();
+            GHL::Data* dsd = GHL_ReadAllData( ds );
+            ds->Release();
+            if (!dsd) {
+                LogError(MODULE) << "error loading shader " << vfilename;
+            }
+			fs = m_render->CreateFragmentShader(dsd);
+			dsd->Release();
 			if (!fs) {
 				LogError(MODULE) << "error loading shader " << ffilename;
 				//return ShaderPtr();

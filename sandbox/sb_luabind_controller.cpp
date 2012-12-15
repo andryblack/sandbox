@@ -35,6 +35,11 @@ SB_META_METHOD(RemoveThread)
 SB_META_METHOD(Clear)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::PermanentThreadsMgr, ThreadsMgr)
+SB_META_BEGIN_KLASS_BIND(Sandbox::PermanentThreadsMgr)
+SB_META_CONSTRUCTOR(())
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_KLASS(Sandbox::Controller, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Controller)
 SB_META_METHOD(Set)
@@ -303,6 +308,7 @@ namespace Sandbox {
         luabind::Class<Thread>(lua);
         luabind::Class<LuaThread>(lua);
         luabind::Class<ThreadsMgr>(lua);
+        luabind::Class<PermanentThreadsMgr>(lua);
         luabind::Class<Controller>(lua);
         luabind::Class<Event>(lua);
         luabind::Class<LuaEvent>(lua);

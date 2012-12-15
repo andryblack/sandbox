@@ -50,6 +50,8 @@ namespace Sandbox {
             if (m_visible) return HandleTouch( touch );
             return false;
         }
+        
+        void MoveToTop();
 	protected:
 		friend class Container;
 		Container* GetParent() const { return m_parent;}

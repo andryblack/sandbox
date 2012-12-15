@@ -28,13 +28,16 @@ namespace Sandbox {
 		void Clear();
         
         /// self mouse handling implementation
-        bool HandleTouch( const TouchInfo& touch );
+        virtual bool HandleTouch( const TouchInfo& touch );
         void Update( float dt );
-	protected:
+    protected:
         bool HandleChilds( const TouchInfo& touch,bool firstResponse );
 		void DrawChilds(Graphics& g) const;
         void UpdateChilds( float dt );
 		sb::vector<SceneObjectPtr> m_objects;
+    private:
+        void MoveToTop( SceneObject* obj );
+        friend class SceneObject;
 	};
 	typedef sb::shared_ptr<Container> ContainerPtr;
 }

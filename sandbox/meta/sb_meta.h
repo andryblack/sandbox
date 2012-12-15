@@ -85,7 +85,10 @@ namespace Sandbox {
         template <class T>
         struct destructor_helper {
             static void raw( void* data ) { reinterpret_cast<T*>(data)->~T(); }
-            static void shared( void* data ) { reinterpret_cast<sb::shared_ptr<T>*>(data)->~shared_ptr<T>(); }
+            static void shared( void* data ) {
+                typedef sb::shared_ptr<T> ptr_type;
+                reinterpret_cast<ptr_type*>(data)->~ptr_type();
+            }
         };
         
         template <class Klass, class Parent> struct cast_helper {

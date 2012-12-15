@@ -71,4 +71,8 @@ namespace Sandbox {
 		}
 	}
 
+    bool PermanentThreadsMgr::Update(float dt) {
+        ThreadsMgr::Update(dt);
+        return false;
+    }
 }

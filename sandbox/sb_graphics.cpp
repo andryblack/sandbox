@@ -9,6 +9,7 @@
 
 #include "sb_graphics.h"
 #include "sb_assert.h"
+#include <ghl_image.h>
 
 namespace Sandbox {
 	
@@ -31,9 +32,10 @@ namespace Sandbox {
     	
 	void Graphics::Load(GHL::Render* render) {
 		if (!m_fake_tex_white) {
-            GHL::Data* data = GHL_CreateData(4,true,0xff);
-			m_fake_tex_white = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,data);
-			data->Release();
+            GHL::Image* img = GHL_CreateImage(1, 1, GHL::IMAGE_FORMAT_RGBA);
+            img->Fill(0xFFFFFFFF);
+            m_fake_tex_white = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
+			img->Release();
 		}
 	}
 	

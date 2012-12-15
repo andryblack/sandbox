@@ -82,4 +82,18 @@ namespace Sandbox {
 			(*i)->DoUpdate(dt);
 		}
     }
+    
+    void Container::MoveToTop( SceneObject* obj ) {
+        std::vector<SceneObjectPtr>::iterator i = m_objects.begin();
+        for ( ;i!=m_objects.end();i++) {
+			if (i->get()==obj) {
+                break;
+            }
+		}
+        if (i!=m_objects.end()) {
+            SceneObjectPtr o = *i;
+            m_objects.erase(i);
+            m_objects.push_back(o);
+        }
+    }
 }

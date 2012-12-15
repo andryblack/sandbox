@@ -14,8 +14,9 @@
 #include "sb_particle.h"
 #include "sb_event.h"
 #include "sb_vector.h"
+#include "sb_map.h"
+#include "sb_string.h"
 
-#include <map>
 
 namespace Sandbox {
     
@@ -64,7 +65,7 @@ namespace Sandbox {
         
         void AddImage( const ImagePtr& img );
         
-        typedef std::map<std::string,float> ArgsMap;
+        typedef sb::map<sb::string,float> ArgsMap;
         void AddProcessor( const ParticleProcessorBlock* block, 
                           const ArgsMap& args = ArgsMap());
         
@@ -79,11 +80,11 @@ namespace Sandbox {
     private:
         size_t  m_max_amount;
         float   m_emission_speed;
-        std::vector<ImagePtr>   m_images;
+        sb::vector<ImagePtr>   m_images;
         bool    m_loop;
         float   m_cicle_time;
         float   m_args[32];
-        std::vector<ParticleProcessorBlockPtr> m_processors;
+        sb::vector<ParticleProcessorBlockPtr> m_processors;
         float   m_particle_ttl;
     };
     typedef sb::shared_ptr<ParticlesController> ParticlesControllerPtr;

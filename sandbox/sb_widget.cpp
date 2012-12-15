@@ -40,7 +40,7 @@ namespace Sandbox {
             }
             TouchInfo touchNew( touch.GetType(), touch.GetPosition()-m_rect.GetTopLeft() );
             if (!HandleTouchInside( touchNew )) 
-                HandleChilds(touchNew,false);
+                return HandleChilds(touchNew,false);
             return true;
         }
         if (m_inside) {

@@ -57,7 +57,7 @@ namespace Sandbox {
 		TexturePtr CreateTexture( GHL::UInt32 w, 
                                  GHL::UInt32 h, 
                                  bool alpha, 
-                                 const GHL::Data* data);
+                                 const GHL::Image* data);
 	private:
 		GHL::VFS* m_vfs;
 		GHL::Render* m_render;

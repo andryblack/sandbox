@@ -25,6 +25,7 @@
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::SceneObject)
 SB_META_PROPERTY_RW(Visible,GetVisible,SetVisible)
+SB_META_METHOD(MoveToTop)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Sprite)

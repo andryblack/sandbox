@@ -10,6 +10,7 @@
 
 #include "sb_scene_object.h"
 #include "sb_assert.h"
+#include "sb_container.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::SceneObject, Sandbox::meta::object)
 
@@ -29,5 +30,11 @@ namespace Sandbox {
     
     bool SceneObject::HandleTouch( const TouchInfo& ) {
         return false;
+    }
+    
+    void SceneObject::MoveToTop() {
+        if (m_parent) {
+            m_parent->MoveToTop(this);
+        }
     }
 }
