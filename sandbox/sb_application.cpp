@@ -150,11 +150,15 @@ namespace Sandbox {
 #ifdef GHL_PLATFORM_WIN
         luabind::SetValue(m_lua->GetVM(), "platform.os", "WIN32");
 #endif
+    
+#ifdef GHL_PLATFORM_FLASH
+        luabind::SetValue(m_lua->GetVM(), "platform.os", "FLASH");
+#endif
         
 		BindModules( m_lua );
 		m_lua->DoFile("settings.lua");
         
-        luabind::SetValue(m_lua->GetVM(), "settings", 0);
+        luabind::SetValue(m_lua->GetVM(), "settings", (GHL::Settings*)(0));
 	}
 	///
 	bool GHL_CALL Application::Load() {

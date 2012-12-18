@@ -154,7 +154,7 @@ namespace Sandbox {
 			m_vertexes.push_back(GHL::Vertex());
 			GHL::Vertex& v(m_vertexes.back());
 			m_transform.transform(x,y,v.x,v.y);
-			v.z = 0.5f;
+			v.z = 0.0f;
 			v.color[0]=color & 0xff;
 			v.color[1]=(color >> 8)&0xff;
 			v.color[2]=(color >> 16)&0xff;

@@ -67,15 +67,12 @@ LUA_SOURCES=\
 	ldump.c\
 	lfunc.c\
 	lgc.c\
-	linit.c\
-	liolib.c\
 	llex.c\
 	lmathlib.c\
 	lmem.c\
 	loadlib.c\
 	lobject.c\
 	lopcodes.c\
-	loslib.c\
 	lparser.c\
 	lstate.c\
 	lstring.c\
