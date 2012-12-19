@@ -9,6 +9,7 @@
 #include "sb_background.h"
 #include "sb_resources.h"
 #include "sb_graphics.h"
+#include "sb_texture.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::Background, Sandbox::SceneObject)
 
@@ -29,5 +30,12 @@ namespace Sandbox {
         if (!file ) return false;
         m_images.clear();
         return res->LoadImageSubdivs( file , m_images);
+    }
+
+
+    void Background::SetFiltered( bool f ) {
+        for (size_t i=0;i<m_images.size();++i) {
+            m_images[i].GetTexture()->SetFiltered(f);
+        }
     }
 }

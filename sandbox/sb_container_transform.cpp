@@ -33,7 +33,7 @@ namespace Sandbox {
     /// self mouse handling implementation
     bool ContainerTransform::HandleTouch( const TouchInfo& touch ) {
         Transform2d tr;
-		tr.translate(-m_translate).rotate(m_angle).scale(m_scale_x,m_scale_y);
+		tr.translate(-m_translate).rotate(m_angle).scale(1.0f/m_scale_x,1.0f/m_scale_y);
         TouchInfo localTouch(touch.GetType(),tr.transform(touch.GetPosition()));
         return Container::HandleTouch(localTouch);
     }

@@ -32,13 +32,13 @@ namespace Sandbox {
         }
 
         template <char C, size_t count>
-        static void get_create_table_impl(lua_State* L,const InplaceString& name) {
+        static void get_create_table_impl(lua_State* L,const InplaceString& name,int prealloc) {
             const char* other = name.find(C);
             sb::string first = InplaceString(name.begin(),other).str();
             lua_getglobal(L,first.c_str());
             if (!lua_istable(L, -1)) {
                 lua_pop(L, 1);
-                lua_newtable(L);
+                lua_createtable(L, 0, prealloc);
                 lua_pushvalue(L, -1);
                 lua_setglobal(L, first.c_str());
             }
@@ -52,7 +52,7 @@ namespace Sandbox {
                 lua_getfield(L, -1, head.str().c_str() );
                 if (!lua_istable(L, -1)) {
                     lua_pop(L, 1);
-                    lua_newtable(L);
+                    lua_createtable(L, 0, other==name.end() ? prealloc : 1);
                     lua_pushvalue(L, -1);
                     lua_setfield(L, -3, head.str().c_str());
                 }
@@ -62,8 +62,8 @@ namespace Sandbox {
             }
         }
         
-        void lua_get_create_table(lua_State* L,const char* name) {
-            get_create_table_impl<':',2>(L, InplaceString(name));
+        void lua_get_create_table(lua_State* L,const char* name,int prealloc) {
+            get_create_table_impl<':',2>(L, InplaceString(name),prealloc);
         }
 
         static void get_table(lua_State* L,const InplaceString& name) {
@@ -111,7 +111,7 @@ namespace Sandbox {
             if ( name == path ) {
                 lua_setglobal(L, path);
             } else {
-                get_create_table_impl<'.',1>(L, InplaceString(path,name));  /// val tbl
+                get_create_table_impl<'.',1>(L, InplaceString(path,name),1);  /// val tbl
                 lua_pushvalue(L, -2);               /// val tbl val
                 lua_setfield(L, -2, name+1);        /// val tbl
                 lua_pop(L, 2);
@@ -126,7 +126,7 @@ namespace Sandbox {
                 lua_setglobal(L, path);
             } else {
                 name--;
-                get_create_table_impl<':',2>(L, InplaceString(path,name));  /// val tbl
+                get_create_table_impl<':',2>(L, InplaceString(path,name),1);  /// val tbl
                 lua_pushvalue(L, -2);               /// val tbl val
                 lua_setfield(L, -2, name+2);        /// val tbl
                 lua_pop(L, 2);
@@ -317,7 +317,7 @@ namespace Sandbox {
         
         void lua_register_metatable(lua_State* L,const meta::type_info* info) {
             if (info->parents && info->parents[0].info!=meta::type<void>::info() ) {
-                lua_get_create_table(L,info->parents[0].info->name);
+                lua_get_create_table(L,info->parents[0].info->name,2);
                 lua_setfield(L, -2, "__parent");
                 lua_getfield(L, -1, "__metatable");
                 lua_getfield(L, -2, "__parent");                 /// mntbl raw_ptr parent
@@ -375,7 +375,7 @@ namespace Sandbox {
         }
         
         void lua_register_wrapper(lua_State* L,const meta::type_info* info) {
-            lua_get_create_table(L,info->parents[0].info->name);
+            lua_get_create_table(L,info->parents[0].info->name,2);
             lua_setfield(L, -2, "__parent");
             lua_getfield(L, -1, "__metatable");
             lua_getfield(L, -2, "__parent");                 /// mntbl raw_ptr parent

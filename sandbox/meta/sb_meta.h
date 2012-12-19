@@ -48,7 +48,8 @@ namespace Sandbox {
     private: \
        
         template <class T> struct type {
-            static const type_info* info();
+            static const type_info* private_info;
+            static inline const type_info* info() { return private_info; }
         };
         
         template <class T> struct type<const T> {
@@ -109,12 +110,12 @@ namespace Sandbox {
                 return 0;
             }
         };
-#define SB_META_DECLARE_KLASS(Klass,Parent)  \
+#define SB_META_DECLARE_KLASS_X(Klass,Parent,Line)  \
         namespace Sandbox { namespace meta { \
-            template <> const type_info* type<Klass>::info() {\
+            namespace Line{ \
                 static const type_info_parent parents[] = { \
                     { \
-                        type<Parent>::info(), \
+                        type<Parent>::private_info, \
                         &cast_helper<Klass,Parent>::raw, \
                         &cast_helper<Klass,Parent>::shared \
                     }, \
@@ -125,8 +126,8 @@ namespace Sandbox {
                     sizeof(Klass), \
                     parents \
                 }; \
-                return &ti; \
             } \
+            template <> const type_info* type<Klass>::private_info = &Line::ti; \
         }}
 
 #define SB_META_DECLARE_OBJECT(Klass,Parent)  \
@@ -134,7 +135,10 @@ namespace Sandbox {
         const Sandbox::meta::type_info* Klass::get_static_type_info() {\
             return Sandbox::meta::type<Klass>::info(); \
         }
-
+#define CONCATENATE_DIRECT(s1, s2) s1##s2
+#define CONCATENATE(s1, s2) CONCATENATE_DIRECT(s1, s2)
+#define ANONYMOUS_VARIABLE(str) CONCATENATE(str, CONCATENATE(__LINE__,__COUNTER__))
+#define SB_META_DECLARE_KLASS(Type,Parent) SB_META_DECLARE_KLASS_X(Type,Parent,ANONYMOUS_VARIABLE(private_))
 #define SB_META_DECLARE_POD_TYPE(Type) SB_META_DECLARE_KLASS(Type,void)
 
         

@@ -15,6 +15,7 @@
 #include <ghl_settings.h>
 #include <ghl_vfs.h>
 #include <ghl_sound.h>
+#include <ghl_render.h>
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -173,6 +174,8 @@ namespace Sandbox {
         luabind::SetValue(m_lua->GetVM(), "application.scene", m_main_scene);
 		m_main_thread = new ThreadsMgr();
         luabind::SetValue(m_lua->GetVM(), "application.thread", m_main_thread);
+        luabind::SetValue(m_lua->GetVM(), "application.size.width", m_render->GetWidth() );
+        luabind::SetValue(m_lua->GetVM(), "application.size.height", m_render->GetHeight() );
 		OnLoaded();
 		m_lua->DoFile("main.lua");
 		return true;

@@ -62,6 +62,20 @@ namespace Sandbox {
         inline property_holder_ro<T,const U& (T::*)() const> property_ro( const char* name,const U& (T::*getter)() const) {
             return property_holder_ro<T,const U& (T::*)() const>(name,getter);
         }
+        template <class T,class Setter> struct property_holder_wo {
+            const char* name;
+            Setter setter;
+            property_holder_wo( const char* name, Setter setter ) : name(name),setter(setter){}
+        };
+        template <class T,class U>
+        inline property_holder_wo<T,void (T::*)(U)> property_wo( const char* name,void (T::*setter)(U)) {
+            return property_holder_wo<T,void(T::*)(U)>(name,setter);
+        }
+        template <class T,class U>
+        inline property_holder_wo<T,void(T::*)(const U&)> property_wo( const char* name,void(T::*setter)(const U&)) {
+            return property_holder_wo<T,void(T::*)(const U&) const>(name,setter);
+        }
+
         
         template <class T,class Getter,class Setter> struct property_holder_rw {
             const char* name;
@@ -144,6 +158,7 @@ namespace Sandbox {
         
 #define SB_META_PROPERTY( name ) bind( property( #name , &ThisType::name ) );
 #define SB_META_PROPERTY_RO( name, getter ) bind( property_ro( #name, &ThisType::getter ) );
+#define SB_META_PROPERTY_WO( name, setter ) bind( property_wo( #name, &ThisType::setter ) );
 #define SB_META_PROPERTY_RW( name, getter, setter ) bind( property_rw( #name, &ThisType::getter, &ThisType::setter ) );
 #define SB_META_PROPERTY_RW_DEF( name ) bind( property_rw( #name, &ThisType::Get##name, &ThisType::Set##name ) );
 #define SB_META_METHOD( name ) bind( method( #name , &ThisType::name ) );

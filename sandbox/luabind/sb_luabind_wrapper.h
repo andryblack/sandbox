@@ -72,12 +72,12 @@ namespace Sandbox {
             }
         };
         
-#define SB_META_DECLARE_BINDING_OBJECT_WRAPPER(Klass,Parent) \
+#define SB_META_DECLARE_BINDING_OBJECT_WRAPPER_X(Klass,Parent,Line) \
         namespace Sandbox { namespace meta { \
-            template <> const type_info* type<Klass>::info() {\
+            namespace Line {\
                 static const type_info_parent parents[] = { \
                     { \
-                        type<Parent>::info(), \
+                        type<Parent>::private_info, \
                         &cast_helper<Klass,Parent>::raw, \
                         &cast_helper<Klass,Parent>::shared \
                     }, \
@@ -93,9 +93,11 @@ namespace Sandbox {
                     sizeof(Klass), \
                     parents \
                 }; \
-                return &ti; \
             } \
-        }} \
+            template <> const type_info* type<Klass>::private_info = &Line::ti; \
+        }} 
+#define SB_META_DECLARE_BINDING_OBJECT_WRAPPER(Klass,Parent) \
+        SB_META_DECLARE_BINDING_OBJECT_WRAPPER_X(Klass,Parent,ANONYMOUS_VARIABLE(private_))\
         const Sandbox::meta::type_info* Klass::get_static_type_info() {\
             return Sandbox::meta::type<Klass>::info(); \
         }

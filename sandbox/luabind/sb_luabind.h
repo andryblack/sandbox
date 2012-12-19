@@ -35,7 +35,7 @@ namespace Sandbox {
         
         template <class T>
         inline void RawClass( lua_State* L ) {
-            lua_stack_check sc(L);
+            LUA_CHECK_STACK
             impl::raw_klass_registrator<T> kr(L);
             lua_create_metatable(L);
             meta::bind_type<T>::bind( kr );
@@ -43,7 +43,7 @@ namespace Sandbox {
         }
         template <class T>
         inline void ExternClass( lua_State* L ) {
-            lua_stack_check sc(L);
+            LUA_CHECK_STACK
             impl::klass_registrator<T> kr(L);
             lua_create_metatable(L);
             meta::bind_type<T>::bind( kr );
@@ -51,7 +51,7 @@ namespace Sandbox {
         }
         template <class T>
         inline void Class( lua_State* L ) {
-            lua_stack_check sc(L);
+            LUA_CHECK_STACK
             impl::shared_klass_registrator<T> kr(L);
             lua_create_metatable(L);
             meta::bind_type<T>::bind( kr );
@@ -59,23 +59,23 @@ namespace Sandbox {
         }
         template <class T,class W>
         inline void ClassWrapper( lua_State* L ) {
-            lua_stack_check sc(L);
+            LUA_CHECK_STACK
             Class<T>(L);
             impl::shared_klass_registrator<W> kr(L);
             lua_create_metatable(L);
             {
-                lua_stack_check sc(L);
+                LUA_CHECK_STACK
                 meta::bind_type<W>::bind( kr );
             }
             lua_register_wrapper(L,meta::type<W>::info());
         }
         template <class T>
         inline void Enum( lua_State* L ) {
-            lua_stack_check sc(L);
+            LUA_CHECK_STACK
             impl::enum_registrator<T> kr(L);
             lua_create_metatable(L);
             lua_register_enum_metatable(L,meta::type<T>::info(),&impl::enum_registrator<T>::compare_func);
-            lua_get_create_table(L, meta::type<T>::info()->name);
+            lua_get_create_table(L, meta::type<T>::info()->name,3);
             meta::bind_type<T>::bind( kr );
             lua_pop(L, 1);
         }
@@ -88,6 +88,11 @@ namespace Sandbox {
         }
         template <class T>
         inline void SetValue( lua_State* L, const char* path, typename sb::type_traits<T>::parameter_type t ) {
+            stack<T>::push(L,t);
+            lua_set_value( L, path );
+        }
+        template <class T>
+        inline void SetValue( lua_State* L, const char* path, T t ) {
             stack<T>::push(L,t);
             lua_set_value( L, path );
         }

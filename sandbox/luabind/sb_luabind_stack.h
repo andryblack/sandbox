@@ -480,6 +480,7 @@ namespace Sandbox {
             }
         };
         
+#ifdef SB_DEBUG
         class lua_stack_check {
         public:
             explicit lua_stack_check(lua_State* L) {
@@ -494,6 +495,10 @@ namespace Sandbox {
             lua_State* m_L;
             int m_top;
         };
+#define LUA_CHECK_STACK lua_stack_check sc(L);
+#else
+#define LUA_CHECK_STACK 
+#endif
         
 #define LUABIND_DECLARE_RAW_STACK_TYPE(Type) \
 template <> \

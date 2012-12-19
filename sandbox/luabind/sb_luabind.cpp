@@ -36,7 +36,7 @@ namespace Sandbox {
             lua_pushcfunction(L, &lua_class_func);
             lua_setglobal(L, "class");
             
-            lua_stack_check sc(L);
+            LUA_CHECK_STACK
             lua_create_metatable(L);
             lua_register_metatable(L,meta::type<meta::object>::info());
         }

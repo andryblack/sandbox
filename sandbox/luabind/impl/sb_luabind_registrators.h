@@ -79,6 +79,21 @@ namespace Sandbox {
                 lua_setfield(m_L, -2, prop.name);               /// props 
                 lua_pop(m_L, 1);
             }
+            template <class Setter>
+            void operator()( const meta::property_holder_wo<T, Setter>& prop ) {
+                sb_assert(lua_istable(m_L, -1));
+                lua_pushliteral(m_L, "__props");
+                lua_rawget(m_L, -2 );                 /// props
+                sb_assert(lua_istable(m_L, -1));
+                lua_createtable(m_L, 0, 2);                     /// props tbl
+                Setter* set_ptr =
+                reinterpret_cast<Setter*>(lua_newuserdata(m_L, sizeof(Setter)));    /// props tbl ud
+                *set_ptr = prop.setter;
+                lua_pushcclosure(m_L, &method_helper<Setter>::call, 1);    /// props tbl func
+                lua_setfield(m_L, -2, "set");                  /// props tbl
+                lua_setfield(m_L, -2, prop.name);               /// props
+                lua_pop(m_L, 1);
+            }
             template <class Getter,class Setter>
             void operator()( const meta::property_holder_rw<T, Getter, Setter>& prop ) {
                 sb_assert(lua_istable(m_L, -1)); 

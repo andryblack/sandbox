@@ -17,7 +17,7 @@ namespace Sandbox {
     namespace luabind {
         
         struct data_holder;
-        void lua_get_create_table(lua_State* L,const char* name);
+        void lua_get_create_table(lua_State* L,const char* name,int prealloc);
         void lua_set_metatable( lua_State* L, const data_holder& holder );
         void lua_create_metatable(lua_State* L);
         void lua_register_metatable(lua_State* L,const meta::type_info* info);

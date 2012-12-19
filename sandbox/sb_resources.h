@@ -71,10 +71,10 @@ namespace Sandbox {
 		bool ImageHaveAlpha(const GHL::Image* img) const;
 		bool ConvertImage(GHL::Image* img,const TexturePtr& tex) const;
 #ifdef SB_RESOURCES_CACHE
-		sb::map<sb::string,sb::weak_ptr<Texture> > m_textures;
-		sb::map<sb::string,GHL::VertexShader*> m_vshaders;
-		sb::map<sb::string,GHL::FragmentShader*> m_fshaders;
-		sb::map<sb::string,sb::weak_ptr<Shader> > m_shaders;
+		sb::map<sb::string,sb::weak_ptr<Texture> >  m_textures;
+		sb::map<sb::string,GHL::VertexShader*>      m_vshaders;
+		sb::map<sb::string,GHL::FragmentShader*>    m_fshaders;
+		sb::map<sb::string,sb::weak_ptr<Shader> >   m_shaders;
 #endif
 	};
 }
