@@ -12,11 +12,9 @@
 
 #include <map>
 
-namespace Sandbox {
-    
-    namespace sb {
-        using std::map;
-    }
+
+namespace sb {
+    using std::map;
 }
 
 

@@ -8,9 +8,8 @@
 
 #include "sb_meta_utils.h"
 
-namespace Sandbox {
     
-    namespace sb {
+namespace sb {
 
     namespace implementation {
 
@@ -202,10 +201,10 @@ namespace Sandbox {
         enum { is_std_float         = implementation::is_std_float<unqualified_type>::result ||
                                       implementation::is_std_float<typename reference_traits<unqualified_type>::referred_type>::result };
         enum { is_std_arith        = is_std_integral || is_std_float };
-        enum { is_std_fundamental   = is_std_arith || IsSomeType<T,void>::Result };
+        enum { is_std_fundamental   = is_std_arith || is_some_type<T,void>::result };
 
-        typedef typename SelectType<is_std_arith || is_pointer || is_member_pointer, T,
-                typename implementation::add_parameter_type<T>::result>::Result parameter_type;
+        typedef typename select_type<is_std_arith || is_pointer || is_member_pointer, T,
+                typename implementation::add_parameter_type<T>::result>::result parameter_type;
     };
 
 
@@ -243,27 +242,27 @@ namespace Sandbox {
 	};
 		
 	//template <typename T> struct IsEnum;
-	template <typename T> struct IsEnum {
+	template <typename T> struct is_enum {
 		
 		enum {
 			convertible = is_convertible_basic_impl<T,IntConv>::value,
-			Result = !type_traits<T>::is_std_fundamental && convertible,
+			result = !type_traits<T>::is_std_fundamental && convertible,
 		};
 	};
-	template <typename T> struct IsEnum<T&> {
-		enum { Result = IsEnum<T>::Result, };	
+	template <typename T> struct is_enum<T&> {
+		enum { result = is_enum<T>::result, };
 	};
-	template <typename T> struct IsEnum<const T&> {
-		enum { Result = IsEnum<T>::Result, };	
+	template <typename T> struct is_enum<const T&> {
+		enum { result = is_enum<T>::result, };
 	};
-	template <> struct IsEnum<float> {
-		enum { Result = false, };
+	template <> struct is_enum<float> {
+		enum { result = false, };
 	};
-	template <> struct IsEnum<bool> {
-		enum { Result = false, };
+	template <> struct is_enum<bool> {
+		enum { result = false, };
 	};
 	
-    }
 }
+
 
 #endif // SB_TRAITS_H

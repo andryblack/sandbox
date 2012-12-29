@@ -18,7 +18,7 @@
 #include "sb_assert.h"
 #include <vector>
 
-namespace Sandbox
+namespace sb
 {
 	/**
 	 * array template

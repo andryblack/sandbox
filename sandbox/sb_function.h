@@ -4,7 +4,6 @@
 #ifdef SB_HAVE_TR1
 
 #include <tr1/functional>
-namespace Sandbox {
     namespace sb {
         using std::tr1::function;
         using std::tr1::bind;
@@ -13,7 +12,6 @@ namespace Sandbox {
             using std::tr1::placeholders::_2;
         }
     }
-}
 
 #else
 
@@ -26,7 +24,6 @@ namespace Sandbox {
 
 #include <memory>
 
-namespace Sandbox {
 
     namespace sb {
     
@@ -34,11 +31,11 @@ namespace Sandbox {
             template <typename Res> struct functor_impl_base {
                 virtual ~functor_impl_base() {}
                 typedef Res result_type;
-                typedef NullType arg1_type;
-                typedef NullType arg2_type;
-                typedef NullType arg3_type;
-                typedef NullType arg4_type;
-                typedef NullType arg5_type;
+                typedef null_type arg1_type;
+                typedef null_type arg2_type;
+                typedef null_type arg3_type;
+                typedef null_type arg4_type;
+                typedef null_type arg5_type;
             };
             
             template <typename Res,typename Arg1,typename Arg2,typename Arg3,typename Arg4,typename Arg5> struct functor_impl : public functor_impl_base<Res>{
@@ -51,29 +48,29 @@ namespace Sandbox {
                 virtual functor_impl* clone() const = 0;
             };
             
-            template <typename Res> struct functor_impl<Res,NullType,NullType,NullType,NullType,NullType> : public functor_impl_base<Res>{
+            template <typename Res> struct functor_impl<Res,null_type,null_type,null_type,null_type,null_type> : public functor_impl_base<Res>{
                 virtual Res operator()() = 0;
                 virtual functor_impl* clone() const = 0;
             };
-            template <typename Res,typename Arg1> struct functor_impl<Res,Arg1,NullType,NullType,NullType,NullType> : public functor_impl_base<Res>{
+            template <typename Res,typename Arg1> struct functor_impl<Res,Arg1,null_type,null_type,null_type,null_type> : public functor_impl_base<Res>{
                 typedef typename type_traits<Arg1>::parameter_type arg1_type;
                 virtual Res operator()(arg1_type) = 0;
                 virtual functor_impl* clone() const = 0;
             };
-            template <typename Res,typename Arg1,typename Arg2> struct functor_impl<Res,Arg1,Arg2,NullType,NullType,NullType> : public functor_impl_base<Res> {
+            template <typename Res,typename Arg1,typename Arg2> struct functor_impl<Res,Arg1,Arg2,null_type,null_type,null_type> : public functor_impl_base<Res> {
                 typedef typename type_traits<Arg1>::parameter_type arg1_type;
                 typedef typename type_traits<Arg2>::parameter_type arg2_type;
                 virtual Res operator()(arg1_type,arg2_type) = 0;
                 virtual functor_impl* clone() const = 0;
             };
-            template <typename Res,typename Arg1,typename Arg2,typename Arg3> struct functor_impl<Res,Arg1,Arg2,Arg3,NullType,NullType> : public functor_impl_base<Res> {
+            template <typename Res,typename Arg1,typename Arg2,typename Arg3> struct functor_impl<Res,Arg1,Arg2,Arg3,null_type,null_type> : public functor_impl_base<Res> {
                 typedef typename type_traits<Arg1>::parameter_type arg1_type;
                 typedef typename type_traits<Arg2>::parameter_type arg2_type;
                 typedef typename type_traits<Arg3>::parameter_type arg3_type;
                 virtual Res operator()(arg1_type,arg2_type,arg3_type) = 0;
                 virtual functor_impl* clone() const = 0;
             };
-            template <typename Res,typename Arg1,typename Arg2,typename Arg3,typename Arg4> struct functor_impl<Res,Arg1,Arg2,Arg3,Arg4,NullType> : public functor_impl_base<Res> {
+            template <typename Res,typename Arg1,typename Arg2,typename Arg3,typename Arg4> struct functor_impl<Res,Arg1,Arg2,Arg3,Arg4,null_type> : public functor_impl_base<Res> {
                 typedef typename type_traits<Arg1>::parameter_type arg1_type;
                 typedef typename type_traits<Arg2>::parameter_type arg2_type;
                 typedef typename type_traits<Arg3>::parameter_type arg3_type;
@@ -315,7 +312,7 @@ namespace Sandbox {
                 typedef typename original_function::arg3_type arg2_type;
                 typedef typename original_function::arg4_type arg3_type;
                 typedef typename original_function::arg5_type arg4_type;
-                typedef NullType arg5_type;
+                typedef null_type arg5_type;
                 
                 typedef typename proto_build<result_type,
                 typename proto_help<arg1_type>::result,
@@ -490,7 +487,6 @@ namespace Sandbox {
         
     }
 
-}
 
 #endif /* SB_HAVE_TR1 */
 

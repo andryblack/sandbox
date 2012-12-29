@@ -11,11 +11,8 @@
 
 #include <vector>
 
-namespace Sandbox {
-    
-    namespace sb {
-        using std::vector;
-    }
+namespace sb {
+    using std::vector;
 }
 
 

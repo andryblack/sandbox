@@ -13,15 +13,13 @@
 
 #ifdef SB_HAVE_TR1
 #include <tr1/memory>
-namespace Sandbox {
-    namespace sb {
-        
-        using std::tr1::shared_ptr;
-        using std::tr1::weak_ptr;
-        using std::tr1::enable_shared_from_this;
-        using std::tr1::static_pointer_cast;
-        
-    }
+namespace sb {
+    
+    using std::tr1::shared_ptr;
+    using std::tr1::weak_ptr;
+    using std::tr1::enable_shared_from_this;
+    using std::tr1::static_pointer_cast;
+    
 }
 
 #else 
@@ -29,7 +27,6 @@ namespace Sandbox {
 #include <cstring>
 #include "sb_assert.h"
 
-namespace Sandbox {
     namespace sb {
         template <class T> class weak_ptr;
         template <class T> class shared_ptr;
@@ -287,7 +284,6 @@ namespace Sandbox {
             return shared_ptr<T>(ptr,implement::static_cast_tag());
         }
     }
-}
 #endif /*SB_HAVE_TR1*/
 
 

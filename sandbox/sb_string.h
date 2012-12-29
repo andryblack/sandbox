@@ -11,10 +11,8 @@
 
 #include <string>
 
-namespace Sandbox {
-    namespace sb {
-        using std::string;
-    }
+namespace sb {
+    using std::string;
 }
 
 

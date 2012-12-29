@@ -10,22 +10,22 @@
 #ifndef SB_META_UTILS_H
 #define SB_META_UTILS_H
 
-namespace Sandbox {
+namespace sb {
 	
 	
 	
 	
-	template <bool v,class A,class B> struct SelectType {
-		typedef A Result;
+	template <bool v,class A,class B> struct select_type {
+		typedef A result;
 	};
-	template <class A,class B> struct SelectType<false,A,B> {
-		typedef B Result;
+	template <class A,class B> struct select_type<false,A,B> {
+		typedef B result;
 	};
 	
-	template <class A,class B> struct IsSomeType { enum { Result = 0, }; };
-	template <class T> struct IsSomeType<T,T> { enum { Result = 1, }; };
+	template <class A,class B> struct is_some_type { enum { result = 0, }; };
+	template <class T> struct is_some_type<T,T> { enum { result = 1, }; };
 	
-	struct NullType{};
+	struct null_type{};
 	
 }
 #endif /*SB_META_UTILS_H*/
