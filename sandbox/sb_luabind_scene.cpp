@@ -20,6 +20,7 @@
 #include "sb_container_transform.h"
 #include "sb_container_color.h"
 #include "sb_container_visible.h"
+#include "sb_container_transform3d.h"
 #include "sb_scene.h"
 #include "sb_touch_info.h"
 
@@ -69,18 +70,18 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::Container)
 SB_META_CONSTRUCTOR(())
 SB_META_METHOD(Reserve)
 SB_META_METHOD(AddObject)
+SB_META_METHOD(InsertBefore)
 SB_META_METHOD(RemoveObject)
 SB_META_METHOD(Clear)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::BlendMode,void);
-SB_META_BEGIN_ENUM_BIND(Sandbox::BlendMode,namespace Sandbox)
-SB_META_ENUM_ITEM(BLEND_MODE_COPY)
-SB_META_ENUM_ITEM(BLEND_MODE_ALPHABLEND)
-SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE)
-SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE_ALPHA)
-SB_META_ENUM_ITEM(BLEND_MODE_SCREEN)
-SB_META_END_ENUM_BIND()
+SB_META_ENUM_BIND(Sandbox::BlendMode,namespace Sandbox,
+                        SB_META_ENUM_ITEM(BLEND_MODE_COPY)
+                        SB_META_ENUM_ITEM(BLEND_MODE_ALPHABLEND)
+                        SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE)
+                        SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE_ALPHA)
+                        SB_META_ENUM_ITEM(BLEND_MODE_SCREEN))
 
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerBlend)
@@ -99,11 +100,10 @@ SB_META_PROPERTY_RW(Active,GetActive,SetActive)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::TouchInfo::Type,void);
-SB_META_BEGIN_ENUM_BIND(Sandbox::TouchInfo::Type,Sandbox::TouchInfo)
-SB_META_ENUM_MEMBER_ITEM(BEGIN,Sandbox::TouchInfo::BEGIN)
-SB_META_ENUM_MEMBER_ITEM(MOVE,Sandbox::TouchInfo::MOVE)
-SB_META_ENUM_MEMBER_ITEM(END,Sandbox::TouchInfo::END)
-SB_META_END_ENUM_BIND()
+SB_META_ENUM_BIND(Sandbox::TouchInfo::Type,Sandbox::TouchInfo,
+                  SB_META_ENUM_MEMBER_ITEM(BEGIN,Sandbox::TouchInfo::BEGIN)
+                  SB_META_ENUM_MEMBER_ITEM(MOVE,Sandbox::TouchInfo::MOVE)
+                  SB_META_ENUM_MEMBER_ITEM(END,Sandbox::TouchInfo::END) )
 
 SB_META_DECLARE_KLASS(Sandbox::TouchInfo, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::TouchInfo)
@@ -125,6 +125,13 @@ SB_META_PROPERTY_RW(Scale,GetScale,SetScale)
 SB_META_PROPERTY_RW(ScaleX,GetScaleX,SetScaleX)
 SB_META_PROPERTY_RW(ScaleY,GetScaleY,SetScaleY)
 SB_META_PROPERTY_RW(Angle,GetAngle,SetAngle)
+SB_META_END_KLASS_BIND()
+
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerTransform3d)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW_DEF(ProjectionMatrix)
+SB_META_PROPERTY_RW_DEF(ViewMatrix)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerColor)
@@ -186,6 +193,7 @@ namespace Sandbox {
         luabind::Class<ContainerTransform>(lua);
         luabind::Class<ContainerColor>(lua);
         luabind::Class<ContainerVisible>(lua);
+        luabind::Class<ContainerTransform3d>(lua);
         luabind::ExternClass<Scene>(lua);
     }
 

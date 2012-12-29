@@ -28,11 +28,11 @@ namespace Sandbox {
         };
         
         template <class Proto>
-        inline constructor_holder<Proto> constructor() {
+        static inline constructor_holder<Proto> constructor() {
             return constructor_holder<Proto>();
         }
         template <class Func>
-        inline constructor_ptr_holder<Func> constructor(Func func) {
+        static inline constructor_ptr_holder<Func> constructor(Func func) {
             return constructor_ptr_holder<Func>(func);
         }
         
@@ -45,7 +45,7 @@ namespace Sandbox {
             property_holder( const char* name, prop_ptr prop ) : name(name),prop(prop){}
         };
         template <class T,class U> 
-        inline property_holder<T, U> property( const char* name, U T::* prop ) {
+        static inline property_holder<T, U> property( const char* name, U T::* prop ) {
             return property_holder<T, U>(name,prop);
         }
         
@@ -55,11 +55,11 @@ namespace Sandbox {
             property_holder_ro( const char* name, Getter getter ) : name(name),getter(getter){}
         };
         template <class T,class U> 
-        inline property_holder_ro<T,U (T::*)() const> property_ro( const char* name,U (T::*getter)() const) {
+        static inline property_holder_ro<T,U (T::*)() const> property_ro( const char* name,U (T::*getter)() const) {
             return property_holder_ro<T,U (T::*)() const>(name,getter);
         }
         template <class T,class U> 
-        inline property_holder_ro<T,const U& (T::*)() const> property_ro( const char* name,const U& (T::*getter)() const) {
+        static inline property_holder_ro<T,const U& (T::*)() const> property_ro( const char* name,const U& (T::*getter)() const) {
             return property_holder_ro<T,const U& (T::*)() const>(name,getter);
         }
         template <class T,class Setter> struct property_holder_wo {
@@ -68,12 +68,12 @@ namespace Sandbox {
             property_holder_wo( const char* name, Setter setter ) : name(name),setter(setter){}
         };
         template <class T,class U>
-        inline property_holder_wo<T,void (T::*)(U)> property_wo( const char* name,void (T::*setter)(U)) {
+        static inline property_holder_wo<T,void (T::*)(U)> property_wo( const char* name,void (T::*setter)(U)) {
             return property_holder_wo<T,void(T::*)(U)>(name,setter);
         }
         template <class T,class U>
-        inline property_holder_wo<T,void(T::*)(const U&)> property_wo( const char* name,void(T::*setter)(const U&)) {
-            return property_holder_wo<T,void(T::*)(const U&) const>(name,setter);
+        static inline property_holder_wo<T,void(T::*)(const U&)> property_wo( const char* name,void(T::*setter)(const U&)) {
+            return property_holder_wo<T,void(T::*)(const U&)>(name,setter);
         }
 
         
@@ -84,19 +84,19 @@ namespace Sandbox {
             property_holder_rw( const char* name, Getter getter, Setter setter ) : name(name),getter(getter),setter(setter){}
         };
         template <class T,class U> 
-        inline property_holder_rw<T,U (T::*)() const,void(T::*)(U)> property_rw( const char* name,
+        static inline property_holder_rw<T,U (T::*)() const,void(T::*)(U)> property_rw( const char* name,
                                                                                 U (T::*getter)() const,
                                                                                 void (T::*setter)(U)) {
             return property_holder_rw<T,U (T::*)() const,void(T::*)(U)>(name,getter,setter);
         }
         template <class T,class U> 
-        inline property_holder_rw<T,const U& (T::*)() const,void(T::*)(const U&)> property_rw( const char* name,
+        static inline property_holder_rw<T,const U& (T::*)() const,void(T::*)(const U&)> property_rw( const char* name,
                                                                                               const U& (T::*getter)() const,
                                                                                               void(T::*setter)(const U&)) {
             return property_holder_rw<T,const U& (T::*)() const,void(T::*)(const U&)>(name,getter,setter);
         }
         template <class T,class U> 
-        inline property_holder_rw<T, U (T::*)() const,void(T::*)(const U&)> property_rw( const char* name,
+        static inline property_holder_rw<T, U (T::*)() const,void(T::*)(const U&)> property_rw( const char* name,
                                                                                              U (T::*getter)() const,
                                                                                               void(T::*setter)(const U&)) {
             return property_holder_rw<T,U (T::*)() const,void(T::*)(const U&)>(name,getter,setter);
@@ -108,7 +108,7 @@ namespace Sandbox {
             method_holder( const char* name,Func func ) : name(name),func(func){}
         };
         template <typename Func> 
-        inline method_holder<Func> method( const char* name, Func func ) {
+        static inline method_holder<Func> method( const char* name, Func func ) {
             return method_holder<Func>(name,func);
         }
         
@@ -123,7 +123,7 @@ namespace Sandbox {
             operator_holder( operator_name name,Func func ) : name(name),func(func){}
         };
         template <typename Func> 
-        inline operator_holder<Func> operator_( operator_name name, Func func ) {
+        static inline operator_holder<Func> operator_( operator_name name, Func func ) {
             return operator_holder<Func>(name,func);
         }
         
@@ -133,7 +133,7 @@ namespace Sandbox {
             static_method_holder( const char* name,Func func ) : name(name),func(func){}
         };
         template <typename Func> 
-        inline static_method_holder<Func> static_method( const char* name, Func func ) {
+        static inline static_method_holder<Func> static_method( const char* name, Func func ) {
             return static_method_holder<Func>(name,func);
         }
         
@@ -143,7 +143,7 @@ namespace Sandbox {
             static_value_holder( const char* name,const Type& value ) : name(name),value(value){}
         };
         template <typename Type> 
-        inline static_value_holder<Type> static_value( const char* name, const Type& value  ) {
+        static inline static_value_holder<Type> static_value( const char* name, const Type& value  ) {
             return static_value_holder<Type>(name,value);
         }
         
@@ -172,24 +172,17 @@ namespace Sandbox {
 #define SB_META_CONSTRUCTOR( args ) bind( constructor<void args>() );
         
 
-#define SB_META_BEGIN_ENUM_BIND(Klass,Namespace)  \
+#define SB_META_ENUM_BIND(Klass,Namespace,Items)  \
     namespace Sandbox { namespace meta { \
         template <> template <class U> void bind_type<Klass>::bind(U& bind) { \
-            typedef Klass ThisType;(void)bind; using Namespace; \
-            static const struct { const char* name; Klass val; } items[] = { 
-#define SB_META_ENUM_ITEM( name ) { #name, name },
-#define SB_META_ENUM_MEMBER_ITEM( name, val ) { #name, val },
-#define SB_META_END_ENUM_BIND() \
-            }; \
-            for (size_t i=0;i<sizeof(items)/sizeof(items[0]);i++) { \
-                bind( static_value( items[i].name, items[i].val )); \
-            } \
-        } \
+            using Namespace; \
+            Items \
+        }\
     }}
-
-        
-    }
+#define SB_META_ENUM_ITEM( name ) bind( static_value( #name, name ));
+#define SB_META_ENUM_MEMBER_ITEM( name,val ) bind( static_value( #name, val ));
     
+    }
 }
 
 #endif

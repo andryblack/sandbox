@@ -226,17 +226,21 @@ namespace Sandbox {
 					lua_State* th = lua_tothread(L, -1);
 					lua_pushnumber(th, dt);
 					int res = lua_resume(th,0, 1);
-					lua_pop(L,1);
 					if (res==LUA_YIELD) {
-						return false;
+                        lua_pop(L,1);
+                        return false;
 					}
 					if (res) {
-                        lua_pushcclosure(th, &luabind::lua_traceback, 0);
-                        lua_pushvalue(th, -2);
-                        lua_pcall(th, 1, 1, 0);
-						LogError(LuaThreadModule) << "Failed script resume  " ;
-                        LogError(LuaThreadModule) << lua_tostring(th, -1) ;
-                        lua_pop(th, 2);
+                        LogError(LuaThreadModule) << "Failed script resume  " << res;
+                        if (res==LUA_ERRRUN) {
+                            LogError(LuaThreadModule) << "error:" << lua_tostring(th, -1);
+                            lua_pushcclosure(L, &luabind::lua_traceback, 0);
+                            lua_pushvalue(L, -2);
+                            lua_pcall(L, 1, 1, 0);
+                            LogError(LuaThreadModule) << lua_tostring(L, -1) ;
+                            lua_pop(L, 2);
+                        }
+                         
 					}
 				} else {
 					LogError(LuaThreadModule) << "update on released script";
@@ -267,16 +271,19 @@ namespace Sandbox {
 			sb_assert(lua_isthread(main_state,-1));
 			lua_pushvalue(main_state, -2);				/// (3) func,th,func
 			lua_xmove(main_state, thL, 1);				/// (2) th,func
-			int res = lua_resume(thL,0, 0);
-			if (res==LUA_YIELD) {
-				e->SetThread(main_state);				/// (1) func
-			} else {
-				if (res!=0) {
-					LogError(LuaThreadModule) <<"Failed thread run  ";
-                    LogError(LuaThreadModule) << lua_tostring(thL, -1);
-				}
-				lua_pop(main_state,1);					/// (1) func
-			}
+            e->SetThread(main_state);				/// (1) func
+
+//            int res = lua_resume(thL,0, 0);
+//
+//          if (res==LUA_YIELD) {
+//            e->SetThread(main_state);				/// (1) func
+//			} else {
+//				if (res!=0) {
+//					LogError(LuaThreadModule) <<"Failed thread run  ";
+//                    LogError(LuaThreadModule) << lua_tostring(thL, -1);
+//				}
+//				lua_pop(main_state,1);					/// (1) func
+//			}
 			lua_pop(main_state,1);
 			int new_top = lua_gettop(L);
 			(void)stck;

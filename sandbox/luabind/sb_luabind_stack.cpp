@@ -35,12 +35,16 @@ namespace Sandbox {
                 lua_pop(L, 2);
                 return 1;
             }
+            int nargs = 2;
             if (lua_isstring(L,1))
                 lua_pushvalue(L, 1);  /* pass error message */
-            else 
+            else {
+                lua_pushvalue(L, 1);
                 lua_pushstring(L, "error");
-            lua_pushinteger(L, 2);  /* skip this function and traceback */
-            lua_call(L, 2, 1);  /* call debug.traceback */
+                nargs = 3;
+            }
+            lua_pushinteger(L, 1);  /* skip this function and traceback */
+            lua_call(L, nargs, 1);  /* call debug.traceback */
             return 1;
         }
         
@@ -74,6 +78,7 @@ namespace Sandbox {
             }
             lua_pop(L, 1); // func
             str+="\n";
+            sb_assert(top==lua_gettop(L));
             lua_pushstring(L, str.c_str());
             lua_error(L);
         }
@@ -88,11 +93,17 @@ namespace Sandbox {
         
                 
         void lua_call_method(lua_State* L, int args, int ress, const char* name) {
-            int res = lua_pcall(L, args, ress, 0);
+            
+            lua_pushcclosure(L, &luabind::lua_traceback, 0);
+            lua_insert(L, -2-args);
+            
+            int res = lua_pcall(L, args, ress, -2-args);
+            
             if (res) {
                 LogError(LuabindModule) << " Failed script call method '" << name << "'" ;
                 LogError(LuabindModule) << lua_tostring(L, -1) ;
             }
+            lua_remove(L, -1-ress);
         }
         
         

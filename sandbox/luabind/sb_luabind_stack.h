@@ -495,17 +495,17 @@ namespace Sandbox {
             lua_State* m_L;
             int m_top;
         };
-#define LUA_CHECK_STACK lua_stack_check sc(L);
+#define LUA_CHECK_STACK ::Sandbox::luabind::lua_stack_check sc(L);
 #else
 #define LUA_CHECK_STACK 
 #endif
         
 #define LUABIND_DECLARE_RAW_STACK_TYPE(Type) \
-template <> \
-struct stack<Type> { \
-static void push( lua_State* L, Type val ); \
-static Type get( lua_State* L, int idx ); \
-}; 
+    template <> \
+    struct stack<Type> { \
+        static void push( lua_State* L, Type val ); \
+        static Type get( lua_State* L, int idx ); \
+    }; 
         
         LUABIND_DECLARE_RAW_STACK_TYPE(bool)
         LUABIND_DECLARE_RAW_STACK_TYPE(char)

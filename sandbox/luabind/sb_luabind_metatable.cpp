@@ -413,6 +413,10 @@ namespace Sandbox {
             int args_cnt = lua_gettop(L);
             
             lua_newtable(L);
+      
+            lua_pushliteral(L, "__metatable");
+            lua_rawget(L, 1);
+            lua_setmetatable(L, -2);
             
             lua_pushliteral(L, "__init");
             lua_rawget(L, 1);
@@ -423,14 +427,10 @@ namespace Sandbox {
                 }
                 lua_call_method(L, args_cnt, 0, "__init");
             } else {
+                /// @todo : call parent instead
                 lua_pop(L, 1);
             }
             
-            lua_pushliteral(L, "__metatable");
-            lua_rawget(L, 1);
-            
-            
-            lua_setmetatable(L, -2);
             return 1;
         }
         
@@ -500,7 +500,7 @@ namespace Sandbox {
                 
 #if 0
                 data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
-                if (strcmp(holder->info->name,"Sandbox::WidgetWrapper")==0) {
+                if (strcmp(holder->info->name,"Sandbox::Sprite")==0) {
                     int a = 0;
                 }
 #endif

@@ -195,6 +195,12 @@ namespace Sandbox {
                 lua_pushcclosure(this->m_L, &raw_klass_registrator<T>::constructor, 1);   /// mntbl name ctr
                 lua_rawset(this->m_L, -3);                    /// mntbl 
             }
+            void operator() ( const meta::constructor_ptr_holder<int(*)(lua_State*)>& hdr) {
+                sb_assert(lua_istable(this->m_L, -1));
+                lua_pushliteral(this->m_L, "__constructor");         /// mntbl name
+                lua_pushcclosure(this->m_L, hdr.func, 0);     /// mntbl name ctr
+                lua_rawset(this->m_L, -3);                    /// mntbl
+            }
         private:
             typedef void (*constructor_func)(lua_State*,void*);
             static int constructor( lua_State* L ) {
