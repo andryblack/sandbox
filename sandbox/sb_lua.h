@@ -29,8 +29,7 @@ namespace Sandbox {
     
     class Resources;
     
-	class LuaVM;
-	
+    class MemoryMgr;
 		
 	
     class LuaVM : public NotCopyable {
@@ -39,7 +38,7 @@ namespace Sandbox {
         ~LuaVM();
         void SetBasePath(const char* path);
         bool DoFile(const char* fn);
-        GHL::UInt32 GetMemoryUsed() const { return m_mem_use;}
+        sb::string GetMemoryUsed() const;
         
         lua_State* GetVM() { return m_L; }
         
@@ -55,6 +54,7 @@ namespace Sandbox {
 		void free(GHL::Byte* data,size_t size);
 		void resize(GHL::Byte* data,size_t osize,size_t nsize);
         static void* lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
+        MemoryMgr*  m_mem_mgr;
     };
 }
 

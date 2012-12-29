@@ -25,6 +25,7 @@ extern "C" {
 #include "sb_event.h"
 #include "sb_log.h"
 #include "sb_resources.h"
+#include "sb_memory_mgr.h"
 
 namespace Sandbox {
 	
@@ -96,6 +97,7 @@ namespace Sandbox {
         m_L(0),
         m_mem_use(0)
     {
+        m_mem_mgr = new MemoryMgr();
         m_L = lua_newstate(&LuaVM::lua_alloc_func,this);
         
         static const luaL_Reg loadedlibs[] = {
@@ -148,6 +150,10 @@ namespace Sandbox {
             lua_close(m_L);
             m_L = 0;
         }
+        if (m_mem_use) {
+            LogWarning() << "Lua unfree " << format_memory(m_mem_use);
+        }
+        delete m_mem_mgr;
     }
     
     LuaVM* LuaVM::GetInstance( lua_State* L ) {
@@ -268,14 +274,19 @@ namespace Sandbox {
 		return ptr;
 	}
     
+    sb::string LuaVM::GetMemoryUsed() const {
+        sb::string res = sb::string("lua:") + format_memory(m_mem_use) +
+        "/"+format_memory(m_mem_mgr->allocated());
+        return res;
+    }
     GHL::Byte* LuaVM::alloc(size_t size) {
 		m_mem_use+=GHL::UInt32(size);
-		return new GHL::Byte[size];
+		return m_mem_mgr->alloc(size);
 	}
 	void LuaVM::free(GHL::Byte* data,size_t size) {
 		sb_assert(m_mem_use>=size);
 		m_mem_use-=GHL::UInt32(size);
-		delete [] (data);
+		m_mem_mgr->free(data);
 	}
 	void LuaVM::resize(GHL::Byte*,size_t osize,size_t nsize) {
 		sb_assert(m_mem_use>=osize);

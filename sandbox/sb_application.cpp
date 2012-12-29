@@ -43,16 +43,7 @@ namespace Sandbox {
 	void register_scene( lua_State* lua );
 	void register_controller( lua_State* lua );
 	
-    static void format_memory( char* buf, size_t size, GHL::UInt32 mem,const char* caption ) {
-        if ( mem > 1024*1024 ) {
-            ::snprintf(buf, size, "%s:%0.2fM", caption,float(mem)/(1024*1024));
-        } else if ( mem > 1024 ) {
-            ::snprintf(buf, size, "%s:%0.2fK", caption,float(mem)/(1024));
-        }
-        else {
-            ::snprintf(buf, size, "%s:%0.2fb", caption,float(mem));
-        }
-    }
+    
     
 	Application::Application() {
 		m_system = 0;
@@ -227,8 +218,7 @@ namespace Sandbox {
 			float(m_render->GetHeight())
 			,0.0f,-1.0f,1.0f).matrix);
 		m_render->DebugDrawText( 10, 10 , buf );
-        format_memory(buf,128,m_lua->GetMemoryUsed(),"lua");
-        m_render->DebugDrawText( 10, 21 , buf );
+        m_render->DebugDrawText( 10, 21 , m_lua->GetMemoryUsed().c_str() );
         ::snprintf(buf,128,"batches:%0.2f",m_batches);
         m_render->DebugDrawText( 10, 32 , buf );
 	}

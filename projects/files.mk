@@ -51,7 +51,8 @@ SANDBOX_SOURCES=\
 	sb_threads_mgr.cpp\
 	sb_touch_info.cpp\
 	sb_utf.cpp\
-	sb_widget.cpp
+	sb_widget.cpp\
+	sb_memory_mgr.cpp
 
 LUA_SOURCES=\
 	lapi.c\
