@@ -156,6 +156,9 @@ namespace Sandbox {
 	bool GHL_CALL Application::Load() {
 		ConfigureDevice( m_system );
 		m_graphics = new Graphics();
+        sb_assert(m_resources);
+        sb_assert(m_render);
+        sb_assert(m_image_decoder);
 		m_resources->Init(m_render, m_image_decoder);
         luabind::SetValue(m_lua->GetVM(), "application.resources", m_resources);
 		m_lua->DoFile("load.lua");

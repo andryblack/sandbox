@@ -23,11 +23,9 @@
 #define snprintf _snprintf
 #endif
 
-SB_META_DECLARE_KLASS(Sandbox::Thread, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Thread)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::ThreadsMgr, Thread)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ThreadsMgr)
 SB_META_CONSTRUCTOR(())
 SB_META_METHOD(AddThread)
@@ -35,7 +33,6 @@ SB_META_METHOD(RemoveThread)
 SB_META_METHOD(Clear)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::PermanentThreadsMgr, ThreadsMgr)
 SB_META_BEGIN_KLASS_BIND(Sandbox::PermanentThreadsMgr)
 SB_META_CONSTRUCTOR(())
 SB_META_END_KLASS_BIND()
@@ -221,16 +218,23 @@ namespace Sandbox {
 					if (!lua_isthread(L,-1)) {
 						LogError(LuaThreadModule) << "not thread :" << luaL_typename(L,-1);
 						sb_assert(lua_isthread(L,-1));
-                        return false;
-					} 
+                        return true;
+					}
 					lua_State* th = lua_tothread(L, -1);
+                    int status = lua_status(th);
+                    if (status!=LUA_YIELD) {
+                        LogDebug(LuaThreadModule) << "thread " << th << " status: " << status;
+                    }
 					lua_pushnumber(th, dt);
 					int res = lua_resume(th,0, 1);
 					if (res==LUA_YIELD) {
                         lua_pop(L,1);
+                        if (status!=LUA_YIELD) {
+                            LogDebug(LuaThreadModule) << "thread " << th << " suspended: " << status;
+                        }
                         return false;
 					}
-					if (res) {
+					if (res!=LUA_OK) {
                         LogError(LuaThreadModule) << "Failed script resume  " << res;
                         if (res==LUA_ERRRUN) {
                             LogError(LuaThreadModule) << "error:" << lua_tostring(th, -1);
@@ -240,12 +244,13 @@ namespace Sandbox {
                             LogError(LuaThreadModule) << lua_tostring(L, -1) ;
                             lua_pop(L, 2);
                         }
-                         
-					}
+                   } 
 				} else {
 					LogError(LuaThreadModule) << "update on released script";
-				}
-			}
+          		}
+			} else {
+                LogError(LuaThreadModule) << "update destroyed thread";
+            }
 			return true;
 		}
 		static int constructor_func(lua_State* L) {

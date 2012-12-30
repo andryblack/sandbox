@@ -4,6 +4,10 @@
 
 #include "sb_log.h"
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
 namespace Sandbox {
     
     static const char* level_descr[] = {

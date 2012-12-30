@@ -104,6 +104,12 @@ namespace Sandbox {
         m_render->Clear(clr.r, clr.g, clr.b, clr.a);
     }
     
+    void Graphics::ClearDepth( float val ) {
+        sb_assert( (m_render!=0) && "scene not started" );
+        Flush();
+        m_render->ClearDepth(val);
+    }
+    
     /// fill rect by pattern
     void Graphics::FillRect( const TexturePtr& texture, const Rectf& rect) {
         sb_assert( (m_render!=0) && "scene not started" );

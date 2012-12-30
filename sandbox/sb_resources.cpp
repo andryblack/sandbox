@@ -120,6 +120,10 @@ namespace Sandbox {
             LogError(MODULE) << "image decoder not initialized";
             return 0;
         }
+        if (!m_vfs) {
+            LogError(MODULE) << "VFS not initialized";
+            return 0;
+        }
 		std::string fn = m_base_path + filename;
 		GHL::DataStream* ds = m_vfs->OpenFile(fn.c_str());
 		if (!ds) {
@@ -205,6 +209,7 @@ namespace Sandbox {
 				tw << "x" << th;
             img->Convert(ifmt);
             texture->SetData(0,0,img);
+            texture->DiscardInternal();
         } else {
 			LogInfo(MODULE) << "Loaded image : " << filename << " " << img->GetWidth() << "x" << img->GetHeight() ;
         }
@@ -241,9 +246,9 @@ namespace Sandbox {
         if (!texture) {
             return ImagePtr();
         }
-		float imgW = texture->GetOriginalWidth();
-		float imgH = texture->GetOriginalHeight();
-		return ImagePtr(new Image(texture,0,0,imgW,imgH));
+		GHL::UInt32 imgW = texture->GetOriginalWidth();
+		GHL::UInt32 imgH = texture->GetOriginalHeight();
+		return ImagePtr(new Image(texture,0,0,float(imgW),float(imgH)));
 	}
 	
 	ShaderPtr Resources::GetShader(const char* vfn,const char* ffn) {

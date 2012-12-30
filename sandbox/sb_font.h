@@ -27,7 +27,7 @@ namespace Sandbox {
 	
 	class Graphics;
 	
-	class Font : public meta::object, public NotCopyable {
+	class Font : public meta::object {
         SB_META_OBJECT
 	public:
 		Font();

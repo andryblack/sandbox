@@ -45,6 +45,8 @@ namespace Sandbox {
         /// clear scene
         void Clear( const Color& clr );
 
+        void ClearDepth( float val );
+        
 		/// global transform
 		const Transform2d& GetTransform() const { return m_transform;}
 		void SetTransform(const Transform2d& tr) { m_transform = tr;}

@@ -10,6 +10,7 @@
 #define YinYang_sb_meta_h
 
 #include <cstring>
+#include <new>
 #include "../sb_shared_ptr.h"
 
 namespace Sandbox {
@@ -46,9 +47,7 @@ namespace Sandbox {
         };
 #define SB_META_OBJECT \
     public: \
-        virtual const Sandbox::meta::type_info* get_type_info() const { \
-            return get_static_type_info(); \
-        } \
+        virtual const Sandbox::meta::type_info* get_type_info() const;\
         static const Sandbox::meta::type_info* get_static_type_info();\
     private: \
        
@@ -101,9 +100,11 @@ namespace Sandbox {
             static void* raw( void* ptr ) {
                 return static_cast<Parent*>(reinterpret_cast<Klass*>(ptr));
             }
-            static type_info_parent::shared_destruct shared( void* ptr1, void* ptr2 ) {
-				sb::shared_ptr<Klass> tmp = *reinterpret_cast<sb::shared_ptr<Klass>*>(ptr1);
-				::new( ptr2 ) sb::shared_ptr<Parent>( tmp );
+            static type_info_parent::shared_destruct shared( void* storage_ptr1, void* storage_ptr2 ) {
+                typedef sb::shared_ptr<Klass> klass_ptr;
+				klass_ptr temp_ptr = *reinterpret_cast<klass_ptr*>(storage_ptr1);
+				typedef sb::shared_ptr<Parent> parent_ptr;
+                new(storage_ptr2) parent_ptr(temp_ptr);
                 return &destructor_helper<Parent>::shared;
             }
         };
@@ -144,8 +145,11 @@ namespace Sandbox {
         SB_META_DECLARE_KLASS(Klass,Parent) \
         const Sandbox::meta::type_info* Klass::get_static_type_info() {\
             return Sandbox::meta::type<Klass>::info(); \
-        }
-        
+        }\
+        const Sandbox::meta::type_info* Klass::get_type_info() const { \
+            return get_static_type_info(); \
+        } 
+
 #define SB_META_DECLARE_POD_TYPE(Type) SB_META_DECLARE_KLASS(Type,void)
 
         

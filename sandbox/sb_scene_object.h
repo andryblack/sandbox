@@ -9,8 +9,6 @@
 #ifndef SB_SCENE_OBJECT_H
 #define SB_SCENE_OBJECT_H
 
-#include "sb_shared_ptr.h"
-#include "sb_notcopyable.h"
 #include "meta/sb_meta.h"
 
 namespace Sandbox {
@@ -19,7 +17,7 @@ namespace Sandbox {
 	class Container;
     class TouchInfo;
 
-	class SceneObject : public meta::object, public NotCopyable {
+	class SceneObject : public meta::object {
 	    SB_META_OBJECT
     public:
     	SceneObject();

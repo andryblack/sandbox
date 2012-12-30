@@ -156,6 +156,7 @@ namespace Sandbox {
         virtual void OnTouchLeave() { call("OnTouchLeave"); }
         virtual bool HandleTouchInside(const TouchInfo& touch) { return call<bool,const TouchInfo&>("HandleTouchInside",touch); }
     public:
+        virtual ~WidgetWrapper() {}
         void default_OnTouchEnter() { Widget::OnTouchEnter(); }
         void default_OnTouchLeave() { Widget::OnTouchLeave(); }
         bool default_HandleTouchInside(const TouchInfo& touch) { return Widget::HandleTouch(touch); }

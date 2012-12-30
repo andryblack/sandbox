@@ -16,6 +16,7 @@
 namespace Sandbox {
 	
 	class ThreadsMgr : public Thread {
+        SB_META_OBJECT
 	public:
 		ThreadsMgr();
 		~ThreadsMgr();
@@ -32,6 +33,7 @@ namespace Sandbox {
 	};
     
     class PermanentThreadsMgr : public ThreadsMgr {
+        SB_META_OBJECT
     public:
         bool Update(float dt);
     };

@@ -46,6 +46,7 @@ namespace Sandbox {
         public:
             wrapper() : m_mark_destroy(false) {
             }
+            virtual ~wrapper() {}
             void MarkDestroy(){
                 sb_assert(!m_mark_destroy);
                 m_mark_destroy = true;
@@ -100,6 +101,9 @@ namespace Sandbox {
         SB_META_DECLARE_BINDING_OBJECT_WRAPPER_X(Klass,Parent,ANONYMOUS_VARIABLE(private_))\
         const Sandbox::meta::type_info* Klass::get_static_type_info() {\
             return Sandbox::meta::type<Klass>::info(); \
+        }\
+        const Sandbox::meta::type_info* Klass::get_type_info() const { \
+            return get_static_type_info(); \
         }
     }
 }

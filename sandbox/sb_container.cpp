@@ -34,6 +34,16 @@ namespace Sandbox {
 		o->SetParent(this);
 		m_objects.push_back(o);
 	}
+    void Container::InsertBefore(const SceneObjectPtr& ob,const SceneObjectPtr& o) {
+        sb_assert(o && "null object");
+		if (Container* c=o->GetParent()) {
+			c->RemoveObject(o);
+		}
+		o->SetParent(this);
+        sb::vector<SceneObjectPtr>::iterator it = std::find(m_objects.begin(),m_objects.end(),ob);
+        m_objects.insert(it, o);
+    }
+    
 	void Container::RemoveObject(const SceneObjectPtr& obj) {
 		sb_assert( obj && "null object");
 		std::vector<SceneObjectPtr>::iterator i = std::find(m_objects.begin(),m_objects.end(),obj);

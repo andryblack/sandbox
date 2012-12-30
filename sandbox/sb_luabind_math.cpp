@@ -52,7 +52,7 @@ namespace Sandbox {
             while (lua_next(L, 2) != 0) {
                 /* uses 'key' (at index -2) and 'value' (at index -1) */
                 if (indx<16) {
-                    m.matrix[indx] = lua_tonumber(L, -1);
+                    m.matrix[indx] = float(lua_tonumber(L, -1));
                     //m.matrix[(indx%4)*4+(indx/4)] = lua_tonumber(L, -1);
                 }
                 ++indx;
