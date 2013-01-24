@@ -10,6 +10,7 @@
 #define YinYang_sb_utf8_h
 
 #include <ghl_types.h>
+#include <sb_string.h>
 
 namespace Sandbox {
     
@@ -17,7 +18,11 @@ namespace Sandbox {
     typedef GHL::UInt16 UTF16Char;
     typedef GHL::UInt32 UTF32Char;
     const char* get_char(const char* s,UTF32Char& ch);
-    
+    void append_char( sb::string& s, UTF32Char ch );
+    sb::string strip( const sb::string& src, const sb::string& chars );
+    sb::string toupper( const sb::string& str );
+    sb::string::size_type find( const sb::string& instr, const char* str);
+    sb::string::size_type find( const sb::string& instr, const char* str,sb::string::size_type from);
 }
 
 #endif
