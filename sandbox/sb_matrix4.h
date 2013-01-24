@@ -115,6 +115,9 @@ namespace Sandbox {
             /// \return The matrix (in column-major format)
             static Matrix4f rotate(float angle_x, float angle_y, float angle_z, EulerOrder euler);
 
+            static inline Matrix4f rotate(const Sandbox::Vector3f& v, EulerOrder euler) {
+                return rotate(v.x, v.y, v.z, euler);
+            }
             /// \brief Create a scale matrix
             ///
             /// \param x = Scale X
@@ -131,6 +134,10 @@ namespace Sandbox {
             /// \param z = Translate Z
             /// \return The matrix (in column-major format)
             static Matrix4f translate(float x, float y, float z);
+        
+            static inline Matrix4f translate(const Vector3f& v) {
+                return translate(v.x, v.y, v.z);
+            }
 
             /// \brief Create the "look at" matrix
             ///
@@ -309,6 +316,9 @@ namespace Sandbox {
             /// \brief Multiplication operator.
             Matrix4f operator *(const Matrix4f &mult) const { Matrix4f result = *this; result.multiply(mult); return result; }
 
+            Matrix4f operator *=(const Matrix4f &mult) { multiply(mult); return (*this); }
+
+        
             /// \brief Addition operator.
             Matrix4f operator +(const Matrix4f &add_matrix) const { Matrix4f result = *this; result.add(add_matrix); return result; }
 

@@ -45,6 +45,7 @@ namespace Sandbox {
             object(const object&);
             object& operator = (const object&);
         };
+        
 #define SB_META_OBJECT \
     public: \
         virtual const Sandbox::meta::type_info* get_type_info() const;\
@@ -152,6 +153,19 @@ namespace Sandbox {
 
 #define SB_META_DECLARE_POD_TYPE(Type) SB_META_DECLARE_KLASS(Type,void)
 
+        template <class T>
+        inline T* sb_dynamic_cast(object* o) {
+            const type_info* rt = T::get_static_type_info();
+            const type_info* ti = o->get_type_info();
+            void* vo = o;
+            while (ti) {
+                if (ti == rt) return static_cast<T*>(vo);
+                /// handle only 0 parent
+                ti = ti->parents[0].info;
+                vo = ti->parents[0].downcast(vo);
+            }
+            return 0;
+        }
         
     }
     

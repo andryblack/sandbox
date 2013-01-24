@@ -50,6 +50,10 @@ namespace Sandbox {
 			a = (a<0.0f) ? 0.0f : ( (a>1.0f) ? 1.0f : a );
 		}
 		
+        static Color Bytes(GHL::Byte r,GHL::Byte g,GHL::Byte b,GHL::Byte a) {
+            return Color(conv_byte(r),conv_byte(g),conv_byte(b),conv_byte(a));
+        }
+        
         static Color from_bytes(const GHL::Byte c[4] ) { return Color(conv_byte(c[0]),conv_byte(c[1]),conv_byte(c[2]),conv_byte(c[3])); }
 		
         GHL::UInt32 hw() const { return
