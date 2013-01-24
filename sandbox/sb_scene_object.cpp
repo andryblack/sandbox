@@ -11,6 +11,7 @@
 #include "sb_scene_object.h"
 #include "sb_assert.h"
 #include "sb_container.h"
+#include "sb_scene.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::SceneObject, Sandbox::meta::object)
 
@@ -36,5 +37,15 @@ namespace Sandbox {
         if (m_parent) {
             m_parent->MoveToTop(this);
         }
+    }
+    
+    Scene* SceneObject::GetScene() const {
+        Container* c = GetParent();
+        while (c) {
+            Scene* s = meta::sb_dynamic_cast<Scene>(c);
+            if (s) return s;
+            c = c->GetParent();
+        }
+        return 0;
     }
 }

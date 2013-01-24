@@ -34,6 +34,8 @@ namespace Sandbox {
         Rectf   m_rect;
         bool    m_inside;
     };
+    typedef sb::shared_ptr<Widget> WidgetPtr;
+    typedef sb::weak_ptr<Widget> WidgetWeakPtr;
     
     class TouchButtonWidget : public Widget {
         SB_META_OBJECT

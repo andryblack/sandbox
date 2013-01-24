@@ -10,13 +10,15 @@
 #ifndef SB_SCENE_H
 #define SB_SCENE_H
 
-#include "sb_scene_object.h"
+#include "sb_container.h"
+#include "sb_widget.h"
 
 namespace Sandbox {
 	
 	class Graphics;
 	
-	class Scene {
+	class Scene : public Container {
+        SB_META_OBJECT
 	public:
         /// draw scene
 		void Draw(Graphics& g) const;
@@ -24,11 +26,8 @@ namespace Sandbox {
         bool HandleTouch( const TouchInfo& touch );
         /// update
         void Update( float dt );
-        
-		void SetRoot(const SceneObjectPtr& obj) { m_root = obj;}
-		const SceneObjectPtr& GetRoot() const { return m_root;}
-	private:
-		SceneObjectPtr	m_root;
+    private:
+	    WidgetWeakPtr   m_focus_widget;
 	};
 }
 #endif /*SB_SCENE_H*/

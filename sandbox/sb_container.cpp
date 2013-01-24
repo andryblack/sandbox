@@ -64,7 +64,7 @@ namespace Sandbox {
 	}
 	void Container::DrawChilds(Graphics& g) const {
 		for (std::vector<SceneObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();++i) {
-			(*i)->DoDraw(g);
+			if ((*i)->GetVisible()) (*i)->Draw(g);
 		}
 	}
     bool Container::HandleTouch(const Sandbox::TouchInfo &touch) {
@@ -74,7 +74,7 @@ namespace Sandbox {
         /// copy, for allow scene modifications
         std::vector<SceneObjectPtr> childs = m_objects;
         for (std::vector<SceneObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
-			if ( (*i)->DoHandleTouch(touch) && firstResponse) {
+			if ( (*i)->GetVisible() && (*i)->HandleTouch(touch) && firstResponse) {
                 return true;
             }
 		}
@@ -89,7 +89,7 @@ namespace Sandbox {
         /// copy, for allow scene modifications
         std::vector<SceneObjectPtr> childs = m_objects;
         for (std::vector<SceneObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
-			(*i)->DoUpdate(dt);
+			if ((*i)->GetVisible()) (*i)->Update(dt);
 		}
     }
     

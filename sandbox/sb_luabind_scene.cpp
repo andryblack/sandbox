@@ -142,9 +142,7 @@ SB_META_END_KLASS_BIND()
 
 
 
-SB_META_DECLARE_KLASS(Sandbox::Scene, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Scene)
-SB_META_PROPERTY_RW(Root,GetRoot,SetRoot)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -159,7 +157,7 @@ namespace Sandbox {
         virtual ~WidgetWrapper() {}
         void default_OnTouchEnter() { Widget::OnTouchEnter(); }
         void default_OnTouchLeave() { Widget::OnTouchLeave(); }
-        bool default_HandleTouchInside(const TouchInfo& touch) { return Widget::HandleTouch(touch); }
+        bool default_HandleTouchInside(const TouchInfo& touch) { return Widget::HandleTouchInside(touch); }
     };
     
 }

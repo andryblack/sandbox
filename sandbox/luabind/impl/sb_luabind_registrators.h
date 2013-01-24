@@ -41,6 +41,14 @@ namespace Sandbox {
             }
         };
         
+        template <class T,int base> struct method_helper<int(T::*)(lua_State*),base> {
+            static int call( lua_State* L ) {
+                typedef int (T::*Func)(lua_State*);
+				Func func = *reinterpret_cast<Func*>(lua_touserdata(L, lua_upvalueindex(1)));
+				return (&stack<T>::get(L,base+0)->*func)(L);
+			}
+        };
+        
         template <class T>
         class klass_registrator : public registrator_base {
         public:
