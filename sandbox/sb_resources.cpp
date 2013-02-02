@@ -125,7 +125,10 @@ namespace Sandbox {
             return 0;
         }
 		std::string fn = m_base_path + filename;
-		GHL::DataStream* ds = m_vfs->OpenFile(fn.c_str());
+		GHL::DataStream* ds = 0;
+		if (fn.find_last_of('.')>fn.find_last_of("/")) {
+			ds = m_vfs->OpenFile(fn.c_str());
+		}
 		if (!ds) {
 			std::string file = fn+".png";
 			ds = m_vfs->OpenFile( file.c_str() );
