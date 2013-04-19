@@ -160,7 +160,7 @@ namespace Sandbox {
                 Func* ptr = 
                 reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// name ud
                 *ptr = func.func;
-                lua_pushcclosure(m_L, &method_helper<Func,2>::call, 1); /// name method
+                lua_pushcclosure(m_L, &method_helper<Func,1>::call, 1); /// name method
                 lua_rawset(this->m_L, -3); 
             }
             template <class Type>

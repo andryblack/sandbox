@@ -134,6 +134,8 @@ namespace Sandbox {
 	private:
 		GHL::Render* m_render;
 		GHL::Texture* m_fake_tex_white;
+        GHL::Texture* m_fake_tex_black;
+        
 		Transform2d	m_transform;
 		Matrix4f	m_projection_matrix;
 		Matrix4f	m_view_matrix;

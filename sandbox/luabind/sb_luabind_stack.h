@@ -165,31 +165,33 @@ namespace Sandbox {
             return try_to_push_lua_object_impl(L,val,v);
         }
         
-        template <class T>
-        struct stack {
+        template <class T,bool IsEnum> struct stack_help{
             static void push( lua_State* L, const T& val ) {
-                data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
-                                                                                     sizeof(data_holder)+
-                                                                                     sizeof(T)));
-                holder->type = data_holder::raw_data;
-                holder->is_const = false;
-                holder->info = meta::type<T>::info();
-                holder->destructor = &destructor_helper<T>::raw;
-                void* data = holder+1;
-                new (data) T(val);
-                lua_set_metatable( L, *holder );
+                {
+                    data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L,
+                                                                                         sizeof(data_holder)+
+                                                                                         sizeof(T)));
+                    holder->type = data_holder::raw_data;
+                    holder->is_const = false;
+                    holder->info = meta::type<T>::info();
+                    holder->destructor = &destructor_helper<T>::raw;
+                    void* data = holder+1;
+                    new (data) T(val);
+                    lua_set_metatable( L, *holder );
+                }
             }
             static T& get_impl( lua_State* L, data_holder* holder,int idx ) {
                 if ( holder->is_const ) {
                     lua_access_error( L, idx , holder->info->name );
                     return *reinterpret_cast<T*>(0);
-                } 
+                }
                 T* res = get_object_ptr<T>(holder,L,idx);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 }
                 return *res;
             }
+            typedef T& get_type;
             static T& get( lua_State* L, int idx ) {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
@@ -201,11 +203,33 @@ namespace Sandbox {
                         data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
                         lua_pop(L, 1);
                         return get_impl(L, holder,idx);
-                    } 
+                    }
                     lua_pop(L, 1);
-                } 
+                }
                 lua_argerror( L, idx, meta::type<T>::info()->name, 0);
                 return *reinterpret_cast<T*>(0);
+            }
+        };
+        
+        template <class T> struct stack_help<T,true> {
+            static void push( lua_State* L, const T& val ) {
+                lua_pushinteger(L, val);
+            }
+            typedef T get_type;
+            static T get( lua_State* L, int idx ) {
+                return static_cast<T>(lua_tointeger(L, idx));
+            }
+        };
+        
+        template <class T>
+        struct stack {
+            typedef stack_help<T, sb::is_enum<T>::result > help;
+            static void push( lua_State* L, const T& val ) {
+                help::push(L,val);
+            }
+            typedef typename help::get_type get_type;
+            static get_type get( lua_State* L, int idx ) {
+                return help::get(L,idx);
             }
         };
         template <class T>
@@ -483,9 +507,9 @@ namespace Sandbox {
 #ifdef SB_DEBUG
         class lua_stack_check {
         public:
-            explicit lua_stack_check(lua_State* L) {
+            explicit lua_stack_check(lua_State* L,int delta) {
                 m_L = L;
-                m_top = lua_gettop(L);
+                m_top = lua_gettop(L) + delta;
             }
             ~lua_stack_check() {
                 int top = lua_gettop(m_L);
@@ -495,9 +519,9 @@ namespace Sandbox {
             lua_State* m_L;
             int m_top;
         };
-#define LUA_CHECK_STACK ::Sandbox::luabind::lua_stack_check sc(L);
+#define LUA_CHECK_STACK(d) ::Sandbox::luabind::lua_stack_check sc(L,d);
 #else
-#define LUA_CHECK_STACK 
+#define LUA_CHECK_STACK(d)
 #endif
         
 #define LUABIND_DECLARE_RAW_STACK_TYPE(Type) \

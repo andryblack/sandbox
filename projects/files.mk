@@ -20,6 +20,7 @@ SANDBOX_SOURCES=\
 	sb_container_transform3d.cpp\
 	sb_container_viewport.cpp\
 	sb_container_visible.cpp\
+	sb_controller.cpp\
 	sb_controller_bidirect.cpp\
 	sb_controller_elastic.cpp\
 	sb_controller_map.cpp\

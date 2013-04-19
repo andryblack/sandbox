@@ -11,10 +11,12 @@
 #define SB_CONTROLLER_H
 
 #include "sb_shared_ptr.h"
+#include "meta/sb_meta.h"
 
 namespace Sandbox {
 	
-	class Controller {
+	class Controller : public meta::object{
+        SB_META_OBJECT
 	public:
 		virtual ~Controller() {}
 		virtual void Set(float k) = 0;

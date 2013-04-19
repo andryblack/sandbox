@@ -18,6 +18,7 @@
 #include "sb_controller_map.h"
 #include "sb_controller_elastic.h"
 #include "sb_controllers_color.h"
+#include "sb_animation.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -37,7 +38,6 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::PermanentThreadsMgr)
 SB_META_CONSTRUCTOR(())
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::Controller, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Controller)
 SB_META_METHOD(Set)
 SB_META_END_KLASS_BIND()
@@ -143,6 +143,20 @@ SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::AnimationData, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::AnimationData)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW_DEF(Speed)
+SB_META_PROPERTY_RW_DEF(LoopFrame)
+SB_META_METHOD(Reserve)
+SB_META_METHOD(AddFrame)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::Animation)
+SB_META_CONSTRUCTOR((AnimationDataPtr))
+SB_META_METHOD(Start)
+SB_META_METHOD(ClearSprites)
+SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     static const char* const LuaEventModule = "Sanbox:LuaEvent";
@@ -160,6 +174,7 @@ namespace Sandbox {
 			if (m_ref.Valid()) {
 				if ( luabind::LuaVMHelperPtr lua = m_ref.GetHelper()) {
 					lua_State* L = lua->lua;
+                    LUA_CHECK_STACK(0)
 					sb_assert(L);
 					m_ref.GetObject(L);
 					sb_assert(lua_isfunction(L,-1));
@@ -174,6 +189,7 @@ namespace Sandbox {
 			}
 		}
 		static int constructor_func(lua_State* L) {
+            LUA_CHECK_STACK(1)
 			if (!lua_isfunction(L,2)) {
                 luabind::lua_argerror(L,2,"function",0);
 				return 0;
@@ -206,6 +222,7 @@ namespace Sandbox {
 		~LuaThread() {
 		}
 		void SetThread(lua_State* L) {
+            LUA_CHECK_STACK(-1)
 			sb_assert(lua_isthread(L,-1));
 			m_ref.SetObject( L );
 		}
@@ -213,6 +230,9 @@ namespace Sandbox {
 			if (m_ref.Valid()) {
 				if ( luabind::LuaVMHelperPtr lua = m_ref.GetHelper()) {
 					lua_State* L = lua->lua;
+                    LUA_CHECK_STACK(0)
+                    //LogVerbose(LuaThreadModule) << "update thread >>> " << lua_gettop(L);
+
 					sb_assert(L);
 					m_ref.GetObject(L);
 					if (!lua_isthread(L,-1)) {
@@ -223,15 +243,16 @@ namespace Sandbox {
 					lua_State* th = lua_tothread(L, -1);
                     int status = lua_status(th);
                     if (status!=LUA_YIELD) {
-                        LogDebug(LuaThreadModule) << "thread " << th << " status: " << status;
+                        //LogDebug(LuaThreadModule) << "thread " << th << " status: " << status;
                     }
 					lua_pushnumber(th, dt);
 					int res = lua_resume(th,0, 1);
 					if (res==LUA_YIELD) {
                         lua_pop(L,1);
                         if (status!=LUA_YIELD) {
-                            LogDebug(LuaThreadModule) << "thread " << th << " suspended: " << status;
+                            //LogDebug(LuaThreadModule) << "thread " << th << " suspended: " << status;
                         }
+                        //LogVerbose(LuaThreadModule) << "update thread <<< " << lua_gettop(L);
                         return false;
 					}
 					if (res!=LUA_OK) {
@@ -244,7 +265,11 @@ namespace Sandbox {
                             LogError(LuaThreadModule) << lua_tostring(L, -1) ;
                             lua_pop(L, 2);
                         }
-                   } 
+                    } else {
+                        lua_pop(L,1);
+                        //LogDebug(LuaThreadModule) << "thread " << th << " ended";
+                    }
+                    //LogVerbose(LuaThreadModule) << "update thread <<< " << lua_gettop(L);
 				} else {
 					LogError(LuaThreadModule) << "update on released script";
           		}
@@ -254,6 +279,9 @@ namespace Sandbox {
 			return true;
 		}
 		static int constructor_func(lua_State* L) {
+            LUA_CHECK_STACK(1)
+            //LogVerbose(LuaThreadModule) << "construct thread >>>> " << lua_gettop(L);
+            
 			int stck = lua_gettop(L);
 			if (!lua_isfunction(L,2)) {
 				char buf[128];
@@ -295,6 +323,8 @@ namespace Sandbox {
 			(void)new_top;
 			sb_assert(stck==new_top);
             luabind::stack<sb::shared_ptr<LuaThread> >::push(L, e);
+            
+            //LogVerbose(LuaThreadModule) << "construct thread <<<< " << lua_gettop(L);
 			return 1;
 		}
 	private:
@@ -337,6 +367,8 @@ namespace Sandbox {
         luabind::Class<ControllerElastic>(lua);
         luabind::Class<ControllerColor>(lua);
         luabind::Class<ControllerAlpha>(lua);
+        luabind::Class<Animation>(lua);
+        luabind::Class<AnimationData>(lua);
     }
     
 }

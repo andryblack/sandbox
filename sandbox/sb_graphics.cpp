@@ -19,6 +19,7 @@ namespace Sandbox {
         (void)MODULE;
 		m_render = 0;
 		m_fake_tex_white = 0;
+        m_fake_tex_black = 0;
 		m_vertexes.reserve(512);
 		m_indexes.reserve(512);
 	}
@@ -26,6 +27,8 @@ namespace Sandbox {
 	Graphics::~Graphics() {
 		if (m_fake_tex_white)
 			m_fake_tex_white->Release();
+        if (m_fake_tex_black)
+            m_fake_tex_black->Release();
 		m_fake_tex_white = 0;
 	}
     
@@ -37,6 +40,12 @@ namespace Sandbox {
             m_fake_tex_white = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
 			img->Release();
 		}
+        if (!m_fake_tex_black) {
+            GHL::Image* img = GHL_CreateImage(1, 1, GHL::IMAGE_FORMAT_RGBA);
+            img->Fill(0xFF000000);
+            m_fake_tex_black = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
+			img->Release();
+		}
 	}
 	
 	void Graphics::SetBlendMode(BlendMode bmode) {
@@ -45,8 +54,7 @@ namespace Sandbox {
 			switch (bmode) {
 				case BLEND_MODE_COPY: 
 					m_render->SetTexture(0,1);
-					m_render->SetupAlphaTest(false, GHL::COMPARE_FUNC_GREATER, 0.0f);
-					m_render->SetupBlend(false, GHL::BLEND_FACTOR_SRC_COLOR, GHL::BLEND_FACTOR_ZERO); 
+					m_render->SetupBlend(false, GHL::BLEND_FACTOR_SRC_COLOR, GHL::BLEND_FACTOR_ZERO);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
@@ -54,8 +62,7 @@ namespace Sandbox {
 					break;
 				case BLEND_MODE_ALPHABLEND: 
 					m_render->SetTexture(0,1);
-					m_render->SetupAlphaTest(true, GHL::COMPARE_FUNC_GREATER, 0.0f);
-					m_render->SetupBlend(true, GHL::BLEND_FACTOR_SRC_ALPHA, GHL::BLEND_FACTOR_SRC_ALPHA_INV); 
+					m_render->SetupBlend(true, GHL::BLEND_FACTOR_SRC_ALPHA, GHL::BLEND_FACTOR_SRC_ALPHA_INV);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
@@ -63,8 +70,7 @@ namespace Sandbox {
 					break;
 				case BLEND_MODE_ADDITIVE: 
 					m_render->SetTexture(0,1);
-					m_render->SetupAlphaTest(false, GHL::COMPARE_FUNC_GREATER, 0.0f);
-					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE); 
+					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
@@ -72,7 +78,6 @@ namespace Sandbox {
 					break;
 				case BLEND_MODE_ADDITIVE_ALPHA: 
 					m_render->SetTexture(0,1);
-					m_render->SetupAlphaTest(true, GHL::COMPARE_FUNC_GREATER, 0.0f);
 					m_render->SetupBlend(true, GHL::BLEND_FACTOR_SRC_ALPHA, GHL::BLEND_FACTOR_ONE); 
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
@@ -80,12 +85,11 @@ namespace Sandbox {
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					break;
 				case BLEND_MODE_SCREEN:
-					m_render->SetTexture(m_fake_tex_white,1);
-					m_render->SetupAlphaTest(true, GHL::COMPARE_FUNC_GREATER, 0.0f);
+					m_render->SetTexture(m_fake_tex_black,1);
 					m_render->SetupBlend(true, GHL::BLEND_FACTOR_DST_COLOR_INV, GHL::BLEND_FACTOR_ONE);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_DIFFUSE,0);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_DIFFUSE,0);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_CURRENT,GHL::TEX_ARG_TEXTURE_INV,1);
+					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
+					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
+					m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_SELECT_2,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					break;
 				default:
@@ -506,7 +510,6 @@ namespace Sandbox {
 		
 	void Graphics::BeginScene(GHL::Render* render) {
 		m_render = render;
-		m_render->SetupAlphaTest(false, GHL::COMPARE_FUNC_GREATER, 0.0f);
 		m_blend_mode = BLEND_MODE_COPY;
 		m_render->SetupBlend(false);
 		m_texture = TexturePtr();

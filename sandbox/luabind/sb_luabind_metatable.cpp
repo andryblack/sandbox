@@ -467,7 +467,7 @@ namespace Sandbox {
         
         static int lua_setter_indexer (lua_State *L)
 		{
-            LUA_CHECK_STACK
+            LUA_CHECK_STACK(0)
             sb_assert(lua_istable(L, 1));
             lua_pushliteral(L, "__native");
             lua_rawget(L, 1);

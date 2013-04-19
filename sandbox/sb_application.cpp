@@ -170,6 +170,7 @@ namespace Sandbox {
         luabind::SetValue(m_lua->GetVM(), "application.thread", m_main_thread);
         luabind::SetValue(m_lua->GetVM(), "application.size.width", m_render->GetWidth() );
         luabind::SetValue(m_lua->GetVM(), "application.size.height", m_render->GetHeight() );
+        m_graphics->Load(m_render);
 		OnLoaded();
 		m_lua->DoFile("main.lua");
 		return true;

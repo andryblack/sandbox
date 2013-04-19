@@ -41,6 +41,7 @@ namespace Sandbox {
 	typedef sb::shared_ptr<AnimationData> AnimationDataPtr;
 	
 	class Animation : public Thread {
+        SB_META_OBJECT
 	public:
 		explicit Animation(const AnimationDataPtr& data);
 		~Animation();

@@ -42,7 +42,7 @@ namespace Sandbox {
         
         lua_State* GetVM() { return m_L; }
         
-        static LuaVM* GetInstance( lua_State* L ); 
+        bool DoString( const char* cont );
     private:
         Resources*  m_resources;
         lua_State*  m_L;
@@ -51,10 +51,12 @@ namespace Sandbox {
 		GHL::Byte* alloc(size_t size);
         static int lua_module_searcher(lua_State *L);
         static int lua_loadfile_func(lua_State* L);
+        static int lua_dofile_func(lua_State* L);
 		void free(GHL::Byte* data,size_t size);
 		void resize(GHL::Byte* data,size_t osize,size_t nsize);
         static void* lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
         MemoryMgr*  m_mem_mgr;
+        bool DoFileImpl(const char* name,int results);
     };
 }
 

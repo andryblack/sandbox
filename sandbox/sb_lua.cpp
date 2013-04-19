@@ -122,7 +122,7 @@ namespace Sandbox {
         }
         
         static const luaL_Reg base_funcs_impl[] = {
-			//{"dofile", lua_dofile_func},
+			{"dofile", lua_dofile_func},
 			{"print", lua_print_func},
             //{"require",lua_require_func},
             {"loadfile",lua_loadfile_func},
@@ -156,12 +156,7 @@ namespace Sandbox {
         delete m_mem_mgr;
     }
     
-    LuaVM* LuaVM::GetInstance( lua_State* L ) {
-        lua_getglobal(L, "LuaVM_instance");
-        LuaVM* this_ = lua_isuserdata(L, -1) ? reinterpret_cast<LuaVM*>(lua_touserdata(L, -1)) : 0;
-        lua_pop(L, 1);
-        return this_;
-    }
+
     
     void LuaVM::SetBasePath(const char *path) {
         m_base_path = path;
@@ -169,7 +164,7 @@ namespace Sandbox {
             m_base_path += "/";
     }
     
-    bool LuaVM::DoFile(const char* fn) {
+    bool LuaVM::DoFileImpl(const char* fn,int results) {
         sb::string path = m_base_path + fn;
         GHL::DataStream* ds = m_resources->OpenFile(path.c_str());
         if (!ds) {
@@ -177,7 +172,10 @@ namespace Sandbox {
 			return false;
 		}
 		lua_read_data data = {ds,{}};
-		int res = lua_load(m_L,&lua_read_func,&data,fn,0);
+        lua_pushcclosure(m_L, &luabind::lua_traceback, 0);  /// tb
+        int traceback_index = lua_gettop(m_L);
+        
+		int res = lua_load(m_L,&lua_read_func,&data,fn,0);  /// MF tf
 		ds->Release();
 		if (res!=0) {
 			LogError(MODULE) << "Failed to load script: " << fn;
@@ -186,18 +184,45 @@ namespace Sandbox {
 		} else {
 			LogInfo(MODULE) << "Loaded script: " << fn;
             
-            lua_pushcclosure(m_L, &luabind::lua_traceback, 0);
-            lua_insert(m_L, -2);
-            int res = lua_pcall(m_L, 0, 0, -2);
+            //
+            int res = lua_pcall(m_L, 0, results, -2);
             if (res) {
                 LogError(MODULE) << "pcall : " << res;
                 LogError(MODULE) << lua_tostring(m_L, -1) ;
                 return false;
             }
-            lua_remove(m_L, -1);
+            lua_remove(m_L, traceback_index);
+            //int crnt_top = lua_gettop(m_L);
+            //lua_remove(m_L, crnt_top-traceback_index-1);
 		}
         
 		return true;
+    }
+    bool LuaVM::DoFile(const char* fn) {
+        return DoFileImpl(fn,0);
+    }
+    
+    bool LuaVM::DoString( const char* cont ) {
+        //LogInfo(MODULE) << "pcall >>>> top : " << lua_gettop(m_L);
+        lua_pushcclosure(m_L, &luabind::lua_traceback, 0);  /// tb
+        int traceback_index = lua_gettop(m_L);
+        int res = luaL_loadstring(m_L, cont);
+        if (res!=0) {
+			LogError(MODULE) << "Failed to load script: " << cont;
+            LogError(MODULE) << lua_tostring(m_L, -1) ;
+			return false;
+		} else {
+			  //
+            res = lua_pcall(m_L, 0, 0, -2);
+            if (res) {
+                LogError(MODULE) << "pcall : " << res;
+                LogError(MODULE) << lua_tostring(m_L, -1) ;
+                return false;
+            }
+            lua_remove(m_L, traceback_index);
+     	}
+        //LogInfo(MODULE) << "pcall <<<< top : " << lua_gettop(m_L);
+        return true;
     }
     
    
@@ -231,18 +256,18 @@ namespace Sandbox {
             return 2;
         }
         LuaVM* this_ = reinterpret_cast<LuaVM*>(lua_touserdata(L, lua_upvalueindex(1)));
-        GHL::DataStream* ds = this_->m_resources->OpenFile(fname);
+        sb::string filename =  fname;
+        GHL::DataStream* ds = this_->m_resources->OpenFile(filename.c_str());
         if (!ds) {
             lua_pushnil(L);
-            lua_pushstring(L, "error opening file");
+            lua_pushstring(L, (sb::string("error opening file: ")+filename).c_str());
             return 2;
 		}
 		lua_read_data data = {ds,{}};
 		int res = lua_load(L,&lua_read_func,&data,fname,0);
 		ds->Release();
 		if (res!=0) {
-            lua_pushnil(L);
-            lua_pushstring(L, "error loading file");
+            lua_pushstring(L, (sb::string("error loading file: ")+filename).c_str());
             return 2;
 		} 
         if ( env ) {  /* 'env' parameter? */
@@ -250,6 +275,18 @@ namespace Sandbox {
             lua_setupvalue(L, -2, 1);  /* set it as 1st upvalue of loaded chunk */
         }
         return 1;
+    }
+        
+    int LuaVM::lua_dofile_func(lua_State* L) {
+        LuaVM* this_ = reinterpret_cast<LuaVM*>(lua_touserdata(L, lua_upvalueindex(1)));
+        int cnt = lua_gettop(L);
+        if (this_->DoFileImpl(lua_tostring(L, 1),LUA_MULTRET)) {
+            int results = lua_gettop(L)-cnt;
+            return results;
+        }
+        lua_pushstring(L, "error dofile");
+        lua_error(L);
+        return 0;
     }
     void* LuaVM::lua_alloc_func(void *ud, void *_ptr, size_t osize,size_t nsize) {
 		GHL::Byte* ptr = reinterpret_cast<GHL::Byte*> (_ptr);

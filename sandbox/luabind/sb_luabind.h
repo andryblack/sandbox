@@ -35,7 +35,7 @@ namespace Sandbox {
         
         template <class T>
         static inline void RawClass( lua_State* L ) {
-            LUA_CHECK_STACK
+            LUA_CHECK_STACK(0)
             impl::raw_klass_registrator<T> kr(L);
             lua_create_metatable(L);
             meta::bind_type<T>::bind( kr );
@@ -43,7 +43,7 @@ namespace Sandbox {
         }
         template <class T>
         static inline void ExternClass( lua_State* L ) {
-            LUA_CHECK_STACK
+            LUA_CHECK_STACK(0)
             impl::klass_registrator<T> kr(L);
             lua_create_metatable(L);
             meta::bind_type<T>::bind( kr );
@@ -51,7 +51,7 @@ namespace Sandbox {
         }
         template <class T>
         static inline void Class( lua_State* L ) {
-            LUA_CHECK_STACK
+            LUA_CHECK_STACK(0)
             impl::shared_klass_registrator<T> kr(L);
             lua_create_metatable(L);
             meta::bind_type<T>::bind( kr );
@@ -59,19 +59,19 @@ namespace Sandbox {
         }
         template <class T,class W>
         static inline void ClassWrapper( lua_State* L ) {
-            LUA_CHECK_STACK
+            LUA_CHECK_STACK(0)
             Class<T>(L);
             impl::shared_klass_registrator<W> kr(L);
             lua_create_metatable(L);
             {
-                LUA_CHECK_STACK
+                LUA_CHECK_STACK(0)
                 meta::bind_type<W>::bind( kr );
             }
             lua_register_wrapper(L,meta::type<W>::info());
         }
         template <class T>
         static inline void Enum( lua_State* L ) {
-            LUA_CHECK_STACK
+            LUA_CHECK_STACK(0)
             impl::enum_registrator<T> kr(L);
             lua_create_metatable(L);
             lua_register_enum_metatable(L,meta::type<T>::info(),&impl::enum_registrator<T>::compare_func);

@@ -117,7 +117,7 @@ namespace Sandbox {
                 return 0;
             }
         };
-#define SB_META_DECLARE_KLASS_X(Klass,Parent,Line)  \
+#define SB_META_DECLARE_KLASS_X(Klass,Parent,Line,KlassName)  \
         namespace Sandbox { namespace meta { \
             namespace Line{ \
                 static const type_info_parent parents[] = { \
@@ -129,7 +129,7 @@ namespace Sandbox {
                     { 0, 0, 0 } \
                 };\
                 static const type_info ti = { \
-                    #Klass, \
+                    KlassName, \
                     sizeof(Klass), \
                     parents \
                 }; \
@@ -137,10 +137,13 @@ namespace Sandbox {
             template <> const type_info* type<Klass>::private_info = &Line::ti; \
         }}
 
+
 #define CONCATENATE_DIRECT(s1, s2) s1##s2
 #define CONCATENATE(s1, s2) CONCATENATE_DIRECT(s1, s2)
 #define ANONYMOUS_VARIABLE(str) CONCATENATE(str, CONCATENATE(__LINE__,__COUNTER__))
-#define SB_META_DECLARE_KLASS(Type,Parent) SB_META_DECLARE_KLASS_X(Type,Parent,ANONYMOUS_VARIABLE(private_))
+#define SB_META_DECLARE_KLASS(Type,Parent) SB_META_DECLARE_KLASS_X(Type,Parent,ANONYMOUS_VARIABLE(private_),#Type)
+
+#define SB_META_DECLARE_NAMED_KLASS(Type,Name) SB_META_DECLARE_KLASS_X(Type,void,ANONYMOUS_VARIABLE(private_),Name)
 
 #define SB_META_DECLARE_OBJECT(Klass,Parent)  \
         SB_META_DECLARE_KLASS(Klass,Parent) \

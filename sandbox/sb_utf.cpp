@@ -8,6 +8,7 @@
 
 #include "sb_utf.h"
 #include <cstring>
+#include <wctype.h>
 
 namespace Sandbox {
     

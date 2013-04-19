@@ -164,7 +164,8 @@ namespace Sandbox {
 	
 	
 	TexturePtr Resources::GetTexture(const char* filename) {
-		
+		if (!filename)
+            return TexturePtr();
 #ifdef SB_RESOURCES_CACHE
         sb::weak_ptr<Texture> al = m_textures[filename];
 		if (TexturePtr tex = al.lock()) {

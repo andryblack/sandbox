@@ -46,7 +46,7 @@ namespace Sandbox {
         }
         Matrix4f m = Matrix4f::identity();
         {
-            LUA_CHECK_STACK
+            LUA_CHECK_STACK(0)
             size_t indx = 0;
             lua_pushnil(L);
             while (lua_next(L, 2) != 0) {

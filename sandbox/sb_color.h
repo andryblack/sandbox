@@ -87,7 +87,7 @@ namespace Sandbox {
             return static_cast<GHL::Byte>((conv_hex_char(*str++)<<4) | conv_hex_char(*str));
         }
         static Color FromString( const char* str ) {
-            
+            if (!str) return Color(0,0,0,1);
             size_t len = ::strlen(str);
             GHL::Byte c[4];
             if (len>=6) {

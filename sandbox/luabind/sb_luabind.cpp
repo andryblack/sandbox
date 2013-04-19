@@ -16,6 +16,7 @@ namespace Sandbox {
 
         
         LuaVMHelperPtr GetHelper( lua_State* L ) {
+            LUA_CHECK_STACK(0)
             LuaVMHelperPtr res;
             lua_getglobal(L, "__lua_vm_helper");
             if ( lua_isuserdata(L, -1) ) {
@@ -36,7 +37,8 @@ namespace Sandbox {
             lua_pushcfunction(L, &lua_class_func);
             lua_setglobal(L, "class");
             
-            LUA_CHECK_STACK
+            LUA_CHECK_STACK(0)
+            
             lua_create_metatable(L);
             lua_register_metatable(L,meta::type<meta::object>::info());
         }
