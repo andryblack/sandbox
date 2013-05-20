@@ -470,12 +470,12 @@ namespace Sandbox {
         
         template <class T>
         struct stack<sb::vector<T> > {
-            static void push( lua_State* L, const sb::map<sb::string,T>& val ) {
-                lua_createtable(L, val.size(), 0 );
+            static void push( lua_State* L, const sb::vector<T>& val ) {
+                lua_createtable(L, int(val.size()), 0 );
                 lua_Integer idx = 1;
                 for (typename sb::vector<T>::const_iterator it=val.begin();it!=val.end();++it) {
                     lua_pushinteger(L, idx);
-                    stack<T>::push( L,it->second );
+                    stack<T>::push( L, *it );
                     lua_settable(L, -3);
                     idx++;
                 }
