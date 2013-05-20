@@ -11,7 +11,7 @@
 #define SB_EVENT_FUNCTION
 
 #include "sb_event.h"
-#include "sb_function.h"
+#include <sbtl/sb_function.h>
 
 namespace Sandbox {
 	

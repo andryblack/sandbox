@@ -11,7 +11,7 @@
 #define SB_OBJECT_PROXY_H
 
 #include "sb_scene_object.h"
-#include "sb_function.h"
+#include <sbtl/sb_function.h>
 #include "sb_vector2.h"
 
 namespace Sandbox {

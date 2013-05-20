@@ -11,11 +11,9 @@
 #define SB_LUA_H
 
 
-#include "sb_shared_ptr.h"
+#include <sbtl/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
-#include "sb_string.h"
-
-#include <vector>
+#include <sbtl/sb_string.h>
 
 #include <ghl_types.h>
 

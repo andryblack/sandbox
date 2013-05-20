@@ -11,7 +11,7 @@
 #define SB_CONTAINER_H
 
 #include "sb_scene_object.h"
-#include "sb_vector.h"
+#include <sbtl/sb_vector.h>
 
 namespace Sandbox {
 

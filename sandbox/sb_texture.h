@@ -10,9 +10,10 @@
 #ifndef SB_TEXTURE_H
 #define SB_TEXTURE_H
 
-#include "sb_shared_ptr.h"
+#include <sbtl/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
 #include <ghl_texture.h>
+#include <sbtl/sb_string.h>
 
 namespace Sandbox {
 	

@@ -13,7 +13,7 @@
 #include "sb_sprite.h"
 #include "sb_thread.h"
 #include "sb_event.h"
-#include "sb_vector.h"
+#include <sbtl/sb_vector.h>
 
 namespace Sandbox {
 	

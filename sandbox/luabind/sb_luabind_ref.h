@@ -9,7 +9,7 @@
 #ifndef YinYang_sb_luabind_ref_h
 #define YinYang_sb_luabind_ref_h
 
-#include "sb_shared_ptr.h"
+#include <sbtl/sb_shared_ptr.h>
 
 struct lua_State;
 

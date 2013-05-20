@@ -11,7 +11,7 @@
 
 #include <cstring>
 #include <new>
-#include "../sb_shared_ptr.h"
+#include "../sbtl/sb_shared_ptr.h"
 
 namespace Sandbox {
      

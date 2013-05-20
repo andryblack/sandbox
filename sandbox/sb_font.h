@@ -11,7 +11,7 @@
 #define SB_FONT_H
 
 #include "sb_notcopyable.h"
-#include "sb_shared_ptr.h"
+#include <sbtl/sb_shared_ptr.h>
 #include "meta/sb_meta.h"
 
 

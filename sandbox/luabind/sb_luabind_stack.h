@@ -12,11 +12,11 @@
 #include "sb_notcopyable.h"
 #include "meta/sb_meta.h"
 
-#include "sb_shared_ptr.h"
+#include <sbtl/sb_shared_ptr.h>
 #include "sb_traits.h"
-#include "sb_map.h"
-#include "sb_string.h"
-#include "sb_vector.h"
+#include <sbtl/sb_map.h>
+#include <sbtl/sb_string.h>
+#include <sbtl/sb_vector.h>
 
 extern "C" {
 #include "../../lua/src/lua.h"

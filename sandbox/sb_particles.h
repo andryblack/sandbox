@@ -13,9 +13,9 @@
 #include "sb_image.h"
 #include "sb_particle.h"
 #include "sb_event.h"
-#include "sb_vector.h"
-#include "sb_map.h"
-#include "sb_string.h"
+#include <sbtl/sb_vector.h>
+#include <sbtl/sb_map.h>
+#include <sbtl/sb_string.h>
 
 
 namespace Sandbox {

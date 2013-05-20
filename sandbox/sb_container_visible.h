@@ -11,7 +11,7 @@
 #define SB_CONTAINER_VISIBLE_H
 
 #include "sb_container.h"
-#include "sb_function.h"
+#include <sbtl/sb_function.h>
 
 namespace Sandbox {
 	

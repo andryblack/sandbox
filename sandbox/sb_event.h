@@ -10,7 +10,7 @@
 #ifndef SB_EVENT_H
 #define SB_EVENT_H
 
-#include "sb_shared_ptr.h"
+#include <sbtl/sb_shared_ptr.h>
 
 namespace Sandbox {
 

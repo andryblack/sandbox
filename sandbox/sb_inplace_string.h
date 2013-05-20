@@ -11,7 +11,7 @@
 #define SB_INPLACE_STRING_H
 
 #include <cstring>
-#include "sb_string.h"
+#include <sbtl/sb_string.h>
 #include "sb_assert.h"
 
 namespace Sandbox {

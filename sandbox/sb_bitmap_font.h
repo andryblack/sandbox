@@ -12,7 +12,7 @@
 #include "sb_font.h"
 #include "sb_utf.h"
 #include "sb_image.h"
-#include "sb_vector.h"
+#include <sbtl/sb_vector.h>
 
 namespace Sandbox {
     

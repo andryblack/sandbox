@@ -8,7 +8,7 @@
 #include <sstream>
 #include <ghl_log.h>
 #include <ghl_types.h>
-#include "sb_string.h"
+#include <sbtl/sb_string.h>
 
 namespace Sandbox {
     

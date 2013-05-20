@@ -9,9 +9,9 @@
 #ifndef YinYang_sb_luabind_h
 #define YinYang_sb_luabind_h
 
-#include "sb_shared_ptr.h"
+#include <sbtl/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
-#include "sb_string.h"
+#include <sbtl/sb_string.h>
 #include "sb_inplace_string.h"
 #include "sb_notcopyable.h"
 #include "sb_assert.h"
