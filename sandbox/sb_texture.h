@@ -12,45 +12,39 @@
 
 #include <sbtl/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
-#include <ghl_texture.h>
 #include <sbtl/sb_string.h>
+#include <ghl_types.h>
+
+namespace GHL {
+    struct Texture;
+}
 
 namespace Sandbox {
+    
+	class Resources;
 	
-	class Texture : public NotCopyable {
+    class Texture : public NotCopyable {
 	private:
-		GHL::Texture* m_texture;
-        GHL::UInt32 m_original_w;
-        GHL::UInt32 m_original_h;
+	    mutable GHL::Texture*   m_texture;
+        sb::string              m_file;
+        GHL::UInt32             m_original_w;
+        GHL::UInt32             m_original_h;
+        mutable size_t          m_live_ticks;
+        bool    m_filtered;
+        bool    m_tiled;
 	public:
-		explicit Texture(GHL::Texture* texture, GHL::UInt32 w=0, GHL::UInt32 h=0) : 
-			m_texture(texture),m_original_w(w),m_original_h(h){
-            if (m_texture) {
-                if (m_original_w==0) m_original_w = m_texture->GetWidth();
-                if (m_original_h==0) m_original_h = m_texture->GetHeight();
-            }
-        }
-		~Texture() { if (m_texture) m_texture->Release();}
-		const GHL::Texture* Present() const { return m_texture;}
-		void SetFiltered(bool f) { 
-			m_texture->SetMinFilter(f?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
-			m_texture->SetMagFilter(f?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
-		}
-        bool GetFiltered() const {
-            return m_texture->GetMagFilter() != GHL::TEX_FILTER_NEAR;
-        }
-        void SetTiled(bool t) {
-			m_texture->SetWrapModeU(t?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
-			m_texture->SetWrapModeV(t?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
-        }
-        bool GetTiled() const {
-            return m_texture->GetWrapModeU() != GHL::TEX_WRAP_CLAMP;
-        }
-		GHL::UInt32 GetWidth() const { return m_texture->GetWidth();}
-		GHL::UInt32 GetHeight() const { return m_texture->GetHeight();}
-        GHL::UInt32 GetOriginalWidth() const { return m_original_w; }
+		explicit Texture(const sb::string& file, GHL::UInt32 w=0, GHL::UInt32 h=0);
+        explicit Texture(GHL::Texture* tes,GHL::UInt32 w=0, GHL::UInt32 h=0);
+		~Texture();
+		const GHL::Texture* Present(Resources* resources) const;
+		void SetFiltered(bool f);
+        bool GetFiltered() const { return m_filtered; }
+        void SetTiled(bool t) ;
+        bool GetTiled() const { return m_tiled; }
+	    GHL::UInt32 GetOriginalWidth() const { return m_original_w; }
         GHL::UInt32 GetOriginalHeight() const { return m_original_h; }
-		GHL::Texture* GetNative() const { return m_texture;}
+        size_t GetLiveTicks() const { return m_live_ticks; }
+        void Release();
 	};
 	typedef sb::shared_ptr<Texture> TexturePtr;
 }

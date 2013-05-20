@@ -34,7 +34,7 @@ namespace Sandbox {
 	class Graphics {
 	public:
 
-		Graphics();
+		explicit Graphics( Resources* resources );
 		~Graphics();
 		
 		void Load(GHL::Render* render);
@@ -130,6 +130,7 @@ namespace Sandbox {
         GHL::UInt32 GetScreenWidth() const { if (m_render) return m_render->GetWidth(); return 0;}
 		GHL::UInt32 GetScreenHeight() const { if (m_render) return m_render->GetHeight(); return 0;}
 	private:
+        Resources*  m_resources;
 		GHL::Render* m_render;
 		GHL::Texture* m_fake_tex_white;
         GHL::Texture* m_fake_tex_black;
@@ -142,6 +143,8 @@ namespace Sandbox {
 		Color		m_color;
 		BlendMode	m_blend_mode;
 		TexturePtr  m_texture;
+        float       m_itw;
+        float       m_ith;
 		ShaderPtr	m_shader;
 		GHL::PrimitiveType	m_ptype;
         size_t      m_primitives;

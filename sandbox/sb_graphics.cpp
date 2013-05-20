@@ -15,7 +15,7 @@ namespace Sandbox {
 	
     static const char* MODULE = "Sanbox:Graphics";
 	
-	Graphics::Graphics() {
+	Graphics::Graphics(Resources* res) : m_resources(res){
         (void)MODULE;
 		m_render = 0;
 		m_fake_tex_white = 0;
@@ -129,14 +129,16 @@ namespace Sandbox {
         appendQuad();
 		
 		GHL::UInt32 clr = (m_color).hw();
-		
-        const float itw = 1.0f / texture->GetWidth();
-        const float ith = 1.0f / texture->GetHeight();
         
-        const float tx = rect.x * itw;
-        const float ty = rect.y * ith;
-        const float tw = rect.w * itw;
-        const float th = rect.h * ith;
+        const GHL::Texture* t = texture->Present(m_resources);
+		
+        m_itw = 1.0f / t->GetWidth();
+        m_ith = 1.0f / t->GetHeight();
+        
+        const float tx = rect.x * m_itw;
+        const float ty = rect.y * m_ith;
+        const float tw = rect.w * m_itw;
+        const float th = rect.h * m_ith;
         
         {
             appendVertex(rect.x,rect.y,
@@ -154,7 +156,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
         if (m_primitives==0) return;
         /// do batch
-		m_render->SetTexture(m_texture ? m_texture->Present() : 0,0);
+		m_render->SetTexture(m_texture ? m_texture->Present(m_resources) : 0,0);
 		//m_render->SetTexture(m_texture ? m_texture->Present() : 0,1);
 		m_render->DrawPrimitivesFromMemory(m_ptype,
 										   GHL::VERTEX_TYPE_SIMPLE,
@@ -176,6 +178,9 @@ namespace Sandbox {
         bool flush = false;
 		if (m_texture!=texture) {
             flush = true;
+            const GHL::Texture* tex = texture->Present(m_resources);
+            m_itw = 1.0f / tex->GetWidth();
+            m_ith = 1.0f / tex->GetHeight();
         } else if (m_ptype!=GHL::PRIMITIVE_TYPE_TRIANGLES) {
             flush = true;
         }
@@ -208,10 +213,10 @@ namespace Sandbox {
 	void Graphics::DrawImage(const Image& img,float x,float y) {
 		sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
-		x-=img.GetHotspot().x;
-        y-=img.GetHotspot().y;
 		const float w = img.GetWidth();
 		const float h = img.GetHeight();
+		x-=img.GetHotspot().x*w/img.GetTextureW();
+        y-=img.GetHotspot().y*h/img.GetTextureH();
 		
         appendQuad();
 		
@@ -219,22 +224,26 @@ namespace Sandbox {
 		
         {
             appendVertex(x,y,
-                                 img.GetTextureX(),img.GetTextureY(),clr);
+                                 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x+w,y,
-                                 img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+                                 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x,y+h,
-                                 img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+                                 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
             appendVertex(x+w,y+h,
-                                 img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+                                 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
         } 
 	}
 	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr) {
 		sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
-        x-=img.GetHotspot().x;
-        y-=img.GetHotspot().y;
-		const float w = img.GetWidth();
+        const float w = img.GetWidth();
 		const float h = img.GetHeight();
+		x-=img.GetHotspot().x*w/img.GetTextureW();
+        y-=img.GetHotspot().y*h/img.GetTextureH();
 		
         appendQuad();
 		
@@ -242,23 +251,27 @@ namespace Sandbox {
 		
         {
             appendVertex(x,y,
-						 img.GetTextureX(),img.GetTextureY(),clr);
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x+w,y,
-						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x,y+h,
-						 img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
             appendVertex(x+w,y+h,
-						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
         } 
 		
 	}
 	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr,float scale) {
 		sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
-		x-=img.GetHotspot().x*scale;
-        y-=img.GetHotspot().y*scale;
 		const float w = img.GetWidth()*scale;
 		const float h = img.GetHeight()*scale;
+		x-=img.GetHotspot().x*w/img.GetTextureW();
+        y-=img.GetHotspot().y*h/img.GetTextureH();
 		
         appendQuad();
 		
@@ -266,13 +279,17 @@ namespace Sandbox {
 		
         {
             appendVertex(x,y,
-						 img.GetTextureX(),img.GetTextureY(),clr);
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x+w,y,
-						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x,y+h,
-						 img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
             appendVertex(x+w,y+h,
-						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
         } 
 		
 	}
@@ -441,13 +458,12 @@ namespace Sandbox {
 							 (Color(*reinterpret_cast<const GHL::UInt32*>(vertices[i].color))*m_color).hw());
             }
         } 
-		if (texture)
-			m_render->SetTexture(texture->Present(),0);
-		else {
+		if (texture) {
+			m_render->SetTexture(texture->Present(m_resources),0);
+		} else {
 			m_render->SetTexture(0,0);
 		}
-		m_texture = texture;
-
+		
         
         m_texture = texture;
         m_ptype = prim;

@@ -156,7 +156,7 @@ namespace Sandbox {
 	///
 	bool GHL_CALL Application::Load() {
 		ConfigureDevice( m_system );
-		m_graphics = new Graphics();
+		m_graphics = new Graphics(m_resources);
         sb_assert(m_resources);
         sb_assert(m_render);
         sb_assert(m_image_decoder);
@@ -204,6 +204,9 @@ namespace Sandbox {
         m_batches = m_batches * 0.875f + 0.125f*batches;    /// interpolate 4 frames
 		DrawDebugInfo();
 		m_render->EndScene();
+        
+        m_resources->ProcessMemoryMgmt();
+        
 		return true;
 	}
 	
@@ -226,6 +229,7 @@ namespace Sandbox {
         m_render->DebugDrawText( 10, 21 , m_lua->GetMemoryUsed().c_str() );
         ::snprintf(buf,128,"batches:%0.2f",m_batches);
         m_render->DebugDrawText( 10, 32 , buf );
+        m_render->DebugDrawText( 10, 43, (sb::string("tex:")+format_memory(m_render->GetTexturesMemory())).c_str());
 	}
 	
 	void Application::SetClearColor(const Color& c) {

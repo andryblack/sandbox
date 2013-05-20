@@ -58,7 +58,12 @@ namespace Sandbox {
                                  GHL::UInt32 h, 
                                  bool alpha, 
                                  const GHL::Image* data);
-	private:
+        GHL::Texture* LoadTexture( const sb::string& filename );
+        
+        size_t  GetLiveTicks() const { return m_live_ticks; }
+        
+        void    ProcessMemoryMgmt();
+    private:
 		GHL::VFS* m_vfs;
 		GHL::Render* m_render;
 		GHL::ImageDecoder* m_image;
@@ -66,16 +71,18 @@ namespace Sandbox {
 		
 		friend class Atlaser;
 		
-		TexturePtr InternalCreateTexture( int w,int h, bool alpha,bool fill);
-		GHL::Image* LoadImage(const char* file);
+        GHL::Texture* InternalCreateTexture( int w,int h, bool alpha,bool fill);
+		GHL::Image* LoadImage(const char* file,const char** ext = 0);
 		bool ImageHaveAlpha(const GHL::Image* img) const;
-		bool ConvertImage(GHL::Image* img,const TexturePtr& tex) const;
+		bool ConvertImage(GHL::Image* img,GHL::Texture* tex) const;
+        bool GetImageInfo(sb::string& file,GHL::UInt32& w,GHL::UInt32& h);
 #ifdef SB_RESOURCES_CACHE
 		sb::map<sb::string,sb::weak_ptr<Texture> >  m_textures;
 		sb::map<sb::string,GHL::VertexShader*>      m_vshaders;
 		sb::map<sb::string,GHL::FragmentShader*>    m_fshaders;
 		sb::map<sb::string,sb::weak_ptr<Shader> >   m_shaders;
 #endif
+        size_t  m_live_ticks;
 	};
 }
 

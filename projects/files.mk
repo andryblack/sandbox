@@ -49,6 +49,7 @@ SANDBOX_SOURCES=\
 	sb_shader.cpp\
 	sb_sprite.cpp\
 	sb_tcb_spline2d.cpp\
+	sb_texture.cpp\
 	sb_threads_mgr.cpp\
 	sb_touch_info.cpp\
 	sb_utf.cpp\
