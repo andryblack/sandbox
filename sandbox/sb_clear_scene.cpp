@@ -15,7 +15,7 @@ namespace Sandbox {
     
     
     void ClearScene::Draw(Sandbox::Graphics &g) const {
-        g.Clear(m_color);
+        g.Clear(m_color,m_depth);
     }
     
 }

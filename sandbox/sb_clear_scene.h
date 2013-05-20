@@ -17,14 +17,17 @@ namespace Sandbox {
     class ClearScene : public SceneObject {
         SB_META_OBJECT
     public:
-        
+        ClearScene() : m_depth(1.0) {}
         void Draw( Graphics& g ) const;
         
         void SetColor( const Color& c ) { m_color = c; }
         const Color& GetColor() const { return m_color; }
         
+        void SetDepth(float d) { m_depth = d; }
+        float GetDepth() const { return m_depth; }
     private:
         Color   m_color;
+        float   m_depth;
     };
     
 }

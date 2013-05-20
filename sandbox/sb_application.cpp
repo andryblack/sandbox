@@ -27,6 +27,7 @@ SB_META_BEGIN_KLASS_BIND(GHL::Settings)
 SB_META_PROPERTY(width)
 SB_META_PROPERTY(height)
 SB_META_PROPERTY(fullscreen)
+SB_META_PROPERTY(depth)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Application, void)
@@ -196,7 +197,7 @@ namespace Sandbox {
 			m_render->Clear(m_clear_color.r,
 							m_clear_color.g,
 							m_clear_color.b,
-							m_clear_color.a);
+							m_clear_color.a,0);
 		m_graphics->BeginScene(m_render);
 		DrawFrame(*m_graphics);
 		size_t batches = m_graphics->EndScene();
