@@ -10,13 +10,15 @@
 #define SB_APPLICATION_H_INCLUDED
 
 #include <ghl_application.h>
-#include "sb_graphics.h"
-#include "sb_resources.h"
+#include "sb_color.h"
 #include "sb_threads_mgr.h"
 #include "sb_scene.h"
 #include "sb_lua.h"
 
 namespace Sandbox {
+    
+    class Resources;
+    class SoundManager;
 	
 	class Application : public GHL::Application {
     public:
@@ -62,6 +64,7 @@ namespace Sandbox {
 		LuaVM*			m_lua;
 		Graphics*		m_graphics;
 		Resources*		m_resources;
+        SoundManager*   m_sound_mgr;
 		std::string		m_lua_base_path;
 		std::string		m_resources_base_path;
 		size_t			m_frames;

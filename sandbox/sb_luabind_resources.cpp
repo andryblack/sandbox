@@ -16,6 +16,7 @@
 #include "sb_shader.h"
 #include "sb_color.h"
 #include "sb_rect.h"
+#include "sb_sound.h"
 
 SB_META_DECLARE_KLASS(Sandbox::Shader, void)
 
@@ -92,8 +93,28 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::Resources)
 SB_META_METHOD(GetImage)
 SB_META_METHOD(GetTexture)
 SB_META_METHOD(GetShader)
+SB_META_PROPERTY_WO(BasePath, SetBasePath)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::SoundInstance, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::SoundInstance)
+SB_META_METHOD(Stop)
+SB_META_METHOD(FadeOut)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Sound, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Sound)
+SB_META_METHOD(Play)
+SB_META_METHOD(PlayEx)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::SoundManager, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::SoundManager)
+SB_META_METHOD(GetSound)
+SB_META_PROPERTY_RW_DEF(SoundsVolume)
+SB_META_PROPERTY_RW_DEF(MusicVolume)
+SB_META_PROPERTY_WO(SoundsDir,SetSoundsDir)
+SB_META_END_KLASS_BIND()
 
 
 namespace Sandbox {
@@ -108,6 +129,9 @@ namespace Sandbox {
         luabind::Class<Image>(lua);
         luabind::ExternClass<Resources>(lua);
         luabind::Class<Texture>(lua);
+        luabind::Class<SoundInstance>(lua);
+        luabind::Class<Sound>(lua);
+        luabind::ExternClass<SoundManager>(lua);
     }
 
 }

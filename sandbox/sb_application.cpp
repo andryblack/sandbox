@@ -9,6 +9,9 @@
 
 #include "sb_application.h"
 #include "sb_touch_info.h"
+#include "sb_sound.h"
+#include "sb_resources.h"
+#include "sb_graphics.h"
 
 #include "luabind/sb_luabind.h"
 
@@ -32,8 +35,6 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Application, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
-SB_META_PROPERTY_RW(SoundEnabled, GetSoundEnabled, SetSoundEnabled)
-SB_META_PROPERTY_RW(MusicEnabled, GetMusicEnabled, SetMusicEnabled)
 SB_META_END_KLASS_BIND()
 
 
@@ -54,6 +55,7 @@ namespace Sandbox {
 		m_sound = 0;
 		m_graphics = 0;
 		m_resources = 0;
+        m_sound_mgr = new SoundManager();
 		m_lua = 0;
 		m_frames = 0;
 		m_frames_time = 0;
@@ -72,6 +74,7 @@ namespace Sandbox {
 		delete m_main_thread;
 		delete m_main_scene;
 		delete m_lua;
+        delete m_sound_mgr;
 		delete m_resources;
 		delete m_graphics;
 	}
@@ -161,7 +164,10 @@ namespace Sandbox {
         sb_assert(m_render);
         sb_assert(m_image_decoder);
 		m_resources->Init(m_render, m_image_decoder);
+        m_sound_mgr->Init(m_sound,m_resources);
         luabind::SetValue(m_lua->GetVM(), "application.resources", m_resources);
+        luabind::SetValue(m_lua->GetVM(), "application.sound", m_sound_mgr);
+
 		m_lua->DoFile("load.lua");
 		if (!LoadResources(*m_resources))
 			return false;
