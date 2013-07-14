@@ -268,6 +268,15 @@ namespace Sandbox {
                 return stack<const T>::get(L,idx);
             }
         };
+        template <class T>
+        struct stack<T&> {
+//            static void push( lua_State* L, const T& val ) {
+//                stack<T>::push(L,val);
+//            }
+            static T& get( lua_State* L, int idx ) {
+                return *stack<T*>::get(L,idx);
+            }
+        };
         
         template <class T>
         struct stack<T*> {

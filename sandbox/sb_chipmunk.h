@@ -66,6 +66,7 @@ namespace Sandbox {
 			void Activate();
 			void Sleep();
 			bool IsStatic() const;
+            void UpdatePosition(float dt);
 
 			cpBody* get_body() const { return m_body;}
 		protected:
@@ -81,6 +82,11 @@ namespace Sandbox {
 		public:
 			StaticBody();
 		};
+        
+        class RogueBody : public Body {
+		public:
+			RogueBody();
+		};
 			
 		class Shape : public sb::enable_shared_from_this<Shape>{
 		public:
@@ -93,6 +99,8 @@ namespace Sandbox {
 			void SetElasticity(float e);
             long GetCollisionType() const;
             void SetCollisionType( long type );
+            unsigned int GetLayers() const;
+            void SetLayers(unsigned int);
 			
 			void set_space( Space* space) { m_space = space;}
 			Space* get_space() const { return m_space;}
@@ -143,6 +151,7 @@ namespace Sandbox {
         typedef sb::shared_ptr<CollisionHandler> CollisionHandlerPtr;
         
 		class Space : public Thread, public sb::enable_shared_from_this<Space> {
+            SB_META_OBJECT
 		public:
 			Space();
 			~Space();
@@ -343,10 +352,23 @@ namespace Sandbox {
 			BodyPtr		m_body;
             bool    m_apply_rotate;
 		};
+        
+        class InvertTransformAdapter : public Container {
+		public:
+			explicit InvertTransformAdapter( const BodyPtr& body );
+            void Draw(Graphics& g) const;
+            
+            void SetApplyRotate( bool apply ) { m_apply_rotate = apply; }
+            bool GetApplyRotate() const { return m_apply_rotate;}
+		private:
+			BodyPtr		m_body;
+            bool    m_apply_rotate;
+		};
 		
 		class DebugDrawImpl;
 		
 		class SpaceDebugDraw	: public SceneObject {
+            SB_META_OBJECT
 		public:
 			explicit SpaceDebugDraw( const SpacePtr& space );
 			~SpaceDebugDraw();
@@ -357,6 +379,7 @@ namespace Sandbox {
 		};
 		
 		class BodyDebugDraw	: public SceneObject {
+            SB_META_OBJECT
 		public:
 			explicit BodyDebugDraw( const BodyPtr& body );
 			~BodyDebugDraw();

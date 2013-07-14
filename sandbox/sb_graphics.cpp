@@ -39,12 +39,14 @@ namespace Sandbox {
             img->Fill(0xFFFFFFFF);
             m_fake_tex_white = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
 			img->Release();
+            m_fake_tex_white->DiscardInternal();
 		}
         if (!m_fake_tex_black) {
             GHL::Image* img = GHL_CreateImage(1, 1, GHL::IMAGE_FORMAT_RGBA);
             img->Fill(0xFF000000);
             m_fake_tex_black = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
 			img->Release();
+            m_fake_tex_black->DiscardInternal();
 		}
 	}
 	
@@ -505,7 +507,6 @@ namespace Sandbox {
 	void Graphics::SetViewport(const Recti& rect) {
 		Flush();
 		m_viewport = rect;
-		m_render->SetViewport(rect.x, rect.y, rect.w, rect.h);
 	}
 	
 	void Graphics::SetClipRect(const Recti& rect) {
@@ -538,7 +539,9 @@ namespace Sandbox {
 		SetViewMatrix(Matrix4f::identity());
 		SetViewport(Recti(0,0,render->GetWidth(),render->GetHeight()));
 		SetClipRect(GetViewport());
-	}
+        m_render->SetIndexBuffer(0);
+        m_render->SetVertexBuffer(0);
+    }
 	size_t Graphics::EndScene() {
 		sb_assert( (m_render!=0) && "scene not started" );
 		Flush();
@@ -564,6 +567,11 @@ namespace Sandbox {
 			BeginScene(render);
 		}
 	}
+    
+    const GHL::Texture* Graphics::Present( const TexturePtr& tex ) {
+        if (!tex) return 0;
+        return tex->Present(m_resources);
+    }
 	
 	
 	

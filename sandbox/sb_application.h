@@ -12,8 +12,9 @@
 #include <ghl_application.h>
 #include "sb_color.h"
 #include "sb_threads_mgr.h"
-#include "sb_scene.h"
+#include "sb_rt_scene.h"
 #include "sb_lua.h"
+#include "sbtl/sb_list.h"
 
 namespace Sandbox {
     
@@ -27,6 +28,8 @@ namespace Sandbox {
         void SetMusicEnabled( bool e );
         bool GetMusicEnabled() const;
 
+        void    AddScene( const RTScenePtr& scene );
+        void    RemoveScene( const RTScenePtr& scene );
   	protected:
 		Application();
 		virtual ~Application();
@@ -54,8 +57,7 @@ namespace Sandbox {
 		
 		void SetClearColor(const Color& c);
         
-        
-	private:
+ 	private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
 		GHL::Render*	m_render;
@@ -73,6 +75,7 @@ namespace Sandbox {
 		void DrawDebugInfo();
 		ThreadsMgr*		m_main_thread;
 		Scene*			m_main_scene;
+        sb::list<RTScenePtr>    m_rt_scenes;
 		
 		bool		m_clear_buffer;
 		Color		m_clear_color;

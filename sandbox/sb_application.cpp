@@ -12,6 +12,7 @@
 #include "sb_sound.h"
 #include "sb_resources.h"
 #include "sb_graphics.h"
+#include "sbtl/sb_algorithm.h"
 
 #include "luabind/sb_luabind.h"
 
@@ -35,6 +36,8 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Application, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
+SB_META_METHOD(AddScene)
+SB_META_METHOD(RemoveScene)
 SB_META_END_KLASS_BIND()
 
 
@@ -198,6 +201,16 @@ namespace Sandbox {
             m_main_scene->Update(dt);
 		m_main_thread->Update(dt);
 		Update(dt);
+        
+        // update targets
+        for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
+            (*it)->Update(dt);
+        }
+        
+        for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
+            (*it)->Draw(m_render, *m_graphics);
+        }
+        
 		m_render->BeginScene(0);
 		if (m_clear_buffer)
 			m_render->Clear(m_clear_color.r,
@@ -208,6 +221,7 @@ namespace Sandbox {
 		DrawFrame(*m_graphics);
 		size_t batches = m_graphics->EndScene();
         m_batches = m_batches * 0.875f + 0.125f*batches;    /// interpolate 4 frames
+        m_render->SetupBlend(true,GHL::BLEND_FACTOR_SRC_ALPHA,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
 		DrawDebugInfo();
 		m_render->EndScene();
         
@@ -235,8 +249,24 @@ namespace Sandbox {
         m_render->DebugDrawText( 10, 21 , m_lua->GetMemoryUsed().c_str() );
         ::snprintf(buf,128,"batches:%0.2f",m_batches);
         m_render->DebugDrawText( 10, 32 , buf );
-        m_render->DebugDrawText( 10, 43, (sb::string("tex:")+format_memory(m_render->GetTexturesMemory())).c_str());
+        m_render->DebugDrawText( 10, 43,
+                                (sb::string("res:")+format_memory(m_resources->GetMemoryUsed())+
+                                 sb::string("/")+format_memory(m_resources->GetMemoryLimit())).c_str());
+        size_t render_mem = m_render->GetMemoryUsage();
+        if (render_mem)
+            m_render->DebugDrawText( 10, 54,
+                                    (sb::string("tex:")+format_memory(render_mem)).c_str() );
 	}
+    
+    void    Application::AddScene( const RTScenePtr& scene ) {
+        m_rt_scenes.push_back(scene);
+    }
+    void    Application::RemoveScene( const RTScenePtr& scene ) {
+        sb::list<RTScenePtr>::iterator it = sb::find(m_rt_scenes.begin(),m_rt_scenes.end(),scene);
+        if (it!=m_rt_scenes.end()) {
+            m_rt_scenes.erase(it);
+        }
+    }
 	
 	void Application::SetClearColor(const Color& c) {
 		m_clear_buffer = true;

@@ -8,6 +8,7 @@
  */
 
 #include "sb_scene.h"
+#include "sb_graphics.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::Scene, Sandbox::Container)
 

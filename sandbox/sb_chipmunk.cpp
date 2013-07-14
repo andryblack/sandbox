@@ -13,6 +13,10 @@
 #include "sb_graphics.h"
 #include "sb_log.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::Chipmunk::Space, Sandbox::Thread)
+SB_META_DECLARE_OBJECT(Sandbox::Chipmunk::SpaceDebugDraw, Sandbox::SceneObject)
+SB_META_DECLARE_OBJECT(Sandbox::Chipmunk::BodyDebugDraw, Sandbox::SceneObject)
+
 namespace Sandbox {
 
     static const char* MODULE = "Sandbox:Chipmunk";
@@ -233,7 +237,12 @@ namespace Sandbox {
         void Shape::SetCollisionType( long type ) {
             cpShapeSetCollisionType( m_shape, type );
         }
-        
+        unsigned int Shape::GetLayers() const {
+            return cpShapeGetLayers(m_shape);
+        }
+        void Shape::SetLayers(unsigned int v) {
+            cpShapeSetLayers(m_shape, v);
+        }
        	
 			
 		CircleShape::CircleShape( const BodyPtr& body, float radius, const Vector2f& pos ) {
@@ -384,8 +393,14 @@ namespace Sandbox {
 		bool Body::IsStatic() const{
 			return cpBodyIsStatic(m_body)==cpTrue;
 		}
+        void Body::UpdatePosition(float dt) {
+            cpBodyUpdatePosition(m_body, dt);
+        }
 
 		StaticBody::StaticBody() : Body(cpBodyNewStatic()){
+		}
+        
+        RogueBody::RogueBody() : Body(cpBodyNew(INFINITY,INFINITY)){
 		}
 
 		
@@ -667,6 +682,7 @@ namespace Sandbox {
 		TransformAdapter::TransformAdapter( const BodyPtr& body ) {
 			m_body = body;
             m_apply_rotate = true;
+            Update(0);
 		}
 		
 		void TransformAdapter::Update(float ) {
@@ -674,6 +690,25 @@ namespace Sandbox {
             if (m_apply_rotate)
                 SetAngle( m_body->GetAngle() );
 		}
+        
+        InvertTransformAdapter::InvertTransformAdapter( const BodyPtr& body ) {
+			m_body = body;
+            m_apply_rotate = true;
+       }
+		
+
+        
+        void InvertTransformAdapter::Draw(Graphics& g) const {
+            Transform2d old = g.GetTransform();
+            Transform2d tr = old;
+            if (m_apply_rotate) {
+                tr.rotate(-m_body->GetAngle());
+            }
+            tr.translate(-m_body->GetPos());
+            g.SetTransform(tr);
+            DrawChilds(g);
+            g.SetTransform(old);
+        }
 		
 		
 		
@@ -707,10 +742,14 @@ namespace Sandbox {
 				g->DrawLine(posA,posB,Color(0,1,0,1));
 			}
 			static void SpaceShapeIteratorFunc(cpShape *shape, void *data) {
-				//Graphics* g = reinterpret_cast<Graphics*> (data);
+				Graphics* g = reinterpret_cast<Graphics*> (data);
 				cpBody* b = cpShapeGetBody(shape);
-				if (b && cpBodyIsStatic(b)) {
+                cpSpace* s = cpShapeGetSpace(shape);
+                if (b && (cpBodyIsStatic(b) || cpSpaceContainsBody(s,b)==cpFalse)) {
+                    Transform2d tr = g->GetTransform();
+                    g->SetTransform(tr.translated(vect(cpBodyGetPos(b))).rotated(float(cpBodyGetAngle(b))));
 					BodyShapeIteratorFunc(b,shape,data);
+                    g->SetTransform(tr);
 				}
 			}
 			static void BodyShapeIteratorFunc(cpBody *, cpShape *shape, void *data) {
@@ -728,7 +767,11 @@ namespace Sandbox {
 					}
 					points.push_back(points.front());
 					g->DrawLineStrip(points);
-				} 
+				} else if (CP_SEGMENT_SHAPE==shape->klass_private->type) {
+                    Vector2f posA = vect(cpSegmentShapeGetA(shape));
+                    Vector2f posB = vect(cpSegmentShapeGetB(shape));
+					g->DrawLine(posA,posB);
+				}
 			}
 		};
 		

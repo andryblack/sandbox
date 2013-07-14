@@ -31,6 +31,8 @@ namespace Sandbox {
 	Resources::Resources(GHL::VFS* vfs) :
 		m_vfs(vfs),m_render(0),m_image(0) {
 			
+        m_memory_limit = 20 * 1024 * 1024;
+        m_memory_used = 0;
 	}
 	
     void Resources::Init(GHL::Render* render,GHL::ImageDecoder* image) {
@@ -235,7 +237,8 @@ namespace Sandbox {
 #ifdef SB_RESOURCES_CACHE
 		m_textures[fn]=ptr;
 #endif
-		return ptr;
+        m_managed_textures.push_back(ptr);
+        return ptr;
 	}
     
     GHL::Texture* Resources::LoadTexture( const sb::string& filename ) {
@@ -259,6 +262,16 @@ namespace Sandbox {
 		}
 		GHL::UInt32 tw = next_pot( img->GetWidth() );
         GHL::UInt32 th = next_pot( img->GetHeight() );
+        
+        size_t mem = tw * th * bpp;
+        size_t need_release = 0;
+        if ((m_memory_used+mem)>m_memory_limit) {
+            need_release = m_memory_used + mem - m_memory_limit;
+        }
+        if (need_release) {
+            FreeMemory(need_release, false);
+        }
+        
         bool setData = ( tw == img->GetWidth() ) && ( th == img->GetHeight() );
 		GHL::Image* fillData = setData ? 0 : GHL_CreateImage(tw,th,img->GetFormat());
         if (fillData) fillData->Fill(0);
@@ -274,6 +287,8 @@ namespace Sandbox {
 			bpp = 4;
 		}
 		
+        m_memory_used += texture->GetWidth() * texture->GetHeight() * bpp;
+        
 		if (!setData) {
             fillData->Release();
             LogWarning(MODULE) << "image " << filename << "." << ext<< " NPOT " <<
@@ -281,11 +296,12 @@ namespace Sandbox {
             tw << "x" << th;
             img->Convert(ifmt);
             texture->SetData(0,0,img);
-            texture->DiscardInternal();
         } else {
 			//LogInfo(MODULE) << "Loaded image : " << filename << "." << ext << " " << img->GetWidth() << "x" << img->GetHeight() ;
         }
+        texture->DiscardInternal();
         img->Release();
+        
         return texture;
     }
     
@@ -402,19 +418,57 @@ namespace Sandbox {
     sb::shared_ptr<Atlaser> Resources::CreateAtlaser(int w,int h) {
 		return sb::shared_ptr<Atlaser>(new Atlaser(this,w,h));
 	}
+    
+    RenderTargetPtr Resources::CreateRenderTarget(int w, int h, bool alpha, bool depth) {
+        sb_assert(w>0);
+        sb_assert(h>0);
+        GHL::UInt32 nw = next_pot(w);
+        GHL::UInt32 nh = next_pot(h);
+        sb_assert(m_render);
+        RenderTarget* rt = new RenderTarget( m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth) );
+        return RenderTargetPtr(rt);
+    }
+    
+    size_t    Resources::FreeMemory(size_t need_release,bool full) {
+        size_t memory_used = 0;
+        for (sb::list<sb::weak_ptr<Texture> >::iterator it = m_managed_textures.begin();it!=m_managed_textures.end();) {
+            TexturePtr t = it->lock();
+            sb::list<sb::weak_ptr<Texture> >::iterator next = it;
+            ++next;
+            if (t) {
+                memory_used += t->GetMemoryUsage();
+                if (need_release) {
+                    size_t lt = t->GetLiveTicks();
+                    if ( lt && lt < m_live_ticks ) {
+                        size_t released = t->Release();
+                        memory_used-=released;
+                        if (released>need_release) {
+                            need_release = 0;
+                        } else {
+                            need_release -= released;
+                        }
+                        if (released) {
+                            m_managed_textures.push_back(t);
+                            next = m_managed_textures.erase(it);
+                        }
+                    }
+                } else {
+                    if (!full) break;
+                }
+            } else {
+                next = m_managed_textures.erase(it);
+            }
+            it = next;
+        }
+        return memory_used;
+    }
 
 	void    Resources::ProcessMemoryMgmt() {
         ++m_live_ticks;
-#ifdef SB_RESOURCES_CACHE
-        for (sb::map<sb::string,sb::weak_ptr<Texture> >::iterator it = m_textures.begin();it!=m_textures.end();++it) {
-            TexturePtr t = it->second.lock();
-            if (t) {
-                size_t lt = t->GetLiveTicks();
-                if ( lt && lt < m_live_ticks ) {
-                    t->Release();
-                }
-            }
+        size_t need_release = 0;
+        if (m_memory_used>m_memory_limit) {
+            need_release = m_memory_used - m_memory_limit;
         }
-#endif
+        m_memory_used = FreeMemory(need_release,true);
     }
 }

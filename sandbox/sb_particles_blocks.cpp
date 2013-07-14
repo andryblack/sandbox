@@ -7,6 +7,7 @@
 //
 
 #include "sb_particles.h"
+#include <cstdlib>
 
 namespace Sandbox {
     

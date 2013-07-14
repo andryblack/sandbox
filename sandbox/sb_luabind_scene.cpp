@@ -23,6 +23,8 @@
 #include "sb_container_transform3d.h"
 #include "sb_scene.h"
 #include "sb_touch_info.h"
+#include "sb_debug_geometry.h"
+#include "sb_rt_scene.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::SceneObject)
 SB_META_PROPERTY_RW(Visible,GetVisible,SetVisible)
@@ -66,6 +68,17 @@ SB_META_PROPERTY_RW(Text,GetText,SetText)
 SB_META_PROPERTY_RW(Align,GetAlign,SetAlign)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::CircleObject)
+SB_META_CONSTRUCTOR((const Sandbox::Vector2f&,float))
+SB_META_PROPERTY_RW_DEF(Pos)
+SB_META_PROPERTY_RW_DEF(R)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::LineObject)
+SB_META_CONSTRUCTOR((const Sandbox::Vector2f&,const Sandbox::Vector2f&))
+SB_META_PROPERTY_RW_DEF(A)
+SB_META_PROPERTY_RW_DEF(B)
+SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Container)
 SB_META_CONSTRUCTOR(())
@@ -146,6 +159,11 @@ SB_META_END_KLASS_BIND()
 SB_META_BEGIN_KLASS_BIND(Sandbox::Scene)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::RTScene)
+SB_META_CONSTRUCTOR((const Sandbox::RenderTargetPtr&))
+SB_META_PROPERTY_RO(Target, GetTarget)
+SB_META_END_KLASS_BIND()
+
 namespace Sandbox {
     
     class WidgetWrapper : public Widget , public luabind::wrapper {
@@ -183,6 +201,8 @@ namespace Sandbox {
         luabind::Class<FillRect>(lua);
         luabind::Class<Background>(lua);
         luabind::Class<Label>(lua);
+        luabind::Class<CircleObject>(lua);
+        luabind::Class<LineObject>(lua);
         luabind::Class<Container>(lua);
         luabind::RawClass<TouchInfo>(lua);
         luabind::Enum<TouchInfo::Type>(lua);
@@ -195,6 +215,7 @@ namespace Sandbox {
         luabind::Class<ContainerVisible>(lua);
         luabind::Class<ContainerTransform3d>(lua);
         luabind::ExternClass<Scene>(lua);
+        luabind::Class<RTScene>(lua);
     }
 
 }

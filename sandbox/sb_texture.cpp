@@ -59,11 +59,21 @@ namespace Sandbox {
         m_tiled = t;
     }
     
-    void Texture::Release() {
-        if (m_file.empty()) return;
-        if (m_texture) m_texture->Release();
+    size_t Texture::Release() {
+        if (m_file.empty()) return 0;
+        size_t res = 0;
+        if (m_texture) {
+            res = m_texture->GetMemoryUsage();
+            m_texture->Release();
+        }
         m_texture = 0;
         m_live_ticks = 0;
+        return res;
+    }
+    
+    size_t Texture::GetMemoryUsage() const {
+        if (m_texture) return m_texture->GetMemoryUsage();
+        return 0;
     }
         
 }

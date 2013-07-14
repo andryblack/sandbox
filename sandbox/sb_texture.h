@@ -44,7 +44,8 @@ namespace Sandbox {
 	    GHL::UInt32 GetOriginalWidth() const { return m_original_w; }
         GHL::UInt32 GetOriginalHeight() const { return m_original_h; }
         size_t GetLiveTicks() const { return m_live_ticks; }
-        void Release();
+        size_t Release();
+        size_t GetMemoryUsage() const;
 	};
 	typedef sb::shared_ptr<Texture> TexturePtr;
 }

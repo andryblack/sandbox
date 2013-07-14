@@ -18,14 +18,18 @@ namespace Sandbox {
     template <class T>
     class VectorData : public RefCounter<GHL::Data> {
     private:
-        sb::vector<T>   m_data;
+        typedef sb::vector<T> container_t;
+        container_t   m_data;
     public:
+        
+        typedef typename container_t::value_type value_type;
+        
         VectorData(){}
-        explicit VectorData( const sb::vector<T>& data ) : m_data(data) {
+        explicit VectorData( const container_t& data ) : m_data(data) {
             
         }
-        sb::vector<T>& vector() { return m_data; }
-        const sb::vector<T>& vector() const { return m_data; }
+        container_t& vector() { return m_data; }
+        const container_t& vector() const { return m_data; }
         
         /// Data size
 		virtual GHL::UInt32 GHL_CALL	GetSize() const {
@@ -50,6 +54,9 @@ namespace Sandbox {
         virtual GHL::Data* GHL_CALL  Clone() const {
             return new VectorData(m_data);
         }
+        
+        void push_back( const value_type& v ) { m_data.push_back(v); }
+        size_t size() const { return m_data.size(); }
     };
     
 }

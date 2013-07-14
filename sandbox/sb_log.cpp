@@ -27,7 +27,7 @@ namespace Sandbox {
         GHL_Log(m_level, m_stream.str().c_str());
     }
     
-    void format_memory( char* buf, size_t size, GHL::UInt32 mem,const char* caption ) {
+    void format_memory( char* buf, size_t size, size_t mem,const char* caption ) {
         if ( mem > 1024*1024 ) {
             ::snprintf(buf, size, "%s%0.2fM", caption,float(mem)/(1024*1024));
         } else if ( mem > 1024 ) {
@@ -38,7 +38,7 @@ namespace Sandbox {
         }
     }
     
-    sb::string format_memory( GHL::UInt32 mem ) {
+    sb::string format_memory( size_t mem ) {
         char buf[64];
         format_memory(buf, 64, mem, "");
         return sb::string(buf);

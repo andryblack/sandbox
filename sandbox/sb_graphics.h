@@ -126,6 +126,7 @@ namespace Sandbox {
 		/// get "native" render
 		GHL::Render* BeginNative();
 		void EndNative(GHL::Render* render);
+        const GHL::Texture* Present( const TexturePtr& tex );
 		
         GHL::UInt32 GetScreenWidth() const { if (m_render) return m_render->GetWidth(); return 0;}
 		GHL::UInt32 GetScreenHeight() const { if (m_render) return m_render->GetHeight(); return 0;}

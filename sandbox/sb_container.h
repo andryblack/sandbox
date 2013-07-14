@@ -22,7 +22,7 @@ namespace Sandbox {
 		~Container();
 		
 		void Reserve(size_t size);
-		void Draw(Graphics& g) const;
+		virtual void Draw(Graphics& g) const;
 		void AddObject(const SceneObjectPtr& o);
 		void InsertBefore(const SceneObjectPtr& ob,const SceneObjectPtr& o);
         void RemoveObject(const SceneObjectPtr& obj);

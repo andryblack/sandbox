@@ -71,8 +71,8 @@ namespace Sandbox {
         }
     };
     
-    void format_memory( char* buf, size_t size, GHL::UInt32 mem,const char* caption );
-    sb::string format_memory( GHL::UInt32 mem );
+    void format_memory( char* buf, size_t size, size_t mem,const char* caption );
+    sb::string format_memory( size_t mem );
 }
 
 #endif /*SB_LOG_H_INCLUDED*/

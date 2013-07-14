@@ -17,12 +17,46 @@
 #include "sb_color.h"
 #include "sb_rect.h"
 #include "sb_sound.h"
+#include "sb_rendertatget.h"
 
 SB_META_DECLARE_KLASS(Sandbox::Shader, void)
 
+static int sb_color_constructor(lua_State* L) {
+    Sandbox::Color c;
+    int t = lua_type(L, 2);
+    if (t == LUA_TTABLE) {
+        LUA_CHECK_STACK(0)
+        size_t indx = 0;
+        lua_pushnil(L);
+        while (lua_next(L, 2) != 0) {
+            if (indx==0) c.r = float(lua_tonumber(L, -1));
+            else if (indx==1) c.g = float(lua_tonumber(L, -1));
+            else if (indx==2) c.b = float(lua_tonumber(L, -1));
+            else if (indx==3) c.a = float(lua_tonumber(L, -1));
+            ++indx;
+            /* removes 'value'; keeps 'key' for next iteration */
+            lua_pop(L, 1);
+        }
+    } else if (t == LUA_TSTRING) {
+        c = Sandbox::Color::FromString(lua_tostring(L, 2));
+    } else if (t == LUA_TNUMBER) {
+        c.r = float(lua_tonumber(L, 2));
+        c.g = float(lua_tonumber(L, 3));
+        c.b = float(lua_tonumber(L, 4));
+        c.a = float(lua_tonumber(L, 5));
+    } else {
+        Sandbox::luabind::lua_argerror(L, 2, "color", 0);
+        return 0;
+    }
+    
+    
+    Sandbox::luabind::stack<Sandbox::Color>::push(L, c);
+    return 1;
+}
+
 SB_META_DECLARE_KLASS(Sandbox::Color, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Color)
-SB_META_CONSTRUCTOR((float,float,float,float))
+bind( constructor(&sb_color_constructor) );
 SB_META_PROPERTY(r)
 SB_META_PROPERTY(g)
 SB_META_PROPERTY(b)
@@ -55,6 +89,11 @@ SB_META_PROPERTY_RO(Width, GetOriginalWidth)
 SB_META_PROPERTY_RO(Height, GetOriginalHeight)
 SB_META_PROPERTY_RW(Filtered, GetFiltered, SetFiltered)
 SB_META_PROPERTY_RW(Tiled,GetTiled, SetTiled)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::RenderTarget, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::RenderTarget)
+SB_META_PROPERTY_RO(Texture, GetTexture)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Image, void)
@@ -93,6 +132,7 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::Resources)
 SB_META_METHOD(GetImage)
 SB_META_METHOD(GetTexture)
 SB_META_METHOD(GetShader)
+SB_META_METHOD(CreateRenderTarget)
 SB_META_PROPERTY_WO(BasePath, SetBasePath)
 SB_META_END_KLASS_BIND()
 
@@ -129,6 +169,7 @@ namespace Sandbox {
         luabind::Class<Image>(lua);
         luabind::ExternClass<Resources>(lua);
         luabind::Class<Texture>(lua);
+        luabind::Class<RenderTarget>(lua);
         luabind::Class<SoundInstance>(lua);
         luabind::Class<Sound>(lua);
         luabind::ExternClass<SoundManager>(lua);

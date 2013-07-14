@@ -13,8 +13,10 @@
 #include "sb_image.h"
 #include "sb_shader.h"
 #include "sb_atlaser.h"
+#include "sb_rendertatget.h"
 #include <sbtl/sb_string.h>
 #include <sbtl/sb_map.h>
+#include <sbtl/sb_list.h>
 
 namespace GHL {
 	struct VFS;
@@ -62,6 +64,11 @@ namespace Sandbox {
         
         size_t  GetLiveTicks() const { return m_live_ticks; }
         
+        size_t  GetMemoryLimit() const { return m_memory_limit; }
+        size_t  GetMemoryUsed() const { return m_memory_used; }
+        
+        RenderTargetPtr CreateRenderTarget(int w, int h, bool alpha, bool depth);
+        
         void    ProcessMemoryMgmt();
     private:
 		GHL::VFS* m_vfs;
@@ -82,7 +89,11 @@ namespace Sandbox {
 		sb::map<sb::string,GHL::FragmentShader*>    m_fshaders;
 		sb::map<sb::string,sb::weak_ptr<Shader> >   m_shaders;
 #endif
-        size_t  m_live_ticks;
+        size_t    m_live_ticks;
+        size_t    m_memory_limit;
+        size_t    m_memory_used;
+        sb::list<sb::weak_ptr<Texture> >   m_managed_textures;
+        size_t    FreeMemory(size_t mem,bool full);
 	};
 }
 

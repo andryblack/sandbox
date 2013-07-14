@@ -21,7 +21,7 @@ namespace Sandbox {
         SB_META_OBJECT
 	public:
         /// draw scene
-		void Draw(Graphics& g) const;
+		virtual void Draw(Graphics& g) const;
         /// handle touch
         bool HandleTouch( const TouchInfo& touch );
         /// update
