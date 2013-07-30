@@ -110,7 +110,7 @@ namespace Sandbox {
                 }
                 texture->SetData(0,0,subimg);
                 subimg->Release();
-                output.push_back(Image(TexturePtr(new Texture(texture)),0,0,float(ipw),float(iph)));
+                output.push_back(Image(sb::make_shared<Texture>(texture),0,0,float(ipw),float(iph)));
                 output.back().SetHotspot(Vector2f(-float(x),-float(y)));
                 x+=ipw;
             }
@@ -207,8 +207,7 @@ namespace Sandbox {
                                                         th,alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,
                                                         setData ? data : 0);
 		if (data && !setData) texture->SetData(0,0,data);
-		TexturePtr ptr(new Texture(texture,w,h));
-		return ptr;
+        return sb::make_shared<Texture>(texture,w,h);
 	}
 	
 	
@@ -232,7 +231,7 @@ namespace Sandbox {
             return TexturePtr();
         }
         
-        TexturePtr ptr(new Texture(fn,img_w,img_h));
+        TexturePtr ptr = sb::make_shared<Texture>(fn,need_premultiply,img_w,img_h);
 		
 #ifdef SB_RESOURCES_CACHE
 		m_textures[fn]=ptr;
@@ -333,7 +332,7 @@ namespace Sandbox {
         }
 		GHL::UInt32 imgW = texture->GetOriginalWidth();
 		GHL::UInt32 imgH = texture->GetOriginalHeight();
-		return ImagePtr(new Image(texture,0,0,float(imgW),float(imgH)));
+        return sb::make_shared<Image>(texture,0,0,float(imgW),float(imgH));
 	}
 	
 	ShaderPtr Resources::GetShader(const char* vfn,const char* ffn) {
@@ -407,7 +406,7 @@ namespace Sandbox {
 			LogError(MODULE) << "error creating shader program from " << vfilename << " , " << ffilename ;
 			//return ShaderPtr();
 		}
-		ShaderPtr res( new Shader(sp) );
+		ShaderPtr res = sb::make_shared<Shader>(sp);
 #ifdef SB_RESOURCES_CACHE
 		m_shaders[name]=res;
 #endif
@@ -416,8 +415,8 @@ namespace Sandbox {
 	
 	
     sb::shared_ptr<Atlaser> Resources::CreateAtlaser(int w,int h) {
-		return sb::shared_ptr<Atlaser>(new Atlaser(this,w,h));
-	}
+        return sb::make_shared<Atlaser>(this,w,h);
+    }
     
     RenderTargetPtr Resources::CreateRenderTarget(int w, int h, bool alpha, bool depth) {
         sb_assert(w>0);
@@ -425,8 +424,7 @@ namespace Sandbox {
         GHL::UInt32 nw = next_pot(w);
         GHL::UInt32 nh = next_pot(h);
         sb_assert(m_render);
-        RenderTarget* rt = new RenderTarget( m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth) );
-        return RenderTargetPtr(rt);
+        return sb::make_shared<RenderTarget>(m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth));
     }
     
     size_t    Resources::FreeMemory(size_t need_release,bool full) {

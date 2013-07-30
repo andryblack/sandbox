@@ -21,7 +21,7 @@ namespace Sandbox {
 	}
 	
 	EventPtr EventFunction::Create(const sb::function<void()>& f) {
-		return EventPtr( new EventFunction(f) );
+        return sb::make_shared<EventFunction>(f);
 	}
 
 }
