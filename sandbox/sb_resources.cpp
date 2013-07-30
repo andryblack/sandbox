@@ -211,7 +211,7 @@ namespace Sandbox {
 	}
 	
 	
-	TexturePtr Resources::GetTexture(const char* filename) {
+	TexturePtr Resources::GetTexture(const char* filename, bool need_premultiply) {
         if (!filename)
             return TexturePtr();
         
@@ -240,7 +240,7 @@ namespace Sandbox {
         return ptr;
 	}
     
-    GHL::Texture* Resources::LoadTexture( const sb::string& filename ) {
+    GHL::Texture* Resources::LoadTexture( const sb::string& filename , bool premultiply ) {
         const char* ext = "";
 		GHL::Image* img = LoadImage(filename.c_str(),&ext);
 		if (!img) {
@@ -253,6 +253,9 @@ namespace Sandbox {
             bpp = 3;
 		} else if (img->GetFormat()==GHL::IMAGE_FORMAT_RGBA) {
 			tfmt = GHL::TEXTURE_FORMAT_RGBA;
+            if (premultiply) {
+                img->PremultiplyAlpha();
+            }
             bpp = 4;
 		} else {
 			img->Release();
@@ -325,8 +328,8 @@ namespace Sandbox {
 		return true;
 	}
 	
-	ImagePtr Resources::GetImage(const char* filename) {
-        TexturePtr texture = GetTexture( filename );
+	ImagePtr Resources::GetImage(const char* filename,bool need_premultiply) {
+        TexturePtr texture = GetTexture( filename , need_premultiply);
         if (!texture) {
             return ImagePtr();
         }

@@ -43,8 +43,8 @@ namespace Sandbox {
 		void SetBasePath(const char* path);
 		GHL::DataStream* OpenFile(const char* fn);
 		
-		TexturePtr GetTexture(const char* filename);
-		ImagePtr GetImage(const char* filename);
+		TexturePtr GetTexture(const char* filename, bool need_premultiply);
+		ImagePtr GetImage(const char* filename, bool need_premultiply);
 		bool LoadImageSubdivs(const char* filename, sb::vector<Image>& output);
 		
 		ShaderPtr GetShader(const char* vfn,const char* ffn);
@@ -60,7 +60,7 @@ namespace Sandbox {
                                  GHL::UInt32 h, 
                                  bool alpha, 
                                  const GHL::Image* data);
-        GHL::Texture* LoadTexture( const sb::string& filename );
+        GHL::Texture* LoadTexture( const sb::string& filename , bool premultiply);
         
         size_t  GetLiveTicks() const { return m_live_ticks; }
         

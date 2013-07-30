@@ -15,12 +15,14 @@ namespace Sandbox {
     const size_t TEXTURE_TTL = 16;
     
     
-    Texture::Texture(const sb::string& file, GHL::UInt32 w, GHL::UInt32 h) :
+    Texture::Texture(const sb::string& file, bool premul, GHL::UInt32 w, GHL::UInt32 h) :
     m_texture(0),m_file(file),m_original_w(w),m_original_h(h),m_live_ticks(0),m_filtered(false),m_tiled(false){
+        m_need_premultiply = premul;
     }
     
     Texture::Texture(GHL::Texture* tex, GHL::UInt32 w, GHL::UInt32 h) :
     m_texture(tex),m_file(),m_original_w(w),m_original_h(h),m_live_ticks(0),m_filtered(false),m_tiled(false){
+        m_need_premultiply = false;
         if (m_texture) {
             if (m_original_w==0) m_original_w = m_texture->GetWidth();
             if (m_original_h==0) m_original_h = m_texture->GetHeight();
@@ -33,7 +35,7 @@ namespace Sandbox {
     
     const GHL::Texture* Texture::Present(Resources* resources) const {
         if (!m_texture) {
-            m_texture = resources->LoadTexture( m_file );
+            m_texture = resources->LoadTexture( m_file , m_need_premultiply );
             m_texture->SetMinFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
             m_texture->SetMagFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
             m_texture->SetWrapModeU(m_tiled?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);

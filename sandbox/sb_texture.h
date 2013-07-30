@@ -32,8 +32,9 @@ namespace Sandbox {
         mutable size_t          m_live_ticks;
         bool    m_filtered;
         bool    m_tiled;
+        bool    m_need_premultiply;
 	public:
-		explicit Texture(const sb::string& file, GHL::UInt32 w=0, GHL::UInt32 h=0);
+		explicit Texture(const sb::string& file, bool premul, GHL::UInt32 w, GHL::UInt32 h);
         explicit Texture(GHL::Texture* tes,GHL::UInt32 w=0, GHL::UInt32 h=0);
 		~Texture();
 		const GHL::Texture* Present(Resources* resources) const;
