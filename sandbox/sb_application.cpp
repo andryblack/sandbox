@@ -8,11 +8,13 @@
  */
 
 #include "sb_application.h"
-#include "sb_touch_info.h"
 #include "sb_sound.h"
 #include "sb_resources.h"
 #include "sb_graphics.h"
-#include "sbtl/sb_algorithm.h"
+#include "rocket/sb_rocket_context.h"
+#include "rocket/sb_rocket_bind.h"
+#include <sbstd/sb_algorithm.h>
+#include "sb_lua_context.h"
 
 #include "luabind/sb_luabind.h"
 
@@ -20,6 +22,7 @@
 #include <ghl_vfs.h>
 #include <ghl_sound.h>
 #include <ghl_render.h>
+#include <ghl_system.h>
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -69,15 +72,17 @@ namespace Sandbox {
         m_batches = 0.0f;
         m_sound_enabled = true;
         m_music_enabled = true;
+        m_rocket = 0;
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
 	}
 	
 	Application::~Application() {
-		delete m_main_thread;
+        delete m_main_thread;
 		delete m_main_scene;
 		delete m_lua;
-        delete m_sound_mgr;
+        delete m_rocket;
+		delete m_sound_mgr;
 		delete m_resources;
 		delete m_graphics;
 	}
@@ -87,6 +92,7 @@ namespace Sandbox {
         register_resources(lua->GetVM());
         register_scene(lua->GetVM());
         register_controller(lua->GetVM());
+        RocketBind(lua->GetVM());
     }
 	
     void GHL_CALL Application::Initialize() {
@@ -133,31 +139,32 @@ namespace Sandbox {
 			base_path+="/";
 		m_lua->SetBasePath(base_path.c_str());
 		
+        LuaContextPtr ctx = m_lua->GetGlobalContext();
+        
         luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
-        luabind::SetValue(m_lua->GetVM(), "application.app", this);
+        ctx->SetValue("application.app", this);
         luabind::RawClass<GHL::Settings>(m_lua->GetVM());
-        luabind::SetValue(m_lua->GetVM(), "settings", settings);
+        ctx->SetValue("settings", settings);
 		
 #ifdef GHL_PLATFORM_IOS
-        luabind::SetValue(m_lua->GetVM(), "platform.os", "iOS");
+        ctx->SetValue("platform.os", "iOS");
 #endif
 
 #ifdef GHL_PLATFORM_MAC
-        luabind::SetValue(m_lua->GetVM(), "platform.os", "OSX");
+        ctx->SetValue("platform.os", "OSX");
 #endif
 
 #ifdef GHL_PLATFORM_WIN
-        luabind::SetValue(m_lua->GetVM(), "platform.os", "WIN32");
+        ctx->SetValue("platform.os", "WIN32");
 #endif
     
 #ifdef GHL_PLATFORM_FLASH
-        luabind::SetValue(m_lua->GetVM(), "platform.os", "FLASH");
+        ctx->SetValue("platform.os", "FLASH");
 #endif
         
 		BindModules( m_lua );
 		m_lua->DoFile("settings.lua");
-        
-        luabind::SetValue(m_lua->GetVM(), "settings", (GHL::Settings*)(0));
+        ctx->SetValue("settings", (GHL::Settings*)(0));
 	}
 	///
 	bool GHL_CALL Application::Load() {
@@ -168,19 +175,26 @@ namespace Sandbox {
         sb_assert(m_image_decoder);
 		m_resources->Init(m_render, m_image_decoder);
         m_sound_mgr->Init(m_sound,m_resources);
-        luabind::SetValue(m_lua->GetVM(), "application.resources", m_resources);
-        luabind::SetValue(m_lua->GetVM(), "application.sound", m_sound_mgr);
+        
+        LuaContextPtr ctx = m_lua->GetGlobalContext();
+        
+        ctx->SetValue("application.resources", m_resources);
+        ctx->SetValue("application.sound", m_sound_mgr);
 
 		m_lua->DoFile("load.lua");
 		if (!LoadResources(*m_resources))
 			return false;
 		m_main_scene = new Scene();
-        luabind::SetValue(m_lua->GetVM(), "application.scene", m_main_scene);
+        ctx->SetValue("application.scene", m_main_scene);
 		m_main_thread = new ThreadsMgr();
-        luabind::SetValue(m_lua->GetVM(), "application.thread", m_main_thread);
-        luabind::SetValue(m_lua->GetVM(), "application.size.width", m_render->GetWidth() );
-        luabind::SetValue(m_lua->GetVM(), "application.size.height", m_render->GetHeight() );
+        ctx->SetValue("application.thread", m_main_thread);
+        ctx->SetValue("application.size.width", m_render->GetWidth() );
+        ctx->SetValue("application.size.height", m_render->GetHeight() );
         m_graphics->Load(m_render);
+        
+        m_rocket = new RocketContext(m_resources,m_lua);
+        ctx->SetValue("application.rocket", m_rocket );
+        
 		OnLoaded();
 		m_lua->DoFile("main.lua");
 		return true;
@@ -201,6 +215,7 @@ namespace Sandbox {
             m_main_scene->Update(dt);
 		m_main_thread->Update(dt);
 		Update(dt);
+        m_rocket->Update(dt);
         
         // update targets
         for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
@@ -219,6 +234,8 @@ namespace Sandbox {
 							m_clear_color.a,0);
 		m_graphics->BeginScene(m_render);
 		DrawFrame(*m_graphics);
+        m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
+        m_rocket->Draw(*m_graphics);
 		size_t batches = m_graphics->EndScene();
         m_batches = m_batches * 0.875f + 0.125f*batches;    /// interpolate 4 frames
         m_render->SetupBlend(true,GHL::BLEND_FACTOR_SRC_ALPHA,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
@@ -310,16 +327,16 @@ namespace Sandbox {
 	void GHL_CALL Application::OnChar( GHL::UInt32 ) {
 	}
 	///
-	void GHL_CALL Application::OnMouseDown( GHL::MouseButton, GHL::Int32 x, GHL::Int32 y) {
-        m_main_scene->HandleTouch( TouchInfo(TouchInfo::BEGIN,Vector2f(float(x),float(y))) );
+	void GHL_CALL Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+        m_rocket->OnMouseDown(key, x, y, m_system->GetKeyMods());
 	}
 	///
-	void GHL_CALL Application::OnMouseMove( GHL::MouseButton, GHL::Int32 x, GHL::Int32 y) {
-        m_main_scene->HandleTouch( TouchInfo(TouchInfo::MOVE,Vector2f(float(x),float(y))) );
+	void GHL_CALL Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+        m_rocket->OnMouseMove(x, y, m_system->GetKeyMods());
     }
 	///
-	void GHL_CALL Application::OnMouseUp( GHL::MouseButton, GHL::Int32 x, GHL::Int32 y) {
-        m_main_scene->HandleTouch( TouchInfo(TouchInfo::END,Vector2f(float(x),float(y))) );
+	void GHL_CALL Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+        m_rocket->OnMouseUp(key, x, y, m_system->GetKeyMods());
     }
 	///
 	void GHL_CALL Application::OnDeactivated() {

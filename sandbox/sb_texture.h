@@ -10,9 +10,9 @@
 #ifndef SB_TEXTURE_H
 #define SB_TEXTURE_H
 
-#include <sbtl/sb_shared_ptr.h>
+#include <sbstd/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
-#include <sbtl/sb_string.h>
+#include <sbstd/sb_string.h>
 #include <ghl_types.h>
 
 namespace GHL {

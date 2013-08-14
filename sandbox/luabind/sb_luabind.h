@@ -9,9 +9,9 @@
 #ifndef YinYang_sb_luabind_h
 #define YinYang_sb_luabind_h
 
-#include <sbtl/sb_shared_ptr.h>
+#include <sbstd/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
-#include <sbtl/sb_string.h>
+#include <sbstd/sb_string.h>
 #include "sb_inplace_string.h"
 #include "sb_notcopyable.h"
 #include "sb_assert.h"
@@ -81,30 +81,6 @@ namespace Sandbox {
         }
         
         
-        template <class T>
-        static inline void SetValue( lua_State* L, const char* path, const sb::shared_ptr<T>& t ) {
-            stack<sb::shared_ptr<T> >::push(L,t);
-            lua_set_value( L, path );
-        }
-        template <class T>
-        static inline void SetValue( lua_State* L, const char* path, typename sb::type_traits<T>::parameter_type t ) {
-            stack<T>::push(L,t);
-            lua_set_value( L, path );
-        }
-        template <class T>
-        static inline void SetValue( lua_State* L, const char* path, T t ) {
-            stack<T>::push(L,t);
-            lua_set_value( L, path );
-        }
-        static inline void SetValue( lua_State* L, const char* path, const char* t ) {
-            stack<const char*>::push(L,t);
-            lua_set_value( L, path );
-        }
-        template <class T>
-        static inline void SetValue( lua_State* L, const char* path, T* t ) {
-            stack<T*>::push(L,t);
-            lua_set_value( L, path );
-        }
     }
     
 }

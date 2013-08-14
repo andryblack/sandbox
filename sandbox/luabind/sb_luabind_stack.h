@@ -12,11 +12,11 @@
 #include "sb_notcopyable.h"
 #include "meta/sb_meta.h"
 
-#include <sbtl/sb_shared_ptr.h>
-#include "sb_traits.h"
-#include <sbtl/sb_map.h>
-#include <sbtl/sb_string.h>
-#include <sbtl/sb_vector.h>
+#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_traits.h>
+#include <sbstd/sb_map.h>
+#include <sbstd/sb_string.h>
+#include <sbstd/sb_vector.h>
 
 extern "C" {
 #include "../../lua/src/lua.h"
@@ -259,25 +259,7 @@ namespace Sandbox {
                 return *reinterpret_cast<T*>(0);
             }
         };
-        template <class T>
-        struct stack<const T&> {
-            static void push( lua_State* L, const T& val ) {
-                stack<T>::push(L,val);
-            }
-            static const T& get( lua_State* L, int idx ) {
-                return stack<const T>::get(L,idx);
-            }
-        };
-        template <class T>
-        struct stack<T&> {
-//            static void push( lua_State* L, const T& val ) {
-//                stack<T>::push(L,val);
-//            }
-            static T& get( lua_State* L, int idx ) {
-                return *stack<T*>::get(L,idx);
-            }
-        };
-        
+                
         template <class T>
         struct stack<T*> {
             static void push( lua_State* L, T* val ) {
@@ -513,6 +495,8 @@ namespace Sandbox {
             }
         };
         
+        
+        
 #ifdef SB_DEBUG
         class lua_stack_check {
         public:
@@ -553,7 +537,45 @@ namespace Sandbox {
         LUABIND_DECLARE_RAW_STACK_TYPE(const char*)
         
         
+        template <>
+        struct stack<sb::string> {
+            static void push( lua_State* L, const sb::string& val ) {
+                stack<const char*>::push(L, val.c_str());
+            }
+            static sb::string get( lua_State* L, int idx) {
+                return stack<const char*>::get(L,idx);
+            }
+        };
+        
+        template <>
+        struct stack<const sb::string&> {
+            static void push( lua_State* L, const sb::string& val ) {
+                stack<const char*>::push(L, val.c_str());
+            }
+            static sb::string get( lua_State* L, int idx) {
+                return stack<const char*>::get(L,idx);
+            }
+        };
     
+        template <class T>
+        struct stack<const T&> {
+            static void push( lua_State* L, const T& val ) {
+                stack<T>::push(L,val);
+            }
+            static const T& get( lua_State* L, int idx ) {
+                return stack<const T>::get(L,idx);
+            }
+        };
+        template <class T>
+        struct stack<T&> {
+            //            static void push( lua_State* L, const T& val ) {
+            //                stack<T>::push(L,val);
+            //            }
+            static T& get( lua_State* L, int idx ) {
+                return *stack<T*>::get(L,idx);
+            }
+        };
+
     }
 }
 

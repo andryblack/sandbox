@@ -9,12 +9,12 @@
 #ifndef __sr_osx__sb_sound__
 #define __sr_osx__sb_sound__
 
-#include <sbtl/sb_shared_ptr.h>
+#include <sbstd/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
 #include <ghl_types.h>
-#include <sbtl/sb_map.h>
-#include <sbtl/sb_list.h>
-#include <sbtl/sb_string.h>
+#include <sbstd/sb_map.h>
+#include <sbstd/sb_list.h>
+#include <sbstd/sb_string.h>
 
 namespace GHL {
     struct SoundEffect;

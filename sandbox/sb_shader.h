@@ -10,11 +10,11 @@
 #ifndef SB_SHADER_H
 #define SB_SHADER_H
 
-#include <sbtl/sb_shared_ptr.h>
+#include <sbstd/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
-#include <sbtl/sb_vector.h>
-#include <sbtl/sb_string.h>
-#include <sbtl/sb_map.h>
+#include <sbstd/sb_vector.h>
+#include <sbstd/sb_string.h>
+#include <sbstd/sb_map.h>
 
 namespace GHL {
 	struct ShaderProgram;

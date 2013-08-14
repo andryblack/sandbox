@@ -29,10 +29,6 @@ namespace Sandbox {
 		m_parent = parent;
 	}
     
-    bool SceneObject::HandleTouch( const TouchInfo& ) {
-        return false;
-    }
-    
     void SceneObject::MoveToTop() {
         if (m_parent) {
             m_parent->MoveToTop(this);

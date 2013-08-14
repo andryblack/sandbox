@@ -26,6 +26,7 @@ extern "C" {
 #include "sb_log.h"
 #include "sb_resources.h"
 #include "sb_memory_mgr.h"
+#include "sb_lua_context.h"
 
 namespace Sandbox {
 	
@@ -201,29 +202,29 @@ namespace Sandbox {
     bool LuaVM::DoFile(const char* fn) {
         return DoFileImpl(fn,0);
     }
-    
-    bool LuaVM::DoString( const char* cont ) {
-        //LogInfo(MODULE) << "pcall >>>> top : " << lua_gettop(m_L);
-        lua_pushcclosure(m_L, &luabind::lua_traceback, 0);  /// tb
-        int traceback_index = lua_gettop(m_L);
-        int res = luaL_loadstring(m_L, cont);
-        if (res!=0) {
-			LogError(MODULE) << "Failed to load script: " << cont;
-            LogError(MODULE) << lua_tostring(m_L, -1) ;
-			return false;
-		} else {
-			  //
-            res = lua_pcall(m_L, 0, 0, -2);
-            if (res) {
-                LogError(MODULE) << "pcall : " << res;
-                LogError(MODULE) << lua_tostring(m_L, -1) ;
-                return false;
-            }
-            lua_remove(m_L, traceback_index);
-     	}
-        //LogInfo(MODULE) << "pcall <<<< top : " << lua_gettop(m_L);
-        return true;
-    }
+//    
+//    bool LuaVM::DoString( const char* cont ) {
+//        //LogInfo(MODULE) << "pcall >>>> top : " << lua_gettop(m_L);
+//        lua_pushcclosure(m_L, &luabind::lua_traceback, 0);  /// tb
+//        int traceback_index = lua_gettop(m_L);
+//        int res = luaL_loadstring(m_L, cont);
+//        if (res!=0) {
+//			LogError(MODULE) << "Failed to load script: " << cont;
+//            LogError(MODULE) << lua_tostring(m_L, -1) ;
+//			return false;
+//		} else {
+//			  //
+//            res = lua_pcall(m_L, 0, 0, -2);
+//            if (res) {
+//                LogError(MODULE) << "pcall : " << res;
+//                LogError(MODULE) << lua_tostring(m_L, -1) ;
+//                return false;
+//            }
+//            lua_remove(m_L, traceback_index);
+//     	}
+//        //LogInfo(MODULE) << "pcall <<<< top : " << lua_gettop(m_L);
+//        return true;
+//    }
     
    
     int LuaVM::lua_module_searcher(lua_State *L) {
@@ -310,6 +311,25 @@ namespace Sandbox {
 		}
 		return ptr;
 	}
+    
+    LuaContextPtr  LuaVM::CreateContext() {
+        lua_newtable(m_L);
+        lua_getglobal(m_L, "_G");
+        lua_setfield(m_L, -2, "_G");
+        LuaContextPtr ctx = sb::make_shared<LuaContext>();
+        ctx->SetObject(m_L);
+        return ctx;
+    }
+    
+    LuaContextPtr   LuaVM::GetGlobalContext() {
+        LuaContextPtr ctx = m_global_context.lock();
+        if (ctx) return ctx;
+        lua_getglobal(m_L, "_G");
+        ctx = sb::make_shared<LuaContext>();
+        ctx->SetObject(m_L);
+        m_global_context = ctx;
+        return ctx;
+    }
     
     sb::string LuaVM::GetMemoryUsed() const {
         sb::string res = sb::string("lua:") + format_memory(m_mem_use) +

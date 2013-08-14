@@ -11,7 +11,7 @@
 #define SB_CONTAINER_H
 
 #include "sb_scene_object.h"
-#include <sbtl/sb_vector.h>
+#include <sbstd/sb_vector.h>
 
 namespace Sandbox {
 
@@ -28,12 +28,9 @@ namespace Sandbox {
         void RemoveObject(const SceneObjectPtr& obj);
 		void Clear();
         
-        /// self mouse handling implementation
-        virtual bool HandleTouch( const TouchInfo& touch );
         void Update( float dt );
     protected:
-        bool HandleChilds( const TouchInfo& touch,bool firstResponse );
-		void DrawChilds(Graphics& g) const;
+    	void DrawChilds(Graphics& g) const;
         void UpdateChilds( float dt );
 		sb::vector<SceneObjectPtr> m_objects;
     private:

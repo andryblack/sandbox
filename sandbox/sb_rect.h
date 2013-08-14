@@ -34,6 +34,18 @@ namespace Sandbox {
         Vector2f GetTopLeft() const {
             return Vector2f( x,y );
         }
+        Vector2f GetSize() const {
+            return Vector2f( w, h );
+        }
+        
+        void SetPos(const Vector2f& f) {
+            x = f.x;
+            y = f.y;
+        }
+        void SetSize(const Vector2f& f) {
+            w = f.x;
+            h = f.y;
+        }
 	};
 	
 	typedef Rect<float> Rectf;

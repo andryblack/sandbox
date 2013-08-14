@@ -83,14 +83,16 @@ namespace Sandbox {
 		return w;
 	}
 	
-	void BitmapFont::Draw(Graphics& g,const Vector2f& _pos,const char* text,FontAlign align) const {
-		if (!text) return;
+	float BitmapFont::Draw(Graphics& g,const Vector2f& _pos,const char* text,FontAlign align) const {
+		if (!text) return 0;
 		Vector2f pos = _pos;
+        float align_x = 0.0f;
 		if (align == ALIGN_RIGHT) {
-			pos.x-=GetTextWidth(text);
+			align_x=GetTextWidth(text);
 		} else if (align==ALIGN_CENTER) {
-			pos.x-=GetTextWidth(text)*0.5f;
+			align_x=GetTextWidth(text)*0.5f;
 		}
+        pos.x-=align_x;
 		const Glypth* prev = 0;
 		while (*text) {
 			UTF32Char ch = 0;
@@ -105,6 +107,7 @@ namespace Sandbox {
 				prev=gl;
 			}
 		}
+        return pos.x - _pos.x + align_x;
 	}
 
 }

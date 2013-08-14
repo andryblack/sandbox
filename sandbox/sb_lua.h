@@ -11,9 +11,9 @@
 #define SB_LUA_H
 
 
-#include <sbtl/sb_shared_ptr.h>
+#include <sbstd/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
-#include <sbtl/sb_string.h>
+#include <sbstd/sb_string.h>
 
 #include <ghl_types.h>
 
@@ -28,7 +28,10 @@ namespace Sandbox {
     class Resources;
     
     class MemoryMgr;
-		
+    
+    class LuaContext;
+    typedef sb::shared_ptr<LuaContext> LuaContextPtr;
+	typedef sb::weak_ptr<LuaContext> LuaContextWeakPtr;
 	
     class LuaVM : public NotCopyable {
     public:
@@ -40,7 +43,8 @@ namespace Sandbox {
         
         lua_State* GetVM() { return m_L; }
         
-        bool DoString( const char* cont );
+        LuaContextPtr   GetGlobalContext();
+        LuaContextPtr   CreateContext();
     private:
         Resources*  m_resources;
         lua_State*  m_L;
@@ -55,6 +59,7 @@ namespace Sandbox {
         static void* lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
         MemoryMgr*  m_mem_mgr;
         bool DoFileImpl(const char* name,int results);
+        LuaContextWeakPtr   m_global_context;
     };
 }
 

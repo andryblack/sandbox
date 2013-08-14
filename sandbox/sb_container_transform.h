@@ -23,10 +23,7 @@ namespace Sandbox {
 		
 		void Draw(Graphics& g) const;
         
-        /// self mouse handling implementation
-        virtual bool HandleTouch( const TouchInfo& touch );
-		
-		void SetTranslate(const Vector2f& tr) { m_translate = tr; }
+        void SetTranslate(const Vector2f& tr) { m_translate = tr; }
 		const Vector2f& GetTranslate() const { return m_translate;}
 		void SetScale(float s) { m_scale_x = m_scale_y = s;}
         float GetScale() const { return (m_scale_x + m_scale_y)*0.5f; }

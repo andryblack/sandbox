@@ -10,7 +10,6 @@
 #include "sb_container_transform.h"
 #include "sb_transform2d.h"
 #include "sb_graphics.h"
-#include "sb_touch_info.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::ContainerTransform, Sandbox::Container)
 
@@ -29,12 +28,5 @@ namespace Sandbox {
 		DrawChilds(g);
 		g.SetTransform(old);
 	}
-    
-    /// self mouse handling implementation
-    bool ContainerTransform::HandleTouch( const TouchInfo& touch ) {
-        Transform2d tr;
-		tr.translate(-m_translate).rotate(m_angle).scale(1.0f/m_scale_x,1.0f/m_scale_y);
-        TouchInfo localTouch(touch.GetType(),tr.transform(touch.GetPosition()));
-        return Container::HandleTouch(localTouch);
-    }
+   
 }

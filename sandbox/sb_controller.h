@@ -10,7 +10,7 @@
 #ifndef SB_CONTROLLER_H
 #define SB_CONTROLLER_H
 
-#include <sbtl/sb_shared_ptr.h>
+#include <sbstd/sb_shared_ptr.h>
 #include "meta/sb_meta.h"
 
 namespace Sandbox {

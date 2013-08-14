@@ -32,6 +32,29 @@ namespace Sandbox {
         }
 
         template <char C, size_t count>
+        static void get_create_table_impl2(lua_State* L,const InplaceString& name,int prealloc) {
+            InplaceString tail(name.begin(),name.end());
+            while (!tail.empty()) {
+                const char* other = tail.find(C);
+                InplaceString head( tail.begin(), other );
+                
+                lua_pushlstring(L, head.begin(),head.length());
+                lua_rawget(L, -2);
+                
+                if (!lua_istable(L, -1)) {
+                    lua_pop(L, 1);
+                    lua_createtable(L, 0, other==name.end() ? prealloc : 1);
+                    lua_pushlstring(L, head.begin(),head.length());
+                    lua_pushvalue(L, -2);
+                    lua_rawset(L, -4);
+                }
+                lua_remove(L, -2);
+                if (other==name.end()) break;
+                tail = InplaceString(other+count,name.end());
+            }
+        }
+        
+        template <char C, size_t count>
         static void get_create_table_impl(lua_State* L,const InplaceString& name,int prealloc) {
             const char* other = name.find(C);
             sb::string first = InplaceString(name.begin(),other).str();
@@ -46,20 +69,7 @@ namespace Sandbox {
             other+=count;
             if (other >= name.end()) return;
             InplaceString tail(other,name.end());
-            while (!tail.empty()) {
-                other = tail.find(C);
-                InplaceString head( tail.begin(), other );
-                lua_getfield(L, -1, head.str().c_str() );
-                if (!lua_istable(L, -1)) {
-                    lua_pop(L, 1);
-                    lua_createtable(L, 0, other==name.end() ? prealloc : 1);
-                    lua_pushvalue(L, -1);
-                    lua_setfield(L, -3, head.str().c_str());
-                }
-                lua_remove(L, -2);
-                if (other==name.end()) break;
-                tail = InplaceString(other+count,name.end());
-            }
+            get_create_table_impl2<C,count>(L,tail,prealloc);
         }
         
         void lua_get_create_table(lua_State* L,const char* name,int prealloc) {
@@ -116,6 +126,14 @@ namespace Sandbox {
                 lua_setfield(L, -2, name+1);        /// val tbl
                 lua_pop(L, 2);
             }
+        }
+        
+        void lua_get_create_child_table( lua_State* L, const char*& path) {
+            InplaceString full_path(path);
+            const char* name = full_path.rfind('.');
+            if (name==path) return;
+            get_create_table_impl2<'.', 1>(L, InplaceString(path,name), 1);
+            path = name+1;
         }
 
         

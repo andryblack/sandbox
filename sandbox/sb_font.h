@@ -11,7 +11,7 @@
 #define SB_FONT_H
 
 #include "sb_notcopyable.h"
-#include <sbtl/sb_shared_ptr.h>
+#include <sbstd/sb_shared_ptr.h>
 #include "meta/sb_meta.h"
 
 
@@ -32,9 +32,13 @@ namespace Sandbox {
 	public:
 		Font();
 		virtual ~Font();
-		virtual void Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const = 0;
+		virtual float Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const = 0;
 		virtual float GetTextWidth(const char* text) const = 0;
+        virtual float GetHeight() const { return m_height; }
+    protected:
+        void    set_height(float height) { m_height = height; }
 	private:
+        float   m_height;
 	};
 	
 	typedef sb::shared_ptr<Font> FontPtr;

@@ -12,6 +12,9 @@
 namespace Sandbox {
     namespace luabind {
         
+        LuaReference::LuaReference() : m_ref(LUA_NOREF) {
+            
+        }
         LuaReference::LuaReference( const LuaVMHelperWeakPtr& ptr ) : m_lua(ptr),m_ref(LUA_NOREF) {
         }
         LuaReference::~LuaReference() {
@@ -23,6 +26,9 @@ namespace Sandbox {
         LuaVMHelperPtr GetHelper( lua_State* L );
         
         void LuaReference::SetObject( lua_State* L ) {
+            if (Valid()) {
+                UnsetObject(L);
+            }
             LUA_CHECK_STACK(-1)
             m_lua = luabind::GetHelper( L );
             sb_assert(m_ref==LUA_NOREF);

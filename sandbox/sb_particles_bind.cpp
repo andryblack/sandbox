@@ -8,6 +8,7 @@
 
 #include "sb_particles.h"
 #include "sb_lua.h"
+#include "sb_lua_context.h"
 #include "luabind/sb_luabind.h"
 
 SB_META_DECLARE_KLASS(Sandbox::ParticleProcessorBlock, void)
@@ -45,7 +46,7 @@ namespace Sandbox {
     }
 
     void ParticlesSystem::BindProcessor( LuaVM* lua, const char* name,const ParticleProcessorBlock* block) {
-        luabind::SetValue(lua->GetVM(), (std::string("Sandbox.ParticleProcessorBlock.")+name).c_str(), block);
+        lua->GetGlobalContext()->SetValue((std::string("Sandbox.ParticleProcessorBlock.")+name).c_str(), block);
     }
     
     

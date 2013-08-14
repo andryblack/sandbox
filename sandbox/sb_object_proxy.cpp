@@ -10,7 +10,6 @@
 #include "sb_object_proxy.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::ObjectDrawProxy, Sandbox::SceneObject)
-SB_META_DECLARE_OBJECT(Sandbox::ObjectTouchProxy, Sandbox::SceneObject)
 
 namespace Sandbox {
 
@@ -21,15 +20,4 @@ namespace Sandbox {
 		if (m_func) m_func(g);
 	}
 	
-    
-    ObjectTouchProxy::ObjectTouchProxy(const TouchFunc& func) : m_touch_func( func ) {
-        
-    }
-    
-    /// self mouse handling implementation
-    bool ObjectTouchProxy::HandleTouch( const TouchInfo& touch ) {
-        if (m_touch_func) return m_touch_func( touch );
-        return false;
-    }
-
 }

@@ -15,7 +15,6 @@ namespace Sandbox {
 	
 	class Graphics;
 	class Container;
-    class TouchInfo;
     class Scene;
 
 	class SceneObject : public meta::object {
@@ -30,9 +29,6 @@ namespace Sandbox {
         /// visible
 		void SetVisible(bool v) { m_visible = v;}
 		bool GetVisible() const { return m_visible;}
-        
-        /// self mouse handling implementation
-        virtual bool HandleTouch( const TouchInfo& touch );
         
         void MoveToTop();
 	protected:

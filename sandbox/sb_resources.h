@@ -14,9 +14,9 @@
 #include "sb_shader.h"
 #include "sb_atlaser.h"
 #include "sb_rendertatget.h"
-#include <sbtl/sb_string.h>
-#include <sbtl/sb_map.h>
-#include <sbtl/sb_list.h>
+#include <sbstd/sb_string.h>
+#include <sbstd/sb_map.h>
+#include <sbstd/sb_list.h>
 
 namespace GHL {
 	struct VFS;

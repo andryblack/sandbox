@@ -14,7 +14,6 @@
 #include "sb_fill_rect.h"
 #include "sb_background.h"
 #include "sb_label.h"
-#include "sb_widget.h"
 #include "sb_container.h"
 #include "sb_container_blend.h"
 #include "sb_container_transform.h"
@@ -22,7 +21,6 @@
 #include "sb_container_visible.h"
 #include "sb_container_transform3d.h"
 #include "sb_scene.h"
-#include "sb_touch_info.h"
 #include "sb_debug_geometry.h"
 #include "sb_rt_scene.h"
 
@@ -107,31 +105,6 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerVisible)
 SB_META_PROPERTY_RW_DEF(Invert)
 SB_META_END_KLASS_BIND()
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::Widget)
-SB_META_CONSTRUCTOR(())
-SB_META_PROPERTY_RW(Rect,GetRect,SetRect)
-SB_META_PROPERTY_RW(Active,GetActive,SetActive)
-SB_META_END_KLASS_BIND()
-
-SB_META_DECLARE_KLASS(Sandbox::TouchInfo::Type,void);
-SB_META_ENUM_BIND(Sandbox::TouchInfo::Type,Sandbox::TouchInfo,
-                  SB_META_ENUM_MEMBER_ITEM(BEGIN,Sandbox::TouchInfo::BEGIN)
-                  SB_META_ENUM_MEMBER_ITEM(MOVE,Sandbox::TouchInfo::MOVE)
-                  SB_META_ENUM_MEMBER_ITEM(END,Sandbox::TouchInfo::END) )
-
-SB_META_DECLARE_KLASS(Sandbox::TouchInfo, void)
-SB_META_BEGIN_KLASS_BIND(Sandbox::TouchInfo)
-SB_META_PROPERTY_RO(Type,GetType)
-SB_META_PROPERTY_RO(Position,GetPosition)
-SB_META_END_KLASS_BIND()
-
-SB_META_BEGIN_KLASS_BIND(Sandbox::TouchButtonWidget)
-SB_META_CONSTRUCTOR(())
-SB_META_PROPERTY_RW(ActivateEvent,GetActivateEvent,SetActivateEvent)
-SB_META_PROPERTY_RW(DeactivateEvent,GetDeactivateEvent,SetDeactivateEvent)
-SB_META_PROPERTY_RW(TouchUpInsideEvent,GetTouchUpInsideEvent,SetTouchUpInsideEvent)
-SB_META_END_KLASS_BIND()
-
 SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerTransform)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Translate,GetTranslate,SetTranslate)
@@ -164,30 +137,6 @@ SB_META_CONSTRUCTOR((const Sandbox::RenderTargetPtr&))
 SB_META_PROPERTY_RO(Target, GetTarget)
 SB_META_END_KLASS_BIND()
 
-namespace Sandbox {
-    
-    class WidgetWrapper : public Widget , public luabind::wrapper {
-        SB_META_OBJECT
-    protected:
-        virtual void OnTouchEnter() { call("OnTouchEnter"); }
-        virtual void OnTouchLeave() { call("OnTouchLeave"); }
-        virtual bool HandleTouchInside(const TouchInfo& touch) { return call<bool,const TouchInfo&>("HandleTouchInside",touch); }
-    public:
-        virtual ~WidgetWrapper() {}
-        void default_OnTouchEnter() { Widget::OnTouchEnter(); }
-        void default_OnTouchLeave() { Widget::OnTouchLeave(); }
-        bool default_HandleTouchInside(const TouchInfo& touch) { return Widget::HandleTouchInside(touch); }
-    };
-    
-}
-
-SB_META_DECLARE_BINDING_OBJECT_WRAPPER(Sandbox::WidgetWrapper, Sandbox::Widget)
-SB_META_BEGIN_KLASS_BIND(Sandbox::WidgetWrapper)
-SB_META_CONSTRUCTOR(())
-bind( method("OnTouchEnter", &WidgetWrapper::default_OnTouchEnter));
-bind( method("OnTouchLeave", &WidgetWrapper::default_OnTouchLeave));
-bind( method("HandleTouchInside", &WidgetWrapper::default_HandleTouchInside));
-SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     
@@ -204,10 +153,6 @@ namespace Sandbox {
         luabind::Class<CircleObject>(lua);
         luabind::Class<LineObject>(lua);
         luabind::Class<Container>(lua);
-        luabind::RawClass<TouchInfo>(lua);
-        luabind::Enum<TouchInfo::Type>(lua);
-        luabind::ClassWrapper<Widget,WidgetWrapper>(lua);
-        luabind::Class<TouchButtonWidget>(lua);
         luabind::Enum<BlendMode>(lua);
         luabind::Class<ContainerBlend>(lua);
         luabind::Class<ContainerTransform>(lua);

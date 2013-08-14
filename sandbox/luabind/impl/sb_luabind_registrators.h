@@ -11,7 +11,7 @@
 
 #include "meta/sb_meta_bind.h"
 #include "sb_luabind_method.h"
-#include <sbtl/sb_function.h>
+#include <sbstd/sb_function.h>
 #include "../../sb_log.h"
 
 namespace Sandbox {

@@ -14,12 +14,13 @@
 #include "sb_threads_mgr.h"
 #include "sb_rt_scene.h"
 #include "sb_lua.h"
-#include "sbtl/sb_list.h"
+#include <sbstd/sb_list.h>
 
 namespace Sandbox {
     
     class Resources;
     class SoundManager;
+    class RocketContext;
 	
 	class Application : public GHL::Application {
     public:
@@ -84,6 +85,8 @@ namespace Sandbox {
         
         bool    m_sound_enabled;
         bool    m_music_enabled;
+        
+        RocketContext*  m_rocket;
 	public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys );

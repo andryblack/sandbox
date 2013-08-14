@@ -7,8 +7,8 @@
 #define SB_TCB_SPLINE2D_H
 
 #include "sb_vector2.h"
-#include <sbtl/sb_shared_ptr.h>
-#include <sbtl/sb_vector.h>
+#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_vector.h>
 
 
 namespace Sandbox {

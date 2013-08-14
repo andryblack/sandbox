@@ -12,7 +12,7 @@
 #include "sb_font.h"
 #include "sb_utf.h"
 #include "sb_image.h"
-#include <sbtl/sb_vector.h>
+#include <sbstd/sb_vector.h>
 
 namespace Sandbox {
     
@@ -22,12 +22,13 @@ namespace Sandbox {
         BitmapFont();
         ~BitmapFont();
         
-        virtual void Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const;
+        virtual float Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const;
 		virtual float GetTextWidth(const char* text) const ;
 
         void Reserve(size_t size);
 		void AddGlypth(const ImagePtr& img,const char* code,float asc);
 		void AddKerningPair(const char* from,const char* to,float offset);
+        void SetHeight(float h) { set_height(h);}
     private:
         struct Kerning {
 			GHL::UInt32 code;
