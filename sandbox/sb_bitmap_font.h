@@ -28,7 +28,10 @@ namespace Sandbox {
         void Reserve(size_t size);
 		void AddGlypth(const ImagePtr& img,const char* code,float asc);
 		void AddKerningPair(const char* from,const char* to,float offset);
-        void SetHeight(float h) { set_height(h);}
+        void SetHeight(float h) { set_height(h);set_x_height(h);}
+        void SetXHeight(float h) { set_x_height(h);}
+        void SetSize(float s) { set_size(s); }
+        void SetBaseline(float bl) {set_baseline(bl);}
     private:
         struct Kerning {
 			GHL::UInt32 code;

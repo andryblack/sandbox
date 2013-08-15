@@ -41,6 +41,7 @@ namespace Sandbox {
         luabind::LuaVMHelperPtr helper = GetHelper();
         if (!helper) return false;
         lua_State* L = helper->lua;
+        LUA_CHECK_STACK(0)
         lua_pushcclosure(L, &luabind::lua_traceback, 0);  /// tb
         int traceback_index = lua_gettop(L);
         GetObject(L);
@@ -48,7 +49,7 @@ namespace Sandbox {
         if (res) {
             LogError(MODULE) << "pcall : " << res;
             LogError(MODULE) << lua_tostring(L, -1);
-            lua_pop(L, 1);
+            lua_pop(L, 2);
             return false;
         }
         lua_pop(L, lua_gettop(L)-traceback_index+1);

@@ -25,6 +25,10 @@ namespace Sandbox {
         bool    SetSource( const LuaContextPtr& ctx, const char* src);
     };
     typedef sb::shared_ptr<LuaFunction> LuaFunctionPtr;
+    namespace luabind {
+        template <>
+        struct stack<LuaFunctionPtr> : public stack<sb::shared_ptr<LuaReference> >{};
+    }
 }
 
 #endif /* defined(__sr_osx__sb_lua_function__) */

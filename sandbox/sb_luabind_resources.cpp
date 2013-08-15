@@ -118,6 +118,9 @@ SB_META_ENUM_BIND(Sandbox::FontAlign,namespace Sandbox,
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Font)
 SB_META_PROPERTY_RO(Height, GetHeight)
+SB_META_PROPERTY_RO(Size, GetSize)
+SB_META_PROPERTY_RO(Baseline, GetBaseline)
+SB_META_PROPERTY_RO(XHeight, GetXHeight)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::BitmapFont)
@@ -126,6 +129,9 @@ SB_META_METHOD(Reserve)
 SB_META_METHOD(AddGlypth)
 SB_META_METHOD(AddKerningPair)
 SB_META_METHOD(SetHeight)
+SB_META_METHOD(SetSize)
+SB_META_METHOD(SetBaseline)
+SB_META_METHOD(SetXHeight)
 SB_META_END_KLASS_BIND()
 
 

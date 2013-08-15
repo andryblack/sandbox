@@ -14,6 +14,7 @@
 namespace Sandbox {
     
     RocketRenderInterface::RocketRenderInterface(Resources* res) : m_resources(res), m_graphics(0) {
+        m_clip_enabled = false;
     }
     
     void RocketRenderInterface::BeginDraw(Graphics& g) {
@@ -56,6 +57,7 @@ namespace Sandbox {
         } else {
             m_graphics->SetClipRect(m_graphics->GetViewport());
         }
+        m_clip_enabled = enable;
     }
     
     void RocketRenderInterface::SetScissorRegion(int x, int y, int width, int height) {
@@ -63,6 +65,9 @@ namespace Sandbox {
         m_clip_rect.y = y;
         m_clip_rect.w = width;
         m_clip_rect.h = height;
+        if (m_clip_enabled) {
+            m_graphics->SetClipRect(m_clip_rect);
+        }
     }
     
     bool RocketRenderInterface::LoadTexture(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source) {

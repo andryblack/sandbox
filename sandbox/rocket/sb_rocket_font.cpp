@@ -12,11 +12,11 @@
 namespace Sandbox {
     
     int RocketFontFaceHandle::GetSize() const {
-        return m_font->GetHeight();
+        return m_font->GetSize();
     }
     
     int RocketFontFaceHandle::GetXHeight() const {
-        return 10;
+        return m_font->GetXHeight();
     }
     
     int RocketFontFaceHandle::GetLineHeight() const {
@@ -24,7 +24,7 @@ namespace Sandbox {
     }
     
     int RocketFontFaceHandle::GetBaseline() const {
-        return 0;
+        return m_font->GetBaseline();
     }
     
     int RocketFontFaceHandle::GetStringWidth(const Rocket::Core::WString& string, Rocket::Core::word prior_character ) const {

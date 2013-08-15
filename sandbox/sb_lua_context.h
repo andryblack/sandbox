@@ -57,12 +57,17 @@ namespace Sandbox {
         inline void SetValue( const char* path, T* t ) {
             lua_State* L = get_state_with_table_on_top(path);
             if (!L) return;
+            LUA_CHECK_STACK(-2)
             luabind::stack<T*>::push(L,t);
             set_value_on_top_of_stack_to_table(L);
         }
 
     };
     typedef sb::shared_ptr<LuaContext> LuaContextPtr;
+    namespace luabind {
+        template <>
+        struct stack<LuaContextPtr > : public stack<sb::shared_ptr<LuaReference> >{};
+    }
 }
 
 #endif /* defined(__sr_osx__sb_lua_context__) */

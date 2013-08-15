@@ -35,6 +35,7 @@ namespace Sandbox {
         luabind::LuaVMHelperPtr helper = GetHelper();
         if (!helper) return 0;
         lua_State* L = helper->lua;
+        LUA_CHECK_STACK(2)
         GetObject(L);
         luabind::lua_get_create_child_table(L,path);
         lua_pushstring(L, path);
@@ -42,6 +43,8 @@ namespace Sandbox {
     }
     
     void LuaContext::set_value_on_top_of_stack_to_table(lua_State* L) {
+        LUA_CHECK_STACK(-3)
         lua_rawset(L, -3);
+        lua_pop(L, 1);
     }
 }

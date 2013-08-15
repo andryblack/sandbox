@@ -148,7 +148,8 @@ namespace Sandbox {
                 static const char* meta_operator[] = {
                     "__add",
                     "__mul",
-                    "__sub"
+                    "__sub",
+                    "__index"
                 };
                 lua_setfield(m_L, -2, meta_operator[func.name]);               /// methods 
                 lua_pop(m_L, 1);

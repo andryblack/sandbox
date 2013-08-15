@@ -22,7 +22,7 @@ namespace Sandbox {
     public:
         RocketDocument(const Rocket::Core::String& tag,Rocket::Core::Context* context);
         virtual void LoadScript(Rocket::Core::Stream* stream, const Rocket::Core::String& source_name);
-        const LuaContextPtr& GetLuaContext() { return m_context; }
+        const LuaContextPtr& GetLuaContext() const { return m_context; }
     };
     
 }

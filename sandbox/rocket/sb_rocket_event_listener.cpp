@@ -13,7 +13,10 @@ namespace Sandbox {
     
     /// Process the incoming Event
     void RocketEventListener::ProcessEvent(Rocket::Core::Event& event) {
+        luabind::LuaVMHelperPtr h = m_context->GetHelper();
+        m_context->SetValue("event", &event);
         m_function->Execute();
+        m_context->SetValue("event", (void*)0);
     }
     
     /// Called when the listener has been attached to a new Element

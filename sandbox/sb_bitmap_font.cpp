@@ -34,7 +34,7 @@ namespace Sandbox {
 		m_glypths.back().img = img;
 		m_glypths.back().asc = asc;
 		m_glypths.back().code = ch;
-	}
+    }
 	void BitmapFont::AddKerningPair(const char* from,const char* to,float offset) {
 		if (!from) return;
 		if (from[0]==0) return;

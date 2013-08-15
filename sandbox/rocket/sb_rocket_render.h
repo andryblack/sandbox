@@ -21,7 +21,8 @@ namespace Sandbox {
     private:
         Resources* m_resources;
         Graphics*   m_graphics;
-        Recti m_clip_rect;
+        Recti   m_clip_rect;
+        bool    m_clip_enabled;
     public:
         explicit RocketRenderInterface(Resources* res);
         

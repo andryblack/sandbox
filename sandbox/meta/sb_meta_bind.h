@@ -115,7 +115,8 @@ namespace Sandbox {
         enum operator_name {
             op_add,
             op_mul,
-            op_sub
+            op_sub,
+            op_index
         };
         template <class Func> struct operator_holder {
             operator_name name;

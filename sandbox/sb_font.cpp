@@ -17,7 +17,10 @@ namespace Sandbox {
 	
 		
 	Font::Font() {
-		
+        m_size = 8.0f;
+        m_height = 16.0f;
+        m_baseline = 0.0f;
+        m_xheight = m_height;
 	}
 	
 	Font::~Font() {
