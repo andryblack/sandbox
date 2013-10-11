@@ -60,13 +60,15 @@ namespace Sandbox {
 	}
 	
 	void Container::Draw(Graphics& g) const {
-		DrawChilds(g);
-	}
-	void Container::DrawChilds(Graphics& g) const {
-		for (std::vector<SceneObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();++i) {
+        ProcessModificators(g);
+    }
+    
+    void Container::DrawWithModificators( Graphics& g ) const {
+        for (std::vector<SceneObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();++i) {
 			if ((*i)->GetVisible()) (*i)->Draw(g);
 		}
-	}
+    }
+	
     
     void Container::Update( float dt ) {
         UpdateChilds(dt);

@@ -9,6 +9,7 @@
 #include "sb_rocket_document.h"
 #include "sb_rocket_context.h"
 #include "sb_lua.h"
+#include "sb_log.h"
 
 extern "C" {
 #include "../lua/src/lua.h"

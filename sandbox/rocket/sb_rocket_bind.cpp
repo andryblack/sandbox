@@ -93,6 +93,7 @@ SB_META_METHOD(Focus)
 SB_META_METHOD(Blur)
 SB_META_METHOD(Click)
 SB_META_METHOD(GetElementById)
+SB_META_PROPERTY_RW(InnerRML, GetInnerRML, SetInnerRML)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Rocket::Core::ElementDocument, Rocket::Core::Element)

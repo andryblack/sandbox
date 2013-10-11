@@ -8,6 +8,7 @@
 
 #include "sb_lua_function.h"
 #include "sb_lua_context.h"
+#include "sb_log.h"
 
 namespace Sandbox {
     

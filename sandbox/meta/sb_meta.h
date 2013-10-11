@@ -51,7 +51,9 @@ namespace Sandbox {
         virtual const Sandbox::meta::type_info* get_type_info() const;\
         static const Sandbox::meta::type_info* get_static_type_info();\
     private: \
-       
+     
+    
+
         template <class T> struct type {
             static const type_info* private_info;
             static inline const type_info* info() { return private_info; }
@@ -78,7 +80,11 @@ namespace Sandbox {
             }
         };
         
-                
+#define SB_META_PRIVATE_CLASS(Type) \
+        template <> struct meta::type<Type> { \
+            typedef void* info; \
+        };
+        
         inline bool is_convertible( const type_info* from, const type_info* to ) {
             do {
                 if ( from == to ) return true;
@@ -137,23 +143,56 @@ namespace Sandbox {
             template <> const type_info* type<Klass>::private_info = &Line::ti; \
         }}
 
+#define SB_META_DECLARE_KLASS_X2(Klass,Parent1,Parent2,Line,KlassName)  \
+    namespace Sandbox { namespace meta { \
+        namespace Line{ \
+            static const type_info_parent parents[] = { \
+                { \
+                    type<Parent1>::private_info, \
+                    &cast_helper<Klass,Parent1>::raw, \
+                    &cast_helper<Klass,Parent1>::shared \
+                }, \
+                { \
+                    type<Parent2>::private_info, \
+                    &cast_helper<Klass,Parent2>::raw, \
+                    &cast_helper<Klass,Parent2>::shared \
+                }, \
+                { 0, 0, 0 } \
+            };\
+            static const type_info ti = { \
+                KlassName, \
+                sizeof(Klass), \
+                parents \
+            }; \
+        } \
+        template <> const type_info* type<Klass>::private_info = &Line::ti; \
+    }}
 
 #define CONCATENATE_DIRECT(s1, s2) s1##s2
 #define CONCATENATE(s1, s2) CONCATENATE_DIRECT(s1, s2)
 #define ANONYMOUS_VARIABLE(str) CONCATENATE(str, CONCATENATE(__LINE__,__COUNTER__))
 #define SB_META_DECLARE_KLASS(Type,Parent) SB_META_DECLARE_KLASS_X(Type,Parent,ANONYMOUS_VARIABLE(private_),#Type)
+#define SB_META_DECLARE_KLASS2(Type,Parent1,Parent2) SB_META_DECLARE_KLASS_X2(Type,Parent1,Parent2,ANONYMOUS_VARIABLE(private_),#Type)
 
 #define SB_META_DECLARE_NAMED_KLASS(Type,Name) SB_META_DECLARE_KLASS_X(Type,void,ANONYMOUS_VARIABLE(private_),Name)
-
+#define SB_META_DECLARE_OBJECT_IMPL(Klass)\
+    const Sandbox::meta::type_info* Klass::get_static_type_info() {\
+        return Sandbox::meta::type<Klass>::info(); \
+    }\
+    const Sandbox::meta::type_info* Klass::get_type_info() const { \
+        return get_static_type_info(); \
+    }
+        
 #define SB_META_DECLARE_OBJECT(Klass,Parent)  \
         SB_META_DECLARE_KLASS(Klass,Parent) \
-        const Sandbox::meta::type_info* Klass::get_static_type_info() {\
-            return Sandbox::meta::type<Klass>::info(); \
-        }\
-        const Sandbox::meta::type_info* Klass::get_type_info() const { \
-            return get_static_type_info(); \
-        } 
+        SB_META_DECLARE_OBJECT_IMPL(Klass)
 
+#define SB_META_DECLARE_OBJECT2(Klass,Parent1,Parent2)  \
+    SB_META_DECLARE_KLASS2(Klass,Parent1,Parent2) \
+    SB_META_DECLARE_OBJECT_IMPL(Klass)
+
+
+        
 #define SB_META_DECLARE_POD_TYPE(Type) SB_META_DECLARE_KLASS(Type,void)
 
         template <class T>

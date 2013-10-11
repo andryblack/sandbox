@@ -10,11 +10,15 @@
 #ifndef SB_ASSERT_H
 #define SB_ASSERT_H
 
+#include <ghl_types.h>
+
 #ifdef SB_DEBUG
 #include "sb_log.h"
 #include <cstdlib>
+extern bool (*sb_terminate_handler)();
 inline void sb_terminate() /*__attribute__((noreturn)) */{
-    ::abort();
+    if (!sb_terminate_handler || !sb_terminate_handler())
+        ::abort();
 }
 #define sb_assert( COND ) do { if (!(COND)) { \
 	::Sandbox::LogError("assert") << "assert :" << #COND; \
@@ -26,5 +30,12 @@ inline void sb_terminate() /*__attribute__((noreturn)) */{
 	#define sb_assert( COND ) do { } while (false)
 #endif
 
+namespace sb {
+    template <bool f> struct static_assert_failure {
+        typedef char failed[f ? 1 : -1];
+    };
+}
+
+#define sb_static_assert( COND ) typedef ::sb::static_assert_failure<COND>::failed GHL_CONCAT(assertion,__LINE__)
 
 #endif /*SB_ASSERT_H*/

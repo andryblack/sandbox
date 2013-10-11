@@ -9,6 +9,7 @@
 
 #include "sb_lua.h"
 #include "luabind/sb_luabind.h"
+#include <sbstd/sb_assert.h>
 
 extern "C" {
 #include "../lua/src/lua.h"
@@ -32,8 +33,22 @@ namespace Sandbox {
 	
     static const char* MODULE = "Sanbox:Lua";
     
-	
-	
+	static lua_State* g_terminate_context = 0;
+	bool lua_terminate_handler() {
+        if (g_terminate_context) {
+            LogError(MODULE) << "--- terminate ---";
+            lua_pushcclosure(g_terminate_context, &luabind::lua_traceback, 0);
+            if (!lua_isstring(g_terminate_context, -2)){
+                lua_pushstring(g_terminate_context, "unknown");
+            } else {
+                lua_pushvalue(g_terminate_context, -2);
+            }
+            lua_pcall(g_terminate_context, 1, 1, 0);
+            LogError(MODULE) << lua_tostring(g_terminate_context, -1);
+            LogError(MODULE) << "--- terminate ---";
+        }
+        return false;
+    }
 		
     
 	struct lua_read_data {
@@ -77,14 +92,19 @@ namespace Sandbox {
     
     static int at_panic_func(lua_State* L) {
         LogError(MODULE) << "--- panic ---";
-        if (!lua_isstring(L, -1)){
-            lua_pushstring(L, "unknown");
-        }
         lua_pushcclosure(L, &luabind::lua_traceback, 0);
+        if (!lua_isstring(L, -2)){
+            lua_pushstring(L, "unknown");
+        } else {
+            lua_pushvalue(L, -2);
+        }
         lua_pcall(L, 1, 1, 0);
         LogError(MODULE) << "--- panic ---";
         LogError(MODULE) << lua_tostring(L, -1);
-        exit(1);
+#ifdef SB_DEBUG
+        sb_terminate_handler = 0;
+        sb_terminate();
+#endif
         return 0;
     }
 	
@@ -142,12 +162,20 @@ namespace Sandbox {
         
 		lua_atpanic(m_L, &at_panic_func);
         
+        g_terminate_context = m_L;
+#ifdef SB_DEBUG
+        sb_terminate_handler = &lua_terminate_handler;
+#endif
         luabind::Initialize(m_L);
     }
     
     LuaVM::~LuaVM() {
         if (m_L) {
             luabind::Deinitialize(m_L);
+            g_terminate_context = 0;
+#ifdef SB_DEBUG
+            sb_terminate_handler = 0;
+#endif
             lua_close(m_L);
             m_L = 0;
         }

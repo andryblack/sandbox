@@ -20,7 +20,7 @@ namespace Sandbox {
     }
     
     static inline GHL::Byte conv_hex(const char* str) {
-        return static_cast<GHL::Byte>((conv_hex_char(*str++)<<4) | conv_hex_char(*str));
+        return static_cast<GHL::Byte>((conv_hex_char(str[0])<<4) | conv_hex_char(str[1]));
     }
     
     Color Color::FromString( const char* str ) {

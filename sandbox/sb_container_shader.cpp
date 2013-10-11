@@ -24,10 +24,10 @@ namespace Sandbox {
 		if (m_enabled) {
 			ShaderPtr ss = g.GetShader();
 			g.SetShader(m_shader);
-			DrawChilds(g);
+            Container::Draw(g);
 			g.SetShader(ss);
 		} else {
-			DrawChilds(g);
+			Container::Draw(g);
 		}
 	}
 	

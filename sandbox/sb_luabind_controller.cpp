@@ -70,28 +70,28 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ControllerAngle, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerAngle)
-SB_META_CONSTRUCTOR((ContainerTransformPtr))
+SB_META_CONSTRUCTOR((TransformModificatorPtr))
 SB_META_PROPERTY_RW(Begin,GetBegin,SetBegin)
 SB_META_PROPERTY_RW(End,GetEnd,SetEnd)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ControllerScale, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerScale)
-SB_META_CONSTRUCTOR((ContainerTransformPtr))
+SB_META_CONSTRUCTOR((TransformModificatorPtr))
 SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ControllerScaleX, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerScaleX)
-SB_META_CONSTRUCTOR((ContainerTransformPtr))
+SB_META_CONSTRUCTOR((TransformModificatorPtr))
 SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ControllerScaleY, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerScaleY)
-SB_META_CONSTRUCTOR((ContainerTransformPtr))
+SB_META_CONSTRUCTOR((TransformModificatorPtr))
 SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
@@ -124,21 +124,21 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ControllerTranslate, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerTranslate)
-SB_META_CONSTRUCTOR((const Sandbox::ContainerTransformPtr&))
+SB_META_CONSTRUCTOR((const Sandbox::TransformModificatorPtr&))
 SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ControllerColor, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerColor)
-SB_META_CONSTRUCTOR((const Sandbox::ContainerColorPtr&))
+SB_META_CONSTRUCTOR((const Sandbox::ColorModificatorPtr&))
 SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ControllerAlpha, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerAlpha)
-SB_META_CONSTRUCTOR((const Sandbox::ContainerColorPtr&))
+SB_META_CONSTRUCTOR((const Sandbox::ColorModificatorPtr&))
 SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
@@ -167,7 +167,7 @@ namespace Sandbox {
     
   	class LuaEvent : public Event {
 	public:
-
+        typedef sb::shared_ptr<LuaEvent> Ptr;
         explicit LuaEvent(luabind::LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
 		~LuaEvent() {
 		}
@@ -192,25 +192,29 @@ namespace Sandbox {
 				}
 			}
 		}
-		static int constructor_func(lua_State* L) {
-            LUA_CHECK_STACK(1)
-			if (!lua_isfunction(L,2)) {
-                luabind::lua_argerror(L,2,"function",0);
-				return 0;
+        static Ptr construct_from_lua_function(lua_State* L,int idx) {
+            if (!lua_isfunction(L,idx)) {
+                luabind::lua_argerror(L,idx,"function",0);
+				return Ptr();
 			}
             luabind::LuaVMHelperPtr helper = luabind::GetHelper(L);
             if (!helper) {
                 lua_pushstring(L, "error state");
                 lua_error(L);
-                return 0;
+                return Ptr();
             }
 			lua_State* main_state = helper->lua;
 			sb::shared_ptr<LuaEvent> e = sb::shared_ptr<LuaEvent>(new LuaEvent(helper));
-			lua_pushvalue(L, 2);
+			lua_pushvalue(L, idx);
 			if (main_state!=L) {
 				lua_xmove(L, main_state, 1);
 			}
 			e->SetFunction(main_state);
+            return e;
+        }
+		static int constructor_func(lua_State* L) {
+            LUA_CHECK_STACK(1)
+			Ptr e = construct_from_lua_function(L, 2);
             luabind::stack<sb::shared_ptr<LuaEvent> >::push(L, e);
 			return 1;
 		}
@@ -218,6 +222,16 @@ namespace Sandbox {
         luabind::LuaReference	m_ref;
 	};
 
+    namespace luabind {
+        
+        EventPtr stack<EventPtr>::get(lua_State* L, int idx) {
+            if (lua_isfunction(L, idx)) {
+                return LuaEvent::construct_from_lua_function(L,idx);
+            }
+            return stack_get_impl<Event>(L,idx);
+        }
+        
+    }
     
     static const char* const LuaThreadModule = "Sanbox:LuaThread";
 	class LuaThread : public Thread {

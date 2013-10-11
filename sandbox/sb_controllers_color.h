@@ -11,7 +11,7 @@
 #define SB_CONTROLLERS_COLOR_H
 
 #include "sb_controller.h"
-#include "sb_container_color.h"
+#include "sb_draw_modificator.h"
 
 namespace Sandbox {
 	
@@ -19,19 +19,19 @@ namespace Sandbox {
 		
 		
 		struct LinearControllerSetColor {
-			static void SetValue( const ContainerColorPtr& ctnr,const Color& c) {
+			static void SetValue( const ColorModificatorPtr& ctnr,const Color& c) {
 				ctnr->SetColor(c);
 			}
 		};
 		struct LinearControllerSetAlpha {
-			static void SetValue( const ContainerColorPtr& ctnr,float a) {
+			static void SetValue( const ColorModificatorPtr& ctnr,float a) {
 				ctnr->SetAlpha(a);
 			}
 		};
 	}
 	
-	typedef LinearController<Color,Impl::LinearControllerSetColor,ContainerColorPtr> ControllerColor;
-	typedef LinearController<float,Impl::LinearControllerSetAlpha,ContainerColorPtr> ControllerAlpha;
+	typedef LinearController<Color,Impl::LinearControllerSetColor,ColorModificatorPtr> ControllerColor;
+	typedef LinearController<float,Impl::LinearControllerSetAlpha,ColorModificatorPtr> ControllerAlpha;
 	
 	
 }

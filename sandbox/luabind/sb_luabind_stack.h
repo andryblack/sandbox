@@ -361,57 +361,71 @@ namespace Sandbox {
         };
         
         template <class T>
-        struct stack<sb::shared_ptr<T> > {
-            static void push( lua_State* L, const sb::shared_ptr<T>& val ) {
-                if (!val) {
-                    lua_pushnil(L);
-                    return;
+        static inline void stack_push_impl( lua_State* L, const sb::shared_ptr<T>& val  ) {
+            if (!val) {
+                lua_pushnil(L);
+                return;
+            }
+            if (try_to_push_lua_object(L,val.get()))
+                return;
+            data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L,
+                                                                                 sizeof(data_holder)+
+                                                                                 sizeof(sb::shared_ptr<T>)));
+            holder->type = data_holder::shared_ptr;
+            holder->is_const = false;
+            holder->info = meta::type<T>::info();
+            holder->destructor = &destructor_helper<T>::shared;
+            new (holder+1) sb::shared_ptr<T>(val);
+            lua_set_metatable( L, *holder );
+        }
+        
+        template <class T>
+        static sb::shared_ptr<T> stack_get_impl_help( lua_State* L,  data_holder* holder, int idx ) {
+            if ( holder->type==data_holder::shared_ptr ) {
+                sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);
+                return ptr;
+            } else if ( holder->type==data_holder::wrapper_ptr ) {
+                wrapper_holder* wrapper = reinterpret_cast<wrapper_holder*>(holder);
+                bool lock = wrapper->lock(wrapper,L,idx);
+                sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,wrapper+1);
+                if (lock) wrapper->unlock(wrapper);
+                return ptr;
+            }
+            lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
+            return sb::shared_ptr<T>();
+        }
+        
+        template <class T>
+        static inline sb::shared_ptr<T> stack_get_impl( lua_State* L, int idx  ) {
+            if ( lua_isuserdata(L, idx) ) {
+                data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
+                return stack_get_impl_help<T>(L, holder, idx);
+            } else if ( lua_istable(L, idx) ) {
+                lua_pushliteral(L, "__native");
+                lua_rawget(L, idx);
+                if (lua_isuserdata(L, -1)) {
+                    data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
+                    lua_pop(L, 1);
+                    return stack_get_impl_help<T>(L, holder, idx);
                 }
-                if (try_to_push_lua_object(L,val.get()))
-                    return;
-                data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
-                                                                                     sizeof(data_holder)+
-                                                                                     sizeof(sb::shared_ptr<T>)));
-                holder->type = data_holder::shared_ptr;
-                holder->is_const = false;
-                holder->info = meta::type<T>::info();
-                holder->destructor = &destructor_helper<T>::shared;
-                new (holder+1) sb::shared_ptr<T>(val);
-                lua_set_metatable( L, *holder );
+                lua_pop(L, 1);
+            } else if ( lua_isnil(L, idx) ) {
+                return sb::shared_ptr<T>();
+            }
+            lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
+            return sb::shared_ptr<T>();
+
+        }
+        
+        template <class T>
+        struct stack<sb::shared_ptr<T> > {
+            
+            static void push( lua_State* L, const sb::shared_ptr<T>& val ) {
+                stack_push_impl(L,val);
             }
             
-            static sb::shared_ptr<T> get_impl( lua_State* L,  data_holder* holder, int idx ) {
-                if ( holder->type==data_holder::shared_ptr ) {
-                    sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);
-                    return ptr;
-                } else if ( holder->type==data_holder::wrapper_ptr ) {
-                    wrapper_holder* wrapper = reinterpret_cast<wrapper_holder*>(holder);
-                    bool lock = wrapper->lock(wrapper,L,idx);
-                    sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,wrapper+1);
-                    if (lock) wrapper->unlock(wrapper);
-                    return ptr;
-                }
-                lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
-                return sb::shared_ptr<T>();
-            }
             static sb::shared_ptr<T> get( lua_State* L, int idx ) {
-                if ( lua_isuserdata(L, idx) ) {
-                    data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
-                    return get_impl(L, holder, idx);
-                } else if ( lua_istable(L, idx) ) {
-                    lua_pushliteral(L, "__native");
-                    lua_rawget(L, idx);
-                    if (lua_isuserdata(L, -1)) {
-                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
-                        lua_pop(L, 1);
-                        return get_impl(L, holder, idx);
-                    }
-                    lua_pop(L, 1);
-                } else if ( lua_isnil(L, idx) ) {
-                    return sb::shared_ptr<T>();
-                }
-                lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
-                return sb::shared_ptr<T>();
+                return stack_get_impl<T>(L,idx);
             }
         };
         

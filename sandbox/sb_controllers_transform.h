@@ -11,7 +11,7 @@
 #define SB_CONTROLLERS_TRANSFORM_H
 
 #include "sb_controller.h"
-#include "sb_container_transform.h"
+#include "sb_draw_modificator.h"
 
 namespace Sandbox {
 	
@@ -19,37 +19,37 @@ namespace Sandbox {
 		
 	
 		struct LinearControllerSetTranslate {
-			static void SetValue( const ContainerTransformPtr& tr,const Vector2f& pos) {
+			static void SetValue( const TransformModificatorPtr& tr,const Vector2f& pos) {
 				tr->SetTranslate(pos);
 			}
 		};
 		struct LinearControllerSetScale {
-			static void SetValue( const ContainerTransformPtr& tr,float s) {
+			static void SetValue( const TransformModificatorPtr& tr,float s) {
 				tr->SetScale(s);
 			}
 		};
 		struct LinearControllerSetScaleX {
-			static void SetValue( const ContainerTransformPtr& tr,float s) {
+			static void SetValue( const TransformModificatorPtr& tr,float s) {
 				tr->SetScaleX(s);
 			}
 		};
 		struct LinearControllerSetScaleY {
-			static void SetValue( const ContainerTransformPtr& tr,float s) {
+			static void SetValue( const TransformModificatorPtr& tr,float s) {
 				tr->SetScaleY(s);
 			}
 		};
 		struct LinearControllerSetAngle {
-			static void SetValue( const ContainerTransformPtr& tr,float a) {
+			static void SetValue( const TransformModificatorPtr& tr,float a) {
 				tr->SetAngle(a);
 			}
 		};
 	}
 	
-	typedef LinearController<Vector2f,Impl::LinearControllerSetTranslate,ContainerTransformPtr> ControllerTranslate;
-	typedef LinearController<float,Impl::LinearControllerSetScale,ContainerTransformPtr> ControllerScale;
-	typedef LinearController<float,Impl::LinearControllerSetScaleX,ContainerTransformPtr> ControllerScaleX;
-	typedef LinearController<float,Impl::LinearControllerSetScaleY,ContainerTransformPtr> ControllerScaleY;
-	typedef LinearController<float,Impl::LinearControllerSetAngle,ContainerTransformPtr> ControllerAngle;
+	typedef LinearController<Vector2f,Impl::LinearControllerSetTranslate,TransformModificatorPtr> ControllerTranslate;
+	typedef LinearController<float,Impl::LinearControllerSetScale,TransformModificatorPtr> ControllerScale;
+	typedef LinearController<float,Impl::LinearControllerSetScaleX,TransformModificatorPtr> ControllerScaleX;
+	typedef LinearController<float,Impl::LinearControllerSetScaleY,TransformModificatorPtr> ControllerScaleY;
+	typedef LinearController<float,Impl::LinearControllerSetAngle,TransformModificatorPtr> ControllerAngle;
 }
 
 #endif /*SB_CONTROLLERS_TRANSFORM_H*/

@@ -16,8 +16,6 @@
 #include "sb_label.h"
 #include "sb_container.h"
 #include "sb_container_blend.h"
-#include "sb_container_transform.h"
-#include "sb_container_color.h"
 #include "sb_container_visible.h"
 #include "sb_container_transform3d.h"
 #include "sb_scene.h"
@@ -85,6 +83,8 @@ SB_META_METHOD(AddObject)
 SB_META_METHOD(InsertBefore)
 SB_META_METHOD(RemoveObject)
 SB_META_METHOD(Clear)
+SB_META_METHOD(AddModificator)
+SB_META_METHOD(RemoveModificator)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::BlendMode,void);
@@ -105,7 +105,11 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerVisible)
 SB_META_PROPERTY_RW_DEF(Invert)
 SB_META_END_KLASS_BIND()
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerTransform)
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::DrawModificator)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::TransformModificator)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Translate,GetTranslate,SetTranslate)
 SB_META_PROPERTY_RW(Scale,GetScale,SetScale)
@@ -121,7 +125,7 @@ SB_META_PROPERTY_RW_DEF(ProjectionMatrix)
 SB_META_PROPERTY_RW_DEF(ViewMatrix)
 SB_META_END_KLASS_BIND()
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerColor)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ColorModificator)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Color,GetColor,SetColor)
 SB_META_PROPERTY_RW(Alpha,GetAlpha,SetAlpha)
@@ -155,8 +159,9 @@ namespace Sandbox {
         luabind::Class<Container>(lua);
         luabind::Enum<BlendMode>(lua);
         luabind::Class<ContainerBlend>(lua);
-        luabind::Class<ContainerTransform>(lua);
-        luabind::Class<ContainerColor>(lua);
+        luabind::Class<DrawModificator>(lua);
+        luabind::Class<TransformModificator>(lua);
+        luabind::Class<ColorModificator>(lua);
         luabind::Class<ContainerVisible>(lua);
         luabind::Class<ContainerTransform3d>(lua);
         luabind::ExternClass<Scene>(lua);

@@ -20,6 +20,8 @@ namespace Sandbox {
     void RocketRenderInterface::BeginDraw(Graphics& g) {
         m_graphics = &g;
         m_clip_rect = g.GetViewport();
+        m_clip_enabled = false;
+        m_graphics->SetClipRect(m_graphics->GetViewport());
     }
     void RocketRenderInterface::EndDraw(Graphics& g) {
         sb_assert(m_graphics==&g);
@@ -71,7 +73,7 @@ namespace Sandbox {
     }
     
     bool RocketRenderInterface::LoadTexture(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source) {
-        TexturePtr tex = m_resources->GetTexture(source.CString(), false);
+        TexturePtr tex = m_resources->GetTexture(source.CString(), true);
         if (!tex) return false;
         texture_handle = reinterpret_cast<Rocket::Core::TextureHandle>(new TexturePtr(tex));
         texture_dimensions.x = tex->GetOriginalWidth();

@@ -166,7 +166,7 @@ namespace Sandbox {
             /// debug
 #if 0
             data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, self_index));
-            if (strcmp(holder->info->name,"Sandbox::TouchInfo")==0) {
+            if (strcmp(holder->info->name,"Sandbox::Container")==0) {
                 int a = 0;
             }
 #endif

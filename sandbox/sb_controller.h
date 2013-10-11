@@ -48,7 +48,9 @@ namespace Sandbox {
 		void Set(float k) {
 			Setter::SetValue( m_obj, m_begin * (1.0f-k) + m_end * k );
 		}
-		explicit LinearController(const Obj& obj) : m_obj(obj),m_begin(),m_end() {}
+		explicit LinearController(const Obj& obj) : m_obj(obj),m_begin(),m_end() {
+            sb_assert(m_obj);
+        }
 	private:
 		Obj	m_obj;
 		float	m_begin;

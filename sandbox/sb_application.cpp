@@ -44,6 +44,8 @@ SB_META_METHOD(RemoveScene)
 SB_META_END_KLASS_BIND()
 
 
+bool (*sb_terminate_handler)() = 0;
+
 namespace Sandbox {
     
     void register_math( lua_State* lua );
