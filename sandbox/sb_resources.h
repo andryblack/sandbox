@@ -13,7 +13,7 @@
 #include "sb_image.h"
 #include "sb_shader.h"
 #include "sb_atlaser.h"
-#include "sb_rendertatget.h"
+#include "sb_rendertarget.h"
 #include <sbstd/sb_string.h>
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_list.h>

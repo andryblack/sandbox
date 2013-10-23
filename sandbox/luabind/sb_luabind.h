@@ -14,7 +14,7 @@
 #include <sbstd/sb_string.h>
 #include "sb_inplace_string.h"
 #include "sb_notcopyable.h"
-#include "sb_assert.h"
+#include <sbstd/sb_assert.h>
 
 #include "sb_luabind_stack.h"
 #include "impl/sb_luabind_registrators.h"

@@ -25,6 +25,7 @@ namespace Sandbox {
 	
 	class ShaderUniform : public NotCopyable {
 	public:
+        virtual ~ShaderUniform() {}
 		virtual void DoSet() = 0;
 	protected:
 		explicit ShaderUniform(GHL::ShaderUniform* uniform) : m_uniform(uniform) {}

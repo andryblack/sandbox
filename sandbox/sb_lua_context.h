@@ -27,6 +27,16 @@ namespace Sandbox {
         sb::shared_ptr<LuaContext> CreateInherited();
         
         template <class T>
+        inline T GetValue(const char* path) {
+            lua_State* L = get_state_with_table_on_top(path);
+            if (!L) return;
+            lua_gettable(L,-2);
+            T val = luabind::stack<T>::get(L,-1);
+            lua_pop(L,2);
+            return val;
+        }
+
+        template <class T>
         inline void SetValue( const char* path, const sb::shared_ptr<T>& t ) {
             lua_State* L = get_state_with_table_on_top(path);
             if (!L) return;

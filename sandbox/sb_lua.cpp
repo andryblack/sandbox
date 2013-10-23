@@ -25,7 +25,7 @@ extern "C" {
 #include "sb_inplace_string.h"
 #include "sb_event.h"
 #include "sb_log.h"
-#include "sb_resources.h"
+#include "sb_file_provider.h"
 #include "sb_memory_mgr.h"
 #include "sb_lua_context.h"
 
@@ -113,7 +113,7 @@ namespace Sandbox {
     ////////////////////////////////////////////////////////////
     
     
-    LuaVM::LuaVM( Resources* resources ) : 
+    LuaVM::LuaVM(FileProvider *resources ) :
         m_resources( resources ), 
         m_L(0),
         m_mem_use(0)
@@ -200,19 +200,28 @@ namespace Sandbox {
 			LogError(MODULE) << "error opening file " << fn;
 			return false;
 		}
+        bool res = DoFileImpl(ds,fn,results,LuaContextPtr());
+        ds->Release();
+        return res;
+    }
+    bool LuaVM::DoFileImpl(GHL::DataStream* ds, const char* name, int results, const LuaContextPtr &env) {
 		lua_read_data data = {ds,{}};
         lua_pushcclosure(m_L, &luabind::lua_traceback, 0);  /// tb
         int traceback_index = lua_gettop(m_L);
         
-		int res = lua_load(m_L,&lua_read_func,&data,fn,0);  /// MF tf
-		ds->Release();
-		if (res!=0) {
-			LogError(MODULE) << "Failed to load script: " << fn;
+        int res = lua_load(m_L,&lua_read_func,&data,name,0);  /// MF tf
+
+        if (res!=0) {
+            LogError(MODULE) << "Failed to load script: " << name;
             LogError(MODULE) << lua_tostring(m_L, -1) ;
 			return false;
 		} else {
-			LogInfo(MODULE) << "Loaded script: " << fn;
+            LogInfo(MODULE) << "Loaded script: " << name;
             
+            if (env) {
+                env->GetObject(m_L);
+                lua_setupvalue(m_L, -2, 1);  /* set it as 1st upvalue of loaded chunk */
+            }
             //
             int res = lua_pcall(m_L, 0, results, -2);
             if (res) {
@@ -227,9 +236,17 @@ namespace Sandbox {
         
 		return true;
     }
+
     bool LuaVM::DoFile(const char* fn) {
         return DoFileImpl(fn,0);
     }
+
+    bool   LuaVM::LoadScript(GHL::DataStream* ds, const char *name, const LuaContextPtr& env) {
+        return DoFileImpl(ds,name,0,env);
+    }
+
+
+
 //    
 //    bool LuaVM::DoString( const char* cont ) {
 //        //LogInfo(MODULE) << "pcall >>>> top : " << lua_gettop(m_L);

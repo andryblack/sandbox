@@ -10,7 +10,7 @@
 #define __backgammon_osx__sb_memory_mgr__
 
 #include "sb_notcopyable.h"
-#include "sb_assert.h"
+#include <sbstd/sb_assert.h>
 #include <ghl_types.h>
 #include <cstring>
 

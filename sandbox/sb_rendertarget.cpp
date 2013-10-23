@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 andryblack. All rights reserved.
 //
 
-#include "sb_rendertatget.h"
+#include "sb_rendertarget.h"
 #include <ghl_render_target.h>
 #include <ghl_texture.h>
 

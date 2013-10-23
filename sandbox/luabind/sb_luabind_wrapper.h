@@ -11,7 +11,7 @@
 
 #include "sb_luabind_stack.h"
 #include "sb_luabind_ref.h"
-#include "sb_traits.h"
+#include <sbstd/sb_traits.h>
 #include "impl/sb_luabind_wrapper_base.h"
 
 namespace Sandbox {

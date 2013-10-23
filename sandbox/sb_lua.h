@@ -20,12 +20,12 @@
 struct lua_State;
 
 namespace GHL {
-	struct VFS;
+    struct DataStream;
 }
 
 namespace Sandbox {
     
-    class Resources;
+    class FileProvider;
     
     class MemoryMgr;
     
@@ -35,7 +35,7 @@ namespace Sandbox {
 	
     class LuaVM : public NotCopyable {
     public:
-        explicit LuaVM( Resources* resources );
+        explicit LuaVM( FileProvider* resources );
         ~LuaVM();
         void SetBasePath(const char* path);
         bool DoFile(const char* fn);
@@ -45,8 +45,10 @@ namespace Sandbox {
         
         LuaContextPtr   GetGlobalContext();
         LuaContextPtr   CreateContext();
+
+        bool   LoadScript(GHL::DataStream* ds,const char* name,const LuaContextPtr& env);
     private:
-        Resources*  m_resources;
+        FileProvider*  m_resources;
         lua_State*  m_L;
         GHL::UInt32 m_mem_use;
         sb::string m_base_path;
@@ -59,6 +61,7 @@ namespace Sandbox {
         static void* lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
         MemoryMgr*  m_mem_mgr;
         bool DoFileImpl(const char* name,int results);
+        bool DoFileImpl(GHL::DataStream* ds,const char* name,int results,const LuaContextPtr& env);
         LuaContextWeakPtr   m_global_context;
     };
 }
