@@ -1,13 +1,12 @@
 //
 //  sb_meta_bind.h
-//  YinYang
 //
-//  Created by Андрей Куницын on 7/10/12.
+//  Created on 7/10/12.
 //  Copyright (c) 2012 AndryBlack. All rights reserved.
 //
 
-#ifndef YinYang_sb_meta_bind_h
-#define YinYang_sb_meta_bind_h
+#ifndef sb_meta_bind_h
+#define sb_meta_bind_h
 
 namespace Sandbox {
     
