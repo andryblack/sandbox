@@ -130,18 +130,7 @@ namespace Sandbox {
             return res;
         }
         
-        template <class Type>
-        class has_meta_object_base
-        {
-            class yes { char m;};
-            class no { yes m[2];};
-            
-            static yes deduce(meta::object*);
-            static no deduce(...);
-            
-        public:
-            static const bool result = sizeof(yes) == sizeof(deduce((Type*)(0)));
-        };
+
         
         template<bool has>
         class has_meta_object_base_hpr {
@@ -161,7 +150,7 @@ namespace Sandbox {
         }
         template <class T>
         inline bool try_to_push_lua_object( lua_State* L, const T* val, 
-                                    const has_meta_object_base_hpr<has_meta_object_base<T>::result>* v=0 ) {
+                                    const has_meta_object_base_hpr<meta::implementation::has_meta_object_base<T>::result>* v=0 ) {
             return try_to_push_lua_object_impl(L,val,v);
         }
         
@@ -271,7 +260,7 @@ namespace Sandbox {
                                                                                          sizeof(T*)));
                     holder->type = data_holder::raw_ptr;
                     holder->is_const = false;
-                    holder->info = meta::type<T>::info();
+                    holder->info = meta::get_type_info(val);
                     holder->destructor = 0;
                     T** data = reinterpret_cast<T**>(holder+1);
                     *data = val;

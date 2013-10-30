@@ -208,6 +208,39 @@ namespace Sandbox {
             }
             return 0;
         }
+
+        namespace implementation {
+            template <class Type>
+            class has_meta_object_base
+            {
+                class yes { char m;};
+                class no { yes m[2];};
+
+                static yes deduce(meta::object*);
+                static no deduce(...);
+
+            public:
+                static const bool result = sizeof(yes) == sizeof(deduce((Type*)(0)));
+
+            };
+
+            template<class T,bool> struct get_type_info {
+                static const type_info* get(const T*) {
+                    return type<T>::info();
+                }
+            };
+            template<class T> struct get_type_info<T,true> {
+                static const type_info* get(const T* v) {
+                    return v->get_type_info();
+                }
+            };
+        }
+
+
+        template <class T>
+        inline const type_info* get_type_info(const T* v) {
+            return implementation::get_type_info<T,implementation::has_meta_object_base<T>::result>::get(v);
+        }
         
     }
     
