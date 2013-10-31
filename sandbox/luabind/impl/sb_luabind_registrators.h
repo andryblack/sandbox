@@ -135,6 +135,15 @@ namespace Sandbox {
                 lua_setfield(m_L, -2, func.name);               /// methods 
                 lua_pop(m_L, 1);
             }
+            void operator()( const meta::method_holder<int(*)(lua_State*)>& func ) {
+                sb_assert(lua_istable(m_L, -1));
+                lua_pushliteral(m_L, "__methods");
+                lua_rawget(m_L, -2 );                 /// methods
+                sb_assert(lua_istable(m_L, -1));
+                lua_pushcclosure(m_L, func.func, 0);
+                lua_setfield(m_L, -2, func.name);               /// methods
+                lua_pop(m_L, 1);
+            }
             template <class Func>
             void operator()( const meta::operator_holder<Func>& func ) {
                 sb_assert(lua_istable(m_L, -1)); 
