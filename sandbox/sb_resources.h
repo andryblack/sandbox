@@ -14,6 +14,7 @@
 #include "sb_shader.h"
 #include "sb_atlaser.h"
 #include "sb_rendertarget.h"
+#include "sb_file_provider.h"
 #include <sbstd/sb_string.h>
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_list.h>
@@ -33,7 +34,7 @@ namespace Sandbox {
 	
 	class Atlaser;
 
-	class Resources {
+	class Resources : public FileProvider {
 	public:
 		Resources(GHL::VFS* vfs);
 		~Resources();

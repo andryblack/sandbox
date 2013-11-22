@@ -20,8 +20,7 @@ namespace Sandbox {
     
     class Resources;
     class SoundManager;
-    class RocketContext;
-	
+    
 	class Application : public GHL::Application {
     public:
         void SetSoundEnabled( bool e );
@@ -86,8 +85,7 @@ namespace Sandbox {
         bool    m_sound_enabled;
         bool    m_music_enabled;
         
-        RocketContext*  m_rocket;
-	public:
+    public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys );
 		///

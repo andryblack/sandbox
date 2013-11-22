@@ -11,8 +11,6 @@
 #include "sb_sound.h"
 #include "sb_resources.h"
 #include "sb_graphics.h"
-#include "rocket/sb_rocket_context.h"
-#include "rocket/sb_rocket_bind.h"
 #include <sbstd/sb_algorithm.h>
 #include "sb_lua_context.h"
 
@@ -74,7 +72,6 @@ namespace Sandbox {
         m_batches = 0.0f;
         m_sound_enabled = true;
         m_music_enabled = true;
-        m_rocket = 0;
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
 	}
@@ -83,8 +80,7 @@ namespace Sandbox {
         delete m_main_thread;
 		delete m_main_scene;
 		delete m_lua;
-        delete m_rocket;
-		delete m_sound_mgr;
+    	delete m_sound_mgr;
 		delete m_resources;
 		delete m_graphics;
 	}
@@ -94,7 +90,6 @@ namespace Sandbox {
         register_resources(lua->GetVM());
         register_scene(lua->GetVM());
         register_controller(lua->GetVM());
-        RocketBind(lua->GetVM());
     }
 	
     void GHL_CALL Application::Initialize() {
@@ -194,8 +189,6 @@ namespace Sandbox {
         ctx->SetValue("application.size.height", m_render->GetHeight() );
         m_graphics->Load(m_render);
         
-        m_rocket = new RocketContext(m_resources,m_lua);
-        ctx->SetValue("application.rocket", m_rocket );
         
 		OnLoaded();
 		m_lua->DoFile("main.lua");
@@ -217,7 +210,6 @@ namespace Sandbox {
             m_main_scene->Update(dt);
 		m_main_thread->Update(dt);
 		Update(dt);
-        m_rocket->Update(dt);
         
         // update targets
         for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
@@ -237,8 +229,8 @@ namespace Sandbox {
 		m_graphics->BeginScene(m_render);
 		DrawFrame(*m_graphics);
         m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
-        m_rocket->Draw(*m_graphics);
-		size_t batches = m_graphics->EndScene();
+       
+        size_t batches = m_graphics->EndScene();
         m_batches = m_batches * 0.875f + 0.125f*batches;    /// interpolate 4 frames
         m_render->SetupBlend(true,GHL::BLEND_FACTOR_SRC_ALPHA,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
 		DrawDebugInfo();
@@ -330,15 +322,12 @@ namespace Sandbox {
 	}
 	///
 	void GHL_CALL Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
-        m_rocket->OnMouseDown(key, x, y, m_system->GetKeyMods());
-	}
+    }
 	///
 	void GHL_CALL Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
-        m_rocket->OnMouseMove(x, y, m_system->GetKeyMods());
     }
 	///
 	void GHL_CALL Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
-        m_rocket->OnMouseUp(key, x, y, m_system->GetKeyMods());
     }
 	///
 	void GHL_CALL Application::OnDeactivated() {
