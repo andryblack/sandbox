@@ -10,7 +10,7 @@
 #define __caleydoscope__sb_rt_scene__
 
 #include "sb_scene.h"
-#include "sb_rendertatget.h"
+#include "sb_rendertarget.h"
 
 namespace GHL {
     struct Render;

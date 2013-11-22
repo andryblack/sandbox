@@ -17,7 +17,7 @@
 #include "sb_color.h"
 #include "sb_rect.h"
 #include "sb_sound.h"
-#include "sb_rendertatget.h"
+#include "sb_rendertarget.h"
 
 SB_META_DECLARE_KLASS(Sandbox::Shader, void)
 
