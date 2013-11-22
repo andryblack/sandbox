@@ -54,6 +54,11 @@
 		A47726E61413D79C006A9887 /* lvm.h in Headers */ = {isa = PBXBuildFile; fileRef = A47726B71413D79C006A9887 /* lvm.h */; };
 		A47726E71413D79C006A9887 /* lzio.c in Sources */ = {isa = PBXBuildFile; fileRef = A47726B81413D79C006A9887 /* lzio.c */; };
 		A47726E81413D79C006A9887 /* lzio.h in Headers */ = {isa = PBXBuildFile; fileRef = A47726B91413D79C006A9887 /* lzio.h */; };
+		A48E3C7416E685D6009E2EED /* lctype.c in Sources */ = {isa = PBXBuildFile; fileRef = A48E3C7116E685D6009E2EED /* lctype.c */; };
+		A48E3C7516E685D6009E2EED /* lctype.h in Headers */ = {isa = PBXBuildFile; fileRef = A48E3C7216E685D6009E2EED /* lctype.h */; };
+		A48E3C7616E685D6009E2EED /* lbitlib.c in Sources */ = {isa = PBXBuildFile; fileRef = A48E3C7316E685D6009E2EED /* lbitlib.c */; };
+		A48E3C7916E685FF009E2EED /* loadlib.c in Sources */ = {isa = PBXBuildFile; fileRef = A48E3C7716E685FF009E2EED /* loadlib.c */; };
+		A48E3C7A16E685FF009E2EED /* lcorolib.c in Sources */ = {isa = PBXBuildFile; fileRef = A48E3C7816E685FF009E2EED /* lcorolib.c */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
@@ -105,6 +110,11 @@
 		A47726B71413D79C006A9887 /* lvm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lvm.h; sourceTree = "<group>"; };
 		A47726B81413D79C006A9887 /* lzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lzio.c; sourceTree = "<group>"; };
 		A47726B91413D79C006A9887 /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lzio.h; sourceTree = "<group>"; };
+		A48E3C7116E685D6009E2EED /* lctype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lctype.c; sourceTree = "<group>"; };
+		A48E3C7216E685D6009E2EED /* lctype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lctype.h; sourceTree = "<group>"; };
+		A48E3C7316E685D6009E2EED /* lbitlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lbitlib.c; sourceTree = "<group>"; };
+		A48E3C7716E685FF009E2EED /* loadlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = loadlib.c; sourceTree = "<group>"; };
+		A48E3C7816E685FF009E2EED /* lcorolib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lcorolib.c; sourceTree = "<group>"; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D2AAC07E0554694100DB518D /* liblua-Debug-iphoneos.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "liblua-Debug-iphoneos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -150,6 +160,11 @@
 		A477268A1413D79C006A9887 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				A48E3C7716E685FF009E2EED /* loadlib.c */,
+				A48E3C7816E685FF009E2EED /* lcorolib.c */,
+				A48E3C7116E685D6009E2EED /* lctype.c */,
+				A48E3C7216E685D6009E2EED /* lctype.h */,
+				A48E3C7316E685D6009E2EED /* lbitlib.c */,
 				A477268B1413D79C006A9887 /* lapi.c */,
 				A477268C1413D79C006A9887 /* lapi.h */,
 				A477268D1413D79C006A9887 /* lauxlib.c */,
@@ -231,6 +246,7 @@
 				A47726E41413D79C006A9887 /* lundump.h in Headers */,
 				A47726E61413D79C006A9887 /* lvm.h in Headers */,
 				A47726E81413D79C006A9887 /* lzio.h in Headers */,
+				A48E3C7516E685D6009E2EED /* lctype.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,6 +328,10 @@
 				A47726E31413D79C006A9887 /* lundump.c in Sources */,
 				A47726E51413D79C006A9887 /* lvm.c in Sources */,
 				A47726E71413D79C006A9887 /* lzio.c in Sources */,
+				A48E3C7416E685D6009E2EED /* lctype.c in Sources */,
+				A48E3C7616E685D6009E2EED /* lbitlib.c in Sources */,
+				A48E3C7916E685FF009E2EED /* loadlib.c in Sources */,
+				A48E3C7A16E685FF009E2EED /* lcorolib.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

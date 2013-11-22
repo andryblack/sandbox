@@ -12,6 +12,9 @@
 namespace Sandbox {
     namespace luabind {
         
+        LuaReference::LuaReference() : m_ref(LUA_NOREF) {
+            
+        }
         LuaReference::LuaReference( const LuaVMHelperWeakPtr& ptr ) : m_lua(ptr),m_ref(LUA_NOREF) {
         }
         LuaReference::~LuaReference() {
@@ -22,15 +25,20 @@ namespace Sandbox {
         }
         LuaVMHelperPtr GetHelper( lua_State* L );
         
-        void LuaReference::SetObject( lua_State* state ) {
-            m_lua = luabind::GetHelper( state );
+        void LuaReference::SetObject( lua_State* L ) {
+            if (Valid()) {
+                UnsetObject(L);
+            }
+            LUA_CHECK_STACK(-1)
+            m_lua = luabind::GetHelper( L );
             sb_assert(m_ref==LUA_NOREF);
-            m_ref = luaL_ref(state,LUA_REGISTRYINDEX);
+            m_ref = luaL_ref(L,LUA_REGISTRYINDEX);
             sb_assert(m_ref!=LUA_NOREF);
         }
-        void LuaReference::UnsetObject( lua_State* state ) {
+        void LuaReference::UnsetObject( lua_State* L ) {
+            LUA_CHECK_STACK(0)
             sb_assert(m_ref!=LUA_NOREF);
-            luaL_unref(state,LUA_REGISTRYINDEX,m_ref);
+            luaL_unref(L,LUA_REGISTRYINDEX,m_ref);
             m_ref = LUA_NOREF;
         }
         void LuaReference::GetObject( lua_State* state ) const {

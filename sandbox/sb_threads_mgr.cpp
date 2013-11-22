@@ -10,6 +10,9 @@
 #include "sb_threads_mgr.h"
 #include <algorithm>
 
+SB_META_DECLARE_OBJECT(Sandbox::ThreadsMgr, Sandbox::Thread)
+SB_META_DECLARE_OBJECT(Sandbox::PermanentThreadsMgr, Sandbox::ThreadsMgr)
+
 namespace Sandbox {
 
 	ThreadsMgr::ThreadsMgr() {
@@ -71,4 +74,8 @@ namespace Sandbox {
 		}
 	}
 
+    bool PermanentThreadsMgr::Update(float dt) {
+        ThreadsMgr::Update(dt);
+        return false;
+    }
 }

@@ -13,7 +13,7 @@
 #include "sb_scene_object.h"
 #include "sb_font.h"
 #include "sb_vector2.h"
-#include "sb_string.h"
+#include <sbstd/sb_string.h>
 
 namespace Sandbox {
 	

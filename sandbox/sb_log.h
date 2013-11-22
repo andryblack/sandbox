@@ -7,6 +7,8 @@
 
 #include <sstream>
 #include <ghl_log.h>
+#include <ghl_types.h>
+#include <sbstd/sb_string.h>
 
 namespace Sandbox {
     
@@ -69,7 +71,8 @@ namespace Sandbox {
         }
     };
     
-    
+    void format_memory( char* buf, size_t size, size_t mem,const char* caption );
+    sb::string format_memory( size_t mem );
 }
 
 #endif /*SB_LOG_H_INCLUDED*/

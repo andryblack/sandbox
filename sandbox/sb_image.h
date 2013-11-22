@@ -39,7 +39,7 @@ namespace Sandbox {
         float GetTextureW() const { return m_src_w;}
         float GetTextureH() const { return m_src_h;}
 		
-        /// set hotspot ( relative to real size )
+        /// get hotspot ( relative to original size )
         const Vector2f& GetHotspot() const { return m_hotspot;}
 		
         void SetHotspot( const Vector2f& hs );
@@ -65,14 +65,6 @@ namespace Sandbox {
 	: m_texture(texture),m_src_x(src_x),m_src_y(src_y),m_src_w(src_w),m_src_h(src_h) {
         m_width = src_w;
         m_height = src_h;
-        if (m_texture!=0) {
-            float itw = 1.0f / m_texture->GetWidth();
-            float ith = 1.0f / m_texture->GetHeight();
-            m_src_x *= itw;
-            m_src_y *= ith;
-            m_src_w *= itw;
-            m_src_h *= ith;
-        }
     }
 	
     inline Image::Image(const TexturePtr& texture, float src_x, float src_y, float src_w, float src_h,float w,float h)
@@ -83,23 +75,11 @@ namespace Sandbox {
 	
 	inline void Image::SetHotspot(const Vector2f& hs) {
 		m_hotspot = hs;
-		if (m_texture!=0) {
-			GHL::UInt32 tw = m_texture->GetWidth();
-            GHL::UInt32 th = m_texture->GetHeight();
-			m_hotspot.x *= m_width / (m_src_w * tw );
-			m_hotspot.y *= m_height / (m_src_h * th );
-        }
-	}
+    }
 	
     inline void Image::SetSize(float w, float h) {
         m_width = w;
         m_height = h;
-		if (m_texture!=0) {
-			GHL::UInt32 tw = m_texture->GetWidth();
-            GHL::UInt32 th = m_texture->GetHeight();
-			m_hotspot.x *= m_width / (m_src_w * tw );
-			m_hotspot.y *= m_height / (m_src_h * th );
-        }
     }
 	
 }

@@ -12,11 +12,11 @@
 #include "sb_notcopyable.h"
 #include "meta/sb_meta.h"
 
-#include "sb_shared_ptr.h"
-#include "sb_traits.h"
-#include "sb_map.h"
-#include "sb_string.h"
-#include "sb_vector.h"
+#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_traits.h>
+#include <sbstd/sb_map.h>
+#include <sbstd/sb_string.h>
+#include <sbstd/sb_vector.h>
 
 extern "C" {
 #include "../../lua/src/lua.h"
@@ -130,18 +130,7 @@ namespace Sandbox {
             return res;
         }
         
-        template <class Type>
-        class has_meta_object_base
-        {
-            class yes { char m;};
-            class no { yes m[2];};
-            
-            static yes deduce(meta::object*);
-            static no deduce(...);
-            
-        public:
-            static const bool result = sizeof(yes) == sizeof(deduce((Type*)(0)));
-        };
+
         
         template<bool has>
         class has_meta_object_base_hpr {
@@ -161,35 +150,37 @@ namespace Sandbox {
         }
         template <class T>
         inline bool try_to_push_lua_object( lua_State* L, const T* val, 
-                                    const has_meta_object_base_hpr<has_meta_object_base<T>::result>* v=0 ) {
+                                    const has_meta_object_base_hpr<meta::implementation::has_meta_object_base<T>::result>* v=0 ) {
             return try_to_push_lua_object_impl(L,val,v);
         }
         
-        template <class T>
-        struct stack {
+        template <class T,bool IsEnum> struct stack_help{
             static void push( lua_State* L, const T& val ) {
-                data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
-                                                                                     sizeof(data_holder)+
-                                                                                     sizeof(T)));
-                holder->type = data_holder::raw_data;
-                holder->is_const = false;
-                holder->info = meta::type<T>::info();
-                holder->destructor = &destructor_helper<T>::raw;
-                void* data = holder+1;
-                new (data) T(val);
-                lua_set_metatable( L, *holder );
+                {
+                    data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L,
+                                                                                         sizeof(data_holder)+
+                                                                                         sizeof(T)));
+                    holder->type = data_holder::raw_data;
+                    holder->is_const = false;
+                    holder->info = meta::type<T>::info();
+                    holder->destructor = &destructor_helper<T>::raw;
+                    void* data = holder+1;
+                    new (data) T(val);
+                    lua_set_metatable( L, *holder );
+                }
             }
             static T& get_impl( lua_State* L, data_holder* holder,int idx ) {
                 if ( holder->is_const ) {
                     lua_access_error( L, idx , holder->info->name );
                     return *reinterpret_cast<T*>(0);
-                } 
+                }
                 T* res = get_object_ptr<T>(holder,L,idx);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 }
                 return *res;
             }
+            typedef T& get_type;
             static T& get( lua_State* L, int idx ) {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
@@ -201,11 +192,33 @@ namespace Sandbox {
                         data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
                         lua_pop(L, 1);
                         return get_impl(L, holder,idx);
-                    } 
+                    }
                     lua_pop(L, 1);
-                } 
+                }
                 lua_argerror( L, idx, meta::type<T>::info()->name, 0);
                 return *reinterpret_cast<T*>(0);
+            }
+        };
+        
+        template <class T> struct stack_help<T,true> {
+            static void push( lua_State* L, const T& val ) {
+                lua_pushinteger(L, val);
+            }
+            typedef T get_type;
+            static T get( lua_State* L, int idx ) {
+                return static_cast<T>(lua_tointeger(L, idx));
+            }
+        };
+        
+        template <class T>
+        struct stack {
+            typedef stack_help<T, sb::is_enum<T>::result > help;
+            static void push( lua_State* L, const T& val ) {
+                help::push(L,val);
+            }
+            typedef typename help::get_type get_type;
+            static get_type get( lua_State* L, int idx ) {
+                return help::get(L,idx);
             }
         };
         template <class T>
@@ -235,16 +248,7 @@ namespace Sandbox {
                 return *reinterpret_cast<T*>(0);
             }
         };
-        template <class T>
-        struct stack<const T&> {
-            static void push( lua_State* L, const T& val ) {
-                stack<T>::push(L,val);
-            }
-            static const T& get( lua_State* L, int idx ) {
-                return stack<const T>::get(L,idx);
-            }
-        };
-        
+                
         template <class T>
         struct stack<T*> {
             static void push( lua_State* L, T* val ) {
@@ -256,7 +260,7 @@ namespace Sandbox {
                                                                                          sizeof(T*)));
                     holder->type = data_holder::raw_ptr;
                     holder->is_const = false;
-                    holder->info = meta::type<T>::info();
+                    holder->info = meta::get_type_info(val);
                     holder->destructor = 0;
                     T** data = reinterpret_cast<T**>(holder+1);
                     *data = val;
@@ -346,57 +350,71 @@ namespace Sandbox {
         };
         
         template <class T>
-        struct stack<sb::shared_ptr<T> > {
-            static void push( lua_State* L, const sb::shared_ptr<T>& val ) {
-                if (!val) {
-                    lua_pushnil(L);
-                    return;
+        static inline void stack_push_impl( lua_State* L, const sb::shared_ptr<T>& val  ) {
+            if (!val) {
+                lua_pushnil(L);
+                return;
+            }
+            if (try_to_push_lua_object(L,val.get()))
+                return;
+            data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L,
+                                                                                 sizeof(data_holder)+
+                                                                                 sizeof(sb::shared_ptr<T>)));
+            holder->type = data_holder::shared_ptr;
+            holder->is_const = false;
+            holder->info = meta::type<T>::info();
+            holder->destructor = &destructor_helper<T>::shared;
+            new (holder+1) sb::shared_ptr<T>(val);
+            lua_set_metatable( L, *holder );
+        }
+        
+        template <class T>
+        static sb::shared_ptr<T> stack_get_impl_help( lua_State* L,  data_holder* holder, int idx ) {
+            if ( holder->type==data_holder::shared_ptr ) {
+                sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);
+                return ptr;
+            } else if ( holder->type==data_holder::wrapper_ptr ) {
+                wrapper_holder* wrapper = reinterpret_cast<wrapper_holder*>(holder);
+                bool lock = wrapper->lock(wrapper,L,idx);
+                sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,wrapper+1);
+                if (lock) wrapper->unlock(wrapper);
+                return ptr;
+            }
+            lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
+            return sb::shared_ptr<T>();
+        }
+        
+        template <class T>
+        static inline sb::shared_ptr<T> stack_get_impl( lua_State* L, int idx  ) {
+            if ( lua_isuserdata(L, idx) ) {
+                data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
+                return stack_get_impl_help<T>(L, holder, idx);
+            } else if ( lua_istable(L, idx) ) {
+                lua_pushliteral(L, "__native");
+                lua_rawget(L, idx);
+                if (lua_isuserdata(L, -1)) {
+                    data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
+                    lua_pop(L, 1);
+                    return stack_get_impl_help<T>(L, holder, idx);
                 }
-                if (try_to_push_lua_object(L,val.get()))
-                    return;
-                data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
-                                                                                     sizeof(data_holder)+
-                                                                                     sizeof(sb::shared_ptr<T>)));
-                holder->type = data_holder::shared_ptr;
-                holder->is_const = false;
-                holder->info = meta::type<T>::info();
-                holder->destructor = &destructor_helper<T>::shared;
-                new (holder+1) sb::shared_ptr<T>(val);
-                lua_set_metatable( L, *holder );
+                lua_pop(L, 1);
+            } else if ( lua_isnil(L, idx) ) {
+                return sb::shared_ptr<T>();
+            }
+            lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
+            return sb::shared_ptr<T>();
+
+        }
+        
+        template <class T>
+        struct stack<sb::shared_ptr<T> > {
+            
+            static void push( lua_State* L, const sb::shared_ptr<T>& val ) {
+                stack_push_impl(L,val);
             }
             
-            static sb::shared_ptr<T> get_impl( lua_State* L,  data_holder* holder, int idx ) {
-                if ( holder->type==data_holder::shared_ptr ) {
-                    sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);
-                    return ptr;
-                } else if ( holder->type==data_holder::wrapper_ptr ) {
-                    wrapper_holder* wrapper = reinterpret_cast<wrapper_holder*>(holder);
-                    bool lock = wrapper->lock(wrapper,L,idx);
-                    sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,wrapper+1);
-                    if (lock) wrapper->unlock(wrapper);
-                    return ptr;
-                }
-                lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
-                return sb::shared_ptr<T>();
-            }
             static sb::shared_ptr<T> get( lua_State* L, int idx ) {
-                if ( lua_isuserdata(L, idx) ) {
-                    data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
-                    return get_impl(L, holder, idx);
-                } else if ( lua_istable(L, idx) ) {
-                    lua_pushliteral(L, "__native");
-                    lua_rawget(L, idx);
-                    if (lua_isuserdata(L, -1)) {
-                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
-                        lua_pop(L, 1);
-                        return get_impl(L, holder, idx);
-                    }
-                    lua_pop(L, 1);
-                } else if ( lua_isnil(L, idx) ) {
-                    return sb::shared_ptr<T>();
-                }
-                lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
-                return sb::shared_ptr<T>();
+                return stack_get_impl<T>(L,idx);
             }
         };
         
@@ -446,12 +464,12 @@ namespace Sandbox {
         
         template <class T>
         struct stack<sb::vector<T> > {
-            static void push( lua_State* L, const sb::map<sb::string,T>& val ) {
-                lua_createtable(L, val.size(), 0 );
+            static void push( lua_State* L, const sb::vector<T>& val ) {
+                lua_createtable(L, int(val.size()), 0 );
                 lua_Integer idx = 1;
                 for (typename sb::vector<T>::const_iterator it=val.begin();it!=val.end();++it) {
                     lua_pushinteger(L, idx);
-                    stack<T>::push( L,it->second );
+                    stack<T>::push( L, *it );
                     lua_settable(L, -3);
                     idx++;
                 }
@@ -480,11 +498,14 @@ namespace Sandbox {
             }
         };
         
+        
+        
+#ifdef SB_DEBUG
         class lua_stack_check {
         public:
-            explicit lua_stack_check(lua_State* L) {
+            explicit lua_stack_check(lua_State* L,int delta) {
                 m_L = L;
-                m_top = lua_gettop(L);
+                m_top = lua_gettop(L) + delta;
             }
             ~lua_stack_check() {
                 int top = lua_gettop(m_L);
@@ -494,13 +515,17 @@ namespace Sandbox {
             lua_State* m_L;
             int m_top;
         };
+#define LUA_CHECK_STACK(d) ::Sandbox::luabind::lua_stack_check sc(L,d);
+#else
+#define LUA_CHECK_STACK(d)
+#endif
         
 #define LUABIND_DECLARE_RAW_STACK_TYPE(Type) \
-template <> \
-struct stack<Type> { \
-static void push( lua_State* L, Type val ); \
-static Type get( lua_State* L, int idx ); \
-}; 
+    template <> \
+    struct stack<Type> { \
+        static void push( lua_State* L, Type val ); \
+        static Type get( lua_State* L, int idx ); \
+    }; 
         
         LUABIND_DECLARE_RAW_STACK_TYPE(bool)
         LUABIND_DECLARE_RAW_STACK_TYPE(char)
@@ -515,7 +540,45 @@ static Type get( lua_State* L, int idx ); \
         LUABIND_DECLARE_RAW_STACK_TYPE(const char*)
         
         
+        template <>
+        struct stack<sb::string> {
+            static void push( lua_State* L, const sb::string& val ) {
+                stack<const char*>::push(L, val.c_str());
+            }
+            static sb::string get( lua_State* L, int idx) {
+                return stack<const char*>::get(L,idx);
+            }
+        };
+        
+        template <>
+        struct stack<const sb::string&> {
+            static void push( lua_State* L, const sb::string& val ) {
+                stack<const char*>::push(L, val.c_str());
+            }
+            static sb::string get( lua_State* L, int idx) {
+                return stack<const char*>::get(L,idx);
+            }
+        };
     
+        template <class T>
+        struct stack<const T&> {
+            static void push( lua_State* L, const T& val ) {
+                stack<T>::push(L,val);
+            }
+            static const T& get( lua_State* L, int idx ) {
+                return stack<const T>::get(L,idx);
+            }
+        };
+        template <class T>
+        struct stack<T&> {
+            //            static void push( lua_State* L, const T& val ) {
+            //                stack<T>::push(L,val);
+            //            }
+            static T& get( lua_State* L, int idx ) {
+                return *stack<T*>::get(L,idx);
+            }
+        };
+
     }
 }
 

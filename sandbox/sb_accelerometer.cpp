@@ -15,16 +15,17 @@
 SB_META_DECLARE_KLASS(Sandbox::Accelerometer, Sandbox::Thread)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Accelerometer)
 SB_META_PROPERTY_RO(Data,GetData)
+SB_META_PROPERTY_RO(Supported, GetSupported)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
 	
 	static size_t enable_count = 0;
 	
-	Accelerometer::Accelerometer( GHL::System* system ) : m_system( system ) {
+	Accelerometer::Accelerometer( GHL::System* system ) : m_system( system ), m_supported(false) {
 		m_data = Vector3f( 0,0,0);
 		bool enable = true;
-		m_system->SetDeviceState( GHL::DEVICE_STATE_ACCELEROMETER_ENABLED, &enable );
+		m_supported = m_system->SetDeviceState( GHL::DEVICE_STATE_ACCELEROMETER_ENABLED, &enable );
 		enable_count++;
         m_actual = false;
 		Update(0);

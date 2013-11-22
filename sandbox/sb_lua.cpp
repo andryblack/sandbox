@@ -9,6 +9,7 @@
 
 #include "sb_lua.h"
 #include "luabind/sb_luabind.h"
+#include <sbstd/sb_assert.h>
 
 extern "C" {
 #include "../lua/src/lua.h"
@@ -24,14 +25,30 @@ extern "C" {
 #include "sb_inplace_string.h"
 #include "sb_event.h"
 #include "sb_log.h"
-#include "sb_resources.h"
+#include "sb_file_provider.h"
+#include "sb_memory_mgr.h"
+#include "sb_lua_context.h"
 
 namespace Sandbox {
 	
     static const char* MODULE = "Sanbox:Lua";
     
-	
-	
+	static lua_State* g_terminate_context = 0;
+	bool lua_terminate_handler() {
+        if (g_terminate_context) {
+            LogError(MODULE) << "--- terminate ---";
+            lua_pushcclosure(g_terminate_context, &luabind::lua_traceback, 0);
+            if (!lua_isstring(g_terminate_context, -2)){
+                lua_pushstring(g_terminate_context, "unknown");
+            } else {
+                lua_pushvalue(g_terminate_context, -2);
+            }
+            lua_pcall(g_terminate_context, 1, 1, 0);
+            LogError(MODULE) << lua_tostring(g_terminate_context, -1);
+            LogError(MODULE) << "--- terminate ---";
+        }
+        return false;
+    }
 		
     
 	struct lua_read_data {
@@ -75,14 +92,19 @@ namespace Sandbox {
     
     static int at_panic_func(lua_State* L) {
         LogError(MODULE) << "--- panic ---";
-        if (!lua_isstring(L, -1)){
-            lua_pushstring(L, "unknown");
-        }
         lua_pushcclosure(L, &luabind::lua_traceback, 0);
+        if (!lua_isstring(L, -2)){
+            lua_pushstring(L, "unknown");
+        } else {
+            lua_pushvalue(L, -2);
+        }
         lua_pcall(L, 1, 1, 0);
         LogError(MODULE) << "--- panic ---";
         LogError(MODULE) << lua_tostring(L, -1);
-        exit(1);
+#ifdef SB_DEBUG
+        sb_terminate_handler = 0;
+        sb_terminate();
+#endif
         return 0;
     }
 	
@@ -91,11 +113,12 @@ namespace Sandbox {
     ////////////////////////////////////////////////////////////
     
     
-    LuaVM::LuaVM( Resources* resources ) : 
+    LuaVM::LuaVM(FileProvider *resources ) :
         m_resources( resources ), 
         m_L(0),
         m_mem_use(0)
     {
+        m_mem_mgr = new MemoryMgr();
         m_L = lua_newstate(&LuaVM::lua_alloc_func,this);
         
         static const luaL_Reg loadedlibs[] = {
@@ -120,7 +143,7 @@ namespace Sandbox {
         }
         
         static const luaL_Reg base_funcs_impl[] = {
-			//{"dofile", lua_dofile_func},
+			{"dofile", lua_dofile_func},
 			{"print", lua_print_func},
             //{"require",lua_require_func},
             {"loadfile",lua_loadfile_func},
@@ -139,23 +162,30 @@ namespace Sandbox {
         
 		lua_atpanic(m_L, &at_panic_func);
         
+        g_terminate_context = m_L;
+#ifdef SB_DEBUG
+        sb_terminate_handler = &lua_terminate_handler;
+#endif
         luabind::Initialize(m_L);
     }
     
     LuaVM::~LuaVM() {
         if (m_L) {
             luabind::Deinitialize(m_L);
+            g_terminate_context = 0;
+#ifdef SB_DEBUG
+            sb_terminate_handler = 0;
+#endif
             lua_close(m_L);
             m_L = 0;
         }
+        if (m_mem_use) {
+            LogWarning() << "Lua unfree " << format_memory(m_mem_use);
+        }
+        delete m_mem_mgr;
     }
     
-    LuaVM* LuaVM::GetInstance( lua_State* L ) {
-        lua_getglobal(L, "LuaVM_instance");
-        LuaVM* this_ = lua_isuserdata(L, -1) ? reinterpret_cast<LuaVM*>(lua_touserdata(L, -1)) : 0;
-        lua_pop(L, 1);
-        return this_;
-    }
+
     
     void LuaVM::SetBasePath(const char *path) {
         m_base_path = path;
@@ -163,36 +193,83 @@ namespace Sandbox {
             m_base_path += "/";
     }
     
-    bool LuaVM::DoFile(const char* fn) {
+    bool LuaVM::DoFileImpl(const char* fn,int results) {
         sb::string path = m_base_path + fn;
         GHL::DataStream* ds = m_resources->OpenFile(path.c_str());
         if (!ds) {
 			LogError(MODULE) << "error opening file " << fn;
 			return false;
 		}
+        bool res = DoFileImpl(ds,fn,results,LuaContextPtr());
+        ds->Release();
+        return res;
+    }
+    bool LuaVM::DoFileImpl(GHL::DataStream* ds, const char* name, int results, const LuaContextPtr &env) {
 		lua_read_data data = {ds,{}};
-		int res = lua_load(m_L,&lua_read_func,&data,fn,0);
-		ds->Release();
-		if (res!=0) {
-			LogError(MODULE) << "Failed to load script: " << fn;
+        lua_pushcclosure(m_L, &luabind::lua_traceback, 0);  /// tb
+        int traceback_index = lua_gettop(m_L);
+        
+        int res = lua_load(m_L,&lua_read_func,&data,name,0);  /// MF tf
+
+        if (res!=0) {
+            LogError(MODULE) << "Failed to load script: " << name;
             LogError(MODULE) << lua_tostring(m_L, -1) ;
 			return false;
 		} else {
-			LogInfo(MODULE) << "Loaded script: " << fn;
+            LogInfo(MODULE) << "Loaded script: " << name;
             
-            lua_pushcclosure(m_L, &luabind::lua_traceback, 0);
-            lua_insert(m_L, -2);
-            int res = lua_pcall(m_L, 0, 0, -2);
+            if (env) {
+                env->GetObject(m_L);
+                lua_setupvalue(m_L, -2, 1);  /* set it as 1st upvalue of loaded chunk */
+            }
+            //
+            int res = lua_pcall(m_L, 0, results, -2);
             if (res) {
                 LogError(MODULE) << "pcall : " << res;
                 LogError(MODULE) << lua_tostring(m_L, -1) ;
                 return false;
             }
-            lua_remove(m_L, -1);
+            lua_remove(m_L, traceback_index);
+            //int crnt_top = lua_gettop(m_L);
+            //lua_remove(m_L, crnt_top-traceback_index-1);
 		}
         
 		return true;
     }
+
+    bool LuaVM::DoFile(const char* fn) {
+        return DoFileImpl(fn,0);
+    }
+
+    bool   LuaVM::LoadScript(GHL::DataStream* ds, const char *name, const LuaContextPtr& env) {
+        return DoFileImpl(ds,name,0,env);
+    }
+
+
+
+//    
+//    bool LuaVM::DoString( const char* cont ) {
+//        //LogInfo(MODULE) << "pcall >>>> top : " << lua_gettop(m_L);
+//        lua_pushcclosure(m_L, &luabind::lua_traceback, 0);  /// tb
+//        int traceback_index = lua_gettop(m_L);
+//        int res = luaL_loadstring(m_L, cont);
+//        if (res!=0) {
+//			LogError(MODULE) << "Failed to load script: " << cont;
+//            LogError(MODULE) << lua_tostring(m_L, -1) ;
+//			return false;
+//		} else {
+//			  //
+//            res = lua_pcall(m_L, 0, 0, -2);
+//            if (res) {
+//                LogError(MODULE) << "pcall : " << res;
+//                LogError(MODULE) << lua_tostring(m_L, -1) ;
+//                return false;
+//            }
+//            lua_remove(m_L, traceback_index);
+//     	}
+//        //LogInfo(MODULE) << "pcall <<<< top : " << lua_gettop(m_L);
+//        return true;
+//    }
     
    
     int LuaVM::lua_module_searcher(lua_State *L) {
@@ -225,18 +302,18 @@ namespace Sandbox {
             return 2;
         }
         LuaVM* this_ = reinterpret_cast<LuaVM*>(lua_touserdata(L, lua_upvalueindex(1)));
-        GHL::DataStream* ds = this_->m_resources->OpenFile(fname);
+        sb::string filename =  fname;
+        GHL::DataStream* ds = this_->m_resources->OpenFile(filename.c_str());
         if (!ds) {
             lua_pushnil(L);
-            lua_pushstring(L, "error opening file");
+            lua_pushstring(L, (sb::string("error opening file: ")+filename).c_str());
             return 2;
 		}
 		lua_read_data data = {ds,{}};
 		int res = lua_load(L,&lua_read_func,&data,fname,0);
 		ds->Release();
 		if (res!=0) {
-            lua_pushnil(L);
-            lua_pushstring(L, "error loading file");
+            lua_pushstring(L, (sb::string("error loading file: ")+filename).c_str());
             return 2;
 		} 
         if ( env ) {  /* 'env' parameter? */
@@ -244,6 +321,18 @@ namespace Sandbox {
             lua_setupvalue(L, -2, 1);  /* set it as 1st upvalue of loaded chunk */
         }
         return 1;
+    }
+        
+    int LuaVM::lua_dofile_func(lua_State* L) {
+        LuaVM* this_ = reinterpret_cast<LuaVM*>(lua_touserdata(L, lua_upvalueindex(1)));
+        int cnt = lua_gettop(L);
+        if (this_->DoFileImpl(lua_tostring(L, 1),LUA_MULTRET)) {
+            int results = lua_gettop(L)-cnt;
+            return results;
+        }
+        lua_pushstring(L, "error dofile");
+        lua_error(L);
+        return 0;
     }
     void* LuaVM::lua_alloc_func(void *ud, void *_ptr, size_t osize,size_t nsize) {
 		GHL::Byte* ptr = reinterpret_cast<GHL::Byte*> (_ptr);
@@ -268,14 +357,38 @@ namespace Sandbox {
 		return ptr;
 	}
     
+    LuaContextPtr  LuaVM::CreateContext() {
+        lua_newtable(m_L);
+        lua_getglobal(m_L, "_G");
+        lua_setfield(m_L, -2, "_G");
+        LuaContextPtr ctx = sb::make_shared<LuaContext>();
+        ctx->SetObject(m_L);
+        return ctx;
+    }
+    
+    LuaContextPtr   LuaVM::GetGlobalContext() {
+        LuaContextPtr ctx = m_global_context.lock();
+        if (ctx) return ctx;
+        lua_getglobal(m_L, "_G");
+        ctx = sb::make_shared<LuaContext>();
+        ctx->SetObject(m_L);
+        m_global_context = ctx;
+        return ctx;
+    }
+    
+    sb::string LuaVM::GetMemoryUsed() const {
+        sb::string res = sb::string("lua:") + format_memory(m_mem_use) +
+        "/"+format_memory(m_mem_mgr->allocated());
+        return res;
+    }
     GHL::Byte* LuaVM::alloc(size_t size) {
 		m_mem_use+=GHL::UInt32(size);
-		return new GHL::Byte[size];
+		return m_mem_mgr->alloc(size);
 	}
 	void LuaVM::free(GHL::Byte* data,size_t size) {
 		sb_assert(m_mem_use>=size);
 		m_mem_use-=GHL::UInt32(size);
-		delete [] (data);
+		m_mem_mgr->free(data);
 	}
 	void LuaVM::resize(GHL::Byte*,size_t osize,size_t nsize) {
 		sb_assert(m_mem_use>=osize);

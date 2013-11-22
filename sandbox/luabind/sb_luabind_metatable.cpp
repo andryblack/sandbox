@@ -32,29 +32,21 @@ namespace Sandbox {
         }
 
         template <char C, size_t count>
-        static void get_create_table_impl(lua_State* L,const InplaceString& name) {
-            const char* other = name.find(C);
-            sb::string first = InplaceString(name.begin(),other).str();
-            lua_getglobal(L,first.c_str());
-            if (!lua_istable(L, -1)) {
-                lua_pop(L, 1);
-                lua_newtable(L);
-                lua_pushvalue(L, -1);
-                lua_setglobal(L, first.c_str());
-            }
-            if (other==name.end()) return;
-            other+=count;
-            if (other >= name.end()) return;
-            InplaceString tail(other,name.end());
+        static void get_create_table_impl2(lua_State* L,const InplaceString& name,int prealloc) {
+            InplaceString tail(name.begin(),name.end());
             while (!tail.empty()) {
-                other = tail.find(C);
+                const char* other = tail.find(C);
                 InplaceString head( tail.begin(), other );
-                lua_getfield(L, -1, head.str().c_str() );
+                
+                lua_pushlstring(L, head.begin(),head.length());
+                lua_rawget(L, -2);
+                
                 if (!lua_istable(L, -1)) {
                     lua_pop(L, 1);
-                    lua_newtable(L);
-                    lua_pushvalue(L, -1);
-                    lua_setfield(L, -3, head.str().c_str());
+                    lua_createtable(L, 0, other==name.end() ? prealloc : 1);
+                    lua_pushlstring(L, head.begin(),head.length());
+                    lua_pushvalue(L, -2);
+                    lua_rawset(L, -4);
                 }
                 lua_remove(L, -2);
                 if (other==name.end()) break;
@@ -62,8 +54,26 @@ namespace Sandbox {
             }
         }
         
-        void lua_get_create_table(lua_State* L,const char* name) {
-            get_create_table_impl<':',2>(L, InplaceString(name));
+        template <char C, size_t count>
+        static void get_create_table_impl(lua_State* L,const InplaceString& name,int prealloc) {
+            const char* other = name.find(C);
+            sb::string first = InplaceString(name.begin(),other).str();
+            lua_getglobal(L,first.c_str());
+            if (!lua_istable(L, -1)) {
+                lua_pop(L, 1);
+                lua_createtable(L, 0, prealloc);
+                lua_pushvalue(L, -1);
+                lua_setglobal(L, first.c_str());
+            }
+            if (other==name.end()) return;
+            other+=count;
+            if (other >= name.end()) return;
+            InplaceString tail(other,name.end());
+            get_create_table_impl2<C,count>(L,tail,prealloc);
+        }
+        
+        void lua_get_create_table(lua_State* L,const char* name,int prealloc) {
+            get_create_table_impl<':',2>(L, InplaceString(name),prealloc);
         }
 
         static void get_table(lua_State* L,const InplaceString& name) {
@@ -111,11 +121,19 @@ namespace Sandbox {
             if ( name == path ) {
                 lua_setglobal(L, path);
             } else {
-                get_create_table_impl<'.',1>(L, InplaceString(path,name));  /// val tbl
+                get_create_table_impl<'.',1>(L, InplaceString(path,name),1);  /// val tbl
                 lua_pushvalue(L, -2);               /// val tbl val
                 lua_setfield(L, -2, name+1);        /// val tbl
                 lua_pop(L, 2);
             }
+        }
+        
+        void lua_get_create_child_table( lua_State* L, const char*& path) {
+            InplaceString full_path(path);
+            const char* name = full_path.rfind('.');
+            if (name==path) return;
+            get_create_table_impl2<'.', 1>(L, InplaceString(path,name), 1);
+            path = name+1;
         }
 
         
@@ -126,7 +144,7 @@ namespace Sandbox {
                 lua_setglobal(L, path);
             } else {
                 name--;
-                get_create_table_impl<':',2>(L, InplaceString(path,name));  /// val tbl
+                get_create_table_impl<':',2>(L, InplaceString(path,name),1);  /// val tbl
                 lua_pushvalue(L, -2);               /// val tbl val
                 lua_setfield(L, -2, name+2);        /// val tbl
                 lua_pop(L, 2);
@@ -143,18 +161,17 @@ namespace Sandbox {
             return 0;
         }
         
-        
-        static int getter_indexer (lua_State *L)
-		{
-            sb_assert(lua_isuserdata(L, 1));
+        static bool native_getter_indexer(lua_State* L,int self_index) {
+            sb_assert(lua_isuserdata(L, self_index));
             /// debug
 #if 0
-            data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, 1));
-            if (strcmp(holder->info->name,"Sandbox::TouchInfo")==0) {
+            data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, self_index));
+            if (strcmp(holder->info->name,"Sandbox::Container")==0) {
                 int a = 0;
             }
 #endif
-          	lua_getmetatable(L, 1);             /// mt
+
+            lua_getmetatable(L, self_index);             /// mt
             do {
                 lua_pushliteral(L, "__props");
                 lua_rawget(L, -2);                  /// mt props
@@ -172,9 +189,9 @@ namespace Sandbox {
                     lua_remove(L, -2);          /// get
                     lua_pushvalue(L, 1);        /// get obj
                     lua_call_method(L, 1, 1, "get");
-                    return 1;
+                    return true;
                 }
-				lua_pop(L, 2);                  /// mt 
+				lua_pop(L, 2);                  /// mt
                 
                 lua_pushliteral(L, "__methods");
                 lua_rawget(L, -2);                  /// mt methods
@@ -188,36 +205,44 @@ namespace Sandbox {
                     lua_remove(L, -2);          /// mt res
                     lua_remove(L, -2);          /// res
                     sb_assert(lua_isfunction(L, -1));
-                    return 1;
+                    return true;
                 }
-				lua_pop(L, 2);                  /// mt 
+				lua_pop(L, 2);                  /// mt
                 
                 
 				lua_pushliteral(L, "__parent");
                 lua_rawget(L, -2 );             /// mt prnt
 				if (lua_isnil(L, -1)) {
-					lua_pop(L, 2);
-                    char buf[128];
-                    lua_getglobal(L, "tostring");
-                    lua_pushvalue(L, 1);
-                    lua_call(L, 1, 1);
-                    snprintf(buf, 128, "%s: get unknown field: %s",lua_tostring(L, -1),lua_tostring(L, 2));
-                    lua_pop(L, 1);
-                    lua_pushstring(L, buf);
-                    lua_error(L);
-                    return 0;
+                    lua_pop(L, 2);
+                    return false;
                 }
 				lua_remove(L, -2);              /// prnt
 			} while (true);
 			
 			// Control never gets here
-			return 0;
+			return false;
+        }
+        
+        static int getter_indexer (lua_State *L)
+		{
+            if (!native_getter_indexer(L,1)) {
+                char buf[128];
+                lua_getglobal(L, "tostring");
+                lua_pushvalue(L, 1);
+                lua_call(L, 1, 1);
+                snprintf(buf, 128, "%s: get unknown field: %s",lua_tostring(L, -1),lua_tostring(L, 2));
+                lua_pop(L, 1);
+                lua_pushstring(L, buf);
+                lua_error(L);
+                return 0;
+            }
+            return 1;
 		}
         
-        static int setter_indexer (lua_State *L)
-		{
-            sb_assert(lua_isuserdata(L, 1));
-          	lua_getmetatable(L, 1);             /// mt
+        static bool native_setter_indexer(lua_State* L,int self_indx) {
+            sb_assert(lua_isuserdata(L, self_indx));
+          	lua_getmetatable(L, self_indx);             /// mt
+            sb_assert(lua_istable(L, -1));
             do {
                 lua_pushliteral(L, "__props");
                 lua_rawget(L, -2);                  /// mt props
@@ -236,24 +261,31 @@ namespace Sandbox {
                     lua_pushvalue(L, 1);        /// set obj
                     lua_pushvalue(L, 3);        /// set obj val
                     lua_call_method(L, 2, 0, "set");
-                    return 0;
+                    return true;
                 }
-				lua_pop(L, 2);                  /// mt 
+				lua_pop(L, 2);                  /// mt
 				lua_pushliteral(L, "__parent");
                 lua_rawget(L, -2 );             /// mt prnt
 				if (lua_isnil(L, -1)) {
 					lua_pop(L, 2);
-                    char buf[128];
-                    snprintf(buf, 128, "%s: set unknown field: %s",lua_tostring(L, 1),lua_tostring(L, 2));
-                    lua_pushstring(L, buf);
-                    lua_error(L);
-                    return 0;
+                    return false;
                 }
 				lua_remove(L, -2);              /// prnt
 			} while (true);
 			
 			// Control never gets here
-			return 0;
+			return false;
+        }
+        
+        static int setter_indexer (lua_State *L)
+		{
+            if (!native_setter_indexer(L,1)) {
+                char buf[128];
+                snprintf(buf, 128, "%s: set unknown field: %s",lua_tostring(L, 1),lua_tostring(L, 2));
+                lua_pushstring(L, buf);
+                lua_error(L);
+            }
+            return 0;
 		}
 
         
@@ -307,17 +339,19 @@ namespace Sandbox {
             int args_cnt = lua_gettop(L); 
             lua_pushliteral(L, "__native");
             lua_pushvalue(L, lua_upvalueindex(1));
-            for (int i=1;i<=args_cnt;i++) {
+            for (int i=2;i<=args_cnt;i++) {
                 lua_pushvalue(L, i);
             }
-            lua_call_method(L, args_cnt, 1,"init_func");
+            lua_call_method(L, args_cnt-1, 1,"native-constructor");
             lua_rawset(L, 1);
             return 0;
         }
         
+        /// -2 - class-name
+        /// -1 - class-metatable
         void lua_register_metatable(lua_State* L,const meta::type_info* info) {
             if (info->parents && info->parents[0].info!=meta::type<void>::info() ) {
-                lua_get_create_table(L,info->parents[0].info->name);
+                lua_get_create_table(L,info->parents[0].info->name,2);  /// [metatatable] ptbl
                 lua_setfield(L, -2, "__parent");
                 lua_getfield(L, -1, "__metatable");
                 lua_getfield(L, -2, "__parent");                 /// mntbl raw_ptr parent
@@ -375,7 +409,7 @@ namespace Sandbox {
         }
         
         void lua_register_wrapper(lua_State* L,const meta::type_info* info) {
-            lua_get_create_table(L,info->parents[0].info->name);
+            lua_get_create_table(L,info->parents[0].info->name,2);
             lua_setfield(L, -2, "__parent");
             lua_getfield(L, -1, "__metatable");
             lua_getfield(L, -2, "__parent");                 /// mntbl raw_ptr parent
@@ -409,10 +443,73 @@ namespace Sandbox {
         }
         
         
+        
+        
+        /// for lua classes
+        static int lua_getter_indexer (lua_State *L)
+		{
+            sb_assert(lua_istable(L, 1));
+            /// get from prototype
+            lua_getmetatable(L, 1);
+            sb_assert(lua_istable(L, -1));
+            lua_getfield(L, -1, "__proto");
+            while (!lua_isnil(L, -1)) {
+                sb_assert(lua_istable(L, -1));  /// MT PROTO
+                lua_pushvalue(L, 2);
+                lua_gettable(L, -2);            /// MT PROTO value
+                if (!lua_isnil(L, -1)) {
+                    lua_remove(L, -3);
+                    lua_remove(L, -2);
+                    return 1;
+                }
+                lua_pop(L, 1);
+                lua_getfield(L, -1, "__parent");
+                lua_remove(L, -2);
+            }
+            lua_pop(L, 2);
+            /// getfrom native
+            lua_pushliteral(L, "__native");
+            lua_rawget(L, 1);
+            
+            if (lua_isuserdata(L, -1) && native_getter_indexer(L,-1)) {
+                lua_remove(L, -2);
+                return 1;
+            }
+            lua_pop(L, 1);
+            
+            /// return instance prop
+            lua_pushvalue(L, 2);
+            lua_rawget(L, 1);              /// class res
+            return 1;
+ 		}
+        
+        static int lua_setter_indexer (lua_State *L)
+		{
+            LUA_CHECK_STACK(0)
+            sb_assert(lua_istable(L, 1));
+            lua_pushliteral(L, "__native");
+            lua_rawget(L, 1);
+            if (lua_isuserdata(L, -1) && native_setter_indexer(L, -1)) {
+                lua_pop(L, 1);
+                /// setted to native
+                return 0;
+            }
+            lua_pop(L, 1);
+            lua_pushvalue(L, 2);
+            lua_pushvalue(L, 3);
+            lua_rawset(L, 1);
+            return 0;
+      	}
+        
         static int lua_class_constructor_func( lua_State* L ) {
             int args_cnt = lua_gettop(L);
             
-            lua_newtable(L);
+            lua_newtable(L);    /// instance
+            
+            lua_pushliteral(L, "__class");
+            lua_rawget(L, 1);
+            sb_assert(lua_istable(L, -1));
+            lua_setmetatable(L, -2);
             
             lua_pushliteral(L, "__init");
             lua_rawget(L, 1);
@@ -423,141 +520,14 @@ namespace Sandbox {
                 }
                 lua_call_method(L, args_cnt, 0, "__init");
             } else {
+                sb_assert(false);
+                /// @todo : call parent instead
                 lua_pop(L, 1);
             }
             
-            lua_pushliteral(L, "__metatable");
-            lua_rawget(L, 1);
-            
-            
-            lua_setmetatable(L, -2);
             return 1;
         }
         
-        static int lua_getter_indexer (lua_State *L)
-		{
-            sb_assert(lua_istable(L, 1));
-            /// debug
-          	lua_getmetatable(L, 1);             /// mt
-            
-            lua_pushliteral(L, "__class");
-            lua_rawget(L, -2);                  /// mt class
-            sb_assert(lua_istable(L, -1));
-            
-            lua_remove(L, -2);                  /// class
-            
-            do {
-                
-                // Look for the key in the metatable
-				lua_pushvalue(L, 2);
-				lua_rawget(L, -2);              /// class res
-				
-				// Did we get a non-nil result?  If so, return it
-				if (!lua_isnil(L, -1)) {
-                    lua_remove(L, -2);          /// res
-                    return 1;
-                }
-				lua_pop(L, 1);                  ///  class
-                
-				lua_pushliteral(L, "__parent");
-                lua_rawget(L, -2 );             /// class prnt
-				if (lua_isnil(L, -1)) {
-					lua_pop(L, 2);
-                    lua_pushnil(L);
-                    return 1;
-                }
-             	lua_remove(L, -2);              /// prnt
-                lua_pushliteral(L, "__isnative");
-                lua_rawget(L, -2);
-                if (lua_toboolean(L, -1)) {
-                    lua_pop(L, 2);
-                    lua_pushliteral(L, "__native");
-                    lua_rawget(L, 1);
-                    if ( lua_isnil(L, -1)) {
-                        lua_pop(L, 1);
-                        lua_pushstring(L, "error getting native ptr");
-                        lua_error(L);
-                        return 0;
-                    }
-                    lua_pushvalue(L, 2);
-                    lua_gettable(L,-2);
-                    lua_remove(L, -2);
-                    return 1;
-                } 
-                lua_pop(L, 1);
-			} while (true);
-			
-			// Control never gets here
-			return 0;
-		}
-        
-        static int lua_setter_indexer (lua_State *L)
-		{
-            sb_assert(lua_istable(L, 1));
-            lua_pushliteral(L, "__native");
-            lua_rawget(L, 1);
-            if (lua_isuserdata(L, -1)) {
-                
-#if 0
-                data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
-                if (strcmp(holder->info->name,"Sandbox::WidgetWrapper")==0) {
-                    int a = 0;
-                }
-#endif
-                lua_getmetatable(L, -1);             /// mt
-                sb_assert(lua_istable(L, -1));
-                lua_remove(L, -2);
-                do {
-                    lua_pushliteral(L, "__props");
-                    lua_rawget(L, -2);                  /// mt props
-                    if (!lua_istable(L, -1)) {
-                        lua_argerror(L,1,"noraml",0);
-                    }
-                    sb_assert(lua_istable(L, -1));
-                    
-                    // Look for the key in the metatable
-                    lua_pushvalue(L, 2);
-                    lua_rawget(L, -2);              /// mt props res
-                    // Did we get a non-nil result?  If so, return it
-                    if (!lua_isnil(L, -1)) {
-                        lua_remove(L, -2);          /// mt res
-                        lua_remove(L, -2);          /// res
-                        lua_getfield(L, -1, "set"); /// res set
-                        sb_assert(lua_isfunction(L, -1));
-                        lua_remove(L, -2);          /// set
-                        lua_pushvalue(L, 1);        /// set obj
-                        lua_pushvalue(L, 3);        /// set obj val
-                        lua_call_method(L, 2, 0,"set");
-                        return 0;
-                    }
-                    lua_pop(L, 2);                  /// mt 
-                    lua_pushliteral(L, "__parent");
-                    lua_rawget(L, -2 );             /// mt prnt
-                    if (lua_isnil(L, -1)) {
-                        lua_pop(L, 2);
-                        break;
-                    }
-                    lua_remove(L, -2);              /// prnt
-                } while (true);
-            } else {
-                lua_pop(L, 1);
-            }
-            lua_pushvalue(L, 2);
-            lua_pushvalue(L, 3);
-            lua_rawset(L, 1);
-            return 0;
-      	}
-        
-        
-        static int lua_class_superclass_func( lua_State* L ) {
-            if (!lua_istable(L, 1)) {
-                lua_argerror(L, 1, "super-class-table", 0);
-                return 0;
-            }
-            lua_pushvalue(L,1);
-            lua_setfield(L, lua_upvalueindex(1), "__parent");
-            return 0;
-        }
         
         static int lua_object_to_string( lua_State* L ) {
             if (lua_istable(L, 1)) {
@@ -591,39 +561,44 @@ namespace Sandbox {
             return 0;
         }
         
-        
+  
+        static int lua_class_superclass_func( lua_State* L ) {
+            if (!lua_istable(L, 1)) {
+                lua_argerror(L, 1, "super-class-table", 0);
+                return 0;
+            }
+            lua_pushvalue(L,1);
+            lua_setfield(L, lua_upvalueindex(1), "__parent");
+            return 0;
+        }
+
         int lua_class_func( lua_State* L ) {
             if (!lua_isstring(L, 1)) {
                 lua_argerror(L, 1, "class-name", 0);
                 return 1;
             }
             const char* name = lua_tostring(L, 1);
+            lua_get_create_table(L, name, 6);   /// class-name-table (CNT)
             
-            
-            lua_newtable( L );
-            
-            
-            lua_newtable( L );
+            lua_newtable( L );  /// class name metatable
             lua_pushcclosure(L, &lua_class_constructor_func, 0);
             lua_setfield(L, -2, "__call");
             lua_setmetatable(L, -2);
             
-            lua_newtable( L );
-            lua_pushcfunction(L, &lua_getter_indexer);               /// mntbl raw_ptr indexer
-			lua_setfield(L, -2, "__index");               /// mntbl raw_ptr
-            lua_pushcfunction(L, &lua_setter_indexer);               /// mntbl raw_ptr indexer
-			lua_setfield(L, -2, "__newindex");               /// mntbl raw_ptr
-            lua_pushvalue(L, 1);
-            lua_pushcclosure(L, &lua_object_to_string,1);               /// mntbl raw_ptr object_to_string
-			lua_setfield(L, -2, "__tostring");               /// mntbl raw_ptr
+            lua_newtable( L );  /// instances metatatble (IM)
+            lua_pushcfunction(L, &lua_getter_indexer);              /// CNT IM indexer
+			lua_setfield(L, -2, "__index");                         /// CNT IM
+            lua_pushcfunction(L, &lua_setter_indexer);              /// CNT IM indexer
+			lua_setfield(L, -2, "__newindex");                      /// CNT IM
+            lua_pushvalue(L, 1);                                    /// CNT IM name
+            lua_pushcclosure(L, &lua_object_to_string,1);           /// CNT IM  object_to_string
+			lua_setfield(L, -2, "__tostring");                      /// CNT IM
             
-            lua_pushvalue(L, -2);
-            lua_setfield(L, -2, "__class");
-            lua_setfield(L, -2, "__metatable");
+            lua_pushvalue(L, -2);                                   /// CNT IM CNT
+            lua_setfield(L, -2, "__proto");                         /// CNT IM
+            lua_setfield(L, -2, "__class");                         /// CNT
             
-            lua_pushvalue(L, -1);
-            lua_setglobal(L, name);
-            lua_pushcclosure(L, &lua_class_superclass_func, 1);
+            lua_pushcclosure(L, &lua_class_superclass_func, 1);     /// super func
             return 1;
         }
 

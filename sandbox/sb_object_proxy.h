@@ -11,7 +11,7 @@
 #define SB_OBJECT_PROXY_H
 
 #include "sb_scene_object.h"
-#include "sb_function.h"
+#include <sbstd/sb_function.h>
 #include "sb_vector2.h"
 
 namespace Sandbox {
@@ -28,20 +28,6 @@ namespace Sandbox {
 	};
 	typedef sb::shared_ptr<ObjectDrawProxy> ObjectDrawProxyPtr;
     
-    
-    class ObjectTouchProxy : public SceneObject {
-        SB_META_OBJECT
-    public:
-        typedef sb::function<bool(TouchInfo)> TouchFunc;
-        void Draw(Graphics&) const {}
-		explicit ObjectTouchProxy(const TouchFunc& func);
-		
-        /// self mouse handling implementation
-        bool HandleTouch( const TouchInfo& touch );
-	private:
-        TouchFunc   m_touch_func;
-  	};
-	typedef sb::shared_ptr<ObjectTouchProxy> ObjectTouchProxyPtr;
 }
 
 #endif /*SB_OBJECT_PROXY_H*/

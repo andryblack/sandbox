@@ -9,7 +9,9 @@
 #ifndef YinYang_sb_luabind_ref_h
 #define YinYang_sb_luabind_ref_h
 
-#include "sb_shared_ptr.h"
+#include <sbstd/sb_shared_ptr.h>
+#include "sb_notcopyable.h"
+#include "sb_luabind_stack.h"
 
 struct lua_State;
 
@@ -21,8 +23,9 @@ namespace Sandbox {
         };
         typedef sb::shared_ptr<LuaVMHelper> LuaVMHelperPtr;
         typedef sb::weak_ptr<LuaVMHelper> LuaVMHelperWeakPtr;
-        class LuaReference {
+        class LuaReference : public NotCopyable {
         public:
+            LuaReference();
             explicit LuaReference( const LuaVMHelperWeakPtr& ptr );
             ~LuaReference();
             void SetObject( lua_State* state );
@@ -37,6 +40,27 @@ namespace Sandbox {
             int	m_ref;
         };
         
+        template <>
+        struct stack<LuaReference>{
+            static void push( lua_State* L, const LuaReference& val ) {
+                if (val.Valid()) {
+                    val.GetObject(L);
+                } else {
+                    lua_pushnil(L);
+                }
+            }
+        };
+        template <>
+        struct stack<sb::shared_ptr<LuaReference> >{
+            static void push( lua_State* L, const sb::shared_ptr<LuaReference>& val ) {
+                if (val) {
+                    stack<LuaReference>::push(L, *val);
+                } else {
+                    lua_pushnil(L);
+                }
+            }
+        };
+                
     }
 }
 

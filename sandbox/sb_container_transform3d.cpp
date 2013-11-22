@@ -27,7 +27,7 @@ namespace Sandbox {
 		Matrix4f old_v = g.GetViewMatrix();
 		g.SetProjectionMatrix(m_projection);
 		g.SetViewMatrix(m_view);
-		DrawChilds(g);
+		Container::Draw(g);
 		g.SetProjectionMatrix(old_p);
 		g.SetViewMatrix(old_v);
 	}

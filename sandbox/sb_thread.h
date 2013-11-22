@@ -10,15 +10,17 @@
 #ifndef SB_THREAD_H
 #define SB_THREAD_H
 
-#include "sb_shared_ptr.h"
-#include "sb_notcopyable.h"
+#include "meta/sb_meta.h"
 
 namespace Sandbox {
 	
-	class Thread : public NotCopyable {
+	class Thread : public meta::object {
+        SB_META_OBJECT
 	public:
-		virtual ~Thread() {}
+		virtual ~Thread();
 		virtual bool Update(float dt) = 0;
+    protected:
+        Thread();
 	};
 	typedef sb::shared_ptr<Thread> ThreadPtr;
 	

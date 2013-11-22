@@ -81,7 +81,13 @@ namespace Sandbox {
             ///
             /// Operates in the native datatype
             /// \return reference to this object
-            Vector3f &normalize();
+            Vector3f &normalize() {
+                float ilen = 1.0f / length();
+                x*=ilen;
+                y*=ilen;
+                z*=ilen;
+                return *this;
+            }
 
 		
             /// \brief Dot products this vector with an other vector.

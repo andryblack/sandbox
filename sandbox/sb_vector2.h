@@ -61,6 +61,8 @@ namespace Sandbox {
             return *this;
         }
         
+        Vector2f rotated(float a) const { Vector2f res(*this); res.rotate(a); return res; }
+        
         /// Direction of vector
         float dir() const { return atan2(x, -y); }
         

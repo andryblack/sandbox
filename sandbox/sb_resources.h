@@ -13,8 +13,10 @@
 #include "sb_image.h"
 #include "sb_shader.h"
 #include "sb_atlaser.h"
-#include "sb_string.h"
-#include "sb_map.h"
+#include "sb_rendertarget.h"
+#include <sbstd/sb_string.h>
+#include <sbstd/sb_map.h>
+#include <sbstd/sb_list.h>
 
 namespace GHL {
 	struct VFS;
@@ -41,8 +43,8 @@ namespace Sandbox {
 		void SetBasePath(const char* path);
 		GHL::DataStream* OpenFile(const char* fn);
 		
-		TexturePtr GetTexture(const char* filename);
-		ImagePtr GetImage(const char* filename);
+		TexturePtr GetTexture(const char* filename, bool need_premultiply);
+		ImagePtr GetImage(const char* filename, bool need_premultiply);
 		bool LoadImageSubdivs(const char* filename, sb::vector<Image>& output);
 		
 		ShaderPtr GetShader(const char* vfn,const char* ffn);
@@ -57,8 +59,18 @@ namespace Sandbox {
 		TexturePtr CreateTexture( GHL::UInt32 w, 
                                  GHL::UInt32 h, 
                                  bool alpha, 
-                                 const GHL::Data* data);
-	private:
+                                 const GHL::Image* data);
+        GHL::Texture* LoadTexture( const sb::string& filename , bool premultiply);
+        
+        size_t  GetLiveTicks() const { return m_live_ticks; }
+        
+        size_t  GetMemoryLimit() const { return m_memory_limit; }
+        size_t  GetMemoryUsed() const { return m_memory_used; }
+        
+        RenderTargetPtr CreateRenderTarget(int w, int h, bool alpha, bool depth);
+        
+        void    ProcessMemoryMgmt();
+    private:
 		GHL::VFS* m_vfs;
 		GHL::Render* m_render;
 		GHL::ImageDecoder* m_image;
@@ -66,16 +78,22 @@ namespace Sandbox {
 		
 		friend class Atlaser;
 		
-		TexturePtr InternalCreateTexture( int w,int h, bool alpha,bool fill);
-		GHL::Image* LoadImage(const char* file);
+        GHL::Texture* InternalCreateTexture( int w,int h, bool alpha,bool fill);
+		GHL::Image* LoadImage(const char* file,const char** ext = 0);
 		bool ImageHaveAlpha(const GHL::Image* img) const;
-		bool ConvertImage(GHL::Image* img,const TexturePtr& tex) const;
+		bool ConvertImage(GHL::Image* img,GHL::Texture* tex) const;
+        bool GetImageInfo(sb::string& file,GHL::UInt32& w,GHL::UInt32& h);
 #ifdef SB_RESOURCES_CACHE
-		sb::map<sb::string,sb::weak_ptr<Texture> > m_textures;
-		sb::map<sb::string,GHL::VertexShader*> m_vshaders;
-		sb::map<sb::string,GHL::FragmentShader*> m_fshaders;
-		sb::map<sb::string,sb::weak_ptr<Shader> > m_shaders;
+		sb::map<sb::string,sb::weak_ptr<Texture> >  m_textures;
+		sb::map<sb::string,GHL::VertexShader*>      m_vshaders;
+		sb::map<sb::string,GHL::FragmentShader*>    m_fshaders;
+		sb::map<sb::string,sb::weak_ptr<Shader> >   m_shaders;
 #endif
+        size_t    m_live_ticks;
+        size_t    m_memory_limit;
+        size_t    m_memory_used;
+        sb::list<sb::weak_ptr<Texture> >   m_managed_textures;
+        size_t    FreeMemory(size_t mem,bool full);
 	};
 }
 

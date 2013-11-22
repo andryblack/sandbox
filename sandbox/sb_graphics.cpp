@@ -9,15 +9,17 @@
 
 #include "sb_graphics.h"
 #include "sb_assert.h"
+#include <ghl_image.h>
 
 namespace Sandbox {
 	
     static const char* MODULE = "Sanbox:Graphics";
 	
-	Graphics::Graphics() {
+	Graphics::Graphics(Resources* res) : m_resources(res){
         (void)MODULE;
 		m_render = 0;
 		m_fake_tex_white = 0;
+        m_fake_tex_black = 0;
 		m_vertexes.reserve(512);
 		m_indexes.reserve(512);
 	}
@@ -25,15 +27,26 @@ namespace Sandbox {
 	Graphics::~Graphics() {
 		if (m_fake_tex_white)
 			m_fake_tex_white->Release();
+        if (m_fake_tex_black)
+            m_fake_tex_black->Release();
 		m_fake_tex_white = 0;
 	}
     
     	
 	void Graphics::Load(GHL::Render* render) {
 		if (!m_fake_tex_white) {
-            GHL::Data* data = GHL_CreateData(4,true,0xff);
-			m_fake_tex_white = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,data);
-			data->Release();
+            GHL::Image* img = GHL_CreateImage(1, 1, GHL::IMAGE_FORMAT_RGBA);
+            img->Fill(0xFFFFFFFF);
+            m_fake_tex_white = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
+			img->Release();
+            m_fake_tex_white->DiscardInternal();
+		}
+        if (!m_fake_tex_black) {
+            GHL::Image* img = GHL_CreateImage(1, 1, GHL::IMAGE_FORMAT_RGBA);
+            img->Fill(0xFF000000);
+            m_fake_tex_black = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
+			img->Release();
+            m_fake_tex_black->DiscardInternal();
 		}
 	}
 	
@@ -43,8 +56,7 @@ namespace Sandbox {
 			switch (bmode) {
 				case BLEND_MODE_COPY: 
 					m_render->SetTexture(0,1);
-					m_render->SetupAlphaTest(false, GHL::COMPARE_FUNC_GREATER, 0.0f);
-					m_render->SetupBlend(false, GHL::BLEND_FACTOR_SRC_COLOR, GHL::BLEND_FACTOR_ZERO); 
+					m_render->SetupBlend(false, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ZERO);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
@@ -52,8 +64,7 @@ namespace Sandbox {
 					break;
 				case BLEND_MODE_ALPHABLEND: 
 					m_render->SetTexture(0,1);
-					m_render->SetupAlphaTest(true, GHL::COMPARE_FUNC_GREATER, 0.0f);
-					m_render->SetupBlend(true, GHL::BLEND_FACTOR_SRC_ALPHA, GHL::BLEND_FACTOR_SRC_ALPHA_INV); 
+					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_SRC_ALPHA_INV);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
@@ -61,8 +72,7 @@ namespace Sandbox {
 					break;
 				case BLEND_MODE_ADDITIVE: 
 					m_render->SetTexture(0,1);
-					m_render->SetupAlphaTest(false, GHL::COMPARE_FUNC_GREATER, 0.0f);
-					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE); 
+					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
@@ -70,20 +80,18 @@ namespace Sandbox {
 					break;
 				case BLEND_MODE_ADDITIVE_ALPHA: 
 					m_render->SetTexture(0,1);
-					m_render->SetupAlphaTest(true, GHL::COMPARE_FUNC_GREATER, 0.0f);
-					m_render->SetupBlend(true, GHL::BLEND_FACTOR_SRC_ALPHA, GHL::BLEND_FACTOR_ONE); 
+					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
 					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					break;
 				case BLEND_MODE_SCREEN:
-					m_render->SetTexture(m_fake_tex_white,1);
-					m_render->SetupAlphaTest(true, GHL::COMPARE_FUNC_GREATER, 0.0f);
+					m_render->SetTexture(m_fake_tex_black,1);
 					m_render->SetupBlend(true, GHL::BLEND_FACTOR_DST_COLOR_INV, GHL::BLEND_FACTOR_ONE);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_DIFFUSE,0);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_DIFFUSE,0);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_CURRENT,GHL::TEX_ARG_TEXTURE_INV,1);
+					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
+					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
+					m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_SELECT_2,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					break;
 				default:
@@ -96,11 +104,12 @@ namespace Sandbox {
 	}
     
     /// clear scene
-    void Graphics::Clear( const Color& clr ) {
+    void Graphics::Clear( const Color& clr, float depth ) {
         sb_assert( (m_render!=0) && "scene not started" );
         Flush();
-        m_render->Clear(clr.r, clr.g, clr.b, clr.a);
+        m_render->Clear(clr.r, clr.g, clr.b, clr.a, depth);
     }
+    
     
     /// fill rect by pattern
     void Graphics::FillRect( const TexturePtr& texture, const Rectf& rect) {
@@ -122,14 +131,16 @@ namespace Sandbox {
         appendQuad();
 		
 		GHL::UInt32 clr = (m_color).hw();
-		
-        const float itw = 1.0f / texture->GetWidth();
-        const float ith = 1.0f / texture->GetHeight();
         
-        const float tx = rect.x * itw;
-        const float ty = rect.y * ith;
-        const float tw = rect.w * itw;
-        const float th = rect.h * ith;
+        const GHL::Texture* t = texture->Present(m_resources);
+		
+        m_itw = 1.0f / t->GetWidth();
+        m_ith = 1.0f / t->GetHeight();
+        
+        const float tx = rect.x * m_itw;
+        const float ty = rect.y * m_ith;
+        const float tw = rect.w * m_itw;
+        const float th = rect.h * m_ith;
         
         {
             appendVertex(rect.x,rect.y,
@@ -147,7 +158,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
         if (m_primitives==0) return;
         /// do batch
-		m_render->SetTexture(m_texture ? m_texture->Present() : 0,0);
+		m_render->SetTexture(m_texture ? m_texture->Present(m_resources) : 0,0);
 		//m_render->SetTexture(m_texture ? m_texture->Present() : 0,1);
 		m_render->DrawPrimitivesFromMemory(m_ptype,
 										   GHL::VERTEX_TYPE_SIMPLE,
@@ -169,6 +180,9 @@ namespace Sandbox {
         bool flush = false;
 		if (m_texture!=texture) {
             flush = true;
+            const GHL::Texture* tex = texture->Present(m_resources);
+            m_itw = 1.0f / tex->GetWidth();
+            m_ith = 1.0f / tex->GetHeight();
         } else if (m_ptype!=GHL::PRIMITIVE_TYPE_TRIANGLES) {
             flush = true;
         }
@@ -201,10 +215,10 @@ namespace Sandbox {
 	void Graphics::DrawImage(const Image& img,float x,float y) {
 		sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
-		x-=img.GetHotspot().x;
-        y-=img.GetHotspot().y;
 		const float w = img.GetWidth();
 		const float h = img.GetHeight();
+		x-=img.GetHotspot().x*w/img.GetTextureW();
+        y-=img.GetHotspot().y*h/img.GetTextureH();
 		
         appendQuad();
 		
@@ -212,22 +226,26 @@ namespace Sandbox {
 		
         {
             appendVertex(x,y,
-                                 img.GetTextureX(),img.GetTextureY(),clr);
+                                 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x+w,y,
-                                 img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+                                 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x,y+h,
-                                 img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+                                 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
             appendVertex(x+w,y+h,
-                                 img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+                                 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
         } 
 	}
 	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr) {
 		sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
-        x-=img.GetHotspot().x;
-        y-=img.GetHotspot().y;
-		const float w = img.GetWidth();
+        const float w = img.GetWidth();
 		const float h = img.GetHeight();
+		x-=img.GetHotspot().x*w/img.GetTextureW();
+        y-=img.GetHotspot().y*h/img.GetTextureH();
 		
         appendQuad();
 		
@@ -235,23 +253,27 @@ namespace Sandbox {
 		
         {
             appendVertex(x,y,
-						 img.GetTextureX(),img.GetTextureY(),clr);
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x+w,y,
-						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x,y+h,
-						 img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
             appendVertex(x+w,y+h,
-						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
         } 
 		
 	}
 	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr,float scale) {
 		sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
-		x-=img.GetHotspot().x*scale;
-        y-=img.GetHotspot().y*scale;
 		const float w = img.GetWidth()*scale;
 		const float h = img.GetHeight()*scale;
+		x-=img.GetHotspot().x*w/img.GetTextureW();
+        y-=img.GetHotspot().y*h/img.GetTextureH();
 		
         appendQuad();
 		
@@ -259,13 +281,17 @@ namespace Sandbox {
 		
         {
             appendVertex(x,y,
-						 img.GetTextureX(),img.GetTextureY(),clr);
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x+w,y,
-						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
             appendVertex(x,y+h,
-						 img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
             appendVertex(x+w,y+h,
-						 img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
         } 
 		
 	}
@@ -434,13 +460,12 @@ namespace Sandbox {
 							 (Color(*reinterpret_cast<const GHL::UInt32*>(vertices[i].color))*m_color).hw());
             }
         } 
-		if (texture)
-			m_render->SetTexture(texture->Present(),0);
-		else {
+		if (texture) {
+			m_render->SetTexture(texture->Present(m_resources),0);
+		} else {
 			m_render->SetTexture(0,0);
 		}
-		m_texture = texture;
-
+		
         
         m_texture = texture;
         m_ptype = prim;
@@ -482,7 +507,6 @@ namespace Sandbox {
 	void Graphics::SetViewport(const Recti& rect) {
 		Flush();
 		m_viewport = rect;
-		m_render->SetViewport(rect.x, rect.y, rect.w, rect.h);
 	}
 	
 	void Graphics::SetClipRect(const Recti& rect) {
@@ -498,7 +522,6 @@ namespace Sandbox {
 		
 	void Graphics::BeginScene(GHL::Render* render) {
 		m_render = render;
-		m_render->SetupAlphaTest(false, GHL::COMPARE_FUNC_GREATER, 0.0f);
 		m_blend_mode = BLEND_MODE_COPY;
 		m_render->SetupBlend(false);
 		m_texture = TexturePtr();
@@ -516,7 +539,9 @@ namespace Sandbox {
 		SetViewMatrix(Matrix4f::identity());
 		SetViewport(Recti(0,0,render->GetWidth(),render->GetHeight()));
 		SetClipRect(GetViewport());
-	}
+        m_render->SetIndexBuffer(0);
+        m_render->SetVertexBuffer(0);
+    }
 	size_t Graphics::EndScene() {
 		sb_assert( (m_render!=0) && "scene not started" );
 		Flush();
@@ -542,6 +567,11 @@ namespace Sandbox {
 			BeginScene(render);
 		}
 	}
+    
+    const GHL::Texture* Graphics::Present( const TexturePtr& tex ) {
+        if (!tex) return 0;
+        return tex->Present(m_resources);
+    }
 	
 	
 	

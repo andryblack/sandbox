@@ -25,7 +25,7 @@ namespace Sandbox {
 			g.SetShader(ShaderPtr());
 		}
 		g.SetBlendMode(m_mode);
-		DrawChilds(g);
+        Container::Draw(g);
 		g.SetBlendMode(m);
 		if (unset_shader)
 			g.SetShader(sh);

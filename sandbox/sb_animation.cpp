@@ -9,8 +9,11 @@
 
 #include "sb_animation.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::Animation, Sandbox::Thread)
+
 namespace Sandbox {
 	
+    
 	AnimationData::AnimationData() {
 		m_speed = 10.0f;
 		m_loop_frame = 0;

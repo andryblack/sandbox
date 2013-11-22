@@ -34,7 +34,7 @@ namespace Sandbox {
 	class Graphics {
 	public:
 
-		Graphics();
+		explicit Graphics( Resources* resources );
 		~Graphics();
 		
 		void Load(GHL::Render* render);
@@ -43,8 +43,8 @@ namespace Sandbox {
 		void BeginScene(GHL::Render* render);
         
         /// clear scene
-        void Clear( const Color& clr );
-
+        void Clear( const Color& clr , float depth );
+   
 		/// global transform
 		const Transform2d& GetTransform() const { return m_transform;}
 		void SetTransform(const Transform2d& tr) { m_transform = tr;}
@@ -126,12 +126,16 @@ namespace Sandbox {
 		/// get "native" render
 		GHL::Render* BeginNative();
 		void EndNative(GHL::Render* render);
+        const GHL::Texture* Present( const TexturePtr& tex );
 		
         GHL::UInt32 GetScreenWidth() const { if (m_render) return m_render->GetWidth(); return 0;}
 		GHL::UInt32 GetScreenHeight() const { if (m_render) return m_render->GetHeight(); return 0;}
 	private:
+        Resources*  m_resources;
 		GHL::Render* m_render;
 		GHL::Texture* m_fake_tex_white;
+        GHL::Texture* m_fake_tex_black;
+        
 		Transform2d	m_transform;
 		Matrix4f	m_projection_matrix;
 		Matrix4f	m_view_matrix;
@@ -140,6 +144,8 @@ namespace Sandbox {
 		Color		m_color;
 		BlendMode	m_blend_mode;
 		TexturePtr  m_texture;
+        float       m_itw;
+        float       m_ith;
 		ShaderPtr	m_shader;
 		GHL::PrimitiveType	m_ptype;
         size_t      m_primitives;
@@ -154,7 +160,7 @@ namespace Sandbox {
 			m_vertexes.push_back(GHL::Vertex());
 			GHL::Vertex& v(m_vertexes.back());
 			m_transform.transform(x,y,v.x,v.y);
-			v.z = 0.5f;
+			v.z = 0.0f;
 			v.color[0]=color & 0xff;
 			v.color[1]=(color >> 8)&0xff;
 			v.color[2]=(color >> 16)&0xff;

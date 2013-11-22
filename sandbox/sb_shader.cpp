@@ -8,6 +8,7 @@
  */
 
 #include "sb_shader.h"
+
 #include <ghl_shader.h>
 #include <ghl_render.h>
 
@@ -43,7 +44,7 @@ namespace Sandbox {
 			return it->second;
 		GHL::ShaderUniform* u = m_program ? m_program->GetUniform(name) : 0;
 		if (true) {
-            sb::shared_ptr<ShaderFloatUniform> fu( new ShaderFloatUniform(u) );
+            sb::shared_ptr<ShaderFloatUniform> fu = sb::make_shared<ShaderFloatUniform>(u);
 			m_float_uniforms.insert(std::make_pair(sname,fu));
 			m_uniforms.push_back(fu);
 			return fu;

@@ -20,6 +20,7 @@ SB_META_PROPERTY_RW_DEF(Sensor)
 SB_META_PROPERTY_RW_DEF(Elasticity)
 SB_META_PROPERTY_RW_DEF(Friction)
 SB_META_PROPERTY_RW_DEF(CollisionType)
+SB_META_PROPERTY_RW_DEF(Layers)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Chipmunk::Body, void)
@@ -32,6 +33,7 @@ SB_META_METHOD(Activate)
 SB_META_METHOD(Sleep)
 SB_META_METHOD(ApplyForce)
 SB_META_METHOD(ApplyImpulse)
+SB_META_METHOD(UpdatePosition)
 SB_META_PROPERTY_RW_DEF(Mass)
 SB_META_PROPERTY_RW_DEF(Moment)
 SB_META_PROPERTY_RW_DEF(Pos)
@@ -49,6 +51,11 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Chipmunk::StaticBody, Sandbox::Chipmunk::Body)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::StaticBody)
+SB_META_CONSTRUCTOR(())
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::RogueBody, Sandbox::Chipmunk::Body)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::RogueBody)
 SB_META_CONSTRUCTOR(())
 SB_META_END_KLASS_BIND()
 
@@ -74,7 +81,6 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::BoxShape)
 SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&,  float,float))
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::Chipmunk::Space, Sandbox::Thread)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::Space)
 SB_META_CONSTRUCTOR(())
 SB_META_METHOD(AddBody)
@@ -95,12 +101,16 @@ SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&))
 SB_META_PROPERTY_RW_DEF(ApplyRotate)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::Chipmunk::SpaceDebugDraw, Sandbox::SceneObject)
+SB_META_DECLARE_KLASS(Sandbox::Chipmunk::InvertTransformAdapter, Sandbox::Container)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::InvertTransformAdapter)
+SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&))
+SB_META_PROPERTY_RW_DEF(ApplyRotate)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::SpaceDebugDraw)
 SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::SpacePtr&))
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::Chipmunk::BodyDebugDraw, Sandbox::SceneObject)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Chipmunk::BodyDebugDraw)
 SB_META_CONSTRUCTOR((const Sandbox::Chipmunk::BodyPtr&))
 SB_META_PROPERTY_RW_DEF(Color)
@@ -202,12 +212,14 @@ namespace Sandbox {
             luabind::Class<Shape>(lua->GetVM());
             luabind::Class<Body>(lua->GetVM());
             luabind::Class<StaticBody>(lua->GetVM());
+            luabind::Class<RogueBody>(lua->GetVM());
             luabind::Class<CircleShape>(lua->GetVM());
             luabind::Class<SegmentShape>(lua->GetVM());
             luabind::Class<PolyShape>(lua->GetVM());
             luabind::Class<BoxShape>(lua->GetVM());
             luabind::Class<Space>(lua->GetVM());
             luabind::Class<TransformAdapter>(lua->GetVM());
+            luabind::Class<InvertTransformAdapter>(lua->GetVM());
             luabind::Class<SpaceDebugDraw>(lua->GetVM());
             luabind::Class<BodyDebugDraw>(lua->GetVM());
             luabind::Class<Constraint>(lua->GetVM());

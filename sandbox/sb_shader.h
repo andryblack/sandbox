@@ -10,11 +10,11 @@
 #ifndef SB_SHADER_H
 #define SB_SHADER_H
 
-#include "sb_shared_ptr.h"
+#include <sbstd/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
-#include "sb_vector.h"
-#include "sb_string.h"
-#include "sb_map.h"
+#include <sbstd/sb_vector.h>
+#include <sbstd/sb_string.h>
+#include <sbstd/sb_map.h>
 
 namespace GHL {
 	struct ShaderProgram;
@@ -25,6 +25,7 @@ namespace Sandbox {
 	
 	class ShaderUniform : public NotCopyable {
 	public:
+        virtual ~ShaderUniform() {}
 		virtual void DoSet() = 0;
 	protected:
 		explicit ShaderUniform(GHL::ShaderUniform* uniform) : m_uniform(uniform) {}

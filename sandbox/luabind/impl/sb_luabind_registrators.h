@@ -11,7 +11,7 @@
 
 #include "meta/sb_meta_bind.h"
 #include "sb_luabind_method.h"
-#include "../../sb_function.h"
+#include <sbstd/sb_function.h>
 #include "../../sb_log.h"
 
 namespace Sandbox {
@@ -39,6 +39,14 @@ namespace Sandbox {
                 lua_pushboolean(L, (stack<T>::get(L,1)==stack<T>::get(L,2)) ? 1 : 0 );
                 return 1;
             }
+        };
+        
+        template <class T,int base> struct method_helper<int(T::*)(lua_State*),base> {
+            static int call( lua_State* L ) {
+                typedef int (T::*Func)(lua_State*);
+				Func func = *reinterpret_cast<Func*>(lua_touserdata(L, lua_upvalueindex(1)));
+				return (&stack<T>::get(L,base+0)->*func)(L);
+			}
         };
         
         template <class T>
@@ -79,6 +87,21 @@ namespace Sandbox {
                 lua_setfield(m_L, -2, prop.name);               /// props 
                 lua_pop(m_L, 1);
             }
+            template <class Setter>
+            void operator()( const meta::property_holder_wo<T, Setter>& prop ) {
+                sb_assert(lua_istable(m_L, -1));
+                lua_pushliteral(m_L, "__props");
+                lua_rawget(m_L, -2 );                 /// props
+                sb_assert(lua_istable(m_L, -1));
+                lua_createtable(m_L, 0, 2);                     /// props tbl
+                Setter* set_ptr =
+                reinterpret_cast<Setter*>(lua_newuserdata(m_L, sizeof(Setter)));    /// props tbl ud
+                *set_ptr = prop.setter;
+                lua_pushcclosure(m_L, &method_helper<Setter>::call, 1);    /// props tbl func
+                lua_setfield(m_L, -2, "set");                  /// props tbl
+                lua_setfield(m_L, -2, prop.name);               /// props
+                lua_pop(m_L, 1);
+            }
             template <class Getter,class Setter>
             void operator()( const meta::property_holder_rw<T, Getter, Setter>& prop ) {
                 sb_assert(lua_istable(m_L, -1)); 
@@ -112,6 +135,15 @@ namespace Sandbox {
                 lua_setfield(m_L, -2, func.name);               /// methods 
                 lua_pop(m_L, 1);
             }
+            void operator()( const meta::method_holder<int(*)(lua_State*)>& func ) {
+                sb_assert(lua_istable(m_L, -1));
+                lua_pushliteral(m_L, "__methods");
+                lua_rawget(m_L, -2 );                 /// methods
+                sb_assert(lua_istable(m_L, -1));
+                lua_pushcclosure(m_L, func.func, 0);
+                lua_setfield(m_L, -2, func.name);               /// methods
+                lua_pop(m_L, 1);
+            }
             template <class Func>
             void operator()( const meta::operator_holder<Func>& func ) {
                 sb_assert(lua_istable(m_L, -1)); 
@@ -125,7 +157,8 @@ namespace Sandbox {
                 static const char* meta_operator[] = {
                     "__add",
                     "__mul",
-                    "__sub"
+                    "__sub",
+                    "__index"
                 };
                 lua_setfield(m_L, -2, meta_operator[func.name]);               /// methods 
                 lua_pop(m_L, 1);
@@ -137,7 +170,7 @@ namespace Sandbox {
                 Func* ptr = 
                 reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// name ud
                 *ptr = func.func;
-                lua_pushcclosure(m_L, &method_helper<Func,2>::call, 1); /// name method
+                lua_pushcclosure(m_L, &method_helper<Func,1>::call, 1); /// name method
                 lua_rawset(this->m_L, -3); 
             }
             template <class Type>
@@ -179,6 +212,12 @@ namespace Sandbox {
                 *ptr = &constructor_helper<Proto,2>::template inplace<T>;
                 lua_pushcclosure(this->m_L, &raw_klass_registrator<T>::constructor, 1);   /// mntbl name ctr
                 lua_rawset(this->m_L, -3);                    /// mntbl 
+            }
+            void operator() ( const meta::constructor_ptr_holder<int(*)(lua_State*)>& hdr) {
+                sb_assert(lua_istable(this->m_L, -1));
+                lua_pushliteral(this->m_L, "__constructor");         /// mntbl name
+                lua_pushcclosure(this->m_L, hdr.func, 0);     /// mntbl name ctr
+                lua_rawset(this->m_L, -3);                    /// mntbl
             }
         private:
             typedef void (*constructor_func)(lua_State*,void*);
@@ -266,13 +305,16 @@ namespace Sandbox {
             }
             static void wrapper_destructor( data_holder* h ) {
                 //LogDebug() << "wrapper_destructor " << h;
+                typedef sb::shared_ptr<T> shared_ptr_type;
+                typedef sb::weak_ptr<T> weak_ptr_type;
+                
                 wrapper_holder* w = reinterpret_cast<wrapper_holder*>(h);
-                sb::shared_ptr<T>* obj_ptr = reinterpret_cast<sb::shared_ptr<T>*>(w+1);
-                sb::weak_ptr<T>* wek_ptr = reinterpret_cast<sb::weak_ptr<T>*>(obj_ptr+1);
+                shared_ptr_type* obj_ptr = reinterpret_cast<shared_ptr_type*>(w+1);
+                weak_ptr_type* wek_ptr = reinterpret_cast<weak_ptr_type*>(obj_ptr+1);
                 T* obj = obj_ptr->get();
                 obj->MarkDestroy();
-                obj_ptr->~shared_ptr<T>();
-                wek_ptr->~weak_ptr<T>();
+                obj_ptr->~shared_ptr_type();
+                wek_ptr->~weak_ptr_type();
             }
             static int constructor( lua_State* L ) {
                 wrapper_holder* holder = reinterpret_cast<wrapper_holder*>(lua_newuserdata(L, 

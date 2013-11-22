@@ -10,13 +10,17 @@
 #define SB_APPLICATION_H_INCLUDED
 
 #include <ghl_application.h>
-#include "sb_graphics.h"
-#include "sb_resources.h"
+#include "sb_color.h"
 #include "sb_threads_mgr.h"
-#include "sb_scene.h"
+#include "sb_rt_scene.h"
 #include "sb_lua.h"
+#include <sbstd/sb_list.h>
 
 namespace Sandbox {
+    
+    class Resources;
+    class SoundManager;
+    class RocketContext;
 	
 	class Application : public GHL::Application {
     public:
@@ -25,6 +29,8 @@ namespace Sandbox {
         void SetMusicEnabled( bool e );
         bool GetMusicEnabled() const;
 
+        void    AddScene( const RTScenePtr& scene );
+        void    RemoveScene( const RTScenePtr& scene );
   	protected:
 		Application();
 		virtual ~Application();
@@ -52,8 +58,7 @@ namespace Sandbox {
 		
 		void SetClearColor(const Color& c);
         
-        
-	private:
+ 	private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
 		GHL::Render*	m_render;
@@ -62,6 +67,7 @@ namespace Sandbox {
 		LuaVM*			m_lua;
 		Graphics*		m_graphics;
 		Resources*		m_resources;
+        SoundManager*   m_sound_mgr;
 		std::string		m_lua_base_path;
 		std::string		m_resources_base_path;
 		size_t			m_frames;
@@ -70,6 +76,7 @@ namespace Sandbox {
 		void DrawDebugInfo();
 		ThreadsMgr*		m_main_thread;
 		Scene*			m_main_scene;
+        sb::list<RTScenePtr>    m_rt_scenes;
 		
 		bool		m_clear_buffer;
 		Color		m_clear_color;
@@ -78,6 +85,8 @@ namespace Sandbox {
         
         bool    m_sound_enabled;
         bool    m_music_enabled;
+        
+        RocketContext*  m_rocket;
 	public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys );

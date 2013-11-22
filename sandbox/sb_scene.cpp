@@ -8,21 +8,20 @@
  */
 
 #include "sb_scene.h"
+#include "sb_graphics.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::Scene, Sandbox::Container)
 
 namespace Sandbox {
 
 
 	void Scene::Draw(Graphics& g) const {
-		if (m_root) m_root->DoDraw(g);
+        if (!GetVisible()) return;
+        Container::Draw(g);
 	}
 
-    bool Scene::HandleTouch( const TouchInfo& touch ) {
-        if (m_root) return m_root->DoHandleTouch( touch );
-        return false;
-    }
-    
     void Scene::Update( float dt ) {
-        if (m_root) m_root->DoUpdate(dt);
+        if (!GetVisible()) return;
+        Container::Update(dt);
     }
 }

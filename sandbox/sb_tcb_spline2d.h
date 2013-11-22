@@ -7,8 +7,8 @@
 #define SB_TCB_SPLINE2D_H
 
 #include "sb_vector2.h"
-#include "sb_shared_ptr.h"
-#include <vector>
+#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_vector.h>
 
 
 namespace Sandbox {
@@ -24,7 +24,7 @@ namespace Sandbox {
             Vector2f ra;
             Vector2f rb;
         };
-        std::vector<Point> m_points;
+        sb::vector<Point> m_points;
         float m_length;
         void calc_derivatives(size_t indx);
         float m_tension;

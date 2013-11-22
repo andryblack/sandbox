@@ -4,6 +4,10 @@
 
 #include "sb_log.h"
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
 namespace Sandbox {
     
     static const char* level_descr[] = {
@@ -15,7 +19,7 @@ namespace Sandbox {
         ": DEBUG :"
     };
     
-    Logger::Logger( GHL::LogLevel level , const char* module) : m_level( level ), m_module(module){
+    Logger::Logger( GHL::LogLevel level , const char* module) :  m_module(module),m_level( level ){
         m_stream << "[" << (m_module ? m_module : "Sandbox") << "]" << level_descr[m_level];
     }
     
@@ -23,5 +27,20 @@ namespace Sandbox {
         GHL_Log(m_level, m_stream.str().c_str());
     }
     
+    void format_memory( char* buf, size_t size, size_t mem,const char* caption ) {
+        if ( mem > 1024*1024 ) {
+            ::snprintf(buf, size, "%s%0.2fM", caption,float(mem)/(1024*1024));
+        } else if ( mem > 1024 ) {
+            ::snprintf(buf, size, "%s%0.2fK", caption,float(mem)/(1024));
+        }
+        else {
+            ::snprintf(buf, size, "%s%0.2fb", caption,float(mem));
+        }
+    }
     
+    sb::string format_memory( size_t mem ) {
+        char buf[64];
+        format_memory(buf, 64, mem, "");
+        return sb::string(buf);
+    }
 }

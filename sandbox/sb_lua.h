@@ -11,50 +11,58 @@
 #define SB_LUA_H
 
 
-#include "sb_shared_ptr.h"
+#include <sbstd/sb_shared_ptr.h>
 #include "sb_notcopyable.h"
-#include "sb_string.h"
-
-#include <vector>
+#include <sbstd/sb_string.h>
 
 #include <ghl_types.h>
 
 struct lua_State;
 
 namespace GHL {
-	struct VFS;
+    struct DataStream;
 }
 
 namespace Sandbox {
     
-    class Resources;
+    class FileProvider;
     
-	class LuaVM;
-	
-		
+    class MemoryMgr;
+    
+    class LuaContext;
+    typedef sb::shared_ptr<LuaContext> LuaContextPtr;
+	typedef sb::weak_ptr<LuaContext> LuaContextWeakPtr;
 	
     class LuaVM : public NotCopyable {
     public:
-        explicit LuaVM( Resources* resources );
+        explicit LuaVM( FileProvider* resources );
         ~LuaVM();
         void SetBasePath(const char* path);
         bool DoFile(const char* fn);
-        GHL::UInt32 GetMemoryUsed() const { return m_mem_use;}
+        sb::string GetMemoryUsed() const;
         
         lua_State* GetVM() { return m_L; }
         
-        static LuaVM* GetInstance( lua_State* L ); 
+        LuaContextPtr   GetGlobalContext();
+        LuaContextPtr   CreateContext();
+
+        bool   LoadScript(GHL::DataStream* ds,const char* name,const LuaContextPtr& env);
     private:
-        Resources*  m_resources;
+        FileProvider*  m_resources;
         lua_State*  m_L;
         GHL::UInt32 m_mem_use;
         sb::string m_base_path;
 		GHL::Byte* alloc(size_t size);
         static int lua_module_searcher(lua_State *L);
         static int lua_loadfile_func(lua_State* L);
+        static int lua_dofile_func(lua_State* L);
 		void free(GHL::Byte* data,size_t size);
 		void resize(GHL::Byte* data,size_t osize,size_t nsize);
         static void* lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
+        MemoryMgr*  m_mem_mgr;
+        bool DoFileImpl(const char* name,int results);
+        bool DoFileImpl(GHL::DataStream* ds,const char* name,int results,const LuaContextPtr& env);
+        LuaContextWeakPtr   m_global_context;
     };
 }
 

@@ -10,7 +10,8 @@
 #ifndef SB_EVENT_H
 #define SB_EVENT_H
 
-#include "sb_shared_ptr.h"
+#include <sbstd/sb_shared_ptr.h>
+#include <luabind/sb_luabind_stack.h>
 
 namespace Sandbox {
 
@@ -22,6 +23,17 @@ namespace Sandbox {
 	};
 	typedef sb::shared_ptr<Event> EventPtr;
 	
+    namespace luabind {
+        
+        template <>
+        struct stack<EventPtr> {
+            static EventPtr get( lua_State* L, int idx);
+            static void push( lua_State* L, const EventPtr& val ) {
+                stack_push_impl( L,val );
+            }
+        };
+
+    }
 }
 
 #endif /*SB_EVENT_H*/

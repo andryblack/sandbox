@@ -31,6 +31,8 @@ namespace Sandbox {
 	Resources::Resources(GHL::VFS* vfs) :
 		m_vfs(vfs),m_render(0),m_image(0) {
 			
+        m_memory_limit = 20 * 1024 * 1024;
+        m_memory_used = 0;
 	}
 	
     void Resources::Init(GHL::Render* render,GHL::ImageDecoder* image) {
@@ -55,10 +57,10 @@ namespace Sandbox {
 		return ds;
 	}
 	
-	TexturePtr Resources::InternalCreateTexture( int w,int h, bool alpha,bool fill) {
+    GHL::Texture* Resources::InternalCreateTexture( int w,int h, bool alpha,bool fill) {
         if (!m_render) {
             LogError(MODULE) << "render not initialized";
-            return TexturePtr();
+            return 0;
         }
 		GHL::TextureFormat tfmt;
 		int bpp = 4;
@@ -69,14 +71,16 @@ namespace Sandbox {
 			tfmt = GHL::TEXTURE_FORMAT_RGB;
 			bpp = 3;
         }
-        GHL::Data* data = 0;
+        GHL::Image* img = 0;
         if ( fill ) {
-            data = GHL_CreateData( bpp*w*h , true , 0 );
+            img = GHL_CreateImage(w, h, alpha ? GHL::IMAGE_FORMAT_RGBA : GHL::IMAGE_FORMAT_RGB);
+            img->Fill(0);
         }
-		GHL::Texture* texture = m_render->CreateTexture(w,h,tfmt,data);
-		if (data) data->Release();
-		return TexturePtr(new Texture(texture));
+		GHL::Texture* texture = m_render->CreateTexture(w,h,tfmt,img);
+		if (img) img->Release();
+		return texture;
 	}
+    
     bool Resources::LoadImageSubdivs(const char* filename, std::vector<Image>& output) {
         GHL::Image* img = LoadImage(filename);
         if (!img) return false;
@@ -92,7 +96,7 @@ namespace Sandbox {
                 GHL::UInt32 ow = w - x;
                 GHL::UInt32 pw = ow <= 16 ? ow : prev_pot( ow );
                 GHL::UInt32 ipw = pw > ow ? ow : pw;
-                TexturePtr texture = InternalCreateTexture(pw, ph, ImageHaveAlpha(img), false);
+                GHL::Texture* texture = InternalCreateTexture(pw, ph, ImageHaveAlpha(img), false);
                 if (!texture || !ConvertImage(img,texture)) {
                     LogError(MODULE) << "failed load subdiv image " << filename;
                     img->Release();
@@ -104,9 +108,9 @@ namespace Sandbox {
                     img->Release();
                     return false;
                 }
-                texture->GetNative()->SetData(0,0,ipw,iph,subimg->GetData());
+                texture->SetData(0,0,subimg);
                 subimg->Release();
-                output.push_back(Image(texture,0,0,float(ipw),float(iph)));
+                output.push_back(Image(sb::make_shared<Texture>(texture),0,0,float(ipw),float(iph)));
                 output.back().SetHotspot(Vector2f(-float(x),-float(y)));
                 x+=ipw;
             }
@@ -114,13 +118,20 @@ namespace Sandbox {
         }
         return true;
     }
-	GHL::Image* Resources::LoadImage(const char* filename) {
+	GHL::Image* Resources::LoadImage(const char* filename,const char** ext) {
         if (!m_image) {
             LogError(MODULE) << "image decoder not initialized";
             return 0;
         }
+        if (!m_vfs) {
+            LogError(MODULE) << "VFS not initialized";
+            return 0;
+        }
 		std::string fn = m_base_path + filename;
-		GHL::DataStream* ds = m_vfs->OpenFile(fn.c_str());
+		GHL::DataStream* ds = 0;
+		if (fn.find_last_of('.')>fn.find_last_of("/")) {
+			ds = m_vfs->OpenFile(fn.c_str());
+		}
 		if (!ds) {
 			std::string file = fn+".png";
 			ds = m_vfs->OpenFile( file.c_str() );
@@ -130,8 +141,12 @@ namespace Sandbox {
 				if ( !ds ) {
 					LogError(MODULE) <<"error opening file " << fn;
 					return 0;
-				}
-			}
+				} else {
+                    if (ext) *ext = "tga";
+                }
+			} else {
+                if (ext) *ext = "png";
+            }
 		}
 		GHL::Image* img = m_image->Decode(ds);
 		if (!img) {
@@ -142,30 +157,94 @@ namespace Sandbox {
 		ds->Release();
 		return img;
 	}
-	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,bool alpha, const GHL::Data* data) {
+    
+    bool Resources::GetImageInfo(sb::string& file,GHL::UInt32& w,GHL::UInt32& h) {
+        if (!m_image) {
+            LogError(MODULE) << "image decoder not initialized";
+            return false;
+        }
+        if (!m_vfs) {
+            LogError(MODULE) << "VFS not initialized";
+            return false;
+        }
+        
+        std::string fn = m_base_path + file;
+		GHL::DataStream* ds = 0;
+		if (file.find_last_of('.')!=file.npos) {
+			ds = m_vfs->OpenFile(fn.c_str());
+		}
+		if (!ds) {
+			std::string ifile = fn+".png";
+			ds = m_vfs->OpenFile( ifile.c_str() );
+			if ( !ds ) {
+				ifile = fn+".tga";
+				ds = m_vfs->OpenFile( ifile.c_str() );
+				if ( !ds ) {
+					LogError(MODULE) <<"error opening file " << fn;
+					return 0;
+				} else {
+                    file += ".tga";
+                }
+			} else {
+                file += ".png";
+            }
+		}
+        GHL::ImageInfo info;
+        if (!m_image->GetFileInfo(ds, &info)) {
+            LogError(MODULE) <<"error getting image info for file " << fn;
+			return false;
+        }
+        w = info.width;
+        h = info.height;
+		return true;
+    }
+    
+	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,bool alpha, const GHL::Image* data) {
         GHL::UInt32 tw = next_pot( w );
         GHL::UInt32 th = next_pot( h );
         bool setData = ( tw == w ) && ( th == h );
 		GHL::Texture* texture = m_render->CreateTexture(tw,
                                                         th,alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,
                                                         setData ? data : 0);
-		if (data && !setData) texture->SetData(0,0,w,h,data);
-		TexturePtr ptr(new Texture(texture));
-		return ptr;
+		if (data && !setData) texture->SetData(0,0,data);
+        return sb::make_shared<Texture>(texture,w,h);
 	}
 	
 	
-	TexturePtr Resources::GetTexture(const char* filename) {
-		
+	TexturePtr Resources::GetTexture(const char* filename, bool need_premultiply) {
+        if (!filename)
+            return TexturePtr();
+        
+        sb::string fn = filename;
+        
+        
 #ifdef SB_RESOURCES_CACHE
-        sb::weak_ptr<Texture> al = m_textures[filename];
+        sb::weak_ptr<Texture> al = m_textures[fn];
 		if (TexturePtr tex = al.lock()) {
 			return tex;
 		}
 #endif
-		GHL::Image* img = LoadImage(filename);
+    
+        GHL::UInt32 img_w = 0;
+        GHL::UInt32 img_h = 0;
+        if (!GetImageInfo(fn,img_w,img_h)) {
+            return TexturePtr();
+        }
+        
+        TexturePtr ptr = sb::make_shared<Texture>(fn,need_premultiply,img_w,img_h);
+		
+#ifdef SB_RESOURCES_CACHE
+		m_textures[fn]=ptr;
+#endif
+        m_managed_textures.push_back(ptr);
+        return ptr;
+	}
+    
+    GHL::Texture* Resources::LoadTexture( const sb::string& filename , bool premultiply ) {
+        const char* ext = "";
+		GHL::Image* img = LoadImage(filename.c_str(),&ext);
 		if (!img) {
-			return TexturePtr();
+			return 0;
 		}
 		GHL::TextureFormat tfmt;
         int bpp = 4;
@@ -174,17 +253,31 @@ namespace Sandbox {
             bpp = 3;
 		} else if (img->GetFormat()==GHL::IMAGE_FORMAT_RGBA) {
 			tfmt = GHL::TEXTURE_FORMAT_RGBA;
+            if (premultiply) {
+                img->PremultiplyAlpha();
+            }
             bpp = 4;
 		} else {
 			img->Release();
 			LogError(MODULE) <<"unsupported format file " << filename;
-			return TexturePtr();
+			return 0;
 		}
 		GHL::UInt32 tw = next_pot( img->GetWidth() );
         GHL::UInt32 th = next_pot( img->GetHeight() );
+        
+        size_t mem = tw * th * bpp;
+        size_t need_release = 0;
+        if ((m_memory_used+mem)>m_memory_limit) {
+            need_release = m_memory_used + mem - m_memory_limit;
+        }
+        if (need_release) {
+            FreeMemory(need_release, false);
+        }
+        
         bool setData = ( tw == img->GetWidth() ) && ( th == img->GetHeight() );
-		GHL::Data* fillData = setData ? 0 : GHL_CreateData(bpp*tw*th,true,0);
-        GHL::Texture* texture = m_render->CreateTexture(tw,th,tfmt,setData ? img->GetData() : fillData);
+		GHL::Image* fillData = setData ? 0 : GHL_CreateImage(tw,th,img->GetFormat());
+        if (fillData) fillData->Fill(0);
+        GHL::Texture* texture = m_render->CreateTexture(tw,th,tfmt,setData ? img : fillData);
 		tfmt = texture->GetFormat();
 		GHL::ImageFormat ifmt;
 		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
@@ -196,29 +289,30 @@ namespace Sandbox {
 			bpp = 4;
 		}
 		
+        m_memory_used += texture->GetWidth() * texture->GetHeight() * bpp;
+        
 		if (!setData) {
             fillData->Release();
-            LogWarning(MODULE) << "image " << filename << " NPOT " << 
-				img->GetWidth() << "x" << img->GetHeight() << " -> " <<
-				tw << "x" << th;
+            LogWarning(MODULE) << "image " << filename << "." << ext<< " NPOT " <<
+            img->GetWidth() << "x" << img->GetHeight() << " -> " <<
+            tw << "x" << th;
             img->Convert(ifmt);
-            texture->SetData(0,0,img->GetWidth(),img->GetHeight(),img->GetData());
+            texture->SetData(0,0,img);
         } else {
-			LogInfo(MODULE) << "Loaded image : " << filename << " " << img->GetWidth() << "x" << img->GetHeight() ;
+			//LogInfo(MODULE) << "Loaded image : " << filename << "." << ext << " " << img->GetWidth() << "x" << img->GetHeight() ;
         }
-		TexturePtr ptr(new Texture(texture,img->GetWidth(),img->GetHeight()));
-		img->Release();
-#ifdef SB_RESOURCES_CACHE
-		m_textures[filename]=ptr;
-#endif
-		return ptr;
-	}
+        texture->DiscardInternal();
+        img->Release();
+        
+        return texture;
+    }
+    
 	bool Resources::ImageHaveAlpha(const GHL::Image* img) const {
 		return img->GetFormat()==GHL::IMAGE_FORMAT_RGBA;
 	}
 	
-	bool Resources::ConvertImage(GHL::Image* img,const TexturePtr& tex) const {
-		GHL::TextureFormat tfmt = tex->GetNative()->GetFormat();
+	bool Resources::ConvertImage(GHL::Image* img,GHL::Texture* tex) const {
+		GHL::TextureFormat tfmt = tex->GetFormat();
 		GHL::ImageFormat ifmt;
 		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
 			ifmt = GHL::IMAGE_FORMAT_RGB;
@@ -234,14 +328,14 @@ namespace Sandbox {
 		return true;
 	}
 	
-	ImagePtr Resources::GetImage(const char* filename) {
-        TexturePtr texture = GetTexture( filename );
+	ImagePtr Resources::GetImage(const char* filename,bool need_premultiply) {
+        TexturePtr texture = GetTexture( filename , need_premultiply);
         if (!texture) {
             return ImagePtr();
         }
-		float imgW = texture->GetOriginalWidth();
-		float imgH = texture->GetOriginalHeight();
-		return ImagePtr(new Image(texture,0,0,imgW,imgH));
+		GHL::UInt32 imgW = texture->GetOriginalWidth();
+		GHL::UInt32 imgH = texture->GetOriginalHeight();
+        return sb::make_shared<Image>(texture,0,0,float(imgW),float(imgH));
 	}
 	
 	ShaderPtr Resources::GetShader(const char* vfn,const char* ffn) {
@@ -273,8 +367,13 @@ namespace Sandbox {
 				LogError(MODULE) << "error opening file " << filename;
 				return ShaderPtr();
 			}
-			vs = m_render->CreateVertexShader(ds);
-			ds->Release();
+            GHL::Data* dsd = GHL_ReadAllData( ds );
+            ds->Release();
+            if (!dsd) {
+                LogError(MODULE) << "error loading shader " << vfilename;
+            }
+			vs = m_render->CreateVertexShader(dsd);
+			dsd->Release();
 			if (!vs) {
 				LogError(MODULE) << "error loading shader " << vfilename;
 				//return ShaderPtr();
@@ -290,8 +389,13 @@ namespace Sandbox {
 				LogError(MODULE) << "error opening file " << filename;
 				return ShaderPtr();
 			}
-			fs = m_render->CreateFragmentShader(ds);
-			ds->Release();
+            GHL::Data* dsd = GHL_ReadAllData( ds );
+            ds->Release();
+            if (!dsd) {
+                LogError(MODULE) << "error loading shader " << vfilename;
+            }
+			fs = m_render->CreateFragmentShader(dsd);
+			dsd->Release();
 			if (!fs) {
 				LogError(MODULE) << "error loading shader " << ffilename;
 				//return ShaderPtr();
@@ -305,7 +409,7 @@ namespace Sandbox {
 			LogError(MODULE) << "error creating shader program from " << vfilename << " , " << ffilename ;
 			//return ShaderPtr();
 		}
-		ShaderPtr res( new Shader(sp) );
+		ShaderPtr res = sb::make_shared<Shader>(sp);
 #ifdef SB_RESOURCES_CACHE
 		m_shaders[name]=res;
 #endif
@@ -314,7 +418,58 @@ namespace Sandbox {
 	
 	
     sb::shared_ptr<Atlaser> Resources::CreateAtlaser(int w,int h) {
-		return sb::shared_ptr<Atlaser>(new Atlaser(this,w,h));
-	}
-	
+        return sb::make_shared<Atlaser>(this,w,h);
+    }
+    
+    RenderTargetPtr Resources::CreateRenderTarget(int w, int h, bool alpha, bool depth) {
+        sb_assert(w>0);
+        sb_assert(h>0);
+        GHL::UInt32 nw = next_pot(w);
+        GHL::UInt32 nh = next_pot(h);
+        sb_assert(m_render);
+        return sb::make_shared<RenderTarget>(m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth));
+    }
+    
+    size_t    Resources::FreeMemory(size_t need_release,bool full) {
+        size_t memory_used = 0;
+        for (sb::list<sb::weak_ptr<Texture> >::iterator it = m_managed_textures.begin();it!=m_managed_textures.end();) {
+            TexturePtr t = it->lock();
+            sb::list<sb::weak_ptr<Texture> >::iterator next = it;
+            ++next;
+            if (t) {
+                memory_used += t->GetMemoryUsage();
+                if (need_release) {
+                    size_t lt = t->GetLiveTicks();
+                    if ( lt && lt < m_live_ticks ) {
+                        size_t released = t->Release();
+                        memory_used-=released;
+                        if (released>need_release) {
+                            need_release = 0;
+                        } else {
+                            need_release -= released;
+                        }
+                        if (released) {
+                            m_managed_textures.push_back(t);
+                            next = m_managed_textures.erase(it);
+                        }
+                    }
+                } else {
+                    if (!full) break;
+                }
+            } else {
+                next = m_managed_textures.erase(it);
+            }
+            it = next;
+        }
+        return memory_used;
+    }
+
+	void    Resources::ProcessMemoryMgmt() {
+        ++m_live_ticks;
+        size_t need_release = 0;
+        if (m_memory_used>m_memory_limit) {
+            need_release = m_memory_used - m_memory_limit;
+        }
+        m_memory_used = FreeMemory(need_release,true);
+    }
 }

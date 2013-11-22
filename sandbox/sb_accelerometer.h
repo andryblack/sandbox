@@ -27,13 +27,16 @@ namespace Sandbox {
 		~Accelerometer();
 		bool Update( float dt );
 		const Vector3f& GetData() const { return m_data;}
+        bool GetSupported() const { return m_supported; }
 		static void Bind( LuaVM* lua );
+        bool    Supported();
     protected:
         bool IsActual() const { return m_actual;} 
 	private:
 		GHL::System*	m_system;
 		Vector3f		m_data;
         bool            m_actual;
+        bool            m_supported;
 	};
 	typedef sb::shared_ptr<Accelerometer> AccelerometerPtr;
 }

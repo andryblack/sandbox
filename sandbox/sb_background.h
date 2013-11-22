@@ -11,7 +11,7 @@
 
 #include "sb_scene_object.h"
 #include "sb_image.h"
-#include "sb_vector.h"
+#include <sbstd/sb_vector.h>
 
 namespace Sandbox {
     
@@ -23,6 +23,7 @@ namespace Sandbox {
         Background();
         bool Load( const char* file, Resources* res );
         void Draw( Graphics& g ) const;
+        void SetFiltered( bool f );
     private:
         sb::vector<Image>  m_images;
     };
