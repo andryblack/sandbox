@@ -16,10 +16,18 @@
 #include "sb_lua.h"
 #include <sbstd/sb_list.h>
 
+namespace MyGUI {
+    class Gui;
+}
+
 namespace Sandbox {
     
     class Resources;
     class SoundManager;
+    namespace mygui {
+        class DataManager;
+        class RenderManager;
+    }
     
 	class Application : public GHL::Application {
     public:
@@ -67,8 +75,8 @@ namespace Sandbox {
 		Graphics*		m_graphics;
 		Resources*		m_resources;
         SoundManager*   m_sound_mgr;
-		std::string		m_lua_base_path;
-		std::string		m_resources_base_path;
+		sb::string		m_lua_base_path;
+		sb::string		m_resources_base_path;
 		size_t			m_frames;
 		GHL::UInt32		m_frames_time;
 		float			m_fps;
@@ -84,6 +92,10 @@ namespace Sandbox {
         
         bool    m_sound_enabled;
         bool    m_music_enabled;
+        
+        mygui::DataManager*     m_gui_data_manager;
+        mygui::RenderManager*   m_gui_render;
+        MyGUI::Gui* m_gui;
         
     public:
 		///

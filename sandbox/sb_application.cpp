@@ -22,6 +22,13 @@
 #include <ghl_render.h>
 #include <ghl_system.h>
 
+#include "MyGUI_Gui.h"
+#include "MyGUI_InputManager.h"
+
+#include "mygui/sb_mygui_keys.h"
+#include "mygui/sb_mygui_data_manager.h"
+#include "mygui/sb_mygui_render.h"
+
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
@@ -51,6 +58,10 @@ namespace Sandbox {
 	void register_scene( lua_State* lua );
 	void register_controller( lua_State* lua );
 	
+    namespace mygui {
+        void register_mygui( lua_State* lua );
+        void setup_singletons( LuaVM* lua );
+    }
     
     
 	Application::Application() {
@@ -72,6 +83,9 @@ namespace Sandbox {
         m_batches = 0.0f;
         m_sound_enabled = true;
         m_music_enabled = true;
+        m_gui_data_manager = 0;
+        m_gui = 0;
+        m_gui_render = 0;
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
 	}
@@ -81,15 +95,22 @@ namespace Sandbox {
 		delete m_main_scene;
 		delete m_lua;
     	delete m_sound_mgr;
+        if (m_gui) {
+            m_gui->shutdown();
+        }
+        delete m_gui;
+        delete m_gui_render;
+        delete m_gui_data_manager;
 		delete m_resources;
 		delete m_graphics;
-	}
+  	}
     
     void Application::BindModules( LuaVM* lua) {
         register_math(lua->GetVM());
         register_resources(lua->GetVM());
         register_scene(lua->GetVM());
         register_controller(lua->GetVM());
+        mygui::register_mygui(lua->GetVM());
     }
 	
     void GHL_CALL Application::Initialize() {
@@ -179,8 +200,17 @@ namespace Sandbox {
         ctx->SetValue("application.sound", m_sound_mgr);
 
 		m_lua->DoFile("load.lua");
+        
+        m_gui_data_manager = new mygui::DataManager(m_resources);
+        m_gui_render = new mygui::RenderManager(m_resources);
+        
+        m_gui = new MyGUI::Gui();
+        m_gui->initialise("");
+        mygui::setup_singletons(m_lua);
+        
 		if (!LoadResources(*m_resources))
 			return false;
+        
 		m_main_scene = new Scene();
         ctx->SetValue("application.scene", m_main_scene);
 		m_main_thread = new ThreadsMgr();
@@ -188,6 +218,7 @@ namespace Sandbox {
         ctx->SetValue("application.size.width", m_render->GetWidth() );
         ctx->SetValue("application.size.height", m_render->GetHeight() );
         m_graphics->Load(m_render);
+        
         
         
 		OnLoaded();
@@ -233,6 +264,10 @@ namespace Sandbox {
         size_t batches = m_graphics->EndScene();
         m_batches = m_batches * 0.875f + 0.125f*batches;    /// interpolate 4 frames
         m_render->SetupBlend(true,GHL::BLEND_FACTOR_SRC_ALPHA,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
+        
+        if (m_gui_render)
+            m_gui_render->drawFrame(dt);
+        
 		DrawDebugInfo();
 		m_render->EndScene();
         
@@ -312,22 +347,28 @@ namespace Sandbox {
     }
     
 	///
-	void GHL_CALL Application::OnKeyDown( GHL::Key ) {
+	void GHL_CALL Application::OnKeyDown( GHL::Key k ) {
+        MyGUI::InputManager::getInstance().injectKeyPress(mygui::translate_key(k));
 	}
 	///
-	void GHL_CALL Application::OnKeyUp( GHL::Key ) {
+	void GHL_CALL Application::OnKeyUp( GHL::Key k) {
+        MyGUI::InputManager::getInstance().injectKeyRelease(mygui::translate_key(k));
 	}
 	///
 	void GHL_CALL Application::OnChar( GHL::UInt32 ) {
+        
 	}
 	///
 	void GHL_CALL Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+        MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key));
     }
 	///
 	void GHL_CALL Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+        MyGUI::InputManager::getInstance().injectMouseMove(x, y, 0);
     }
 	///
 	void GHL_CALL Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+        MyGUI::InputManager::getInstance().injectMouseRelease(x, y, mygui::translate_key(key));
     }
 	///
 	void GHL_CALL Application::OnDeactivated() {

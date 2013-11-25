@@ -47,6 +47,7 @@ namespace Sandbox {
         size_t GetLiveTicks() const { return m_live_ticks; }
         size_t Release();
         size_t GetMemoryUsage() const;
+        const sb::string& GetName() const { return m_file; }
 	};
 	typedef sb::shared_ptr<Texture> TexturePtr;
 }
