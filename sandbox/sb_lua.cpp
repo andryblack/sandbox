@@ -38,7 +38,7 @@ namespace Sandbox {
         if (g_terminate_context) {
             LogError(MODULE) << "--- terminate ---";
             lua_pushcclosure(g_terminate_context, &luabind::lua_traceback, 0);
-            if (!lua_isstring(g_terminate_context, -2)){
+            if (lua_gettop(g_terminate_context)<2 || !lua_isstring(g_terminate_context, -2)){
                 lua_pushstring(g_terminate_context, "unknown");
             } else {
                 lua_pushvalue(g_terminate_context, -2);

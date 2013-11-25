@@ -281,6 +281,7 @@ namespace Sandbox {
                 return res;
             }
             static T* get( lua_State* L, int idx ) {
+                if ( lua_gettop(L)<idx) return reinterpret_cast<T*>(0);
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
                     return get_impl(L, holder, idx);
@@ -556,7 +557,8 @@ namespace Sandbox {
                 stack<const char*>::push(L, val.c_str());
             }
             static sb::string get( lua_State* L, int idx) {
-                return stack<const char*>::get(L,idx);
+                const char* val = stack<const char*>::get(L,idx);
+                return val ? val : "";
             }
         };
     
