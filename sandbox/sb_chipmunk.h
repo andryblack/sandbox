@@ -10,12 +10,13 @@
 #ifndef SB_CHIPMUNK_H_INCLUDED
 #define SB_CHIPMUNK_H_INCLUDED
 
-#include "sb_shared_ptr.h"
+#include <sbstd/sb_shared_ptr.h>
 #include "sb_vector2.h"
 #include "sb_thread.h"
-#include "sb_container_transform.h"
+#include "sb_container.h"
 #include "sb_scene_object.h"
 #include "sb_color.h"
+#include "sb_draw_modificator.h"
 
 #include <vector>
 
@@ -99,8 +100,8 @@ namespace Sandbox {
 			void SetElasticity(float e);
             long GetCollisionType() const;
             void SetCollisionType( long type );
-            unsigned int GetLayers() const;
-            void SetLayers(unsigned int);
+            //unsigned int GetLayers() const;
+            //void SetLayers(unsigned int);
 			
 			void set_space( Space* space) { m_space = space;}
 			Space* get_space() const { return m_space;}
@@ -341,7 +342,7 @@ namespace Sandbox {
 			void SetRate(float r);
 		};
 		
-		class TransformAdapter : public ContainerTransform {
+		class TransformAdapter : public Container {
 		public:
 			explicit TransformAdapter( const BodyPtr& body );
 			void Update(float dt);
@@ -351,6 +352,7 @@ namespace Sandbox {
 		private:
 			BodyPtr		m_body;
             bool    m_apply_rotate;
+            TransformModificatorPtr m_transform;
 		};
         
         class InvertTransformAdapter : public Container {

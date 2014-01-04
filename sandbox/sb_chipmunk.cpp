@@ -9,6 +9,7 @@
 
 #include "sb_chipmunk.h"
 #include "../chipmunk/include/chipmunk/chipmunk.h"
+//#include "../chipmunk/include/chipmunk/cpBody.h"
 #include <algorithm>
 #include "sb_graphics.h"
 #include "sb_log.h"
@@ -178,19 +179,19 @@ namespace Sandbox {
         }
 		void Space::AddCollisionHandler(const CollisionHandlerPtr& handler ) {
             if (add(m_collision_handlers,handler)) {
-                cpSpaceAddCollisionHandler(m_space, 
-                                           handler->GetCollisionTypeA(), 
-                                           handler->GetCollisionTypeB(), 
-                                           &Space::collision_begin, 
-                                           0, 0, 0, 
-                                           handler.get());
+//                cpSpaceAddCollisionHandler(m_space, 
+//                                           handler->GetCollisionTypeA(), 
+//                                           handler->GetCollisionTypeB(), 
+//                                           &Space::collision_begin, 
+//                                           0, 0, 0, 
+//                                           handler.get());
             }
         }
         
         void Space::RemoveCollisionHandler( const CollisionHandlerPtr& handler ) {
             if (remove(m_collision_handlers,handler)) {
-                cpSpaceRemoveCollisionHandler(m_space, handler->GetCollisionTypeA(), 
-                                              handler->GetCollisionTypeB());
+//                cpSpaceRemoveCollisionHandler(m_space, handler->GetCollisionTypeA(), 
+//                                              handler->GetCollisionTypeB());
             }
         }
 		
@@ -237,12 +238,12 @@ namespace Sandbox {
         void Shape::SetCollisionType( long type ) {
             cpShapeSetCollisionType( m_shape, type );
         }
-        unsigned int Shape::GetLayers() const {
-            return cpShapeGetLayers(m_shape);
-        }
-        void Shape::SetLayers(unsigned int v) {
-            cpShapeSetLayers(m_shape, v);
-        }
+//        unsigned int Shape::GetLayers() const {
+//            return cpShapeGetLayers(m_shape);
+//        }
+//        void Shape::SetLayers(unsigned int v) {
+//            cpShapeSetLayers(m_shape, v);
+//        }
        	
 			
 		CircleShape::CircleShape( const BodyPtr& body, float radius, const Vector2f& pos ) {
@@ -264,7 +265,8 @@ namespace Sandbox {
 				v[i].x = points[i].x;
 				v[i].y = points[i].y;
 			}
-			SetShape(cpPolyShapeNew(body->get_body(),int(points.size()),v,cpv(offset.x,offset.y)));
+            
+			SetShape(cpPolyShapeNew(body->get_body(),int(points.size()),v,vect(offset)));
 			delete [] v;
 		}
 		
@@ -682,13 +684,15 @@ namespace Sandbox {
 		TransformAdapter::TransformAdapter( const BodyPtr& body ) {
 			m_body = body;
             m_apply_rotate = true;
+            m_transform = TransformModificatorPtr(new TransformModificator());
+            AddModificator(m_transform);
             Update(0);
 		}
 		
 		void TransformAdapter::Update(float ) {
-            SetTranslate( m_body->GetPos() );
+            m_transform->SetTranslate( m_body->GetPos() );
             if (m_apply_rotate)
-                SetAngle( m_body->GetAngle() );
+                m_transform->SetAngle( m_body->GetAngle() );
 		}
         
         InvertTransformAdapter::InvertTransformAdapter( const BodyPtr& body ) {
@@ -706,7 +710,7 @@ namespace Sandbox {
             }
             tr.translate(-m_body->GetPos());
             g.SetTransform(tr);
-            DrawChilds(g);
+            Container::Draw(g);
             g.SetTransform(old);
         }
 		

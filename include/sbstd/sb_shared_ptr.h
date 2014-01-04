@@ -176,6 +176,12 @@ namespace sb {
             release();
         }
         
+        template <class U>
+        void reset(U* v) {
+            shared_ptr other(v);
+            *this = other;
+        }
+        
         implement::counter_base* get_counter() const { return counter;}
     private:
         void release() {

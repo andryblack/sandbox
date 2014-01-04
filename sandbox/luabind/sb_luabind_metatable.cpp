@@ -166,7 +166,7 @@ namespace Sandbox {
             /// debug
 #if 0
             data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, self_index));
-            if (strcmp(holder->info->name,"Sandbox::Container")==0) {
+            if (strcmp(holder->info->name,"MyGUI::Widget")==0) {
                 int a = 0;
             }
 #endif
@@ -179,6 +179,8 @@ namespace Sandbox {
                 
                 // Look for the key in the metatable
 				lua_pushvalue(L, 2);
+                sb_assert(lua_isstring(L, -1));
+                //LogDebug() << "index: " << lua_tostring(L, -1);
 				lua_rawget(L, -2);              /// mt props res
 				// Did we get a non-nil result?  If so, return it
 				if (!lua_isnil(L, -1)) {
@@ -199,6 +201,7 @@ namespace Sandbox {
                 
                 // Look for the key in the metatable
 				lua_pushvalue(L, 2);
+                sb_assert(lua_isstring(L, -1));
 				lua_rawget(L, -2);              /// mt methods res
 				// Did we get a non-nil result?  If so, return it
 				if (!lua_isnil(L, -1)) {

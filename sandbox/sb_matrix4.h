@@ -7,7 +7,7 @@
 #include "sb_matrix3.h"
 #include "sb_vector3.h"
 #include "sb_vector4.h"
-#include "sb_assert.h"
+#include <sbstd/sb_assert.h>
 
 #include <float.h>
 

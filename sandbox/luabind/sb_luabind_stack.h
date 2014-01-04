@@ -150,7 +150,7 @@ namespace Sandbox {
         }
         template <class T>
         inline bool try_to_push_lua_object( lua_State* L, const T* val, 
-                                    const has_meta_object_base_hpr<meta::implementation::has_meta_object_base<T>::result>* v=0 ) {
+                                    const has_meta_object_base_hpr<meta::implementation::has_get_type_info<T>::result>* v=0 ) {
             return try_to_push_lua_object_impl(L,val,v);
         }
         

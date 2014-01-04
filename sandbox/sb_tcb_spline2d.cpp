@@ -4,7 +4,7 @@
  */
 
 #include "sb_tcb_spline2d.h"
-#include "sb_assert.h"
+#include <sbstd/sb_assert.h>
 #include "luabind/sb_luabind.h"
 #include "sb_lua.h"
 

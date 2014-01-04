@@ -8,7 +8,7 @@
  */
 
 #include "sb_graphics.h"
-#include "sb_assert.h"
+#include <sbstd/sb_assert.h>
 #include <ghl_image.h>
 
 namespace Sandbox {

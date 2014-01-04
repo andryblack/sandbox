@@ -195,32 +195,26 @@ namespace Sandbox {
         
 #define SB_META_DECLARE_POD_TYPE(Type) SB_META_DECLARE_KLASS(Type,void)
 
-        template <class T>
-        inline T* sb_dynamic_cast(object* o) {
-            const type_info* rt = T::get_static_type_info();
-            const type_info* ti = o->get_type_info();
-            void* vo = o;
-            while (ti) {
-                if (ti == rt) return static_cast<T*>(vo);
-                /// handle only 0 parent
-                ti = ti->parents[0].info;
-                vo = ti->parents[0].downcast(vo);
-            }
-            return 0;
-        }
-
+        
         namespace implementation {
             template <class Type>
-            class has_meta_object_base
+            class has_get_type_info
             {
                 class yes { char m;};
                 class no { yes m[2];};
 
-                static yes deduce(meta::object*);
-                static no deduce(...);
+                struct BaseMixin
+                {
+                    const type_info* get_type_info() const { return 0;}
+                };
+                struct Base : public Type, public BaseMixin {};
+                template <typename T, T t>  class Helper{};
+                template <typename U>
+                static no deduce(U*, Helper<const type_info* (BaseMixin::*)()const, &U::get_type_info>* = 0);
+                static yes deduce(...);
 
             public:
-                static const bool result = sizeof(yes) == sizeof(deduce((Type*)(0)));
+                static const bool result = sizeof(yes) == sizeof(deduce((Base*)(0)));
 
             };
 
@@ -236,10 +230,23 @@ namespace Sandbox {
             };
         }
 
+        template <class T,class U>
+        inline T* sb_dynamic_cast(U* o) {
+            const type_info* rt = T::get_static_type_info();
+            const type_info* ti = o->get_type_info();
+            void* vo = o;
+            while (ti) {
+                if (ti == rt) return static_cast<T*>(vo);
+                /// handle only 0 parent
+                ti = ti->parents[0].info;
+                vo = ti->parents[0].downcast(vo);
+            }
+            return 0;
+        }
 
         template <class T>
         inline const type_info* get_type_info(const T* v) {
-            return implementation::get_type_info<T,implementation::has_meta_object_base<T>::result>::get(v);
+            return implementation::get_type_info<T,implementation::has_get_type_info<T>::result>::get(v);
         }
         
     }

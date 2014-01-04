@@ -9,7 +9,7 @@
 
 
 #include "sb_scene_object.h"
-#include "sb_assert.h"
+#include <sbstd/sb_assert.h>
 #include "sb_container.h"
 #include "sb_scene.h"
 
