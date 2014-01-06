@@ -16,7 +16,8 @@ namespace Sandbox {
     
     
     Texture::Texture(const sb::string& file, bool premul, GHL::UInt32 w, GHL::UInt32 h) :
-    m_texture(0),m_file(file),m_original_w(w),m_original_h(h),m_live_ticks(0),m_filtered(false),m_tiled(false){
+    m_texture(0),m_file(file),m_original_w(w),
+    m_original_h(h),m_width(w),m_height(h),m_live_ticks(0),m_filtered(false),m_tiled(false){
         m_need_premultiply = premul;
     }
     
@@ -24,8 +25,10 @@ namespace Sandbox {
     m_texture(tex),m_file(),m_original_w(w),m_original_h(h),m_live_ticks(0),m_filtered(false),m_tiled(false){
         m_need_premultiply = false;
         if (m_texture) {
-            if (m_original_w==0) m_original_w = m_texture->GetWidth();
-            if (m_original_h==0) m_original_h = m_texture->GetHeight();
+            m_width = m_texture->GetWidth();
+            m_height = m_texture->GetHeight();
+            if (m_original_w==0) m_original_w = m_width;
+            if (m_original_h==0) m_original_h = m_height;
         }
     }
     
@@ -33,7 +36,14 @@ namespace Sandbox {
         if (m_texture) m_texture->Release();
     }
     
-    const GHL::Texture* Texture::Present(Resources* resources) const {
+    void Texture::SetTextureSize(GHL::UInt32 tw,GHL::UInt32 th) {
+        m_width = tw;
+        m_height = th;
+    }
+    
+    
+    
+    GHL::Texture* Texture::Present(Resources* resources) {
         if (!m_texture) {
             m_texture = resources->LoadTexture( m_file , m_need_premultiply );
             m_texture->SetMinFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);

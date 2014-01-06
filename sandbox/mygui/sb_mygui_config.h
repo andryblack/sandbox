@@ -5,6 +5,9 @@
 #define MYGUI_DONT_USE_DYNLIB
 #define MYGUI_DONT_USE_OBSOLETE
 
+#define MYGUI_USE_FREETYPE
+#define MYGUI_DONT_REPLACE_NULLPTR
+
 #include <string>
 
 namespace MyGUI
@@ -20,6 +23,7 @@ namespace Sandbox {
         struct type_info;
     }
 }
+
         
 #define MYGUI_LOGGING(section, level, text) \
     Sandbox::mygui::log_message(section,MyGUI::LogLevel::level,MyGUI::LogStream()<<text<<MyGUI::LogStream::End())

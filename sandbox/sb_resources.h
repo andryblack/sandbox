@@ -95,6 +95,8 @@ namespace Sandbox {
         size_t    m_memory_used;
         sb::list<sb::weak_ptr<Texture> >   m_managed_textures;
         size_t    FreeMemory(size_t mem,bool full);
+        
+        void GetTextureSize( GHL::UInt32 w,GHL::UInt32 h, GHL::UInt32& tw, GHL::UInt32& th ) const;
 	};
 }
 

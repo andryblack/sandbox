@@ -35,6 +35,12 @@ namespace Sandbox {
             const LuaVMHelperWeakPtr& GetHelperPtr() const { return m_lua;}
             bool Valid() const;
             void Reset();
+            lua_State* GetVM() const {
+                LuaVMHelperPtr helper = GetHelper();
+                if (!helper)
+                    return 0;
+                return helper->lua;
+            }
         private:
             LuaVMHelperWeakPtr m_lua;
             int	m_ref;
@@ -58,6 +64,15 @@ namespace Sandbox {
                 } else {
                     lua_pushnil(L);
                 }
+            }
+            static sb::shared_ptr<LuaReference> get(lua_State* L, int idx) {
+                if (lua_isnil(L, idx)) {
+                    return sb::shared_ptr<LuaReference>();
+                }
+                sb::shared_ptr<LuaReference> res(new LuaReference());
+                lua_pushvalue(L, idx);
+                res->SetObject(L);
+                return res;
             }
         };
                 

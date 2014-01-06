@@ -8,6 +8,7 @@
 
 #include "sb_mygui_bind.h"
 #include <luabind/sb_luabind.h>
+#include <luabind/sb_luabind_function.h>
 #include "../sb_lua.h"
 
 #include "MyGUI_LayoutManager.h"
@@ -61,7 +62,78 @@
 
 #include "MyGUI_CommonStateInfo.h"
 
+namespace Sandbox {
+    
+    namespace luabind {
+        
+        template <>
+        struct stack<MyGUI::UString> {
+            static void push( lua_State* L, const MyGUI::UString& val ) {
+                stack<const char*>::push(L, val.asUTF8_c_str());
+            }
+            static MyGUI::UString get( lua_State* L, int idx ) {
+                return MyGUI::UString(stack<const char*>::get(L, idx));
+            }
+        };
+        
+        template <>
+        struct stack<const MyGUI::UString&> : stack<MyGUI::UString> {};
+        
+        
+        template <>
+        struct stack<MyGUI::MouseButton> {
+            static void push( lua_State* L, const MyGUI::MouseButton& val ) {
+                stack<int>::push(L, val.getValue());
+            }
+            static MyGUI::MouseButton get( lua_State* L, int idx ) {
+                return MyGUI::MouseButton(static_cast<MyGUI::MouseButton::Enum>(stack<int>::get(L, idx)));
+            }
+        };
+        
+        template <>
+        struct stack<const MyGUI::MouseButton&> : stack<MyGUI::MouseButton> {};
 
+    }
+}
+
+template <typename A1,typename A2,typename A3,typename A4>
+class LuaDelegate4 : public MyGUI::delegates::IDelegate4<A1,A2,A3,A4>, public MyGUI::delegates::IDelegateUnlink {
+private:
+    Sandbox::luabind::function  m_function;
+public:
+    virtual bool isType( const std::type_info& _type) { return false; }
+    virtual void invoke( A1 a1, A2 a2, A3 a3, A4 a4 ) {
+        m_function.fcall( a1, a2, a3, a4 );
+    }
+    virtual bool compare(  MyGUI::delegates::IDelegate4<A1,A2,A3,A4>* _delegate) const {
+        return _delegate == this;
+    }
+    virtual bool compare( MyGUI::delegates::IDelegateUnlink* _unlink) const
+    {
+        return _unlink == this;
+    }
+    void SetObject(lua_State* L) {
+        m_function.SetObject(L);
+    }
+};
+
+template <class O,class T,class U, U T::*>
+struct delegate_bind;
+
+template <class O,class T,class A1,class A2,class A3,class A4,MyGUI::delegates::CMultiDelegate4<A1, A2, A3, A4> T::*obj>
+struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate4<A1, A2, A3, A4>, obj > {
+    typedef LuaDelegate4<A1,A2,A3,A4> LuaDelegate;
+    typedef MyGUI::delegates::CMultiDelegate4<A1, A2, A3, A4> MultiDelegate;
+    static int lua_func( lua_State* L ) {
+        O* t = Sandbox::luabind::stack<O*>::get(L,1);
+        LuaDelegate* delegate = new LuaDelegate();
+        lua_pushvalue(L, 2);
+        delegate->SetObject(L);
+        MultiDelegate& md(t->*obj);
+        md += delegate;
+        return 0;
+    }
+};
 
 
 SB_META_DECLARE_KLASS(MyGUI::Align, void)
@@ -121,6 +193,14 @@ SB_META_PROPERTY_RO(absoluteTop, getAbsoluteTop)
 
 SB_META_END_KLASS_BIND()
 
+
+SB_META_DECLARE_KLASS(MyGUI::MouseButton,void);
+SB_META_ENUM_BIND(MyGUI::MouseButton,namespace MyGUI,
+                  SB_META_ENUM_MEMBER_ITEM(Left,MouseButton::Left)
+                  SB_META_ENUM_MEMBER_ITEM(Right,MouseButton::Right)
+                  SB_META_ENUM_MEMBER_ITEM(Middle,MouseButton::Middle))
+
+
 SB_META_DECLARE_OBJECT(MyGUI::IObject, void)
 
 SB_META_DECLARE_OBJECT(MyGUI::Widget, MyGUI::ICroppedRectangle)
@@ -134,6 +214,15 @@ SB_META_PROPERTY_RW(enabled, getEnabled, setEnabled)
 SB_META_PROPERTY_RO(parent, getParent)
 SB_META_PROPERTY_RO(clientWidget, getClientWidget)
 
+bind(method("eventMouseButtonPressed", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetIntIntButton,
+            &MyGUI::WidgetInput::eventMouseButtonPressed>::lua_func));
+
+bind(method("eventMouseButtonReleased", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetIntIntButton,
+            &MyGUI::WidgetInput::eventMouseButtonReleased>::lua_func));
 
 SB_META_METHOD(findWidget)
 SB_META_METHOD(setProperty)
@@ -150,8 +239,15 @@ SB_META_DECLARE_OBJECT(MyGUI::EditText, MyGUI::ISubWidgetText)
 SB_META_DECLARE_OBJECT(MyGUI::ImageBox, MyGUI::Widget)
 
 SB_META_DECLARE_OBJECT(MyGUI::TextBox, MyGUI::Widget)
+SB_META_BEGIN_KLASS_BIND(MyGUI::TextBox)
+SB_META_PROPERTY_RW(caption, getCaption, setCaption)
+SB_META_END_KLASS_BIND()
+
 
 SB_META_DECLARE_OBJECT(MyGUI::Button, MyGUI::TextBox)
+SB_META_BEGIN_KLASS_BIND(MyGUI::Button)
+SB_META_PROPERTY_RW(stateSelected, getStateSelected, setStateSelected)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::MenuItem, MyGUI::Button)
 
@@ -222,6 +318,10 @@ SB_META_DECLARE_OBJECT(MyGUI::ResourceManualPointer, MyGUI::IPointer)
 
 SB_META_DECLARE_OBJECT(MyGUI::ResourceManualFont, MyGUI::IFont)
 
+#ifdef MYGUI_USE_FREETYPE
+SB_META_DECLARE_OBJECT(MyGUI::ResourceTrueTypeFont, MyGUI::IFont)
+#endif
+
 SB_META_DECLARE_OBJECT(MyGUI::ResourceLayout, MyGUI::IResource)
 SB_META_DECLARE_OBJECT(MyGUI::ResourceSkin, MyGUI::IResource)
 SB_META_DECLARE_OBJECT(MyGUI::ResourceImageSet, MyGUI::IResource)
@@ -285,6 +385,8 @@ namespace Sandbox {
     namespace mygui {
         
         void register_mygui( lua_State* lua ) {
+            luabind::RawClass<MyGUI::MouseButton>(lua);
+            
             luabind::RawClass<MyGUI::Align>(lua);
             luabind::RawClass<MyGUI::IntPoint>(lua);
             luabind::RawClass<MyGUI::IntSize>(lua);
@@ -299,7 +401,8 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::WidgetManager>(lua);
             luabind::ExternClass<MyGUI::Gui>(lua);
 
-            
+            luabind::ExternClass<MyGUI::TextBox>(lua);
+            luabind::ExternClass<MyGUI::Button>(lua);
         }
         
         void setup_singletons( LuaVM* lua ) {

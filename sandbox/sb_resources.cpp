@@ -233,12 +233,24 @@ namespace Sandbox {
         
         TexturePtr ptr = sb::make_shared<Texture>(fn,need_premultiply,img_w,img_h);
 		
+        GHL::UInt32 tw = 0;//next_pot( img->GetWidth() );
+        GHL::UInt32 th = 0;//next_pot( img->GetHeight() );
+        
+        GetTextureSize(img_w, img_h, tw, th);
+        
+        ptr->SetTextureSize(tw,th);
+        
 #ifdef SB_RESOURCES_CACHE
 		m_textures[fn]=ptr;
 #endif
         m_managed_textures.push_back(ptr);
         return ptr;
 	}
+    
+    void Resources::GetTextureSize( GHL::UInt32 w,GHL::UInt32 h, GHL::UInt32& tw, GHL::UInt32& th ) const {
+        tw = next_pot( w );
+        th = next_pot( h );
+    }
     
     GHL::Texture* Resources::LoadTexture( const sb::string& filename , bool premultiply ) {
         const char* ext = "";
@@ -262,8 +274,10 @@ namespace Sandbox {
 			LogError(MODULE) <<"unsupported format file " << filename;
 			return 0;
 		}
-		GHL::UInt32 tw = next_pot( img->GetWidth() );
-        GHL::UInt32 th = next_pot( img->GetHeight() );
+		GHL::UInt32 tw = 0;//next_pot( img->GetWidth() );
+        GHL::UInt32 th = 0;//next_pot( img->GetHeight() );
+        
+        GetTextureSize(img->GetWidth(), img->GetHeight(), tw, th);
         
         size_t mem = tw * th * bpp;
         size_t need_release = 0;

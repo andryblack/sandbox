@@ -13,6 +13,8 @@
 #include <sbstd/sb_algorithm.h>
 #include "../sb_resources.h"
 #include "../sb_matrix4.h"
+#include <ghl_image.h>
+#include <ghl_texture.h>
 
 
 namespace Sandbox {
@@ -51,7 +53,7 @@ namespace Sandbox {
         
         class RenderManager::Texture : public MyGUI::ITexture {
         public:
-            Texture( const sb::string& name, Resources* res) : m_name(name),m_resources(res) {
+            Texture( const sb::string& name, Resources* res) : m_name(name),m_resources(res),m_image(0) {
                 
             }
             virtual const std::string& getName() const {
@@ -59,7 +61,9 @@ namespace Sandbox {
             }
             
             virtual void createManual(int _width, int _height, MyGUI::TextureUsage _usage, MyGUI::PixelFormat _format) {
-                
+                if (_format == MyGUI::PixelFormat::R8G8B8A8) {
+                    m_texture = m_resources->CreateTexture(_width, _height, true, 0);
+                }
             }
             
             virtual void loadFromFile(const std::string& _filename) {
@@ -75,22 +79,30 @@ namespace Sandbox {
             }
             
             virtual void* lock(MyGUI::TextureUsage _access) {
-                return 0;
+                if (!m_texture) return 0;
+                m_image = GHL_CreateImage(getWidth(), getHeight(), GHL::IMAGE_FORMAT_RGBA);
+                return m_image->GetDataPtr();
             }
             
             virtual void unlock() {
-                
+                if (m_image && m_texture) {
+                    GHL::Texture* tex = m_texture->Present(m_resources);
+                    tex->SetData(0, 0, m_image,0);
+                    m_image->Release();
+                    m_image = 0;
+                    tex->DiscardInternal();
+                }
             }
             
             virtual bool isLocked() {
-                return false;
+                return m_image!=0;
             }
             
             virtual int getWidth() {
-                return m_texture ? m_texture->GetOriginalWidth() : 0;
+                return m_texture ? m_texture->GetWidth() : 0;
             }
             virtual int getHeight() {
-                return m_texture ? m_texture->GetOriginalHeight() : 0;
+                return m_texture ? m_texture->GetHeight() : 0;
             }
             
             virtual MyGUI::PixelFormat getFormat() {
@@ -111,6 +123,7 @@ namespace Sandbox {
             int m_height;
             TexturePtr  m_texture;
             Resources*  m_resources;
+            GHL::Image* m_image;
         };
         
         

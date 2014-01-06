@@ -278,7 +278,7 @@ FT_BEGIN_HEADER
   /*   You would normally undefine this configuration macro when building  */
   /*   a version of FreeType that doesn't contain a Type 1 or CFF driver.  */
   /*                                                                       */
-#define FT_CONFIG_OPTION_POSTSCRIPT_NAMES
+/* #define FT_CONFIG_OPTION_POSTSCRIPT_NAMES*/
 
 
   /*************************************************************************/
@@ -296,7 +296,7 @@ FT_BEGIN_HEADER
   /*   able to synthesize a Unicode charmap out of the glyphs found in the */
   /*   fonts.                                                              */
   /*                                                                       */
-#define FT_CONFIG_OPTION_ADOBE_GLYPH_LIST
+/* #define FT_CONFIG_OPTION_ADOBE_GLYPH_LIST*/
 
 
   /*************************************************************************/
@@ -310,7 +310,7 @@ FT_BEGIN_HEADER
   /*   Note that the `FOND' resource isn't checked.                        */
   /*                                                                       */
 /* #define FT_CONFIG_OPTION_MAC_FONTS */
-
+#undef FT_CONFIG_OPTION_MAC_FONTS
 
   /*************************************************************************/
   /*                                                                       */
@@ -343,7 +343,7 @@ FT_BEGIN_HEADER
   /* supply font data incrementally as the document is parsed, such        */
   /* as the Ghostscript interpreter for the PostScript language.           */
   /*                                                                       */
-#define FT_CONFIG_OPTION_INCREMENTAL
+/* #define FT_CONFIG_OPTION_INCREMENTAL */
 
 
   /*************************************************************************/
@@ -502,7 +502,7 @@ FT_BEGIN_HEADER
   /*                                                                       */
   /* (By default, the module uses `PSNames' to extract glyph names.)       */
   /*                                                                       */
-#define TT_CONFIG_OPTION_POSTSCRIPT_NAMES
+/* #define TT_CONFIG_OPTION_POSTSCRIPT_NAMES */
 
 
   /*************************************************************************/
@@ -516,7 +516,7 @@ FT_BEGIN_HEADER
   /* Accessing SFNT names is done through the functions declared in        */
   /* `freetype/ftsnames.h'.                                                */
   /*                                                                       */
-#define TT_CONFIG_OPTION_SFNT_NAMES
+/* #define TT_CONFIG_OPTION_SFNT_NAMES */
 
 
   /*************************************************************************/

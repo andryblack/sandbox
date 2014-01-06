@@ -18,31 +18,8 @@ namespace Sandbox {
     namespace luabind {
         
         
-        class WrapperHolder {
-        public:
-            lua_State* GetVM() const {
-                LuaVMHelperPtr helper = m_ref.GetHelper();
-                if (!helper)
-                    return 0;
-                return helper->lua;
-            }
-            void push(lua_State* L) const {
-                m_ref.GetObject(L);
-            }
-            WrapperHolder( ) : m_ref(LuaVMHelperWeakPtr()) {}
-            void set(lua_State* L) {
-                if (!m_ref.Valid()) {
-                    m_ref.SetObject(L);
-                }
-            }
-            void reset() {
-                m_ref.Reset();
-            }
-        private:
-            LuaReference    m_ref;
-        };
         
-        class wrapper : public impl::wrapper_base<WrapperHolder> {
+        class wrapper : public impl::wrapper_base {
         public:
             wrapper() : m_mark_destroy(false) {
             }
@@ -50,22 +27,22 @@ namespace Sandbox {
             void MarkDestroy(){
                 sb_assert(!m_mark_destroy);
                 m_mark_destroy = true;
-                m_self.reset();
+                Reset();
             }
             bool MarkedDestroy() const { return m_mark_destroy; }
-            void SetObject(lua_State* L) {
-                m_self.set(L);
-            }
+            
             void PushObject(lua_State* L) {
-                m_self.push(L);
+                GetObject(L);
             }
             void ResetLuaRef() {
-                m_self.reset();
+                Reset();
             }
             static const meta::type_info* const* get_parents();
+            using impl::wrapper_base::call;
         private:
             bool    m_mark_destroy;
         };
+        typedef sb::shared_ptr<wrapper> wrapper_ptr;
         
         template <class T> struct wrapper_helper {
             static wrapper* get_wrapper_func( lua_State* L, int idx ) {
