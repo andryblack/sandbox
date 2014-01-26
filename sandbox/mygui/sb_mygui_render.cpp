@@ -67,7 +67,7 @@ namespace Sandbox {
             }
             
             virtual void loadFromFile(const std::string& _filename) {
-                m_texture = m_resources->GetTexture(_filename.c_str(), false);
+                m_texture = m_resources->GetTexture(_filename.c_str(), true);
             }
             
             virtual void saveToFile(const std::string& _filename) {
@@ -131,8 +131,8 @@ namespace Sandbox {
             m_view_size.set(m_resources->GetRender()->GetWidth(),
                             m_resources->GetRender()->GetHeight());
             m_rt_info.maximumDepth = 1;
-            m_rt_info.hOffset = 0;//-m_view_size.width/2;
-            m_rt_info.vOffset = 0;//-m_view_size.height/2;
+            m_rt_info.hOffset = 0.5f;//-m_view_size.width/2;
+            m_rt_info.vOffset = 0.5f;//-m_view_size.height/2;
             m_rt_info.aspectCoef = float(m_view_size.height) / float(m_view_size.width);
             m_rt_info.pixScaleX = 0.5f;//0.5f;
             m_rt_info.pixScaleY = -0.5f;//-0.5f;

@@ -74,6 +74,9 @@ namespace Sandbox {
         static inline property_holder_wo<T,void(T::*)(const U&)> property_wo( const char* name,void(T::*setter)(const U&)) {
             return property_holder_wo<T,void(T::*)(const U&)>(name,setter);
         }
+        static inline property_holder_wo<void,int(*)(lua_State*)> property_wo( const char* name,int(*func)(lua_State*)) {
+            return property_holder_wo<void,int(*)(lua_State*)>(name,func);
+        }
 
         
         template <class T,class Getter,class Setter> struct property_holder_rw {

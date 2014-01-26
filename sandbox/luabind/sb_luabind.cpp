@@ -35,9 +35,6 @@ namespace Sandbox {
             (*helper)->lua = L;
             lua_setglobal(L, helper_name);
             
-            lua_pushcfunction(L, &lua_class_func);
-            lua_setglobal(L, "class");
-            
             LUA_CHECK_STACK(0)
             
             lua_create_metatable(L);

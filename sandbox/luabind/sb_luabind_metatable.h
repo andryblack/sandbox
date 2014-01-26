@@ -27,7 +27,6 @@ namespace Sandbox {
         
         void lua_get_create_child_table( lua_State* L, const char*& path);
         void lua_set_value( lua_State* L, const char* path );
-        int lua_class_func( lua_State* L );
     }
 }
 

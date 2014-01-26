@@ -17,71 +17,58 @@
 namespace Sandbox {
     namespace luabind {
         
-        
-        
         class wrapper : public impl::wrapper_base {
         public:
-            wrapper() : m_mark_destroy(false) {
-            }
-            virtual ~wrapper() {}
-            void MarkDestroy(){
-                sb_assert(!m_mark_destroy);
-                m_mark_destroy = true;
-                Reset();
-            }
-            bool MarkedDestroy() const { return m_mark_destroy; }
-            
-            void PushObject(lua_State* L) {
-                GetObject(L);
-            }
-            void ResetLuaRef() {
-                Reset();
-            }
-            static const meta::type_info* const* get_parents();
             using impl::wrapper_base::call;
+            using impl::wrapper_base::call_self;
+            template <class T>
+            T get(const char* name) {
+                T res;
+                lua_State* L = GetVM();
+				GetObject(L);
+				lua_pushstring(L,name);
+				lua_gettable(L,-2);
+                res = stack<T>::get(L,-1);
+                lua_pop(L, 2);
+                return res;
+            }
+            template <class T>
+            T get(const char* name, T def) {
+                T res = def;
+                lua_State* L = GetVM();
+				GetObject(L);
+				lua_pushstring(L,name);
+				lua_gettable(L,-2);
+                res = stack<T>::get(L,-1);
+                lua_pop(L, 2);
+                return res;
+            }
         private:
-            bool    m_mark_destroy;
         };
         typedef sb::shared_ptr<wrapper> wrapper_ptr;
         
-        template <class T> struct wrapper_helper {
-            static wrapper* get_wrapper_func( lua_State* L, int idx ) {
-                return stack<T*>::get(L,idx);
+        
+        template <>
+        struct stack<wrapper_ptr> {
+            static void push( lua_State* L, const wrapper_ptr& val ) {
+                if (val && val->Valid()) {
+                    val->GetObject(L);
+                } else {
+                    lua_pushnil(L);
+                }
+            }
+            static wrapper_ptr get( lua_State* L, int idx ) {
+                if (lua_istable(L,idx)) {
+                    wrapper* w = new wrapper();
+                    lua_pushvalue(L, idx);
+                    w->SetObject(L);
+                    return wrapper_ptr(w);
+                }
+                return wrapper_ptr();
             }
         };
-        
-#define SB_META_DECLARE_BINDING_OBJECT_WRAPPER_X(Klass,Parent,Line) \
-        namespace Sandbox { namespace meta { \
-            namespace Line {\
-                static const type_info_parent parents[] = { \
-                    { \
-                        type<Parent>::private_info, \
-                        &cast_helper<Klass,Parent>::raw, \
-                        &cast_helper<Klass,Parent>::shared \
-                    }, \
-                    { \
-                        type<Sandbox::luabind::wrapper>::info(), \
-                        &cast_helper<Klass,Sandbox::luabind::wrapper>::raw, \
-                        &cast_helper<Klass,Sandbox::luabind::wrapper>::shared \
-                    }, \
-                    { 0, 0, 0 } \
-                };\
-                static const type_info ti = { \
-                    #Klass, \
-                    sizeof(Klass), \
-                    parents \
-                }; \
-            } \
-            template <> const type_info* type<Klass>::private_info = &Line::ti; \
-        }} 
-#define SB_META_DECLARE_BINDING_OBJECT_WRAPPER(Klass,Parent) \
-        SB_META_DECLARE_BINDING_OBJECT_WRAPPER_X(Klass,Parent,ANONYMOUS_VARIABLE(private_))\
-        const Sandbox::meta::type_info* Klass::get_static_type_info() {\
-            return Sandbox::meta::type<Klass>::info(); \
-        }\
-        const Sandbox::meta::type_info* Klass::get_type_info() const { \
-            return get_static_type_info(); \
-        }
+        template <>
+        struct stack<const wrapper_ptr&> : stack<wrapper_ptr> {};
     }
 }
 

@@ -29,7 +29,7 @@ namespace Sandbox {
         struct type_info {
             const char* const name;
             size_t size;
-            const type_info_parent* const parents;
+            type_info_parent parent;
         };
         
         class object {
@@ -88,7 +88,7 @@ namespace Sandbox {
         inline bool is_convertible( const type_info* from, const type_info* to ) {
             do {
                 if ( from == to ) return true;
-                from = from->parents[0].info;
+                from = from->parent.info;
             } while (from && to);
             return false;
         }
@@ -126,53 +126,24 @@ namespace Sandbox {
 #define SB_META_DECLARE_KLASS_X(Klass,Parent,Line,KlassName)  \
         namespace Sandbox { namespace meta { \
             namespace Line{ \
-                static const type_info_parent parents[] = { \
+                static const type_info ti = { \
+                    KlassName, \
+                    sizeof(Klass), \
                     { \
                         type<Parent>::private_info, \
                         &cast_helper<Klass,Parent>::raw, \
                         &cast_helper<Klass,Parent>::shared \
-                    }, \
-                    { 0, 0, 0 } \
-                };\
-                static const type_info ti = { \
-                    KlassName, \
-                    sizeof(Klass), \
-                    parents \
+                    } \
                 }; \
             } \
             template <> const type_info* type<Klass>::private_info = &Line::ti; \
         }}
 
-#define SB_META_DECLARE_KLASS_X2(Klass,Parent1,Parent2,Line,KlassName)  \
-    namespace Sandbox { namespace meta { \
-        namespace Line{ \
-            static const type_info_parent parents[] = { \
-                { \
-                    type<Parent1>::private_info, \
-                    &cast_helper<Klass,Parent1>::raw, \
-                    &cast_helper<Klass,Parent1>::shared \
-                }, \
-                { \
-                    type<Parent2>::private_info, \
-                    &cast_helper<Klass,Parent2>::raw, \
-                    &cast_helper<Klass,Parent2>::shared \
-                }, \
-                { 0, 0, 0 } \
-            };\
-            static const type_info ti = { \
-                KlassName, \
-                sizeof(Klass), \
-                parents \
-            }; \
-        } \
-        template <> const type_info* type<Klass>::private_info = &Line::ti; \
-    }}
 
 #define CONCATENATE_DIRECT(s1, s2) s1##s2
 #define CONCATENATE(s1, s2) CONCATENATE_DIRECT(s1, s2)
 #define ANONYMOUS_VARIABLE(str) CONCATENATE(str, CONCATENATE(__LINE__,__COUNTER__))
 #define SB_META_DECLARE_KLASS(Type,Parent) SB_META_DECLARE_KLASS_X(Type,Parent,ANONYMOUS_VARIABLE(private_),#Type)
-#define SB_META_DECLARE_KLASS2(Type,Parent1,Parent2) SB_META_DECLARE_KLASS_X2(Type,Parent1,Parent2,ANONYMOUS_VARIABLE(private_),#Type)
 
 #define SB_META_DECLARE_NAMED_KLASS(Type,Name) SB_META_DECLARE_KLASS_X(Type,void,ANONYMOUS_VARIABLE(private_),Name)
 #define SB_META_DECLARE_OBJECT_IMPL(Klass)\
@@ -237,9 +208,8 @@ namespace Sandbox {
             void* vo = o;
             while (ti) {
                 if (ti == rt) return static_cast<T*>(vo);
-                /// handle only 0 parent
-                ti = ti->parents[0].info;
-                vo = ti->parents[0].downcast(vo);
+                ti = ti->parent.info;
+                vo = ti->parent.downcast(vo);
             }
             return 0;
         }

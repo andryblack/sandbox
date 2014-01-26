@@ -25,6 +25,7 @@
 #include "MyGUI_ScrollBar.h"
 #include "MyGUI_PopupMenu.h"
 #include "MyGUI_MenuItem.h"
+#include "MyGUI_Window.h"
 
 #include "MyGUI_IResource.h"
 #include "MyGUI_IPointer.h"
@@ -62,6 +63,7 @@
 
 #include "MyGUI_CommonStateInfo.h"
 
+
 namespace Sandbox {
     
     namespace luabind {
@@ -78,6 +80,39 @@ namespace Sandbox {
         
         template <>
         struct stack<const MyGUI::UString&> : stack<MyGUI::UString> {};
+        
+        template <>
+        struct stack<MyGUI::Any> {
+            static void push( lua_State* L, const MyGUI::Any& val ) {
+                if (val.getType()==typeid(int))
+                    stack<int>::push(L, *val.castType<int>());
+                else if (val.getType()==typeid(float))
+                    stack<float>::push(L, *val.castType<float>());
+                else if (val.getType()==typeid(double))
+                    stack<float>::push(L, *val.castType<double>());
+                else if (val.getType()==typeid(std::string))
+                    stack<std::string>::push(L, *val.castType<std::string>());
+                else if (val.getType()==typeid(bool))
+                    stack<bool>::push(L, *val.castType<bool>());
+                else
+                    lua_pushnil(L);
+            }
+            static MyGUI::Any get( lua_State* L, int idx ) {
+                int type = lua_type(L, idx);
+                switch (type){
+                    case LUA_TBOOLEAN:
+                        return MyGUI::Any(stack<bool>::get(L, idx));
+                    case LUA_TNUMBER:
+                        return MyGUI::Any(stack<double>::get(L, idx));
+                    case LUA_TSTRING:
+                        return MyGUI::Any(stack<std::string>::get(L, idx));
+                }
+                return MyGUI::Any(MyGUI::Any::Null);
+            }
+        };
+        
+        template <>
+        struct stack<const MyGUI::Any&> : stack<MyGUI::Any> {};
         
         
         template <>
@@ -103,7 +138,7 @@ private:
 public:
     virtual bool isType( const std::type_info& _type) { return false; }
     virtual void invoke( A1 a1, A2 a2, A3 a3, A4 a4 ) {
-        m_function.fcall( a1, a2, a3, a4 );
+        m_function.call( a1, a2, a3, a4 );
     }
     virtual bool compare(  MyGUI::delegates::IDelegate4<A1,A2,A3,A4>* _delegate) const {
         return _delegate == this;
@@ -116,6 +151,87 @@ public:
         m_function.SetObject(L);
     }
 };
+template <typename A1,typename A2,typename A3>
+class LuaDelegate3 : public MyGUI::delegates::IDelegate3<A1,A2,A3>, public MyGUI::delegates::IDelegateUnlink {
+private:
+    Sandbox::luabind::function  m_function;
+public:
+    virtual bool isType( const std::type_info& _type) { return false; }
+    virtual void invoke( A1 a1, A2 a2, A3 a3) {
+        m_function.call( a1, a2, a3 );
+    }
+    virtual bool compare(  MyGUI::delegates::IDelegate3<A1,A2,A3>* _delegate) const {
+        return _delegate == this;
+    }
+    virtual bool compare( MyGUI::delegates::IDelegateUnlink* _unlink) const
+    {
+        return _unlink == this;
+    }
+    void SetObject(lua_State* L) {
+        m_function.SetObject(L);
+    }
+};
+template <typename A1,typename A2,typename A3>
+class LuaDelegate3<A1,A2&,A3> : public MyGUI::delegates::IDelegate3<A1,A2&,A3>, public MyGUI::delegates::IDelegateUnlink {
+private:
+    Sandbox::luabind::function  m_function;
+public:
+    virtual bool isType( const std::type_info& _type) { return false; }
+    virtual void invoke( A1 a1, A2& a2, A3 a3) {
+        a2 = m_function.call<A2>( a1, a3 );
+    }
+    virtual bool compare(  MyGUI::delegates::IDelegate3<A1,A2&,A3>* _delegate) const {
+        return _delegate == this;
+    }
+    virtual bool compare( MyGUI::delegates::IDelegateUnlink* _unlink) const
+    {
+        return _unlink == this;
+    }
+    void SetObject(lua_State* L) {
+        m_function.SetObject(L);
+    }
+};
+template <typename A1,typename A2>
+class LuaDelegate2 : public MyGUI::delegates::IDelegate2<A1,A2>, public MyGUI::delegates::IDelegateUnlink {
+private:
+    Sandbox::luabind::function  m_function;
+public:
+    virtual bool isType( const std::type_info& _type) { return false; }
+    virtual void invoke( A1 a1, A2 a2 ) {
+        m_function.call( a1, a2 );
+    }
+    virtual bool compare(  MyGUI::delegates::IDelegate2<A1,A2>* _delegate) const {
+        return _delegate == this;
+    }
+    virtual bool compare( MyGUI::delegates::IDelegateUnlink* _unlink) const
+    {
+        return _unlink == this;
+    }
+    void SetObject(lua_State* L) {
+        m_function.SetObject(L);
+    }
+};
+template <typename A1>
+class LuaDelegate1 : public MyGUI::delegates::IDelegate1<A1>, public MyGUI::delegates::IDelegateUnlink {
+private:
+    Sandbox::luabind::function  m_function;
+public:
+    virtual bool isType( const std::type_info& _type) { return false; }
+    virtual void invoke( A1 a1 ) {
+        m_function.call( a1 );
+    }
+    virtual bool compare(  MyGUI::delegates::IDelegate1<A1>* _delegate) const {
+        return _delegate == this;
+    }
+    virtual bool compare( MyGUI::delegates::IDelegateUnlink* _unlink) const
+    {
+        return _unlink == this;
+    }
+    void SetObject(lua_State* L) {
+        m_function.SetObject(L);
+    }
+};
+
 
 template <class O,class T,class U, U T::*>
 struct delegate_bind;
@@ -134,10 +250,69 @@ struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate4<A1, A2, A3, A4>, obj 
         return 0;
     }
 };
+template <class O,class T,class A1,class A2,MyGUI::delegates::CMultiDelegate2<A1, A2> T::*obj>
+struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate2<A1, A2>, obj > {
+    typedef LuaDelegate2<A1,A2> LuaDelegate;
+    typedef MyGUI::delegates::CMultiDelegate2<A1, A2> MultiDelegate;
+    static int lua_func( lua_State* L ) {
+        O* t = Sandbox::luabind::stack<O*>::get(L,1);
+        LuaDelegate* delegate = new LuaDelegate();
+        lua_pushvalue(L, 2);
+        delegate->SetObject(L);
+        MultiDelegate& md(t->*obj);
+        md += delegate;
+        return 0;
+    }
+};
+template <class O,class T,class A1,MyGUI::delegates::CMultiDelegate1<A1> T::*obj>
+struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate1<A1>, obj > {
+    typedef LuaDelegate1<A1> LuaDelegate;
+    typedef MyGUI::delegates::CMultiDelegate1<A1> MultiDelegate;
+    static int lua_func( lua_State* L ) {
+        O* t = Sandbox::luabind::stack<O*>::get(L,1);
+        LuaDelegate* delegate = new LuaDelegate();
+        lua_pushvalue(L, 2);
+        delegate->SetObject(L);
+        MultiDelegate& md(t->*obj);
+        md += delegate;
+        return 0;
+    }
+};
+template <class O,class T,class A1,class A2,MyGUI::delegates::CDelegate2<A1, A2> T::*obj>
+struct delegate_bind<O,T,MyGUI::delegates::CDelegate2<A1, A2>, obj > {
+    typedef LuaDelegate2<A1,A2> LuaDelegate;
+    typedef MyGUI::delegates::CDelegate2<A1, A2> MultiDelegate;
+    static int lua_func( lua_State* L ) {
+        O* t = Sandbox::luabind::stack<O*>::get(L,1);
+        LuaDelegate* delegate = new LuaDelegate();
+        lua_pushvalue(L, 2);
+        delegate->SetObject(L);
+        MultiDelegate& md(t->*obj);
+        md = delegate;
+        return 0;
+    }
+};
+template <class O,class T,class A1,class A2,class A3,MyGUI::delegates::CDelegate3<A1, A2, A3> T::*obj>
+struct delegate_bind<O,T,MyGUI::delegates::CDelegate3<A1, A2, A3>, obj > {
+    typedef LuaDelegate3<A1,A2,A3> LuaDelegate;
+    typedef MyGUI::delegates::CDelegate3<A1, A2, A3> MultiDelegate;
+    static int lua_func( lua_State* L ) {
+        O* t = Sandbox::luabind::stack<O*>::get(L,1);
+        LuaDelegate* delegate = new LuaDelegate();
+        lua_pushvalue(L, 2);
+        delegate->SetObject(L);
+        MultiDelegate& md(t->*obj);
+        md = delegate;
+        return 0;
+    }
+};
+
+
 
 
 SB_META_DECLARE_KLASS(MyGUI::Align, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Align)
+SB_META_CONSTRUCTOR(())
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::IntPoint, void)
@@ -156,6 +331,7 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::IntCoord, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::IntCoord)
+SB_META_CONSTRUCTOR((int,int,int,int))
 SB_META_PROPERTY(left)
 SB_META_PROPERTY(top)
 SB_META_PROPERTY(width)
@@ -172,6 +348,23 @@ SB_META_PROPERTY(left)
 SB_META_PROPERTY(top)
 SB_META_PROPERTY(right)
 SB_META_PROPERTY(bottom)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(MyGUI::Colour, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::Colour)
+SB_META_CONSTRUCTOR((float,float,float,float))
+SB_META_PROPERTY(red)
+SB_META_PROPERTY(green)
+SB_META_PROPERTY(blue)
+SB_META_PROPERTY(alpha)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(MyGUI::IBDrawItemInfo, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::IBDrawItemInfo)
+SB_META_PROPERTY(index)
+SB_META_PROPERTY(update)
+SB_META_PROPERTY(select)
+SB_META_PROPERTY(active)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::ICroppedRectangle, void)
@@ -213,6 +406,13 @@ SB_META_PROPERTY_RW(InheritsAlpha, getInheritsAlpha, setInheritsAlpha)
 SB_META_PROPERTY_RW(enabled, getEnabled, setEnabled)
 SB_META_PROPERTY_RO(parent, getParent)
 SB_META_PROPERTY_RO(clientWidget, getClientWidget)
+SB_META_PROPERTY_WO(colour, setColour)
+SB_META_PROPERTY_RW(alpha, getAlpha,setAlpha)
+
+bind(method("eventMouseButtonClick", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetVoid,
+            &MyGUI::WidgetInput::eventMouseButtonClick>::lua_func));
 
 bind(method("eventMouseButtonPressed", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
@@ -227,6 +427,9 @@ bind(method("eventMouseButtonReleased", delegate_bind<MyGUI::Widget,
 SB_META_METHOD(findWidget)
 SB_META_METHOD(setProperty)
 SB_META_METHOD(changeWidgetSkin)
+
+
+bind(method("createWidget", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(const std::string&, const std::string&, const MyGUI::IntCoord&, MyGUI::Align, const std::string& _name)>(&MyGUI::Widget::createWidgetT)));
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ISubWidget, MyGUI::ICroppedRectangle)
@@ -252,6 +455,11 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_OBJECT(MyGUI::MenuItem, MyGUI::Button)
 
 SB_META_DECLARE_OBJECT(MyGUI::Window, MyGUI::TextBox)
+SB_META_BEGIN_KLASS_BIND(MyGUI::Window)
+SB_META_PROPERTY_RW("movable", getMovable, setMovable)
+SB_META_METHOD(setVisibleSmooth)
+SB_META_METHOD(destroySmooth)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ScrollBar, MyGUI::Widget)
 
@@ -270,8 +478,24 @@ SB_META_DECLARE_OBJECT(MyGUI::MenuBar, MyGUI::MenuControl)
 SB_META_DECLARE_OBJECT(MyGUI::ListBox, MyGUI::Widget)
 
 SB_META_DECLARE_OBJECT(MyGUI::DDContainer, MyGUI::Widget)
+SB_META_BEGIN_KLASS_BIND(MyGUI::DDContainer)
+SB_META_PROPERTY_RW("needDragDrop", getNeedDragDrop, setNeedDragDrop)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ItemBox, MyGUI::DDContainer)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ItemBox)
+bind(method("requestCreateWidgetItem", delegate_bind<MyGUI::ItemBox,
+            MyGUI::ItemBox,
+            MyGUI::EventHandle_ItemBoxPtrWidgetPtr,
+            &MyGUI::ItemBox::requestCreateWidgetItem>::lua_func));
+bind(method("requestCoordItem", delegate_bind<MyGUI::ItemBox,
+            MyGUI::ItemBox,
+            MyGUI::EventHandle_ItemBoxPtrIntCoordRefBool,
+            &MyGUI::ItemBox::requestCoordItem>::lua_func));
+
+SB_META_METHOD(addItem)
+SB_META_METHOD(getIndexByWidget)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::Canvas, MyGUI::Widget)
 
@@ -359,6 +583,7 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_KLASS(MyGUI::WidgetManager, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::WidgetManager)
 SB_META_STATIC_METHOD(getInstancePtr)
+SB_META_METHOD(destroyWidget)
 SB_META_END_KLASS_BIND()
 
 
@@ -384,6 +609,8 @@ SB_META_END_KLASS_BIND()
 namespace Sandbox {
     namespace mygui {
         
+        void register_ScrollList(lua_State* L);
+        
         void register_mygui( lua_State* lua ) {
             luabind::RawClass<MyGUI::MouseButton>(lua);
             
@@ -392,6 +619,8 @@ namespace Sandbox {
             luabind::RawClass<MyGUI::IntSize>(lua);
             luabind::RawClass<MyGUI::IntCoord>(lua);
             luabind::RawClass<MyGUI::IntRect>(lua);
+            luabind::RawClass<MyGUI::Colour>(lua);
+            luabind::RawClass<MyGUI::IBDrawItemInfo>(lua);
             
             luabind::ExternClass<MyGUI::ICroppedRectangle>(lua);
             luabind::ExternClass<MyGUI::Widget>(lua);
@@ -403,6 +632,11 @@ namespace Sandbox {
 
             luabind::ExternClass<MyGUI::TextBox>(lua);
             luabind::ExternClass<MyGUI::Button>(lua);
+            luabind::ExternClass<MyGUI::Window>(lua);
+            luabind::ExternClass<MyGUI::DDContainer>(lua);
+            luabind::ExternClass<MyGUI::ItemBox>(lua);
+            
+            register_ScrollList(lua);
         }
         
         void setup_singletons( LuaVM* lua ) {

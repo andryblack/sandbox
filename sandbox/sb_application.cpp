@@ -28,6 +28,8 @@
 #include "mygui/sb_mygui_keys.h"
 #include "mygui/sb_mygui_data_manager.h"
 #include "mygui/sb_mygui_render.h"
+#include "mygui/sb_mygui_skin.h"
+#include "mygui/widgets/sb_mygui_scroll_list.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -96,6 +98,8 @@ namespace Sandbox {
 		delete m_lua;
     	delete m_sound_mgr;
         if (m_gui) {
+            mygui::unregister_skin();
+            mygui::unregister_widgets();
             m_gui->shutdown();
         }
         delete m_gui;
@@ -206,6 +210,8 @@ namespace Sandbox {
         
         m_gui = new MyGUI::Gui();
         m_gui->initialise("");
+        mygui::register_skin();
+        mygui::register_widgets();
         mygui::setup_singletons(m_lua);
         
 		if (!LoadResources(*m_resources))

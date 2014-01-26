@@ -42,15 +42,10 @@ namespace Sandbox {
             enum {
                 raw_data,
                 raw_ptr,
-                shared_ptr,
-                wrapper_ptr
+                shared_ptr
             } type;
             bool    is_const;
             void    (*destructor)(data_holder* data);
-        };
-        struct wrapper_holder : data_holder {
-            bool (*lock)(wrapper_holder*,lua_State*,int idx);
-            void (*unlock)(wrapper_holder*);
         };
         
         template <class T>
@@ -65,18 +60,14 @@ namespace Sandbox {
         
         void lua_call_method(lua_State* L, int args, int res, const char* name);
         
-        class wrapper;
-        void lua_push_wrapper_value(lua_State* L,wrapper* wpr);
         
         template <class T>
         inline T* get_ptr( const meta::type_info* from, void* data ) {
             const meta::type_info* to = meta::type<T>::info();
             if ( from == to ) return reinterpret_cast<T*>(data);
-            size_t pi = 0;
-            while (from->parents && from->parents[pi].info) {
-                T* r = get_ptr<T>(from->parents[pi].info, from->parents[pi].downcast(data) );
+            if (from->parent.info) {
+                T* r = get_ptr<T>(from->parent.info, from->parent.downcast(data) );
                 if ( r ) return r;
-                pi++;
             }
             return 0;
         }
@@ -88,18 +79,15 @@ namespace Sandbox {
                 return *reinterpret_cast<sb::shared_ptr<T>*>(data);
             }
             char buf[sizeof(sb::shared_ptr<T>)];
-            size_t pi = 0;
-            while (from->parents && 
-                   from->parents[pi].info) {
-                void (*destruct)(void*) = from->parents[pi].downcast_shared( data, buf );
+            if (from->parent.info) {
+                void (*destruct)(void*) = from->parent.downcast_shared( data, buf );
                 if ( destruct ) {
-                    sb::shared_ptr<T> res = get_shared_ptr<T>(from->parents[pi].info, buf);
+                    sb::shared_ptr<T> res = get_shared_ptr<T>(from->parent.info, buf);
                     destruct(buf);
                     if ( res ) {
                         return res;
                     }
                 }
-                pi++;
             }
             return sb::shared_ptr<T>();
         }
@@ -117,13 +105,6 @@ namespace Sandbox {
                 sb::shared_ptr<T> ptr = get_shared_ptr<T>(info,holder+1);
                 if (ptr)
                     res = ptr.get();
-            } else if ( holder->type == data_holder::wrapper_ptr ) {
-                wrapper_holder* wrapper = reinterpret_cast<wrapper_holder*>(holder);
-                bool lock = wrapper->lock(wrapper,L,idx);
-                sb::shared_ptr<T> ptr = get_shared_ptr<T>(info,wrapper+1);
-                if (lock) wrapper->unlock(wrapper);
-                if (ptr)
-                    res = ptr.get();
             } else {
                 sb_assert(false);
             }
@@ -131,29 +112,7 @@ namespace Sandbox {
         }
         
 
-        
-        template<bool has>
-        class has_meta_object_base_hpr {
-        };
-        template <class T>
-        inline bool try_to_push_lua_object_impl( lua_State*,const T*,const has_meta_object_base_hpr<false>* ) {
-            return false;
-        }
-        template <class T>
-        inline bool try_to_push_lua_object_impl( lua_State* L,const T* v,const has_meta_object_base_hpr<true>* ) {
-            wrapper* w = get_ptr<wrapper>(v->get_type_info(), const_cast<T*>(v));
-            if ( w ) {
-                lua_push_wrapper_value(L,w);
-                return true;
-            }
-            return false;
-        }
-        template <class T>
-        inline bool try_to_push_lua_object( lua_State* L, const T* val, 
-                                    const has_meta_object_base_hpr<meta::implementation::has_get_type_info<T>::result>* v=0 ) {
-            return try_to_push_lua_object_impl(L,val,v);
-        }
-        
+                
         template <class T,bool IsEnum> struct stack_help{
             static void push( lua_State* L, const T& val ) {
                 {
@@ -185,15 +144,6 @@ namespace Sandbox {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
                     return get_impl(L, holder,idx);
-                } else if ( lua_istable(L, idx) ) {
-                    lua_pushliteral(L, "__native");
-                    lua_rawget(L, idx);
-                    if (lua_isuserdata(L, -1)) {
-                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
-                        lua_pop(L, 1);
-                        return get_impl(L, holder,idx);
-                    }
-                    lua_pop(L, 1);
                 }
                 lua_argerror( L, idx, meta::type<T>::info()->name, 0);
                 return *reinterpret_cast<T*>(0);
@@ -234,15 +184,6 @@ namespace Sandbox {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
                     return get_impl(L, holder, idx);
-                } else if ( lua_istable(L, idx) ) {
-                    lua_pushliteral(L, "__native");
-                    lua_rawget(L, idx);
-                    if (lua_isuserdata(L, -1)) {
-                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
-                        lua_pop(L, 1);
-                        return get_impl(L, holder, idx);
-                    }
-                    lua_pop(L, 1);
                 }
                 lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
                 return *reinterpret_cast<T*>(0);
@@ -253,8 +194,6 @@ namespace Sandbox {
         struct stack<T*> {
             static void push( lua_State* L, T* val ) {
                 if ( val ) {
-                    if (try_to_push_lua_object(L,val))
-                        return;
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
                                                                                          sizeof(data_holder)+
                                                                                          sizeof(T*)));
@@ -285,15 +224,6 @@ namespace Sandbox {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
                     return get_impl(L, holder, idx);
-                } else if ( lua_istable(L, idx) ) {
-                    lua_pushliteral(L, "__native");
-                    lua_rawget(L, idx);
-                    if (lua_isuserdata(L, -1)) {
-                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
-                        lua_pop(L, 1);
-                        return get_impl(L, holder, idx);
-                    }
-                    lua_pop(L, 1);
                 } else if ( lua_isnil(L, idx) ) {
                     return reinterpret_cast<T*>(0);
                 }
@@ -306,9 +236,7 @@ namespace Sandbox {
         struct stack<const T*> {
             static void push( lua_State* L, const T* val ) {
                 if ( val ) {
-                    if (try_to_push_lua_object(L,val))
-                        return;
-                    data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
+                    data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L,
                                                                                          sizeof(data_holder)+
                                                                                          sizeof(T*)));
                     holder->type = data_holder::raw_ptr;
@@ -333,15 +261,6 @@ namespace Sandbox {
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
                     return get_impl(L, holder, idx);                    
-                } else if ( lua_istable(L, idx) ) {
-                    lua_pushliteral(L, "__native");
-                    lua_rawget(L, idx);
-                    if (lua_isuserdata(L, -1)) {
-                        data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
-                        lua_pop(L, 1);
-                        return get_impl(L, holder, idx);
-                    }
-                    lua_pop(L, 1);
                 } else if ( lua_isnil(L, idx) ) {
                     return reinterpret_cast<T*>(0);
                 }
@@ -356,8 +275,6 @@ namespace Sandbox {
                 lua_pushnil(L);
                 return;
             }
-            if (try_to_push_lua_object(L,val.get()))
-                return;
             data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L,
                                                                                  sizeof(data_holder)+
                                                                                  sizeof(sb::shared_ptr<T>)));
@@ -374,12 +291,6 @@ namespace Sandbox {
             if ( holder->type==data_holder::shared_ptr ) {
                 sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);
                 return ptr;
-            } else if ( holder->type==data_holder::wrapper_ptr ) {
-                wrapper_holder* wrapper = reinterpret_cast<wrapper_holder*>(holder);
-                bool lock = wrapper->lock(wrapper,L,idx);
-                sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,wrapper+1);
-                if (lock) wrapper->unlock(wrapper);
-                return ptr;
             }
             lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
             return sb::shared_ptr<T>();
@@ -390,15 +301,6 @@ namespace Sandbox {
             if ( lua_isuserdata(L, idx) ) {
                 data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
                 return stack_get_impl_help<T>(L, holder, idx);
-            } else if ( lua_istable(L, idx) ) {
-                lua_pushliteral(L, "__native");
-                lua_rawget(L, idx);
-                if (lua_isuserdata(L, -1)) {
-                    data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, -1));
-                    lua_pop(L, 1);
-                    return stack_get_impl_help<T>(L, holder, idx);
-                }
-                lua_pop(L, 1);
             } else if ( lua_isnil(L, idx) ) {
                 return sb::shared_ptr<T>();
             }
@@ -534,6 +436,7 @@ namespace Sandbox {
         LUABIND_DECLARE_RAW_STACK_TYPE(short)
         LUABIND_DECLARE_RAW_STACK_TYPE(int)
         LUABIND_DECLARE_RAW_STACK_TYPE(float)
+        LUABIND_DECLARE_RAW_STACK_TYPE(double)
         LUABIND_DECLARE_RAW_STACK_TYPE(unsigned char)
         LUABIND_DECLARE_RAW_STACK_TYPE(unsigned long)
         LUABIND_DECLARE_RAW_STACK_TYPE(unsigned short)

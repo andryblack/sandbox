@@ -13,12 +13,5 @@ SB_META_DECLARE_KLASS(Sandbox::luabind::wrapper, void);
 namespace Sandbox {
     namespace luabind {
      
-        const meta::type_info* const* wrapper::get_parents() {
-            static const meta::type_info* const p[] = {
-                meta::type<wrapper>::info(),
-                0
-            };
-            return p;
-        }
     }
 }

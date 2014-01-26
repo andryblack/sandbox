@@ -109,12 +109,6 @@ namespace Sandbox {
         
                 
                 
-        
-        
-        void lua_push_wrapper_value(lua_State* L,wrapper* wpr) {
-            wpr->PushObject(L);
-        }
-        
         void stack<char>::push( lua_State* L, char val ) {
             lua_pushlstring(L, &val, 1);
         }
@@ -167,6 +161,14 @@ namespace Sandbox {
         
         float stack<float>::get( lua_State* L, int idx ) {
             return float(lua_tonumber(L, idx));
+        }
+        
+        void stack<double>::push( lua_State* L, double val) {
+            lua_pushnumber(L, val);
+        }
+        
+        double stack<double>::get( lua_State* L, int idx ) {
+            return lua_tonumber(L, idx);
         }
         
         void stack<unsigned char>::push( lua_State* L, unsigned char val) {
