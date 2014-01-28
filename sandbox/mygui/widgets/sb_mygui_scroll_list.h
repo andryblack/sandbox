@@ -73,7 +73,6 @@ namespace Sandbox {
             virtual void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id);
             
             float       m_move_speed;
-            float       m_target_speed;
             float       m_move_accum;
             
             int         m_scroll_target;
@@ -95,6 +94,7 @@ namespace Sandbox {
             int m_last_scroll;
             
             MyGUI::Timer    m_scroll_timer;
+            void normalizeScrollTarget();
         };
         
         void register_widgets();

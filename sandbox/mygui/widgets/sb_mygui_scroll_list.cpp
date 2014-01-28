@@ -26,10 +26,8 @@ namespace Sandbox {
     namespace mygui {
         
         const float min_speed = 5.0f;
-        const float acceleration_up = 300.0f;
-        const float acceleration_down = 100.0f;
         const int min_scroll_distance = 10;
-        const float max_speed = 1024.0f;
+        const float max_speed = 2048.0f*5;
         
         class LuaScrollListDelegate : public ScrollListDelegate {
         private:
@@ -234,28 +232,29 @@ namespace Sandbox {
             return getClientWidget()->getSize().width;
         }
         
-        void ScrollList::moveNext() {
-            m_scroll_target+=getItemSize();
+        void ScrollList::normalizeScrollTarget() {
             int max_scroll = getScrollContentSize() - getScrollAreaSize();
             if (m_scroll_target>max_scroll)
                 m_scroll_target = max_scroll;
+            if (m_scroll_target<0) {
+                m_scroll_target = 0;
+            }
+        }
+        
+        void ScrollList::moveNext() {
+            m_scroll_target+=getItemSize();
+            normalizeScrollTarget();
             if (m_state==state_none || m_state == state_free_scroll) {
-                if (m_move_speed<getItemSize())
-                    m_move_speed=getItemSize();
-                m_target_speed += getItemSize() * 2.0f;
+                m_move_speed += getItemSize() * 2.0f;
                 m_state = state_free_scroll;
             }
         }
         
         void ScrollList::movePrev() {
             m_scroll_target-=getItemSize();
-            if (m_scroll_target<0) {
-                m_scroll_target = 0;
-            }
+            normalizeScrollTarget();
             if (m_state==state_none || m_state == state_free_scroll) {
-                if (m_move_speed<getItemSize())
-                    m_move_speed=getItemSize();
-                m_target_speed += getItemSize() * 2.0f;
+                m_move_speed += getItemSize() * 2.0f;
                 m_state = state_free_scroll;
             }
         }
@@ -267,36 +266,16 @@ namespace Sandbox {
             int crnt_pos = getScroll();
             if (crnt_pos!=m_scroll_target) {
                 
-                if (fabs(m_scroll_target-crnt_pos)<getItemSize()*2) {
-                    m_target_speed = min_speed;
-                }
-                if (m_target_speed > max_speed) {
-                    m_target_speed = max_speed;
-                }
-                if (m_target_speed < min_speed) {
-                    m_target_speed = min_speed;
-                }
-                
-                if (m_move_speed<min_speed)
-                    m_move_speed = min_speed;
-                
-                if (m_move_speed < m_target_speed) {
-                    m_move_speed += acceleration_up * dt;
-                    if (m_move_speed > m_target_speed) {
-                        m_move_speed = m_target_speed;
-                    }
-                } else if (m_move_speed > m_target_speed) {
-                    m_move_speed -= acceleration_down * dt;
-                    if (m_move_speed < m_target_speed) {
-                        m_move_speed = m_target_speed;
-                    }
-                }
-                
-                if (m_move_speed<min_speed)
-                    m_move_speed = min_speed;
                 
                 
                 float speed = m_move_speed;
+                
+                float dist = fabs(m_scroll_target-crnt_pos);
+                speed = dist * 5;
+                if (speed<min_speed)
+                    speed=min_speed;
+                if (speed>max_speed)
+                    speed=max_speed;
                 
                 m_move_accum += dt * speed;
                 int delta = int(m_move_accum);
@@ -320,7 +299,6 @@ namespace Sandbox {
                 setScroll(crnt_pos);
             } else {
                 m_move_speed = 0;
-                m_target_speed = 0;
                 m_move_accum = 0;
                 m_state = state_none;
             }
@@ -365,11 +343,10 @@ namespace Sandbox {
                 setScroll(new_scroll);
                 m_scroll_begin = getScroll() - delta_scroll;
                 delta_scroll = getScroll() - crnt_scroll;
-                if (delta_scroll!=0) {
+                if (true) {
                     unsigned long dt = m_scroll_timer.getMilliseconds();
                     if (dt) {
-                        m_move_speed = float(delta_scroll) / (dt*0.001f);
-                        m_move_speed = m_target_speed = (m_target_speed*0.9f)+m_move_speed*0.1f;
+                        m_move_speed = (m_move_speed*0.9f)+(float(delta_scroll) / (dt*0.001f))*0.1f;
                         m_scroll_timer.reset();
                     }
                 }
@@ -393,7 +370,7 @@ namespace Sandbox {
                         m_scroll_begin_pos = pos_in_layer;
                         m_scroll_begin = getScroll();
                         m_scroll_timer.reset();
-                        m_move_speed = m_target_speed = 0.0f;
+                        m_move_speed = 0.0f;
                     }
                 }
             }
@@ -405,14 +382,16 @@ namespace Sandbox {
                     if (m_state == state_manual_scroll) {
                         //getClientWidget()->setEnabled(true);
                     }
-                    m_scroll_target = roundf(float(getScroll()+m_move_speed)/getItemSize()) * getItemSize();
-                    m_move_speed = m_target_speed = fabsf(m_move_speed);
-                    if (m_move_speed < getItemSize()) {
-                        m_move_speed = getItemSize();
-                        m_target_speed = getItemSize()*3;
-                    }
-                    //m_target_speed = getItemSize() * 5;
-                    //m_move_speed = getItemSize();
+                    float speed_dir = m_move_speed < 0 ? -1.0f : 1.0f;
+                    m_move_speed = fabs(m_move_speed);
+                    if (m_move_speed>max_speed)
+                        m_move_speed = max_speed;
+                    
+                    int scroll_distance = m_move_speed * ( 0.2f ) * speed_dir;
+                    m_scroll_target = roundf(float(getScroll()+scroll_distance)/getItemSize()) * getItemSize();
+                    
+                    normalizeScrollTarget();
+                    
                     m_state = state_free_scroll;
                     LogInfo() << "set animate scroll";
                 } else {
