@@ -104,6 +104,7 @@ namespace Sandbox {
             m_move_speed = 0.0f;
             m_scroll_target = 0;
             m_state = state_none;
+            m_border_dempth = 100;
         }
         
         ScrollList::~ScrollList() {
@@ -131,9 +132,12 @@ namespace Sandbox {
         }
         
         void ScrollList::setPropertyOverride(const std::string& _key, const std::string& _value) {
-            /// @wproperty{ItemBox, VerticalAlignment, bool} Вертикальное выравнивание.
+            /// @wproperty{ItemBox, VisibleCount, size_t} visible cells count.
             if (_key == "VisibleCount")
                 setVisibleCount(MyGUI::utility::parseValue<size_t>(_value));
+            /// @wproperty{ItemBox, VerticalAlignment, bool} bounds.
+            if (_key == "ScrollBounds")
+                setScrollBounds(MyGUI::utility::parseValue<int>(_value));
             
             else
             {
@@ -152,6 +156,10 @@ namespace Sandbox {
             m_visible_count = count;
             //mCountItemInLine = -1;
             updateFromResize();
+        }
+        
+        void ScrollList::setScrollBounds(int b) {
+            m_border_dempth = b;
         }
         
         void ScrollList::setDelegate(const ScrollListDelegatePtr &delegate) {
@@ -200,13 +208,21 @@ namespace Sandbox {
         
         void ScrollList::setScroll(int pos) {
             MyGUI::IntPoint idiff(0,0);
-            
+//            int norm = normalizeScrollValue(pos);
+//            int err = norm - pos;
+//            
+//            err = err * (1.0f -fabs(err)/m_border_dempth);
+//            
+//            pos = norm - err;
+//            
             if (getVerticalAlignment()) {
                 idiff.top = pos;
-            } else {
+             } else {
                 idiff.left = pos;
             }
-            setViewOffset(idiff);
+            resetCurrentActiveItem();
+            setContentPosition(idiff);
+            //setViewOffset(idiff);
         }
         
         int     ScrollList::getScroll() const {
@@ -232,18 +248,18 @@ namespace Sandbox {
             return getClientWidget()->getSize().width;
         }
         
-        void ScrollList::normalizeScrollTarget() {
+        int ScrollList::normalizeScrollValue(int val) const {
             int max_scroll = getScrollContentSize() - getScrollAreaSize();
-            if (m_scroll_target>max_scroll)
-                m_scroll_target = max_scroll;
-            if (m_scroll_target<0) {
-                m_scroll_target = 0;
+            if (val>max_scroll)
+                val = max_scroll;
+            if (val<0) {
+                val = 0;
             }
+            return val;
         }
         
         void ScrollList::moveNext() {
-            m_scroll_target+=getItemSize();
-            normalizeScrollTarget();
+            m_scroll_target = normalizeScrollValue(m_scroll_target+getItemSize());
             if (m_state==state_none || m_state == state_free_scroll) {
                 m_move_speed += getItemSize() * 2.0f;
                 m_state = state_free_scroll;
@@ -251,8 +267,7 @@ namespace Sandbox {
         }
         
         void ScrollList::movePrev() {
-            m_scroll_target-=getItemSize();
-            normalizeScrollTarget();
+            m_scroll_target = normalizeScrollValue(m_scroll_target-getItemSize());
             if (m_state==state_none || m_state == state_free_scroll) {
                 m_move_speed += getItemSize() * 2.0f;
                 m_state = state_free_scroll;
@@ -319,15 +334,18 @@ namespace Sandbox {
                 }
                 if (!layer) return;
                 MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
-                MyGUI::IntPoint move = pos_in_layer - m_scroll_begin_pos;
+                MyGUI::IntPoint move = pos_in_layer - m_scroll_prev_pos;
+                
                 int delta_scroll = 0;
                 if (getVerticalAlignment()) {
                     delta_scroll = move.top;
                 } else {
                     delta_scroll = -move.left;
                 }
+                int crnt_scroll = getScroll();
+                int new_scroll = crnt_scroll + delta_scroll;
                 if (m_state == state_wait_scroll) {
-                    if (fabs(delta_scroll)>min_scroll_distance) {
+                    if (fabs((new_scroll-m_scroll_begin))>min_scroll_distance) {
                         m_state = state_manual_scroll;
                         MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
                         //getClientWidget()->setEnabled(false);
@@ -338,11 +356,27 @@ namespace Sandbox {
                         LogInfo() << "set manual scroll";
                     }
                 }
-                int new_scroll = m_scroll_begin + delta_scroll;
-                int crnt_scroll = getScroll();
+                
+                
+                
+                int norm = normalizeScrollValue(new_scroll);
+                int err = norm - new_scroll;
+                
+                float derr = fabs(err)/m_border_dempth;
+                if (derr>1.0f) {
+                    derr = 1.0f;
+                } else if (derr<0.0f) {
+                    derr = 0.0f;
+                }
+
+                new_scroll = crnt_scroll + delta_scroll * (1.0f - derr);
+                
                 setScroll(new_scroll);
-                m_scroll_begin = getScroll() - delta_scroll;
-                delta_scroll = getScroll() - crnt_scroll;
+                
+                new_scroll = getScroll();
+                m_scroll_prev_pos = pos_in_layer;
+                
+                delta_scroll = new_scroll - crnt_scroll;
                 if (true) {
                     unsigned long dt = m_scroll_timer.getMilliseconds();
                     if (dt) {
@@ -367,7 +401,7 @@ namespace Sandbox {
                     if (getCoord().inside(pos_in_layer)) {
                         m_state = state_wait_scroll;
                         LogInfo() << "set wait scroll";
-                        m_scroll_begin_pos = pos_in_layer;
+                        m_scroll_prev_pos = pos_in_layer;
                         m_scroll_begin = getScroll();
                         m_scroll_timer.reset();
                         m_move_speed = 0.0f;
@@ -390,7 +424,7 @@ namespace Sandbox {
                     int scroll_distance = m_move_speed * ( 0.2f ) * speed_dir;
                     m_scroll_target = roundf(float(getScroll()+scroll_distance)/getItemSize()) * getItemSize();
                     
-                    normalizeScrollTarget();
+                    m_scroll_target = normalizeScrollValue(m_scroll_target);
                     
                     m_state = state_free_scroll;
                     LogInfo() << "set animate scroll";

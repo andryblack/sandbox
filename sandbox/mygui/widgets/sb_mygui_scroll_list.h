@@ -45,6 +45,8 @@ namespace Sandbox {
             void setVisibleCount(size_t count);
             size_t getVisibleCount() const { return m_visible_count; }
             
+            void setScrollBounds(int b);
+            
             void moveNext();
             void movePrev();
             
@@ -89,12 +91,13 @@ namespace Sandbox {
                 state_manual_scroll,
                 state_free_scroll
             } m_state;
-            MyGUI::IntPoint m_scroll_begin_pos;
+            MyGUI::IntPoint m_scroll_prev_pos;
             int m_scroll_begin;
-            int m_last_scroll;
             
             MyGUI::Timer    m_scroll_timer;
-            void normalizeScrollTarget();
+            int normalizeScrollValue(int val) const;
+            
+            int m_border_dempth;
         };
         
         void register_widgets();
