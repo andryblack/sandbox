@@ -100,8 +100,7 @@ namespace Sandbox {
             int m_border_dempth;
         };
         
-        void register_widgets();
-        void unregister_widgets();
+        
     }
     
 }

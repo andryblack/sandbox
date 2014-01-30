@@ -25,7 +25,23 @@ namespace Sandbox {
     
     namespace mygui {
         
-        class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget {
+        class RenderTargetImpl : public MyGUI::IRenderTarget {
+        public:
+            virtual void begin();
+            virtual void end();
+            
+            virtual void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
+            
+            virtual const MyGUI::RenderTargetInfo& getInfo();
+            
+        protected:
+            RenderTargetImpl( Resources* resources );
+            Resources*      m_resources;
+            MyGUI::RenderTargetInfo m_rt_info;
+            MyGUI::IntSize  m_rendertarget_size;
+            void setSize(int width,int height);
+        };
+        class RenderManager : public MyGUI::RenderManager, public RenderTargetImpl {
         public:
             explicit RenderManager( Resources* resources );
             /** Create vertex buffer.
@@ -57,20 +73,14 @@ namespace Sandbox {
             virtual bool checkTexture(MyGUI::ITexture* _texture);
 #endif
             
-            virtual void begin();
-            virtual void end();
             
-            virtual void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
+            void    timerFrame(float dt);
+            void    drawFrame();
             
-            virtual const MyGUI::RenderTargetInfo& getInfo();
-            
-            void    drawFrame(float dt);
-        private:
-            Resources*      m_resources;
-            MyGUI::IntSize  m_view_size;
             class Texture;
+        private:
+            
             sb::map<sb::string,Texture*>  m_textures;
-            MyGUI::RenderTargetInfo m_rt_info;
         };
         
     }

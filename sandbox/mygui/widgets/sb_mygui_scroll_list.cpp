@@ -9,8 +9,6 @@
 #include "sb_mygui_scroll_list.h"
 #include "luabind/sb_luabind.h"
 #include "luabind/sb_luabind_wrapper.h"
-#include "MyGUI_WidgetManager.h"
-#include "MyGUI_FactoryManager.h"
 #include "MyGUI_Gui.h"
 #include "MyGUI_ILayer.h"
 #include "MyGUI_InputManager.h"
@@ -435,17 +433,7 @@ namespace Sandbox {
         }
         
         
-        void register_widgets() {
-            MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
-            
-            factory.registerFactory<ScrollList>(MyGUI::WidgetManager::getInstance().getCategoryName());
-        }
-        void unregister_widgets() {
-            MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
-            
-            factory.unregisterFactory<ScrollList>(MyGUI::WidgetManager::getInstance().getCategoryName());
-        }
-        
+               
         
         
 

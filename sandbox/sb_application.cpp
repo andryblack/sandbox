@@ -29,7 +29,7 @@
 #include "mygui/sb_mygui_data_manager.h"
 #include "mygui/sb_mygui_render.h"
 #include "mygui/sb_mygui_skin.h"
-#include "mygui/widgets/sb_mygui_scroll_list.h"
+#include "mygui/widgets/sb_mygui_widgets.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -248,6 +248,9 @@ namespace Sandbox {
 		m_main_thread->Update(dt);
 		Update(dt);
         
+        if (m_gui_render)
+            m_gui_render->timerFrame(dt);
+        
         // update targets
         for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
             (*it)->Update(dt);
@@ -272,7 +275,7 @@ namespace Sandbox {
         m_render->SetupBlend(true,GHL::BLEND_FACTOR_SRC_ALPHA,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
         
         if (m_gui_render)
-            m_gui_render->drawFrame(dt);
+            m_gui_render->drawFrame();
         
 		DrawDebugInfo();
 		m_render->EndScene();

@@ -41,6 +41,16 @@ namespace Sandbox {
             void applyColor();
         };
         
+        class CopySubSkin : public MyGUI::SubSkin {
+            MYGUI_RTTI_DERIVED(CopySubSkin)
+        public:
+            virtual void _setUVSet(const MyGUI::FloatRect& _rect);
+            virtual void _updateView();
+            virtual void createDrawItem(MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node);
+            virtual void doRender();
+        private:
+        };
+        
         void register_skin();
         void unregister_skin();
         

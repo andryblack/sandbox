@@ -51,18 +51,85 @@ namespace Sandbox {
             VectorData<MyGUI::Vertex>*  m_data;
         };
         
-        class RenderManager::Texture : public MyGUI::ITexture {
+        RenderTargetImpl::RenderTargetImpl(Resources* res) : m_resources(res) {
+            
+        }
+        
+        
+        const MyGUI::RenderTargetInfo& RenderTargetImpl::getInfo() {
+            return m_rt_info;
+        }
+        
+        void RenderTargetImpl::begin() {
+            GHL::Render* r = m_resources->GetRender();
+            if (r) {
+                Matrix4f m = Matrix4f::ortho(0, m_rendertarget_size.width, m_rendertarget_size.height, 0,-1, 1);
+                r->SetProjectionMatrix(m.matrix);
+                r->SetupFaceCull(false);
+            }
+        }
+        
+        void RenderTargetImpl::end() {
+            
+        }
+        
+        void RenderTargetImpl::setSize(int width, int height) {
+            
+            m_rendertarget_size.set(width,height);
+            m_rt_info.maximumDepth = 1;
+            m_rt_info.hOffset = 0.5f;//-m_view_size.width/2;
+            m_rt_info.vOffset = 0.5f;//-m_view_size.height/2;
+            m_rt_info.aspectCoef = float(height) / float(width);
+            m_rt_info.pixScaleX = 0.5f;//0.5f;
+            m_rt_info.pixScaleY = -0.5f;//-0.5f;
+
+        }
+
+        
+        class RenderManager::Texture : public MyGUI::ITexture, public RenderTargetImpl {
         public:
-            Texture( const sb::string& name, Resources* res) : m_name(name),m_resources(res),m_image(0) {
+            Texture( const sb::string& name, Resources* res) : RenderTargetImpl(res),m_name(name),m_image(0) {
                 
             }
+            
+            virtual void begin() {
+                if (m_target) {
+                    GHL::RenderTarget* rt = m_target->GetNative();
+                    GHL::Render* r = m_resources->GetRender();
+                    r->BeginScene(rt);
+                    r->Clear(0, 0, 0, 0, 0);
+                    RenderTargetImpl::begin();
+                }
+            }
+            virtual void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
+                RenderTargetImpl::doRender(_buffer, _texture, _count);
+            }
+            virtual void end() {
+                RenderTargetImpl::end();
+                GHL::Render* r = m_resources->GetRender();
+                r->EndScene();
+            }
+            
+            virtual MyGUI::IRenderTarget* getRenderTarget()
+            {
+                if (m_target)
+                    return this;
+                return 0;
+            }
+            
             virtual const std::string& getName() const {
                 return m_name;
             }
             
             virtual void createManual(int _width, int _height, MyGUI::TextureUsage _usage, MyGUI::PixelFormat _format) {
-                if (_format == MyGUI::PixelFormat::R8G8B8A8) {
-                    m_texture = m_resources->CreateTexture(_width, _height, true, 0);
+                if (_usage == MyGUI::TextureUsage::RenderTarget) {
+                    m_target = m_resources->CreateRenderTarget(_width,_height,true,false);
+                    m_texture = m_target->GetTexture();
+                    setSize(_width, _height);
+                } else {
+                    if (_format == MyGUI::PixelFormat::R8G8B8A8) {
+                        m_texture = m_resources->CreateTexture(_width, _height, true, 0);
+                    }
                 }
             }
             
@@ -119,25 +186,31 @@ namespace Sandbox {
             }
         private:
             sb::string  m_name;
-            int m_width;
-            int m_height;
             TexturePtr  m_texture;
-            Resources*  m_resources;
+            RenderTargetPtr m_target;
             GHL::Image* m_image;
         };
         
         
-        RenderManager::RenderManager( Resources* resources ) : m_resources(resources) {
-            m_view_size.set(m_resources->GetRender()->GetWidth(),
-                            m_resources->GetRender()->GetHeight());
-            m_rt_info.maximumDepth = 1;
-            m_rt_info.hOffset = 0.5f;//-m_view_size.width/2;
-            m_rt_info.vOffset = 0.5f;//-m_view_size.height/2;
-            m_rt_info.aspectCoef = float(m_view_size.height) / float(m_view_size.width);
-            m_rt_info.pixScaleX = 0.5f;//0.5f;
-            m_rt_info.pixScaleY = -0.5f;//-0.5f;
+        void RenderTargetImpl::doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
+            GHL::Render* r = m_resources->GetRender();
+            if (r) {
+                VertexBuffer* vb = reinterpret_cast<VertexBuffer*>(_buffer);
+                RenderManager::Texture* tex = reinterpret_cast<RenderManager::Texture*>(_texture);
+                if (vb && tex) {
+                    r->SetTexture(tex->Present());
+                    r->DrawPrimitivesFromMemory(GHL::PRIMITIVE_TYPE_TRIANGLES,
+                                                GHL::VERTEX_TYPE_SIMPLE, vb->GetData(),
+                                                _count, 0, _count/3);
+                }
+            }
+        }
+
+        RenderManager::RenderManager( Resources* resources ) : RenderTargetImpl(resources) {
+            setSize(m_resources->GetRender()->GetWidth(),
+                    m_resources->GetRender()->GetHeight());
             
-            onResizeView(m_view_size);
+            onResizeView(m_rendertarget_size);
         }
         
         MyGUI::IVertexBuffer* RenderManager::createVertexBuffer() {
@@ -173,7 +246,7 @@ namespace Sandbox {
         }
         
         const MyGUI::IntSize& RenderManager::getViewSize() const {
-            return m_view_size;
+            return m_rendertarget_size;
         }
         
         MyGUI::VertexColourType RenderManager::getVertexFormat() {
@@ -191,40 +264,11 @@ namespace Sandbox {
 #endif
         
         
-        void RenderManager::begin() {
-            GHL::Render* r = m_resources->GetRender();
-            if (r) {
-                Matrix4f m = Matrix4f::ortho(0, m_view_size.width, m_view_size.height, 0,-1, 1);
-                r->SetProjectionMatrix(m.matrix);
-                r->SetupFaceCull(false);
-            }
-        }
-        
-        void RenderManager::end() {
-            
-        }
-        
-        void RenderManager::doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
-            GHL::Render* r = m_resources->GetRender();
-            if (r) {
-                VertexBuffer* vb = reinterpret_cast<VertexBuffer*>(_buffer);
-                Texture* tex = reinterpret_cast<Texture*>(_texture);
-                if (vb && tex) {
-                    r->SetTexture(tex->Present());
-                    r->DrawPrimitivesFromMemory(GHL::PRIMITIVE_TYPE_TRIANGLES,
-                                                GHL::VERTEX_TYPE_SIMPLE, vb->GetData(),
-                                                _count, 0, _count/3);
-                }
-            }
-        }
-        
-        const MyGUI::RenderTargetInfo& RenderManager::getInfo() {
-            return m_rt_info;
-        }
-
-        
-        void    RenderManager::drawFrame(float dt) {
+        void RenderManager::timerFrame(float dt) {
             onFrameEvent(dt);
+        }
+        
+        void    RenderManager::drawFrame() {
             begin();
             onRenderToTarget(this, true);
             end();

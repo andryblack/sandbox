@@ -441,7 +441,14 @@ namespace Sandbox {
         GHL::UInt32 nw = next_pot(w);
         GHL::UInt32 nh = next_pot(h);
         sb_assert(m_render);
-        return sb::make_shared<RenderTarget>(m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth));
+        GHL::RenderTarget* rt = m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth);
+        /*
+        if (rt) {
+            m_render->BeginScene(rt);
+            m_render->Clear(1, 0, 0, 1, 0);
+            m_render->EndScene();
+        }*/
+        return sb::make_shared<RenderTarget>(rt);
     }
     
     size_t    Resources::FreeMemory(size_t need_release,bool full) {
