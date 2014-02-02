@@ -26,6 +26,10 @@ namespace Sandbox {
             m_rt = 0;
             m_texture = 0;
             m_replaced_layer = new MyGUI::SharedLayerNode(0,0);
+            m_texture_name = get_type_info()->name;
+            char buf[128];
+            snprintf(buf, 128, "_%p",this);
+            m_texture_name += buf;
         }
         
         CachedWidget::~CachedWidget() {
@@ -91,7 +95,7 @@ namespace Sandbox {
                     m_texture = 0;
                 }
                 
-                m_texture = MyGUI::RenderManager::getInstance().createTexture(getName());
+                m_texture = MyGUI::RenderManager::getInstance().createTexture(m_texture_name);
                 m_texture->createManual(size.width, size.height, MyGUI::TextureUsage::RenderTarget, MyGUI::PixelFormat::R8G8B8A8);
                 setRenderItemTexture(m_texture);
                 

@@ -44,6 +44,7 @@ namespace Sandbox {
             
             MyGUI::SharedLayerNode*  m_replaced_layer;
             void frameEntered(float dt);
+            std::string m_texture_name;
         };
         
     }
