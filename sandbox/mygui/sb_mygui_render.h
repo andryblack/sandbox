@@ -15,6 +15,8 @@
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_string.h>
 
+#include "sb_scene.h"
+
 namespace GHL {
     struct Render;
 }
@@ -22,6 +24,7 @@ namespace GHL {
 namespace Sandbox {
     
     class Resources;
+    class Graphics;
     
     namespace mygui {
         
@@ -34,16 +37,20 @@ namespace Sandbox {
             
             virtual const MyGUI::RenderTargetInfo& getInfo();
             
+            void    drawScene(const ScenePtr& scene);
+            
         protected:
-            RenderTargetImpl( Resources* resources );
+            RenderTargetImpl( Graphics* graphics, Resources* resources );
+            Graphics*       m_graphics;
             Resources*      m_resources;
             MyGUI::RenderTargetInfo m_rt_info;
             MyGUI::IntSize  m_rendertarget_size;
             void setSize(int width,int height);
+            GHL::Render*    m_render;
         };
         class RenderManager : public MyGUI::RenderManager, public RenderTargetImpl {
         public:
-            explicit RenderManager( Resources* resources );
+            explicit RenderManager( Graphics* graphics, Resources* resources );
             /** Create vertex buffer.
              This method should create vertex buffer with triangles list type,
              each vertex have position, colour, texture coordinates.
@@ -79,7 +86,6 @@ namespace Sandbox {
             
             class Texture;
         private:
-            
             sb::map<sb::string,Texture*>  m_textures;
         };
         

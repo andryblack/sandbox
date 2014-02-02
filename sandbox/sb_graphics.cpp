@@ -51,6 +51,7 @@ namespace Sandbox {
 	}
 	
 	void Graphics::SetBlendMode(BlendMode bmode) {
+        sb_assert( (m_render!=0) && "scene not started" );
 		if (m_blend_mode!=bmode) {
 			Flush();
 			switch (bmode) {
@@ -160,11 +161,12 @@ namespace Sandbox {
         /// do batch
 		m_render->SetTexture(m_texture ? m_texture->Present(m_resources) : 0,0);
 		//m_render->SetTexture(m_texture ? m_texture->Present() : 0,1);
+        const GHL::UInt16* indexes = m_indexes.empty() ? 0 : &m_indexes.front();
 		m_render->DrawPrimitivesFromMemory(m_ptype,
 										   GHL::VERTEX_TYPE_SIMPLE,
 											&m_vertexes.front(),
                                            static_cast<GHL::UInt32>(m_vertexes.size()),
-                                               &m_indexes.front(),
+                                           indexes,
                                            GHL::UInt32(m_primitives));
         m_batches++;
 #ifdef PRINT_BATCHES
@@ -521,6 +523,7 @@ namespace Sandbox {
 		
 		
 	void Graphics::BeginScene(GHL::Render* render) {
+        sb_assert( (m_render==0) && "scene already started" );
 		m_render = render;
 		m_blend_mode = BLEND_MODE_COPY;
 		m_render->SetupBlend(false);
@@ -555,6 +558,8 @@ namespace Sandbox {
 	
 	
 	GHL::Render* Graphics::BeginNative() {
+        sb_assert( (m_render!=0) && "scene not started" );
+        Flush();
 		GHL::Render* render = m_render;
 		if (render) {
 			EndScene();
@@ -563,8 +568,10 @@ namespace Sandbox {
 	}
 	
 	void Graphics::EndNative(GHL::Render* render) {
+        size_t prev_batches = m_batches;
 		if (render) {
 			BeginScene(render);
+            m_batches+=prev_batches;
 		}
 	}
     
@@ -572,7 +579,5 @@ namespace Sandbox {
         if (!tex) return 0;
         return tex->Present(m_resources);
     }
-	
-	
 	
 }

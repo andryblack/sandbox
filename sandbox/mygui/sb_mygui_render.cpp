@@ -13,8 +13,10 @@
 #include <sbstd/sb_algorithm.h>
 #include "../sb_resources.h"
 #include "../sb_matrix4.h"
+#include "../sb_graphics.h"
 #include <ghl_image.h>
 #include <ghl_texture.h>
+#include "sb_transform2d.h"
 
 
 namespace Sandbox {
@@ -51,26 +53,40 @@ namespace Sandbox {
             VectorData<MyGUI::Vertex>*  m_data;
         };
         
-        RenderTargetImpl::RenderTargetImpl(Resources* res) : m_resources(res) {
+        RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res) : m_graphics(g),m_resources(res),m_render(0) {
             
         }
         
+        void RenderTargetImpl::drawScene(const ScenePtr &scene) {
+            if (m_render) {
+                m_graphics->EndNative(m_render);
+                Transform2d tr = m_graphics->GetTransform();
+                m_graphics->SetTransform(tr.translated(-m_rt_info.leftOffset, -m_rt_info.topOffset));
+                scene->Draw(*m_graphics);
+                m_graphics->SetTransform(tr);
+                m_render = m_graphics->BeginNative();
+            }
+        }
         
         const MyGUI::RenderTargetInfo& RenderTargetImpl::getInfo() {
             return m_rt_info;
         }
         
         void RenderTargetImpl::begin() {
-            GHL::Render* r = m_resources->GetRender();
-            if (r) {
-                Matrix4f m = Matrix4f::ortho(0, m_rendertarget_size.width, m_rendertarget_size.height, 0,-1, 1);
-                r->SetProjectionMatrix(m.matrix);
-                r->SetupFaceCull(false);
+            m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
+            m_render = m_graphics->BeginNative();
+            if (m_render) {
+                m_render->SetupBlend(true,GHL::BLEND_FACTOR_SRC_ALPHA,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
+                m_render->SetupFaceCull(false);
             }
         }
         
         void RenderTargetImpl::end() {
-            
+            if (m_render) {
+                m_render->SetupFaceCull(true);
+                m_graphics->EndNative(m_render);
+                m_render = 0;
+            }
         }
         
         void RenderTargetImpl::setSize(int width, int height) {
@@ -88,16 +104,17 @@ namespace Sandbox {
         
         class RenderManager::Texture : public MyGUI::ITexture, public RenderTargetImpl {
         public:
-            Texture( const sb::string& name, Resources* res) : RenderTargetImpl(res),m_name(name),m_image(0) {
+            Texture( const sb::string& name, Graphics* graphics,Resources* res) : RenderTargetImpl(graphics,res),m_name(name),m_image(0) {
                 
             }
             
             virtual void begin() {
                 if (m_target) {
                     GHL::RenderTarget* rt = m_target->GetNative();
-                    GHL::Render* r = m_resources->GetRender();
-                    r->BeginScene(rt);
-                    r->Clear(0, 0, 0, 0, 0);
+                    GHL::Render* render = m_resources->GetRender();
+                    render->BeginScene(rt);
+                    m_graphics->BeginScene(render);
+                    m_graphics->Clear(Color(0,0,0,0), 0);
                     RenderTargetImpl::begin();
                 }
             }
@@ -105,9 +122,12 @@ namespace Sandbox {
                 RenderTargetImpl::doRender(_buffer, _texture, _count);
             }
             virtual void end() {
+                GHL::Render* render = m_render;
                 RenderTargetImpl::end();
-                GHL::Render* r = m_resources->GetRender();
-                r->EndScene();
+                m_graphics->EndScene();
+                if (render) {
+                    render->EndScene();
+                }
             }
             
             virtual MyGUI::IRenderTarget* getRenderTarget()
@@ -134,7 +154,7 @@ namespace Sandbox {
             }
             
             virtual void loadFromFile(const std::string& _filename) {
-                m_texture = m_resources->GetTexture(_filename.c_str(), true);
+                m_texture = m_resources->GetTexture(_filename.c_str(), false);
             }
             
             virtual void saveToFile(const std::string& _filename) {
@@ -154,6 +174,9 @@ namespace Sandbox {
             virtual void unlock() {
                 if (m_image && m_texture) {
                     GHL::Texture* tex = m_texture->Present(m_resources);
+                    {
+                        //m_image->PremultiplyAlpha();
+                    }
                     tex->SetData(0, 0, m_image,0);
                     m_image->Release();
                     m_image = 0;
@@ -193,20 +216,20 @@ namespace Sandbox {
         
         
         void RenderTargetImpl::doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
-            GHL::Render* r = m_resources->GetRender();
-            if (r) {
+            if (m_render) {
                 VertexBuffer* vb = reinterpret_cast<VertexBuffer*>(_buffer);
                 RenderManager::Texture* tex = reinterpret_cast<RenderManager::Texture*>(_texture);
                 if (vb && tex) {
-                    r->SetTexture(tex->Present());
-                    r->DrawPrimitivesFromMemory(GHL::PRIMITIVE_TYPE_TRIANGLES,
+                    m_render->SetTexture(tex->Present());
+                    m_render->DrawPrimitivesFromMemory(GHL::PRIMITIVE_TYPE_TRIANGLES,
                                                 GHL::VERTEX_TYPE_SIMPLE, vb->GetData(),
                                                 _count, 0, _count/3);
                 }
             }
         }
 
-        RenderManager::RenderManager( Resources* resources ) : RenderTargetImpl(resources) {
+        RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res) {
+            m_graphics = graphics;
             setSize(m_resources->GetRender()->GetWidth(),
                     m_resources->GetRender()->GetHeight());
             
@@ -223,7 +246,7 @@ namespace Sandbox {
         
         MyGUI::ITexture* RenderManager::createTexture(const std::string& _name) {
             sb_assert(m_textures.find(_name)==m_textures.end());
-            Texture* tex = new Texture(_name,m_resources);
+            Texture* tex = new Texture(_name,m_graphics,m_resources);
             m_textures[_name] = tex;
             return tex;
         }
@@ -273,6 +296,8 @@ namespace Sandbox {
             onRenderToTarget(this, true);
             end();
         }
+        
+        
     }
     
     

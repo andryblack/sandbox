@@ -36,6 +36,8 @@ namespace Sandbox {
         protected:
             void initialiseOverride();
             void shutdownOverride();
+            
+            virtual void doRenderToTarget(MyGUI::IRenderTarget* rt);
         private:
             MyGUI::IRenderTarget*   m_rt;
             MyGUI::ITexture*        m_texture;

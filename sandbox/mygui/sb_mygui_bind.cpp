@@ -63,6 +63,7 @@
 
 #include "MyGUI_CommonStateInfo.h"
 
+#include "widgets/sb_mygui_scene_widget.h"
 
 namespace Sandbox {
     
@@ -497,6 +498,13 @@ SB_META_METHOD(addItem)
 SB_META_METHOD(getIndexByWidget)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::CachedWidget)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::SceneWidget)
+SB_META_PROPERTY_RW("Scene", getScene, setScene)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_OBJECT(MyGUI::Canvas, MyGUI::Widget)
 
 SB_META_DECLARE_OBJECT(MyGUI::ScrollView, MyGUI::Widget)
@@ -635,6 +643,9 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::Window>(lua);
             luabind::ExternClass<MyGUI::DDContainer>(lua);
             luabind::ExternClass<MyGUI::ItemBox>(lua);
+            
+            luabind::ExternClass<CachedWidget>(lua);
+            luabind::ExternClass<SceneWidget>(lua);
             
             register_ScrollList(lua);
         }

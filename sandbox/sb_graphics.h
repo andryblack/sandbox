@@ -130,7 +130,8 @@ namespace Sandbox {
 		
         GHL::UInt32 GetScreenWidth() const { if (m_render) return m_render->GetWidth(); return 0;}
 		GHL::UInt32 GetScreenHeight() const { if (m_render) return m_render->GetHeight(); return 0;}
-	private:
+        
+   private:
         Resources*  m_resources;
 		GHL::Render* m_render;
 		GHL::Texture* m_fake_tex_white;

@@ -21,22 +21,6 @@ namespace Sandbox {
     
     namespace mygui {
         
-        class CachedWidgetNodeItem : public MyGUI::LayerItem {
-        public:
-            explicit CachedWidgetNodeItem(CachedWidget* parent) : m_parent(parent) {}
-            
-            virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const {
-                return m_parent->getLayerItemByPoint(_left, _top);
-            }
-            virtual const MyGUI::IntCoord& getLayerItemCoord() const {
-                return m_parent->getLayerItemCoord();
-            }
-            virtual void resizeLayerItemView(const MyGUI::IntSize& _oldView, const MyGUI::IntSize& _newView) {
-                return m_parent->resizeLayerItemView(_oldView, _newView);
-            }
-        private:
-            CachedWidget*   m_parent;
-        };
         
         CachedWidget::CachedWidget() {
             m_rt = 0;
@@ -127,10 +111,14 @@ namespace Sandbox {
                 if (rt) {
                     rt->begin();
                     rt->getInfo().setOffset(getAbsoluteLeft(), getAbsoluteTop());
-                    m_replaced_layer->renderToTarget(rt, true);
+                    doRenderToTarget(rt);
                     rt->end();
                 }
             }
+        }
+        
+        void CachedWidget::doRenderToTarget(MyGUI::IRenderTarget* rt) {
+            m_replaced_layer->renderToTarget(rt, true);
         }
 
     }

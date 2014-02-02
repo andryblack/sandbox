@@ -61,8 +61,6 @@ namespace Sandbox {
 		ThreadsMgr* GetThreads() const { return m_main_thread;}
 		Resources* GetResources() const { return m_resources;}
 		
-		void DrawScene() const;
-		
 		void SetClearColor(const Color& c);
         
  	private:

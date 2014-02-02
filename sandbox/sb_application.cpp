@@ -206,7 +206,7 @@ namespace Sandbox {
 		m_lua->DoFile("load.lua");
         
         m_gui_data_manager = new mygui::DataManager(m_resources);
-        m_gui_render = new mygui::RenderManager(m_resources);
+        m_gui_render = new mygui::RenderManager(m_graphics, m_resources);
         
         m_gui = new MyGUI::Gui();
         m_gui->initialise("");
@@ -245,8 +245,9 @@ namespace Sandbox {
 		float dt = float(usecs)/1000000.0f;
         if (m_main_scene)
             m_main_scene->Update(dt);
-		m_main_thread->Update(dt);
-		Update(dt);
+    	m_main_thread->Update(dt);
+	
+        Update(dt);
         
         if (m_gui_render)
             m_gui_render->timerFrame(dt);
@@ -267,15 +268,20 @@ namespace Sandbox {
 							m_clear_color.b,
 							m_clear_color.a,0);
 		m_graphics->BeginScene(m_render);
-		DrawFrame(*m_graphics);
+        if (m_main_scene)
+            m_main_scene->Draw(*m_graphics);
+		if (m_gui_render)
+            m_gui_render->drawFrame();
+        
+        DrawFrame(*m_graphics);
+        
         m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
        
         size_t batches = m_graphics->EndScene();
+       
         m_batches = m_batches * 0.875f + 0.125f*batches;    /// interpolate 4 frames
         m_render->SetupBlend(true,GHL::BLEND_FACTOR_SRC_ALPHA,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
         
-        if (m_gui_render)
-            m_gui_render->drawFrame();
         
 		DrawDebugInfo();
 		m_render->EndScene();
@@ -285,12 +291,8 @@ namespace Sandbox {
 		return true;
 	}
 	
-	void Application::DrawScene() const {
-		m_main_scene->Draw(*m_graphics);
-	}
 	
 	void Application::DrawFrame(Graphics&) const {
-		DrawScene();
 	}
 	
 	void Application::DrawDebugInfo() {
