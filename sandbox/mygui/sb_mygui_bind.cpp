@@ -61,6 +61,8 @@
 #include "MyGUI_ControllerPosition.h"
 #include "MyGUI_ControllerEdgeHide.h"
 
+#include "sb_image.h"
+
 #include "MyGUI_CommonStateInfo.h"
 
 #include "widgets/sb_mygui_scene_widget.h"
@@ -440,7 +442,25 @@ SB_META_DECLARE_OBJECT(MyGUI::ISubWidgetText, MyGUI::ISubWidget)
 SB_META_DECLARE_OBJECT(MyGUI::EditText, MyGUI::ISubWidgetText)
 
 
+static void set_image_proxy(MyGUI::ImageBox* ib,const Sandbox::ImagePtr& img) {
+    if (!img) {
+        ib->setImageTexture("");
+    } else {
+        ib->setImageTexture(img->GetTexture()->GetName());
+        ib->setImageRect(MyGUI::IntRect(img->GetTextureX(),
+                                        img->GetTextureY(),
+                                        img->GetTextureW(),
+                                        img->GetTextureH()));
+    }
+}
+
 SB_META_DECLARE_OBJECT(MyGUI::ImageBox, MyGUI::Widget)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ImageBox)
+SB_META_METHOD(setImageInfo)
+SB_META_METHOD(setImageRect)
+SB_META_METHOD(setImageTexture)
+bind(method("setImage", &set_image_proxy));
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::TextBox, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::TextBox)
@@ -640,6 +660,7 @@ namespace Sandbox {
 
             luabind::ExternClass<MyGUI::TextBox>(lua);
             luabind::ExternClass<MyGUI::Button>(lua);
+            luabind::ExternClass<MyGUI::ImageBox>(lua);
             luabind::ExternClass<MyGUI::Window>(lua);
             luabind::ExternClass<MyGUI::DDContainer>(lua);
             luabind::ExternClass<MyGUI::ItemBox>(lua);
