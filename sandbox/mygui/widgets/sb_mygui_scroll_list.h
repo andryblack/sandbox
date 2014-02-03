@@ -31,6 +31,7 @@ namespace Sandbox {
             virtual MyGUI::Any getItemData(size_t idx) = 0;
             virtual void createWidget(MyGUI::Widget* w) = 0;
             virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) = 0;
+            virtual void onItemClick(size_t idx) = 0;
         };
         typedef sb::shared_ptr<ScrollListDelegate> ScrollListDelegatePtr;
         
@@ -65,6 +66,7 @@ namespace Sandbox {
             void handleCreateWidgetItem(MyGUI::ItemBox*, MyGUI::Widget* w);
             void handleCoordItem(MyGUI::ItemBox*, MyGUI::IntCoord& coords, bool drag);
             void handleDrawItem(MyGUI::ItemBox*, MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di);
+            void handleItemClick(MyGUI::Widget* _sender);
             
             void handleGlobalMouseMove(int x,int y);
             void handleGlobalMousePressed(int x,int y, MyGUI::MouseButton _id);

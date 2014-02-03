@@ -54,6 +54,12 @@ namespace Sandbox {
                     m_obj.call_self("updateWidget",w,*data_ptr,di);
                 }
             }
+            virtual void onItemClick(size_t idx) {
+                luabind::wrapper_ptr* data_ptr = m_list->getItemDataAt<luabind::wrapper_ptr>(idx,false);
+                if (data_ptr) {
+                    m_obj.call_self("onItemClick",*data_ptr,idx);
+                }
+            }
         };
     }
 }
@@ -96,6 +102,7 @@ namespace Sandbox {
             requestCreateWidgetItem = MyGUI::newDelegate(this,&ScrollList::handleCreateWidgetItem);
             requestCoordItem = MyGUI::newDelegate(this,&ScrollList::handleCoordItem);
             requestDrawItem = MyGUI::newDelegate(this,&ScrollList::handleDrawItem);
+            //eventMouseItemActivate += MyGUI::newDelegate(this,&ScrollList::handleItemActivate);
             setNeedDragDrop(false);
             m_visible_count = 1;
             m_move_accum  = 0.0f;
@@ -106,7 +113,6 @@ namespace Sandbox {
         }
         
         ScrollList::~ScrollList() {
-            
         }
         
         void ScrollList::initialiseOverride() {
@@ -134,9 +140,8 @@ namespace Sandbox {
             if (_key == "VisibleCount")
                 setVisibleCount(MyGUI::utility::parseValue<size_t>(_value));
             /// @wproperty{ItemBox, VerticalAlignment, bool} bounds.
-            if (_key == "ScrollBounds")
+            else if (_key == "ScrollBounds")
                 setScrollBounds(MyGUI::utility::parseValue<int>(_value));
-            
             else
             {
                 Base::setPropertyOverride(_key, _value);
@@ -174,6 +179,7 @@ namespace Sandbox {
         void ScrollList::handleCreateWidgetItem(MyGUI::ItemBox*, MyGUI::Widget* w) {
             if (m_delegate) {
                 m_delegate->createWidget(w);
+                w->eventMouseButtonClick += MyGUI::newDelegate(this,&ScrollList::handleItemClick);
             }
         }
         void ScrollList::handleCoordItem(MyGUI::ItemBox*, MyGUI::IntCoord& coords, bool drag) {
@@ -191,6 +197,12 @@ namespace Sandbox {
         void ScrollList::handleDrawItem(MyGUI::ItemBox*, MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) {
             if (m_delegate) {
                 m_delegate->updateWidget(w, di);
+            }
+        }
+        
+        void ScrollList::handleItemClick(MyGUI::Widget* _sender) {
+            if (m_delegate) {
+                m_delegate->onItemClick( getIndexByWidget(_sender) );
             }
         }
         
@@ -398,7 +410,7 @@ namespace Sandbox {
                 if (m_state == state_none || m_state == state_free_scroll) {
                     if (getCoord().inside(pos_in_layer)) {
                         m_state = state_wait_scroll;
-                        LogInfo() << "set wait scroll";
+                        //LogInfo() << "set wait scroll";
                         m_scroll_prev_pos = pos_in_layer;
                         m_scroll_begin = getScroll();
                         m_scroll_timer.reset();
@@ -425,7 +437,7 @@ namespace Sandbox {
                     m_scroll_target = normalizeScrollValue(m_scroll_target);
                     
                     m_state = state_free_scroll;
-                    LogInfo() << "set animate scroll";
+                    //LogInfo() << "set animate scroll";
                 } else {
                     //m_state = state_none;
                 }
