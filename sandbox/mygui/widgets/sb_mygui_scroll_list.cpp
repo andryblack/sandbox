@@ -105,6 +105,7 @@ namespace Sandbox {
             //eventMouseItemActivate += MyGUI::newDelegate(this,&ScrollList::handleItemActivate);
             setNeedDragDrop(false);
             m_visible_count = 1;
+            m_num_subitems = 1;
             m_move_accum  = 0.0f;
             m_move_speed = 0.0f;
             m_scroll_target = 0;
@@ -139,6 +140,8 @@ namespace Sandbox {
             /// @wproperty{ItemBox, VisibleCount, size_t} visible cells count.
             if (_key == "VisibleCount")
                 setVisibleCount(MyGUI::utility::parseValue<size_t>(_value));
+            else if (_key == "SubItemsCount")
+                setSubItems(MyGUI::utility::parseValue<size_t>(_value));
             /// @wproperty{ItemBox, VerticalAlignment, bool} bounds.
             else if (_key == "ScrollBounds")
                 setScrollBounds(MyGUI::utility::parseValue<int>(_value));
@@ -157,6 +160,16 @@ namespace Sandbox {
             if (m_visible_count == count)
                 return;
             m_visible_count = count;
+            //mCountItemInLine = -1;
+            updateFromResize();
+        }
+        
+        void ScrollList::setSubItems(size_t count) {
+            if (count<1)
+                count = 1;
+            if (m_num_subitems == count)
+                return;
+            m_num_subitems = count;
             //mCountItemInLine = -1;
             updateFromResize();
         }
@@ -185,11 +198,11 @@ namespace Sandbox {
         void ScrollList::handleCoordItem(MyGUI::ItemBox*, MyGUI::IntCoord& coords, bool drag) {
             if (m_visible_count) {
                 if (getVerticalAlignment()) {
-                    coords.width = getClientWidget()->getSize().width;
+                    coords.width = getClientWidget()->getSize().width / m_num_subitems;
                     coords.height = getClientWidget()->getSize().height / m_visible_count;
                 } else {
                     coords.width = getClientWidget()->getSize().width / m_visible_count;
-                    coords.height = getClientWidget()->getSize().height;
+                    coords.height = getClientWidget()->getSize().height / m_num_subitems;
                 }
             }
             
@@ -370,16 +383,20 @@ namespace Sandbox {
                 
                 
                 int norm = normalizeScrollValue(new_scroll);
-                int err = norm - new_scroll;
-                
-                float derr = fabs(err)/m_border_dempth;
-                if (derr>1.0f) {
-                    derr = 1.0f;
-                } else if (derr<0.0f) {
-                    derr = 0.0f;
-                }
+                if (m_border_dempth > 0) {
+                    int err = norm - new_scroll;
+                    
+                    float derr = fabs(err)/m_border_dempth;
+                    if (derr>1.0f) {
+                        derr = 1.0f;
+                    } else if (derr<0.0f) {
+                        derr = 0.0f;
+                    }
 
-                new_scroll = crnt_scroll + delta_scroll * (1.0f - derr);
+                    new_scroll = crnt_scroll + delta_scroll * (1.0f - derr);
+                } else {
+                    new_scroll = norm;
+                }
                 
                 setScroll(new_scroll);
                 

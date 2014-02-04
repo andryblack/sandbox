@@ -46,6 +46,9 @@ namespace Sandbox {
             void setVisibleCount(size_t count);
             size_t getVisibleCount() const { return m_visible_count; }
             
+            void setSubItems(size_t count);
+            size_t getSubItems() const { return m_num_subitems; }
+            
             void setScrollBounds(int b);
             
             void moveNext();
@@ -60,6 +63,7 @@ namespace Sandbox {
         private:
             ScrollListDelegatePtr   m_delegate;
             size_t  m_visible_count;
+            size_t  m_num_subitems;
             
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             
