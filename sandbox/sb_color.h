@@ -28,9 +28,9 @@ namespace Sandbox {
         Color(float r_,float g_,float b_,float a_=1.0f) : r(r_),g(g_),b(b_),a(a_) {}
         /// from UIn32 ctor
         explicit Color(GHL::UInt32 clr) :
-		r(conv_byte((clr>>16)&0xff)),
+		r(conv_byte((clr)&0xff)),
 		g(conv_byte((clr>>8)&0xff)),
-		b(conv_byte((clr)&0xff)),
+		b(conv_byte((clr>>16)&0xff)),
 		a(conv_byte((clr>>24)&0xff)) {}
         /// convert component from byte to float
         static float conv_byte(GHL::Byte comp) { return float(comp)/255.0f; }

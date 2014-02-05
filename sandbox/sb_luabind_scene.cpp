@@ -21,6 +21,7 @@
 #include "sb_scene.h"
 #include "sb_debug_geometry.h"
 #include "sb_rt_scene.h"
+#include "sb_geomerty_buffer.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::SceneObject)
 SB_META_PROPERTY_RW(Visible,GetVisible,SetVisible)
@@ -132,6 +133,10 @@ SB_META_PROPERTY_RW(Alpha,GetAlpha,SetAlpha)
 SB_META_END_KLASS_BIND()
 
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::GeometryBuffer)
+SB_META_CONSTRUCTOR(())
+SB_META_METHOD(BuildLine)
+SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Scene)
 SB_META_END_KLASS_BIND()
@@ -164,6 +169,7 @@ namespace Sandbox {
         luabind::Class<ColorModificator>(lua);
         luabind::Class<ContainerVisible>(lua);
         luabind::Class<ContainerTransform3d>(lua);
+        luabind::Class<GeometryBuffer>(lua);
         luabind::ExternClass<Scene>(lua);
         luabind::Class<RTScene>(lua);
     }

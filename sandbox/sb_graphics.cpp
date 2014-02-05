@@ -10,6 +10,7 @@
 #include "sb_graphics.h"
 #include <sbstd/sb_assert.h>
 #include <ghl_image.h>
+#include "sb_geometry.h"
 
 namespace Sandbox {
 	
@@ -448,39 +449,43 @@ namespace Sandbox {
     }
 
 	
-	void Graphics::DrawBuffer(const TexturePtr& texture,GHL::PrimitiveType prim,
-					const std::vector<GHL::Vertex>& vertices,
-					const std::vector<GHL::UInt16>& indices) { 
+	void Graphics::DrawGeometry(const GeometryData& geomentry,bool transform) {
 		Flush();
-        //if (!texture) return;
+        if (transform)
 		{
-            for (size_t i=0;i<vertices.size();i++) {
-                appendVertex(vertices[i].x,
-							 vertices[i].y,
-							 vertices[i].tx,
-							 vertices[i].ty,
-							 (Color(*reinterpret_cast<const GHL::UInt32*>(vertices[i].color))*m_color).hw());
+            for (size_t i=0;i<geomentry.vertexes.size();i++) {
+                appendVertex(geomentry.vertexes[i].x,
+							 geomentry.vertexes[i].y,
+							 geomentry.vertexes[i].tx,
+							 geomentry.vertexes[i].ty,
+							 (Color(*reinterpret_cast<const GHL::UInt32*>(geomentry.vertexes[i].color))*m_color).hw());
             }
         } 
-		if (texture) {
-			m_render->SetTexture(texture->Present(m_resources),0);
+		if (geomentry.texture) {
+			m_render->SetTexture(geomentry.texture->Present(m_resources),0);
 		} else {
 			m_render->SetTexture(0,0);
 		}
 		
         
-        m_texture = texture;
-        m_ptype = prim;
-        m_indexes = indices;
+        m_texture = geomentry.texture;
+        m_ptype = geomentry.primitives;
+        
+        if (m_ptype==GHL::PRIMITIVE_TYPE_TRIANGLES)
+            m_primitives = static_cast<GHL::UInt32>(geomentry.indexes.size())/3;
+        else if (m_ptype==GHL::PRIMITIVE_TYPE_TRIANGLE_STRIP){
+            sb_assert(geomentry.indexes.size()>2);
+            m_primitives = static_cast<GHL::UInt32>(geomentry.indexes.size()-2);
+        }
+        
+        if (transform) {
+            m_indexes = geomentry.indexes;
+        } else {
+            m_render->DrawPrimitivesFromMemory(geomentry.primitives, GHL::VERTEX_TYPE_SIMPLE, &geomentry.vertexes[0], geomentry.vertexes.size(), &geomentry.indexes[0], m_primitives);
+            m_primitives = 0;
+        }
 		
-        if (prim==GHL::PRIMITIVE_TYPE_TRIANGLES)
-            m_primitives = static_cast<GHL::UInt32>(m_indexes.size())/3;
-		else if (prim==GHL::PRIMITIVE_TYPE_TRIANGLE_STRIP){
-			sb_assert(m_indexes.size()>2);
-			m_primitives = static_cast<GHL::UInt32>(m_indexes.size()-2);
-		}
-
-		
+        
         Flush();
 	}
 	

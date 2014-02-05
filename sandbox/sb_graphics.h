@@ -31,6 +31,8 @@ namespace Sandbox {
 		BLEND_MODE_SCREEN,
     };
 	
+    struct GeometryData;
+    
 	class Graphics {
 	public:
 
@@ -115,9 +117,8 @@ namespace Sandbox {
         void DrawParticles( const std::vector<Particle>& particles,
                            const std::vector<const Image*>& images );
 	
-		void DrawBuffer(const TexturePtr& texture,GHL::PrimitiveType prim,
-						const std::vector<GHL::Vertex>& vertices,
-						const std::vector<GHL::UInt16>& indices) ;
+		void DrawGeometry(const GeometryData& buffer,bool transform);
+        
 		/// @brief flush batches
 		void Flush();
 		/// @brief end draw scene
