@@ -46,7 +46,10 @@ namespace Sandbox {
 		
 		TexturePtr GetTexture(const char* filename, bool need_premultiply);
 		ImagePtr GetImage(const char* filename, bool need_premultiply);
-		bool LoadImageSubdivs(const char* filename, sb::vector<Image>& output);
+		bool LoadImageSubdivs(const char* filename,
+                              sb::vector<Image>& output,
+                              GHL::UInt32& width,
+                              GHL::UInt32& height);
 		
 		ShaderPtr GetShader(const char* vfn,const char* ffn);
 		

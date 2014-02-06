@@ -24,8 +24,12 @@ namespace Sandbox {
         bool Load( const char* file, Resources* res );
         void Draw( Graphics& g ) const;
         void SetFiltered( bool f );
+        void SetFullScreen(bool fs);
     private:
         sb::vector<Image>  m_images;
+        bool    m_fullscreen;
+        GHL::UInt32 m_width;
+        GHL::UInt32 m_height;
     };
     
 }

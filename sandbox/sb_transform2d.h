@@ -72,6 +72,11 @@ namespace Sandbox {
             m*=Matrix2f(s.x,0,0,s.y);
             return *this;
         }
+        Transform2d scaled(float sx,float sy) const {
+            Transform2d tr = *this;
+            tr.scale(sx,sy);
+            return tr;
+        }
 		
         Vector2f transform(const Vector2f& vert) const {
             return v + (m * vert);

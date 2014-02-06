@@ -81,11 +81,13 @@ namespace Sandbox {
 		return texture;
 	}
     
-    bool Resources::LoadImageSubdivs(const char* filename, std::vector<Image>& output) {
+    bool Resources::LoadImageSubdivs(const char* filename, std::vector<Image>& output,GHL::UInt32& width,GHL::UInt32& height) {
         GHL::Image* img = LoadImage(filename);
         if (!img) return false;
         GHL::UInt32 w = img->GetWidth();
         GHL::UInt32 h = img->GetHeight();
+        width = w;
+        height = h;
         GHL::UInt32 y = 0;
         while ( y < h ) {
             GHL::UInt32 oh = h - y;
