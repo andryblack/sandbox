@@ -119,7 +119,7 @@ namespace Sandbox {
         if (i<=(size-2)) {
             return (points[i+1]-points[i]).unit();
         }
-        return (points[size-1]-points[size-2]).unit();
+        return (points.front()-points.back()).unit();
     }
     
     void GeometryBuilder::BuildLine(GeometryData& buffer,const sb::vector<Vector2f>& points,const Image& img,const Color& color) {
@@ -133,8 +133,8 @@ namespace Sandbox {
         ctx.ibase = 0;
         ctx.z = 0;
         
-        size_t vtcs = 8 + (points.size()-1)*corner_vertexes;
-		size_t indxs = 6 * 3 + (points.size()-1)*(corner_indexes+2*3);
+        size_t vtcs = 8 + (points.size()-2)*corner_vertexes;
+		size_t indxs = 6 * 3 + (points.size()-2)*(corner_indexes+2*3);
 		buffer.vertexes.reserve(vtcs);
 		buffer.indexes.reserve(indxs);
         
@@ -188,7 +188,7 @@ namespace Sandbox {
             ctx.ibase+=2;
             dir_l = dir_r;
         }
-        dir_l = get_dir_next(points,points.size()-1);
+        //dir_l = get_dir_next(points,points.size()-1);
         
         //ctx.add_vertex(points[0]+dir_l.normal()*width,tx+tw*0.5f,ty+th);
         //ctx.add_vertex(points[0]-dir_l.normal()*width,tx+tw*0.5f,ty);
@@ -201,10 +201,64 @@ namespace Sandbox {
         /// right dot
         ctx.add_triangle(0,3,1);
         ctx.add_triangle(0,2,3);
+        
+        sb_assert(buffer.vertexes.size()==vtcs);
+        sb_assert(buffer.indexes.size()==indxs);
     }
     
     void GeometryBuilder::BuildContour(GeometryData& buffer,const sb::vector<Vector2f>& points,const Image& img,const Color& color) {
-        BuildLine(buffer, points, img, color);
+        if (points.size()<3) return;
+        
+        buffer.primitives = GHL::PRIMITIVE_TYPE_TRIANGLES;
+        buffer.texture = img.GetTexture();
+        BuildLineContext ctx;
+        ctx.buffer = &buffer;
+        ctx.color = color.hw();
+        ctx.ibase = 0;
+        ctx.z = 0;
+        
+        size_t vtcs = (points.size())*corner_vertexes+2;
+		size_t indxs = (points.size())*(corner_indexes+2*3);
+		
+        buffer.vertexes.reserve(vtcs);
+		buffer.indexes.reserve(indxs);
+        
+        float width = img.GetHeight();
+        width*=0.5f;
+        ctx.W = width;
+        
+        float tx = img.GetTextureX() / img.GetTexture()->GetWidth();
+        float ty = img.GetTextureY() / img.GetTexture()->GetHeight();
+        float tw = img.GetTextureW() / img.GetTexture()->GetWidth();
+        float th = img.GetTextureH() / img.GetTexture()->GetHeight();
+        
+        
+        ctx.tx = tx + tw*0.5f;
+        ctx.ty = ty + th*0.5f;
+        ctx.th = th*0.5f;
+        
+        sb_assert(points.size()>=2);
+		Sandbox::Vector2f dir_l = (points[0]-points.back()).unit();
+        
+    
+		
+        for (size_t i=0;i<points.size();i++) {
+			Sandbox::Vector2f dir_r = get_dir_next(points,i);
+            build_corner(points[i],dir_l,dir_r,&ctx);
+            ctx.ibase+=corner_vertexes-2;
+            ctx.add_triangle(0,2,1);
+            ctx.add_triangle(0,2,3);
+            ctx.ibase+=2;
+            dir_l = dir_r;
+        }
+        dir_l = get_dir_next(points,points.size()-1);
+        
+        buffer.vertexes.push_back(buffer.vertexes[0]);
+        buffer.vertexes.push_back(buffer.vertexes[1]);
+        
+        sb_assert(buffer.vertexes.size()==vtcs);
+        sb_assert(buffer.indexes.size()==indxs);
+       
     }
     
 }

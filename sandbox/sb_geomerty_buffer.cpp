@@ -32,5 +32,10 @@ namespace Sandbox {
             GeometryBuilder::BuildLine(m_data, points, *img, clr);
         }
     }
+    void GeometryBuffer::BuildContour(const sb::vector<Vector2f>& points, const ImagePtr& img, const Color& clr) {
+        if (img) {
+            GeometryBuilder::BuildContour(m_data, points, *img, clr);
+        }
+    }
     
 }

@@ -25,6 +25,7 @@ namespace Sandbox {
         virtual void Draw(Graphics& g) const;
         
         void BuildLine(const sb::vector<Vector2f>& points, const ImagePtr& img, const Color& clr);
+        void BuildContour(const sb::vector<Vector2f>& points, const ImagePtr& img, const Color& clr);
         
         
     private:
