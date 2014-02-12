@@ -9,7 +9,7 @@
 	url = ./MyGUI
 [submodule "GHL"]
 	path = GHL
-	url = https://github.com/andryblack/GHL.git
+	url = ./GHL
 [submodule "utils/premake"]
 	path = utils/premake
 	url = https://github.com/andryblack/premake.git
