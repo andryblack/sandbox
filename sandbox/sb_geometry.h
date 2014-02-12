@@ -17,6 +17,7 @@
 #include "sb_vector2.h"
 #include "sb_matrix3.h"
 #include "sb_image.h"
+#include "sb_transform2d.h"
 
 namespace Sandbox {
     
@@ -27,9 +28,16 @@ namespace Sandbox {
         GHL::PrimitiveType  primitives;
     };
     
-    struct GeometryBuilder {
-        static void BuildLine(GeometryData& buffer,const sb::vector<Vector2f>& points,const Image& img,const Color& color);
-        static void BuildContour(GeometryData& buffer,const sb::vector<Vector2f>& points,const Image& img,const Color& color);
+    class GeometryBuilder {
+    private:
+        GeometryData& buffer;
+        Color   color;
+    public:
+        explicit GeometryBuilder(GeometryData& b) : buffer(b) {}
+        void SetColor(const Color& c) { color = c; }
+        void BuildLine(const sb::vector<Vector2f>& points,const Image& img);
+        void BuildContour(const sb::vector<Vector2f>& points,const Image& img);
+        void BuildFill(const sb::vector<Vector2f>& points,const Image& img,const Transform2d& tr);
     };
     
 }

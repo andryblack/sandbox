@@ -11,6 +11,7 @@
 #include "sb_vector2.h"
 #include "sb_vector3.h"
 #include "sb_matrix4.h"
+#include "sb_transform2d.h"
 
 
 SB_META_DECLARE_KLASS(Sandbox::Vector2f, void)
@@ -75,12 +76,18 @@ SB_META_OPERATOR_MUL_(Sandbox::Matrix4f(Sandbox::Matrix4f::*)(const Sandbox::Mat
 SB_META_METHOD(inverted)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::Transform2d, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Transform2d)
+SB_META_CONSTRUCTOR(())
+SB_META_END_KLASS_BIND()
+
 namespace Sandbox {
     
     void register_math( lua_State* lua ) {
         luabind::RawClass<Vector2f>(lua);
         luabind::RawClass<Vector3f>(lua);
         luabind::RawClass<Matrix4f>(lua);
+        luabind::RawClass<Transform2d>(lua);
     }
     
 }

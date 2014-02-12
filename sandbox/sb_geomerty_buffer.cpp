@@ -27,14 +27,26 @@ namespace Sandbox {
         }
     }
     
-    void GeometryBuffer::BuildLine(const sb::vector<Vector2f>& points, const ImagePtr& img, const Color& clr) {
-        if (img) {
-            GeometryBuilder::BuildLine(m_data, points, *img, clr);
+    void GeometryBuffer::BuildLine(const sb::vector<Vector2f>& points) {
+        if (m_image) {
+            GeometryBuilder builder(m_data);
+            builder.SetColor(m_color);
+            builder.BuildLine( points, *m_image);
         }
     }
-    void GeometryBuffer::BuildContour(const sb::vector<Vector2f>& points, const ImagePtr& img, const Color& clr) {
-        if (img) {
-            GeometryBuilder::BuildContour(m_data, points, *img, clr);
+    void GeometryBuffer::BuildContour(const sb::vector<Vector2f>& points) {
+        if (m_image) {
+            GeometryBuilder builder(m_data);
+            builder.SetColor(m_color);
+            builder.BuildContour( points, *m_image);
+        }
+    }
+    
+    void GeometryBuffer::BuildFill(const sb::vector<Vector2f>& points, const Transform2d& tr) {
+        if (m_image) {
+            GeometryBuilder builder(m_data);
+            builder.SetColor(m_color);
+            builder.BuildFill(points, *m_image, tr);
         }
     }
     

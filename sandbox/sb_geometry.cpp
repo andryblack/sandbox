@@ -122,7 +122,7 @@ namespace Sandbox {
         return (points.front()-points.back()).unit();
     }
     
-    void GeometryBuilder::BuildLine(GeometryData& buffer,const sb::vector<Vector2f>& points,const Image& img,const Color& color) {
+    void GeometryBuilder::BuildLine(const sb::vector<Vector2f>& points,const Image& img) {
         if (points.size()<2) return;
         
         buffer.primitives = GHL::PRIMITIVE_TYPE_TRIANGLES;
@@ -206,7 +206,7 @@ namespace Sandbox {
         sb_assert(buffer.indexes.size()==indxs);
     }
     
-    void GeometryBuilder::BuildContour(GeometryData& buffer,const sb::vector<Vector2f>& points,const Image& img,const Color& color) {
+    void GeometryBuilder::BuildContour(const sb::vector<Vector2f>& points,const Image& img) {
         if (points.size()<3) return;
         
         buffer.primitives = GHL::PRIMITIVE_TYPE_TRIANGLES;
@@ -259,6 +259,44 @@ namespace Sandbox {
         sb_assert(buffer.vertexes.size()==vtcs);
         sb_assert(buffer.indexes.size()==indxs);
        
+    }
+    
+    struct BuildFillContext : BuildContext {
+        Transform2d transform;
+        void add_vertex(const Vector2f& v) {
+            Vector2f tex = transform.transform(v);
+            BuildContext::add_vertex(v, tex.x, tex.y);
+        }
+    };
+    
+    void GeometryBuilder::BuildFill(const sb::vector<Vector2f>& points,const Image& img,const Transform2d& tr) {
+        if (points.size()<3) return;
+        buffer.primitives = GHL::PRIMITIVE_TYPE_TRIANGLES;
+        buffer.texture = img.GetTexture();
+        BuildFillContext ctx;
+        ctx.buffer = &buffer;
+        ctx.color = color.hw();
+        ctx.ibase = 0;
+        ctx.z = 0;
+        ctx.transform = tr;
+        if (buffer.texture) {
+            ctx.transform.scale(1.0f/buffer.texture->GetWidth(), 1.0f/buffer.texture->GetHeight());
+        }
+        size_t idx_top = 0;
+        size_t idx_bottom = points.size()-1;
+        ctx.add_vertex(points[idx_bottom]);
+        ctx.add_vertex(points[idx_top]);
+        while (idx_top!=idx_bottom) {
+            ++idx_top;
+            ctx.add_vertex(points[idx_top]);
+            ctx.add_triangle(0, 1, 2);
+            if (idx_top==idx_bottom)
+                break;
+            --idx_bottom;
+            ctx.add_vertex(points[idx_bottom]);
+            ctx.add_triangle(0, 2, 3);
+            ctx.ibase+=2;
+        }
     }
     
 }

@@ -24,12 +24,20 @@ namespace Sandbox {
         ~GeometryBuffer();
         virtual void Draw(Graphics& g) const;
         
-        void BuildLine(const sb::vector<Vector2f>& points, const ImagePtr& img, const Color& clr);
-        void BuildContour(const sb::vector<Vector2f>& points, const ImagePtr& img, const Color& clr);
+        void SetColor(const Color& c) { m_color = c; }
+        const Color& GetColor() const { return m_color; }
         
+        void SetImage(const ImagePtr& img) { m_image = img; }
+        const ImagePtr& GetImage() const {return m_image; }
+        
+        void BuildLine(const sb::vector<Vector2f>& points);
+        void BuildContour(const sb::vector<Vector2f>& points);
+        void BuildFill(const sb::vector<Vector2f>& points, const Transform2d& tr);
         
     private:
         GeometryData  m_data;
+        ImagePtr    m_image;
+        Color   m_color;
     };
     
 }
