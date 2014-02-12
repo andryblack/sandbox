@@ -179,19 +179,19 @@ namespace Sandbox {
         }
 		void Space::AddCollisionHandler(const CollisionHandlerPtr& handler ) {
             if (add(m_collision_handlers,handler)) {
-//                cpSpaceAddCollisionHandler(m_space, 
-//                                           handler->GetCollisionTypeA(), 
-//                                           handler->GetCollisionTypeB(), 
-//                                           &Space::collision_begin, 
-//                                           0, 0, 0, 
-//                                           handler.get());
+                cpSpaceAddCollisionHandler(m_space, 
+                                           handler->GetCollisionTypeA(), 
+                                           handler->GetCollisionTypeB(), 
+                                           &Space::collision_begin, 
+                                           0, 0, 0, 
+                                           handler.get());
             }
         }
         
         void Space::RemoveCollisionHandler( const CollisionHandlerPtr& handler ) {
             if (remove(m_collision_handlers,handler)) {
-//                cpSpaceRemoveCollisionHandler(m_space, handler->GetCollisionTypeA(), 
-//                                              handler->GetCollisionTypeB());
+                cpSpaceRemoveCollisionHandler(m_space, handler->GetCollisionTypeA(), 
+                                              handler->GetCollisionTypeB());
             }
         }
 		
