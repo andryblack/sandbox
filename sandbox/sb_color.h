@@ -37,9 +37,9 @@ namespace Sandbox {
         /// convert component from float to byte
         static GHL::Byte conv_float(float comp) { return static_cast<GHL::Byte>(comp*255);}
 		
-        GHL::Byte red() const { return conv_float(r);}
-        GHL::Byte green() const { return conv_float(g);}
-        GHL::Byte blue() const { return conv_float(b);}
+        GHL::Byte red() const { return conv_float(r*a);}
+        GHL::Byte green() const { return conv_float(g*a);}
+        GHL::Byte blue() const { return conv_float(b*a);}
         GHL::Byte alpha() const { return conv_float(a);}
 		
 		/// clamp all components to [0.0-1.0] range
