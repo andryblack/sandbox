@@ -6,10 +6,10 @@
 	url = git://git.sv.gnu.org/freetype/freetype2.git
 [submodule "MyGUI"]
 	path = MyGUI
-	url = ./MyGUI
+	url = git@github.com:andryblack/MyGUI.git
 [submodule "GHL"]
 	path = GHL
-	url = ./GHL
+	url = git@github.com:andryblack/GHL.git
 [submodule "utils/premake"]
 	path = utils/premake
-	url = https://github.com/andryblack/premake.git
+	url = git@github.com:andryblack/premake.git
