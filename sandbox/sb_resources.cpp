@@ -391,7 +391,7 @@ namespace Sandbox {
 			vs = m_render->CreateVertexShader(dsd);
 			dsd->Release();
 			if (!vs) {
-				LogError(MODULE) << "error loading shader " << vfilename;
+				LogError(MODULE) << "error create shader " << vfilename;
 				//return ShaderPtr();
 			}
 #ifdef SB_RESOURCES_CACHE
@@ -413,7 +413,7 @@ namespace Sandbox {
 			fs = m_render->CreateFragmentShader(dsd);
 			dsd->Release();
 			if (!fs) {
-				LogError(MODULE) << "error loading shader " << ffilename;
+				LogError(MODULE) << "error creating shader " << ffilename;
 				//return ShaderPtr();
 			}
 #ifdef SB_RESOURCES_CACHE

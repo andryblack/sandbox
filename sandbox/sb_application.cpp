@@ -252,14 +252,9 @@ namespace Sandbox {
         if (m_gui_render)
             m_gui_render->timerFrame(dt);
         
-        // update targets
-        for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
-            (*it)->Update(dt);
-        }
         
-        for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
-            (*it)->Draw(m_render, *m_graphics);
-        }
+        
+        UpdateRenderTargets(dt,m_render);
         
 		m_render->BeginScene(0);
 		if (m_clear_buffer)
@@ -294,6 +289,17 @@ namespace Sandbox {
 	
 	void Application::DrawFrame(Graphics&) const {
 	}
+    
+    void Application::UpdateRenderTargets(float dt,GHL::Render* render) {
+        // update targets
+        for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
+            (*it)->Update(dt);
+        }
+        
+        for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
+            (*it)->Draw(m_render, *m_graphics);
+        }
+    }
 	
 	void Application::DrawDebugInfo() {
 		char buf[128];

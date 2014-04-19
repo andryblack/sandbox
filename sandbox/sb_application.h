@@ -43,6 +43,7 @@ namespace Sandbox {
 		virtual ~Application();
 		virtual void Update(float) {}
 		virtual void DrawFrame(Graphics& g) const;
+        virtual void UpdateRenderTargets(float dt,GHL::Render* render);
 		virtual bool LoadResources(Resources&) { return true;}
 		void SetLuaBasePath(const char* path) {
 			m_lua_base_path = path;
