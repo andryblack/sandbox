@@ -15,6 +15,7 @@
 #include <sbstd/sb_vector.h>
 #include <sbstd/sb_string.h>
 #include <sbstd/sb_map.h>
+#include "sb_vector2.h"
 
 namespace GHL {
 	struct ShaderProgram;
@@ -43,17 +44,30 @@ namespace Sandbox {
 	};
     typedef sb::shared_ptr<ShaderFloatUniform> ShaderFloatUniformPtr;
     
+    class ShaderVec2Uniform : public ShaderUniform {
+	public:
+		explicit ShaderVec2Uniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
+		virtual void DoSet();
+		void SetValue(const Vector2f& v) { m_value = v;}
+	private:
+		Vector2f m_value;
+	};
+    typedef sb::shared_ptr<ShaderVec2Uniform> ShaderVec2UniformPtr;
+    
 	class Shader {
 	public:
 		explicit Shader( GHL::ShaderProgram* prg);
 		~Shader();
 		void Set(GHL::Render* r);
 		ShaderFloatUniformPtr GetFloatUniform(const char* name);
+        ShaderVec2UniformPtr GetVec2Uniform(const char* name);
+        void SetTextureStage(const char* uniform_name,int stage);
 	private:
+        template <class T>
+        ShaderUniformPtr GetUniform(const char* name);
 		GHL::ShaderProgram* m_program;
-		sb::vector<ShaderUniformPtr> m_uniforms;
 		void SetUniforms();
-		sb::map<sb::string,ShaderFloatUniformPtr > m_float_uniforms;
+		sb::map<sb::string,ShaderUniformPtr> m_uniforms_map;
 	};
 	
 	typedef sb::shared_ptr<Shader> ShaderPtr;

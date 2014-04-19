@@ -19,6 +19,7 @@ namespace sb {
     using std::tr1::weak_ptr;
     using std::tr1::enable_shared_from_this;
     using std::tr1::static_pointer_cast;
+    using std::tr1::dynamic_pointer_cast;
     
     using std::tr1::make_shared
 }
@@ -80,6 +81,7 @@ namespace sb {
         };
         
         struct static_cast_tag{};
+        struct dynamic_cast_tag{};
         
         
         template <class T,class Y>
@@ -123,6 +125,10 @@ namespace sb {
         
         template <class U>
         shared_ptr(const shared_ptr<U>& other,const implement::static_cast_tag& ) : ptr(static_cast<T*>(other.get())),counter(other.get_counter()) {
+            if (counter) counter->refs++;
+        }
+        template <class U>
+        shared_ptr(const shared_ptr<U>& other,const implement::dynamic_cast_tag& ) : ptr(dynamic_cast<T*>(other.get())),counter(other.get_counter()) {
             if (counter) counter->refs++;
         }
         
@@ -310,7 +316,10 @@ namespace sb {
         return shared_ptr<T>(ptr,implement::static_cast_tag());
     }
     
-    
+    template <class T,class U>
+    inline shared_ptr<T> dynamic_pointer_cast( const shared_ptr<U>& ptr) {
+        return shared_ptr<T>(ptr,implement::dynamic_cast_tag());
+    }
     template <class T>
     inline shared_ptr<T> make_shared() {
         typedef implement::counter_with_buffer_t<T> cntr_t;

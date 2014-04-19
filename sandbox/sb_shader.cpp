@@ -29,26 +29,53 @@ namespace Sandbox {
 	}
 	
 	void Shader::SetUniforms() {
-		for (std::vector<ShaderUniformPtr>::iterator it=m_uniforms.begin();it!=m_uniforms.end();it++)
-			(*it)->DoSet();
+		for (sb::map<sb::string,ShaderUniformPtr>::iterator it=m_uniforms_map.begin();it!=m_uniforms_map.end();it++)
+			it->second->DoSet();
 	}
 	
 	void ShaderFloatUniform::DoSet() {
 		if (m_uniform) m_uniform->SetValueFloat(m_value);
 	}
+    void ShaderVec2Uniform::DoSet() {
+		if (m_uniform) m_uniform->SetValueFloat2(m_value.x,m_value.y);
+	}
 	
-    sb::shared_ptr<ShaderFloatUniform> Shader::GetFloatUniform(const char* name) {
+    template <class T>
+    sb::shared_ptr<ShaderUniform> Shader::GetUniform(const char* name) {
 		sb::string sname = name;
-		sb::map<std::string,sb::shared_ptr<ShaderFloatUniform> >::iterator it = m_float_uniforms.find(sname);
-		if (it!=m_float_uniforms.end())
+		sb::map<sb::string,sb::shared_ptr<ShaderUniform> >::iterator it = m_uniforms_map.find(sname);
+		if (it!=m_uniforms_map.end())
 			return it->second;
 		GHL::ShaderUniform* u = m_program ? m_program->GetUniform(name) : 0;
 		if (true) {
-            sb::shared_ptr<ShaderFloatUniform> fu = sb::make_shared<ShaderFloatUniform>(u);
-			m_float_uniforms.insert(std::make_pair(sname,fu));
-			m_uniforms.push_back(fu);
+            sb::shared_ptr<T> fu = sb::make_shared<T>(u);
+			m_uniforms_map.insert(std::make_pair(sname,fu));
 			return fu;
 		}
-		return sb::shared_ptr<ShaderFloatUniform>();
+		return sb::shared_ptr<ShaderUniform>();
 	}
+    ShaderFloatUniformPtr Shader::GetFloatUniform(const char* name) {
+        return sb::dynamic_pointer_cast<ShaderFloatUniform>(GetUniform<ShaderFloatUniform>(name));
+    }
+    ShaderVec2UniformPtr Shader::GetVec2Uniform(const char* name) {
+        return sb::dynamic_pointer_cast<ShaderVec2Uniform>(GetUniform<ShaderVec2Uniform>(name));
+    }
+    
+    class ShaderIntUniform : public ShaderUniform {
+	public:
+		explicit ShaderIntUniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform),m_value(0) {}
+		virtual void DoSet() {
+            if (m_uniform) m_uniform->SetValueInt(m_value);
+        }
+		void SetValue(int v) { m_value = v;}
+	private:
+		int m_value;
+	};
+    
+    void Shader::SetTextureStage(const char* uniform_name,int stage) {
+        sb::shared_ptr<ShaderIntUniform> uniform = sb::dynamic_pointer_cast<ShaderIntUniform>(GetUniform<ShaderIntUniform>(uniform_name));
+        if (uniform) {
+            uniform->SetValue(stage);
+        }
+    }
 }
