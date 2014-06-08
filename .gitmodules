@@ -13,3 +13,6 @@
 [submodule "utils/premake"]
 	path = utils/premake
 	url = git@github.com:andryblack/premake.git
+[submodule "utils/glsl2agal"]
+	path = utils/glsl2agal
+	url = git@github.com:andryblack/glsl2agal.git

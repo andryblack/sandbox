@@ -353,10 +353,27 @@ namespace Sandbox {
 		GHL::UInt32 imgH = texture->GetOriginalHeight();
         return sb::make_shared<Image>(texture,0,0,float(imgW),float(imgH));
 	}
+    
+    static void change_shader_extension(std::string& filename) {
+        size_t dotpos = filename.find('.');
+        if (dotpos!=filename.npos) {
+            filename.resize(dotpos);
+#if defined(GHL_PLATFORM_FLASH)
+            filename += ".agal";
+#else
+            filename += ".glsl";
+#endif
+        }
+    }
 	
 	ShaderPtr Resources::GetShader(const char* vfn,const char* ffn) {
 		std::string vfilename = vfn;
 		std::string ffilename = ffn;
+        
+        change_shader_extension(vfilename);
+        change_shader_extension(ffilename);
+        
+        
 #ifdef SB_RESOURCES_CACHE
 		std::string name = vfilename+"+"+ffilename;
         sb::weak_ptr<Shader> al = m_shaders[name];

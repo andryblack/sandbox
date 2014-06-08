@@ -81,9 +81,11 @@ namespace Sandbox {
         };
         
 #define SB_META_PRIVATE_CLASS(Type) \
-        template <> struct meta::type<Type> { \
-            typedef void* info; \
-        };
+        namespace Sandbox { namespace meta { \
+            template <> struct type<Type> { \
+                typedef void* info; \
+            }; \
+        } }
         
         inline bool is_convertible( const type_info* from, const type_info* to ) {
             do {

@@ -61,21 +61,4 @@ namespace Sandbox {
         return sb::dynamic_pointer_cast<ShaderVec2Uniform>(GetUniform<ShaderVec2Uniform>(name));
     }
     
-    class ShaderIntUniform : public ShaderUniform {
-	public:
-		explicit ShaderIntUniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform),m_value(0) {}
-		virtual void DoSet() {
-            if (m_uniform) m_uniform->SetValueInt(m_value);
-        }
-		void SetValue(int v) { m_value = v;}
-	private:
-		int m_value;
-	};
-    
-    void Shader::SetTextureStage(const char* uniform_name,int stage) {
-        sb::shared_ptr<ShaderIntUniform> uniform = sb::dynamic_pointer_cast<ShaderIntUniform>(GetUniform<ShaderIntUniform>(uniform_name));
-        if (uniform) {
-            uniform->SetValue(stage);
-        }
-    }
 }

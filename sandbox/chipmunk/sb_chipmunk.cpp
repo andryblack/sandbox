@@ -238,12 +238,12 @@ namespace Sandbox {
         void Shape::SetCollisionType( long type ) {
             cpShapeSetCollisionType( m_shape, type );
         }
-//        unsigned int Shape::GetLayers() const {
-//            return cpShapeGetLayers(m_shape);
-//        }
-//        void Shape::SetLayers(unsigned int v) {
-//            cpShapeSetLayers(m_shape, v);
-//        }
+        unsigned int Shape::GetLayers() const {
+            return cpShapeGetLayers(m_shape);
+        }
+        void Shape::SetLayers(unsigned int v) {
+            cpShapeSetLayers(m_shape, v);
+        }
        	
 			
 		CircleShape::CircleShape( const BodyPtr& body, float radius, const Vector2f& pos ) {

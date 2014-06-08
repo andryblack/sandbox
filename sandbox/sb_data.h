@@ -9,7 +9,7 @@
 #ifndef backgammon_osx_sb_data_h
 #define backgammon_osx_sb_data_h
 
-#include "sb_vector.h"
+#include <sbstd/sb_vector.h>
 #include "sb_ref_cntr.h"
 #include <ghl_data.h>
 

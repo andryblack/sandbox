@@ -9,7 +9,7 @@
 #ifndef backgammon_osx_sb_ref_cntr_h
 #define backgammon_osx_sb_ref_cntr_h
 
-#include "sb_assert.h"
+#include <sbstd/sb_assert.h>
 
 namespace Sandbox {
     

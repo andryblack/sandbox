@@ -1,12 +1,15 @@
 #ifndef SB_MYGUI_CONFIG_H_INCLUDED
 #define SB_MYGUI_CONFIG_H_INCLUDED
 
+
 #define MYGUI_STATIC
 #define MYGUI_DONT_USE_DYNLIB
 #define MYGUI_DONT_USE_OBSOLETE
 
 #define MYGUI_USE_FREETYPE
+#ifndef __FLASHPLAYER__
 #define MYGUI_DONT_REPLACE_NULLPTR
+#endif
 
 #include <string>
 

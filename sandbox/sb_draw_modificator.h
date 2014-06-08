@@ -48,7 +48,6 @@ namespace Sandbox {
         void    ProcessWithStoreTransform(Graphics& g) const;
         void    ProcessStack(Graphics& g) const;
     };
-    SB_META_PRIVATE_CLASS(DrawModificatorsStack)
     
     
     class ColorModificator : public DrawModificator {
@@ -93,5 +92,7 @@ namespace Sandbox {
     };
     typedef sb::shared_ptr<TransformModificator> TransformModificatorPtr;
 }
+
+SB_META_PRIVATE_CLASS(DrawModificatorsStack)
 
 #endif /* defined(__sr_osx__sb_draw_modificator__) */

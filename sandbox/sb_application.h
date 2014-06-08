@@ -92,10 +92,11 @@ namespace Sandbox {
         bool    m_sound_enabled;
         bool    m_music_enabled;
         
+#ifdef SB_USE_MYGUI
         mygui::DataManager*     m_gui_data_manager;
         mygui::RenderManager*   m_gui_render;
         MyGUI::Gui* m_gui;
-        
+#endif
     public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys );

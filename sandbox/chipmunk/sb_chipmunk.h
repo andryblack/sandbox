@@ -100,8 +100,8 @@ namespace Sandbox {
 			void SetElasticity(float e);
             long GetCollisionType() const;
             void SetCollisionType( long type );
-            //unsigned int GetLayers() const;
-            //void SetLayers(unsigned int);
+            unsigned int GetLayers() const;
+            void SetLayers(unsigned int);
 			
 			void set_space( Space* space) { m_space = space;}
 			Space* get_space() const { return m_space;}

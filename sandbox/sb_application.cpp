@@ -22,6 +22,7 @@
 #include <ghl_render.h>
 #include <ghl_system.h>
 
+#ifdef SB_USE_MYGUI
 #include "MyGUI_Gui.h"
 #include "MyGUI_InputManager.h"
 
@@ -30,6 +31,7 @@
 #include "mygui/sb_mygui_render.h"
 #include "mygui/sb_mygui_skin.h"
 #include "mygui/widgets/sb_mygui_widgets.h"
+#endif
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -59,11 +61,12 @@ namespace Sandbox {
     void register_resources( lua_State* lua );
 	void register_scene( lua_State* lua );
 	void register_controller( lua_State* lua );
-	
+#ifdef SB_USE_MYGUI
     namespace mygui {
         void register_mygui( lua_State* lua );
         void setup_singletons( LuaVM* lua );
     }
+#endif
     
     
 	Application::Application() {
@@ -85,9 +88,11 @@ namespace Sandbox {
         m_batches = 0.0f;
         m_sound_enabled = true;
         m_music_enabled = true;
+#ifdef SB_USE_MYGUI
         m_gui_data_manager = 0;
         m_gui = 0;
         m_gui_render = 0;
+#endif
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
 	}
@@ -97,6 +102,7 @@ namespace Sandbox {
 		delete m_main_scene;
 		delete m_lua;
     	delete m_sound_mgr;
+#if SB_USE_MYGUI
         if (m_gui) {
             mygui::unregister_skin();
             mygui::unregister_widgets();
@@ -105,6 +111,7 @@ namespace Sandbox {
         delete m_gui;
         delete m_gui_render;
         delete m_gui_data_manager;
+#endif
 		delete m_resources;
 		delete m_graphics;
   	}
@@ -114,7 +121,9 @@ namespace Sandbox {
         register_resources(lua->GetVM());
         register_scene(lua->GetVM());
         register_controller(lua->GetVM());
+#ifdef SB_USE_MYGUI
         mygui::register_mygui(lua->GetVM());
+#endif
     }
 	
     void GHL_CALL Application::Initialize() {
@@ -205,6 +214,7 @@ namespace Sandbox {
 
 		m_lua->DoFile("load.lua");
         
+#ifdef SB_USE_MYGUI
         m_gui_data_manager = new mygui::DataManager(m_resources);
         m_gui_render = new mygui::RenderManager(m_graphics, m_resources);
         
@@ -213,6 +223,7 @@ namespace Sandbox {
         mygui::register_skin();
         mygui::register_widgets();
         mygui::setup_singletons(m_lua);
+#endif
         
 		if (!LoadResources(*m_resources))
 			return false;
@@ -249,10 +260,10 @@ namespace Sandbox {
 	
         Update(dt);
         
+#ifdef SB_USE_MYGUI
         if (m_gui_render)
             m_gui_render->timerFrame(dt);
-        
-        
+#endif
         
         UpdateRenderTargets(dt,m_render);
         
@@ -265,9 +276,10 @@ namespace Sandbox {
 		m_graphics->BeginScene(m_render);
         if (m_main_scene)
             m_main_scene->Draw(*m_graphics);
+#ifdef SB_USE_MYGUI
 		if (m_gui_render)
             m_gui_render->drawFrame();
-        
+#endif
         DrawFrame(*m_graphics);
         
         m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
@@ -365,11 +377,15 @@ namespace Sandbox {
     
 	///
 	void GHL_CALL Application::OnKeyDown( GHL::Key k ) {
+#ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectKeyPress(mygui::translate_key(k));
+#endif
 	}
 	///
 	void GHL_CALL Application::OnKeyUp( GHL::Key k) {
+#ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectKeyRelease(mygui::translate_key(k));
+#endif
 	}
 	///
 	void GHL_CALL Application::OnChar( GHL::UInt32 ) {
@@ -377,15 +393,21 @@ namespace Sandbox {
 	}
 	///
 	void GHL_CALL Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+#ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key));
+#endif
     }
 	///
 	void GHL_CALL Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+#ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectMouseMove(x, y, 0);
+#endif
     }
 	///
 	void GHL_CALL Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+#ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectMouseRelease(x, y, mygui::translate_key(key));
+#endif
     }
 	///
 	void GHL_CALL Application::OnDeactivated() {

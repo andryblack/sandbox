@@ -61,8 +61,7 @@ namespace Sandbox {
 		void Set(GHL::Render* r);
 		ShaderFloatUniformPtr GetFloatUniform(const char* name);
         ShaderVec2UniformPtr GetVec2Uniform(const char* name);
-        void SetTextureStage(const char* uniform_name,int stage);
-	private:
+  	private:
         template <class T>
         ShaderUniformPtr GetUniform(const char* name);
 		GHL::ShaderProgram* m_program;
