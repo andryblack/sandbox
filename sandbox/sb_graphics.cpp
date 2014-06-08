@@ -314,6 +314,7 @@ namespace Sandbox {
 	}
 	void Graphics::DrawLine(const Vector2f& from, const Vector2f& to) {
 		sb_assert( (m_render!=0) && "scene not started" );
+#ifndef GHL_PLATFORM_FLASH
 		BeginDrawLines();
 		GHL::UInt32 clr = m_color.hw();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
@@ -322,9 +323,11 @@ namespace Sandbox {
 		m_primitives++;
 		appendVertex(from.x, from.y, 0, 0, clr);
 		appendVertex(to.x,to.y,0,0,clr);
+#endif
 	}
 	void Graphics::DrawLine(const Vector2f& from, const Vector2f& to,const Color& clr_) {
 		sb_assert( (m_render!=0) && "scene not started" );
+#ifndef GHL_PLATFORM_FLASH
 		BeginDrawLines();
 		GHL::UInt32 clr = (m_color*clr_).hw();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
@@ -333,10 +336,12 @@ namespace Sandbox {
 		m_primitives++;
 		appendVertex(from.x, from.y, 0, 0, clr);
 		appendVertex(to.x,to.y,0,0,clr);
+#endif
 	}
 	
 	void Graphics::DrawLineStrip(const std::vector<Vector2f>& points) {
 		sb_assert( (m_render!=0) && "scene not started" );
+#ifndef GHL_PLATFORM_FLASH
         if (points.size()<2) return;
 		Flush();
 		m_texture = TexturePtr();
@@ -351,9 +356,11 @@ namespace Sandbox {
 		}
 		m_primitives = points.size()-1;
 		Flush();
+#endif
 	}
 	void Graphics::DrawLineStrip(const std::vector<Vector2f>& points,const Color& clr_) {
 		sb_assert( (m_render!=0) && "scene not started" );
+#ifndef GHL_PLATFORM_FLASH
         if (points.size()<2) return;
 		Flush();
 		m_texture = TexturePtr();
@@ -368,6 +375,7 @@ namespace Sandbox {
 		}
 		m_primitives = points.size()-1;
 		Flush();
+#endif
 	}
 	
 	void Graphics::BeginDrawCircle() {
@@ -377,19 +385,24 @@ namespace Sandbox {
 	}
 	void Graphics::DrawCircle(const Vector2f& pos, float r) {
 		sb_assert( (m_render!=0) && "scene not started" );
+#ifndef GHL_PLATFORM_FLASH
 		BeginDrawCircle();
 		GHL::UInt32 clr = m_color.hw();
 		DrawCircle(pos,r,clr);
 		Flush();
+#endif
 	}
 	void Graphics::DrawCircle(const Vector2f& pos, float r,const Color& clr_) {
 		sb_assert( (m_render!=0) && "scene not started" );
+#ifndef GHL_PLATFORM_FLASH
 		BeginDrawCircle();
 		GHL::UInt32 clr = (m_color*clr_).hw(); 
 		DrawCircle(pos,r,clr);
 		Flush();
+#endif
 	}
 	void Graphics::DrawCircle(const Vector2f& pos, float r,GHL::UInt32 clr) {
+#ifndef GHL_PLATFORM_FLASH
 		size_t subdivs = int(2*M_PI*r)/5;
 		if (subdivs<8) subdivs = 8;
 		const float step = static_cast<float>(M_PI*2/subdivs);
@@ -406,6 +419,7 @@ namespace Sandbox {
 			appendVertex(x, y, 0, 0, clr);
 		}
 		m_primitives+=subdivs;
+#endif
 	}
 	
     void Graphics::DrawParticles( const std::vector<Particle>& particles,
