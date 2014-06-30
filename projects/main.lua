@@ -1,0 +1,519 @@
+
+math.randomseed(1234)
+
+local use = UseModules or {}
+local sandbox_dir = _WORKING_DIR .. '/../..'
+
+if SandboxRoot then
+	sandbox_dir = _WORKING_DIR .. '/' .. SandboxRoot
+end
+
+local flex_sdk_dir = nil
+local flascc_sdk_dir = nil
+
+newoption {
+	trigger = "flex_sdk_dir",
+	value = "PATH",
+	description = "FLEX sdk path"
+}
+
+newoption {
+	trigger = "flascc_sdk_dir",
+	value = "PATH",
+	description = "CrossBridge sdk path"
+}
+
+solution( ProjectName )
+	configurations { 'Debug', 'Release' }
+	
+	--
+
+	local platform_dir = unknown
+	local os_map = { 
+		macosx = 'osx' 
+	}
+	local platform_id = os.get()
+
+	if platform_id == 'flash' then
+		flex_sdk_dir = _OPTIONS['flex_sdk_dir']
+		flascc_sdk_dir = _OPTIONS['flascc_sdk_dir']
+		if flex_sdk_dir == nil then
+			error('must specify flex sdk dir')
+		end
+		if flascc_sdk_dir == nil then
+			error('must specify crossbridge sdk dir')
+		end
+		premake.gcc.cc = flascc_sdk_dir .. '/usr/bin/gcc'
+		premake.gcc.cxx = flascc_sdk_dir .. '/usr/bin/g++'
+		premake.gcc.ar = flascc_sdk_dir .. '/usr/bin/ar'
+		buildoptions {'-Wno-write-strings', '-Wno-trigraphs' }
+
+	end
+
+
+	configuration "Debug"
+         defines { "DEBUG" }
+         flags { "Symbols" }
+
+    if platform_id == 'flash' then
+    	buildoptions { '-g' }
+    end
+
+ 
+    configuration "Release"
+         defines { "NDEBUG" }
+    
+    if platform_id == 'flash' then
+    	buildoptions { '-O4' }
+    else
+    	flags { "OptimizeSpeed" }    
+   	end
+
+	configuration {}
+
+	platform_dir = os_map[platform_id] or platform_id
+
+	local function append_path( path, files ) 
+		local f = {}
+		for _,v in ipairs(files) do
+			f[#f+1] = path .. v
+		end
+		return f
+	end
+
+	
+
+	print('platform_dir:',platform_dir)
+
+	location ( _WORKING_DIR .. '/projects/' .. platform_dir ) 
+	
+	objdir( _WORKING_DIR .. '/build/' .. platform_dir )
+
+	language "C++"
+
+	project 'GHL'
+		kind 'StaticLib'
+
+		local ghl_src = sandbox_dir .. '/GHL/src/'
+
+		targetdir ('lib/' .. platform_dir)
+
+		targetname ('GHL_' .. platform_dir)
+
+		local zlib_files = { 'inffixed.h', 'inftrees.c', 'inftrees.h', 'adler32.c', 'crc32.c', 'crc32.h', 'crypt.h',
+							 'deflate.c', 'deflate.h', 'inffast.c', 'inffast.h', 'inflate.c', 'inflate.h', 'ioapi.h',
+							 'zconf.h', 'zip.c', 'zip.h', 'zlib.h', 'zutil.c', 'zutil.h'}
+
+		files(append_path(ghl_src .. '/zlib/',zlib_files))
+
+		local jpeg_files = {
+			'jaricom.c', 'jcapimin.c', 'jcapistd.c', 'jcarith.c', 'jccoefct.c','jccolor.c',
+			'jcdctmgr.c', 'jchuff.c', 'jcinit.c', 'jcmainct.c', 'jcmarker.c', 'jcmaster.c', 'jcomapi.c', 'jcparam.c',
+			'jcprepct.c', 'jcsample.c', 'jctrans.c', 'jdapimin.c', 'jdapistd.c', 'jdarith.c', 'jdatadst.c', 'jdcoefct.c',
+			'jdcolor.c', 'jddctmgr.c', 'jdhuff.c', 'jdinput.c', 'jdmainct.c', 'jdmarker.c', 'jdmaster.c', 'jdmerge.c',
+			'jdpostct.c', 'jdsample.c', 'jdtrans.c', 'jerror.c', 'jfdctflt.c', 'jfdctfst.c', 'jfdctint.c', 'jidctflt.c',
+			'jidctfst.c', 'jidctint.c', 'jmemmgr.c', 'jmemnobs.c', 'jquant1.c', 'jquant2.c', 'jutils.c',	'transupp.c' 
+		}
+		files(append_path(ghl_src .. '/image/jpeg/',jpeg_files))
+
+		local png_files = {
+			'png.c', 'pngerror.c', 'pngget.c', 'pngmem.c', 'pngpread.c', 'pngread.c', 'pngrio.c', 'pngrtran.c',
+			'pngrutil.c', 'pngset.c', 'pngtrans.c', 'pngwio.c', 'pngwrite.c', 'pngwtran.c', 'pngwutil.c' 
+		}
+		files(append_path(ghl_src .. '/image/libpng/',png_files))
+
+		files {
+			sandbox_dir .. '/GHL/include/**.h',
+			ghl_src .. '*.cpp',
+			ghl_src .. '*.h',
+			ghl_src .. 'image/*',
+			ghl_src .. 'vfs/memory_stream.*',
+			ghl_src .. 'sound/ghl_sound_decoder.h',
+			ghl_src .. 'sound/ghl_sound_impl.h',
+			ghl_src .. 'sound/sound_decoders.cpp',
+			ghl_src .. 'sound/wav_decoder.*',
+			ghl_src .. 'render/buffer_impl.*',
+			ghl_src .. 'render/lucida_console_regular_8.*',
+			ghl_src .. 'render/render_impl.*',
+			ghl_src .. 'render/rendertarget_impl.*',
+			ghl_src .. 'render/shader_impl.*',
+			ghl_src .. 'render/texture_impl.*',
+			ghl_src .. 'render/pfpl/*'
+		}
+
+		local use_openal = false
+		local use_opengl = false
+
+		if os.is('ios') or os.is('macosx') then
+			use_openal = true
+			use_opengl = true
+		end
+
+		local use_opengles = use_opengl and os.is('ios')
+
+		if use_openal then
+			files {
+				ghl_src .. 'sound/openal/*'
+			}
+		end
+
+		if use_opengl then
+			files {
+				ghl_src .. 'render/opengl/buffers_opengl.*',
+				ghl_src .. 'render/opengl/glsl_generator.*',
+				ghl_src .. 'render/opengl/render_opengl_api.h',
+				ghl_src .. 'render/opengl/render_opengl_base.*',
+				ghl_src .. 'render/opengl/rendertarget_opengl.*',
+				ghl_src .. 'render/opengl/shader_glsl.*',
+				ghl_src .. 'render/opengl/texture_opengl.*',
+			}
+			if use_opengles then
+				files {
+					ghl_src .. 'render/opengl/gles1_api.*',
+					ghl_src .. 'render/opengl/gles2_api.*',
+					ghl_src .. 'render/opengl/render_opengles.*',
+				}
+			else
+				files {
+					ghl_src .. 'render/opengl/dynamic/dynamic_gl.*',
+					ghl_src .. 'render/opengl/render_opengl.*',
+				}
+			end
+		end
+
+
+
+		if os.is('macosx') then
+			files { 
+				ghl_src .. 'winlib/winlib_cocoa.*',
+				ghl_src .. 'vfs/vfs_cocoa.*',
+				ghl_src .. 'sound/cocoa/*'
+			}
+		elseif os.is('ios') then
+			defines 'GHL_PLATFORM_IOS'
+			files {
+				ghl_src .. 'winlib/winlib_cocoatouch.*',
+				ghl_src .. 'winlib/WinLibCocoaTouchContext.*',
+				ghl_src .. 'winlib/WinLibCocoaTouchContext2.*',
+				ghl_src .. 'vfs/vfs_cocoa.*',
+				ghl_src .. 'sound/cocoa/*'
+			}
+		elseif os.is('flash') then
+			--defines 'GHL_PLATFORM_FLASH'
+			files {
+				ghl_src .. 'winlib/winlib_flash.*',
+				ghl_src .. 'vfs/vfs_posix.*',
+				ghl_src .. 'sound/flash/*',
+				ghl_src .. 'render/stage3d/*'
+			}
+		end
+
+		includedirs {
+			sandbox_dir .. '/GHL/include'
+		}
+
+		configuration "Debug"
+   			targetsuffix "_d"
+   			defines "GHL_DEBUG"
+
+   	if use.Chipmunk then
+		project 'chipmunk'
+			kind 'StaticLib'
+
+			targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+
+			targetname ('chipmunk_' .. platform_dir)
+
+			buildoptions {'-std=c99' }
+
+			files {
+				sandbox_dir .. '/chipmunk/include/**.h',
+				sandbox_dir .. '/chipmunk/src/**.c'
+			}
+
+			includedirs {
+				sandbox_dir .. '/chipmunk/include/chipmunk'
+			}
+
+			configuration "Debug"
+	   			targetsuffix "_d"
+	end
+
+   	project 'lua'
+   		kind 'StaticLib'
+
+		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+
+		targetname ('lua_' .. platform_dir)
+
+		local lua_files = {
+			'lapi.c', 'lauxlib.c', 'lbaselib.c', 'lbitlib.c', 'lcode.c', 'lcorolib.c', 'lctype.c',
+			'ldblib.c', 'ldebug.c', 'ldo.c', 'ldump.c', 'lfunc.c', 'lgc.c', 'llex.c', 'lmathlib.c',
+			'lmem.c', 'loadlib.c', 'lobject.c', 'lopcodes.c', 'lparser.c', 'lstate.c', 'lstring.c',
+			'lstrlib.c', 'ltable.c', 'ltablib.c', 'ltm.c', 'lundump.c', 'lvm.c', 'lzio.c'
+		}
+		files(append_path(sandbox_dir .. '/lua/src/',lua_files))
+
+
+		configuration "Debug"
+   			targetsuffix "_d"
+   	
+   	if use.Freetype then
+	   	project 'freetype'
+	   		kind 'StaticLib'
+	   		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+
+			targetname ('freetype_' .. platform_dir)
+
+			local freetype_files = {
+				'autofit/afangles.c',
+	            'autofit/afcjk.c',
+	            'autofit/afdummy.c',
+	            'autofit/afglobal.c',
+	            'autofit/afhints.c',
+	            'autofit/afindic.c',
+	            'autofit/aflatin.c',
+	            'autofit/afloader.c',
+	            'autofit/afmodule.c',
+	            'autofit/afpic.c',
+	            'autofit/afwarp.c',
+
+				'base/ftbase.c',
+				'base/ftbitmap.c',
+				'base/ftinit.c',
+				'base/ftsystem.c',
+				'base/ftwinfnt.c',
+
+				'cff/cff.c',
+				'raster/raster.c',
+				'sfnt/sfnt.c',
+				'smooth/smooth.c',
+				'truetype/truetype.c',
+				'type42/type42.c',
+				'winfonts/winfnt.c'
+			}
+			files(append_path(sandbox_dir .. '/freetype/src/',freetype_files))
+
+			defines 'FT2_BUILD_LIBRARY'
+			defines 'DARWIN_NO_CARBON'
+
+			includedirs {
+				sandbox_dir .. '/include',
+				sandbox_dir .. '/freetype/include'
+			}
+
+			configuration "Debug"
+	   			targetsuffix "_d"
+	end
+
+	if use.Mygui then
+		project 'MyGUI'
+
+			kind 'StaticLib'
+
+			targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+
+			targetname ('MyGUI_' .. platform_dir)
+
+			files {
+				sandbox_dir .. '/MyGUI/MyGUIEngine/**.h',
+				sandbox_dir .. '/MyGUI/MyGUIEngine/**.cpp'
+			}
+
+			includedirs {
+				sandbox_dir .. '/MyGUI/MyGUIEngine/include',
+				sandbox_dir .. '/include',
+				sandbox_dir .. '/freetype/include'
+			}
+
+			defines 'MYGUI_CONFIG_INCLUDE="<../../../sandbox/mygui/sb_mygui_config.h>"'
+
+			configuration "Debug"
+	   			targetsuffix "_d"
+	end
+
+	project 'Sandbox'
+
+		kind 'StaticLib'
+
+		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+
+		targetname ('Sandbox_' .. platform_dir)
+
+		
+		files {
+			sandbox_dir .. '/include/**.h',
+			sandbox_dir .. '/sandbox/*.h',
+			sandbox_dir .. '/sandbox/*.cpp',
+			sandbox_dir .. '/sandbox/luabind/**.h',
+			sandbox_dir .. '/sandbox/luabind/**.cpp',
+			sandbox_dir .. '/sandbox/meta/**.h',
+			sandbox_dir .. '/sandbox/meta/**.cpp',
+		}
+
+		includedirs {
+			sandbox_dir .. '/GHL/include',
+			sandbox_dir .. '/include',
+			sandbox_dir .. '/sandbox',
+			sandbox_dir .. '/freetype/include'
+		}
+
+		if use.Mygui then
+			includedirs {
+				sandbox_dir .. '/MyGUI/MyGUIEngine/include',
+			}
+			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+		end
+
+		if use.Chipmunk then
+			files {
+				sandbox_dir .. '/sandbox/chipmunk/*.cpp',
+				sandbox_dir .. '/sandbox/chipmunk/*.h',
+			}
+		end
+
+		configuration "Debug"
+   			targetsuffix "_d"
+   			defines 'SB_DEBUG'
+
+	project( ProjectName )
+
+		kind 'WindowedApp'
+
+		targetdir (_WORKING_DIR .. '/bin/' .. platform_dir)
+
+		libdirs { sandbox_dir .. '/lib' , sandbox_dir .. '/GHL/lib' }
+
+		local libs_postfix = ''
+		if os.is('macosx') then
+			libs_postfix = '-OSX'
+		end
+
+		links( {
+			'Sandbox', 
+			'lua', 
+			'GHL'
+		} )
+
+		if use.Mygui then
+			links { 'MyGUI' }
+		end
+		if use.Freetype then
+			links { 'freetype' }
+		end
+		if use.Chipmunk then
+			links { 'chipmunk' }
+		end
+		if os.is('ios') then
+			links {
+				'Foundation.framework', 
+				'QuartzCore.framework', 
+				'AVFoundation.framework', 
+				'UIKit.framework',  
+				'OpenGLES.framework', 
+				'OpenAL.framework',
+				'AudioToolbox.framework',
+				'CoreMotion.framework' }
+		elseif os.is('macosx') then
+			links { 
+				'OpenGL.framework', 
+				'OpenAL.framework',
+				'Cocoa.framework',
+				'AudioToolbox.framework' }
+		elseif os.is('flash') then
+			links {
+				'AS3++',
+				'Flash++'
+			}
+		end
+
+
+		files {
+			_WORKING_DIR .. '/src/**.h',
+			_WORKING_DIR .. '/src/**.cpp'
+		}
+
+		resourcefolders {
+			_WORKING_DIR .. '/data'
+		}
+
+		if os.is('macosx') then
+			files { 
+				_WORKING_DIR .. '/projects/osx/main.mm',
+				_WORKING_DIR .. '/projects/osx/' .. ProjectName .. '_Mac-Info.plist'
+			}
+			prebuildcommands { "touch " .. path.getabsolute( _WORKING_DIR .. '/data') }
+		elseif os.is('ios') then
+			files { 
+				_WORKING_DIR .. '/projects/ios/main.mm',
+				_WORKING_DIR .. '/projects/ios/'..ProjectName..'_iOS-Info.plist',
+				_WORKING_DIR .. '/projects/ios/Default@2x.png',
+				_WORKING_DIR .. '/projects/ios/Default-568h@2x.png',
+			}
+			prebuildcommands { "touch " .. path.getabsolute(_WORKING_DIR .. '/data') }
+		elseif os.is('flash') then
+			targetextension( '.swf' )
+			files { 
+				_WORKING_DIR .. '/projects/flash/main.cpp',
+			}
+			prelinkcommands { 
+				'rm -f ' .. path.getabsolute( _WORKING_DIR .. '/bin' ) .. '/flash/' .. ProjectName .. '.swf',
+				flascc_sdk_dir .. '/usr/bin/genfs --type=embed ' .. path.getabsolute('data') .. ' ' .. path.getabsolute(_WORKING_DIR ..'/build/' .. platform_dir .. '/data') ,
+				[[java $(JVMARGS) -jar ]] .. flascc_sdk_dir .. [[/usr/lib/asc2.jar -merge -md \
+					-import ]]..flascc_sdk_dir..[[/usr/lib/builtin.abc \
+					-import ]]..flascc_sdk_dir..[[/usr/lib/playerglobal.abc \
+					-import ]]..flascc_sdk_dir..[[/usr/lib/BinaryData.abc \
+					-import ]]..flascc_sdk_dir..[[/usr/lib/ISpecialFile.abc \
+					-import ]]..flascc_sdk_dir..[[/usr/lib/IBackingStore.abc \
+					-import ]]..flascc_sdk_dir..[[/usr/lib/IVFS.abc \
+					-import ]]..flascc_sdk_dir..[[/usr/lib/InMemoryBackingStore.abc \
+					-import ]]..flascc_sdk_dir..[[/usr/lib/PlayerKernel.abc \
+					 ]]..flascc_sdk_dir..[[/usr/share/LSOBackingStore.as \
+					 ]]..path.getabsolute( _WORKING_DIR .. '/' .. ghl_src ) .. [[/flash/Console.as \
+					 ]]..path.getabsolute('build/' .. platform_dir .. '/data')..[[*.as -outdir ]]..path.getabsolute(_WORKING_DIR .. '/build/' .. platform_dir )..[[ -out Console
+				]]
+			}
+
+
+			linkoptions  {
+					'-jvmopt="-Xmx4096M"',
+					'-emit-swf',
+					'-swf-size=1024x768',
+					'-flto-api=exports.txt',
+					flascc_sdk_dir .. '/usr/lib/AlcVFSZip.abc',
+					'-symbol-abc=' .. path.getabsolute(_WORKING_DIR .. '/build') .. '/' .. platform_dir .. '/Console.abc'
+				}
+			
+			
+		end
+
+		includedirs {
+			sandbox_dir .. '/GHL/include',
+			sandbox_dir .. '/include',
+			sandbox_dir .. '/sandbox',
+		}
+
+		if use.Chipmunk then
+			includedirs { sandbox_dir .. '/chipmunk/include' }
+		end
+
+		if use.Mygui then
+			includedirs { sandbox_dir .. '/MyGUI/MyGUIEngine/include' }
+			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+		end
+
+		configuration "Release"
+			if os.is('flash') then
+				linkoptions  {
+					'-O4'
+				}
+			end
+		
+		configuration "Debug"
+   			defines 'SB_DEBUG'
+   			if os.is('flash') then
+				linkoptions  {
+					'-g'
+				}
+			end
+	
