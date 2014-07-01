@@ -65,7 +65,7 @@ namespace Sandbox {
         }
         m_ref_volume = 0.0f;
         m_fade_speed = m_current_volume / time;
-        m_effect->m_mgr->m_fade_outs.push_back(shared_from_this());
+        m_effect->m_mgr->m_fade_outs.push_back(SoundInstancePtr(this));
     }
     
     void SoundInstance::FadeIn(float value,float time) {
@@ -94,7 +94,7 @@ namespace Sandbox {
     }
     
     SoundInstancePtr    Sound::PlayEx(float fadeIn,float vol,float pan) {
-        if (!m_effect) return sb::make_shared<SoundInstance>(shared_from_this(),static_cast<GHL::SoundInstance*>(0),0.0f);
+        if (!m_effect) return SoundInstancePtr(new SoundInstance(SoundPtr(this),static_cast<GHL::SoundInstance*>(0),0.0f));
         float initialVol = vol;
         if (fadeIn!=0.0f) {
             initialVol = 0;
@@ -102,7 +102,7 @@ namespace Sandbox {
         initialVol *= m_mgr->m_sounds_volume;
         GHL::SoundInstance* instance = 0;
         m_mgr->m_sound->PlayEffect(m_effect,initialVol,pan*100.0f,&instance);
-        SoundInstancePtr res = sb::make_shared<SoundInstance>(shared_from_this(),instance,initialVol);
+        SoundInstancePtr res(new SoundInstance(SoundPtr(this),instance,initialVol));
         if (fadeIn!=0.0f) {
             res->FadeIn(vol*m_mgr->m_sounds_volume, fadeIn);
             m_mgr->m_fade_ins.push_back(res);
@@ -165,7 +165,7 @@ namespace Sandbox {
             
         }
         
-        SoundPtr res = sb::make_shared<Sound>(this,effect);
+        SoundPtr res(new Sound(this,effect));
         m_sounds[fullname] = res;
         return res;
     }

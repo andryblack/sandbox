@@ -38,7 +38,7 @@ namespace Sandbox {
         bool            m_actual;
         bool            m_supported;
 	};
-	typedef sb::shared_ptr<Accelerometer> AccelerometerPtr;
+	typedef sb::intrusive_ptr<Accelerometer> AccelerometerPtr;
 }
 
 #endif /*SB_ACCELEROMETER_H_INCLUDED*/

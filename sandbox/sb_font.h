@@ -11,7 +11,7 @@
 #define SB_FONT_H
 
 #include "sb_notcopyable.h"
-#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_intrusive_ptr.h>
 #include "meta/sb_meta.h"
 
 
@@ -55,7 +55,7 @@ namespace Sandbox {
         float   m_baseline;
 	};
 	
-	typedef sb::shared_ptr<Font> FontPtr;
+	typedef sb::intrusive_ptr<Font> FontPtr;
 
 }
 

@@ -167,7 +167,7 @@ namespace Sandbox {
     
   	class LuaEvent : public Event {
 	public:
-        typedef sb::shared_ptr<LuaEvent> Ptr;
+        typedef sb::intrusive_ptr<LuaEvent> Ptr;
         explicit LuaEvent(luabind::LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
 		~LuaEvent() {
 		}
@@ -204,7 +204,7 @@ namespace Sandbox {
                 return Ptr();
             }
 			lua_State* main_state = helper->lua;
-			sb::shared_ptr<LuaEvent> e = sb::shared_ptr<LuaEvent>(new LuaEvent(helper));
+			sb::intrusive_ptr<LuaEvent> e = sb::intrusive_ptr<LuaEvent>(new LuaEvent(helper));
 			lua_pushvalue(L, idx);
 			if (main_state!=L) {
 				lua_xmove(L, main_state, 1);
@@ -215,7 +215,7 @@ namespace Sandbox {
 		static int constructor_func(lua_State* L) {
             LUA_CHECK_STACK(1)
 			Ptr e = construct_from_lua_function(L, 2);
-            luabind::stack<sb::shared_ptr<LuaEvent> >::push(L, e);
+            luabind::stack<sb::intrusive_ptr<LuaEvent> >::push(L, e);
 			return 1;
 		}
 	private:
@@ -228,7 +228,7 @@ namespace Sandbox {
             if (lua_isfunction(L, idx)) {
                 return LuaEvent::construct_from_lua_function(L,idx);
             }
-            return stack_get_impl<Event>(L,idx);
+            return EventPtr(stack<Event*>::get(L, idx));
         }
         
     }
@@ -312,7 +312,7 @@ namespace Sandbox {
             sb_assert(helper);
 			lua_State* main_state = helper->lua;
 			sb_assert(lua_checkstack(main_state,3));
-			sb::shared_ptr<LuaThread> e = sb::shared_ptr<LuaThread>(new LuaThread(helper));
+			sb::intrusive_ptr<LuaThread> e = sb::intrusive_ptr<LuaThread>(new LuaThread(helper));
 			//sb_assert(stck==lua_gettop(L));
 			lua_pushvalue(L, 2);						
 			if (main_state!=L) {
@@ -340,7 +340,7 @@ namespace Sandbox {
 			(void)stck;
 			(void)new_top;
 			sb_assert(stck==new_top);
-            luabind::stack<sb::shared_ptr<LuaThread> >::push(L, e);
+            luabind::stack<sb::intrusive_ptr<LuaThread> >::push(L, e);
             
             //LogVerbose(LuaThreadModule) << "construct thread <<<< " << lua_gettop(L);
 			return 1;

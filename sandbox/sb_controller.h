@@ -10,7 +10,7 @@
 #ifndef SB_CONTROLLER_H
 #define SB_CONTROLLER_H
 
-#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_intrusive_ptr.h>
 #include "meta/sb_meta.h"
 
 namespace Sandbox {
@@ -21,7 +21,7 @@ namespace Sandbox {
 		virtual ~Controller() {}
 		virtual void Set(float k) = 0;
 	};
-	typedef sb::shared_ptr<Controller> ControllerPtr;
+	typedef sb::intrusive_ptr<Controller> ControllerPtr;
 	
 	template <class T,class Setter ,class Obj> class LinearController : public Controller {
 	public:

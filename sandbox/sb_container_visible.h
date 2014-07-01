@@ -26,7 +26,7 @@ namespace Sandbox {
 		sb::function<bool()>	m_func;
 		bool	m_invert;
 	};
-	typedef sb::shared_ptr<ContainerVisible> ContainerVisiblePtr;
+	typedef sb::intrusive_ptr<ContainerVisible> ContainerVisiblePtr;
 }
 
 #endif /*SB_CONTAINER_VISIBLE_H*/

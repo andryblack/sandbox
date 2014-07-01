@@ -26,7 +26,7 @@ namespace Sandbox {
   	private:
 		sb::function<void(Graphics&)> m_func;
 	};
-	typedef sb::shared_ptr<ObjectDrawProxy> ObjectDrawProxyPtr;
+	typedef sb::intrusive_ptr<ObjectDrawProxy> ObjectDrawProxyPtr;
     
 }
 

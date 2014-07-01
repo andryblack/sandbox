@@ -22,7 +22,7 @@ namespace Sandbox {
     protected:
         Thread();
 	};
-	typedef sb::shared_ptr<Thread> ThreadPtr;
+	typedef sb::intrusive_ptr<Thread> ThreadPtr;
 	
 }
 

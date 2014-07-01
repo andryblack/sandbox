@@ -44,7 +44,7 @@ namespace Sandbox {
     };
     typedef const ParticleProcessorBlock* ParticleProcessorBlockPtr;
     
-    class ParticlesController {
+    class ParticlesController : public sb::ref_countered_base {
     public:
         ParticlesController();
         
@@ -87,7 +87,7 @@ namespace Sandbox {
         sb::vector<ParticleProcessorBlockPtr> m_processors;
         float   m_particle_ttl;
     };
-    typedef sb::shared_ptr<ParticlesController> ParticlesControllerPtr;
+    typedef sb::intrusive_ptr<ParticlesController> ParticlesControllerPtr;
     
     class ParticlesSystem : public SceneObject {
         SB_META_OBJECT
@@ -111,7 +111,7 @@ namespace Sandbox {
         ParticlesInstance   m_instance;
         static void BindBuiltins( LuaVM* lua );
     };
-    typedef sb::shared_ptr<ParticlesSystem> ParticlesSystemPtr;
+    typedef sb::intrusive_ptr<ParticlesSystem> ParticlesSystemPtr;
 }
 
 

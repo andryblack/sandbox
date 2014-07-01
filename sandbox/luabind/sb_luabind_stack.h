@@ -42,7 +42,8 @@ namespace Sandbox {
             enum {
                 raw_data,
                 raw_ptr,
-                shared_ptr
+                shared_ptr,
+                intrusive_ptr
             } type;
             bool    is_const;
             void    (*destructor)(data_holder* data);
@@ -55,6 +56,9 @@ namespace Sandbox {
             }
             static void shared( data_holder* d ) {
                 meta::destructor_helper<T>::shared( d + 1 );
+            }
+            static void intrusive( data_holder* d) {
+                meta::destructor_helper<T>::intrusive( *reinterpret_cast<void**>( d + 1 ) );
             }
         };
         
@@ -100,6 +104,8 @@ namespace Sandbox {
             if ( holder->type == data_holder::raw_data ) {
                 res = get_ptr<T>(info, holder+1);
             } else if ( holder->type == data_holder::raw_ptr ) {
+                res = get_ptr<T>(info, *reinterpret_cast<void**>(holder+1));
+            } else if ( holder->type == data_holder::intrusive_ptr ) {
                 res = get_ptr<T>(info, *reinterpret_cast<void**>(holder+1));
             } else if ( holder->type == data_holder::shared_ptr ) {
                 sb::shared_ptr<T> ptr = get_shared_ptr<T>(info,holder+1);
@@ -287,6 +293,24 @@ namespace Sandbox {
         }
         
         template <class T>
+        static inline void stack_push_impl( lua_State* L, const sb::intrusive_ptr<T>& val  ) {
+            if (!val) {
+                lua_pushnil(L);
+                return;
+            }
+            data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L,
+                                                                                 sizeof(data_holder)+
+                                                                                 sizeof(T*)));
+            holder->type = data_holder::intrusive_ptr;
+            holder->is_const = false;
+            holder->info = meta::type<T>::info();
+            holder->destructor = &destructor_helper<T>::intrusive;
+            *reinterpret_cast<T**>(holder+1) = val.get();
+            val->add_ref();
+            lua_set_metatable( L, *holder );
+        }
+        
+        template <class T>
         static sb::shared_ptr<T> stack_get_impl_help( lua_State* L,  data_holder* holder, int idx ) {
             if ( holder->type==data_holder::shared_ptr ) {
                 sb::shared_ptr<T> ptr = get_shared_ptr<T>(holder->info,holder+1);
@@ -329,6 +353,36 @@ namespace Sandbox {
             static sb::shared_ptr<T> get( lua_State* L, int idx ) {
                 return stack<sb::shared_ptr<T> >::get( L, idx );
             }
+        };
+        
+        
+        template <class T>
+        struct stack<sb::intrusive_ptr<T> > {
+            
+            static void push( lua_State* L, const sb::intrusive_ptr<T>& val ) {
+                stack_push_impl(L, val);
+            }
+            
+            static sb::intrusive_ptr<T> get( lua_State* L, int idx ) {
+                if ( lua_isuserdata(L, idx) ) {
+                    data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
+                    if ( holder->type==data_holder::intrusive_ptr ) {
+                        T* ptr = get_ptr<T>(holder->info,*reinterpret_cast<void**>( holder+1));
+                        return sb::intrusive_ptr<T>(ptr);
+                    }
+                } else if ( lua_isnil(L, idx) ) {
+                    return sb::intrusive_ptr<T>();
+                }
+                lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
+                return sb::intrusive_ptr<T>();
+            }
+        };
+
+        template <class T>
+        struct stack<const sb::intrusive_ptr<T> > : stack<sb::intrusive_ptr<T> > {
+        };
+        template <class T>
+        struct stack<const sb::intrusive_ptr<T>& > : stack<sb::intrusive_ptr<T> > {
         };
         
         template <class T>

@@ -302,6 +302,8 @@ namespace Sandbox {
                     res = *reinterpret_cast<void**>(holder+1);
                 } else if ( holder->type == data_holder::shared_ptr ) {
                     res = *(reinterpret_cast<void**>(holder+1)+1); // hack
+                } else if ( holder->type == data_holder::intrusive_ptr ) {
+                    res = *reinterpret_cast<void**>(holder+1);
                 }
                 char buf[128];
                 snprintf(buf, 128, "object<%s>:%p",holder->info->name,res);

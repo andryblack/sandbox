@@ -11,6 +11,7 @@
 
 #include <cstring>
 #include <new>
+#include <sbstd/sb_intrusive_ptr.h>
 #include <sbstd/sb_shared_ptr.h>
 
 namespace Sandbox {
@@ -32,7 +33,7 @@ namespace Sandbox {
             type_info_parent parent;
         };
         
-        class object {
+        class object : public sb::ref_countered_base_not_copyable {
         public:
             virtual ~object() {}
             virtual const type_info* get_type_info() const {
@@ -40,10 +41,7 @@ namespace Sandbox {
             }
             static const type_info* get_static_type_info();
         protected:
-            object(){}
-        private:
-            object(const object&);
-            object& operator = (const object&);
+            object() : sb::ref_countered_base_not_copyable() {}
         };
         
 #define SB_META_OBJECT \
@@ -79,6 +77,11 @@ namespace Sandbox {
                 return type<T>::info();
             }
         };
+        template <class T> struct type<sb::intrusive_ptr<T> > {
+            static const type_info* info() {
+                return type<T>::info();
+            }
+        };
         
 #define SB_META_PRIVATE_CLASS(Type) \
         namespace Sandbox { namespace meta { \
@@ -102,6 +105,9 @@ namespace Sandbox {
             static void shared( void* data ) {
                 typedef sb::shared_ptr<T> ptr_type;
                 reinterpret_cast<ptr_type*>(data)->~ptr_type();
+            }
+            static void intrusive( void* data ) {
+                reinterpret_cast<T*>(data)->remove_ref();
             }
         };
         

@@ -31,7 +31,7 @@ namespace Sandbox {
 		Matrix4f	m_projection;
 		Matrix4f	m_view;
 	};
-	typedef sb::shared_ptr<ContainerTransform3d> ContainerTransform3dPtr;
+	typedef sb::intrusive_ptr<ContainerTransform3d> ContainerTransform3dPtr;
 }
 
 #endif /*SB_CONTAINER_TRANSFORM3D_H*/

@@ -17,7 +17,7 @@
 
 namespace Sandbox {
 	
-	class AnimationData {
+	class AnimationData : public sb::ref_countered_base {
 	public:
 		AnimationData();
 		~AnimationData();
@@ -38,7 +38,7 @@ namespace Sandbox {
 		size_t	m_loop_frame;
 		float	m_speed;
 	};
-	typedef sb::shared_ptr<AnimationData> AnimationDataPtr;
+	typedef sb::intrusive_ptr<AnimationData> AnimationDataPtr;
 	
 	class Animation : public Thread {
         SB_META_OBJECT

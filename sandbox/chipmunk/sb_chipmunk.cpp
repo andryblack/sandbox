@@ -42,23 +42,7 @@ namespace Sandbox {
 			}
 			return false;
 		}
-		template <class T>
-		struct compare_object {
-			explicit compare_object(const T* raw_) : raw(raw_) {}
-			bool operator() ( const sb::shared_ptr<T>& ptr) {
-				return ptr.get() == raw;
-			}
-			const T* raw;
-		};
-		template <class T> 
-		inline bool remove( std::vector<sb::shared_ptr<T> >& objects, const T* object ) {
-			typename std::vector<sb::shared_ptr<T> >::iterator i = std::find_if(objects.begin(),objects.end(),compare_object<T>(object));
-			if (i!=objects.end()) {
-				objects.erase(i);
-				return true;
-			}
-			return false;
-		}
+		
 		
 		
 		static inline cpVect vect( const Vector2f& v) {
@@ -167,11 +151,11 @@ namespace Sandbox {
             Space* _this = static_cast<Space*>(cpSpaceGetUserData(space));
             Shape* sa = static_cast<Shape*>(cpShapeGetUserData(a));
             Shape* sb = static_cast<Shape*>(cpShapeGetUserData(b));
-            CollisionHandlerPtr handler = h->shared_from_this();
+            CollisionHandlerPtr handler(h);
             if (sa && sb)
                 _this->add_collision_postprocess( collision(handler,
-                                                            sa->shared_from_this(),
-                                                            sb->shared_from_this()) );
+                                                            ShapePtr(sa),
+                                                            ShapePtr(sb)) );
             return 1;
         }
         CollisionHandler::CollisionHandler( long a, long b ) : m_collision_a(a), m_collision_b(b) {
@@ -291,7 +275,7 @@ namespace Sandbox {
 			if (shape_p) {
 				Space* space = shape_p->get_space();
 				if (space) {
-					space->RemoveShape(shape_p->shared_from_this());
+					space->RemoveShape(ShapePtr(shape_p));
 				}
 			}
 		}
@@ -416,13 +400,13 @@ namespace Sandbox {
 		BodyPtr Constraint::GetA() const {
 			void* d = cpBodyGetUserData(cpConstraintGetA(m_constraint));
 			Body* body = reinterpret_cast<Body*> (d);
-			return body ? body->shared_from_this() : BodyPtr();
-		}
+			return BodyPtr(body);
+       }
 		
 		BodyPtr Constraint::GetB() const {
 			void* d = cpBodyGetUserData(cpConstraintGetB(m_constraint));
 			Body* body = reinterpret_cast<Body*> (d);
-			return body ? body->shared_from_this() : BodyPtr();
+			return BodyPtr(body);
 		}
 		
 		

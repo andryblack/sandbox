@@ -10,8 +10,7 @@
 #ifndef SB_TEXTURE_H
 #define SB_TEXTURE_H
 
-#include <sbstd/sb_shared_ptr.h>
-#include "sb_notcopyable.h"
+#include <sbstd/sb_intrusive_ptr.h>
 #include <sbstd/sb_string.h>
 #include <ghl_types.h>
 
@@ -23,7 +22,7 @@ namespace Sandbox {
     
 	class Resources;
 	
-    class Texture : public NotCopyable {
+    class Texture : public sb::ref_countered_base_not_copyable {
 	private:
         GHL::Texture*   m_texture;
         sb::string              m_file;
@@ -55,7 +54,7 @@ namespace Sandbox {
         
         void SetTextureSize(GHL::UInt32 tw,GHL::UInt32 th);
 	};
-	typedef sb::shared_ptr<Texture> TexturePtr;
+	typedef sb::intrusive_ptr<Texture> TexturePtr;
 }
 
 #endif /*SB_TEXTURE_H*/

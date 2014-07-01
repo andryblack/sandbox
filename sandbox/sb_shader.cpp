@@ -41,18 +41,18 @@ namespace Sandbox {
 	}
 	
     template <class T>
-    sb::shared_ptr<ShaderUniform> Shader::GetUniform(const char* name) {
+    sb::intrusive_ptr<ShaderUniform> Shader::GetUniform(const char* name) {
 		sb::string sname = name;
-		sb::map<sb::string,sb::shared_ptr<ShaderUniform> >::iterator it = m_uniforms_map.find(sname);
+		sb::map<sb::string,sb::intrusive_ptr<ShaderUniform> >::iterator it = m_uniforms_map.find(sname);
 		if (it!=m_uniforms_map.end())
 			return it->second;
 		GHL::ShaderUniform* u = m_program ? m_program->GetUniform(name) : 0;
 		if (true) {
-            sb::shared_ptr<T> fu = sb::make_shared<T>(u);
+            sb::intrusive_ptr<T> fu(new T(u));
 			m_uniforms_map.insert(std::make_pair(sname,fu));
 			return fu;
 		}
-		return sb::shared_ptr<ShaderUniform>();
+		return sb::intrusive_ptr<ShaderUniform>();
 	}
     ShaderFloatUniformPtr Shader::GetFloatUniform(const char* name) {
         return sb::dynamic_pointer_cast<ShaderFloatUniform>(GetUniform<ShaderFloatUniform>(name));

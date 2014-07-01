@@ -42,7 +42,7 @@ namespace Sandbox {
         friend class SceneObject;
         virtual void DrawWithModificators( Graphics& g ) const;
 	};
-	typedef sb::shared_ptr<Container> ContainerPtr;
+	typedef sb::intrusive_ptr<Container> ContainerPtr;
 }
 
 #endif /*SB_CONTAINER_H*/

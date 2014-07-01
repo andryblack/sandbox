@@ -17,7 +17,7 @@ namespace Sandbox {
 
 	/// @brief Image object
     /// Rectangular part of texture
-    class Image {
+    class Image : public sb::ref_countered_base {
     private:
         TexturePtr m_texture;
         float   m_src_x;
@@ -51,7 +51,7 @@ namespace Sandbox {
         void SetSize(float w,float h);
     };
 	
-    typedef sb::shared_ptr<Image> ImagePtr;
+    typedef sb::intrusive_ptr<Image> ImagePtr;
 	
 	
 	inline Image::Image()

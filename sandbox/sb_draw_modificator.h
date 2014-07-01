@@ -9,7 +9,6 @@
 #ifndef __sr_osx__sb_draw_modificator__
 #define __sr_osx__sb_draw_modificator__
 
-#include <sbstd/sb_shared_ptr.h>
 #include <meta/sb_meta.h>
 #include <sbstd/sb_vector.h>
 #include "sb_color.h"
@@ -29,7 +28,7 @@ namespace Sandbox {
         virtual unsigned int GetStoreMask() const = 0;
         virtual void    Apply(Graphics& g) const = 0;
     };
-    typedef sb::shared_ptr<DrawModificator> DrawModificatorPtr;
+    typedef sb::intrusive_ptr<DrawModificator> DrawModificatorPtr;
     
     class DrawModificatorsStack {
     public:
@@ -64,7 +63,7 @@ namespace Sandbox {
         
         void Apply(Graphics& g) const;
     };
-    typedef sb::shared_ptr<ColorModificator> ColorModificatorPtr;
+    typedef sb::intrusive_ptr<ColorModificator> ColorModificatorPtr;
     
     class TransformModificator : public DrawModificator {
         SB_META_OBJECT
@@ -90,7 +89,7 @@ namespace Sandbox {
 
         void Apply(Graphics& g) const;
     };
-    typedef sb::shared_ptr<TransformModificator> TransformModificatorPtr;
+    typedef sb::intrusive_ptr<TransformModificator> TransformModificatorPtr;
 }
 
 SB_META_PRIVATE_CLASS(DrawModificatorsStack)

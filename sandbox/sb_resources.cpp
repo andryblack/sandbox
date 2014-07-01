@@ -112,7 +112,7 @@ namespace Sandbox {
                 }
                 texture->SetData(0,0,subimg);
                 subimg->Release();
-                output.push_back(Image(sb::make_shared<Texture>(texture),0,0,float(ipw),float(iph)));
+                output.push_back(Image(TexturePtr(new Texture(texture)),0,0,float(ipw),float(iph)));
                 output.back().SetHotspot(Vector2f(-float(x),-float(y)));
                 x+=ipw;
             }
@@ -193,9 +193,11 @@ namespace Sandbox {
 		}
         GHL::ImageInfo info;
         if (!m_image->GetFileInfo(ds, &info)) {
+            ds->Release();
             LogError(MODULE) <<"error getting image info for file " << fn;
 			return false;
         }
+        ds->Release();
         w = info.width;
         h = info.height;
 		return true;
@@ -209,7 +211,7 @@ namespace Sandbox {
                                                         th,alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,
                                                         setData ? data : 0);
 		if (data && !setData) texture->SetData(0,0,data);
-        return sb::make_shared<Texture>(texture,w,h);
+        return TexturePtr( new Texture(texture,w,h));
 	}
 	
 	
@@ -220,12 +222,9 @@ namespace Sandbox {
         sb::string fn = filename;
         
         
-#ifdef SB_RESOURCES_CACHE
-        sb::weak_ptr<Texture> al = m_textures[fn];
-		if (TexturePtr tex = al.lock()) {
+        if (TexturePtr tex = m_textures[fn]) {
 			return tex;
 		}
-#endif
     
         GHL::UInt32 img_w = 0;
         GHL::UInt32 img_h = 0;
@@ -233,7 +232,7 @@ namespace Sandbox {
             return TexturePtr();
         }
         
-        TexturePtr ptr = sb::make_shared<Texture>(fn,need_premultiply,img_w,img_h);
+        TexturePtr ptr = TexturePtr(new Texture(fn,need_premultiply,img_w,img_h));
 		
         GHL::UInt32 tw = 0;//next_pot( img->GetWidth() );
         GHL::UInt32 th = 0;//next_pot( img->GetHeight() );
@@ -242,10 +241,7 @@ namespace Sandbox {
         
         ptr->SetTextureSize(tw,th);
         
-#ifdef SB_RESOURCES_CACHE
 		m_textures[fn]=ptr;
-#endif
-        m_managed_textures.push_back(ptr);
         return ptr;
 	}
     
@@ -351,7 +347,7 @@ namespace Sandbox {
         }
 		GHL::UInt32 imgW = texture->GetOriginalWidth();
 		GHL::UInt32 imgH = texture->GetOriginalHeight();
-        return sb::make_shared<Image>(texture,0,0,float(imgW),float(imgH));
+        return ImagePtr( new Image(texture,0,0,float(imgW),float(imgH)));
 	}
     
     static void change_shader_extension(std::string& filename) {
@@ -374,16 +370,14 @@ namespace Sandbox {
         change_shader_extension(ffilename);
         
         
-#ifdef SB_RESOURCES_CACHE
 		std::string name = vfilename+"+"+ffilename;
-        sb::weak_ptr<Shader> al = m_shaders[name];
-		if (ShaderPtr sh = al.lock()) {
+        if (ShaderPtr sh = m_shaders[name]) {
 			return sh;
 		}
-#endif
+
 		GHL::VertexShader* vs = 0;
 		GHL::FragmentShader* fs = 0;
-#ifdef SB_RESOURCES_CACHE
+
 		{
 			std::map<std::string,GHL::VertexShader*>::iterator it = m_vshaders.find(vfilename);
 			if (it!=m_vshaders.end()) vs = it->second;
@@ -392,7 +386,7 @@ namespace Sandbox {
 			std::map<std::string,GHL::FragmentShader*>::iterator it = m_fshaders.find(ffilename);
 			if (it!=m_fshaders.end()) fs = it->second;
 		}
-#endif
+
 		if (!vs) {
 			std::string filename = m_base_path+vfilename;
 			GHL::DataStream* ds = m_vfs->OpenFile(filename.c_str());
@@ -411,9 +405,7 @@ namespace Sandbox {
 				LogError(MODULE) << "error create shader " << vfilename;
 				//return ShaderPtr();
 			}
-#ifdef SB_RESOURCES_CACHE
 			m_vshaders[vfilename]=vs;
-#endif
 		}
 		if (!fs) {
 			std::string filename = m_base_path+ffilename;
@@ -433,27 +425,19 @@ namespace Sandbox {
 				LogError(MODULE) << "error creating shader " << ffilename;
 				//return ShaderPtr();
 			}
-#ifdef SB_RESOURCES_CACHE
 			m_fshaders[vfilename]=fs;
-#endif
 		}
 		GHL::ShaderProgram* sp = m_render->CreateShaderProgram(vs,fs);
 		if (!sp) {
 			LogError(MODULE) << "error creating shader program from " << vfilename << " , " << ffilename ;
 			//return ShaderPtr();
 		}
-		ShaderPtr res = sb::make_shared<Shader>(sp);
-#ifdef SB_RESOURCES_CACHE
+		ShaderPtr res = ShaderPtr(new Shader(sp));
 		m_shaders[name]=res;
-#endif
 		return res;
 	}
 	
-	
-    sb::shared_ptr<Atlaser> Resources::CreateAtlaser(int w,int h) {
-        return sb::make_shared<Atlaser>(this,w,h);
-    }
-    
+	    
     RenderTargetPtr Resources::CreateRenderTarget(int w, int h, bool alpha, bool depth) {
         sb_assert(w>0);
         sb_assert(h>0);
@@ -467,37 +451,38 @@ namespace Sandbox {
             m_render->Clear(1, 0, 0, 1, 0);
             m_render->EndScene();
         }*/
-        return sb::make_shared<RenderTarget>(rt);
+        return RenderTargetPtr( new RenderTarget(rt));
     }
     
     size_t    Resources::FreeMemory(size_t need_release,bool full) {
         size_t memory_used = 0;
-        for (sb::list<sb::weak_ptr<Texture> >::iterator it = m_managed_textures.begin();it!=m_managed_textures.end();) {
-            TexturePtr t = it->lock();
-            sb::list<sb::weak_ptr<Texture> >::iterator next = it;
+        for (TexturesCacheMap::iterator it = m_textures.begin();it!=m_textures.end();) {
+            TexturePtr& t = it->second;
+            TexturesCacheMap::iterator next = it;
             ++next;
             if (t) {
                 memory_used += t->GetMemoryUsage();
                 if (need_release) {
                     size_t lt = t->GetLiveTicks();
                     if ( lt && lt < m_live_ticks ) {
-                        size_t released = t->Release();
-                        memory_used-=released;
-                        if (released>need_release) {
-                            need_release = 0;
+                        if (t->unique()) {
+                            t.reset();
+                            next = m_textures.erase(it);
                         } else {
-                            need_release -= released;
-                        }
-                        if (released) {
-                            m_managed_textures.push_back(t);
-                            next = m_managed_textures.erase(it);
+                            size_t released = t->Release();
+                            memory_used-=released;
+                            if (released>need_release) {
+                                need_release = 0;
+                            } else {
+                                need_release -= released;
+                            }
                         }
                     }
                 } else {
                     if (!full) break;
                 }
             } else {
-                next = m_managed_textures.erase(it);
+                next = m_textures.erase(it);
             }
             it = next;
         }

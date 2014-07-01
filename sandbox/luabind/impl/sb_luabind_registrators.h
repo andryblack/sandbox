@@ -264,17 +264,8 @@ namespace Sandbox {
         struct shared_klass_constructor_helper {
             typedef T* (*constructor_func)(lua_State*);
             static int constructor( lua_State* L ) {
-                data_holder* holder = reinterpret_cast<data_holder*>(lua_newuserdata(L, 
-                                                                                     sizeof(data_holder)+
-                                                                                     sizeof(sb::shared_ptr<T>)));
-                holder->type = data_holder::shared_ptr;
-                holder->is_const = false;
-                holder->info = meta::type<T>::info();
-                holder->destructor = &destructor_helper<T>::shared;
-                void* data = holder+1;
                 constructor_func func = *reinterpret_cast<constructor_func*>(lua_touserdata(L, lua_upvalueindex(1)));
-                new (data) sb::shared_ptr<T>((*func)(L));
-                lua_set_metatable( L, *holder );
+                stack<sb::intrusive_ptr<T> >::push(L,sb::intrusive_ptr<T>((*func)(L)));
                 return 1;
             }
         };

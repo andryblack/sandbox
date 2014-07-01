@@ -23,7 +23,7 @@ namespace Sandbox {
             using impl::function_wrapper_base::call;
         private:
         };
-        typedef sb::shared_ptr<function> function_ptr;
+        typedef sb::intrusive_ptr<function> function_ptr;
         
         
 

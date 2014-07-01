@@ -189,7 +189,7 @@ namespace Sandbox {
                     lua_xmove(L, main_state, 1);
                 }
                 raw->SetFunction(main_state);
-                luabind::stack<sb::shared_ptr<LuaCollisionHandler> >::push(L, sb::shared_ptr<LuaCollisionHandler>( raw ));
+                luabind::stack<sb::intrusive_ptr<LuaCollisionHandler> >::push(L, sb::intrusive_ptr<LuaCollisionHandler>( raw ));
                 return 1;
             }
         private:

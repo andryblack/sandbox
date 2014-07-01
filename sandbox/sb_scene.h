@@ -25,6 +25,6 @@ namespace Sandbox {
         void Update( float dt );
     private:
 	};
-    typedef sb::shared_ptr<Scene> ScenePtr;
+    typedef sb::intrusive_ptr<Scene> ScenePtr;
 }
 #endif /*SB_SCENE_H*/

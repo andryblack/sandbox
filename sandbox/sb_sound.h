@@ -9,7 +9,7 @@
 #ifndef __sr_osx__sb_sound__
 #define __sr_osx__sb_sound__
 
-#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_intrusive_ptr.h>
 #include "sb_notcopyable.h"
 #include <ghl_types.h>
 #include <sbstd/sb_map.h>
@@ -27,9 +27,9 @@ namespace Sandbox {
     class Resources;
     
     class Sound;
-    typedef sb::shared_ptr<Sound> SoundPtr;
+    typedef sb::intrusive_ptr<Sound> SoundPtr;
     
-    class SoundInstance : public NotCopyable, public sb::enable_shared_from_this<SoundInstance> {
+    class SoundInstance : public sb::ref_countered_base_not_copyable {
     public:
         SoundInstance(const SoundPtr& effect, GHL::SoundInstance* instance, float crntVolume);
         ~SoundInstance();
@@ -49,11 +49,11 @@ namespace Sandbox {
         friend  class Sound;
         void    UpdateVolume();
     };
-    typedef sb::shared_ptr<SoundInstance> SoundInstancePtr;
+    typedef sb::intrusive_ptr<SoundInstance> SoundInstancePtr;
     
     class SoundManager;
 
-    class Sound : public NotCopyable, public sb::enable_shared_from_this<Sound> {
+    class Sound : public sb::ref_countered_base_not_copyable {
     public:
         explicit Sound( SoundManager* mgr, GHL::SoundEffect* eff );
         ~Sound();

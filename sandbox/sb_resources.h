@@ -30,7 +30,6 @@ namespace GHL {
 }
 namespace Sandbox {
 	
-#define SB_RESOURCES_CACHE
 	
 	class Atlaser;
 
@@ -57,8 +56,6 @@ namespace Sandbox {
 		GHL::ImageDecoder* GetImageDecoder() {return m_image;}
 		GHL::VFS* GetVFS() { return m_vfs;}
 		const std::string& GetBasePath() const { return m_base_path;}
-		
-        sb::shared_ptr<Atlaser> CreateAtlaser(int w, int h);
 		
 		TexturePtr CreateTexture( GHL::UInt32 w, 
                                  GHL::UInt32 h, 
@@ -87,16 +84,16 @@ namespace Sandbox {
 		bool ImageHaveAlpha(const GHL::Image* img) const;
 		bool ConvertImage(GHL::Image* img,GHL::Texture* tex) const;
         bool GetImageInfo(sb::string& file,GHL::UInt32& w,GHL::UInt32& h);
-#ifdef SB_RESOURCES_CACHE
-		sb::map<sb::string,sb::weak_ptr<Texture> >  m_textures;
+
+        typedef sb::map<sb::string,TexturePtr > TexturesCacheMap;
+        TexturesCacheMap m_textures;
 		sb::map<sb::string,GHL::VertexShader*>      m_vshaders;
 		sb::map<sb::string,GHL::FragmentShader*>    m_fshaders;
-		sb::map<sb::string,sb::weak_ptr<Shader> >   m_shaders;
-#endif
+		sb::map<sb::string,ShaderPtr >   m_shaders;
+
         size_t    m_live_ticks;
         size_t    m_memory_limit;
         size_t    m_memory_used;
-        sb::list<sb::weak_ptr<Texture> >   m_managed_textures;
         size_t    FreeMemory(size_t mem,bool full);
         
         void GetTextureSize( GHL::UInt32 w,GHL::UInt32 h, GHL::UInt32& tw, GHL::UInt32& th ) const;

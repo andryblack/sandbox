@@ -11,13 +11,14 @@
 
 #include "sb_texture.h"
 
+
 namespace GHL {
     struct RenderTarget;
 }
 
 namespace Sandbox {
     
-    class RenderTarget : public NotCopyable {
+    class RenderTarget : public sb::ref_countered_base_not_copyable {
     public:
         explicit RenderTarget(GHL::RenderTarget* rt);
         ~RenderTarget();
@@ -27,7 +28,7 @@ namespace Sandbox {
         GHL::RenderTarget*   m_rt;
         TexturePtr  m_texture;
     };
-    typedef sb::shared_ptr<RenderTarget> RenderTargetPtr;
+    typedef sb::intrusive_ptr<RenderTarget> RenderTargetPtr;
 }
 
 #endif /* defined(__caleydoscope__sb_rendertatget__) */

@@ -28,6 +28,7 @@ namespace sb {
 
 #include <cstring>
 #include "sb_assert.h"
+#include "sb_pointer.h"
 
 namespace sb {
     template <class T> class weak_ptr;
@@ -79,9 +80,6 @@ namespace sb {
                 static_cast<const T*>(v)->~T();
             }
         };
-        
-        struct static_cast_tag{};
-        struct dynamic_cast_tag{};
         
         
         template <class T,class Y>

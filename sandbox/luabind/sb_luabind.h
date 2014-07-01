@@ -57,18 +57,7 @@ namespace Sandbox {
             meta::bind_type<T>::bind( kr );
             lua_register_metatable(L,meta::type<T>::info());
         }
-        template <class T,class W>
-        static inline void ClassWrapper( lua_State* L ) {
-            LUA_CHECK_STACK(0)
-            Class<T>(L);
-            impl::shared_klass_registrator<W> kr(L);
-            lua_create_metatable(L);
-            {
-                LUA_CHECK_STACK(0)
-                meta::bind_type<W>::bind( kr );
-            }
-            lua_register_wrapper(L,meta::type<W>::info());
-        }
+        
         template <class T>
         static inline void Enum( lua_State* L ) {
             LUA_CHECK_STACK(0)

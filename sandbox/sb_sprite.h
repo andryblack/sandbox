@@ -31,7 +31,7 @@ namespace Sandbox {
 		ImagePtr m_image;
 		Vector2f m_pos;
 	};
-	typedef sb::shared_ptr<Sprite> SpritePtr;
+	typedef sb::intrusive_ptr<Sprite> SpritePtr;
     
     class ColorizedSprite : public Sprite {
         SB_META_OBJECT

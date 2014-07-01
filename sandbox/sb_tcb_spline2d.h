@@ -7,7 +7,7 @@
 #define SB_TCB_SPLINE2D_H
 
 #include "sb_vector2.h"
-#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_intrusive_ptr.h>
 #include <sbstd/sb_vector.h>
 
 
@@ -15,7 +15,7 @@ namespace Sandbox {
 
     class LuaVM;
 
-    class TCBSpline2d
+    class TCBSpline2d : public sb::ref_countered_base
     {
     private:
         struct Point {
@@ -61,6 +61,6 @@ namespace Sandbox {
         static void Register( LuaVM* lua );
     };
     
-    typedef sb::shared_ptr<TCBSpline2d> TCBSpline2dPtr;
+    typedef sb::intrusive_ptr<TCBSpline2d> TCBSpline2dPtr;
 }
 #endif // SB_TCB_SPLINE2D_H

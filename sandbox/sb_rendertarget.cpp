@@ -15,7 +15,7 @@ namespace Sandbox {
     RenderTarget::RenderTarget(GHL::RenderTarget* rt) : m_rt(rt){
         GHL::Texture* tex = rt->GetTexture();
         tex->AddRef();
-        m_texture = sb::make_shared<Texture>(tex);
+        m_texture.reset( new Texture(tex) );
     }
     
     RenderTarget::~RenderTarget() {

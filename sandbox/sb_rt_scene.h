@@ -27,7 +27,7 @@ namespace Sandbox {
     private:
         RenderTargetPtr m_rt;
     };
-    typedef sb::shared_ptr<RTScene> RTScenePtr;
+    typedef sb::intrusive_ptr<RTScene> RTScenePtr;
 }
 
 #endif /* defined(__caleydoscope__sb_rt_scene__) */

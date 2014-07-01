@@ -10,8 +10,7 @@
 #ifndef SB_SHADER_H
 #define SB_SHADER_H
 
-#include <sbstd/sb_shared_ptr.h>
-#include "sb_notcopyable.h"
+#include <sbstd/sb_intrusive_ptr.h>
 #include <sbstd/sb_vector.h>
 #include <sbstd/sb_string.h>
 #include <sbstd/sb_map.h>
@@ -24,7 +23,7 @@ namespace GHL {
 }
 namespace Sandbox {
 	
-	class ShaderUniform : public NotCopyable {
+	class ShaderUniform : public sb::ref_countered_base_not_copyable {
 	public:
         virtual ~ShaderUniform() {}
 		virtual void DoSet() = 0;
@@ -32,7 +31,7 @@ namespace Sandbox {
 		explicit ShaderUniform(GHL::ShaderUniform* uniform) : m_uniform(uniform) {}
 		GHL::ShaderUniform* m_uniform;
 	};
-	typedef sb::shared_ptr<ShaderUniform> ShaderUniformPtr;
+	typedef sb::intrusive_ptr<ShaderUniform> ShaderUniformPtr;
 	
 	class ShaderFloatUniform : public ShaderUniform {
 	public:
@@ -42,7 +41,7 @@ namespace Sandbox {
 	private:
 		float m_value;
 	};
-    typedef sb::shared_ptr<ShaderFloatUniform> ShaderFloatUniformPtr;
+    typedef sb::intrusive_ptr<ShaderFloatUniform> ShaderFloatUniformPtr;
     
     class ShaderVec2Uniform : public ShaderUniform {
 	public:
@@ -52,9 +51,9 @@ namespace Sandbox {
 	private:
 		Vector2f m_value;
 	};
-    typedef sb::shared_ptr<ShaderVec2Uniform> ShaderVec2UniformPtr;
+    typedef sb::intrusive_ptr<ShaderVec2Uniform> ShaderVec2UniformPtr;
     
-	class Shader {
+	class Shader : public sb::ref_countered_base_not_copyable {
 	public:
 		explicit Shader( GHL::ShaderProgram* prg);
 		~Shader();
@@ -69,7 +68,7 @@ namespace Sandbox {
 		sb::map<sb::string,ShaderUniformPtr> m_uniforms_map;
 	};
 	
-	typedef sb::shared_ptr<Shader> ShaderPtr;
+	typedef sb::intrusive_ptr<Shader> ShaderPtr;
 }
 
 #endif /*SB_SADER_H*/

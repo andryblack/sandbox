@@ -40,7 +40,7 @@ namespace Sandbox {
 		Container* m_parent;
 		bool	m_visible;
 	};
-	typedef sb::shared_ptr<SceneObject> SceneObjectPtr;
+	typedef sb::intrusive_ptr<SceneObject> SceneObjectPtr;
 }
 
 #endif /*SB_SCENE_OBJECT_H*/

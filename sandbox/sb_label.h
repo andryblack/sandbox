@@ -37,7 +37,7 @@ namespace Sandbox {
 		FontAlign	m_align;
 		sb::string	m_text;
 	};
-	typedef sb::shared_ptr<Label> LabelPtr;
+	typedef sb::intrusive_ptr<Label> LabelPtr;
 }
 
 #endif /*SB_LABEL_H*/

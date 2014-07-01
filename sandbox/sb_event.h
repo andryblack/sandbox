@@ -10,18 +10,18 @@
 #ifndef SB_EVENT_H
 #define SB_EVENT_H
 
-#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_intrusive_ptr.h>
 #include <luabind/sb_luabind_stack.h>
 
 namespace Sandbox {
 
-	class Event {
+	class Event : public sb::ref_countered_base {
 	public:
 		virtual ~Event() {}
 		virtual void Emmit() = 0;
 	protected:
 	};
-	typedef sb::shared_ptr<Event> EventPtr;
+	typedef sb::intrusive_ptr<Event> EventPtr;
 	
     namespace luabind {
         
