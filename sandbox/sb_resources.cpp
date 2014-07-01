@@ -115,6 +115,7 @@ namespace Sandbox {
                 output.push_back(Image(TexturePtr(new Texture(texture)),0,0,float(ipw),float(iph)));
                 output.back().SetHotspot(Vector2f(-float(x),-float(y)));
                 x+=ipw;
+                texture->DiscardInternal();
             }
             y+=iph;
         }
