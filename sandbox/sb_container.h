@@ -16,7 +16,7 @@
 
 namespace Sandbox {
 
-	class Container : public SceneObject , public DrawModificatorsStack {
+	class Container : public SceneObject {
 	    SB_META_OBJECT
     public:
     	Container();
@@ -31,8 +31,14 @@ namespace Sandbox {
         
         void Update( float dt );
         
-        void AddModificator( const DrawModificatorPtr& m ) { AddModificatorImpl(m); }
-        void RemoveModificator( const DrawModificatorPtr& m ) { RemoveModificatorImpl(m); }
+        void SetTransformModificator(const TransformModificatorPtr& ptr);
+        TransformModificatorPtr GetTransformModificator();
+        
+        void SetColorModificator(const ColorModificatorPtr& ptr);
+        ColorModificatorPtr GetColorModificator();
+        
+        void SetTranslate(const Vector2f& tr);
+        Vector2f GetTranslate() const;
         
     protected:
     	void UpdateChilds( float dt );
@@ -40,7 +46,8 @@ namespace Sandbox {
     private:
         void MoveToTop( SceneObject* obj );
         friend class SceneObject;
-        virtual void DrawWithModificators( Graphics& g ) const;
+        TransformModificatorPtr     m_transform;
+        ColorModificatorPtr         m_color;
 	};
 	typedef sb::intrusive_ptr<Container> ContainerPtr;
 }

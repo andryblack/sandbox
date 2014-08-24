@@ -84,8 +84,11 @@ SB_META_METHOD(AddObject)
 SB_META_METHOD(InsertBefore)
 SB_META_METHOD(RemoveObject)
 SB_META_METHOD(Clear)
-SB_META_METHOD(AddModificator)
-SB_META_METHOD(RemoveModificator)
+SB_META_METHOD(GetTransformModificator)
+SB_META_METHOD(SetTransformModificator)
+SB_META_METHOD(GetColorModificator)
+SB_META_METHOD(SetColorModificator)
+SB_META_PROPERTY_RW_DEF(Translate)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::BlendMode,void);

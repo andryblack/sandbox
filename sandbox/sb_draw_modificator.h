@@ -23,30 +23,10 @@ namespace Sandbox {
     protected:
         DrawModificator()  {}
     public:
-        static const unsigned int STORE_COLOR = 1;
-        static const unsigned int STORE_TRANSFORM = 2;
-        virtual unsigned int GetStoreMask() const = 0;
         virtual void    Apply(Graphics& g) const = 0;
     };
     typedef sb::intrusive_ptr<DrawModificator> DrawModificatorPtr;
     
-    class DrawModificatorsStack {
-    public:
-        DrawModificatorsStack();
-        void ProcessModificators( Graphics& g ) const;
-    protected:
-        void AddModificatorImpl( const DrawModificatorPtr& m );
-        void RemoveModificatorImpl( const DrawModificatorPtr& m );
-        
-        virtual void DrawWithModificators( Graphics& g ) const = 0;
-    private:
-        sb::vector<DrawModificatorPtr>  m_modificators;
-        unsigned int m_store_mask;
-        void    UpdateStoreMask();
-        void    ProcessWithStoreColor(Graphics& g) const;
-        void    ProcessWithStoreTransform(Graphics& g) const;
-        void    ProcessStack(Graphics& g) const;
-    };
     
     
     class ColorModificator : public DrawModificator {
@@ -54,7 +34,6 @@ namespace Sandbox {
     private:
         Color   m_color;
     public:
-        virtual unsigned int GetStoreMask() const { return STORE_COLOR; }
         
         const Color& GetColor() const { return m_color; }
         void SetColor(const Color& c) { m_color = c; }
@@ -74,7 +53,6 @@ namespace Sandbox {
 		float		m_angle;
     public:
         TransformModificator();
-        virtual unsigned int GetStoreMask() const { return STORE_TRANSFORM; }
         
         void SetTranslate(const Vector2f& tr) { m_translate = tr; }
 		const Vector2f& GetTranslate() const { return m_translate;}
@@ -91,7 +69,5 @@ namespace Sandbox {
     };
     typedef sb::intrusive_ptr<TransformModificator> TransformModificatorPtr;
 }
-
-SB_META_PRIVATE_CLASS(DrawModificatorsStack)
 
 #endif /* defined(__sr_osx__sb_draw_modificator__) */
