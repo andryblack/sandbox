@@ -275,7 +275,18 @@ namespace Sandbox {
     int LuaVM::lua_module_searcher(lua_State *L) {
         LuaVM* this_ = reinterpret_cast<LuaVM*>(lua_touserdata(L, lua_upvalueindex(1)));
         const char *name = luaL_checkstring(L, 1);
-        sb::string path = this_->m_base_path + name + ".lua";
+        
+        sb::string path = this_->m_base_path;
+        const char *begin = name;
+        for (const char* s = name; *s; ++s) {
+            if (*s=='.') {
+                path.append(begin, s);
+                path.append("/");
+                begin = s+1;
+            }
+        }
+        path.append(begin);
+        path.append(".lua");
         GHL::DataStream* ds = this_->m_resources->OpenFile(path.c_str());
         if (!ds) {
 			LogError(MODULE) << "error opening module file " << name;
