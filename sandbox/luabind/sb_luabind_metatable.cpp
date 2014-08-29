@@ -8,7 +8,6 @@
 
 #include "sb_luabind_metatable.h"
 #include "sb_luabind_stack.h"
-#include "sb_luabind_wrapper.h"
 #include "sb_inplace_string.h"
 #include "../sb_log.h"
 

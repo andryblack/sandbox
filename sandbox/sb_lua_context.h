@@ -10,6 +10,7 @@
 #define __sr_osx__sb_lua_context__
 
 #include "luabind/sb_luabind_ref.h"
+#include "luabind/impl/sb_luabind_wrapper_base.h"
 #include "luabind/sb_luabind_stack.h"
 #include "sb_notcopyable.h"
 #include <sbstd/sb_traits.h>

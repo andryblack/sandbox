@@ -19,7 +19,6 @@
 #include "sb_luabind_stack.h"
 #include "impl/sb_luabind_registrators.h"
 #include "sb_luabind_ref.h"
-#include "sb_luabind_wrapper.h"
 
 namespace Sandbox {
     
