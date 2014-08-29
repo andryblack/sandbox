@@ -33,6 +33,10 @@ namespace Sandbox {
         Image(const TexturePtr& texture,float src_x,float src_y,float src_w,float src_h,float w,float h);
 		
         const TexturePtr& GetTexture() const { return m_texture;}
+        
+        void SetTextureRect(float x,float y,float w,float h) {
+            m_src_x = x; m_src_y = y; m_src_w = w; m_src_h = h;
+        }
 		
         float GetTextureX() const { return m_src_x;}
         float GetTextureY() const { return m_src_y;}

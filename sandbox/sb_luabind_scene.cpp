@@ -34,6 +34,12 @@ SB_META_PROPERTY_RW(Image,GetImage,SetImage)
 SB_META_PROPERTY_RW(Pos,GetPos,SetPos)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::SpriteFill)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW(Size,GetSize,SetSize)
+SB_META_PROPERTY_RW(Rect,GetRect,SetRect)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::ColorizedSprite)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Color,GetColor,SetColor)
@@ -161,6 +167,7 @@ namespace Sandbox {
     void register_scene( lua_State* lua ) {
         luabind::Class<SceneObject>(lua);
         luabind::Class<Sprite>(lua);
+        luabind::Class<SpriteFill>(lua);
         luabind::Class<ColorizedSprite>(lua);
         luabind::Class<ClearScene>(lua);
         luabind::Class<FillRect>(lua);

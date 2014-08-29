@@ -14,9 +14,11 @@
 #include "sb_image.h"
 #include "sb_scene_object.h"
 #include "sb_color.h"
+#include "sb_rect.h"
 
 namespace Sandbox {
-	
+    
+    
 	class Sprite : public SceneObject {
         SB_META_OBJECT
     public:
@@ -30,6 +32,22 @@ namespace Sandbox {
 	protected:
 		ImagePtr m_image;
 		Vector2f m_pos;
+	};
+	typedef sb::intrusive_ptr<Sprite> SpritePtr;
+    
+    class SpriteFill : public Sprite {
+        SB_META_OBJECT
+    public:
+		SpriteFill() {}
+		~SpriteFill() {}
+		void SetSize(const Vector2f& s) { m_size = s; }
+        const Vector2f& GetSize() const { return m_size; }
+        void SetRect(const Rectf& rect);
+        Rectf GetRect() const;
+		virtual void Draw( Graphics& g ) const;
+	protected:
+		ImagePtr m_image;
+		Vector2f m_size;
 	};
 	typedef sb::intrusive_ptr<Sprite> SpritePtr;
     
