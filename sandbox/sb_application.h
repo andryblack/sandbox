@@ -38,7 +38,9 @@ namespace Sandbox {
 
         void    AddScene( const RTScenePtr& scene );
         void    RemoveScene( const RTScenePtr& scene );
-  	protected:
+        void    SetMouseContext(const LuaContextPtr& ctx );
+  	
+    protected:
 		Application();
 		virtual ~Application();
 		virtual void Update(float) {}
@@ -71,6 +73,7 @@ namespace Sandbox {
 		GHL::ImageDecoder*	m_image_decoder;
 		GHL::Sound*		m_sound;
 		LuaVM*			m_lua;
+        LuaContextPtr   m_mouse_ctx;
 		Graphics*		m_graphics;
 		Resources*		m_resources;
         SoundManager*   m_sound_mgr;

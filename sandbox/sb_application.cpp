@@ -50,6 +50,7 @@ SB_META_DECLARE_KLASS(Sandbox::Application, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
 SB_META_METHOD(AddScene)
 SB_META_METHOD(RemoveScene)
+SB_META_METHOD(SetMouseContext)
 SB_META_END_KLASS_BIND()
 
 
@@ -342,6 +343,9 @@ namespace Sandbox {
             m_rt_scenes.erase(it);
         }
     }
+    void    Application::SetMouseContext(const LuaContextPtr& ctx ) {
+        m_mouse_ctx = ctx;
+    }
 	
 	void Application::SetClearColor(const Color& c) {
 		m_clear_buffer = true;
@@ -396,18 +400,27 @@ namespace Sandbox {
 #ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key));
 #endif
+        if (m_mouse_ctx) {
+            m_mouse_ctx->call_self("onDown",key,x,y);
+        }
     }
 	///
 	void GHL_CALL Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
 #ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectMouseMove(x, y, 0);
 #endif
+        if (m_mouse_ctx) {
+            m_mouse_ctx->call_self("onMove",key,x,y);
+        }
     }
 	///
 	void GHL_CALL Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
 #ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectMouseRelease(x, y, mygui::translate_key(key));
 #endif
+        if (m_mouse_ctx) {
+            m_mouse_ctx->call_self("onUp",key,x,y);
+        }
     }
 	///
 	void GHL_CALL Application::OnDeactivated() {
