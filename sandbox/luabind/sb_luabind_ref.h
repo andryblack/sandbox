@@ -10,6 +10,8 @@
 #define YinYang_sb_luabind_ref_h
 
 #include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_pointer.h>
+
 #include "sb_notcopyable.h"
 #include "sb_luabind_stack.h"
 
@@ -23,7 +25,7 @@ namespace Sandbox {
         };
         typedef sb::shared_ptr<LuaVMHelper> LuaVMHelperPtr;
         typedef sb::weak_ptr<LuaVMHelper> LuaVMHelperWeakPtr;
-        class LuaReference : public NotCopyable {
+        class LuaReference : public sb::ref_countered_base_not_copyable {
         public:
             LuaReference();
             explicit LuaReference( const LuaVMHelperWeakPtr& ptr );
@@ -57,19 +59,19 @@ namespace Sandbox {
             }
         };
         template <>
-        struct stack<sb::shared_ptr<LuaReference> >{
-            static void push( lua_State* L, const sb::shared_ptr<LuaReference>& val ) {
+        struct stack<sb::intrusive_ptr<LuaReference> >{
+            static void push( lua_State* L, const sb::intrusive_ptr<LuaReference>& val ) {
                 if (val) {
                     stack<LuaReference>::push(L, *val);
                 } else {
                     lua_pushnil(L);
                 }
             }
-            static sb::shared_ptr<LuaReference> get(lua_State* L, int idx) {
+            static sb::intrusive_ptr<LuaReference> get(lua_State* L, int idx) {
                 if (lua_isnil(L, idx)) {
-                    return sb::shared_ptr<LuaReference>();
+                    return sb::intrusive_ptr<LuaReference>();
                 }
-                sb::shared_ptr<LuaReference> res(new LuaReference());
+                sb::intrusive_ptr<LuaReference> res(new LuaReference());
                 lua_pushvalue(L, idx);
                 res->SetObject(L);
                 return res;

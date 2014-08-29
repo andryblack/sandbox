@@ -372,18 +372,15 @@ namespace Sandbox {
         lua_newtable(m_L);
         lua_getglobal(m_L, "_G");
         lua_setfield(m_L, -2, "_G");
-        LuaContextPtr ctx = sb::make_shared<LuaContext>();
+        LuaContextPtr ctx(new LuaContext());
         ctx->SetObject(m_L);
         return ctx;
     }
     
     LuaContextPtr   LuaVM::GetGlobalContext() {
-        LuaContextPtr ctx = m_global_context.lock();
-        if (ctx) return ctx;
         lua_getglobal(m_L, "_G");
-        ctx = sb::make_shared<LuaContext>();
+        LuaContextPtr ctx(new LuaContext());
         ctx->SetObject(m_L);
-        m_global_context = ctx;
         return ctx;
     }
     

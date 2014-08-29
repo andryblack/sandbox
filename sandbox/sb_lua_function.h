@@ -10,12 +10,12 @@
 #define __sr_osx__sb_lua_function__
 
 #include "luabind/sb_luabind_ref.h"
-#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_intrusive_ptr.h>
 
 namespace Sandbox {
     
     class LuaContext;
-    typedef sb::shared_ptr<LuaContext> LuaContextPtr;
+    typedef sb::intrusive_ptr<LuaContext> LuaContextPtr;
     
     class LuaFunction : public luabind::LuaReference {
     public:

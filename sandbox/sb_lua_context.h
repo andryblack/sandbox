@@ -14,23 +14,26 @@
 #include "luabind/sb_luabind_stack.h"
 #include "sb_notcopyable.h"
 #include <sbstd/sb_traits.h>
-#include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_intrusive_ptr.h>
 
 namespace Sandbox {
     
-    class LuaContext : public luabind::LuaReference {
+    class LuaContext : public luabind::impl::wrapper_base {
     private:
         lua_State* get_state_with_table_on_top(const char* path);
         void set_value_on_top_of_stack_to_table(lua_State* L);
     public:
         explicit LuaContext();
         
-        sb::shared_ptr<LuaContext> CreateInherited();
+        using luabind::impl::wrapper_base::call;
+        using luabind::impl::wrapper_base::call_self;
+        
+        sb::intrusive_ptr<LuaContext> CreateInherited();
         
         template <class T>
         inline T GetValue(const char* path) {
             lua_State* L = get_state_with_table_on_top(path);
-            if (!L) return;
+            if (!L) return T();
             lua_gettable(L,-2);
             T val = luabind::stack<T>::get(L,-1);
             lua_pop(L,2);
@@ -74,10 +77,20 @@ namespace Sandbox {
         }
 
     };
-    typedef sb::shared_ptr<LuaContext> LuaContextPtr;
+    typedef sb::intrusive_ptr<LuaContext> LuaContextPtr;
     namespace luabind {
         template <>
-        struct stack<LuaContextPtr > : public stack<sb::shared_ptr<LuaReference> >{};
+        struct stack<LuaContextPtr> : public stack<sb::intrusive_ptr<LuaReference> >{
+            static LuaContextPtr get(lua_State* L, int idx) {
+                if (lua_isnil(L, idx)) {
+                    return LuaContextPtr();
+                }
+                LuaContextPtr res(new LuaContext());
+                lua_pushvalue(L, idx);
+                res->SetObject(L);
+                return res;
+            }
+        };
     }
 }
 

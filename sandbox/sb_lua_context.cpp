@@ -20,7 +20,7 @@ namespace Sandbox {
         luabind::LuaVMHelperPtr helper = GetHelper();
         if (!helper) return LuaContextPtr();
         lua_State* L = helper->lua;
-        LuaContextPtr ctx = sb::make_shared<LuaContext>();
+        LuaContextPtr ctx(new LuaContext);
         lua_newtable(L);    /// new ctx
         lua_newtable(L);
         GetObject(L);

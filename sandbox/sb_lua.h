@@ -12,6 +12,7 @@
 
 
 #include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_intrusive_ptr.h>
 #include "sb_notcopyable.h"
 #include <sbstd/sb_string.h>
 
@@ -30,8 +31,7 @@ namespace Sandbox {
     class MemoryMgr;
     
     class LuaContext;
-    typedef sb::shared_ptr<LuaContext> LuaContextPtr;
-	typedef sb::weak_ptr<LuaContext> LuaContextWeakPtr;
+    typedef sb::intrusive_ptr<LuaContext> LuaContextPtr;
 	
     class LuaVM : public NotCopyable {
     public:
@@ -62,7 +62,6 @@ namespace Sandbox {
         MemoryMgr*  m_mem_mgr;
         bool DoFileImpl(const char* name,int results);
         bool DoFileImpl(GHL::DataStream* ds,const char* name,int results,const LuaContextPtr& env);
-        LuaContextWeakPtr   m_global_context;
     };
 }
 
