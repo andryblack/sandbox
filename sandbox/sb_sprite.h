@@ -19,19 +19,16 @@
 namespace Sandbox {
     
     
-	class Sprite : public SceneObject {
+	class Sprite : public SceneObjectWithPosition {
         SB_META_OBJECT
     public:
 		Sprite();
 		~Sprite();
 		void SetImage(const ImagePtr& img) { m_image = img;}
 		const ImagePtr& GetImage() const { return m_image;}
-		void SetPos(const Vector2f& pos) { m_pos=pos;}
-		const Vector2f& GetPos() const { return m_pos;}
 		virtual void Draw( Graphics& g ) const;
 	protected:
 		ImagePtr m_image;
-		Vector2f m_pos;
 	};
 	typedef sb::intrusive_ptr<Sprite> SpritePtr;
     

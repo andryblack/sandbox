@@ -9,7 +9,7 @@
 
 #include "sb_label.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::Label, Sandbox::SceneObject)
+SB_META_DECLARE_OBJECT(Sandbox::Label, Sandbox::SceneObjectWithPosition)
 
 namespace Sandbox {
 
@@ -20,7 +20,7 @@ namespace Sandbox {
 
 	void Label::Draw(Graphics& g) const {
 		if (m_font && !m_text.empty()) {
-			m_font->Draw(g,m_pos,m_text.c_str(),m_align);
+			m_font->Draw(g,GetPos(),m_text.c_str(),m_align);
 		}
 	}
 }

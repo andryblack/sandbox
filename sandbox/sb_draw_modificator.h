@@ -18,18 +18,9 @@ namespace Sandbox {
     
     class Graphics;
     
-    class DrawModificator : public meta::object {
-        SB_META_OBJECT
-    protected:
-        DrawModificator()  {}
-    public:
-        virtual void    Apply(Graphics& g) const = 0;
-    };
-    typedef sb::intrusive_ptr<DrawModificator> DrawModificatorPtr;
     
     
-    
-    class ColorModificator : public DrawModificator {
+    class ColorModificator : public meta::object {
         SB_META_OBJECT
     private:
         Color   m_color;
@@ -44,7 +35,7 @@ namespace Sandbox {
     };
     typedef sb::intrusive_ptr<ColorModificator> ColorModificatorPtr;
     
-    class TransformModificator : public DrawModificator {
+    class TransformModificator : public meta::object {
         SB_META_OBJECT
     private:
         Vector2f	m_translate;
@@ -65,6 +56,7 @@ namespace Sandbox {
 		void SetAngle(float a) { m_angle = a;}
 		float GetAngle() const { return m_angle;}
 
+        void Transform(Vector2f& v) const;
         void Apply(Graphics& g) const;
     };
     typedef sb::intrusive_ptr<TransformModificator> TransformModificatorPtr;

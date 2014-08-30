@@ -15,7 +15,7 @@
 
 namespace Sandbox {
     
-    class FillRect : public SceneObject {
+    class FillRect : public SceneObjectWithPosition {
         SB_META_OBJECT
     public:
         virtual void Draw( Graphics& g ) const;
@@ -23,11 +23,11 @@ namespace Sandbox {
         const TexturePtr& GetTexture() const { return m_texture; }
         void SetTexture( const TexturePtr& texture ) { m_texture = texture; }
         
-        const Rectf& GetRect() const { return m_rect; }
-        void SetRect( const Rectf& rect ) { m_rect = rect; }
+        Rectf GetRect() const { return Rectf(GetPos().x,GetPos().y,m_size.x,m_size.y); }
+        void SetRect( const Rectf& rect ) { SetPos(rect.GetTopLeft()); m_size=rect.GetSize(); }
     private:
         TexturePtr  m_texture;
-        Rectf   m_rect;
+        Vector2f    m_size;
     };
     
 }

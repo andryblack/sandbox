@@ -39,10 +39,11 @@ namespace Sandbox {
         
         void SetTranslate(const Vector2f& tr);
         Vector2f GetTranslate() const;
-        
+    
     protected:
     	void UpdateChilds( float dt );
 		sb::vector<SceneObjectPtr> m_objects;
+        virtual void GlobalToLocalImpl(Vector2f& v) const;
     private:
         void MoveToTop( SceneObject* obj );
         friend class SceneObject;

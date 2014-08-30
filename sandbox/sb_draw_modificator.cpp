@@ -9,9 +9,8 @@
 #include "sb_draw_modificator.h"
 #include "sb_graphics.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::DrawModificator, Sandbox::meta::object)
-SB_META_DECLARE_OBJECT(Sandbox::ColorModificator, Sandbox::DrawModificator)
-SB_META_DECLARE_OBJECT(Sandbox::TransformModificator, Sandbox::DrawModificator)
+SB_META_DECLARE_OBJECT(Sandbox::ColorModificator, meta::object)
+SB_META_DECLARE_OBJECT(Sandbox::TransformModificator, meta::object)
 
 namespace Sandbox {
     
@@ -28,5 +27,10 @@ namespace Sandbox {
         Transform2d tr = g.GetTransform();
         tr.translate(m_translate).rotate(m_angle).scale(m_scale_x,m_scale_y);
         g.SetTransform(tr);
+    }
+    void TransformModificator::Transform(Vector2f& v) const {
+        v = (v - m_translate).rotate(m_angle);
+        v.x /= m_scale_x;
+        v.y /= m_scale_y;
     }
 }

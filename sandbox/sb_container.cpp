@@ -139,4 +139,11 @@ namespace Sandbox {
         if (m_transform) return m_transform->GetTranslate();
         return Vector2f();
     }
+    
+    void Container::GlobalToLocalImpl(Vector2f& v) const {
+        SceneObject::GlobalToLocalImpl(v);
+        if (m_transform) {
+            m_transform->Transform(v);
+        }
+    }
 }

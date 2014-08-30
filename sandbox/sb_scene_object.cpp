@@ -14,6 +14,7 @@
 #include "sb_scene.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::SceneObject, Sandbox::meta::object)
+SB_META_DECLARE_OBJECT(Sandbox::SceneObjectWithPosition, Sandbox::SceneObject)
 
 namespace Sandbox {
 
@@ -43,5 +44,22 @@ namespace Sandbox {
             c = c->GetParent();
         }
         return 0;
+    }
+    
+    void SceneObject::GlobalToLocalImpl(Vector2f& v) const {
+        if (m_parent) {
+            m_parent->GlobalToLocalImpl(v);
+        }
+    }
+    
+    Vector2f SceneObject::GlobalToLocal(const Vector2f& v) const {
+        Vector2f res = v;
+        GlobalToLocalImpl(res);
+        return res;
+    }
+    
+    void SceneObjectWithPosition::GlobalToLocalImpl(Vector2f& v) const {
+        SceneObject::GlobalToLocalImpl(v);
+        v -= m_pos;
     }
 }

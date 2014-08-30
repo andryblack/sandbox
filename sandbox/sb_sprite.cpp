@@ -10,7 +10,7 @@
 #include "sb_sprite.h"
 #include "sb_graphics.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::Sprite, Sandbox::SceneObject)
+SB_META_DECLARE_OBJECT(Sandbox::Sprite, Sandbox::SceneObjectWithPosition)
 SB_META_DECLARE_OBJECT(Sandbox::ColorizedSprite, Sandbox::Sprite)
 SB_META_DECLARE_OBJECT(Sandbox::SpriteFill, Sandbox::Sprite)
 
@@ -24,7 +24,7 @@ namespace Sandbox {
 	
 	void Sprite::Draw(Graphics& g) const {
         if (m_image)
-            g.DrawImage(*m_image,m_pos);
+            g.DrawImage(*m_image,GetPos());
 	}
 
     void SpriteFill::SetRect(const Rectf& rect) {
@@ -58,7 +58,7 @@ namespace Sandbox {
     }
     void ColorizedSprite::Draw(Graphics& g) const {
         if (m_image)
-            g.DrawImage(*m_image,m_pos,m_color);
+            g.DrawImage(*m_image,GetPos(),m_color);
     }
     
     

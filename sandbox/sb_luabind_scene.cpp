@@ -26,12 +26,16 @@
 SB_META_BEGIN_KLASS_BIND(Sandbox::SceneObject)
 SB_META_PROPERTY_RW(Visible,GetVisible,SetVisible)
 SB_META_METHOD(MoveToTop)
+SB_META_METHOD(GlobalToLocal)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::SceneObjectWithPosition)
+SB_META_PROPERTY_RW(Pos,GetPos,SetPos)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Sprite)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Image,GetImage,SetImage)
-SB_META_PROPERTY_RW(Pos,GetPos,SetPos)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::SpriteFill)
@@ -66,14 +70,12 @@ SB_META_END_KLASS_BIND()
 SB_META_BEGIN_KLASS_BIND(Sandbox::Label)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Font,GetFont,SetFont)
-SB_META_PROPERTY_RW(Pos,GetPos,SetPos)
 SB_META_PROPERTY_RW(Text,GetText,SetText)
 SB_META_PROPERTY_RW(Align,GetAlign,SetAlign)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::CircleObject)
 SB_META_CONSTRUCTOR((const Sandbox::Vector2f&,float))
-SB_META_PROPERTY_RW_DEF(Pos)
 SB_META_PROPERTY_RW_DEF(R)
 SB_META_END_KLASS_BIND()
 
@@ -115,9 +117,6 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerVisible)
 SB_META_PROPERTY_RW_DEF(Invert)
 SB_META_END_KLASS_BIND()
 
-
-SB_META_BEGIN_KLASS_BIND(Sandbox::DrawModificator)
-SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::TransformModificator)
 SB_META_CONSTRUCTOR(())
@@ -166,6 +165,7 @@ namespace Sandbox {
     
     void register_scene( lua_State* lua ) {
         luabind::Class<SceneObject>(lua);
+        luabind::Class<SceneObjectWithPosition>(lua);
         luabind::Class<Sprite>(lua);
         luabind::Class<SpriteFill>(lua);
         luabind::Class<ColorizedSprite>(lua);
@@ -178,7 +178,6 @@ namespace Sandbox {
         luabind::Class<Container>(lua);
         luabind::Enum<BlendMode>(lua);
         luabind::Class<ContainerBlend>(lua);
-        luabind::Class<DrawModificator>(lua);
         luabind::Class<TransformModificator>(lua);
         luabind::Class<ColorModificator>(lua);
         luabind::Class<ContainerVisible>(lua);

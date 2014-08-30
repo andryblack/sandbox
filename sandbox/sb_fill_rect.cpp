@@ -9,14 +9,14 @@
 #include "sb_fill_rect.h"
 #include "sb_graphics.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::FillRect, Sandbox::SceneObject)
+SB_META_DECLARE_OBJECT(Sandbox::FillRect, Sandbox::SceneObjectWithPosition)
 
 namespace Sandbox {
     
     
     void FillRect::Draw(Sandbox::Graphics &g) const {
         if (m_texture) {
-            g.FillRect(m_texture, m_rect);
+            g.FillRect(m_texture, GetRect());
         }
     }
     

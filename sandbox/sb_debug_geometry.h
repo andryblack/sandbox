@@ -14,19 +14,16 @@
 
 namespace Sandbox {
     
-    class CircleObject : public SceneObject {
+    class CircleObject : public SceneObjectWithPosition {
         SB_META_OBJECT
     public:
         explicit CircleObject(const Vector2f& pos, float r);
         
         virtual void Draw(Graphics& g) const;
         
-        const Vector2f& GetPos() const {return m_pos; }
-        void SetPos(const Vector2f& pos) { m_pos = pos; }
         float GetR() const { return m_r; }
         void SetR(float r) { m_r = r; }
     private:
-        Vector2f   m_pos;
         float   m_r;
     };
     
