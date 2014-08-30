@@ -2,6 +2,7 @@
 #define SB_VECTOR2_H_INCLUDED
 
 #include "sb_math.h"
+#include "luabind/sb_luabind_stack.h"
 
 namespace Sandbox {
 
@@ -106,6 +107,32 @@ namespace Sandbox {
 
         bool operator != (const Vector2f& v) const {return ((x != v.x) || (y != v.y));}
     };
+    
+    namespace luabind {
+        template <>
+        struct stack<Vector2f> {
+            typedef stack_help<Vector2f, false > help;
+            static void push( lua_State* L, const Vector2f& val ) {
+                help::push(L,val);
+            }
+            static Vector2f get( lua_State* L, int idx ) {
+                if (lua_istable(L, idx)) {
+                    Vector2f res;
+                    lua_rawgeti(L, idx, 1);
+                    res.x = lua_tonumber(L, -1);
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 2);
+                    res.y = lua_tonumber(L, -1);
+                    lua_pop(L, 1);
+                    return  res;
+                }
+                return help::get(L,idx);
+            }
+        };
+        template <>
+        struct stack<const Vector2f&> : stack<Vector2f> {};
+        
+    }
   
 }
 

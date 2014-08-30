@@ -196,14 +196,14 @@ namespace Sandbox {
             static int get_prop_func( lua_State* L ) {
                 typedef typename meta::property_holder<T, U>::prop_ptr prop_ptr;
                 prop_ptr ptr = *reinterpret_cast<prop_ptr*>(lua_touserdata(L, lua_upvalueindex(1)));
-                stack<U>::push(L,&stack<T>::get(L,1)->*ptr);
+                stack<U>::push(L,stack<T>::get(L,1).*ptr);
                 return 1;
             }
             template <class U>
             static int set_prop_func( lua_State* L ) {
                 typedef typename meta::property_holder<T, U>::prop_ptr prop_ptr;
                 prop_ptr ptr = *reinterpret_cast<prop_ptr*>(lua_touserdata(L, lua_upvalueindex(1)));
-                (&stack<T>::get(L,1)->*ptr) = stack<U>::get(L,2);
+                (stack<T*>::get(L,1)->*ptr) = stack<U>::get(L,2);
                 return 0;
             }
         protected:
