@@ -29,7 +29,7 @@ namespace Sandbox {
         g.SetTransform(tr);
     }
     void TransformModificator::Transform(Vector2f& v) const {
-        v = (v - m_translate).rotate(m_angle);
+        v = (v - m_translate).rotate(-m_angle);
         v.x /= m_scale_x;
         v.y /= m_scale_y;
     }
