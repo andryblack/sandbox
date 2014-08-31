@@ -468,7 +468,7 @@ namespace Sandbox {
                     if ( lt && lt < m_live_ticks ) {
                         if (t->unique()) {
                             t.reset();
-                            next = m_textures.erase(it);
+                            m_textures.erase(it);
                         } else {
                             size_t released = t->Release();
                             memory_used-=released;
@@ -483,7 +483,7 @@ namespace Sandbox {
                     if (!full) break;
                 }
             } else {
-                next = m_textures.erase(it);
+               m_textures.erase(it);
             }
             it = next;
         }
