@@ -33,6 +33,11 @@
 #include "mygui/widgets/sb_mygui_widgets.h"
 #endif
 
+#ifdef SB_USE_NETWORK
+#include "net/sb_network.h"
+#include "net/sb_network_bind.h"
+#endif
+
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
@@ -94,6 +99,9 @@ namespace Sandbox {
         m_gui = 0;
         m_gui_render = 0;
 #endif
+#ifdef SB_USE_NETWORK
+        m_network = new Network();
+#endif
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
 	}
@@ -113,6 +121,9 @@ namespace Sandbox {
         delete m_gui_render;
         delete m_gui_data_manager;
 #endif
+#ifdef SB_USE_NETWORK
+        delete  m_network;
+#endif
 		delete m_resources;
 		delete m_graphics;
   	}
@@ -124,6 +135,9 @@ namespace Sandbox {
         register_controller(lua->GetVM());
 #ifdef SB_USE_MYGUI
         mygui::register_mygui(lua->GetVM());
+#endif
+#ifdef SB_USE_NETWORK
+        BindNetwork(lua);
 #endif
     }
 	
@@ -194,7 +208,13 @@ namespace Sandbox {
         ctx->SetValue("platform.os", "FLASH");
 #endif
         
+        
 		BindModules( m_lua );
+
+#ifdef SB_USE_NETWORK
+        ctx->SetValue("application.network", m_network);
+#endif
+
 		m_lua->DoFile("settings.lua");
         ctx->SetValue("settings", (GHL::Settings*)(0));
 	}

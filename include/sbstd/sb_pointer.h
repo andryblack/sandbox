@@ -21,15 +21,16 @@ namespace sb {
         struct empty_base {};
     }
     
-    class ref_countered_base {
+    template <class T>
+    class ref_counter : public T {
     private:
         typedef unsigned int counter_t;
-        counter_t   counter;
+        mutable counter_t   counter;
     public:
-        void add_ref() {
+        void add_ref() const {
             ++counter;
         }
-        void remove_ref() {
+        void remove_ref() const {
             sb_assert(counter!=0);
             --counter;
             if (counter==0) {
@@ -39,23 +40,28 @@ namespace sb {
         bool unique() const { return counter == 1; }
         counter_t& internal_counter() { return counter; }
     protected:
-        ref_countered_base() : counter(0) {}
-        virtual ~ref_countered_base() {
+        ref_counter() : counter(0) {}
+        virtual ~ref_counter() {
             sb_assert(counter==0);
         }
-        ref_countered_base(const ref_countered_base&) : counter(0) {}
-        ref_countered_base& operator = (const ref_countered_base&) {
+        ref_counter(const ref_counter&) : counter(0) {}
+        ref_counter& operator = (const ref_counter&) {
             return *this;
         }
     };
     
-    class ref_countered_base_not_copyable : public ref_countered_base {
+    typedef ref_counter<implement::empty_base> ref_countered_base;
+    
+    template <class T>
+    class ref_counter_not_copyable : public ref_counter<T> {
     protected:
-        ref_countered_base_not_copyable() : ref_countered_base() {}
+        ref_counter_not_copyable() : ref_counter<T>() {}
     private:
-        ref_countered_base_not_copyable( const ref_countered_base_not_copyable& );
-        ref_countered_base_not_copyable& operator = (const ref_countered_base_not_copyable&);
+        ref_counter_not_copyable( const ref_counter_not_copyable& );
+        ref_counter_not_copyable& operator = (const ref_counter_not_copyable&);
     };
+    
+    typedef ref_counter_not_copyable<implement::empty_base> ref_countered_base_not_copyable;
     
 }
 

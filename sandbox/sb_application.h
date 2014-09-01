@@ -28,6 +28,7 @@ namespace Sandbox {
         class DataManager;
         class RenderManager;
     }
+    class Network;
     
 	class Application : public GHL::Application {
     public:
@@ -99,6 +100,9 @@ namespace Sandbox {
         mygui::DataManager*     m_gui_data_manager;
         mygui::RenderManager*   m_gui_render;
         MyGUI::Gui* m_gui;
+#endif
+#ifdef SB_USE_NETWORK
+        Network*    m_network;
 #endif
     public:
 		///

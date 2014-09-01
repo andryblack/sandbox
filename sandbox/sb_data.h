@@ -15,6 +15,7 @@
 
 namespace Sandbox {
     
+    
     template <class T>
     class VectorData : public RefCounter<GHL::Data> {
     private:
