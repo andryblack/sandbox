@@ -58,5 +58,18 @@ namespace Sandbox {
         Color   m_color;
     };
     
+    class SpriteBox : public SceneObjectWithPosition {
+        SB_META_OBJECT
+    public:
+        void SetImage(const ImageBoxPtr& img) { m_image = img; }
+        const ImageBoxPtr& GetImage() const { return m_image; }
+        virtual void Draw( Graphics& g ) const;
+        void SetSize(const Vector2f& size) { m_size = size; }
+        const Vector2f& GetSize() const { return m_size; }
+    private:
+        ImageBoxPtr m_image;
+        Vector2f    m_size;
+    };
+    
 }
 #endif /*SB_SPRITE_H*/

@@ -33,6 +33,7 @@ namespace Sandbox {
         Image(const TexturePtr& texture,float src_x,float src_y,float src_w,float src_h,float w,float h);
 		
         const TexturePtr& GetTexture() const { return m_texture;}
+        void SetTexture(const TexturePtr& tex) { m_texture = tex; }
         
         void SetTextureRect(float x,float y,float w,float h) {
             m_src_x = x; m_src_y = y; m_src_w = w; m_src_h = h;
@@ -85,6 +86,35 @@ namespace Sandbox {
         m_width = w;
         m_height = h;
     }
+    
+    class ImageBox : public Image {
+    public:
+        ImageBox() : m_offset_l(0.0f),m_offset_r(0.0f),m_offset_t(0.0f),m_offset_b(0.0f),m_tile_v(false),m_tile_h(false){}
+        float GetOffsetL() const { return m_offset_l; }
+        float GetOffsetR() const { return m_offset_r; }
+        float GetOffsetT() const { return m_offset_t; }
+        float GetOffsetB() const { return m_offset_b; }
+        
+        bool GetTileV() const { return m_tile_v; }
+        bool GetTileH() const { return m_tile_h; }
+        
+        void SetOffsets(float l,float r, float t, float b) {
+            m_offset_l = l; m_offset_r = r;
+            m_offset_t = t; m_offset_b = b;
+        }
+        void SetTile(bool h,bool v) {
+            m_tile_v = v;
+            m_tile_h = h;
+        }
+    private:
+        float   m_offset_l;
+        float   m_offset_r;
+        float   m_offset_t;
+        float   m_offset_b;
+        bool    m_tile_v;
+        bool    m_tile_h;
+    };
+    typedef sb::intrusive_ptr<ImageBox> ImageBoxPtr;
 	
 }
 

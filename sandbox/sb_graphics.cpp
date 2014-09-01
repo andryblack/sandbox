@@ -298,6 +298,167 @@ namespace Sandbox {
         } 
 		
 	}
+    
+    void Graphics::DrawImageBox(const ImageBox& img, const Vector2f& pos, const Vector2f& size) {
+        sb_assert( (m_render!=0) && "scene not started" );
+        BeginDrawImage(img);
+        float x1 = pos.x;
+        float y1 = pos.y;
+		const float w = img.GetWidth();
+		const float h = img.GetHeight();
+        const float hsx = img.GetHotspot().x*w/img.GetTextureW();
+        const float hsy = img.GetHotspot().y*h/img.GetTextureH();
+        
+		x1-=hsx;
+        y1-=hsy;
+        
+		float x4 = pos.x + size.x + hsx;
+        float y4 = pos.y + size.y + hsy;
+        
+        float osl = img.GetOffsetL()*w/img.GetTextureW();
+        float osr = img.GetOffsetR()*w/img.GetTextureW();
+        float ost = img.GetOffsetT()*h/img.GetTextureH();
+        float osb = img.GetOffsetB()*h/img.GetTextureH();
+        
+        float x2 = x1 + osl;
+        float x3 = x4 - osr;
+        float y2 = y1 + ost;
+        float y3 = y4 - osb;
+        
+		
+        float tx1 = img.GetTextureX() * m_itw;
+        float tx2 = (img.GetTextureX()+img.GetOffsetL()) * m_itw;
+        float tx3 = (img.GetTextureX()+img.GetTextureW()-img.GetOffsetR()) * m_itw;
+        float tx4 = (img.GetTextureX()+img.GetTextureW()) * m_itw;
+        
+        float ty1 = img.GetTextureY() * m_ith;
+        float ty2 = (img.GetTextureY()+img.GetOffsetT()) * m_ith;
+        float ty3 = (img.GetTextureY()+img.GetTextureH()-img.GetOffsetB()) * m_ith;
+        float ty4 = (img.GetTextureY()+img.GetTextureH()) * m_ith;
+        
+        int count_x = 1;
+        float stepx = x3-x2;
+        float stepy = y3-y2;
+        if (img.GetTileH()) {
+            float sx = (img.GetTextureW()-img.GetOffsetL()-img.GetOffsetR())*w/img.GetTextureW();
+            count_x = ::roundf(stepx/sx);
+            stepx = stepx / count_x;
+        }
+        int count_y = 1;
+        if (img.GetTileV()) {
+            float sy = (img.GetTextureH()-img.GetOffsetT()-img.GetOffsetB())*h/img.GetTextureH();
+            count_y = ::roundf(stepy/sy);
+            stepy = stepy / count_y;
+        }
+        
+		GHL::UInt32 clr = m_color.hw();
+		
+        appendQuad();
+        {
+            appendVertex(x1,y1,tx1,ty1,clr);
+            appendVertex(x2,y1,tx2,ty1,clr);
+            appendVertex(x1,y2,tx1,ty2,clr);
+            appendVertex(x2,y2,tx2,ty2,clr);
+        }
+        
+        float lx2 = x2;
+        float lx3 = x2+stepx;
+        for (int i=0;i<count_x;++i) {
+            appendQuad();
+            {
+                appendVertex(lx2,y1,tx2,ty1,clr);
+                appendVertex(lx3,y1,tx3,ty1,clr);
+                appendVertex(lx2,y2,tx2,ty2,clr);
+                appendVertex(lx3,y2,tx3,ty2,clr);
+            }
+            lx2 += stepx;
+            lx3 += stepx;
+        }
+        
+        appendQuad();
+        {
+            appendVertex(x3,y1,tx3,ty1,clr);
+            appendVertex(x4,y1,tx4,ty1,clr);
+            appendVertex(x3,y2,tx3,ty2,clr);
+            appendVertex(x4,y2,tx4,ty2,clr);
+        }
+        
+        
+        
+        float ly2 = y2;
+        float ly3 = y2+stepy;
+        for (int j=0;j<count_y;++j) {
+            
+            appendQuad();
+            {
+                appendVertex(x1,ly2,tx1,ty2,clr);
+                appendVertex(x2,ly2,tx2,ty2,clr);
+                appendVertex(x1,ly3,tx1,ty3,clr);
+                appendVertex(x2,ly3,tx2,ty3,clr);
+            }
+            
+            lx2 = x2;
+            lx3 = x2+stepx;
+            for (int i=0;i<count_x;++i) {
+                appendQuad();
+                {
+                    appendVertex(lx2,ly2,tx2,ty2,clr);
+                    appendVertex(lx3,ly2,tx3,ty2,clr);
+                    appendVertex(lx2,ly3,tx2,ty3,clr);
+                    appendVertex(lx3,ly3,tx3,ty3,clr);
+                }
+                lx2 += stepx;
+                lx3 += stepx;
+            }
+            
+            
+            appendQuad();
+            {
+                appendVertex(x3,ly2,tx3,ty2,clr);
+                appendVertex(x4,ly2,tx4,ty2,clr);
+                appendVertex(x3,ly3,tx3,ty3,clr);
+                appendVertex(x4,ly3,tx4,ty3,clr);
+            }
+            
+            ly2 += stepy;
+            ly3 += stepy;
+        }
+        
+        
+        
+        appendQuad();
+        {
+            appendVertex(x1,y3,tx1,ty3,clr);
+            appendVertex(x2,y3,tx2,ty3,clr);
+            appendVertex(x1,y4,tx1,ty4,clr);
+            appendVertex(x2,y4,tx2,ty4,clr);
+        }
+        
+        lx2 = x2;
+        lx3 = x2+stepx;
+        for (int i=0;i<count_x;++i) {
+            appendQuad();
+            {
+                appendVertex(lx2,y3,tx2,ty3,clr);
+                appendVertex(lx3,y3,tx3,ty3,clr);
+                appendVertex(lx2,y4,tx2,ty4,clr);
+                appendVertex(lx3,y4,tx3,ty4,clr);
+            }
+            lx2 += stepx;
+            lx3 += stepx;
+        }
+        
+        
+        appendQuad();
+        {
+            appendVertex(x3,y3,tx3,ty3,clr);
+            appendVertex(x4,y3,tx4,ty3,clr);
+            appendVertex(x3,y4,tx3,ty4,clr);
+            appendVertex(x4,y4,tx4,ty4,clr);
+        }
+
+        
+    }
 	
 	void Graphics::BeginDrawLines() {
 		bool flush = false;

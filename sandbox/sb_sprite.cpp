@@ -13,6 +13,7 @@
 SB_META_DECLARE_OBJECT(Sandbox::Sprite, Sandbox::SceneObjectWithPosition)
 SB_META_DECLARE_OBJECT(Sandbox::ColorizedSprite, Sandbox::Sprite)
 SB_META_DECLARE_OBJECT(Sandbox::SpriteFill, Sandbox::Sprite)
+SB_META_DECLARE_OBJECT(Sandbox::SpriteBox, Sandbox::SceneObjectWithPosition)
 
 namespace Sandbox {
 	
@@ -62,6 +63,9 @@ namespace Sandbox {
     }
     
     
-    
+    void SpriteBox::Draw(Graphics& g) const {
+        if (m_image)
+            g.DrawImageBox(*m_image,GetPos(),GetSize());
+	}
 }
 

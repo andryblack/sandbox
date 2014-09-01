@@ -100,14 +100,28 @@ SB_META_DECLARE_KLASS(Sandbox::Image, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Image)
 SB_META_CONSTRUCTOR((Sandbox::TexturePtr,float,float,float,float))
 SB_META_METHOD(SetSize)
+SB_META_METHOD(SetTextureRect)
 SB_META_PROPERTY_RO(TextureX,GetTextureX)
 SB_META_PROPERTY_RO(TextureY,GetTextureY)
 SB_META_PROPERTY_RO(TextureW,GetTextureW)
 SB_META_PROPERTY_RO(TextureH,GetTextureH)
 SB_META_PROPERTY_RO(Width,GetWidth)
 SB_META_PROPERTY_RO(Height,GetHeight)
-SB_META_PROPERTY_RO(Texture,GetTexture)
+SB_META_PROPERTY_RW(Texture,GetTexture,SetTexture)
 SB_META_PROPERTY_RW(Hotspot,GetHotspot,SetHotspot)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::ImageBox, Sandbox::Image)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ImageBox)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RO(OffsetL, GetOffsetL)
+SB_META_PROPERTY_RO(OffsetR, GetOffsetR)
+SB_META_PROPERTY_RO(OffsetT, GetOffsetT)
+SB_META_PROPERTY_RO(OffsetB, GetOffsetB)
+SB_META_PROPERTY_RO(TileV, GetTileV)
+SB_META_PROPERTY_RO(TileH, GetTileH)
+SB_META_METHOD(SetOffsets)
+SB_META_METHOD(SetTile)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::FontAlign,void);
@@ -175,6 +189,7 @@ namespace Sandbox {
         luabind::Class<BitmapFont>(lua);
         luabind::Enum<FontAlign>(lua);
         luabind::Class<Image>(lua);
+        luabind::Class<ImageBox>(lua);
         luabind::ExternClass<Resources>(lua);
         luabind::Class<Texture>(lua);
         luabind::Class<RenderTarget>(lua);

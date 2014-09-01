@@ -90,6 +90,7 @@ namespace Sandbox {
 		void DrawImage(const Image& img,const Vector2f& pos,const Color& clr,float scale) {
             DrawImage(img,pos.x,pos.y,clr,scale);
         }
+        void DrawImageBox(const ImageBox& img, const Vector2f& pos, const Vector2f& size);
         /// @}
         
         /// fill rect by pattern
