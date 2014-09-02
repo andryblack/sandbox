@@ -46,10 +46,12 @@ namespace Sandbox {
     GHL::Texture* Texture::Present(Resources* resources) {
         if (!m_texture) {
             m_texture = resources->LoadTexture( m_file , m_need_premultiply );
-            m_texture->SetMinFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
-            m_texture->SetMagFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
-            m_texture->SetWrapModeU(m_tiled?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
-            m_texture->SetWrapModeV(m_tiled?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
+            if (m_texture) {
+                m_texture->SetMinFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
+                m_texture->SetMagFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
+                m_texture->SetWrapModeU(m_tiled?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
+                m_texture->SetWrapModeV(m_tiled?GHL::TEX_WRAP_REPEAT:GHL::TEX_WRAP_CLAMP);
+            }
         }
         m_live_ticks = resources->GetLiveTicks() + TEXTURE_TTL;
         return m_texture;
