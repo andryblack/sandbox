@@ -17,6 +17,7 @@ SB_META_PROPERTY_RO(Completed,GetCompleted)
 SB_META_PROPERTY_RO(Error,GetError)
 SB_META_PROPERTY_RO(ReceivedSize,GetReceivedSize)
 SB_META_PROPERTY_RO(ReceivedHeaders,GetReceivedHeaders)
+SB_META_PROPERTY_RO(ErrorText, GetErrorText)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::NetworkRequest, Sandbox::NetworkRequestBase)

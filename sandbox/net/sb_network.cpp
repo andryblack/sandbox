@@ -9,6 +9,7 @@
 #include "sb_network.h"
 #include "sb_data.h"
 #include <ghl_data.h>
+#include "sb_log.h"
 
 namespace Sandbox {
     
@@ -63,6 +64,9 @@ namespace Sandbox {
     void GHL_CALL NetworkRequestBase::OnError(const char* error) {
         m_completed = true;
         m_error = true;
+        if (error) {
+            m_error_text = error;
+        }
     }
     
     
@@ -93,8 +97,11 @@ namespace Sandbox {
         NetworkRequestPtr request(new NetworkRequest(url));
         GHL::Data* data_p = GHL_HoldData(reinterpret_cast<const GHL::Byte*>(data.c_str()), data.length());
         if (!m_net->Post(request.get(),data_p)) {
+            if (!request->GetErrorText().empty()) {
+                LogError() << "network POST error: " << request->GetErrorText();
+            }
             data_p->Release();
-            return NetworkRequestPtr();
+            return request->GetCompleted() ? request : NetworkRequestPtr();
         }
         data_p->Release();
         return request;

@@ -53,6 +53,8 @@ namespace Sandbox {
         
         void SetHeader(const sb::string& name, const sb::string& value) { m_headers[name]=value; }
         const headers_map_t& GetReceivedHeaders() const { return m_received_headers; }
+        
+        const sb::string& GetErrorText() const { return m_error_text; }
     private:
         sb::string  m_url;
         headers_map_t   m_headers;
@@ -60,6 +62,7 @@ namespace Sandbox {
         bool    m_error;
         size_t  m_received_size;
         headers_map_t   m_received_headers;
+        sb::string  m_error_text;
     };
     
     class NetworkRequest : public NetworkRequestBase {
