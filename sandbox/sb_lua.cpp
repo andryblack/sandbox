@@ -20,6 +20,7 @@ extern "C" {
 #include <ghl_types.h>
 #include <ghl_data_stream.h>
 #include <ghl_vfs.h>
+#include <ghl_system.h>
 #include <algorithm>
 
 #include "sb_inplace_string.h"
@@ -111,8 +112,20 @@ namespace Sandbox {
         return 0;
     }
 	
+    static int lua_os_time_func(lua_State* L) {
+        lua_pushnumber(L, GHL_SystemGetTime());
+        return 1;
+    }
 	
-	
+	int lua_os_open_func (lua_State *L) {
+        static const luaL_Reg os_funcs_impl[] = {
+			{"time", lua_os_time_func},
+			{NULL, NULL}
+		};
+        luaL_newlib(L, os_funcs_impl);
+        return 1;
+    }
+    
     ////////////////////////////////////////////////////////////
     
     
@@ -130,7 +143,7 @@ namespace Sandbox {
             {LUA_COLIBNAME, luaopen_coroutine},
             {LUA_TABLIBNAME, luaopen_table},
             //{LUA_IOLIBNAME, luaopen_io},
-            //{LUA_OSLIBNAME, luaopen_os},
+            {LUA_OSLIBNAME, lua_os_open_func},
             {LUA_STRLIBNAME, luaopen_string},
             {LUA_BITLIBNAME, luaopen_bit32},
             {LUA_MATHLIBNAME, luaopen_math},
@@ -146,7 +159,7 @@ namespace Sandbox {
             luaL_requiref(m_L, lib->name, lib->func, 1);
             lua_pop(m_L, 1);  /* remove lib */
         }
-        
+      
         static const luaL_Reg base_funcs_impl[] = {
 			{"dofile", lua_dofile_func},
 			{"print", lua_print_func},
