@@ -147,6 +147,9 @@ namespace Sandbox {
 	///
 	void GHL_CALL Application::SetSystem( GHL::System* sys ) {
 		m_system = sys;
+        if (!m_title.empty()) {
+            SetTitle(m_title);
+        }
 	}
 	///
 	void GHL_CALL Application::SetVFS( GHL::VFS* vfs ) {
@@ -371,6 +374,13 @@ namespace Sandbox {
 		m_clear_buffer = true;
 		m_clear_color = c;
 	}
+    
+    void Application::SetTitle(const sb::string& title) {
+        m_title = title;
+        if (m_system) {
+            m_system->SetTitle(title.c_str());
+        }
+    }
     
     void Application::SetSoundEnabled( bool e ) {
         m_sound_enabled = e;

@@ -66,7 +66,7 @@ namespace Sandbox {
 		Resources* GetResources() const { return m_resources;}
 		
 		void SetClearColor(const Color& c);
-        
+        void SetTitle(const sb::string& title);
  	private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -95,6 +95,8 @@ namespace Sandbox {
         
         bool    m_sound_enabled;
         bool    m_music_enabled;
+        
+        sb::string  m_title;
         
 #ifdef SB_USE_MYGUI
         mygui::DataManager*     m_gui_data_manager;
