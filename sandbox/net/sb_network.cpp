@@ -10,6 +10,7 @@
 #include "sb_data.h"
 #include <ghl_data.h>
 #include "sb_log.h"
+#include "sb_resources.h"
 
 namespace Sandbox {
     
@@ -76,8 +77,37 @@ namespace Sandbox {
         m_data.append(reinterpret_cast<const char*>(data),size);
     }
     
+    NetworkDataRequest::~NetworkDataRequest() {
+        ReleaseData();
+    }
     
-    Network::Network() {
+    void NetworkDataRequest::OnData(const GHL::Byte *data, GHL::UInt32 size) {
+        NetworkRequestBase::OnData(data, size);
+        if (!m_data) {
+            m_data = new VectorData<GHL::Byte>();
+        }
+        size_t pos = m_data->vector().size();
+        m_data->vector().resize(pos+size);
+        ::memcpy(&m_data->vector()[pos], data, size);
+    }
+    
+    void NetworkDataRequest::ReleaseData() {
+        if (m_data) {
+            m_data->Release();
+            m_data = 0;
+        }
+    }
+    
+    void GHL_CALL ImageRequest::OnComplete() {
+        NetworkDataRequest::OnComplete();
+        const GHL::Data* data = GetData();
+        if (data) {
+            m_img = m_resources->CreateImageFromData(data);
+        }
+        ReleaseData();
+    }
+    
+    Network::Network(Resources* res) : m_resources(res) {
         m_net = GHL_CreateNetwork();
     }
     
@@ -90,6 +120,13 @@ namespace Sandbox {
         NetworkRequestPtr request(new NetworkRequest(url));
         if (!m_net->Get(request.get()))
             return NetworkRequestPtr();
+        return request;
+    }
+    ImageRequestPtr Network::GETImage(const sb::string& url) {
+        if (!m_net || !m_resources) return ImageRequestPtr();
+        ImageRequestPtr request(new ImageRequest(url,m_resources));
+        if (!m_net->Get(request.get()))
+            return ImageRequestPtr();
         return request;
     }
     NetworkRequestPtr Network::SimplePOST(const sb::string& url, const sb::string& data) {

@@ -27,6 +27,7 @@ namespace GHL {
 	struct VertexShader;
 	struct FragmentShader;
 	struct DataStream;
+    struct Data;
 }
 namespace Sandbox {
 	
@@ -42,6 +43,8 @@ namespace Sandbox {
 		
 		void SetBasePath(const char* path);
 		GHL::DataStream* OpenFile(const char* fn);
+        
+        ImagePtr CreateImageFromData( const GHL::Data* data );
 		
 		TexturePtr GetTexture(const char* filename, bool need_premultiply);
 		ImagePtr GetImage(const char* filename, bool need_premultiply);
@@ -97,6 +100,11 @@ namespace Sandbox {
         size_t    FreeMemory(size_t mem,bool full);
         
         void GetTextureSize( GHL::UInt32 w,GHL::UInt32 h, GHL::UInt32& tw, GHL::UInt32& th ) const;
+        
+        GHL::Image* ImageFromData( const GHL::Data* data );
+        GHL::Image* ImageFromStream( GHL::DataStream* ds );
+        
+        GHL::Texture* CreateTexture( GHL::Image* img , bool premultiply, const sb::string& file, const sb::string& ext);
 	};
 }
 

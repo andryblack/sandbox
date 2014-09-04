@@ -100,7 +100,7 @@ namespace Sandbox {
         m_gui_render = 0;
 #endif
 #ifdef SB_USE_NETWORK
-        m_network = new Network();
+        m_network = 0;
 #endif
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
@@ -179,7 +179,10 @@ namespace Sandbox {
 		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
 			base_path+="/";
 		m_resources->SetBasePath(base_path.c_str());
-		
+
+#ifdef SB_USE_NETWORK
+        m_network = new Network(m_resources);
+#endif
         
         m_lua = new LuaVM(m_resources);
         

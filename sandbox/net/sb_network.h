@@ -15,8 +15,12 @@
 #include <sbstd/sb_pointer.h>
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_intrusive_ptr.h>
+#include "sb_data.h"
+#include "sb_image.h"
 
 namespace Sandbox {
+    
+    class Resources;
     
     class NetworkRequestBase : public sb::ref_counter_not_copyable<GHL::NetworkRequest> {
     public:
@@ -77,15 +81,42 @@ namespace Sandbox {
     
     typedef sb::intrusive_ptr<NetworkRequest> NetworkRequestPtr;
     
+    class NetworkDataRequest : public NetworkRequestBase {
+    public:
+        explicit NetworkDataRequest(const sb::string& url) :  NetworkRequestBase(url), m_data(0) {}
+        ~NetworkDataRequest();
+        const GHL::Data*    GetData() const { return m_data; }
+        /// received data
+        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size);
+    protected:
+        void ReleaseData();
+    private:
+        VectorData<GHL::Byte>*   m_data;
+    };
+    
+    class ImageRequest : public NetworkDataRequest {
+    public:
+        explicit ImageRequest(const sb::string& url,Resources* res) :  NetworkDataRequest(url),m_resources(res) {}
+        const ImagePtr& GetImage() const { return m_img; }
+        virtual void GHL_CALL OnComplete();
+    private:
+        ImagePtr    m_img;
+        Resources*  m_resources;
+    };
+    
+    typedef sb::intrusive_ptr<ImageRequest> ImageRequestPtr;
+    
     class Network {
     public:
-        Network();
+        explicit Network(Resources* res);
         ~Network();
         
+        ImageRequestPtr GETImage(const sb::string& url);
         NetworkRequestPtr SimpleGET(const sb::string& url);
         NetworkRequestPtr SimplePOST(const sb::string& url, const sb::string& data);
     private:
         GHL::Network* m_net;
+        Resources*  m_resources;
     };
     
 }
