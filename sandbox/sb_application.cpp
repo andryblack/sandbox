@@ -56,6 +56,7 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
 SB_META_METHOD(AddScene)
 SB_META_METHOD(RemoveScene)
 SB_META_METHOD(SetMouseContext)
+SB_META_METHOD(GetFlashVar)
 SB_META_END_KLASS_BIND()
 
 
@@ -167,6 +168,17 @@ namespace Sandbox {
 	void GHL_CALL Application::SetSound( GHL::Sound* sound) {
 		m_sound = sound;
 	}
+    
+    sb::string Application::GetFlashVar(const sb::string& name) const {
+        if (!m_system) {
+            return "";
+        }
+        const char* data = name.c_str();
+        if (m_system->GetDeviceData(GHL::DEVICE_DATA_FLASH_VAR, &data)) {
+            return sb::string(data);
+        }
+        return "";
+    }
 	///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
 		sb_assert( m_vfs );

@@ -41,6 +41,7 @@ namespace Sandbox {
         void    RemoveScene( const RTScenePtr& scene );
         void    SetMouseContext(const LuaContextPtr& ctx );
   	
+        sb::string GetFlashVar(const sb::string& name) const;
     protected:
 		Application();
 		virtual ~Application();
@@ -67,6 +68,8 @@ namespace Sandbox {
 		
 		void SetClearColor(const Color& c);
         void SetTitle(const sb::string& title);
+        
+        
  	private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
