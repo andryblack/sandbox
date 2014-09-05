@@ -357,6 +357,20 @@ namespace Sandbox {
         
         
         template <class T>
+        static inline sb::intrusive_ptr<T> get_intrusive_ptr( lua_State* L, int idx ) {
+            if ( lua_isuserdata(L, idx) ) {
+                data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
+                if ( holder->type==data_holder::intrusive_ptr ) {
+                    T* ptr = get_ptr<T>(holder->info,*reinterpret_cast<void**>( holder+1));
+                    return sb::intrusive_ptr<T>(ptr);
+                }
+            } else if ( lua_isnil(L, idx) ) {
+                return sb::intrusive_ptr<T>();
+            }
+            lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
+            return sb::intrusive_ptr<T>();
+        }
+        template <class T>
         struct stack<sb::intrusive_ptr<T> > {
             
             static void push( lua_State* L, const sb::intrusive_ptr<T>& val ) {
@@ -364,17 +378,7 @@ namespace Sandbox {
             }
             
             static sb::intrusive_ptr<T> get( lua_State* L, int idx ) {
-                if ( lua_isuserdata(L, idx) ) {
-                    data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
-                    if ( holder->type==data_holder::intrusive_ptr ) {
-                        T* ptr = get_ptr<T>(holder->info,*reinterpret_cast<void**>( holder+1));
-                        return sb::intrusive_ptr<T>(ptr);
-                    }
-                } else if ( lua_isnil(L, idx) ) {
-                    return sb::intrusive_ptr<T>();
-                }
-                lua_argerror( L, idx, meta::type<T>::info()->name, 0 );
-                return sb::intrusive_ptr<T>();
+                return get_intrusive_ptr<T>(L,idx);
             }
         };
 
