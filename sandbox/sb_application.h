@@ -42,6 +42,7 @@ namespace Sandbox {
         void    SetMouseContext(const LuaContextPtr& ctx );
   	
         sb::string GetFlashVar(const sb::string& name) const;
+        GHL::System* GetSystem() const { return m_system;}
     protected:
 		Application();
 		virtual ~Application();
@@ -59,7 +60,7 @@ namespace Sandbox {
 		virtual void BindModules( LuaVM* );
 		virtual void OnLoaded() {}
 		virtual void ConfigureDevice(GHL::System*) {}
-		GHL::System* GetSystem() const { return m_system;}
+		
 		GHL::VFS* GetVFS() const { return m_vfs;}
 		GHL::Render* GetRender() const { return m_render;}
 		LuaVM* GetLua() const { return m_lua;}
