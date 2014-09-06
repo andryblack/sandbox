@@ -80,6 +80,13 @@ SB_META_PROPERTY_RW(Text,GetText,SetText)
 SB_META_PROPERTY_RW(Align,GetAlign,SetAlign)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::MultilineLabel)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW(Width,GetWidth,SetWidth)
+SB_META_PROPERTY_RO(Lines, GetLines)
+SB_META_PROPERTY_RO(Height, GetHeight)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::CircleObject)
 SB_META_CONSTRUCTOR((const Sandbox::Vector2f&,float))
 SB_META_PROPERTY_RW_DEF(R)
@@ -180,6 +187,7 @@ namespace Sandbox {
         luabind::Class<FillRect>(lua);
         luabind::Class<Background>(lua);
         luabind::Class<Label>(lua);
+        luabind::Class<MultilineLabel>(lua);
         luabind::Class<CircleObject>(lua);
         luabind::Class<LineObject>(lua);
         luabind::Class<Container>(lua);

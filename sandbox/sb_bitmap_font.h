@@ -10,7 +10,7 @@
 #define __YinYang__sb_bitmap_font__
 
 #include "sb_font.h"
-#include "sb_utf.h"
+
 #include "sb_image.h"
 #include <sbstd/sb_vector.h>
 
@@ -24,6 +24,7 @@ namespace Sandbox {
         
         virtual float Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const;
 		virtual float GetTextWidth(const char* text) const ;
+        virtual bool MovePosition(Vector2f& pos,UTF32Char prev,UTF32Char next) const;
 
         void Reserve(size_t size);
 		void AddGlypth(const ImagePtr& img,const char* code,float asc);

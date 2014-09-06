@@ -13,7 +13,7 @@
 #include "sb_notcopyable.h"
 #include <sbstd/sb_intrusive_ptr.h>
 #include "meta/sb_meta.h"
-
+#include "sb_utf.h"
 
 namespace Sandbox {
 
@@ -34,6 +34,7 @@ namespace Sandbox {
 		virtual ~Font();
 		virtual float Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const = 0;
 		virtual float GetTextWidth(const char* text) const = 0;
+        virtual bool MovePosition(Vector2f& pos,UTF32Char prev,UTF32Char next) const = 0;
         
         /// font size (font units)
         float   GetSize() const { return m_size; }

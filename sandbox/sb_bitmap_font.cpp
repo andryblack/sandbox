@@ -82,6 +82,18 @@ namespace Sandbox {
 		}
 		return w;
 	}
+    
+    bool BitmapFont::MovePosition(Vector2f& pos,UTF32Char prev,UTF32Char next) const {
+        if (next) {
+            const Glypth* gl = get_glypth(next);
+            if (gl) {
+                const Glypth* glprev = get_glypth(prev);
+                pos.x+=gl->asc;
+                pos.x+=getKerning(glprev,next);
+            }
+        }
+        return true;
+    }
 	
 	float BitmapFont::Draw(Graphics& g,const Vector2f& _pos,const char* text,FontAlign align) const {
 		if (!text) return 0;

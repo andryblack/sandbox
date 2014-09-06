@@ -27,14 +27,37 @@ namespace Sandbox {
 		const FontPtr& GetFont() const { return m_font;}
 		void SetAlign( FontAlign align) { m_align = align; }
 		FontAlign GetAlign() const { return m_align;}
-		void SetText(const char* text) { m_text = text; }
+		void SetText(const char* text) { m_text = text; UpdateText();}
 		const char* GetText() const { return m_text.c_str(); }
-	private:
+    protected:
+        virtual void UpdateText() {}
 		FontPtr		m_font;
 		FontAlign	m_align;
 		sb::string	m_text;
 	};
 	typedef sb::intrusive_ptr<Label> LabelPtr;
+    
+    class MultilineLabel : public Label {
+        SB_META_OBJECT
+    public:
+        MultilineLabel();
+        ~MultilineLabel();
+        void Draw(Graphics& g) const;
+        void SetWidth(float w) { m_width = w; UpdateText(); }
+        float GetWidth() const { return m_width; }
+        size_t GetLines() const { return m_lines.size(); }
+        float GetHeight() const;
+    protected:
+        virtual void UpdateText();
+        struct Line {
+            Vector2f pos;
+            sb::string text;
+        };
+        struct MultilineContext;
+        friend class MultilineContext;
+        sb::vector<Line> m_lines;
+        float   m_width;
+    };
 }
 
 #endif /*SB_LABEL_H*/
