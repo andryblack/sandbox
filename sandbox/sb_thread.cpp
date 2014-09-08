@@ -7,6 +7,7 @@
 //
 
 #include "sb_thread.h"
+#include "sb_lua.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::Thread, Sandbox::meta::object)
 
@@ -43,12 +44,18 @@ namespace Sandbox {
                         return true;
 					}
 					lua_State* th = lua_tothread(L, -1);
+                    
+                    g_terminate_thread = th;
+                    
                     int status = lua_status(th);
                     if (status!=LUA_YIELD) {
                         //LogDebug(LuaThreadModule) << "thread " << th << " status: " << status;
                     }
 					lua_pushnumber(th, dt);
 					int res = lua_resume(th,0, 1);
+                    
+                    g_terminate_thread = 0;
+                    
 					if (res==LUA_YIELD) {
                         lua_pop(L,1);
                         if (status!=LUA_YIELD) {

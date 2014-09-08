@@ -38,16 +38,20 @@ namespace Sandbox {
     static const char* MODULE = "Sanbox:Lua";
     
 	static lua_State* g_terminate_context = 0;
+    
+    lua_State* g_terminate_thread = 0;
+    
 	bool lua_terminate_handler() {
         if (g_terminate_context) {
             LogError(MODULE) << "--- terminate ---";
-            lua_pushcclosure(g_terminate_context, &luabind::lua_traceback, 0);
-            if (lua_gettop(g_terminate_context)<2 || !lua_isstring(g_terminate_context, -2)){
-                lua_pushstring(g_terminate_context, "unknown");
+            const char* text = "unknown";
+            if (lua_gettop(g_terminate_context)<1 || !lua_isstring(g_terminate_context, -1)){
+                //text = "unknown";
             } else {
-                lua_pushvalue(g_terminate_context, -2);
+                text = lua_tostring(g_terminate_context, -1);
             }
-            lua_pcall(g_terminate_context, 1, 1, 0);
+            luaL_traceback(g_terminate_context,
+                           g_terminate_thread?g_terminate_thread:g_terminate_context,text,1);
             LogError(MODULE) << lua_tostring(g_terminate_context, -1);
             LogError(MODULE) << "--- terminate ---";
         }

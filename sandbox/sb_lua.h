@@ -33,6 +33,8 @@ namespace Sandbox {
     class LuaContext;
     typedef sb::intrusive_ptr<LuaContext> LuaContextPtr;
 	
+    extern lua_State* g_terminate_thread;
+    
     class LuaVM : public NotCopyable {
     public:
         explicit LuaVM( FileProvider* resources );
