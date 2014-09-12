@@ -44,6 +44,15 @@ namespace Sandbox {
             object() : sb::ref_countered_base_not_copyable() {}
         };
         
+        template <class T>
+        class object_proxy : public T {
+        public:
+            virtual const type_info* get_type_info() const {
+                return object::get_static_type_info();
+            }
+            static const type_info* get_static_type_info() { return object::get_static_type_info(); }
+        };
+        
 #define SB_META_OBJECT \
     public: \
         virtual const Sandbox::meta::type_info* get_type_info() const;\

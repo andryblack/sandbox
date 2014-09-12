@@ -51,7 +51,7 @@ SB_META_PROPERTY(fullscreen)
 SB_META_PROPERTY(depth)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::Application, void)
+SB_META_DECLARE_OBJECT(Sandbox::Application, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
 SB_META_METHOD(AddScene)
 SB_META_METHOD(RemoveScene)
@@ -205,10 +205,7 @@ namespace Sandbox {
 		
         LuaContextPtr ctx = m_lua->GetGlobalContext();
         
-        luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
-        ctx->SetValue("application.app", this);
-        luabind::RawClass<GHL::Settings>(m_lua->GetVM());
-        ctx->SetValue("settings", settings);
+        
 		
 #ifdef GHL_PLATFORM_IOS
         ctx->SetValue("platform.os", "iOS");
@@ -226,9 +223,14 @@ namespace Sandbox {
         ctx->SetValue("platform.os", "FLASH");
 #endif
         
+        luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
+        luabind::RawClass<GHL::Settings>(m_lua->GetVM());
         
 		BindModules( m_lua );
 
+        ctx->SetValue("application.app", this);
+        ctx->SetValue("settings", settings);
+        
 #ifdef SB_USE_NETWORK
         ctx->SetValue("application.network", m_network);
 #endif
@@ -353,6 +355,7 @@ namespace Sandbox {
     }
 	
 	void Application::DrawDebugInfo() {
+#ifdef SB_DEBUG
 		char buf[128];
 		::snprintf(buf,128,"fps:%0.2f",m_fps);
 		m_render->SetProjectionMatrix(Matrix4f::ortho(0.0f,
@@ -370,6 +373,7 @@ namespace Sandbox {
         if (render_mem)
             m_render->DebugDrawText( 10, 54,
                                     (sb::string("tex:")+format_memory(render_mem)).c_str() );
+#endif
 	}
     
     void    Application::AddScene( const RTScenePtr& scene ) {

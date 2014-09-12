@@ -30,7 +30,8 @@ namespace Sandbox {
     }
     class Network;
     
-	class Application : public GHL::Application {
+	class Application : public meta::object_proxy<GHL::Application> {
+        SB_META_OBJECT
     public:
         void SetSoundEnabled( bool e );
         bool GetSoundEnabled() const;
