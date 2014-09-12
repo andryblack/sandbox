@@ -20,8 +20,8 @@ namespace Sandbox {
         (void)MODULE;
 		m_render = 0;
 		m_fake_tex_white = 0;
-        m_fake_tex_black = 0;
-		m_vertexes.reserve(512);
+        m_vertexes.reserve(512);
+        m_vertexes2tex.reserve(512);
 		m_indexes.reserve(512);
 	}
 	
@@ -45,9 +45,10 @@ namespace Sandbox {
         if (!m_fake_tex_black) {
             GHL::Image* img = GHL_CreateImage(1, 1, GHL::IMAGE_FORMAT_RGBA);
             img->Fill(0xFF000000);
-            m_fake_tex_black = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
+            GHL::Texture* tex = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
+            m_fake_tex_black = TexturePtr(new Texture(tex));
 			img->Release();
-            m_fake_tex_black->DiscardInternal();
+            tex->DiscardInternal();
 		}
 	}
 	
@@ -57,44 +58,22 @@ namespace Sandbox {
 			Flush();
 			switch (bmode) {
 				case BLEND_MODE_COPY: 
-					m_render->SetTexture(0,1);
 					m_render->SetupBlend(false, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ZERO);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					break;
 				case BLEND_MODE_ALPHABLEND: 
-					m_render->SetTexture(0,1);
 					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_SRC_ALPHA_INV);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					break;
 				case BLEND_MODE_ADDITIVE: 
-					m_render->SetTexture(0,1);
 					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					break;
 				case BLEND_MODE_ADDITIVE_ALPHA: 
-					m_render->SetTexture(0,1);
 					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					break;
-				case BLEND_MODE_SCREEN:
-					m_render->SetTexture(m_fake_tex_black,1);
-					m_render->SetupBlend(true, GHL::BLEND_FACTOR_DST_COLOR_INV, GHL::BLEND_FACTOR_ONE);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-					m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
-					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_SELECT_2,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+//				case BLEND_MODE_SCREEN:
+//					m_render->SetTexture(m_fake_tex_black,1);
+//					m_render->SetupBlend(true, GHL::BLEND_FACTOR_DST_COLOR_INV, GHL::BLEND_FACTOR_ONE);
+//					m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+//					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_SELECT_2,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
 					break;
 				default:
 					sb_assert(false && "unknown blend mode");
@@ -161,19 +140,32 @@ namespace Sandbox {
         if (m_primitives==0) return;
         /// do batch
 		m_render->SetTexture(m_texture ? m_texture->Present(m_resources) : 0,0);
-		//m_render->SetTexture(m_texture ? m_texture->Present() : 0,1);
+        if (m_mask) {
+            m_render->SetTexture(m_mask->Present(m_resources),1);
+        }
+		
         const GHL::UInt16* indexes = m_indexes.empty() ? 0 : &m_indexes.front();
-		m_render->DrawPrimitivesFromMemory(m_ptype,
+        if (!m_calc2_tex) {
+            m_render->DrawPrimitivesFromMemory(m_ptype,
 										   GHL::VERTEX_TYPE_SIMPLE,
 											&m_vertexes.front(),
                                            static_cast<GHL::UInt32>(m_vertexes.size()),
                                            indexes,
                                            GHL::UInt32(m_primitives));
+        } else {
+            m_render->DrawPrimitivesFromMemory(m_ptype,
+                                               GHL::VERTEX_TYPE_2_TEX,
+                                               &m_vertexes2tex.front(),
+                                               static_cast<GHL::UInt32>(m_vertexes2tex.size()),
+                                               indexes,
+                                               GHL::UInt32(m_primitives));
+        }
         m_batches++;
 #ifdef PRINT_BATCHES
         LogDebug(MODULE) << "batch " << m_data->primitives;
 #endif
         m_vertexes.clear();
+        m_vertexes2tex.clear();
 		m_indexes.clear();
 		m_primitives = 0;
 	}
@@ -198,14 +190,14 @@ namespace Sandbox {
     }
 	
 	void Graphics::appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3) {
-		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
+		GHL::UInt16 base = m_calc2_tex ? static_cast<GHL::UInt16>(m_vertexes2tex.size()) : static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+i1);
 		m_indexes.push_back(base+i2);
 		m_indexes.push_back(base+i3);
 		m_primitives++;
 	}
 	void Graphics::appendQuad() {
-		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
+		GHL::UInt16 base = m_calc2_tex ? static_cast<GHL::UInt16>(m_vertexes2tex.size()) : static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+0);
 		m_indexes.push_back(base+1);
 		m_indexes.push_back(base+2);
@@ -227,6 +219,7 @@ namespace Sandbox {
 		
 		GHL::UInt32 clr = (m_color).hw();
 		
+        if (!m_calc2_tex)
         {
             appendVertex(x,y,
                                  img.GetTextureX()*m_itw,
@@ -240,7 +233,20 @@ namespace Sandbox {
             appendVertex(x+w,y+h,
                                  img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
-        } 
+        }  else {
+            appendVertex2(x,y,
+                         img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
+            appendVertex2(x+w,y,
+                         img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
+            appendVertex2(x,y+h,
+                         img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+            appendVertex2(x+w,y+h,
+                         img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+        }
 	}
 	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr) {
 		sb_assert( (m_render!=0) && "scene not started" );
@@ -253,7 +259,7 @@ namespace Sandbox {
         appendQuad();
 		
 		GHL::UInt32 clr = (m_color*_clr).hw();
-		
+		if (!m_calc2_tex)
         {
             appendVertex(x,y,
 						 img.GetTextureX()*m_itw,
@@ -267,7 +273,20 @@ namespace Sandbox {
             appendVertex(x+w,y+h,
 						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
-        } 
+        } else {
+            appendVertex2(x,y,
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
+            appendVertex2(x+w,y,
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
+            appendVertex2(x,y+h,
+						 img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+            appendVertex2(x+w,y+h,
+						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+        }
 		
 	}
 	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr,float scale) {
@@ -282,6 +301,7 @@ namespace Sandbox {
 		
 		GHL::UInt32 clr = (m_color*_clr).hw();
 		
+        if (!m_calc2_tex)
         {
             appendVertex(x,y,
 						 img.GetTextureX()*m_itw,
@@ -295,7 +315,21 @@ namespace Sandbox {
             appendVertex(x+w,y+h,
 						 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
-        } 
+        } else {
+            appendVertex2(x,y,
+                          img.GetTextureX()*m_itw,
+                          img.GetTextureY()*m_ith,clr);
+            appendVertex2(x+w,y,
+                          img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                          img.GetTextureY()*m_ith,clr);
+            appendVertex2(x,y+h,
+                          img.GetTextureX()*m_itw,
+                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+            appendVertex2(x+w,y+h,
+                          img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+
+        }
 		
 	}
     
@@ -609,6 +643,7 @@ namespace Sandbox {
             
             GHL::UInt32 clr = (m_color * p.color).hw();
             
+            if (!m_calc2_tex)
             {
                 appendVertex(x,y,
                              img.GetTextureX(),img.GetTextureY(),clr);
@@ -618,7 +653,16 @@ namespace Sandbox {
                              img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
                 appendVertex(x+w,y+h,
                              img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
-            } 
+            } else {
+                appendVertex2(x,y,
+                             img.GetTextureX(),img.GetTextureY(),clr);
+                appendVertex2(x+w,y,
+                             img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+                appendVertex2(x,y+h,
+                             img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+                appendVertex2(x+w,y+h,
+                             img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+            }
 
         }
     }
@@ -673,7 +717,58 @@ namespace Sandbox {
 			m_render->SetShader(0);
 
 	}
-	
+    
+    void Graphics::SetMask(MaskMode mode, const TexturePtr& mask_tex,const Transform2d& tr) {
+        SetMaskTexture(mask_tex);
+        SetMaskMode(mode);
+        m_mask_transform = tr;
+    }
+    void Graphics::SetMaskTexture(const TexturePtr& tex) {
+        bool need_flush = false;
+        if (m_mask != tex) {
+            need_flush = true;
+        }
+        bool needCalc2 = tex && tex!=m_fake_tex_black;
+        if (needCalc2!=m_calc2_tex) {
+            need_flush = true;
+        }
+        if (need_flush) {
+            Flush();
+        }
+        m_mask = tex;
+        m_calc2_tex = needCalc2;
+        if (!tex) {
+            m_render->SetTexture(0,1);
+        }
+    }
+    void Graphics::SetMaskMode(MaskMode mode) {
+        if (mode != m_mask_mode) {
+            Flush();
+        }
+        if (!m_mask && mode!=MASK_MODE_NONE) {
+            SetMaskTexture(m_fake_tex_black);
+        }
+        switch (mode) {
+            case MASK_MODE_NONE:
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                break;
+                
+            case MASK_MODE_ALPHA:
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                break;
+                
+            case MASK_MODE_SCREEN:
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_SELECT_2,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                break;
+        }
+    
+        m_mask_mode = mode;
+        
+    }
+  	
 	void Graphics::SetProjectionMatrix(const Matrix4f& m) {
 		Flush();
 		m_projection_matrix = m;
@@ -708,6 +803,8 @@ namespace Sandbox {
 		m_blend_mode = BLEND_MODE_COPY;
 		m_render->SetupBlend(false);
 		m_texture = TexturePtr();
+        m_mask = TexturePtr();
+        m_mask_mode = MASK_MODE_NONE;
 		m_render->SetTexture(0,0);
 		m_ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
 		m_vertexes.clear();
@@ -717,22 +814,30 @@ namespace Sandbox {
 		m_color = Color(1,1,1,1);
 		m_transform = Transform2d();
 		m_shader = ShaderPtr();
+        m_calc2_tex = false;
 		SetProjectionMatrix(Matrix4f::ortho(0,float(render->GetWidth()),
 											float(render->GetHeight()),0,-10,10));
 		SetViewMatrix(Matrix4f::identity());
 		SetViewport(Recti(0,0,render->GetWidth(),render->GetHeight()));
 		SetClipRect(GetViewport());
+        m_render->SetTexture(0,0);
+        m_render->SetTexture(0,1);
         m_render->SetIndexBuffer(0);
         m_render->SetVertexBuffer(0);
+        m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
+        m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
     }
 	size_t Graphics::EndScene() {
 		sb_assert( (m_render!=0) && "scene not started" );
 		Flush();
 		m_render->SetTexture(0,0);
+        m_render->SetTexture(0,1);
 		m_render->SetShader(0);
 		m_texture = TexturePtr();
+        m_mask = TexturePtr();
 		m_shader = ShaderPtr();
 		m_render = 0;
+        m_mask_mode = MASK_MODE_NONE;
         return m_batches;
 	}
 	

@@ -55,6 +55,11 @@ SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Color,GetColor,SetColor)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::SpriteWithMask)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW(Mask, GetMask, SetMask)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::ClearScene)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Color,GetColor,SetColor)
@@ -117,14 +122,27 @@ SB_META_ENUM_BIND(Sandbox::BlendMode,namespace Sandbox,
                         SB_META_ENUM_ITEM(BLEND_MODE_COPY)
                         SB_META_ENUM_ITEM(BLEND_MODE_ALPHABLEND)
                         SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE)
-                        SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE_ALPHA)
-                        SB_META_ENUM_ITEM(BLEND_MODE_SCREEN))
+                        SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE_ALPHA))
+
+SB_META_DECLARE_KLASS(Sandbox::MaskMode,void);
+SB_META_ENUM_BIND(Sandbox::MaskMode,namespace Sandbox,
+                  SB_META_ENUM_ITEM(MASK_MODE_NONE)
+                  SB_META_ENUM_ITEM(MASK_MODE_ALPHA)
+                  SB_META_ENUM_ITEM(MASK_MODE_SCREEN))
 
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerBlend)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Mode,GetMode,SetMode)
 SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerMask)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW(Mode,GetMode,SetMode)
+SB_META_PROPERTY_RW(Texture,GetTexture,SetTexture)
+SB_META_PROPERTY_RW(Transform,GetTransform,SetTransform)
+SB_META_END_KLASS_BIND()
+
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerVisible)
 SB_META_PROPERTY_RW_DEF(Invert)
@@ -183,6 +201,7 @@ namespace Sandbox {
         luabind::Class<SpriteBox>(lua);
         luabind::Class<SpriteFill>(lua);
         luabind::Class<ColorizedSprite>(lua);
+        luabind::Class<SpriteWithMask>(lua);
         luabind::Class<ClearScene>(lua);
         luabind::Class<FillRect>(lua);
         luabind::Class<Background>(lua);
@@ -192,7 +211,9 @@ namespace Sandbox {
         luabind::Class<LineObject>(lua);
         luabind::Class<Container>(lua);
         luabind::Enum<BlendMode>(lua);
+        luabind::Enum<MaskMode>(lua);
         luabind::Class<ContainerBlend>(lua);
+        luabind::Class<ContainerMask>(lua);
         luabind::Class<TransformModificator>(lua);
         luabind::Class<ColorModificator>(lua);
         luabind::Class<ContainerVisible>(lua);

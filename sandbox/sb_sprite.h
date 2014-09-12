@@ -71,5 +71,15 @@ namespace Sandbox {
         Vector2f    m_size;
     };
     
+    class SpriteWithMask : public Sprite {
+        SB_META_OBJECT
+    public:
+        virtual void Draw( Graphics& g ) const;
+        const ImagePtr& GetMask() const { return m_mask; }
+        void SetMask(const ImagePtr& m) { m_mask = m; }
+    private:
+        ImagePtr    m_mask;
+    };
+    
 }
 #endif /*SB_SPRITE_H*/

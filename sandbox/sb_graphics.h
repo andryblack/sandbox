@@ -28,7 +28,12 @@ namespace Sandbox {
         BLEND_MODE_ALPHABLEND,
         BLEND_MODE_ADDITIVE,
         BLEND_MODE_ADDITIVE_ALPHA,
-		BLEND_MODE_SCREEN,
+    };
+    
+    enum MaskMode {
+        MASK_MODE_NONE,
+        MASK_MODE_ALPHA,
+        MASK_MODE_SCREEN,
     };
 	
     struct GeometryData;
@@ -75,6 +80,15 @@ namespace Sandbox {
 		ShaderPtr GetShader() const { return m_shader; }
 		void SetShader(const ShaderPtr& sh);
 
+        /// mask
+        void SetMask(MaskMode mode, const TexturePtr& mask_tex,const Transform2d& tr);
+        const TexturePtr& GetMaskTexture() const { return m_mask; }
+        void SetMaskTexture(const TexturePtr& tex);
+        MaskMode GetMaskMode() const { return m_mask_mode; }
+        void SetMaskMode(MaskMode mode);
+        const Transform2d& GetMaskTransform() const { return m_mask_transform; }
+        void SetMaskTransform( const Transform2d& tr ) { m_mask_transform = tr; }
+        
 		/// draw image
 		/// @{
 
@@ -137,23 +151,29 @@ namespace Sandbox {
         Resources*  m_resources;
 		GHL::Render* m_render;
 		GHL::Texture* m_fake_tex_white;
-        GHL::Texture* m_fake_tex_black;
+        TexturePtr  m_fake_tex_black;
         
-		Transform2d	m_transform;
+		Transform2d     m_transform;
+        Transform2d     m_mask_transform;
+        
 		Matrix4f	m_projection_matrix;
 		Matrix4f	m_view_matrix;
 		Recti		m_viewport;
 		Recti		m_clip_rect;
 		Color		m_color;
 		BlendMode	m_blend_mode;
+        MaskMode    m_mask_mode;
 		TexturePtr  m_texture;
+        TexturePtr  m_mask;
         float       m_itw;
         float       m_ith;
 		ShaderPtr	m_shader;
 		GHL::PrimitiveType	m_ptype;
         size_t      m_primitives;
 		std::vector<GHL::Vertex> m_vertexes;
+        std::vector<GHL::Vertex2Tex> m_vertexes2tex;
 		std::vector<GHL::UInt16> m_indexes;
+        bool    m_calc2_tex;
 	
 		void BeginDrawImage(const Image& img);
 		void BeginDrawLines();
@@ -170,6 +190,19 @@ namespace Sandbox {
 			v.color[3]=(color >> 24)&0xff;
 			v.tx = tx;
 			v.ty = ty;
+		}
+        inline void appendVertex2(float x,float y,float tx,float ty,GHL::UInt32 color=0xffffffff) {
+			m_vertexes2tex.push_back(GHL::Vertex2Tex());
+			GHL::Vertex2Tex& v(m_vertexes2tex.back());
+			m_transform.transform(x,y,v.x,v.y);
+			v.z = 0.0f;
+			v.color[0]=color & 0xff;
+			v.color[1]=(color >> 8)&0xff;
+			v.color[2]=(color >> 16)&0xff;
+			v.color[3]=(color >> 24)&0xff;
+			v.tx = tx;
+			v.ty = ty;
+            m_mask_transform.transform(x, y, v.t2x, v.t2y);
 		}
 		void appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3);
 		void appendQuad();

@@ -14,6 +14,7 @@ SB_META_DECLARE_OBJECT(Sandbox::Sprite, Sandbox::SceneObjectWithPosition)
 SB_META_DECLARE_OBJECT(Sandbox::ColorizedSprite, Sandbox::Sprite)
 SB_META_DECLARE_OBJECT(Sandbox::SpriteFill, Sandbox::Sprite)
 SB_META_DECLARE_OBJECT(Sandbox::SpriteBox, Sandbox::SceneObjectWithPosition)
+SB_META_DECLARE_OBJECT(Sandbox::SpriteWithMask, Sandbox::Sprite)
 
 namespace Sandbox {
 	
@@ -67,5 +68,30 @@ namespace Sandbox {
         if (m_image)
             g.DrawImageBox(*m_image,GetPos(),GetSize());
 	}
+    
+    void SpriteWithMask::Draw( Graphics& g ) const {
+        if (m_image) {
+            if (m_mask) {
+                const TexturePtr& mt = m_mask->GetTexture();
+                MaskMode m = g.GetMaskMode();
+                TexturePtr t = g.GetMaskTexture();
+                Transform2d tr = g.GetMaskTransform();
+                Transform2d mtr;// = g.GetTransform();
+                
+                if (mt) {
+                    mtr.scale(1.0f/mt->GetWidth(),1.0f/mt->GetHeight());
+                    mtr.translate(-GetPos());
+                } else {
+                    mtr.translate(-GetPos());
+                }
+                g.SetMask(MASK_MODE_ALPHA, mt, mtr);
+                g.DrawImage(*m_image,GetPos());
+                g.SetMask(m, t, tr);
+                
+            } else {
+                g.DrawImage(*m_image,GetPos());
+            }
+        }
+    }
 }
 
