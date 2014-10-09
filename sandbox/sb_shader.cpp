@@ -12,6 +12,10 @@
 #include <ghl_shader.h>
 #include <ghl_render.h>
 
+SB_META_DECLARE_OBJECT(Sandbox::ShaderUniform, void)
+SB_META_DECLARE_OBJECT(Sandbox::ShaderFloatUniform, Sandbox::ShaderUniform)
+SB_META_DECLARE_OBJECT(Sandbox::ShaderVec2Uniform, Sandbox::ShaderUniform)
+
 namespace Sandbox {
 
 	Shader::Shader( GHL::ShaderProgram* prg) : m_program(prg) {
@@ -55,10 +59,10 @@ namespace Sandbox {
 		return sb::intrusive_ptr<ShaderUniform>();
 	}
     ShaderFloatUniformPtr Shader::GetFloatUniform(const char* name) {
-        return sb::dynamic_pointer_cast<ShaderFloatUniform>(GetUniform<ShaderFloatUniform>(name));
+        return ShaderFloatUniformPtr(meta::sb_dynamic_cast<ShaderFloatUniform>(GetUniform<ShaderFloatUniform>(name).get()));
     }
     ShaderVec2UniformPtr Shader::GetVec2Uniform(const char* name) {
-        return sb::dynamic_pointer_cast<ShaderVec2Uniform>(GetUniform<ShaderVec2Uniform>(name));
+        return ShaderVec2UniformPtr(meta::sb_dynamic_cast<ShaderVec2Uniform>(GetUniform<ShaderVec2Uniform>(name).get()));
     }
     
 }

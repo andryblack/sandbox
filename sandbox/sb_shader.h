@@ -14,6 +14,7 @@
 #include <sbstd/sb_vector.h>
 #include <sbstd/sb_string.h>
 #include <sbstd/sb_map.h>
+#include "meta/sb_meta.h"
 #include "sb_vector2.h"
 
 namespace GHL {
@@ -24,6 +25,7 @@ namespace GHL {
 namespace Sandbox {
 	
 	class ShaderUniform : public sb::ref_countered_base_not_copyable {
+        SB_META_OBJECT
 	public:
         virtual ~ShaderUniform() {}
 		virtual void DoSet() = 0;
@@ -34,6 +36,7 @@ namespace Sandbox {
 	typedef sb::intrusive_ptr<ShaderUniform> ShaderUniformPtr;
 	
 	class ShaderFloatUniform : public ShaderUniform {
+        SB_META_OBJECT
 	public:
 		explicit ShaderFloatUniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform),m_value(1.0f) {}
 		virtual void DoSet();
@@ -44,6 +47,7 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<ShaderFloatUniform> ShaderFloatUniformPtr;
     
     class ShaderVec2Uniform : public ShaderUniform {
+        SB_META_OBJECT
 	public:
 		explicit ShaderVec2Uniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
 		virtual void DoSet();
