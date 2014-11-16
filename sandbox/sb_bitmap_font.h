@@ -33,6 +33,8 @@ namespace Sandbox {
         void SetXHeight(float h) { set_x_height(h);}
         void SetSize(float s) { set_size(s); }
         void SetBaseline(float bl) {set_baseline(bl);}
+        
+        void FixupChars(const char* from, const char* to);
     private:
         struct Kerning {
 			GHL::UInt32 code;
@@ -46,6 +48,7 @@ namespace Sandbox {
 		};
 		sb::vector<Glypth> m_glypths;
 		const Glypth* get_glypth(GHL::UInt32 code) const;
+        Glypth* get_glypth_int(GHL::UInt32 code);
 		float getKerning(const Glypth* g,GHL::UInt32 to) const;
     };
     

@@ -24,6 +24,25 @@ namespace Sandbox {
     void BitmapFont::Reserve(size_t size) {
 		m_glypths.reserve(size);
 	}
+    
+    void BitmapFont::FixupChars(const char* from, const char* to) {
+        while (from && *from) {
+            UTF32Char chFrom = 0;
+            UTF32Char chTo = 0;
+            from = get_char(from, chFrom);
+            to = get_char(to, chTo);
+            Glypth* glyph = get_glypth_int(chFrom);
+            if (!glyph) {
+                m_glypths.resize(m_glypths.size()+1);
+                glyph = &m_glypths.back();
+            }
+            const Glypth* toGlyph = get_glypth(chTo);
+            if (toGlyph) {
+                *glyph = *toGlyph;
+                glyph->code = chFrom;
+            }
+        }
+    }
 	
 	void BitmapFont::AddGlypth(const ImagePtr& img,const char* code,float asc) {
 		if (!code) return;
@@ -56,6 +75,12 @@ namespace Sandbox {
 		}
 		return 0;
 	}
+    BitmapFont::Glypth* BitmapFont::get_glypth_int(GHL::UInt32 code) {
+        for (std::vector<Glypth>::iterator it=m_glypths.begin();it!=m_glypths.end();it++) {
+            if (it->code == code) return &(*it);
+        }
+        return 0;
+    }
 	float BitmapFont::getKerning(const Glypth* g,GHL::UInt32 to) const {
 		if (g) {
 			for (size_t i=0;i<g->kerning.size();i++) {
