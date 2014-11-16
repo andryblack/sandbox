@@ -55,6 +55,11 @@ SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Color,GetColor,SetColor)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::ColorizedSpriteBox)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW(Color,GetColor,SetColor)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::SpriteWithMask)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Mask, GetMask, SetMask)
@@ -201,6 +206,7 @@ namespace Sandbox {
         luabind::Class<SpriteBox>(lua);
         luabind::Class<SpriteFill>(lua);
         luabind::Class<ColorizedSprite>(lua);
+        luabind::Class<ColorizedSpriteBox>(lua);
         luabind::Class<SpriteWithMask>(lua);
         luabind::Class<ClearScene>(lua);
         luabind::Class<FillRect>(lua);

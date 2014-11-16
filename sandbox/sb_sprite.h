@@ -43,7 +43,6 @@ namespace Sandbox {
         Rectf GetRect() const;
 		virtual void Draw( Graphics& g ) const;
 	protected:
-		ImagePtr m_image;
 		Vector2f m_size;
 	};
 	typedef sb::intrusive_ptr<Sprite> SpritePtr;
@@ -66,9 +65,19 @@ namespace Sandbox {
         virtual void Draw( Graphics& g ) const;
         void SetSize(const Vector2f& size) { m_size = size; }
         const Vector2f& GetSize() const { return m_size; }
-    private:
+    protected:
         ImageBoxPtr m_image;
         Vector2f    m_size;
+    };
+    
+    class ColorizedSpriteBox : public SpriteBox {
+        SB_META_OBJECT
+    public:
+        virtual void Draw( Graphics& g ) const;
+        void SetColor( const Color& color ) { m_color = color; }
+        const Color& GetColor() const { return m_color; }
+    private:
+        Color   m_color;
     };
     
     class SpriteWithMask : public Sprite {

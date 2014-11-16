@@ -14,6 +14,7 @@ SB_META_DECLARE_OBJECT(Sandbox::Sprite, Sandbox::SceneObjectWithPosition)
 SB_META_DECLARE_OBJECT(Sandbox::ColorizedSprite, Sandbox::Sprite)
 SB_META_DECLARE_OBJECT(Sandbox::SpriteFill, Sandbox::Sprite)
 SB_META_DECLARE_OBJECT(Sandbox::SpriteBox, Sandbox::SceneObjectWithPosition)
+SB_META_DECLARE_OBJECT(Sandbox::ColorizedSpriteBox, Sandbox::SpriteBox)
 SB_META_DECLARE_OBJECT(Sandbox::SpriteWithMask, Sandbox::Sprite)
 
 namespace Sandbox {
@@ -31,8 +32,8 @@ namespace Sandbox {
 
     void SpriteFill::SetRect(const Rectf& rect) {
         SetPos(Vector2f(rect.x, rect.y));
-        m_size.x = rect.x;
-        m_size.y = rect.y;
+        m_size.x = rect.w;
+        m_size.y = rect.h;
     }
     
     Rectf SpriteFill::GetRect() const {
@@ -54,6 +55,7 @@ namespace Sandbox {
                     Image img(*m_image);
                     img.SetSize(img.GetWidth()*dxs, img.GetHeight()*dys);
                     img.SetTextureRect(img.GetTextureX(), img.GetTextureY(), img.GetTextureW()*dxs, img.GetTextureH()*dys);
+                    g.DrawImage(img, x, y);
                 }
             }
         }
@@ -68,6 +70,15 @@ namespace Sandbox {
         if (m_image)
             g.DrawImageBox(*m_image,GetPos(),GetSize());
 	}
+    
+    void ColorizedSpriteBox::Draw(Graphics& g) const {
+        if (m_image) {
+            Color prev = g.GetColor();
+            g.SetColor(prev*m_color);
+            g.DrawImageBox(*m_image,GetPos(),GetSize());
+            g.SetColor(prev);
+        }
+    }
     
     void SpriteWithMask::Draw( Graphics& g ) const {
         if (m_image) {
