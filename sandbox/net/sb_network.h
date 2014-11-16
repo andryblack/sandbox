@@ -94,6 +94,7 @@ namespace Sandbox {
         VectorData<GHL::Byte>*   m_data;
     };
     
+#ifndef SB_NO_RESOURCES
     class ImageRequest : public NetworkDataRequest {
     public:
         explicit ImageRequest(const sb::string& url,Resources* res) :  NetworkDataRequest(url),m_resources(res) {}
@@ -105,13 +106,15 @@ namespace Sandbox {
     };
     
     typedef sb::intrusive_ptr<ImageRequest> ImageRequestPtr;
+#endif
     
     class Network {
     public:
         explicit Network(Resources* res);
         ~Network();
-        
+#ifndef SB_NO_RESOURCES
         ImageRequestPtr GETImage(const sb::string& url);
+#endif
         NetworkRequestPtr SimpleGET(const sb::string& url);
         NetworkRequestPtr SimplePOST(const sb::string& url, const sb::string& data);
     private:

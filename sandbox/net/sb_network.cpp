@@ -32,7 +32,7 @@ namespace Sandbox {
     }
     /// headers
     GHL::UInt32 GHL_CALL NetworkRequestBase::GetHeadersCount() const {
-        return m_headers.size();
+        return GHL::UInt32(m_headers.size());
     }
     const char* GHL_CALL NetworkRequestBase::GetHeaderName(GHL::UInt32 idx) const {
         headers_map_t::const_iterator it = m_headers.begin();
@@ -97,7 +97,7 @@ namespace Sandbox {
             m_data = 0;
         }
     }
-    
+#ifndef SB_NO_RESOURCES
     void GHL_CALL ImageRequest::OnComplete() {
         NetworkDataRequest::OnComplete();
         const GHL::Data* data = GetData();
@@ -106,7 +106,7 @@ namespace Sandbox {
         }
         ReleaseData();
     }
-    
+#endif
     Network::Network(Resources* res) : m_resources(res) {
         m_net = GHL_CreateNetwork();
     }
@@ -122,6 +122,7 @@ namespace Sandbox {
             return NetworkRequestPtr();
         return request;
     }
+#ifndef SB_NO_RESOURCES
     ImageRequestPtr Network::GETImage(const sb::string& url) {
         if (!m_net || !m_resources) return ImageRequestPtr();
         ImageRequestPtr request(new ImageRequest(url,m_resources));
@@ -129,10 +130,11 @@ namespace Sandbox {
             return ImageRequestPtr();
         return request;
     }
+#endif
     NetworkRequestPtr Network::SimplePOST(const sb::string& url, const sb::string& data) {
         if (!m_net) return NetworkRequestPtr();
         NetworkRequestPtr request(new NetworkRequest(url));
-        GHL::Data* data_p = GHL_HoldData(reinterpret_cast<const GHL::Byte*>(data.c_str()), data.length());
+        GHL::Data* data_p = GHL_HoldData(reinterpret_cast<const GHL::Byte*>(data.c_str()), GHL::UInt32(data.length()));
         if (!m_net->Post(request.get(),data_p)) {
             if (!request->GetErrorText().empty()) {
                 LogError() << "network POST error: " << request->GetErrorText();

@@ -29,16 +29,20 @@ SB_META_DECLARE_KLASS(Sandbox::NetworkDataRequest, Sandbox::NetworkRequestBase)
 SB_META_BEGIN_KLASS_BIND(Sandbox::NetworkDataRequest)
 SB_META_END_KLASS_BIND()
 
+#ifndef SB_NO_RESOURCES
 SB_META_DECLARE_KLASS(Sandbox::ImageRequest, Sandbox::NetworkDataRequest)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ImageRequest)
 SB_META_PROPERTY_RO(Image,GetImage)
 SB_META_END_KLASS_BIND()
+#endif
 
 SB_META_DECLARE_KLASS(Sandbox::Network, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Network)
 SB_META_METHOD(SimpleGET)
 SB_META_METHOD(SimplePOST)
+#ifndef SB_NO_RESOURCES
 SB_META_METHOD(GETImage)
+#endif
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -47,7 +51,9 @@ namespace Sandbox {
         luabind::ExternClass<Sandbox::NetworkRequestBase>(vm->GetVM());
         luabind::ExternClass<Sandbox::NetworkRequest>(vm->GetVM());
         luabind::ExternClass<Sandbox::NetworkDataRequest>(vm->GetVM());
+#ifndef SB_NO_RESOURCES
         luabind::ExternClass<Sandbox::ImageRequest>(vm->GetVM());
+#endif
         luabind::ExternClass<Sandbox::Network>(vm->GetVM());
     }
 }
