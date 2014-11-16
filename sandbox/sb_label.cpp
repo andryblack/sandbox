@@ -8,9 +8,11 @@
  */
 
 #include "sb_label.h"
+#include "sb_graphics.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::Label, Sandbox::SceneObjectWithPosition)
 SB_META_DECLARE_OBJECT(Sandbox::MultilineLabel, Sandbox::Label)
+SB_META_DECLARE_OBJECT(Sandbox::ColorizedLabel, Sandbox::Label)
 
 namespace Sandbox {
 
@@ -24,6 +26,13 @@ namespace Sandbox {
 			m_font->Draw(g,GetPos(),m_text.c_str(),m_align);
 		}
 	}
+    
+    void ColorizedLabel::Draw(Graphics& g) const {
+        Color prev = g.GetColor();
+        g.SetColor(prev*m_color);
+        Label::Draw(g);
+        g.SetColor(prev);
+    }
     
     MultilineLabel::MultilineLabel() : m_width(100.0f){
         

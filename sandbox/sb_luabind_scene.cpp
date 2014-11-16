@@ -90,6 +90,11 @@ SB_META_PROPERTY_RW(Text,GetText,SetText)
 SB_META_PROPERTY_RW(Align,GetAlign,SetAlign)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::ColorizedLabel)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW(Color,GetColor,SetColor)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::MultilineLabel)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Width,GetWidth,SetWidth)
@@ -212,6 +217,7 @@ namespace Sandbox {
         luabind::Class<FillRect>(lua);
         luabind::Class<Background>(lua);
         luabind::Class<Label>(lua);
+        luabind::Class<ColorizedLabel>(lua);
         luabind::Class<MultilineLabel>(lua);
         luabind::Class<CircleObject>(lua);
         luabind::Class<LineObject>(lua);

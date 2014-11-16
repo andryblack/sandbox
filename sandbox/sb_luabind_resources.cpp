@@ -18,12 +18,14 @@
 #include "sb_rect.h"
 #include "sb_sound.h"
 #include "sb_rendertarget.h"
+#include "sb_utf.h"
 
 SB_META_DECLARE_KLASS(Sandbox::Shader, void)
 
 static int sb_color_constructor(lua_State* L) {
     Sandbox::Color c;
     int t = lua_type(L, 2);
+    int nargs = lua_gettop(L);
     if (t == LUA_TTABLE) {
         LUA_CHECK_STACK(0)
         size_t indx = 0;
@@ -39,6 +41,9 @@ static int sb_color_constructor(lua_State* L) {
         }
     } else if (t == LUA_TSTRING) {
         c = Sandbox::Color::FromString(lua_tostring(L, 2));
+        if (nargs>2) {
+            c.a = float(lua_tonumber(L, 3));
+        }
     } else if (t == LUA_TNUMBER) {
         c.r = float(lua_tonumber(L, 2));
         c.g = float(lua_tonumber(L, 3));
@@ -146,6 +151,7 @@ SB_META_METHOD(SetHeight)
 SB_META_METHOD(SetSize)
 SB_META_METHOD(SetBaseline)
 SB_META_METHOD(SetXHeight)
+SB_META_METHOD(FixupChars)
 SB_META_END_KLASS_BIND()
 
 
@@ -178,6 +184,20 @@ SB_META_PROPERTY_RW_DEF(MusicVolume)
 SB_META_PROPERTY_WO(SoundsDir,SetSoundsDir)
 SB_META_END_KLASS_BIND()
 
+struct UTF8 {
+    static  sb::string GetChar(const sb::string& src) {
+        Sandbox::UTF32Char ch = 0;
+        const char* next = Sandbox::get_char(src.c_str(), ch);
+        sb::string res;
+        res.assign(src.c_str(),next);
+        return res;
+    }
+};
+
+SB_META_DECLARE_KLASS(UTF8, void)
+SB_META_BEGIN_KLASS_BIND(UTF8)
+SB_META_STATIC_METHOD(GetChar)
+SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     
@@ -196,6 +216,7 @@ namespace Sandbox {
         luabind::Class<SoundInstance>(lua);
         luabind::Class<Sound>(lua);
         luabind::ExternClass<SoundManager>(lua);
+        luabind::ExternClass<UTF8>(lua);
     }
 
 }

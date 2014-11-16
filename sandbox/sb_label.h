@@ -14,6 +14,7 @@
 #include "sb_font.h"
 #include "sb_vector2.h"
 #include <sbstd/sb_string.h>
+#include "sb_color.h"
 
 namespace Sandbox {
 	
@@ -36,6 +37,16 @@ namespace Sandbox {
 		sb::string	m_text;
 	};
 	typedef sb::intrusive_ptr<Label> LabelPtr;
+    
+    class ColorizedLabel : public Label {
+        SB_META_OBJECT
+    public:
+        void Draw(Graphics& g) const;
+        void SetColor(const Color& c) { m_color = c; }
+        const Color& GetColor() const { return m_color; }
+    private:
+        Color   m_color;
+    };
     
     class MultilineLabel : public Label {
         SB_META_OBJECT
