@@ -34,6 +34,7 @@ namespace Sandbox {
         inline T GetValue(const char* path) {
             lua_State* L = get_state_with_table_on_top(path);
             if (!L) return T();
+            LUA_CHECK_STACK(-2)
             lua_gettable(L,-2);
             T val = luabind::stack<T>::get(L,-1);
             lua_pop(L,2);
@@ -43,6 +44,7 @@ namespace Sandbox {
         template <class T>
         inline void SetValue( const char* path, const sb::shared_ptr<T>& t ) {
             lua_State* L = get_state_with_table_on_top(path);
+            LUA_CHECK_STACK(-2)
             if (!L) return;
             luabind::stack<sb::shared_ptr<T> >::push(L,t);
             set_value_on_top_of_stack_to_table(L);
@@ -51,6 +53,7 @@ namespace Sandbox {
         inline void SetValue( const char* path, typename sb::type_traits<T>::parameter_type t ) {
             lua_State* L = get_state_with_table_on_top(path);
             if (!L) return;
+            LUA_CHECK_STACK(-2)
             luabind::stack<T>::push(L,t);
             set_value_on_top_of_stack_to_table(L);
         }
@@ -58,12 +61,14 @@ namespace Sandbox {
         inline void SetValue( const char* path, T t ) {
             lua_State* L = get_state_with_table_on_top(path);
             if (!L) return;
+            LUA_CHECK_STACK(-2)
             luabind::stack<T>::push(L,t);
             set_value_on_top_of_stack_to_table(L);
         }
         inline void SetValue( const char* path, const char* t ) {
             lua_State* L = get_state_with_table_on_top(path);
             if (!L) return;
+            LUA_CHECK_STACK(-2)
             luabind::stack<const char*>::push(L,t);
             set_value_on_top_of_stack_to_table(L);
         }
