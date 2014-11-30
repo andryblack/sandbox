@@ -30,8 +30,6 @@ extern "C" {
 #include "sb_memory_mgr.h"
 #include "sb_lua_context.h"
 
-extern "C" int luaopen_cjson(lua_State *l);
-extern "C" int luaopen_cjson_safe(lua_State *l);
 
 namespace Sandbox {
 	
@@ -152,8 +150,6 @@ namespace Sandbox {
             {LUA_BITLIBNAME, luaopen_bit32},
             {LUA_MATHLIBNAME, luaopen_math},
             {LUA_DBLIBNAME, luaopen_debug},
-            {"cjson", luaopen_cjson},
-            {"cjson.safe", luaopen_cjson_safe},
             {NULL, NULL}
         };
 

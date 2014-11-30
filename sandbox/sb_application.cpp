@@ -69,6 +69,7 @@ namespace Sandbox {
 	void register_scene( lua_State* lua );
     void register_thread( lua_State* lua );
 	void register_controller( lua_State* lua );
+    void register_json( lua_State* lua );
 #ifdef SB_USE_MYGUI
     namespace mygui {
         void register_mygui( lua_State* lua );
@@ -136,6 +137,7 @@ namespace Sandbox {
         register_scene(lua->GetVM());
         register_thread(lua->GetVM());
         register_controller(lua->GetVM());
+        register_json(lua->GetVM());
 #ifdef SB_USE_MYGUI
         mygui::register_mygui(lua->GetVM());
 #endif

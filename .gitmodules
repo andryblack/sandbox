@@ -16,6 +16,6 @@
 [submodule "utils/glsl2agal"]
 	path = utils/glsl2agal
 	url = git@github.com:andryblack/glsl2agal.git
-[submodule "lua-cjson"]
-	path = lua-cjson
-	url = git@github.com:andryblack/lua-cjson.git
+[submodule "yajl"]
+	path = yajl
+	url = https://github.com/lloyd/yajl.git

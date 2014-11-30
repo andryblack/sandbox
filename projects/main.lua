@@ -23,16 +23,26 @@ newoption {
 	description = "CrossBridge sdk path"
 }
 
+local use_network = use.Network
+
+local swf_size = SwfSize or { Width = 800, Height = 600}
+
 solution( ProjectName )
 	configurations { 'Debug', 'Release' }
 	
 	--
 
-	local platform_dir = unknown
+	platform_dir = unknown
 	local os_map = { 
 		macosx = 'osx' 
 	}
 	local platform_id = os.get()
+
+	local hide_options = {
+
+		 --'-fvisibility=hidden',
+		 '-fvisibility-inlines-hidden'
+	}
 
 	if platform_id == 'flash' then
 		flex_sdk_dir = _OPTIONS['flex_sdk_dir']
@@ -47,9 +57,12 @@ solution( ProjectName )
 		premake.gcc.cxx = flascc_sdk_dir .. '/usr/bin/g++'
 		premake.gcc.ar = flascc_sdk_dir .. '/usr/bin/ar'
 		buildoptions {'-Wno-write-strings', '-Wno-trigraphs' }
-
+		buildoptions( hide_options )
 	end
 
+	if platform_id == 'ios' then
+		defines { 'GHL_PLATFORM_IOS' }
+	end
 
 	configuration "Debug"
          defines { "DEBUG" }
@@ -189,6 +202,11 @@ solution( ProjectName )
 				ghl_src .. 'vfs/vfs_cocoa.*',
 				ghl_src .. 'sound/cocoa/*'
 			}
+			if use_network then
+				files {
+					ghl_src .. 'net/cocoa/ghl_net_cocoa.mm'
+				}
+			end
 		elseif os.is('ios') then
 			defines 'GHL_PLATFORM_IOS'
 			files {
@@ -198,6 +216,11 @@ solution( ProjectName )
 				ghl_src .. 'vfs/vfs_cocoa.*',
 				ghl_src .. 'sound/cocoa/*'
 			}
+			if use_network then
+				files {
+					ghl_src .. 'net/cocoa/ghl_net_cocoa.mm'
+				}
+			end
 		elseif os.is('flash') then
 			--defines 'GHL_PLATFORM_FLASH'
 			files {
@@ -206,6 +229,11 @@ solution( ProjectName )
 				ghl_src .. 'sound/flash/*',
 				ghl_src .. 'render/stage3d/*'
 			}
+			if use_network then
+				files {
+					ghl_src .. 'net/flash/ghl_net_flash.cpp'
+				}
+			end
 		end
 
 		includedirs {
@@ -257,7 +285,24 @@ solution( ProjectName )
 
 		configuration "Debug"
    			targetsuffix "_d"
-   	
+
+   	project 'yajl'
+   		kind 'StaticLib'
+   		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+   		targetname ('yajl_' .. platform_dir)
+   		local lua_files = {
+			'yajl.c', 'yajl_alloc.c', 'yajl_buf.c', 'yajl_encode.c', 'yajl_gen.c', 'yajl_lex.c', 'yajl_parser.c',
+			'yajl_tree.c', 
+		}
+		includedirs {
+				sandbox_dir .. '/include',
+		}
+		prebuildcommands {
+			'mkdir -p ' .. path.getabsolute(sandbox_dir..'/include/yajl'),
+			'cp ' .. path.getabsolute(sandbox_dir..'/yajl/src/api') .. '/*.h ' .. path.getabsolute(sandbox_dir..'/include/yajl/')
+		}
+		files(append_path(sandbox_dir .. '/yajl/src/',lua_files))
+
    	if use.Freetype then
 	   	project 'freetype'
 	   		kind 'StaticLib'
@@ -349,13 +394,16 @@ solution( ProjectName )
 			sandbox_dir .. '/sandbox/luabind/**.cpp',
 			sandbox_dir .. '/sandbox/meta/**.h',
 			sandbox_dir .. '/sandbox/meta/**.cpp',
+			sandbox_dir .. '/sandbox/json/**.h',
+			sandbox_dir .. '/sandbox/json/**.cpp',
 		}
 
 		includedirs {
 			sandbox_dir .. '/GHL/include',
 			sandbox_dir .. '/include',
 			sandbox_dir .. '/sandbox',
-			sandbox_dir .. '/freetype/include'
+			sandbox_dir .. '/freetype/include',
+			sandbox_dir .. '/yajl/src/api'
 		}
 
 		if use.Mygui then
@@ -370,6 +418,14 @@ solution( ProjectName )
 				sandbox_dir .. '/sandbox/chipmunk/*.cpp',
 				sandbox_dir .. '/sandbox/chipmunk/*.h',
 			}
+		end
+
+		if use_network then
+			files {
+				sandbox_dir .. '/sandbox/net/**.cpp',
+				sandbox_dir .. '/sandbox/net/**.h',
+			}
+			defines 'SB_USE_NETWORK'
 		end
 
 		configuration "Debug"
@@ -392,6 +448,7 @@ solution( ProjectName )
 		links( {
 			'Sandbox', 
 			'lua', 
+			'yajl',
 			'GHL'
 		} )
 
@@ -428,64 +485,64 @@ solution( ProjectName )
 		end
 
 
-		files {
-			_WORKING_DIR .. '/src/**.h',
-			_WORKING_DIR .. '/src/**.cpp'
-		}
+		-- files {
+		-- 	_WORKING_DIR .. '/src/**.h',
+		-- 	_WORKING_DIR .. '/src/**.cpp'
+		-- }
 
-		resourcefolders {
-			_WORKING_DIR .. '/data'
-		}
+		-- resourcefolders {
+		-- 	_WORKING_DIR .. '/data'
+		-- }
 
-		if os.is('macosx') then
-			files { 
-				_WORKING_DIR .. '/projects/osx/main.mm',
-				_WORKING_DIR .. '/projects/osx/' .. ProjectName .. '_Mac-Info.plist'
-			}
-			prebuildcommands { "touch " .. path.getabsolute( _WORKING_DIR .. '/data') }
-		elseif os.is('ios') then
-			files { 
-				_WORKING_DIR .. '/projects/ios/main.mm',
-				_WORKING_DIR .. '/projects/ios/'..ProjectName..'_iOS-Info.plist',
-				_WORKING_DIR .. '/projects/ios/Default@2x.png',
-				_WORKING_DIR .. '/projects/ios/Default-568h@2x.png',
-			}
-			prebuildcommands { "touch " .. path.getabsolute(_WORKING_DIR .. '/data') }
-		elseif os.is('flash') then
-			targetextension( '.swf' )
-			files { 
-				_WORKING_DIR .. '/projects/flash/main.cpp',
-			}
-			prelinkcommands { 
-				'rm -f ' .. path.getabsolute( _WORKING_DIR .. '/bin' ) .. '/flash/' .. ProjectName .. '.swf',
-				flascc_sdk_dir .. '/usr/bin/genfs --type=embed ' .. path.getabsolute('data') .. ' ' .. path.getabsolute(_WORKING_DIR ..'/build/' .. platform_dir .. '/data') ,
-				[[java $(JVMARGS) -jar ]] .. flascc_sdk_dir .. [[/usr/lib/asc2.jar -merge -md \
-					-import ]]..flascc_sdk_dir..[[/usr/lib/builtin.abc \
-					-import ]]..flascc_sdk_dir..[[/usr/lib/playerglobal.abc \
-					-import ]]..flascc_sdk_dir..[[/usr/lib/BinaryData.abc \
-					-import ]]..flascc_sdk_dir..[[/usr/lib/ISpecialFile.abc \
-					-import ]]..flascc_sdk_dir..[[/usr/lib/IBackingStore.abc \
-					-import ]]..flascc_sdk_dir..[[/usr/lib/IVFS.abc \
-					-import ]]..flascc_sdk_dir..[[/usr/lib/InMemoryBackingStore.abc \
-					-import ]]..flascc_sdk_dir..[[/usr/lib/PlayerKernel.abc \
-					 ]]..flascc_sdk_dir..[[/usr/share/LSOBackingStore.as \
-					 ]]..path.getabsolute( _WORKING_DIR .. '/' .. ghl_src ) .. [[/flash/Console.as \
-					 ]]..path.getabsolute('build/' .. platform_dir .. '/data')..[[*.as -outdir ]]..path.getabsolute(_WORKING_DIR .. '/build/' .. platform_dir )..[[ -out Console
-				]]
-			}
+		-- if os.is('macosx') then
+		-- 	files { 
+		-- 		_WORKING_DIR .. '/projects/osx/main.mm',
+		-- 		_WORKING_DIR .. '/projects/osx/' .. ProjectName .. '_Mac-Info.plist'
+		-- 	}
+		-- 	prebuildcommands { "touch " .. path.getabsolute( _WORKING_DIR .. '/data') }
+		-- elseif os.is('ios') then
+		-- 	files { 
+		-- 		_WORKING_DIR .. '/projects/ios/main.mm',
+		-- 		_WORKING_DIR .. '/projects/ios/'..ProjectName..'_iOS-Info.plist',
+		-- 		_WORKING_DIR .. '/projects/ios/Default@2x.png',
+		-- 		_WORKING_DIR .. '/projects/ios/Default-568h@2x.png',
+		-- 	}
+		-- 	prebuildcommands { "touch " .. path.getabsolute(_WORKING_DIR .. '/data') }
+		-- elseif os.is('flash') then
+		-- 	targetextension( '.swf' )
+		-- 	files { 
+		-- 		_WORKING_DIR .. '/projects/flash/main.cpp',
+		-- 	}
+		-- 	prelinkcommands { 
+		-- 		'rm -f ' .. path.getabsolute( _WORKING_DIR .. '/bin' ) .. '/flash/' .. ProjectName .. '.swf',
+		-- 		flascc_sdk_dir .. '/usr/bin/genfs --type=embed ' .. path.getabsolute('data') .. ' ' .. path.getabsolute(_WORKING_DIR ..'/build/' .. platform_dir .. '/data') ,
+		-- 		[[java $(JVMARGS) -jar ]] .. flascc_sdk_dir .. [[/usr/lib/asc2.jar -merge -md \
+		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/builtin.abc \
+		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/playerglobal.abc \
+		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/BinaryData.abc \
+		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/ISpecialFile.abc \
+		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/IBackingStore.abc \
+		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/IVFS.abc \
+		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/InMemoryBackingStore.abc \
+		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/PlayerKernel.abc \
+		-- 			 ]]..flascc_sdk_dir..[[/usr/share/LSOBackingStore.as \
+		-- 			 ]]..path.getabsolute( _WORKING_DIR .. '/' .. ghl_src ) .. [[/flash/Console.as \
+		-- 			 ]]..path.getabsolute('build/' .. platform_dir .. '/data')..[[*.as -outdir ]]..path.getabsolute(_WORKING_DIR .. '/build/' .. platform_dir )..[[ -out Console
+		-- 		]]
+		-- 	}
 
 
-			linkoptions  {
-					'-jvmopt="-Xmx4096M"',
-					'-emit-swf',
-					'-swf-size=1024x768',
-					'-flto-api=exports.txt',
-					flascc_sdk_dir .. '/usr/lib/AlcVFSZip.abc',
-					'-symbol-abc=' .. path.getabsolute(_WORKING_DIR .. '/build') .. '/' .. platform_dir .. '/Console.abc'
-				}
+		-- 	linkoptions  {
+		-- 			'-jvmopt="-Xmx4096M"',
+		-- 			'-emit-swf',
+		-- 			'-swf-size=1024x768',
+		-- 			'-flto-api=exports.txt',
+		-- 			flascc_sdk_dir .. '/usr/lib/AlcVFSZip.abc',
+		-- 			'-symbol-abc=' .. path.getabsolute(_WORKING_DIR .. '/build') .. '/' .. platform_dir .. '/Console.abc'
+		-- 		}
 			
 			
-		end
+		-- end
 
 		includedirs {
 			sandbox_dir .. '/GHL/include',
@@ -502,6 +559,12 @@ solution( ProjectName )
 			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
 		end
 
+		if use_network then
+			defines 'SB_USE_NETWORK'
+		end
+
+		linkoptions( hide_options )
+
 		configuration "Release"
 			if os.is('flash') then
 				linkoptions  {
@@ -516,4 +579,4 @@ solution( ProjectName )
 					'-g'
 				}
 			end
-	
+		configuration {}
