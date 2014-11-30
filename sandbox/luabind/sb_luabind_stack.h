@@ -392,7 +392,7 @@ namespace Sandbox {
         template <class T>
         struct stack<sb::map<sb::string,T> > {
             static void push( lua_State* L, const sb::map<sb::string,T>& val ) {
-                lua_createtable(L, 0, val.size() );
+                lua_createtable(L, 0, int(val.size()) );
                 for (typename sb::map<sb::string,T>::const_iterator it=val.begin();it!=val.end();++it) {
                     stack<T>::push( L,it->second );
                     lua_setfield(L, -2, it->first.c_str());

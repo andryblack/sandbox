@@ -18,4 +18,4 @@
 	url = git@github.com:andryblack/glsl2agal.git
 [submodule "lua-cjson"]
 	path = lua-cjson
-	url = https://github.com/mpx/lua-cjson.git
+	url = git@github.com:andryblack/lua-cjson.git
