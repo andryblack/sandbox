@@ -108,6 +108,34 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<ImageRequest> ImageRequestPtr;
 #endif
     
+    class NetworkPostData : public sb::ref_countered_base_not_copyable {
+    public:
+        NetworkPostData();
+        virtual ~NetworkPostData();
+        GHL::Data* GetData() { return m_data; }
+        virtual void Setup(NetworkRequestBase* request) = 0;
+    protected:
+        VectorData<GHL::Byte>* m_data;
+    };
+    
+    class NetworkMultipartFormData : public NetworkPostData {
+    public:
+        NetworkMultipartFormData();
+        ~NetworkMultipartFormData();
+        virtual void Setup(NetworkRequestBase* request);
+        void AddFile(const sb::string& name,
+                     const sb::string& filename,
+                     const sb::string& content_type,
+                     const BinaryDataPtr& data);
+        void Close();
+    private:
+        sb::string  m_boundary;
+        void write_boundary();
+        void write_string(const char* str);
+    };
+    
+    typedef sb::intrusive_ptr<NetworkPostData> NetworkPostDataPtr;
+    
     class Network {
     public:
         explicit Network(Resources* res);
@@ -117,9 +145,17 @@ namespace Sandbox {
 #endif
         NetworkRequestPtr SimpleGET(const sb::string& url);
         NetworkRequestPtr SimplePOST(const sb::string& url, const sb::string& data);
+        NetworkRequestPtr POST(const sb::string& url,
+                               const NetworkPostDataPtr& data);
+        void SetCookie(const sb::string& host,
+                       const sb::string& cookie) {
+            m_cookie[host]=cookie;
+        }
     private:
         GHL::Network* m_net;
         Resources*  m_resources;
+        sb::map<sb::string,sb::string> m_cookie;
+        void ApplyCookie(const NetworkRequestPtr& req);
     };
     
 }

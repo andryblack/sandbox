@@ -51,6 +51,7 @@ namespace Sandbox {
     }
     /// received header
     void GHL_CALL NetworkRequestBase::OnHeader(const char* name,const char* value) {
+        LogInfo() << "Header " << name << ": " << value;
         m_received_headers[name]=value;
     }
     /// received data
@@ -118,6 +119,7 @@ namespace Sandbox {
     NetworkRequestPtr Network::SimpleGET(const sb::string& url) {
         if (!m_net) return NetworkRequestPtr();
         NetworkRequestPtr request(new NetworkRequest(url));
+        ApplyCookie(request);
         if (!m_net->Get(request.get()))
             return NetworkRequestPtr();
         return request;
@@ -134,6 +136,7 @@ namespace Sandbox {
     NetworkRequestPtr Network::SimplePOST(const sb::string& url, const sb::string& data) {
         if (!m_net) return NetworkRequestPtr();
         NetworkRequestPtr request(new NetworkRequest(url));
+        ApplyCookie(request);
         GHL::Data* data_p = GHL_HoldData(reinterpret_cast<const GHL::Byte*>(data.c_str()), GHL::UInt32(data.length()));
         if (!m_net->Post(request.get(),data_p)) {
             if (!request->GetErrorText().empty()) {
@@ -144,6 +147,107 @@ namespace Sandbox {
         }
         data_p->Release();
         return request;
+    }
+    
+    NetworkPostData::NetworkPostData() : m_data(new VectorData<GHL::Byte>()) {
+        
+    }
+    NetworkPostData::~NetworkPostData() {
+        m_data->Release();
+    }
+    static const char* rn = "\r\n";
+    static const char* dashes = "--";
+    
+    NetworkMultipartFormData::NetworkMultipartFormData() {
+        m_boundary = "0-------------sandbox-multipart-form-data-----123456789";
+    }
+    
+    NetworkMultipartFormData::~NetworkMultipartFormData() {
+        
+    }
+    
+    void NetworkMultipartFormData::write_string(const char* str) {
+        size_t pos = m_data->vector().size();
+        size_t len = ::strlen(str);
+        m_data->vector().resize(pos+len,0);
+        ::memcpy(&m_data->vector()[pos],str,len);
+    }
+    
+    void NetworkMultipartFormData::write_boundary() {
+        write_string(dashes);
+        write_string(m_boundary.c_str());
+        write_string(rn);
+    }
+    
+    void NetworkMultipartFormData::AddFile(const sb::string& name,
+                 const sb::string& filename,
+                 const sb::string& content_type,
+                 const BinaryDataPtr& content) {
+        write_boundary();
+        if (!content_type.empty()) {
+            write_string("Content-Type: ");
+            write_string(content_type.c_str());
+            write_string(rn);
+        }
+        write_string("Content-Disposition: form-data");
+        if (!name.empty()) {
+            write_string("; name=\"");
+            write_string(name.c_str());
+            write_string("\"");
+        }
+        if (!filename.empty()) {
+            write_string("; filename=\"");
+            write_string(filename.c_str());
+            write_string("\"");
+        }
+        write_string(rn);
+        GHL::Data* data = 0;
+        if (content) {
+            data = content->GetData();
+        }
+        if (data) {
+            write_string(rn);
+            size_t pos = m_data->vector().size();
+            m_data->vector().resize(pos+data->GetSize());
+            ::memcpy(&m_data->vector()[pos], data->GetData(), data->GetSize());
+        }
+        write_string(rn);
+    }
+    
+    void NetworkMultipartFormData::Close() {
+        write_string(dashes);
+        write_string(m_boundary.c_str());
+        write_string(dashes);
+    }
+    
+    void NetworkMultipartFormData::Setup(NetworkRequestBase *request) {
+        request->SetHeader("Content-Type", "multipart/form-data; boundary=" + m_boundary);
+    }
+    
+    NetworkRequestPtr Network::POST(const sb::string& url, const NetworkPostDataPtr& data) {
+        if (!m_net) return NetworkRequestPtr();
+        NetworkRequestPtr request(new NetworkRequest(url));
+        data->Setup(request.get());
+        ApplyCookie(request);
+        GHL::Data* data_p = data->GetData();
+        if (!m_net->Post(request.get(),data_p)) {
+            if (!request->GetErrorText().empty()) {
+                LogError() << "network POST error: " << request->GetErrorText();
+            }
+            data_p->Release();
+            return request->GetCompleted() ? request : NetworkRequestPtr();
+        }
+        data_p->Release();
+        return request;
+    }
+    
+    void Network::ApplyCookie(const NetworkRequestPtr& req) {
+        const char* url = req->GetURL();
+        for (sb::map<sb::string, sb::string>::const_iterator it = m_cookie.begin();it!=m_cookie.end();++it) {
+            if (strncmp(url, it->first.c_str(), it->first.length())==0) {
+                req->SetHeader("Cookie", it->second);
+            }
+        }
     }
     
 }

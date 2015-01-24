@@ -36,10 +36,23 @@ SB_META_PROPERTY_RO(Image,GetImage)
 SB_META_END_KLASS_BIND()
 #endif
 
+SB_META_DECLARE_KLASS(Sandbox::NetworkPostData, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::NetworkPostData)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::NetworkMultipartFormData, Sandbox::NetworkPostData)
+SB_META_BEGIN_KLASS_BIND(Sandbox::NetworkMultipartFormData)
+SB_META_CONSTRUCTOR(())
+SB_META_METHOD(AddFile)
+SB_META_METHOD(Close)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_KLASS(Sandbox::Network, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Network)
 SB_META_METHOD(SimpleGET)
 SB_META_METHOD(SimplePOST)
+SB_META_METHOD(POST)
+SB_META_METHOD(SetCookie);
 #ifndef SB_NO_RESOURCES
 SB_META_METHOD(GETImage)
 #endif
@@ -51,6 +64,8 @@ namespace Sandbox {
         luabind::ExternClass<Sandbox::NetworkRequestBase>(vm->GetVM());
         luabind::ExternClass<Sandbox::NetworkRequest>(vm->GetVM());
         luabind::ExternClass<Sandbox::NetworkDataRequest>(vm->GetVM());
+        luabind::ExternClass<Sandbox::NetworkPostData>(vm->GetVM());
+        luabind::Class<Sandbox::NetworkMultipartFormData>(vm->GetVM());
 #ifndef SB_NO_RESOURCES
         luabind::ExternClass<Sandbox::ImageRequest>(vm->GetVM());
 #endif

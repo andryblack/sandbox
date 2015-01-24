@@ -29,7 +29,10 @@ extern "C" {
 #include "sb_file_provider.h"
 #include "sb_memory_mgr.h"
 #include "sb_lua_context.h"
+#include "sb_data.h"
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::BinaryData)
+SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
 	
@@ -185,6 +188,7 @@ namespace Sandbox {
         sb_terminate_handler = &lua_terminate_handler;
 #endif
         luabind::Initialize(m_L);
+        luabind::ExternClass<BinaryData>(m_L);
     }
     
     LuaVM::~LuaVM() {

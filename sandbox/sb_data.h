@@ -12,6 +12,7 @@
 #include <sbstd/sb_vector.h>
 #include "sb_ref_cntr.h"
 #include <ghl_data.h>
+#include "meta/sb_meta.h"
 
 namespace Sandbox {
     
@@ -59,6 +60,24 @@ namespace Sandbox {
         void push_back( const value_type& v ) { m_data.push_back(v); }
         size_t size() const { return m_data.size(); }
     };
+    
+    class BinaryData : public meta::object {
+        SB_META_OBJECT
+    private:
+        GHL::Data*  m_data;
+    public:
+        explicit BinaryData(GHL::Data* data) : m_data(data) {
+            if (m_data) m_data->AddRef();
+        }
+        ~BinaryData() {
+            if (m_data) {
+                m_data->Release();
+            }
+        }
+        GHL::Data* GetData() { return m_data; }
+        const GHL::Data* GetData() const { return m_data; }
+    };
+    typedef sb::intrusive_ptr<BinaryData> BinaryDataPtr;
     
 }
 
