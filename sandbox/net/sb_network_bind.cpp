@@ -44,6 +44,7 @@ SB_META_DECLARE_KLASS(Sandbox::NetworkMultipartFormData, Sandbox::NetworkPostDat
 SB_META_BEGIN_KLASS_BIND(Sandbox::NetworkMultipartFormData)
 SB_META_CONSTRUCTOR(())
 SB_META_METHOD(AddFile)
+SB_META_METHOD(AddFormField)
 SB_META_METHOD(Close)
 SB_META_END_KLASS_BIND()
 

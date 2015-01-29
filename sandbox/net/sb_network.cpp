@@ -179,6 +179,18 @@ namespace Sandbox {
         write_string(rn);
     }
     
+    void NetworkMultipartFormData::AddFormField(const sb::string& field, const sb::string& data) {
+        write_boundary();
+        write_string("Content-Disposition: form-data");
+        write_string("; name=\"");
+        write_string(field.c_str());
+        write_string("\"");
+        write_string(rn);
+        write_string(rn);
+        write_string(data.c_str());
+        write_string(rn);
+    }
+    
     void NetworkMultipartFormData::AddFile(const sb::string& name,
                  const sb::string& filename,
                  const sb::string& content_type,

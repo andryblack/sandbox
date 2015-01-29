@@ -127,6 +127,7 @@ namespace Sandbox {
                      const sb::string& filename,
                      const sb::string& content_type,
                      const BinaryDataPtr& data);
+        void AddFormField(const sb::string& field, const sb::string& data);
         void Close();
     private:
         sb::string  m_boundary;
