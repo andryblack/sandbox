@@ -668,15 +668,14 @@ namespace Sandbox {
 		TransformAdapter::TransformAdapter( const BodyPtr& body ) {
 			m_body = body;
             m_apply_rotate = true;
-            m_transform = TransformModificatorPtr(new TransformModificator());
-            AddModificator(m_transform);
             Update(0);
 		}
 		
 		void TransformAdapter::Update(float ) {
-            m_transform->SetTranslate( m_body->GetPos() );
+            TransformModificatorPtr mod = GetTransformModificator();
+            mod->SetTranslate( m_body->GetPos() );
             if (m_apply_rotate)
-                m_transform->SetAngle( m_body->GetAngle() );
+                mod->SetAngle( m_body->GetAngle() );
 		}
         
         InvertTransformAdapter::InvertTransformAdapter( const BodyPtr& body ) {

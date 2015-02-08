@@ -352,8 +352,7 @@ namespace Sandbox {
 		private:
 			BodyPtr		m_body;
             bool    m_apply_rotate;
-            TransformModificatorPtr m_transform;
-		};
+      	};
         
         class InvertTransformAdapter : public Container {
 		public:

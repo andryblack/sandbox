@@ -303,6 +303,9 @@ solution( ProjectName )
 		}
 		files(append_path(sandbox_dir .. '/yajl/src/',lua_files))
 
+		configuration "Debug"
+   			targetsuffix "_d"
+
    	if use.Freetype then
 	   	project 'freetype'
 	   		kind 'StaticLib'
@@ -351,7 +354,7 @@ solution( ProjectName )
 	   			targetsuffix "_d"
 	end
 
-	if use.Mygui then
+	if use.MyGUI then
 		project 'MyGUI'
 
 			kind 'StaticLib'
@@ -406,7 +409,7 @@ solution( ProjectName )
 			sandbox_dir .. '/yajl/src/api'
 		}
 
-		if use.Mygui then
+		if use.MyGUI then
 			includedirs {
 				sandbox_dir .. '/MyGUI/MyGUIEngine/include',
 			}
@@ -452,7 +455,7 @@ solution( ProjectName )
 			'GHL'
 		} )
 
-		if use.Mygui then
+		if use.MyGUI then
 			links { 'MyGUI' }
 		end
 		if use.Freetype then
@@ -554,7 +557,7 @@ solution( ProjectName )
 			includedirs { sandbox_dir .. '/chipmunk/include' }
 		end
 
-		if use.Mygui then
+		if use.MyGUI then
 			includedirs { sandbox_dir .. '/MyGUI/MyGUIEngine/include' }
 			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
 		end
