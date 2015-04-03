@@ -65,7 +65,7 @@ namespace Sandbox {
             sb::string text;
         };
         struct MultilineContext;
-        friend class MultilineContext;
+		friend struct MultilineContext;
         sb::vector<Line> m_lines;
         float   m_width;
     };

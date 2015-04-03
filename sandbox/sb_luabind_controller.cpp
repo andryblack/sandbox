@@ -18,9 +18,6 @@
 #include "sb_controllers_color.h"
 #include "sb_animation.h"
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
 
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Controller)

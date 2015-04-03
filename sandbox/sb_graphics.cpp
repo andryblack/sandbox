@@ -375,13 +375,13 @@ namespace Sandbox {
         float stepy = y3-y2;
         if (img.GetTileH()) {
             float sx = (img.GetTextureW()-img.GetOffsetL()-img.GetOffsetR())*w/img.GetTextureW();
-            count_x = ::roundf(stepx/sx);
+            count_x = int(::roundf(stepx/sx));
             stepx = stepx / count_x;
         }
         int count_y = 1;
         if (img.GetTileV()) {
             float sy = (img.GetTextureH()-img.GetOffsetT()-img.GetOffsetB())*h/img.GetTextureH();
-            count_y = ::roundf(stepy/sy);
+            count_y = int(::roundf(stepy/sy));
             stepy = stepy / count_y;
         }
         

@@ -15,5 +15,4 @@ namespace sb {
     using std::find;
 }
 
-
 #endif

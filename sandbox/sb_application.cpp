@@ -21,6 +21,7 @@
 #include <ghl_sound.h>
 #include <ghl_render.h>
 #include <ghl_system.h>
+#include <ghl_keys.h>
 
 #ifdef SB_USE_MYGUI
 #include "MyGUI_Gui.h"
@@ -38,9 +39,7 @@
 #include "net/sb_network_bind.h"
 #endif
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
+#include <sbstd/sb_platform.h>
 
 
 SB_META_DECLARE_KLASS(GHL::Settings, void)
@@ -59,6 +58,13 @@ SB_META_METHOD(SetMouseContext)
 SB_META_METHOD(GetFlashVar)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(GHL::MouseButton,void);
+SB_META_ENUM_BIND(GHL::MouseButton,namespace GHL,
+                  SB_META_ENUM_ITEM(MOUSE_BUTTON_NONE)
+                  SB_META_ENUM_ITEM(MOUSE_BUTTON_LEFT)
+                  SB_META_ENUM_ITEM(MOUSE_BUTTON_RIGHT)
+                  SB_META_ENUM_ITEM(MOUSE_BUTTON_MIDDLE)
+                  )
 
 bool (*sb_terminate_handler)() = 0;
 
@@ -227,6 +233,7 @@ namespace Sandbox {
         ctx->SetValue("platform.os", "FLASH");
 #endif
         
+        luabind::Enum<GHL::MouseButton>(m_lua->GetVM());
         luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
         luabind::RawClass<GHL::Settings>(m_lua->GetVM());
         
@@ -361,14 +368,14 @@ namespace Sandbox {
 	void Application::DrawDebugInfo() {
 #ifdef SB_DEBUG
 		char buf[128];
-		::snprintf(buf,128,"fps:%0.2f",m_fps);
+		sb::snprintf(buf,128,"fps:%0.2f",m_fps);
 		m_render->SetProjectionMatrix(Matrix4f::ortho(0.0f,
 			float(m_render->GetWidth()),
 			float(m_render->GetHeight())
 			,0.0f,-1.0f,1.0f).matrix);
 		m_render->DebugDrawText( 10, 10 , buf );
         m_render->DebugDrawText( 10, 21 , m_lua->GetMemoryUsed().c_str() );
-        ::snprintf(buf,128,"batches:%0.2f",m_batches);
+        sb::snprintf(buf,128,"batches:%0.2f",m_batches);
         m_render->DebugDrawText( 10, 32 , buf );
         m_render->DebugDrawText( 10, 43,
                                 (sb::string("res:")+format_memory(m_resources->GetMemoryUsed())+

@@ -10,10 +10,7 @@
 
 #include "sb_inplace_string.h"
 #include "../sb_log.h"
-
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
+#include <sbstd/sb_platform.h>
 
 namespace Sandbox {
     namespace luabind {
@@ -54,7 +51,7 @@ namespace Sandbox {
             if ( !got ) {
                 got = lua_typename( L, lua_type(L,idx) );
             }
-            ::snprintf(buf, 128, "invalid argument %d : got '%s' , expected '%s'\n", idx,got,expected);
+            sb::snprintf(buf, 128, "invalid argument %d : got '%s' , expected '%s'\n", idx,got,expected);
             sb::string str = buf;
             int top = lua_gettop(L);
             lua_getglobal(L, "tostring");
@@ -85,7 +82,7 @@ namespace Sandbox {
         void lua_access_error( lua_State* L, int idx, 
                               const char* got ) {
             char buf[128];
-            ::snprintf(buf, 128, "invalid argument access %d : '%s' is const", idx,got);
+            sb::snprintf(buf, 128, "invalid argument access %d : '%s' is const", idx,got);
             lua_pushstring(L, buf);
             lua_error(L);
         }

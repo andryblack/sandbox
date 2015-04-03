@@ -11,9 +11,8 @@
 #include "sb_inplace_string.h"
 #include "../sb_log.h"
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
+#include <sbstd/sb_platform.h>
+
 
 namespace Sandbox {
     namespace luabind {
@@ -22,7 +21,7 @@ namespace Sandbox {
         void lua_unregistered_error( lua_State* L, 
                                     const char* type ) {
             char buf[128];
-            ::snprintf(buf, 128, "unregistered type '%s'", type);
+            sb::snprintf(buf, 128, "unregistered type '%s'", type);
 
             LogError(LuabindModule) << buf ;
 
@@ -232,7 +231,7 @@ namespace Sandbox {
                 lua_getglobal(L, "tostring");
                 lua_pushvalue(L, 1);
                 lua_call(L, 1, 1);
-                snprintf(buf, 128, "%s: get unknown field: %s",lua_tostring(L, -1),lua_tostring(L, 2));
+                sb::snprintf(buf, 128, "%s: get unknown field: %s",lua_tostring(L, -1),lua_tostring(L, 2));
                 lua_pop(L, 1);
                 lua_pushstring(L, buf);
                 lua_error(L);
@@ -283,7 +282,7 @@ namespace Sandbox {
 		{
             if (!native_setter_indexer(L,1)) {
                 char buf[128];
-                snprintf(buf, 128, "%s: set unknown field: %s",lua_tostring(L, 1),lua_tostring(L, 2));
+                sb::snprintf(buf, 128, "%s: set unknown field: %s",lua_tostring(L, 1),lua_tostring(L, 2));
                 lua_pushstring(L, buf);
                 lua_error(L);
             }
@@ -305,7 +304,7 @@ namespace Sandbox {
                     res = *reinterpret_cast<void**>(holder+1);
                 }
                 char buf[128];
-                snprintf(buf, 128, "object<%s>:%p",holder->info->name,res);
+                sb::snprintf(buf, 128, "object<%s>:%p",holder->info->name,res);
                 lua_pushstring(L, buf);
                 return 1;
             }

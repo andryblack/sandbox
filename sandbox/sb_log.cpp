@@ -4,9 +4,7 @@
 
 #include "sb_log.h"
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
+#include <sbstd/sb_platform.h>
 
 namespace Sandbox {
     
@@ -29,12 +27,12 @@ namespace Sandbox {
     
     void format_memory( char* buf, size_t size, size_t mem,const char* caption ) {
         if ( mem > 1024*1024 ) {
-            ::snprintf(buf, size, "%s%0.2fM", caption,float(mem)/(1024*1024));
+            sb::snprintf(buf, size, "%s%0.2fM", caption,float(mem)/(1024*1024));
         } else if ( mem > 1024 ) {
-            ::snprintf(buf, size, "%s%0.2fK", caption,float(mem)/(1024));
+            sb::snprintf(buf, size, "%s%0.2fK", caption,float(mem)/(1024));
         }
         else {
-            ::snprintf(buf, size, "%s%0.2fb", caption,float(mem));
+            sb::snprintf(buf, size, "%s%0.2fb", caption,float(mem));
         }
     }
     

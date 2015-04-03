@@ -389,7 +389,7 @@ namespace Sandbox {
         
         TexturePtr tptr = TexturePtr(new Texture(texture,img_w,img_h));
 		
-        return ImagePtr( new Image(tptr,0,0,img_w,img_h));
+        return ImagePtr( new Image(tptr,0,0,float(img_w),float(img_h)));
         
     }
     

@@ -8,6 +8,7 @@
 
 #include "sb_thread.h"
 #include "sb_lua.h"
+#include <sbstd/sb_platform.h>
 
 SB_META_DECLARE_OBJECT(Sandbox::Thread, Sandbox::meta::object)
 
@@ -90,7 +91,7 @@ namespace Sandbox {
     sb::intrusive_ptr<LuaThread> LuaThread::construct(lua_State* L,int idx) {
         if (!lua_isfunction(L,idx)) {
             char buf[128];
-            ::snprintf(buf,127,"function expected, got %s",luaL_typename(L, 2));
+            sb::snprintf(buf,127,"function expected, got %s",luaL_typename(L, 2));
             luaL_argerror(L, 2, buf);
             return sb::intrusive_ptr<LuaThread>();
         }

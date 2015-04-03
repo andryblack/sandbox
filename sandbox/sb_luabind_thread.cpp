@@ -12,9 +12,6 @@
 #include "sb_threads_mgr.h"
 #include "sb_event.h"
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Thread)
 SB_META_END_KLASS_BIND()

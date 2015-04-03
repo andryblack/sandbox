@@ -119,10 +119,10 @@ namespace Sandbox {
                 if (lua_istable(L, idx)) {
                     Vector2f res;
                     lua_rawgeti(L, idx, 1);
-                    res.x = lua_tonumber(L, -1);
+                    res.x = float(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 2);
-                    res.y = lua_tonumber(L, -1);
+                    res.y = float(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     return  res;
                 }

@@ -64,6 +64,8 @@ solution( ProjectName )
 		defines { 'GHL_PLATFORM_IOS' }
 	end
 
+	defines {'GHL_STATIC_LIB'}
+
 	configuration "Debug"
          defines { "DEBUG" }
          flags { "Symbols" }
@@ -162,6 +164,10 @@ solution( ProjectName )
 			use_opengl = true
 		end
 
+		if os.is('windows') then
+			use_opengl = true
+		end
+
 		local use_opengles = use_opengl and os.is('ios')
 
 		if use_openal then
@@ -234,6 +240,18 @@ solution( ProjectName )
 					ghl_src .. 'net/flash/ghl_net_flash.cpp'
 				}
 			end
+		elseif os.is('windows') then
+			--defines 'GHL_PLATFORM_FLASH'
+			files {
+				ghl_src .. 'winlib/winlib_win32.*',
+				ghl_src .. 'vfs/vfs_win32.*',
+				ghl_src .. 'sound/dsound/*',
+			}
+			if use_network then
+				files {
+					ghl_src .. 'net/win32/ghl_net_win32.cpp'
+				}
+			end
 		end
 
 		includedirs {
@@ -297,10 +315,12 @@ solution( ProjectName )
 		includedirs {
 				sandbox_dir .. '/include',
 		}
-		prebuildcommands {
-			'mkdir -p ' .. path.getabsolute(sandbox_dir..'/include/yajl'),
-			'cp ' .. path.getabsolute(sandbox_dir..'/yajl/src/api') .. '/*.h ' .. path.getabsolute(sandbox_dir..'/include/yajl/')
-		}
+		if not os.is('windows') then
+			prebuildcommands {
+				'mkdir -p ' .. path.getabsolute(sandbox_dir..'/include/yajl'),
+				'cp ' .. path.getabsolute(sandbox_dir..'/yajl/src/api') .. '/*.h ' .. path.getabsolute(sandbox_dir..'/include/yajl/')
+			}
+		end
 		files(append_path(sandbox_dir .. '/yajl/src/',lua_files))
 
 		configuration "Debug"
@@ -484,6 +504,11 @@ solution( ProjectName )
 			links {
 				'AS3++',
 				'Flash++'
+			}
+		elseif os.is('windows') then
+			links {
+				'OpenGL32',
+				'WinMM'
 			}
 		end
 
