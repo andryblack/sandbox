@@ -44,6 +44,7 @@ namespace Sandbox {
     	void UpdateChilds( float dt );
 		sb::vector<SceneObjectPtr> m_objects;
         virtual void GlobalToLocalImpl(Vector2f& v) const;
+        virtual void GetTransformImpl(Transform2d& tr) const;
     private:
         void MoveToTop( SceneObject* obj );
         friend class SceneObject;

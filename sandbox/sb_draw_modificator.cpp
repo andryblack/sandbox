@@ -25,8 +25,11 @@ namespace Sandbox {
     
     void TransformModificator::Apply(Graphics &g) const {
         Transform2d tr = g.GetTransform();
-        tr.translate(m_translate).rotate(m_angle).scale(m_scale_x,m_scale_y);
+        Apply(tr);
         g.SetTransform(tr);
+    }
+    void TransformModificator::Apply(Transform2d& tr) const {
+        tr.translate(m_translate).rotate(m_angle).scale(m_scale_x,m_scale_y);
     }
     void TransformModificator::Transform(Vector2f& v) const {
         v = (v - m_translate).rotate(-m_angle);

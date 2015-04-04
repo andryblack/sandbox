@@ -46,7 +46,10 @@ namespace Sandbox {
 		
         /// get hotspot ( relative to original size )
         const Vector2f& GetHotspot() const { return m_hotspot;}
-		
+        /// get hotspot in sprite-size
+        Vector2f GetHotspotReal() const {
+            return Vector2f(m_hotspot.x*m_width/m_src_w, m_hotspot.y*m_height/m_src_h);
+        }
         void SetHotspot( const Vector2f& hs );
 		
         float GetWidth() const { return m_width;}
@@ -54,6 +57,8 @@ namespace Sandbox {
 		
         /// set real size ( recalc hotspot )
         void SetSize(float w,float h);
+        
+        bool CheckBit(int x,int y,Resources* resources);
     };
 	
     typedef sb::intrusive_ptr<Image> ImagePtr;

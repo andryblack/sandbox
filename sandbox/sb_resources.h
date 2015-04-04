@@ -65,6 +65,7 @@ namespace Sandbox {
                                  bool alpha, 
                                  const GHL::Image* data);
         GHL::Texture* LoadTexture( const sb::string& filename , bool premultiply);
+        BitmaskPtr LoadBitmask( const sb::string& filename );
         
         size_t  GetLiveTicks() const { return m_live_ticks; }
         

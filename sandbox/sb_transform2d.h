@@ -31,7 +31,7 @@ namespace Sandbox {
         }
 		void inverse() {
             m.inverse();
-            /// v ???
+            v = - (m * v);
         }
         Transform2d& translate(const Vector2f& pos) {
             v+=m*pos;
@@ -85,6 +85,11 @@ namespace Sandbox {
 			ox = v.x+m.matrix[0*2+0]*x + m.matrix[1*2+0]*y;
 			oy = v.y+m.matrix[0*2+1]*x + m.matrix[1*2+1]*y;
 		}
+        Transform2d& operator *= (const Transform2d& tr) {
+            translate(tr.v);
+            m *= tr.m;
+            return *this;
+        }
     };
 	
 }

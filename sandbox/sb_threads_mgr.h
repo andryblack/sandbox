@@ -26,10 +26,14 @@ namespace Sandbox {
 		void AddThread(const ThreadPtr& t);
 		void RemoveThread(const ThreadPtr& t);
 		void Clear();
+        
+        bool GetDropEmpty() const { return m_drop_empty; }
+        void SetDropEmpty(bool d) { m_drop_empty = d; }
 	private:
 		std::vector<ThreadPtr> m_threads;
 		std::vector<ThreadPtr> m_added_threads;
 		std::vector<ThreadPtr> m_removed_threads;
+        bool    m_drop_empty;
 	};
     
     class PermanentThreadsMgr : public ThreadsMgr {

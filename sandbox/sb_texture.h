@@ -21,6 +21,9 @@ namespace GHL {
 namespace Sandbox {
     
 	class Resources;
+    class Bitmask;
+    typedef sb::intrusive_ptr<Bitmask> BitmaskPtr;
+
 	
     class Texture : public sb::ref_countered_base_not_copyable {
 	private:
@@ -34,11 +37,13 @@ namespace Sandbox {
         bool    m_filtered;
         bool    m_tiled;
         bool    m_need_premultiply;
+        BitmaskPtr              m_bitmask;
 	public:
 		explicit Texture(const sb::string& file, bool premul, GHL::UInt32 w, GHL::UInt32 h);
         explicit Texture(GHL::Texture* tes,GHL::UInt32 w=0, GHL::UInt32 h=0);
 		~Texture();
 		GHL::Texture* Present(Resources* resources);
+        BitmaskPtr GetBitmask(Resources* resources);
 		void SetFiltered(bool f);
         bool GetFiltered() const { return m_filtered; }
         void SetTiled(bool t) ;

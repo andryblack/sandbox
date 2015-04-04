@@ -11,6 +11,7 @@
 #define SB_RECT_H
 
 #include "sb_vector2.h"
+#include <sbstd/sb_algorithm.h>
 
 namespace Sandbox {
 	
@@ -45,6 +46,22 @@ namespace Sandbox {
         void SetSize(const Vector2f& f) {
             w = f.x;
             h = f.y;
+        }
+        T GetRight() const { return x + w; }
+        T GetBottom() const { return y + h; }
+        
+        Rect GetIntersect(const Rect& r2) const {
+            Rect res;
+            res.x = sb::max(x,r2.x);
+            res.y = sb::max(y,r2.y);
+            res.w = sb::min(GetRight(),r2.GetRight());
+            res.h = sb::min(GetBottom(),r2.GetBottom());
+            res.w -= res.x;
+            res.h -= res.y;
+            return res;
+        }
+        Rect operator - (const Sandbox::Vector2f& v) const {
+            return Rect(x-v.x,y-v.y,w,h);
         }
 	};
 	

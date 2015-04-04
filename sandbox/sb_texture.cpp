@@ -8,6 +8,7 @@
 
 #include "sb_texture.h"
 #include "sb_resources.h"
+#include "sb_bitmask.h"
 #include <ghl_texture.h>
 
 namespace Sandbox {
@@ -55,6 +56,12 @@ namespace Sandbox {
         }
         m_live_ticks = resources->GetLiveTicks() + TEXTURE_TTL;
         return m_texture;
+    }
+    BitmaskPtr Texture::GetBitmask(Resources* resources) {
+        if (!m_bitmask) {
+            m_bitmask = resources->LoadBitmask(m_file);
+        }
+        return m_bitmask;
     }
     
     void Texture::SetFiltered(bool f) {

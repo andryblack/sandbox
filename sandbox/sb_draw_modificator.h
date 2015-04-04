@@ -58,6 +58,7 @@ namespace Sandbox {
 
         void Transform(Vector2f& v) const;
         void Apply(Graphics& g) const;
+        void Apply(Transform2d& tr) const;
     };
     typedef sb::intrusive_ptr<TransformModificator> TransformModificatorPtr;
 }

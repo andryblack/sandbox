@@ -11,6 +11,7 @@
 
 #include "meta/sb_meta.h"
 #include "sb_vector2.h"
+#include "sb_transform2d.h"
 
 namespace Sandbox {
 	
@@ -33,11 +34,13 @@ namespace Sandbox {
         
         Vector2f GlobalToLocal(const Vector2f& v) const;
         void MoveToTop();
+        Transform2d GetTransform() const;
 	protected:
 		friend class Container;
 		Container* GetParent() const { return m_parent;}
         Scene*  GetScene() const;
         virtual void GlobalToLocalImpl(Vector2f& v) const;
+        virtual void GetTransformImpl(Transform2d& tr) const;
 	private:
 		void SetParent(Container* parent);
 		Container* m_parent;
@@ -50,9 +53,13 @@ namespace Sandbox {
     public:
         void SetPos(const Vector2f& pos) { m_pos=pos;}
 		const Vector2f& GetPos() const { return m_pos;}
+        void Move(const Vector2f& d) { m_pos += d; }
+        void MoveX(float x) { m_pos.x += x; }
+        void MoveY(float y) { m_pos.y += y; }
     private:
         Vector2f    m_pos;
         virtual void GlobalToLocalImpl(Vector2f& v) const;
+        virtual void GetTransformImpl(Transform2d& tr) const;
     };
 }
 

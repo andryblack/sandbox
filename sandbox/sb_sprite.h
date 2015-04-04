@@ -53,6 +53,8 @@ namespace Sandbox {
         virtual void Draw( Graphics& g ) const;
         void SetColor( const Color& color ) { m_color = color; }
         const Color& GetColor() const { return m_color; }
+        void SetAlpha( float a ) { m_color.a = a; }
+        float GetAlpha() const { return m_color.a; }
     private:
         Color   m_color;
     };
@@ -76,6 +78,8 @@ namespace Sandbox {
         virtual void Draw( Graphics& g ) const;
         void SetColor( const Color& color ) { m_color = color; }
         const Color& GetColor() const { return m_color; }
+        void SetAlpha( float a ) { m_color.a = a; }
+        float GetAlpha() const { return m_color.a; }
     private:
         Color   m_color;
     };

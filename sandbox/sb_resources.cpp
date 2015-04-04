@@ -18,6 +18,7 @@
 #include <ghl_data.h>
 
 #include "sb_atlaser.h"
+#include "sb_bitmask.h"
 
 #include "sb_log.h"
 
@@ -329,6 +330,15 @@ namespace Sandbox {
         img->Release();
         
         return texture;
+    }
+    
+    BitmaskPtr Resources::LoadBitmask( const sb::string& filename ) {
+        const char* ext = "";
+        GHL::Image* img = LoadImage(filename.c_str(),&ext);
+        if (!img) {
+            return BitmaskPtr();
+        }
+        return BitmaskPtr(new Bitmask(img));
     }
     
 	bool Resources::ImageHaveAlpha(const GHL::Image* img) const {

@@ -15,7 +15,7 @@ SB_META_DECLARE_OBJECT(Sandbox::PermanentThreadsMgr, Sandbox::ThreadsMgr)
 
 namespace Sandbox {
 
-	ThreadsMgr::ThreadsMgr() {
+    ThreadsMgr::ThreadsMgr() : m_drop_empty(true) {
 	}
 	
 	ThreadsMgr::~ThreadsMgr() {
@@ -41,7 +41,7 @@ namespace Sandbox {
 			else
 				i++;
 		}
-		return m_threads.empty() && m_removed_threads.empty() && m_added_threads.empty();
+		return m_threads.empty() && m_removed_threads.empty() && m_added_threads.empty() && m_drop_empty;
 	}
 	
 	void ThreadsMgr::AddThread(const ThreadPtr& t) {
