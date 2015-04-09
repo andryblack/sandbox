@@ -50,9 +50,7 @@ solution( ProjectName )
 		if flascc_sdk_dir == nil then
 			error('must specify crossbridge sdk dir')
 		end
-		premake.gcc.cc = flascc_sdk_dir .. '/usr/bin/gcc'
-		premake.gcc.cxx = flascc_sdk_dir .. '/usr/bin/g++'
-		premake.gcc.ar = flascc_sdk_dir .. '/usr/bin/ar'
+		gccprefix ( flascc_sdk_dir .. '/usr/bin/' )
 		buildoptions {'-Wno-write-strings', '-Wno-trigraphs' }
 	else
 		table.insert(hide_options,'-fvisibility=hidden')

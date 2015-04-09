@@ -27,4 +27,5 @@ local old_getbuildcategory = xcode.getbuildcategory
 -- ios
 
 table.insert(premake.option.get('os').allowed,{'ios',"Apple iOS"})
+table.insert(premake.option.get('os').allowed,{'flash',"Crossbridge flash"})
 		
