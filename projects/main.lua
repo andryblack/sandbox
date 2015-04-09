@@ -8,8 +8,8 @@ if SandboxRoot then
 	sandbox_dir = _WORKING_DIR .. '/' .. SandboxRoot
 end
 
-local flex_sdk_dir = nil
-local flascc_sdk_dir = nil
+flex_sdk_dir = nil
+flascc_sdk_dir = nil
 
 newoption {
 	trigger = "flex_sdk_dir",
@@ -25,12 +25,14 @@ newoption {
 
 local use_network = use.Network
 
-local swf_size = SwfSize or { Width = 800, Height = 600}
+swf_size = SwfSize or { Width = 800, Height = 600}
 
 solution( ProjectName )
 	configurations { 'Debug', 'Release' }
 	
-	--
+	local hide_options = {
+		'-fvisibility-inlines-hidden'
+	}
 
 	platform_dir = unknown
 	local os_map = { 
@@ -38,11 +40,6 @@ solution( ProjectName )
 	}
 	local platform_id = os.get()
 
-	local hide_options = {
-
-		 --'-fvisibility=hidden',
-		 '-fvisibility-inlines-hidden'
-	}
 
 	if platform_id == 'flash' then
 		flex_sdk_dir = _OPTIONS['flex_sdk_dir']
@@ -57,8 +54,11 @@ solution( ProjectName )
 		premake.gcc.cxx = flascc_sdk_dir .. '/usr/bin/g++'
 		premake.gcc.ar = flascc_sdk_dir .. '/usr/bin/ar'
 		buildoptions {'-Wno-write-strings', '-Wno-trigraphs' }
-		buildoptions( hide_options )
+	else
+		table.insert(hide_options,'-fvisibility=hidden')
 	end
+
+	buildoptions( hide_options )
 
 	if platform_id == 'ios' then
 		defines { 'GHL_PLATFORM_IOS' }
@@ -461,7 +461,7 @@ solution( ProjectName )
 
 		targetdir (_WORKING_DIR .. '/bin/' .. platform_dir)
 
-		libdirs { sandbox_dir .. '/lib' , sandbox_dir .. '/GHL/lib' }
+		libdirs { _WORKING_DIR .. '/lib/' .. platform_dir }
 
 		local libs_postfix = ''
 		if os.is('macosx') then

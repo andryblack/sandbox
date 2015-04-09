@@ -58,11 +58,13 @@ namespace Sandbox {
 		void SetEndEvent(const EventPtr& e) { m_end_event = e;}
         const EventPtr& GetEndEvent() const { return m_end_event; }
 		
+        void AddSync( const sb::intrusive_ptr<Animation>& anim );
 		virtual bool Update(float dt);
 	private:
-		void SetImages(const ImagePtr& img);
+		void SetImages();
 		AnimationDataPtr		m_data;
 		std::vector<SpritePtr>	m_sprites;
+        std::vector<sb::intrusive_ptr<Animation> > m_sync;
 		bool	m_started;
 		bool	m_loop;
 		float	m_time;

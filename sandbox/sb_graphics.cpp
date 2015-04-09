@@ -549,7 +549,7 @@ namespace Sandbox {
 		for (size_t i=0;i<points.size();i++) {
 			appendVertex(points[i].x, points[i].y, 0, 0, clr);
 		}
-		m_primitives = points.size()-1;
+        m_primitives = GHL::UInt32(points.size())-1;
 		Flush();
 #endif
 	}
@@ -568,7 +568,7 @@ namespace Sandbox {
 		for (size_t i=0;i<points.size();i++) {
 			appendVertex(points[i].x, points[i].y, 0, 0, clr);
 		}
-		m_primitives = points.size()-1;
+		m_primitives = GHL::UInt32(points.size())-1;
 		Flush();
 #endif
 	}
@@ -700,7 +700,7 @@ namespace Sandbox {
         if (transform) {
             m_indexes = geomentry.indexes;
         } else {
-            m_render->DrawPrimitivesFromMemory(geomentry.primitives, GHL::VERTEX_TYPE_SIMPLE, &geomentry.vertexes[0], geomentry.vertexes.size(), &geomentry.indexes[0], m_primitives);
+            m_render->DrawPrimitivesFromMemory(geomentry.primitives, GHL::VERTEX_TYPE_SIMPLE, &geomentry.vertexes[0], GHL::UInt32(geomentry.vertexes.size()), &geomentry.indexes[0], m_primitives);
             m_primitives = 0;
         }
 		

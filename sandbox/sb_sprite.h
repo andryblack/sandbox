@@ -58,6 +58,7 @@ namespace Sandbox {
     private:
         Color   m_color;
     };
+    typedef sb::intrusive_ptr<ColorizedSprite> ColorizedSpritePtr;
     
     class SpriteBox : public SceneObjectWithPosition {
         SB_META_OBJECT

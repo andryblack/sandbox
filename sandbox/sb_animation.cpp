@@ -54,7 +54,7 @@ namespace Sandbox {
 		m_frame = 0;
 		m_time = 0;
 		if (!m_started) return;
-		SetImages(m_data->GetImage(0));
+		SetImages();
 	}
 	
 	void Animation::Stop() {
@@ -80,6 +80,12 @@ namespace Sandbox {
 		m_sprites.clear();
 	}
 	
+    void Animation::AddSync( const sb::intrusive_ptr<Animation>& anim ) {
+        sb_assert(anim);
+        sb_assert(anim.get()!=this);
+        m_sync.push_back(anim);
+    }
+    
 	bool Animation::Update(float dt) {
 		if (!m_started) return true;
 		m_time+=dt;
@@ -91,7 +97,7 @@ namespace Sandbox {
 				if (!m_loop) {
 					//sb_assert( frames_amount >= (m_frame+1) );
 					m_frame = frames_amount - 1;
-					SetImages(m_data->GetImage(m_frame));
+					SetImages();
 					m_started = false;
 				} 
 				if (m_end_event)
@@ -99,18 +105,26 @@ namespace Sandbox {
 				m_played_once = true;
 			}
 			if (m_started) {
-				m_frame = ( m_frame+frames) % frames_amount;
-				SetImages(m_data->GetImage(m_frame));
+                m_frame = ( m_frame+frames);
+                if (m_frame >= frames_amount) {
+                    m_frame = m_data->GetLoopFrame() + ((m_frame-m_data->GetLoopFrame()) % (m_data->Frames()-m_data->GetLoopFrame()));
+                }
+                SetImages();
 				m_time -=  frame_time * float(frames);
 			}
 		}
 		return Complete();
 	}
 	
-	void Animation::SetImages(const ImagePtr& img) {
+	void Animation::SetImages() {
+        ImagePtr img = m_data->GetImage(m_frame);
 		for (size_t i=0;i<m_sprites.size();i++) {
 			m_sprites[i]->SetImage(img);
 		}
+        for (size_t i=0;i<m_sync.size();++i) {
+            m_sync[i]->m_frame = m_frame;
+            m_sync[i]->SetImages();
+        }
 	}
 }
 

@@ -113,9 +113,23 @@ SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::ControllerSpriteColor, Controller)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerSpriteColor)
+SB_META_CONSTRUCTOR((const Sandbox::ColorizedSpritePtr&))
+SB_META_PROPERTY_RW_DEF(Begin)
+SB_META_PROPERTY_RW_DEF(End)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_KLASS(Sandbox::ControllerAlpha, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerAlpha)
 SB_META_CONSTRUCTOR((const Sandbox::ColorModificatorPtr&))
+SB_META_PROPERTY_RW_DEF(Begin)
+SB_META_PROPERTY_RW_DEF(End)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::ControllerSpriteAlpha, Controller)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerSpriteAlpha)
+SB_META_CONSTRUCTOR((const Sandbox::ColorizedSpritePtr&))
 SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
@@ -136,6 +150,7 @@ SB_META_METHOD(Start)
 SB_META_METHOD(ClearSprites)
 SB_META_METHOD(Stop)
 SB_META_METHOD(AddSprite)
+SB_META_METHOD(AddSync)
 SB_META_PROPERTY_RW_DEF(EndEvent)
 SB_META_PROPERTY_RO(PlayedOnce, PlayedOnce);
 SB_META_END_KLASS_BIND()
@@ -158,6 +173,8 @@ namespace Sandbox {
         luabind::Class<ControllerElastic>(lua);
         luabind::Class<ControllerColor>(lua);
         luabind::Class<ControllerAlpha>(lua);
+        luabind::Class<ControllerSpriteColor>(lua);
+        luabind::Class<ControllerSpriteAlpha>(lua);
         luabind::Class<Animation>(lua);
         luabind::Class<AnimationData>(lua);
     }

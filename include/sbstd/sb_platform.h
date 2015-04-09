@@ -32,7 +32,7 @@ namespace sb {
         return count;
     }
 #else
-    using std::snprintf;
+    using ::snprintf;
 #endif
 
 }

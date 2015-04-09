@@ -169,7 +169,7 @@ namespace Sandbox {
         float       m_ith;
 		ShaderPtr	m_shader;
 		GHL::PrimitiveType	m_ptype;
-        size_t      m_primitives;
+        GHL::UInt32      m_primitives;
 		std::vector<GHL::Vertex> m_vertexes;
         std::vector<GHL::Vertex2Tex> m_vertexes2tex;
 		std::vector<GHL::UInt16> m_indexes;

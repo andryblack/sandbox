@@ -10,6 +10,8 @@
 #define backgammon_osx_sb_ref_cntr_h
 
 #include <sbstd/sb_assert.h>
+#include <ghl_api.h>
+
 
 namespace Sandbox {
     

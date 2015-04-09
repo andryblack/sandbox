@@ -113,6 +113,7 @@ namespace Sandbox {
 #endif
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
+        m_sound_mgr->SetSoundsDir("sound");
 	}
 	
 	Application::~Application() {

@@ -12,7 +12,7 @@
 
 namespace Sandbox {
     
-    const unsigned char UTF8_BYTE_MASK = 0xBF;
+    //const unsigned char UTF8_BYTE_MASK = 0xBF;
     const unsigned char UTF8_BYTE_MARK = 0x80;
     const unsigned char UTF8_BYTE_MASK_READ = 0x3F;
     const unsigned char UTF8_FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
