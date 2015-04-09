@@ -62,7 +62,14 @@ solution( ProjectName )
 
 	if platform_id == 'ios' then
 		defines { 'GHL_PLATFORM_IOS' }
+		xcodebuildsettings { 
+			SDKROOT = 'iphoneos' , 
+			CODE_SIGN_IDENTITY='iPhone Developer', 
+			ARCHS='$(ARCHS_STANDARD)',
+			IPHONEOS_DEPLOYMENT_TARGET='7.0'
+		}
 	end
+
 
 	defines {'GHL_STATIC_LIB'}
 

@@ -10,12 +10,12 @@
 [submodule "GHL"]
 	path = GHL
 	url = git@github.com:andryblack/GHL.git
-[submodule "utils/premake"]
-	path = utils/premake
-	url = git@github.com:andryblack/premake.git
 [submodule "utils/glsl2agal"]
 	path = utils/glsl2agal
 	url = git@github.com:andryblack/glsl2agal.git
 [submodule "yajl"]
 	path = yajl
 	url = https://github.com/lloyd/yajl.git
+[submodule "utils/premake5"]
+	path = utils/premake5
+	url = https://github.com/andryblack/premake-core.git
