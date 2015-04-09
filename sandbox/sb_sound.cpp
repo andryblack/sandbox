@@ -110,7 +110,7 @@ namespace Sandbox {
         return res;
     }
     
-    SoundManager::SoundManager( ) : m_sound(0),m_resources(0) {
+    SoundManager::SoundManager( ) : m_sound(0),m_resources(0),m_music(0) {
         m_sounds_volume = 70.0f;
         m_music_volume = 70.0f;
     }
@@ -129,6 +129,9 @@ namespace Sandbox {
     
     void SoundManager::SetMusicVolume(float v) {
         m_music_volume = v;
+        if (m_music) {
+            m_music->SetVolume(m_music_volume);
+        }
     }
     
     SoundPtr SoundManager::GetSound(const char* filename) {
@@ -182,6 +185,29 @@ namespace Sandbox {
                 it = m_fade_outs.erase(it);
             else
                 ++it;
+        }
+    }
+    
+    void SoundManager::PlayMusic(const char* filename,bool loop) {
+        if (!m_resources)
+            return;
+        if (!m_sound)
+            return;
+        if (m_music) {
+            m_music->Stop();
+            m_music->Release();
+            m_music = 0;
+        }
+        sb::string fullname = m_sounds_dir + filename;
+        GHL::DataStream* ds = m_resources->OpenFile(fullname.c_str());
+        if (!ds) {
+            return;
+        }
+        m_music = m_sound->OpenMusic(ds);
+        ds->Release();
+        if (m_music) {
+            m_music->SetVolume(m_music_volume);
+            m_music->Play(loop);
         }
     }
     

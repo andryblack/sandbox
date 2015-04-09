@@ -20,6 +20,7 @@ namespace GHL {
     struct SoundEffect;
     struct SoundInstance;
     struct Sound;
+    struct MusicInstance;
 }
 
 namespace Sandbox {
@@ -78,6 +79,8 @@ namespace Sandbox {
         float   GetSoundsVolume() const { return m_sounds_volume; }
         void    SetMusicVolume( float v);
         float   GetMusicVolume() const { return m_music_volume; }
+        
+        void PlayMusic(const char* filename,bool loop);
     private:
         friend class Sound;
         friend class SoundInstance;
@@ -90,6 +93,7 @@ namespace Sandbox {
         typedef sb::list<SoundInstancePtr> SoundsList;
         SoundsList  m_fade_ins;
         SoundsList  m_fade_outs;
+        GHL::MusicInstance* m_music;
     };
     
 }
