@@ -153,9 +153,6 @@ namespace Sandbox {
 #endif
     }
 	
-    void GHL_CALL Application::Initialize() {
-        
-    }
 	///
 	void GHL_CALL Application::SetSystem( GHL::System* sys ) {
 		m_system = sys;
@@ -231,7 +228,11 @@ namespace Sandbox {
 #endif
     
 #ifdef GHL_PLATFORM_FLASH
-        ctx->SetValue("platform.os", "FLASH");
+        ctx->SetValue("platform.os", "flash");
+#endif
+        
+#ifdef GHL_PLATFORM_ANDROID
+        ctx->SetValue("platform.os", "android");
 #endif
         
         luabind::Enum<GHL::MouseButton>(m_lua->GetVM());
@@ -491,6 +492,11 @@ namespace Sandbox {
 	}
 	///
 	void GHL_CALL Application::Release(  ) {
+        delete m_lua;
+        m_lua = 0;
+        delete m_sound_mgr;
+        m_sound_mgr = 0;
+        LogInfo() << "Release application";
 		delete this;
 	}
 	

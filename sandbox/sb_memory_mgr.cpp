@@ -46,7 +46,7 @@ namespace Sandbox {
                 ++pages;
             }
 
-            LogInfo() << "block " << block_sizes[i] << "b allocated:" << format_memory(GHL::UInt32(total*block_sizes[i])) << " in " << pages << " pages(" << format_memory(GHL::UInt32(PAGE_SIZE*pages))<<")";
+            LogInfo() << "block " << block_sizes[i] << "b allocated:" << format_memory(GHL::UInt32(total*block_sizes[i])) << " in " << pages << " pages(" << format_memory(GHL::UInt32(MEM_PAGE_SIZE*pages))<<")";
 #endif            
             delete m_block_pools[i];
         }
@@ -86,7 +86,7 @@ namespace Sandbox {
         for (size_t i=0;i<blocks_allocators;++i) {
             block_pool_base* bp = m_block_pools[i];
             while (bp) {
-                res+=PAGE_SIZE;
+                res+=MEM_PAGE_SIZE;
                 bp = bp->next;
             }
         }

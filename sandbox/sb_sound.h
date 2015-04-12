@@ -71,6 +71,7 @@ namespace Sandbox {
     class SoundManager : public NotCopyable {
     public:
         explicit SoundManager( );
+        ~SoundManager();
         void    Init(GHL::Sound* snd, Resources* res);
         void    Update(float dt);
         SoundPtr GetSound(const char* filename);

@@ -20,8 +20,8 @@ namespace Sandbox {
 
     class MemoryMgr : public NotCopyable {
     private:
-        static const size_t PAGE_SIZE = 1024*8;
-        static const size_t ALIGN = 16;
+        static const size_t MEM_PAGE_SIZE = 1024*8;
+        static const size_t MEM_ALIGN = 16;
         struct block_pool_base {
             size_t   first_free;
             block_pool_base*    next;
@@ -43,7 +43,7 @@ namespace Sandbox {
         template <size_t size> class block_pool : public block_pool_base{
         private:
             static const size_t block_size = size;
-            static const size_t blocks_amount = (PAGE_SIZE-ALIGN-sizeof(block_pool_base))/block_size;
+            static const size_t blocks_amount = (MEM_PAGE_SIZE-MEM_ALIGN-sizeof(block_pool_base))/block_size;
             typedef GHL::Byte block_t[block_size];
             block_t m_blocks[blocks_amount];
         public:
@@ -86,7 +86,7 @@ namespace Sandbox {
             void*   free;
         };
         page*   m_first_page;
-        static const size_t MAX_ALLOC = PAGE_SIZE - sizeof(page) - ALIGN;
+        static const size_t MAX_ALLOC = MEM_PAGE_SIZE - sizeof(page) - MEM_ALIGN;
 #ifdef SB_MEMORY_MGR_STAT
         size_t m_total_allocated;
 #endif

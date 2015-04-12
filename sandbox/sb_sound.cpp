@@ -115,6 +115,12 @@ namespace Sandbox {
         m_music_volume = 70.0f;
     }
     
+    SoundManager::~SoundManager() {
+        if (m_music) {
+            m_music->Release();
+            m_music = 0;
+        }
+    }
     void    SoundManager::Init(GHL::Sound* snd, Resources* res) {
         m_sound = snd;
         m_resources = res;

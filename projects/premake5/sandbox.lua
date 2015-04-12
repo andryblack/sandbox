@@ -1,6 +1,8 @@
 
 math.randomseed(1234)
 
+
+
 local use = UseModules or {}
 local sandbox_dir = _WORKING_DIR .. '/../..'
 
@@ -11,17 +13,10 @@ end
 flex_sdk_dir = nil
 flascc_sdk_dir = nil
 
-newoption {
-	trigger = "flex_sdk_dir",
-	value = "PATH",
-	description = "FLEX sdk path"
-}
+if not AndroidConfig then
+	AndroidConfig = {}
+end
 
-newoption {
-	trigger = "flascc_sdk_dir",
-	value = "PATH",
-	description = "CrossBridge sdk path"
-}
 
 local use_network = use.Network
 
@@ -29,6 +24,12 @@ swf_size = SwfSize or { Width = 800, Height = 600}
 
 solution( ProjectName )
 	configurations { 'Debug', 'Release' }
+
+	android_stl('gnustl_static')
+	android_api_level(AndroidConfig.api_level or 9)
+	android_target_api_level(AndroidConfig.target_api_level or 14)
+	android_packagename( AndroidConfig.package or 'com.sandbox.example')
+	android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 	
 	local hide_options = {
 		'-fvisibility-inlines-hidden'
@@ -42,8 +43,8 @@ solution( ProjectName )
 
 
 	if platform_id == 'flash' then
-		flex_sdk_dir = _OPTIONS['flex_sdk_dir']
-		flascc_sdk_dir = _OPTIONS['flascc_sdk_dir']
+		flex_sdk_dir = _OPTIONS['flex-sdk-dir']
+		flascc_sdk_dir = _OPTIONS['flascc-sdk-dir']
 		if flex_sdk_dir == nil then
 			error('must specify flex sdk dir')
 		end
@@ -74,7 +75,6 @@ solution( ProjectName )
 	configuration "Debug"
          defines { "DEBUG" }
          flags { "Symbols" }
-
     if platform_id == 'flash' then
     	buildoptions { '-g' }
     end
@@ -82,7 +82,6 @@ solution( ProjectName )
  
     configuration "Release"
          defines { "NDEBUG" }
-    
     if platform_id == 'flash' then
     	buildoptions { '-O4' }
     else
@@ -173,7 +172,11 @@ solution( ProjectName )
 			use_opengl = true
 		end
 
-		local use_opengles = use_opengl and os.is('ios')
+		if os.is('android') then
+			use_opengl = true
+		end
+
+		local use_opengles = use_opengl and ( os.is('ios') or os.is('android') )
 
 		if use_openal then
 			files {
@@ -255,6 +258,19 @@ solution( ProjectName )
 			if use_network then
 				files {
 					ghl_src .. 'net/win32/ghl_net_win32.cpp'
+				}
+			end
+		elseif os.is('android') then
+			--defines 'GHL_PLATFORM_FLASH'
+			files {
+				ghl_src .. 'winlib/winlib_android.*',
+				ghl_src .. 'vfs/vfs_android.*',
+				ghl_src .. 'vfs/vfs_posix.*',
+				ghl_src .. 'sound/android/*'
+			}
+			if use_network then
+				files {
+					ghl_src .. 'net/android/ghl_net_android.cpp'
 				}
 			end
 		end
@@ -490,6 +506,7 @@ solution( ProjectName )
 			links { 'chipmunk' }
 		end
 		if os.is('ios') then
+			files { sandbox_dir .. '/projects/ios/main.mm' }
 			links {
 				'Foundation.framework', 
 				'QuartzCore.framework', 
@@ -500,20 +517,33 @@ solution( ProjectName )
 				'AudioToolbox.framework',
 				'CoreMotion.framework' }
 		elseif os.is('macosx') then
+			files { sandbox_dir .. '/projects/osx/main.mm' }
 			links { 
 				'OpenGL.framework', 
 				'OpenAL.framework',
 				'Cocoa.framework',
 				'AudioToolbox.framework' }
 		elseif os.is('flash') then
+			files { sandbox_dir .. '/projects/flash/main.cpp' }
 			links {
 				'AS3++',
 				'Flash++'
 			}
 		elseif os.is('windows') then
+			files { sandbox_dir .. '/projects/windows/main.cpp' }
 			links {
 				'OpenGL32',
 				'WinMM'
+			}
+		elseif os.is('android') then
+			files { sandbox_dir .. '/projects/android/main.cpp' }
+			links {
+				'android',
+				'log',
+				'EGL',
+				'OpenSLES',
+				'GLESv1_CM',
+				'GLESv2'
 			}
 		end
 
