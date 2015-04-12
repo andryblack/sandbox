@@ -174,6 +174,7 @@ SB_META_DECLARE_KLASS(Sandbox::Sound, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Sound)
 SB_META_METHOD(Play)
 SB_META_METHOD(PlayEx)
+SB_META_METHOD(PlayExControl)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::SoundManager, void)

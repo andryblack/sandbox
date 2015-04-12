@@ -93,7 +93,17 @@ namespace Sandbox {
         return m_current_volume == m_ref_volume;
     }
     
-    SoundInstancePtr    Sound::PlayEx(float fadeIn,float vol,float pan) {
+    void    Sound::Play() {
+        if (!m_effect) return;
+        m_mgr->m_sound->PlayEffect(m_effect,m_mgr->m_sounds_volume,0.0f,0);
+    }
+
+    void    Sound::PlayEx(float vol,float pan) {
+        if (!m_effect) return;
+        m_mgr->m_sound->PlayEffect(m_effect,m_mgr->m_sounds_volume*vol,pan*100.0f,0);
+    }
+    
+    SoundInstancePtr    Sound::PlayExControl(float fadeIn,float vol,float pan) {
         if (!m_effect) return SoundInstancePtr(new SoundInstance(SoundPtr(this),static_cast<GHL::SoundInstance*>(0),0.0f));
         float initialVol = vol;
         if (fadeIn!=0.0f) {

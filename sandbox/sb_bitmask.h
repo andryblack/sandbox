@@ -3,7 +3,7 @@
 
 #include <sbstd/sb_intrusive_ptr.h>
 #include <sbstd/sb_vector.h>
-
+#include <string.h>
 #include <ghl_types.h>
 
 namespace GHL {

@@ -58,9 +58,9 @@ namespace Sandbox {
     public:
         explicit Sound( SoundManager* mgr, GHL::SoundEffect* eff );
         ~Sound();
-        
-        SoundInstancePtr    Play() { return PlayEx(0.0f,1.0f,0.0f);}
-        SoundInstancePtr    PlayEx(float fadeIn,float vol,float pan);
+        void Play();
+        void PlayEx(float vol,float pan);
+        SoundInstancePtr    PlayExControl(float fadeIn,float vol,float pan);
     private:
         SoundManager*       m_mgr;
         GHL::SoundEffect*   m_effect;
