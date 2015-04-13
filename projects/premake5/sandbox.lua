@@ -162,6 +162,7 @@ solution( ProjectName )
 
 		local use_openal = false
 		local use_opengl = false
+		local use_vorbis = true
 
 		if os.is('ios') or os.is('macosx') then
 			use_openal = true
@@ -170,6 +171,7 @@ solution( ProjectName )
 
 		if os.is('windows') then
 			use_opengl = true
+			use_vorbis = true
 		end
 
 		if os.is('android') then
@@ -181,6 +183,13 @@ solution( ProjectName )
 		if use_openal then
 			files {
 				ghl_src .. 'sound/openal/*'
+			}
+		end
+
+		if use_vorbis then
+
+			files {
+				ghl_src .. 'sound/vorbis_decoder.*'
 			}
 		end
 
@@ -209,6 +218,18 @@ solution( ProjectName )
 		end
 
 
+		if use_vorbis then
+			includedirs {
+				sandbox_dir .. '/sound/libogg/include',
+				sandbox_dir .. '/sound/libvorbis/include'
+			}
+			local ogg_files = {'bitwise.c','framing.c'}
+			files(append_path(ghl_src .. '/sound/libogg/src/',ogg_files))
+			local vorbis_files = {'bitrate.c','block.c','codebook.c','envelope.c','floor0.c','floor1.c','info.c','lookup.c',
+				'lpc.c','lsp.c','mapping0.c','mdct.c','psy.c','registry.c','res0.c','sharedbook.c','smallft.c','synthesis.c',
+				'vorbisfile.c','window.c'}
+			files(append_path(ghl_src .. '/sound/libvorbis/lib/',vorbis_files))
+		end
 
 		if os.is('macosx') then
 			files { 

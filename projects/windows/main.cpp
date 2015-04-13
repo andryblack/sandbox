@@ -7,11 +7,10 @@
 //
 
 
-#include "../../src/application.h"
 #include <windows.h>
+int StartApplication(int argc, char** argv);
 int main(int argc, char** argv) {
-	int res = GHL_StartApplication(new Application(), 0, 0);
-	return res;
+	return StartApplication(argc,argv);
 }
 int WINAPI WinMain(HINSTANCE /*hInst*/,HINSTANCE /*hPrev*/,LPSTR /*cmdLine*/,int /*showCmd*/) {
 	return main(0, 0);
