@@ -29,6 +29,26 @@ namespace Sandbox {
         if (m_image)
             g.DrawImage(*m_image,GetPos());
 	}
+    
+    bool Sprite::CheckHit(const Vector2f& pos) const {
+        if (!m_image)
+            return false;
+        if (!GetVisible())
+            return false;
+        Vector2f local = GlobalToLocal(pos);
+        Vector2f hs = -m_image->GetHotspotReal();
+        if (local.x < hs.x)
+            return false;
+        local.x -= hs.x;
+        if (local.y < hs.y)
+            return false;
+        local.y -= hs.y;
+        if (local.x > m_image->GetWidth())
+            return false;
+        if (local.y > m_image->GetHeight())
+            return false;
+        return true;
+    }
 
     void SpriteFill::SetRect(const Rectf& rect) {
         SetPos(Vector2f(rect.x, rect.y));

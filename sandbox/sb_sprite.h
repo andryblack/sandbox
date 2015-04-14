@@ -27,6 +27,7 @@ namespace Sandbox {
 		void SetImage(const ImagePtr& img) { m_image = img;}
 		const ImagePtr& GetImage() const { return m_image;}
 		virtual void Draw( Graphics& g ) const;
+        bool CheckHit(const Vector2f& pos) const;
 	protected:
 		ImagePtr m_image;
 	};
