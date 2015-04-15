@@ -48,6 +48,8 @@ namespace Sandbox {
 		
 		void Start(bool loop);
 		void Stop();
+        
+        void Randomize();
 		
 		bool Complete() const;
 		bool PlayedOnce() const;

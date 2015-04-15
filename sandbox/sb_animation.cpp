@@ -57,6 +57,12 @@ namespace Sandbox {
 		SetImages();
 	}
 	
+    void Animation::Randomize() {
+        if (m_data) {
+            m_frame = rand() % m_data->Frames();
+            SetImages();
+        }
+    }
 	void Animation::Stop() {
 		m_started = false;
 	}
