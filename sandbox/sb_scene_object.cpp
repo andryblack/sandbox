@@ -62,6 +62,11 @@ namespace Sandbox {
         }
     }
     
+    Vector2f SceneObject::LocalToGlobal(const Vector2f& v) const {
+        Transform2d tr = GetTransform();
+        return tr.transform(v);
+    }
+    
     Vector2f SceneObject::GlobalToLocal(const Vector2f& v) const {
         Vector2f res = v;
         GlobalToLocalImpl(res);

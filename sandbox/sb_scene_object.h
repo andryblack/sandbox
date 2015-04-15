@@ -35,6 +35,7 @@ namespace Sandbox {
         Vector2f GlobalToLocal(const Vector2f& v) const;
         void MoveToTop();
         Transform2d GetTransform() const;
+        Vector2f LocalToGlobal(const Vector2f& v) const;
 	protected:
 		friend class Container;
 		Container* GetParent() const { return m_parent;}
