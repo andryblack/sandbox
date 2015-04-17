@@ -18,12 +18,13 @@ namespace Sandbox {
         
     }
     
-    void RTScene::Draw(GHL::Render *r,Graphics& g) {
+    size_t RTScene::Draw(GHL::Render *r,Graphics& g) {
         r->BeginScene(m_rt->GetNative());
         g.BeginScene(r);
         Scene::Draw(g);
-        g.EndScene();
+        size_t res = g.EndScene();
         r->EndScene();
+        return res;
     }
     
 }

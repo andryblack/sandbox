@@ -97,6 +97,7 @@ namespace Sandbox {
 		Color		m_clear_color;
         
         float       m_batches;
+        float       m_batches_rt;
         
         bool    m_sound_enabled;
         bool    m_music_enabled;

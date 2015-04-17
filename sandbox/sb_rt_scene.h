@@ -22,7 +22,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         explicit RTScene(const RenderTargetPtr& rt);
-        void Draw(GHL::Render* r,Graphics& g);
+        size_t Draw(GHL::Render* r,Graphics& g);
         const RenderTargetPtr& GetTarget() const { return m_rt;}
     private:
         RenderTargetPtr m_rt;

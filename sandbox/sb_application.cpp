@@ -101,6 +101,7 @@ namespace Sandbox {
 		m_main_thread = 0;
 		m_clear_buffer = false;
         m_batches = 0.0f;
+        m_batches_rt = 0.0f;
         m_sound_enabled = true;
         m_music_enabled = true;
 #ifdef SB_USE_MYGUI
@@ -362,12 +363,16 @@ namespace Sandbox {
             (*it)->Update(dt);
         }
         
+        size_t batches = 0;
+        
         for (sb::list<RTScenePtr>::const_iterator it = m_rt_scenes.begin();it!=m_rt_scenes.end();++it) {
-            (*it)->Draw(m_render, *m_graphics);
+            batches += (*it)->Draw(m_render, *m_graphics);
         }
+        m_batches_rt = m_batches_rt * 0.875f + 0.125f*batches;    /// interpolate 4 frames
     }
 	
 	void Application::DrawDebugInfo() {
+        //return;
 #ifdef SB_DEBUG
 		char buf[128];
 		sb::snprintf(buf,128,"fps:%0.2f",m_fps);
@@ -377,7 +382,7 @@ namespace Sandbox {
 			,0.0f,-1.0f,1.0f).matrix);
 		m_render->DebugDrawText( 10, 10 , buf );
         m_render->DebugDrawText( 10, 21 , m_lua->GetMemoryUsed().c_str() );
-        sb::snprintf(buf,128,"batches:%0.2f",m_batches);
+        sb::snprintf(buf,128,"batches:%0.2f/%0.2f",m_batches,m_batches_rt);
         m_render->DebugDrawText( 10, 32 , buf );
         m_render->DebugDrawText( 10, 43,
                                 (sb::string("res:")+format_memory(m_resources->GetMemoryUsed())+
