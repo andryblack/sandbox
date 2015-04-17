@@ -29,10 +29,12 @@ namespace Sandbox {
 		void SetBegin(const T& from) { m_begin = from;}
 		const T& GetEnd() const { return m_end;}
 		void SetEnd(const T& to) { m_end = to;}
-		void Set(float k) {
+		virtual void Set(float k) {
 			Setter::SetValue( m_obj, m_begin * (1.0f-k) + m_end * k );
 		}
 		explicit LinearController(const Obj& obj) : m_obj(obj),m_begin(),m_end() {}
+    protected:
+        const Obj& GetObject() const { return m_obj; }
 	private:
 		Obj	m_obj;
 		T	m_begin;

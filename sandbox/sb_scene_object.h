@@ -62,6 +62,7 @@ namespace Sandbox {
         virtual void GlobalToLocalImpl(Vector2f& v) const;
         virtual void GetTransformImpl(Transform2d& tr) const;
     };
+    typedef sb::intrusive_ptr<SceneObjectWithPosition> SceneObjectWithPositionPtr;
 }
 
 #endif /*SB_SCENE_OBJECT_H*/

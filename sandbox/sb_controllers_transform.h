@@ -12,6 +12,7 @@
 
 #include "sb_controller.h"
 #include "sb_draw_modificator.h"
+#include "sb_scene_object.h"
 
 namespace Sandbox {
 	
@@ -23,6 +24,11 @@ namespace Sandbox {
 				tr->SetTranslate(pos);
 			}
 		};
+        struct LinearControllerSetPos {
+            static void SetValue( const SceneObjectWithPositionPtr& tr,const Vector2f& pos) {
+                tr->SetPos(pos);
+            }
+        };
 		struct LinearControllerSetScale {
 			static void SetValue( const TransformModificatorPtr& tr,float s) {
 				tr->SetScale(s);
@@ -46,6 +52,7 @@ namespace Sandbox {
 	}
 	
 	typedef LinearController<Vector2f,Impl::LinearControllerSetTranslate,TransformModificatorPtr> ControllerTranslate;
+    typedef LinearController<Vector2f,Impl::LinearControllerSetPos,SceneObjectWithPositionPtr> ControllerPos;
 	typedef LinearController<float,Impl::LinearControllerSetScale,TransformModificatorPtr> ControllerScale;
 	typedef LinearController<float,Impl::LinearControllerSetScaleX,TransformModificatorPtr> ControllerScaleX;
 	typedef LinearController<float,Impl::LinearControllerSetScaleY,TransformModificatorPtr> ControllerScaleY;

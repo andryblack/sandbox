@@ -106,6 +106,13 @@ SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::ControllerPos, Controller)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerPos)
+SB_META_CONSTRUCTOR((const Sandbox::SceneObjectWithPositionPtr&))
+SB_META_PROPERTY_RW_DEF(Begin)
+SB_META_PROPERTY_RW_DEF(End)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_KLASS(Sandbox::ControllerColor, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerColor)
 SB_META_CONSTRUCTOR((const Sandbox::ColorModificatorPtr&))
@@ -171,6 +178,7 @@ namespace Sandbox {
         luabind::Class<ControllerPhase>(lua);
         luabind::Class<ControllerMap>(lua);
         luabind::Class<ControllerTranslate>(lua);
+        luabind::Class<ControllerPos>(lua);
         luabind::Class<ControllerElastic>(lua);
         luabind::Class<ControllerColor>(lua);
         luabind::Class<ControllerAlpha>(lua);
