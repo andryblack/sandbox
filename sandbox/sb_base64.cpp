@@ -2,6 +2,7 @@
 #include "sb_data.h"
 #include <sbstd/sb_vector.h>
 #include <ghl_types.h>
+#include "sb_log.h"
 
 namespace Sandbox {
     
