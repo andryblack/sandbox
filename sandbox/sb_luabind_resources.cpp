@@ -19,6 +19,7 @@
 #include "sb_sound.h"
 #include "sb_rendertarget.h"
 #include "sb_utf.h"
+#include "sb_tilemap.h"
 
 SB_META_DECLARE_KLASS(Sandbox::Shader, void)
 
@@ -154,8 +155,11 @@ SB_META_METHOD(SetXHeight)
 SB_META_METHOD(FixupChars)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::FileProvider,void);
+SB_META_BEGIN_KLASS_BIND(Sandbox::FileProvider)
+SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(Sandbox::Resources, void)
+SB_META_DECLARE_KLASS(Sandbox::Resources, Sandbox::FileProvider)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Resources)
 SB_META_METHOD(GetImage)
 SB_META_METHOD(GetTexture)
@@ -186,6 +190,23 @@ SB_META_PROPERTY_RW_DEF(MusicVolume)
 SB_META_PROPERTY_WO(SoundsDir,SetSoundsDir)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::TileMapLayer)
+SB_META_CONSTRUCTOR((size_t,size_t))
+SB_META_METHOD(GetAt)
+SB_META_METHOD(SetAt)
+SB_META_PROPERTY_RO(Width, GetWidth)
+SB_META_PROPERTY_RO(Height, GetHeight)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::TileMap)
+SB_META_CONSTRUCTOR((size_t,size_t))
+SB_META_METHOD(GetLayer)
+SB_META_METHOD(SetLayer)
+SB_META_PROPERTY_RO(Width, GetWidth)
+SB_META_PROPERTY_RO(Height, GetHeight)
+bind( static_method( "LoadTileMapTMX" , &Sandbox::LoadTileMapTMX ) );
+SB_META_END_KLASS_BIND()
+
 struct UTF8 {
     static  sb::string GetChar(const sb::string& src) {
         Sandbox::UTF32Char ch = 0;
@@ -212,6 +233,7 @@ namespace Sandbox {
         luabind::Enum<FontAlign>(lua);
         luabind::Class<Image>(lua);
         luabind::Class<ImageBox>(lua);
+        luabind::ExternClass<FileProvider>(lua);
         luabind::ExternClass<Resources>(lua);
         luabind::Class<Texture>(lua);
         luabind::Class<RenderTarget>(lua);
@@ -219,6 +241,9 @@ namespace Sandbox {
         luabind::Class<Sound>(lua);
         luabind::ExternClass<SoundManager>(lua);
         luabind::ExternClass<UTF8>(lua);
+        luabind::Class<TileMapLayer>(lua);
+        luabind::Class<TileMap>(lua);
+        
     }
 
 }

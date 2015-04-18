@@ -327,6 +327,14 @@ solution( ProjectName )
 	   			targetsuffix "_d"
 	end
 
+	project 'pugixml'
+		kind 'StaticLib'
+		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+		targetname ('pugixml_' .. platform_dir)
+		files(append_path(sandbox_dir .. '/pugixml/src/',{'*.cpp','*.hpp'}))
+		configuration "Debug"
+   			targetsuffix "_d"
+
    	project 'lua'
    		kind 'StaticLib'
 
@@ -468,7 +476,8 @@ solution( ProjectName )
 			sandbox_dir .. '/include',
 			sandbox_dir .. '/sandbox',
 			sandbox_dir .. '/freetype/include',
-			sandbox_dir .. '/yajl/src/api'
+			sandbox_dir .. '/yajl/src/api',
+			sandbox_dir .. '/pugixml/src'
 		}
 
 		if use.MyGUI then
@@ -512,6 +521,7 @@ solution( ProjectName )
 
 		links( {
 			'Sandbox', 
+			'pugixml',
 			'lua', 
 			'yajl',
 			'GHL'

@@ -19,3 +19,6 @@
 [submodule "utils/premake5"]
 	path = utils/premake5
 	url = https://github.com/andryblack/premake-core.git
+[submodule "pugixml"]
+	path = pugixml
+	url = https://github.com/zeux/pugixml.git
