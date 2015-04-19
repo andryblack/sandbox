@@ -61,6 +61,37 @@ namespace Sandbox {
         size_t size() const { return m_data.size(); }
     };
     
+    class StringData : public RefCounter<GHL::Data> {
+    private:
+        sb::string  m_data;
+    public:
+        StringData() {}
+        explicit StringData(const sb::string& d) : m_data(d) {}
+        /// clone data
+        virtual GHL::Data* GHL_CALL  Clone() const {
+            return new StringData(m_data);
+        }
+        /// Data size
+        virtual GHL::UInt32 GHL_CALL	GetSize() const {
+            return GHL::UInt32(m_data.length());
+        }
+        /// Const data ptr
+        virtual const GHL::Byte* GHL_CALL	GetData() const {
+            return reinterpret_cast<const GHL::Byte*>(m_data.c_str());
+        }
+        /// set data
+        virtual void GHL_CALL	SetData( GHL::UInt32 offset, const GHL::Byte* data, GHL::UInt32 size ) {
+            const char* src = reinterpret_cast<const char*>(data);
+            size_t nsize = offset+size;
+            if (m_data.size()<nsize) {
+                m_data.resize(nsize);
+            }
+            std::copy(src,src+size,m_data.begin()+offset);
+        }
+        sb::string& string() { return m_data; }
+        const sb::string& string() const { return m_data; }
+    };
+    
     class BinaryData : public meta::object {
         SB_META_OBJECT
     private:

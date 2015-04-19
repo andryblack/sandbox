@@ -71,6 +71,8 @@ namespace Sandbox {
 		void SetClearColor(const Color& c);
         void SetTitle(const sb::string& title);
         
+        bool RestoreAppProfile();
+        void StoreAppProfile();
         
  	private:
 		GHL::System*	m_system;

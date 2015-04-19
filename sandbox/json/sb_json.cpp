@@ -9,6 +9,7 @@ extern "C" {
 #include "../lua/src/lualib.h"
 }
 #include "luabind/sb_luabind_stack.h"
+#include <ghl_data.h>
 
 namespace Sandbox {
     
@@ -143,16 +144,8 @@ namespace Sandbox {
         c->on_value(true);
         return 1;
     }
-
-    static int json_parse(lua_State* L) {
-        if (!lua_isstring(L, 1)) {
-            lua_pushnil(L);
-            lua_pushstring(L, "need string");
-            return 2;
-        }
-        size_t len = 0;
-        const char* text = lua_tolstring(L, 1, &len);
-        yajl_callbacks cb;
+    
+    static void fill_parse_callbacks( yajl_callbacks& cb ) {
         cb.yajl_null = &yajl_parse_null;
         cb.yajl_boolean = &yajl_parse_boolean;
         cb.yajl_integer = &yajl_parse_integer;
@@ -164,6 +157,18 @@ namespace Sandbox {
         cb.yajl_end_map = &yajl_parse_end_map;
         cb.yajl_start_array = &yajl_parse_start_array;
         cb.yajl_end_array = &yajl_parse_end_array;
+    }
+
+    static int json_parse(lua_State* L) {
+        if (!lua_isstring(L, 1)) {
+            lua_pushnil(L);
+            lua_pushstring(L, "need string");
+            return 2;
+        }
+        size_t len = 0;
+        const char* text = lua_tolstring(L, 1, &len);
+        yajl_callbacks cb;
+        fill_parse_callbacks(cb);
         parse_context ctx;
         ctx.L = L;
         ctx.stack_depth = 0;
@@ -175,10 +180,10 @@ namespace Sandbox {
         }
         if (s!=yajl_status_ok) {
             unsigned char* err_text = yajl_get_error(h, 1,reinterpret_cast<const unsigned char * >(text),len);
-            yajl_free_error(h,err_text);
             lua_pop(L, ctx.stack_depth);
             lua_pushnil(L);
             lua_pushstring(L, reinterpret_cast<const char*>(err_text));
+            yajl_free_error(h,err_text);
             yajl_free(h);
             return 2;
         }
@@ -313,5 +318,67 @@ namespace Sandbox {
         lua_pushcfunction(L, &json_encode);
         lua_setfield(L, -2, "encode");
         lua_setglobal(L, "json");
+    }
+    
+    sb::string convert_to_json(const LuaContextPtr& tctx) {
+        encode_context ctx;
+        if (!tctx) return ctx.data;
+        lua_State* L = tctx->GetVM();
+        if (!L) return ctx.data;
+        LUA_CHECK_STACK(0)
+        tctx->GetObject(L);
+        if (!lua_istable(L, -1)) {
+            lua_pop(L, 1);
+            return ctx.data;
+        }
+        yajl_gen g = yajl_gen_alloc(0);
+        yajl_gen_config(g,yajl_gen_print_callback,&yajl_encode_print,&ctx);
+        do_json_encode_table(L,-1,g);
+        yajl_gen_free(g);
+        lua_pop(L, 1);
+        return ctx.data;
+    }
+    static LuaContextPtr convert_from_json(lua_State* L,const void* data,size_t size) {
+        
+        LUA_CHECK_STACK(0)
+        
+        size_t len = size;
+        yajl_callbacks cb;
+        fill_parse_callbacks(cb);
+        parse_context ctx;
+        ctx.L = L;
+        ctx.stack_depth = 0;
+        
+        yajl_handle h = yajl_alloc(&cb, 0, &ctx);
+        yajl_status s = yajl_parse(h,static_cast<const unsigned char * >(data),len);
+        if (s == yajl_status_ok) {
+            s = yajl_complete_parse(h);
+        }
+        if (s!=yajl_status_ok) {
+            unsigned char* err_text = yajl_get_error(h, 1,static_cast<const unsigned char * >(data),len);
+            lua_pop(L, ctx.stack_depth);
+            LogError() << "failed parse json: " << reinterpret_cast<const char*>(err_text);
+            yajl_free_error(h,err_text);
+            yajl_free(h);
+            return LuaContextPtr();
+        }
+        yajl_free(h);
+        sb_assert(ctx.stack_depth == 1);
+        if (!ctx.stack_depth)
+            return LuaContextPtr();
+        
+        LuaContextPtr res = luabind::stack<LuaContextPtr>::get(L, -1);
+        lua_pop(L, ctx.stack_depth);
+        return res;
+    }
+    LuaContextPtr convert_from_json(lua_State* L,const char* text) {
+        if (!L) return LuaContextPtr();
+        if (!text) return LuaContextPtr();
+        return convert_from_json(L, text, ::strlen(text));
+    }
+    LuaContextPtr convert_from_json(lua_State* L,const GHL::Data* data) {
+        if (!L) return LuaContextPtr();
+        if (!data) return LuaContextPtr();
+        return convert_from_json(L, data->GetData(),data->GetSize());
     }
 }

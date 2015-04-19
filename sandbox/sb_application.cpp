@@ -41,6 +41,9 @@
 
 #include <sbstd/sb_platform.h>
 
+#include "json/sb_json.h"
+#include "sb_data.h"
+
 
 SB_META_DECLARE_KLASS(GHL::Settings, void)
 SB_META_BEGIN_KLASS_BIND(GHL::Settings)
@@ -75,7 +78,7 @@ namespace Sandbox {
 	void register_scene( lua_State* lua );
     void register_thread( lua_State* lua );
 	void register_controller( lua_State* lua );
-    void register_json( lua_State* lua );
+    
 #ifdef SB_USE_MYGUI
     namespace mygui {
         void register_mygui( lua_State* lua );
@@ -244,6 +247,12 @@ namespace Sandbox {
 
         ctx->SetValue("application.app", this);
         ctx->SetValue("settings", settings);
+        
+        if (!RestoreAppProfile()) {
+            ctx->SetValue("application.profile.first_start", true );
+        } else {
+            ctx->SetValue("application.profile.first_start", false );
+        }
         
 #ifdef SB_USE_NETWORK
         ctx->SetValue("application.network", m_network);
@@ -446,6 +455,36 @@ namespace Sandbox {
         return m_music_enabled;
     }
     
+    bool Application::RestoreAppProfile() {
+        if (m_lua && m_vfs) {
+            sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
+            path += "/profile.json";
+            GHL::DataStream* ds = m_vfs->OpenFile(path.c_str());
+            if (!ds) return false;
+            GHL::Data* d = GHL_ReadAllData( ds );
+            ds->Release();
+            if (!d) return false;
+            LuaContextPtr decoded = convert_from_json( m_lua->GetVM(), d);
+            d->Release();
+            m_lua->GetGlobalContext()->SetValue("application.profile", decoded);
+            return true;
+        }
+        return false;
+    }
+    void Application::StoreAppProfile() {
+        if (m_lua && m_vfs) {
+            LuaContextPtr profile = m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application.profile");
+            if (profile) {
+                sb::string json = convert_to_json(profile);
+                StringData* sd( new StringData(json));
+                sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
+                path += "/profile.json";
+                LogVerbose() << "store profile to " << path;
+                m_vfs->WriteFile(path.c_str(), sd);
+                sd->Release();
+            }
+        }
+    }
 	///
 	void GHL_CALL Application::OnKeyDown( GHL::Key k ) {
 #ifdef SB_USE_MYGUI
@@ -491,12 +530,14 @@ namespace Sandbox {
     }
 	///
 	void GHL_CALL Application::OnDeactivated() {
+        StoreAppProfile();
 	}
 	///
 	void GHL_CALL Application::OnActivated() {
 	}
 	///
 	void GHL_CALL Application::Release(  ) {
+        StoreAppProfile();
         delete m_lua;
         m_lua = 0;
         delete m_sound_mgr;
@@ -505,4 +546,6 @@ namespace Sandbox {
 		delete this;
 	}
 	
+    
+    
 }

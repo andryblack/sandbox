@@ -307,9 +307,9 @@ namespace Sandbox {
         
 		if (!setData) {
             fillData->Release();
-            LogWarning(MODULE) << "image " << filename << "." << ext<< " NPOT " <<
-            img->GetWidth() << "x" << img->GetHeight() << " -> " <<
-            tw << "x" << th;
+            //LogWarning(MODULE) << "image " << filename << "." << ext<< " NPOT " <<
+            //img->GetWidth() << "x" << img->GetHeight() << " -> " <<
+            //tw << "x" << th;
             img->Convert(ifmt);
             texture->SetData(0,0,img);
         } else {
