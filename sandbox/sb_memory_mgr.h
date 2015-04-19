@@ -20,34 +20,38 @@ namespace Sandbox {
 
     class MemoryMgr : public NotCopyable {
     private:
-        static const size_t MEM_PAGE_SIZE = 1024*8;
-        static const size_t MEM_ALIGN = 16;
         struct block_pool_base {
             size_t   first_free;
             block_pool_base*    next;
             virtual GHL::Byte* alloc() = 0;
+            virtual bool realloc(GHL::Byte* ptr,size_t nsize) = 0;
             virtual bool free(GHL::Byte* ptr) = 0;
             static const size_t NO_FREE = -1;
+            size_t  page_size;
 #ifdef SB_MEMORY_MGR_STAT
             size_t  allocated;
 #endif
             block_pool_base() : first_free(0),next(0) {
 #ifdef SB_MEMORY_MGR_STAT
-                allocated = false;
+                allocated = 0;
 #endif
             }
             virtual ~block_pool_base() {
                 delete next;
             }
         };
-        template <size_t size> class block_pool : public block_pool_base{
+        template <size_t size,size_t kb> class block_pool : public block_pool_base{
         private:
+            static const size_t MEM_PAGE_SIZE = 1024*kb;
+            static const size_t MEM_ALIGN = 16;
+            
             static const size_t block_size = size;
             static const size_t blocks_amount = (MEM_PAGE_SIZE-MEM_ALIGN-sizeof(block_pool_base))/block_size;
             typedef GHL::Byte block_t[block_size];
             block_t m_blocks[blocks_amount];
         public:
             block_pool() {
+                page_size = MEM_PAGE_SIZE;
                 for (size_t i=0;i<blocks_amount;++i) {
                     *reinterpret_cast<size_t*>(m_blocks[i]) = i+1;
                 }
@@ -76,25 +80,30 @@ namespace Sandbox {
                 if (next) return next->free(ptr);
                 return false;
             }
+            virtual bool realloc(GHL::Byte* ptr,size_t nsize) {
+                if ( ptr>= m_blocks[0] && ptr< (m_blocks+blocks_amount)[0] ) {
+                    if (nsize <= block_size)
+                        return true;
+                    return false;
+                }
+                if (next) return next->realloc(ptr,nsize);
+                return false;
+            }
         };
-        /// 8 16 32 64 128 256
+        /// 16 32 64 128 256 512
         static const size_t blocks_allocators = 6;
         block_pool_base*    m_block_pools[blocks_allocators];
-        struct page {
-            page*   next;
-            size_t  size;
-            void*   free;
-        };
-        page*   m_first_page;
-        static const size_t MAX_ALLOC = MEM_PAGE_SIZE - sizeof(page) - MEM_ALIGN;
+        
 #ifdef SB_MEMORY_MGR_STAT
         size_t m_total_allocated;
 #endif
+        block_pool_base* pool_for_size(size_t size);
     public:
         MemoryMgr();
         ~MemoryMgr();
         GHL::Byte* alloc( size_t size );
-        void free( GHL::Byte* ptr );
+        void free( GHL::Byte* ptr , size_t size );
+        GHL::Byte* realloc( GHL::Byte* ptr, size_t size, size_t nsize );
         GHL::UInt32 allocated() const;
     };
     

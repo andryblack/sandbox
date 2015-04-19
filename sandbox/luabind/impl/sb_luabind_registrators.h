@@ -18,7 +18,12 @@ namespace Sandbox {
 	namespace luabind {
     class wrapper;
     namespace impl {
- 
+        
+        static const int __get = 1;
+        static const int __set = 2;
+        static const int __props = 2;
+        static const int __methods = 3;
+        
         class registrator_base {
         public:
         protected:
@@ -57,87 +62,81 @@ namespace Sandbox {
             void operator()( const meta::property_holder<T, U>& prop ) {
                 typedef typename meta::property_holder<T, U>::prop_ptr prop_ptr;
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "__props");
-                lua_rawget(m_L, -2 );                 /// props
+                lua_rawgeti(m_L, -1 , __props);                 /// props
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_createtable(m_L, 0, 2);                     /// props tbl
+                lua_createtable(m_L, 2, 0);                     /// props tbl
                 prop_ptr* ptr = 
                 reinterpret_cast<prop_ptr*>(lua_newuserdata(m_L, sizeof(prop_ptr)));    /// props tbl ud
                 *ptr = prop.prop;
                 lua_pushvalue(m_L, -1);                         /// props tbl ud ud
                 lua_pushcclosure(m_L, &get_prop_func<U>, 1);    /// props tbl ud func
-                lua_setfield(m_L, -3, "get");                   /// props tbl ud
+                lua_rawseti(m_L, -3, __get);                   /// props tbl ud
                 lua_pushcclosure(m_L, &set_prop_func<U>, 1);    /// props tbl func
-                lua_setfield(m_L, -2, "set");                   /// props tbl 
+                lua_rawseti(m_L, -2, __set);                   /// props tbl
                 lua_setfield(m_L, -2, prop.name);               /// props 
                 lua_pop(m_L, 1);
             }
             template <class Getter>
             void operator()( const meta::property_holder_ro<T, Getter>& prop ) {
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "__props");
-                lua_rawget(m_L, -2 );                 /// props
+                lua_rawgeti(m_L, -1 , __props);                 /// props
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_createtable(m_L, 0, 2);                     /// props tbl
+                lua_createtable(m_L, 2, 0);                     /// props tbl
                 Getter* ptr = 
                 reinterpret_cast<Getter*>(lua_newuserdata(m_L, sizeof(Getter)));    /// props tbl ud
                 *ptr = prop.getter;
                 lua_pushcclosure(m_L, &method_helper<Getter>::call, 1);    /// props tbl func
-                lua_setfield(m_L, -2, "get");                   /// props tbl 
+                lua_rawseti(m_L, -2, __get);                   /// props tbl
                 lua_setfield(m_L, -2, prop.name);               /// props 
                 lua_pop(m_L, 1);
             }
             template <class Setter>
             void operator()( const meta::property_holder_wo<T, Setter>& prop ) {
                 sb_assert(lua_istable(m_L, -1));
-                lua_pushliteral(m_L, "__props");
-                lua_rawget(m_L, -2 );                 /// props
+                lua_rawgeti(m_L, -1 , __props);                 /// props
                 sb_assert(lua_istable(m_L, -1));
-                lua_createtable(m_L, 0, 2);                     /// props tbl
+                lua_createtable(m_L, 2, 0);                     /// props tbl
                 Setter* set_ptr =
                 reinterpret_cast<Setter*>(lua_newuserdata(m_L, sizeof(Setter)));    /// props tbl ud
                 *set_ptr = prop.setter;
                 lua_pushcclosure(m_L, &method_helper<Setter>::call, 1);    /// props tbl func
-                lua_setfield(m_L, -2, "set");                  /// props tbl
+                lua_rawseti(m_L, -2, __set);                  /// props tbl
                 lua_setfield(m_L, -2, prop.name);               /// props
                 lua_pop(m_L, 1);
             }
             void operator()( const meta::property_holder_wo<void,int(*)(lua_State*)>& prop ) {
                 sb_assert(lua_istable(m_L, -1));
-                lua_pushliteral(m_L, "__props");
-                lua_rawget(m_L, -2 );                 /// props
+                lua_rawgeti(m_L, -1 , __props);                 /// props
                 sb_assert(lua_istable(m_L, -1));
-                lua_createtable(m_L, 0, 2);                     /// props tbl
+                lua_createtable(m_L, 2, 0);                     /// props tbl
                 lua_pushcclosure(m_L, prop.setter, 0);    /// props tbl func
-                lua_setfield(m_L, -2, "set");                  /// props tbl
+                lua_setfield(m_L, -2, __set);                  /// props tbl
                 lua_setfield(m_L, -2, prop.name);               /// props
                 lua_pop(m_L, 1);
             }
             template <class Getter,class Setter>
             void operator()( const meta::property_holder_rw<T, Getter, Setter>& prop ) {
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "__props");
-                lua_rawget(m_L, -2 );                 /// props
+                lua_rawgeti(m_L, -1 , __props);                   /// props
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_createtable(m_L, 0, 2);                     /// props tbl
+                lua_createtable(m_L, 2, 0);                     /// props tbl
                 Getter* get_ptr = 
                 reinterpret_cast<Getter*>(lua_newuserdata(m_L, sizeof(Getter)));    /// props tbl ud
                 *get_ptr = prop.getter;
                 lua_pushcclosure(m_L, &method_helper<Getter>::call, 1);    /// props tbl func
-                lua_setfield(m_L, -2, "get");                   /// props tbl 
+                lua_rawseti(m_L, -2, __get);                   /// props tbl
                 Setter* set_ptr = 
                 reinterpret_cast<Setter*>(lua_newuserdata(m_L, sizeof(Setter)));    /// props tbl ud
                 *set_ptr = prop.setter;
                 lua_pushcclosure(m_L, &method_helper<Setter>::call, 1);    /// props tbl func
-                lua_setfield(m_L, -2, "set");                   /// props tbl 
+                lua_rawseti(m_L, -2, __set);                   /// props tbl
                 lua_setfield(m_L, -2, prop.name);               /// props 
                 lua_pop(m_L, 1);
             }
             template <class Func>
             void operator()( const meta::method_holder<Func>& func ) {
                 sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "__methods");
-                lua_rawget(m_L, -2 );                 /// methods
+                lua_rawgeti(m_L, -1 , __methods);                 /// methods
                 sb_assert(lua_istable(m_L, -1)); 
                 Func* ptr = 
                 reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// methods ud
@@ -148,8 +147,7 @@ namespace Sandbox {
             }
             void operator()( const meta::method_holder<int(*)(lua_State*)>& func ) {
                 sb_assert(lua_istable(m_L, -1));
-                lua_pushliteral(m_L, "__methods");
-                lua_rawget(m_L, -2 );                 /// methods
+                lua_rawgeti(m_L, -1 , __methods);                  /// methods
                 sb_assert(lua_istable(m_L, -1));
                 lua_pushcclosure(m_L, func.func, 0);
                 lua_setfield(m_L, -2, func.name);               /// methods

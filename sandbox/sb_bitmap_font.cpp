@@ -127,7 +127,7 @@ namespace Sandbox {
 		if (align == ALIGN_RIGHT) {
 			align_x=GetTextWidth(text);
 		} else if (align==ALIGN_CENTER) {
-			align_x=GetTextWidth(text)*0.5f;
+			align_x=int(GetTextWidth(text)*0.5f);
 		}
         pos.x-=align_x;
 		const Glypth* prev = 0;

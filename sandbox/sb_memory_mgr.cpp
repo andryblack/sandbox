@@ -14,16 +14,28 @@ namespace Sandbox {
     
     
     MemoryMgr::MemoryMgr() {
-        m_block_pools[0] = new block_pool<8>();
-        m_block_pools[1] = new block_pool<16>();
-        m_block_pools[2] = new block_pool<32>();
-        m_block_pools[3] = new block_pool<64>();
-        m_block_pools[4] = new block_pool<128>();
-        m_block_pools[5] = new block_pool<256>();
-        m_first_page = 0;
+        m_block_pools[0] = new block_pool<16,32>();
+        m_block_pools[1] = new block_pool<32,128>();
+        m_block_pools[2] = new block_pool<64,1024>();
+        m_block_pools[3] = new block_pool<128,1024>();
+        m_block_pools[4] = new block_pool<256,1024>();
+        m_block_pools[5] = new block_pool<512,1024>();
+        
 #ifdef SB_MEMORY_MGR_STAT
         m_total_allocated = 0;
 #endif
+    }
+    
+    MemoryMgr::block_pool_base* MemoryMgr::pool_for_size(size_t size) {
+        if (size<=512) {
+            if (size<=16) return m_block_pools[0];
+            if (size<=32) return m_block_pools[1];
+            if (size<=64) return m_block_pools[2];
+            if (size<=128) return m_block_pools[3];
+            if (size<=256) return m_block_pools[4];
+            return m_block_pools[5];
+        }
+        return 0;
     }
     
     MemoryMgr::~MemoryMgr() {
@@ -31,7 +43,7 @@ namespace Sandbox {
         LogInfo() << "==== memory mgr statistics ====";
         LogInfo() << "total allocated: " << format_memory(GHL::UInt32(m_total_allocated));
         static const size_t block_sizes[blocks_allocators] = {
-            8,16,32,64,128,256
+            16,32,64,128,256,512
         };
 
 #endif
@@ -46,15 +58,9 @@ namespace Sandbox {
                 ++pages;
             }
 
-            LogInfo() << "block " << block_sizes[i] << "b allocated:" << format_memory(GHL::UInt32(total*block_sizes[i])) << " in " << pages << " pages(" << format_memory(GHL::UInt32(MEM_PAGE_SIZE*pages))<<")";
+            LogInfo() << "block " << block_sizes[i] << "b allocated:" << format_memory(GHL::UInt32(total*block_sizes[i])) << " in " << pages << " pages(" << format_memory(GHL::UInt32(m_block_pools[i]->page_size*pages))<<")";
 #endif            
             delete m_block_pools[i];
-        }
-        page* p = m_first_page;
-        while (p) {
-            page* n = p->next;
-            delete [] reinterpret_cast<GHL::Byte*>(p);
-            p = n;
         }
     }
     
@@ -62,23 +68,29 @@ namespace Sandbox {
 #ifdef SB_MEMORY_MGR_STAT
         m_total_allocated+=size;
 #endif
-        if (size<=256) {
-            if (size<=8) return m_block_pools[0]->alloc();
-            if (size<=16) return m_block_pools[1]->alloc();
-            if (size<=32) return m_block_pools[2]->alloc();
-            if (size<=64) return m_block_pools[3]->alloc();
-            if (size<=128) return m_block_pools[4]->alloc();
-            return m_block_pools[5]->alloc();
-        } else if (size<MAX_ALLOC) {
-            
+        block_pool_base* pool = pool_for_size(size);
+        if (pool) {
+            return pool->alloc();
         }
         return new GHL::Byte[ size ];
     }
-    void MemoryMgr::free( GHL::Byte* ptr ) {
-        for (size_t i=0;i<blocks_allocators;++i) {
-            if (m_block_pools[i]->free(ptr)) return;
+    void MemoryMgr::free( GHL::Byte* ptr , size_t size) {
+        block_pool_base* pool = pool_for_size(size);
+        if (pool) {
+            pool->free(ptr);
+            return;
         }
         delete [] ptr;
+    }
+    
+    GHL::Byte* MemoryMgr::realloc( GHL::Byte* ptr, size_t size,size_t nsize ) {
+        block_pool_base* pool = pool_for_size(size); {
+            if (pool) {
+                if (pool->realloc(ptr, nsize))
+                    return ptr;
+            }
+        }
+        return 0;
     }
     
     GHL::UInt32 MemoryMgr::allocated() const {
@@ -86,7 +98,7 @@ namespace Sandbox {
         for (size_t i=0;i<blocks_allocators;++i) {
             block_pool_base* bp = m_block_pools[i];
             while (bp) {
-                res+=MEM_PAGE_SIZE;
+                res+=bp->page_size;
                 bp = bp->next;
             }
         }

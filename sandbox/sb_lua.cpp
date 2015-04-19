@@ -268,6 +268,10 @@ namespace Sandbox {
     }
 
 
+    void LuaVM::DoGC() {
+        if (m_L)
+            lua_gc(m_L, LUA_GCCOLLECT, 0);
+    }
 
 //    
 //    bool LuaVM::DoString( const char* cont ) {
@@ -378,11 +382,7 @@ namespace Sandbox {
 			return NULL;
 		}
 		else if (nsize > osize) {
-			GHL::Byte* new_data = _this->alloc(nsize);
-			if (ptr && osize) {
-				::memcpy(new_data,ptr,osize);
-				_this->free(ptr,osize);
-			}
+            GHL::Byte* new_data = _this->realloc(ptr,osize,nsize);
 			return new_data;
 		} else {
 			_this->resize(ptr,osize,nsize);
@@ -418,7 +418,7 @@ namespace Sandbox {
 	void LuaVM::free(GHL::Byte* data,size_t size) {
 		sb_assert(m_mem_use>=size);
 		m_mem_use-=GHL::UInt32(size);
-		m_mem_mgr->free(data);
+		m_mem_mgr->free(data,size);
 	}
 	void LuaVM::resize(GHL::Byte*,size_t osize,size_t nsize) {
 		sb_assert(m_mem_use>=osize);
@@ -426,4 +426,18 @@ namespace Sandbox {
 		m_mem_use+=GHL::UInt32(nsize);
 	}
     
+    GHL::Byte* LuaVM::realloc(GHL::Byte* ptr,size_t osize,size_t nsize) {
+        sb_assert(m_mem_use>=osize);
+        m_mem_use-=GHL::UInt32(osize);
+        m_mem_use+=GHL::UInt32(nsize);
+        GHL::Byte* res = m_mem_mgr->realloc(ptr,osize, nsize);
+        if (!res) {
+            res = m_mem_mgr->alloc(nsize);
+            if (osize) {
+                ::memcpy(res,ptr,osize);
+            }
+            m_mem_mgr->free(ptr,osize);
+        }
+        return res;
+    }
 }

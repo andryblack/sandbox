@@ -46,6 +46,13 @@ namespace Sandbox {
         return 0;
     }
     
+    void SceneObject::RemoveFromScene() {
+        Container* c = GetParent();
+        if (c) {
+            c->RemoveObject(SceneObjectPtr(this));
+        }
+    }
+    
     void SceneObject::GlobalToLocalImpl(Vector2f& v) const {
         if (m_parent) {
             m_parent->GlobalToLocalImpl(v);

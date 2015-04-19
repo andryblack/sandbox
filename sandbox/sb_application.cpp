@@ -359,6 +359,9 @@ namespace Sandbox {
         
         m_resources->ProcessMemoryMgmt();
         
+//        if (m_lua)
+//            m_lua->DoGC();
+        
 		return true;
 	}
 	
@@ -396,10 +399,16 @@ namespace Sandbox {
         m_render->DebugDrawText( 10, 43,
                                 (sb::string("res:")+format_memory(m_resources->GetMemoryUsed())+
                                  sb::string("/")+format_memory(m_resources->GetMemoryLimit())).c_str());
+        int y = 54;
         size_t render_mem = m_render->GetMemoryUsage();
-        if (render_mem)
-            m_render->DebugDrawText( 10, 54,
+        if (render_mem) {
+            m_render->DebugDrawText( 10, y,
                                     (sb::string("tex:")+format_memory(render_mem)).c_str() );
+            y += 11;
+        }
+        sb::snprintf(buf,128,"objects:%d",int(meta::object::count()));
+        m_render->DebugDrawText( 10, y, buf );
+        y += 11;
 #endif
 	}
     
@@ -530,6 +539,11 @@ namespace Sandbox {
     }
 	///
 	void GHL_CALL Application::OnDeactivated() {
+        if (m_lua) {
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.OnDeactivated")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("OnDeactivated");
+            }
+        }
         StoreAppProfile();
 	}
 	///

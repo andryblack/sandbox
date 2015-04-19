@@ -13,7 +13,9 @@ namespace Sandbox {
     
     
     namespace meta {
-        
+#ifdef SB_DEBUG
+        size_t object::m_count = 0;
+#endif
         static const type_info* void_ti = 0;
         
         template <> 

@@ -34,14 +34,33 @@ namespace Sandbox {
         };
         
         class object : public sb::ref_countered_base_not_copyable {
+        private:
+#ifdef SB_DEBUG
+            static  size_t  m_count;
+#endif
         public:
-            virtual ~object() {}
+            static size_t count() {
+#ifdef SB_DEBUG
+                return m_count;
+#else
+                return 0;
+#endif
+            }
+            virtual ~object() {
+ #ifdef SB_DEBUG
+                --m_count;
+#endif
+            }
             virtual const type_info* get_type_info() const {
                 return get_static_type_info();
             }
             static const type_info* get_static_type_info();
         protected:
-            object() : sb::ref_countered_base_not_copyable() {}
+            object() : sb::ref_countered_base_not_copyable() {
+#ifdef SB_DEBUG
+                ++m_count;
+#endif
+            }
         };
         
         template <class T>

@@ -10,6 +10,7 @@ extern "C" {
 }
 #include "luabind/sb_luabind_stack.h"
 #include <ghl_data.h>
+#include "sb_log.h"
 
 namespace Sandbox {
     

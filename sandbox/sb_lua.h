@@ -49,6 +49,8 @@ namespace Sandbox {
         LuaContextPtr   CreateContext();
 
         bool   LoadScript(GHL::DataStream* ds,const char* name,const LuaContextPtr& env);
+        
+        void DoGC();
     private:
         FileProvider*  m_resources;
         lua_State*  m_L;
@@ -60,6 +62,7 @@ namespace Sandbox {
         static int lua_dofile_func(lua_State* L);
 		void free(GHL::Byte* data,size_t size);
 		void resize(GHL::Byte* data,size_t osize,size_t nsize);
+        GHL::Byte* realloc(GHL::Byte* data,size_t osize,size_t nsize);
         static void* lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
         MemoryMgr*  m_mem_mgr;
         bool DoFileImpl(const char* name,int results);

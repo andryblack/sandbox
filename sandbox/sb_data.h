@@ -1,15 +1,16 @@
 //
 //  sb_data.h
-//  backgammon-osx
+//  Sandbox
 //
 //  Created by Andrey Kunitsyn on 12/29/12.
 //  Copyright (c) 2012 Andrey Kunitsyn. All rights reserved.
 //
 
-#ifndef backgammon_osx_sb_data_h
-#define backgammon_osx_sb_data_h
+#ifndef SB_DATA_H_INCLUDED
+#define SB_DATA_H_INCLUDED
 
 #include <sbstd/sb_vector.h>
+#include <sbstd/sb_string.h>
 #include "sb_ref_cntr.h"
 #include <ghl_data.h>
 #include "meta/sb_meta.h"
@@ -112,4 +113,4 @@ namespace Sandbox {
     
 }
 
-#endif
+#endif /*SB_DATA_H_INCLUDED*/
