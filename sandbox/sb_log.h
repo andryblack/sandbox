@@ -30,6 +30,8 @@ namespace Sandbox {
     };
     
     class EmptyLogger {
+    public:
+        EmptyLogger( const char* ) {}
         template <class T>
         EmptyLogger& operator << (const T& ) {
             return *this;
@@ -57,6 +59,8 @@ namespace Sandbox {
         }
     };
     
+#if defined(SB_DEBUG) && !defined(SB_SILENT)
+    
     class LogVerbose : public Logger {
     public:
         LogVerbose( const char* module = 0) : Logger( GHL::LOG_LEVEL_VERBOSE,module) {
@@ -70,6 +74,10 @@ namespace Sandbox {
             
         }
     };
+#else
+    typedef EmptyLogger LogVerbose;
+    typedef EmptyLogger LogDebug;
+#endif
     
     void format_memory( char* buf, size_t size, size_t mem,const char* caption );
     sb::string format_memory( size_t mem );

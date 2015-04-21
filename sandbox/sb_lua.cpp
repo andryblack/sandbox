@@ -12,9 +12,9 @@
 #include <sbstd/sb_assert.h>
 
 extern "C" {
-#include "../lua/src/lua.h"
-#include "../lua/src/lauxlib.h"
-#include "../lua/src/lualib.h"
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 }
 
 #include <ghl_types.h>
@@ -238,7 +238,7 @@ namespace Sandbox {
             LogError(MODULE) << lua_tostring(m_L, -1) ;
 			return false;
 		} else {
-            LogInfo(MODULE) << "Loaded script: " << name;
+            LogVerbose(MODULE) << "Loaded script: " << name;
             
             if (env) {
                 env->GetObject(m_L);
@@ -248,7 +248,8 @@ namespace Sandbox {
             int res = lua_pcall(m_L, 0, results, -2);
             if (res) {
                 LogError(MODULE) << "pcall : " << res;
-                LogError(MODULE) << lua_tostring(m_L, -1) ;
+                const char* err = lua_tostring(m_L, -1) ;
+                LogError(MODULE) << (err ? err : "failed");
                 return false;
             }
             lua_remove(m_L, traceback_index);

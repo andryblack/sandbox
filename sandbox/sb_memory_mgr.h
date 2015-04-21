@@ -14,7 +14,11 @@
 #include <ghl_types.h>
 #include <cstring>
 
+#ifdef SB_DEBUG
+#ifndef SB_SILENT
 #define SB_MEMORY_MGR_STAT
+#endif
+#endif
 
 namespace Sandbox {
 
