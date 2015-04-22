@@ -22,4 +22,8 @@ namespace Sandbox {
             return false;
         return bm->Get(x, y);
     }
+    
+    sb::intrusive_ptr<Image> Image::Clone() const {
+        return sb::intrusive_ptr<Image>(new Image(*this));
+    }
 }

@@ -15,11 +15,10 @@ namespace GHL {
 class Texture : public Sandbox::meta::object {
     SB_META_OBJECT
 private:
-    sb::string  m_file;
     GHL::UInt32         m_width;
     GHL::UInt32         m_height;
 public:
-    explicit Texture( const sb::string& file, GHL::UInt32 w, GHL::UInt32 h) : m_file(file),
+    explicit Texture( GHL::UInt32 w, GHL::UInt32 h) :
         m_width(w), m_height(h) {}
     GHL::UInt32 width() const { return m_width; }
     GHL::UInt32 height() const { return m_height; }
@@ -31,10 +30,12 @@ class TextureData : public Texture {
 private:
     GHL::Image* m_data;
 public:
-    explicit TextureData( const sb::string& file, GHL::Image* img );
+    explicit TextureData( GHL::UInt32 w, GHL::UInt32 h );
+    explicit TextureData( GHL::Image* img );
     ~TextureData();
     void PremultiplyAlpha();
     const GHL::Image* GetImage() const { return m_data; }
+    void Place( GHL::UInt32 x, GHL::UInt32 y, const sb::intrusive_ptr<TextureData>& img );
 };
 typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 

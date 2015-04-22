@@ -59,6 +59,8 @@ namespace Sandbox {
         void SetSize(float w,float h);
         
         bool CheckBit(int x,int y,Resources* resources);
+        
+        sb::intrusive_ptr<Image> Clone() const;
     };
 	
     typedef sb::intrusive_ptr<Image> ImagePtr;
