@@ -190,9 +190,9 @@ Application::Application() : m_lua(0),m_vfs(0) {
     Sandbox::luabind::Class<TextureData>(L);
     Sandbox::luabind::ExternClass<Application>(L);
 
-#ifdef GHL_PLATFORM_MAC
+#if defined( GHL_PLATFORM_MAC )
     m_platform = "osx";
-#elif GHL_PLATFORM_WIN
+#elif defined( GHL_PLATFORM_WIN )
     m_platform = "windows";
 #else
     m_platform = "unknown";

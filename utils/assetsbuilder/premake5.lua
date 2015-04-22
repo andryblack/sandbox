@@ -38,7 +38,7 @@
 		location ( _OPTIONS["to"] )
 		defines {'GHL_STATIC_LIB','SB_SILENT' , 'GHL_SILENT'}
 
-
+		flags       { "No64BitChecks", "ExtraWarnings", "StaticRuntime" }
 
 		configuration "Debug"
 			targetdir   "bin/debug"
@@ -93,7 +93,7 @@
 		targetname  "assetsbuilder"
 		language    "C++"
 		kind        "ConsoleApp"
-		flags       { "No64BitChecks", "ExtraWarnings", "StaticRuntime" }
+		
 		includedirs { 
 			path.join(sandbox_dir,'lua','src'),
 			path.join(sandbox_dir,'include'),

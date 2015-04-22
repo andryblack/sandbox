@@ -8,7 +8,13 @@ end
 
 local function wrap( t )
 	if t then
-		return setmetatable({},{__index=t,__newindex=function(p,v) error('write to protected field ' .. v) end})
+		return setmetatable({},
+			{
+				__index=t,
+				__newindex=function(p,v) 
+					error('write to protected field ' .. v) 
+			end}
+			)
 	end
 	return t
 end
@@ -20,6 +26,7 @@ local sandbox = {
 	table = wrap(table),
 	print = print,
 	error = error,
+	platform = platform
 }
 
 rules = {

@@ -31,7 +31,8 @@ namespace Sandbox {
     
     class EmptyLogger {
     public:
-        EmptyLogger( const char* ) {}
+		EmptyLogger() {}
+        explicit EmptyLogger( const char* ) {}
         template <class T>
         EmptyLogger& operator << (const T& ) {
             return *this;
