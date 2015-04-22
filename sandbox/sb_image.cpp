@@ -14,8 +14,8 @@ namespace Sandbox {
             return false;
         if (y>m_height)
             return false;
-        x = x * m_src_w / m_width;
-        y = y * m_src_h / m_height;
+        x = m_src_x + x * m_src_w / m_width;
+        y = m_src_y + y * m_src_h / m_height;
         if (!m_texture) return false;
         BitmaskPtr bm = m_texture->GetBitmask(resources);
         if (!bm)

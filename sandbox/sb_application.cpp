@@ -58,16 +58,10 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
 SB_META_METHOD(AddScene)
 SB_META_METHOD(RemoveScene)
 SB_META_METHOD(SetMouseContext)
+SB_META_METHOD(SetKeyboardContext)
 SB_META_METHOD(GetFlashVar)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(GHL::MouseButton,void);
-SB_META_ENUM_BIND(GHL::MouseButton,namespace GHL,
-                  SB_META_ENUM_ITEM(MOUSE_BUTTON_NONE)
-                  SB_META_ENUM_ITEM(MOUSE_BUTTON_LEFT)
-                  SB_META_ENUM_ITEM(MOUSE_BUTTON_RIGHT)
-                  SB_META_ENUM_ITEM(MOUSE_BUTTON_MIDDLE)
-                  )
 
 bool (*sb_terminate_handler)() = 0;
 
@@ -78,6 +72,7 @@ namespace Sandbox {
 	void register_scene( lua_State* lua );
     void register_thread( lua_State* lua );
 	void register_controller( lua_State* lua );
+    void register_keys( lua_State* lua );
     
 #ifdef SB_USE_MYGUI
     namespace mygui {
@@ -149,6 +144,7 @@ namespace Sandbox {
         register_thread(lua->GetVM());
         register_controller(lua->GetVM());
         register_json(lua->GetVM());
+        register_keys(lua->GetVM());
 #ifdef SB_USE_MYGUI
         mygui::register_mygui(lua->GetVM());
 #endif
@@ -239,7 +235,6 @@ namespace Sandbox {
         ctx->SetValue("platform.os", "android");
 #endif
         
-        luabind::Enum<GHL::MouseButton>(m_lua->GetVM());
         luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
         luabind::RawClass<GHL::Settings>(m_lua->GetVM());
         
@@ -424,6 +419,10 @@ namespace Sandbox {
     void    Application::SetMouseContext(const LuaContextPtr& ctx ) {
         m_mouse_ctx = ctx;
     }
+    
+    void Application::SetKeyboardContext(const LuaContextPtr& ctx) {
+        m_keyboard_ctx = ctx;
+    }
 	
 	void Application::SetClearColor(const Color& c) {
 		m_clear_buffer = true;
@@ -499,16 +498,24 @@ namespace Sandbox {
 #ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectKeyPress(mygui::translate_key(k));
 #endif
+        if (m_keyboard_ctx) {
+            m_keyboard_ctx->call_self("onKeyDown",k);
+        }
 	}
 	///
 	void GHL_CALL Application::OnKeyUp( GHL::Key k) {
 #ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectKeyRelease(mygui::translate_key(k));
 #endif
+        if (m_keyboard_ctx) {
+            m_keyboard_ctx->call_self("onKeyUp",k);
+        }
 	}
 	///
-	void GHL_CALL Application::OnChar( GHL::UInt32 ) {
-        
+	void GHL_CALL Application::OnChar( GHL::UInt32 ch) {
+        if (m_keyboard_ctx) {
+            m_keyboard_ctx->call_self("onChar",ch);
+        }
 	}
 	///
 	void GHL_CALL Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
@@ -540,14 +547,19 @@ namespace Sandbox {
 	///
 	void GHL_CALL Application::OnDeactivated() {
         if (m_lua) {
-            if (m_lua->GetGlobalContext()->GetValue<bool>("application.OnDeactivated")) {
-                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("OnDeactivated");
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onDeactivated")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onDeactivated");
             }
         }
         StoreAppProfile();
 	}
 	///
 	void GHL_CALL Application::OnActivated() {
+        if (m_lua) {
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onActivate")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onActivate");
+            }
+        }
 	}
 	///
 	void GHL_CALL Application::Release(  ) {

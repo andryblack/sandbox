@@ -41,6 +41,7 @@ namespace Sandbox {
         void    AddScene( const RTScenePtr& scene );
         void    RemoveScene( const RTScenePtr& scene );
         void    SetMouseContext(const LuaContextPtr& ctx );
+        void    SetKeyboardContext(const LuaContextPtr& ctx );
   	
         sb::string GetFlashVar(const sb::string& name) const;
         GHL::System* GetSystem() const { return m_system;}
@@ -82,6 +83,7 @@ namespace Sandbox {
 		GHL::Sound*		m_sound;
 		LuaVM*			m_lua;
         LuaContextPtr   m_mouse_ctx;
+        LuaContextPtr   m_keyboard_ctx;
 		Graphics*		m_graphics;
 		Resources*		m_resources;
         SoundManager*   m_sound_mgr;
