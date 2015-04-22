@@ -60,7 +60,6 @@ local function find_textures( from, mask )
 		local t = g._textures 
 		for _,v in pairs(t) do
 			if match(v._path .. '/' .. v._name) then
-				print('found match texture ' .. v._path .. '/' .. v._name )
 				table.insert(res,v)
 			end
 		end
@@ -101,7 +100,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 		v._atlas = a
 	end
 	a:build()
-	a:dump()
+	--a:dump()
 	for _,v in ipairs(a.images) do
 		v.src._placed_to = {v.place_to[1] + 1, v.place_to[2] + 1 }
 	end
@@ -111,9 +110,11 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	local atex = { type='png', premultiplied = true, _path = path.join(from) , _name = name }
 	g._textures[name] = atex
 	function a:apply(  )
+		print('build atlas ' .. self.name .. ' with ' .. tostring(#self.images) .. ' textures')
+
 		local img = TextureData( w, h )
 		for _,v in ipairs(self.images) do
-			print(v.src._path,v.src._name)
+			--print(v.src._path,v.src._name)
 			local tpath = path.join(v.src._path,v.src._name .. '.' .. v.src.type)
 			local i = assert(application:load_texture(tpath),'failed load texture ' .. tpath)
 			if v.premultiply then
@@ -299,9 +300,10 @@ function _M.apply( rules )
 	end
 
 	local pmi = rules.premultiply_images or {}
+	print('premultiply images')
 	for k,v in pairs(pmi) do
 		if v then
-			print('premultiply image',k)
+			
 			local t = assert(application:load_texture(k))
 			t:PremultiplyAlpha()
 			assert(application:store_texture(k,t),'failed store texture to ' .. k)

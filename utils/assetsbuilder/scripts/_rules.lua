@@ -99,6 +99,8 @@ function _M.apply_rules( rules )
 			add_dest_dir(path.getdirectory(v),dst_tree)
 		end
 	end
+	assert(dst_path and dst_path~='',"invalid dst_path '" .. tostring(dst_path) .."'")
+	print('make destination directories at ' .. tostring(dst_path))
 	make_dst_tree(dst_tree)
 	copy_files(rules.copy_files or {})
 	img.apply( rules )
