@@ -27,8 +27,8 @@ static void luaL_register(lua_State* L,const char* name,const luaL_Reg *l) {
 }
 #endif
 
-GHL_API GHL::VFS* GHL_CALL GHL_CreateVFSPosix(const char* data,const char* docs);
-GHL_API void GHL_CALL GHL_DestroyVFSPosix(GHL::VFS* vfs);
+GHL_API GHL::VFS* GHL_CALL GHL_CreateVFS();
+GHL_API void GHL_CALL GHL_DestroyVFS(GHL::VFS* vfs);
 
 extern "C" {
 /* Built-in premake functions */
@@ -164,7 +164,7 @@ void TextureData::Place( GHL::UInt32 x, GHL::UInt32 y, const sb::intrusive_ptr<T
 
 Application::Application() : m_lua(0),m_vfs(0) {
 	m_lua = new Sandbox::LuaVM(this);
-    m_vfs = GHL_CreateVFSPosix("/","/");
+    m_vfs = GHL_CreateVFS();
     m_image_decoder = GHL_CreateImageDecoder();
     
     lua_State* L = m_lua->GetVM();
@@ -202,7 +202,7 @@ Application::Application() : m_lua(0),m_vfs(0) {
 Application::~Application() {
 	delete m_lua;
     if (m_vfs) {
-        GHL_DestroyVFSPosix(m_vfs);
+        GHL_DestroyVFS(m_vfs);
     }
     if (m_image_decoder) {
         GHL_DestroyImageDecoder(m_image_decoder);

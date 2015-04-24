@@ -67,7 +67,7 @@
 			links       { "dl" }
 
 		configuration "macosx"
-			links       { "CoreServices.framework" }
+			links       { "CoreServices.framework" , "Foundation.framework"}
 
 		configuration { "macosx", "gmake" }
 			toolset "clang"
@@ -82,7 +82,7 @@
 
 		configuration( nil )
 
-	ghl_disable_platform = true
+	ghl_disable_media = true
 	use_network = false
 	lua_build_all = true
 

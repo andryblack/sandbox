@@ -43,6 +43,7 @@ project 'GHL'
 			ghl_src .. '*.h',
 			ghl_src .. 'image/*',
 			ghl_src .. 'vfs/memory_stream.*',
+			ghl_src .. 'vfs/ghl_vfs_factory.*',
 			ghl_src .. 'sound/ghl_sound_decoder.h',
 			ghl_src .. 'sound/ghl_sound_impl.h',
 			ghl_src .. 'sound/sound_decoders.cpp',
@@ -61,17 +62,17 @@ project 'GHL'
 		local use_vorbis = true
 
 		if os.is('ios') or os.is('macosx') then
-			use_openal = not ghl_disable_platform
-			use_opengl = not ghl_disable_platform
+			use_openal = not ghl_disable_media
+			use_opengl = not ghl_disable_media
 		end
 
 		if os.is('windows') then
-			use_opengl = not ghl_disable_platform
+			use_opengl = not ghl_disable_media
 			use_vorbis = true
 		end
 
 		if os.is('android') then
-			use_opengl = true
+			use_opengl = not ghl_disable_media
 		end
 
 		local use_opengles = use_opengl and ( os.is('ios') or os.is('android') )
@@ -127,11 +128,21 @@ project 'GHL'
 			files(append_path(ghl_src .. '/sound/libvorbis/lib/',vorbis_files))
 		end
 
-		if not ghl_disable_platform then
+		if os.is('macosx') or os.is('ios') then	
+			files { ghl_src .. 'vfs/vfs_cocoa.*', }
+		elseif os.is('windows') then
+			files { ghl_src .. 'vfs/vfs_win32.*', }
+		elseif os.is('android') then
+			files { ghl_src .. 'vfs/vfs_posix.*',
+				ghl_src .. 'vfs/vfs_android.*',}
+		else
+			files { ghl_src .. 'vfs/vfs_posix.*', }
+		end
+
+		if not ghl_disable_media then
 			if os.is('macosx') then	
 				files { 
 					ghl_src .. 'winlib/winlib_cocoa.*',
-					ghl_src .. 'vfs/vfs_cocoa.*',
 					ghl_src .. 'sound/cocoa/*'
 				}
 				if use_network then
@@ -145,7 +156,6 @@ project 'GHL'
 					ghl_src .. 'winlib/winlib_cocoatouch.*',
 					ghl_src .. 'winlib/WinLibCocoaTouchContext.*',
 					ghl_src .. 'winlib/WinLibCocoaTouchContext2.*',
-					ghl_src .. 'vfs/vfs_cocoa.*',
 					ghl_src .. 'sound/cocoa/*'
 				}
 				if use_network then
@@ -157,7 +167,6 @@ project 'GHL'
 				--defines 'GHL_PLATFORM_FLASH'
 				files {
 					ghl_src .. 'winlib/winlib_flash.*',
-					ghl_src .. 'vfs/vfs_posix.*',
 					ghl_src .. 'sound/flash/*',
 					ghl_src .. 'render/stage3d/*'
 				}
@@ -170,7 +179,6 @@ project 'GHL'
 				--defines 'GHL_PLATFORM_FLASH'
 				files {
 					ghl_src .. 'winlib/winlib_win32.*',
-					ghl_src .. 'vfs/vfs_win32.*',
 					ghl_src .. 'sound/dsound/*',
 				}
 				if use_network then
@@ -182,8 +190,6 @@ project 'GHL'
 				--defines 'GHL_PLATFORM_FLASH'
 				files {
 					ghl_src .. 'winlib/winlib_android.*',
-					ghl_src .. 'vfs/vfs_android.*',
-					ghl_src .. 'vfs/vfs_posix.*',
 					ghl_src .. 'sound/android/*'
 				}
 				if use_network then
@@ -192,10 +198,6 @@ project 'GHL'
 					}
 				end
 			end
-		else
-			files {
-				ghl_src .. 'vfs/vfs_posix.*',
-			}
 		end
 
 		includedirs {
