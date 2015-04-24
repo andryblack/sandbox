@@ -161,6 +161,16 @@ function ndk.generateAppMakefile(sln, cfg)
 		_p('NDK_DEBUG := 1')
 	end
 	
+	local cppflags = {
+		["C++11"] = "-std=c++11",
+	}
+
+	local flags = table.translate(sln.flags, cppflags)
+
+	
+	ndk.writeStrings('APP_CPPFLAGS', '', flags)
+	_p('NDK_TOOLCHAIN_VERSION := 4.8')
+
 	_p('')			
 end
 
@@ -237,7 +247,7 @@ end
 function ndk.getModuleName(prj, cfg)
 	if prj.kind == premake.WINDOWEDAPP then
 		-- HACK: Want to specify targetname for projects, but only on Android. Does config scoping allow this?
-		return cfg.targetname or 'unknown'
+		return cfg.targetname or prj.name or 'unknown'
 	else
 		return prj.name or 'unknown'
 	end
@@ -288,7 +298,14 @@ function ndk.generateMakefile(prj,cfg)
 	end
 	ndk.writeStrings('LOCAL_LDLIBS', '', link_options)
 	ndk.writeStrings('LOCAL_SHARED_LIBRARIES', '', ndk.getDependentModules(prj, cfg, premake.SHAREDLIB))
-	ndk.writeStrings('LOCAL_STATIC_LIBRARIES', '', ndk.getDependentModules(prj, cfg, premake.STATICLIB))
+	local static_libs = ndk.getDependentModules(prj, cfg, premake.STATICLIB)
+	for _,v in ipairs(prj.android_modules or {}) do
+		table.insert(static_libs,v)
+	end
+	if type(prj.solution.android_stl) == 'string' then
+		table.insert(static_libs,prj.solution.android_stl)
+	end
+	ndk.writeStrings('LOCAL_STATIC_LIBRARIES', '', static_libs )
 
 	_p('# Include paths')
 	ndk.writeRelativePaths('LOCAL_C_INCLUDES', local_path, cfg.includedirs, true)
@@ -319,7 +336,12 @@ function ndk.generateMakefile(prj,cfg)
 	_p('# Project dependencies')
 	ndk.writeDependencies(local_path, cfg, project.getdependencies(prj))
 	_p('')
-
+	if cfg.kind == premake.WINDOWEDAPP and prj.android_ndk_modules then
+		for _,v in ipairs(prj.android_ndk_modules) do
+			_x('$(call import-module,%s)',v)
+		end
+		
+	end
 end
 
 

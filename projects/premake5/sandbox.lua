@@ -25,12 +25,29 @@ swf_size = SwfSize or { Width = 800, Height = 600}
 solution( ProjectName )
 	configurations { 'Debug', 'Release' }
 
-	android_stl('gnustl_static')
-	android_api_level(AndroidConfig.api_level or 9)
-	android_target_api_level(AndroidConfig.target_api_level or 14)
-	android_packagename( AndroidConfig.package or 'com.sandbox.example')
-	android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
-	
+	if os.is('android') then
+		android_stl('gnustl_static')
+		android_api_level(AndroidConfig.api_level or 9)
+		android_target_api_level(AndroidConfig.target_api_level or 14)
+		android_packagename( AndroidConfig.package or 'com.sandbox.example')
+		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
+		if AndroidConfig.keystore and AndroidConfig.keyalias then
+			android_key_store(AndroidConfig.keystore)
+			android_key_alias(AndroidConfig.keyalias)
+		end
+		android_packageversion( AndroidConfig.versioncode or 1)
+		android_packageversionname( AndroidConfig.versionname or "1.0" )
+		if use.AndroidGooglePlayService then
+			android_modules_path( path.getabsolute(sandbox_dir) )
+			android_libs('google-play-services_lib')
+			flags{ "C++11" }
+			android_metadata {
+				'com.google.android.gms.games.APP_ID=@string/app_id',
+				'com.google.android.gms.version=@integer/google_play_services_version'
+			}
+		end
+	end
+
 	local hide_options = {
 		'-fvisibility-inlines-hidden'
 	}
@@ -98,12 +115,23 @@ solution( ProjectName )
 
 	print('platform_dir:',platform_dir)
 
-	location ( _WORKING_DIR .. '/projects/' .. platform_dir ) 
+	local loc = _WORKING_DIR .. '/projects/' .. platform_dir
+	location ( loc ) 
 	
 	objdir( _WORKING_DIR .. '/build/' .. platform_dir )
 
 	language "C++"
 
+	if use.AndroidGooglePlayService and os.is('android') then
+		local cfgs = {'release','debug'}
+		for _,cfg in ipairs(cfgs) do
+			os.rmdir( path.join(loc, cfg, 'lib' ))
+			os.mkdir( path.join(loc, cfg, 'lib', 'google-play-services_lib' ) )
+			local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
+			assert(os.copydir( path.join(sdk_dir,'extras/google/google_play_services/libproject','google-play-services_lib') ,
+				 path.join(loc, cfg,'lib', 'google-play-services_lib' )))
+		end
+	end
 
 	dofile('ghl.lua')
 
@@ -307,6 +335,12 @@ solution( ProjectName )
 			defines 'SB_USE_NETWORK'
 		end
 
+		if os.is('android') and use.AndroidGooglePlayService then
+			includedirs {
+				path.join(sandbox_dir,'gpg-cpp-sdk/android/include')
+			}
+		end
+
 		configuration "Debug"
    			targetsuffix "_d"
    			defines 'SB_DEBUG'
@@ -381,6 +415,14 @@ solution( ProjectName )
 				'GLESv1_CM',
 				'GLESv2'
 			}
+			if use.AndroidGooglePlayService then
+				android_ndk_static_libs {
+					'gpg-1',
+				}
+				android_ndk_modules {
+					'gpg-cpp-sdk/android'
+				}
+			end
 		end
 
 

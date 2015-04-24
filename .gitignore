@@ -16,3 +16,4 @@ projects/ios/lua.xcodeproj/project.xcworkspace/
 projects/ios/lua.xcodeproj/xcuserdata/
 build
 bin
+gpg-cpp-sdk

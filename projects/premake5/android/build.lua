@@ -31,11 +31,14 @@ function build.projectrules(sln)
 		if prj.kind == premake.WINDOWEDAPP then
 			local vprj = premake.esc(prj.name)
 			_p('%s-update: %s-jni', vprj, vprj)
+			for _,v in ipairs( sln.android_libs or {} ) do
+				_x(1,'@cd ${config}/lib/%s && ${ANDROID} update lib-project -p . --target android-%s',v,tostring(target_api))
+			end
 			_x(1,'@cd ${config} && ${ANDROID} update project -p . -n %s --target android-%s',vprj, tostring(target_api))
 			_p('')
 			_p('%s-jni: prebuild-%s', vprj, vprj)
 			_p(1,'@echo "==== Building %s jni ===="', prj.name)
-			_x(1,'@cd ${config} && ${NDK_BUILD}')
+			_x(1,'@cd ${config} && ${NDK_BUILD} NDK_MODULE_PATH=%s V=$(verbose)',sln.android_modules_path or '')
 			_p('')
 			_p('%s-apk: %s-update', vprj, vprj)
 			_x(1,'@cd ${config} && ${ANT} ${config}')
@@ -133,6 +136,14 @@ function build.generate_solution(sln)
 	else
 		_x('ANT ?= ant')
 	end
+
+
+
+	_x('ifndef verbose')
+	_x(1,'verbose = 0')
+	_x('endif')
+
+
 	build.projects(sln)
 
 	make.solutionPhonyRule(sln)
@@ -163,6 +174,16 @@ function build.generate_ant_build( sln, cfg )
 	_p('out.aidl.absolute.dir=${out.other.absolute.dir}/aidl')
 	_p('out.dexed.absolute.dir=${out.other.absolute.dir}/dexedLibs')
 	_p('out.manifest.abs.file=${out.other.absolute.dir}/AndroidManifest.xml')
+	if sln.android_key_store then
+		_x('key.store=%s',path.getabsolute(sln.android_key_store))
+	end
+	if sln.android_key_alias then
+		_x('key.alias=%s',sln.android_key_alias)
+	end
+	for i,v in ipairs( sln.android_libs or {} ) do
+		_x('android.library.reference.%d=lib/%s',i,v)
+	end
+	_p('source.dir=../src')
 end
 
 return build

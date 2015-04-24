@@ -74,6 +74,12 @@ api.register {
 	kind = "integer"
 }
 
+api.register {
+	name = "android_packageversionname",
+	scope = "solution",
+	kind = "string"
+}
+
 -- Specify android activity name
 api.register {
 	name = "android_activity",
@@ -89,6 +95,13 @@ api.register {
 	list = true
 }
 
+api.register {
+	name = "android_metadata",
+	scope = 'solution',
+	kind = 'string',
+	list = true
+}
+
 -- Specify applicaton orientation
 api.register {
 	name = "android_screenorientation",
@@ -100,6 +113,47 @@ api.register {
 		'any'
 	}
 
+}
+
+api.register {
+	name = "android_key_store",
+	scope = "solution",
+	kind = "string"
+}
+api.register {
+	name = "android_key_alias",
+	scope = "solution",
+	kind = "string"
+}
+
+-- Specify applicaton permissions
+
+
+api.register {
+	name = "android_modules_path",
+	scope = "solution",
+	kind = "string"
+}
+
+api.register {
+	name = "android_ndk_modules",
+	scope = "project",
+	kind = "string",
+	list = true
+}
+
+api.register {
+	name = "android_ndk_static_libs",
+	scope = "project",
+	kind = "string",
+	list = true
+}
+
+api.register {
+	name = "android_libs",
+	scope = 'solution',
+	kind = 'string',
+	list = true
 }
 
 newoption {
