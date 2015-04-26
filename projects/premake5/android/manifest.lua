@@ -36,7 +36,7 @@ end
 
 function manifest.generateManifest(sln,cfg)
 	local packagename = sln.android_packagename or 'com.example.app'
-	local activity = 'android.app.NativeActivity'
+	local activity = sln.android_activity or 'android.app.NativeActivity'
 	local attributes = ''
 	if (not sln.android_libs) or table.isempty(sln.android_libs) then
 		attributes = attributes .. ' android:hasCode="false"'
@@ -44,7 +44,6 @@ function manifest.generateManifest(sln,cfg)
 	local mainLibName = sln.name
 	local debugVal = 'false'
 	if cfg.shortname == 'debug' then
-		mainLibName = mainLibName .. '_d'
 		attributes = attributes .. ' android:debuggable="true"'
 	end
 	_p('<?xml version="1.0" encoding="utf-8"?>')

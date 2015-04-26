@@ -299,7 +299,7 @@ function ndk.generateMakefile(prj,cfg)
 	ndk.writeStrings('LOCAL_LDLIBS', '', link_options)
 	ndk.writeStrings('LOCAL_SHARED_LIBRARIES', '', ndk.getDependentModules(prj, cfg, premake.SHAREDLIB))
 	local static_libs = ndk.getDependentModules(prj, cfg, premake.STATICLIB)
-	for _,v in ipairs(prj.android_modules or {}) do
+	for _,v in ipairs(prj.android_ndk_static_libs or {}) do
 		table.insert(static_libs,v)
 	end
 	if type(prj.solution.android_stl) == 'string' then

@@ -382,4 +382,121 @@ namespace Sandbox {
         if (!data) return LuaContextPtr();
         return convert_from_json(L, data->GetData(),data->GetSize());
     }
+    
+    struct json_parse_map {
+        sb::map<sb::string,sb::string>& res;
+        sb::string* out_val;
+        int depth;
+        explicit json_parse_map(sb::map<sb::string,sb::string>& r) : res(r),out_val(0),depth(0) {}
+        
+        static int yajl_parse_null(void * ctx) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->out_val) {
+                c->out_val->assign("null");
+                c->out_val = 0;
+                return 1;
+            }
+            return 0;
+        }
+        static int yajl_parse_boolean(void * ctx, int boolVal) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->out_val) {
+                c->out_val->assign(boolVal == 0 ? "false" : "true");
+                c->out_val = 0;
+                return 1;
+            }
+            return 0;
+        }
+        
+        static int yajl_parse_number(void * ctx, const char * numberVal,
+                            size_t numberLen) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->out_val) {
+                c->out_val->assign(numberVal,numberVal+numberLen);
+                c->out_val = 0;
+                return 1;
+            }
+            return 0;
+        }
+        
+        /** strings are returned as pointers into the JSON text when,
+         * possible, as a result, they are _not_ null padded */
+        static int yajl_parse_string(void * ctx, const unsigned char * stringVal,
+                                     size_t stringLen) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->out_val) {
+                c->out_val->assign(stringVal,stringVal+stringLen);
+                c->out_val = 0;
+                return 1;
+            }
+            return 0;
+        }
+        
+        static int yajl_parse_start_map(void * ctx) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->depth == 0) {
+                c->depth++;
+                return 1;
+            }
+            return 0;
+        }
+        static int yajl_parse_map_key(void * ctx, const unsigned char * key,
+                                      size_t stringLen) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            sb::string key_s(key,key+stringLen);
+            c->out_val = &(c->res[key_s]);
+            return 1;
+        }
+        static int yajl_parse_end_map(void * ctx) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->depth == 1) {
+                c->depth--;
+                return 1;
+            }
+            return 0;
+        }
+        
+        static int yajl_parse_start_array(void * ctx) {
+            return 0;
+        }
+        static int yajl_parse_end_array(void * ctx) {
+            return 0;
+        }
+        
+        static void fill_callbacks(yajl_callbacks& cb) {
+            cb.yajl_null = &json_parse_map::yajl_parse_null;
+            cb.yajl_boolean = &json_parse_map::yajl_parse_boolean;
+            cb.yajl_integer = 0;
+            cb.yajl_double = 0;
+            cb.yajl_number = &json_parse_map::yajl_parse_number;
+            cb.yajl_string = &json_parse_map::yajl_parse_string;
+            cb.yajl_start_map = &json_parse_map::yajl_parse_start_map;
+            cb.yajl_map_key = &json_parse_map::yajl_parse_map_key;
+            cb.yajl_end_map = &json_parse_map::yajl_parse_end_map;
+            cb.yajl_start_array = &json_parse_map::yajl_parse_start_array;
+            cb.yajl_end_array = &json_parse_map::yajl_parse_end_array;
+        }
+    };
+    
+    bool json_parse(const char* data,sb::map<sb::string,sb::string>& res) {
+        yajl_callbacks cb;
+        json_parse_map ctx(res);
+        ctx.fill_callbacks(cb);
+        
+        yajl_handle h = yajl_alloc(&cb, 0, &ctx);
+        size_t len = ::strlen(data);
+        yajl_status s = yajl_parse(h,reinterpret_cast<const unsigned char * >(data),len);
+        if (s == yajl_status_ok) {
+            s = yajl_complete_parse(h);
+        }
+        if (s!=yajl_status_ok) {
+            unsigned char* err_text = yajl_get_error(h, 1,reinterpret_cast<const unsigned char * >(data),len);
+            LogError() << "failed parse json: " << reinterpret_cast<const char*>(err_text);
+            yajl_free_error(h,err_text);
+            yajl_free(h);
+            return false;
+        }
+        yajl_free(h);
+        return true;
+    }
 }

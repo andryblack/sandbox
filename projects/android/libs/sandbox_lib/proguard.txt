@@ -1,0 +1,7 @@
+
+# Keep SafeParcelable value, needed for reflection. This is required to support backwards
+# compatibility of some classes.
+-keep public class com.sandboxgames.NativeActivity {
+    public static final *** NULL;
+}
+

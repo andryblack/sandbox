@@ -83,7 +83,7 @@ api.register {
 -- Specify android activity name
 api.register {
 	name = "android_activity",
-	scope = "project",
+	scope = "solution",
 	kind = "string"
 }
 

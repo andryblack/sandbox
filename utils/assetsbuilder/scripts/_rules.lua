@@ -22,14 +22,17 @@ local function copy_files_pattern( pattern )
 	for k,v in ipairs(files) do
 		local f = path.getrelative(src_path,v)
 		--print('copy file',k,f)
-		rules.copy_files[f]=true
+		rules.copy_files[f]=f
 		rules.dest_files[f]=true
 	end
 	
 end
 
 function _M.assets_rules.copy_file( file )
-	copy_files_pattern(file)
+	local src = file[1]
+	local dst = file[2] or src
+	rules.copy_files[src]=dst
+	rules.dest_files[dst]=true
 end
 
 function _M.assets_rules.copy_files( file_or_filelist )
@@ -84,10 +87,10 @@ local function make_dst_tree( rules )
 end
 
 local function copy_files( files )
-	for v,marker in pairs(files) do
-		if marker then
+	for v,dst in pairs(files) do
+		if dst then
 			print('copy',v)
-			assert(os.copyfile(path.join(src_path,v),path.join(dst_path,v)))
+			assert(os.copyfile(path.join(src_path,v),path.join(dst_path,dst)))
 		end
 	end
 end

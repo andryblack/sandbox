@@ -13,6 +13,7 @@
 #include "sb_graphics.h"
 #include <sbstd/sb_algorithm.h>
 #include "sb_lua_context.h"
+#include "sb_extension.h"
 
 #include "luabind/sb_luabind.h"
 
@@ -53,13 +54,36 @@ SB_META_PROPERTY(fullscreen)
 SB_META_PROPERTY(depth)
 SB_META_END_KLASS_BIND()
 
+namespace Sandbox {
+    int Application_CallExtension( lua_State* L ) {
+        Application* app = luabind::stack<Application*>::get(L, 1);
+        if (!app)
+            return 0;
+        const char* method = luabind::stack<const char*>::get(L, 2);
+        if (!method)
+            return 0;
+        const char* args = luabind::stack<const char*>::get(L, 3);
+        if (!args)
+            return 0;
+        //LogInfo() << "CallExtension: " << method << " " << args;
+        sb::string res;
+        if (app->CallExtension(method, args, res)) {
+            luabind::stack<const char*>::push(L,res.c_str());
+            return 1;
+        }
+        luabind::stack<bool>::push(L, false);
+        luabind::stack<const char*>::push(L,res.c_str());
+        return 2;
+    }
+}
+
 SB_META_DECLARE_OBJECT(Sandbox::Application, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
 SB_META_METHOD(AddScene)
 SB_META_METHOD(RemoveScene)
 SB_META_METHOD(SetMouseContext)
 SB_META_METHOD(SetKeyboardContext)
-SB_META_METHOD(GetFlashVar)
+bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 SB_META_END_KLASS_BIND()
 
 
@@ -113,6 +137,10 @@ namespace Sandbox {
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
         m_sound_mgr->SetSoundsDir("sound");
+        
+        //const char* test = "{\"val\":41,\"id\":\"CgkInqr15dUFEAIQAw\"}";
+        //sb::map<sb::string,sb::string> res;
+        //json_parse(test, res);
 	}
 	
 	Application::~Application() {
@@ -177,17 +205,7 @@ namespace Sandbox {
 		m_sound = sound;
 	}
     
-    sb::string Application::GetFlashVar(const sb::string& name) const {
-        if (!m_system) {
-            return "";
-        }
-        const char* data = name.c_str();
-        if (m_system->GetDeviceData(GHL::DEVICE_DATA_FLASH_VAR, &data)) {
-            return sb::string(data);
-        }
-        return "";
-    }
-	///
+    ///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
 		sb_assert( m_vfs );
         m_resources = new Resources(m_vfs);
@@ -258,8 +276,9 @@ namespace Sandbox {
 	}
 	///
 	bool GHL_CALL Application::Load() {
-		ConfigureDevice( m_system );
-		m_graphics = new Graphics(m_resources);
+        ConfigureDevice( m_system );
+        PlatformExtension::OnLoadAll(this);
+        m_graphics = new Graphics(m_resources);
         sb_assert(m_resources);
         sb_assert(m_render);
         sb_assert(m_image_decoder);

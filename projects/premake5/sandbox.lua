@@ -27,6 +27,8 @@ solution( ProjectName )
 
 	if os.is('android') then
 		android_stl('gnustl_static')
+		android_activity('com.sandboxgames.NativeActivity')
+		android_libs(path.getabsolute(path.join(sandbox_dir,'projects/android/libs','sandbox_lib')))
 		android_api_level(AndroidConfig.api_level or 9)
 		android_target_api_level(AndroidConfig.target_api_level or 14)
 		android_packagename( AndroidConfig.package or 'com.sandbox.example')
@@ -39,7 +41,8 @@ solution( ProjectName )
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
 		if use.AndroidGooglePlayService then
 			android_modules_path( path.getabsolute(sandbox_dir) )
-			android_libs('google-play-services_lib')
+			local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
+			android_libs(path.join(sdk_dir,'extras/google/google_play_services/libproject','google-play-services_lib'))
 			flags{ "C++11" }
 			android_metadata {
 				'com.google.android.gms.games.APP_ID=@string/app_id',
@@ -122,16 +125,7 @@ solution( ProjectName )
 
 	language "C++"
 
-	if use.AndroidGooglePlayService and os.is('android') then
-		local cfgs = {'release','debug'}
-		for _,cfg in ipairs(cfgs) do
-			os.rmdir( path.join(loc, cfg, 'lib' ))
-			os.mkdir( path.join(loc, cfg, 'lib', 'google-play-services_lib' ) )
-			local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
-			assert(os.copydir( path.join(sdk_dir,'extras/google/google_play_services/libproject','google-play-services_lib') ,
-				 path.join(loc, cfg,'lib', 'google-play-services_lib' )))
-		end
-	end
+	
 
 	dofile('ghl.lua')
 
@@ -335,11 +329,6 @@ solution( ProjectName )
 			defines 'SB_USE_NETWORK'
 		end
 
-		if os.is('android') and use.AndroidGooglePlayService then
-			includedirs {
-				path.join(sandbox_dir,'gpg-cpp-sdk/android/include')
-			}
-		end
 
 		configuration "Debug"
    			targetsuffix "_d"
@@ -376,7 +365,9 @@ solution( ProjectName )
 			links { 'chipmunk' }
 		end
 		if os.is('ios') then
-			files { sandbox_dir .. '/projects/ios/main.mm' }
+			files { sandbox_dir .. '/projects/osx/main.mm',
+					sandbox_dir .. '/projects/osx/*.cpp',
+					sandbox_dir .. '/projects/osx/*.h' }
 			links {
 				'Foundation.framework', 
 				'QuartzCore.framework', 
@@ -387,26 +378,29 @@ solution( ProjectName )
 				'AudioToolbox.framework',
 				'CoreMotion.framework' }
 		elseif os.is('macosx') then
-			files { sandbox_dir .. '/projects/osx/main.mm' }
+			files { sandbox_dir .. '/projects/osx/main.mm',
+					sandbox_dir .. '/projects/osx/*.cpp',
+					sandbox_dir .. '/projects/osx/*.h' }
 			links { 
 				'OpenGL.framework', 
 				'OpenAL.framework',
 				'Cocoa.framework',
 				'AudioToolbox.framework' }
 		elseif os.is('flash') then
-			files { sandbox_dir .. '/projects/flash/main.cpp' }
+			files { sandbox_dir .. '/projects/flash/*.cpp' }
 			links {
 				'AS3++',
 				'Flash++'
 			}
 		elseif os.is('windows') then
-			files { sandbox_dir .. '/projects/windows/main.cpp' }
+			files { sandbox_dir .. '/projects/windows/*.cpp' }
 			links {
 				'OpenGL32',
 				'WinMM'
 			}
 		elseif os.is('android') then
-			files { sandbox_dir .. '/projects/android/main.cpp' }
+			files { sandbox_dir .. '/projects/android/main.cpp',
+					sandbox_dir .. '/projects/android/sb_android_extension.cpp' }
 			links {
 				'android',
 				'log',
@@ -416,6 +410,8 @@ solution( ProjectName )
 				'GLESv2'
 			}
 			if use.AndroidGooglePlayService then
+				files { sandbox_dir .. '/projects/android/gps_extension.cpp' }
+				includedirs { sandbox_dir .. '/gpg-cpp-sdk/android/include' }
 				android_ndk_static_libs {
 					'gpg-1',
 				}

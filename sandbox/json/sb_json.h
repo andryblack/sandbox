@@ -2,6 +2,7 @@
 #define SB_JSON_H_INCLUDED
 
 #include <sbstd/sb_string.h>
+#include <sbstd/sb_map.h>
 
 #include "sb_lua_context.h"
 
@@ -17,6 +18,9 @@ namespace Sandbox {
     sb::string convert_to_json(const LuaContextPtr& ctx);
     LuaContextPtr convert_from_json(lua_State* L,const char* json);
     LuaContextPtr convert_from_json(lua_State* L,const GHL::Data* data);
+    
+    bool json_parse(const char* data,sb::map<sb::string,sb::string>& res);
+    
 }
 
 #endif

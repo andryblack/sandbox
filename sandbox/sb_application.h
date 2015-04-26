@@ -30,6 +30,7 @@ namespace Sandbox {
     }
     class Network;
     
+    
 	class Application : public meta::object_proxy<GHL::Application> {
         SB_META_OBJECT
     public:
@@ -43,8 +44,12 @@ namespace Sandbox {
         void    SetMouseContext(const LuaContextPtr& ctx );
         void    SetKeyboardContext(const LuaContextPtr& ctx );
   	
-        sb::string GetFlashVar(const sb::string& name) const;
         GHL::System* GetSystem() const { return m_system;}
+        
+        virtual bool CallExtension( const char* method,
+                                   const char* argument,
+                                   sb::string& result );
+        
     protected:
 		Application();
 		virtual ~Application();
@@ -75,7 +80,7 @@ namespace Sandbox {
         bool RestoreAppProfile();
         void StoreAppProfile();
         
- 	private:
+    private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
 		GHL::Render*	m_render;
