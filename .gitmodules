@@ -15,10 +15,10 @@
 	url = git@github.com:andryblack/glsl2agal.git
 [submodule "yajl"]
 	path = yajl
-	url = https://github.com/lloyd/yajl.git
+	url = git@github.com:lloyd/yajl.git
 [submodule "utils/premake5"]
 	path = utils/premake5
-	url = https://github.com/andryblack/premake-core.git
+	url = git@github.com:andryblack/premake-core.git
 [submodule "pugixml"]
 	path = pugixml
-	url = https://github.com/zeux/pugixml.git
+	url = git@github.com:zeux/pugixml.git
