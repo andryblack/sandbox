@@ -5,6 +5,8 @@ BIN=$ROOT/bin
 UTILS=$ROOT/utils
 MAKE=make
 
+mkdir -p $BIN
+
 PLATFORM=`uname -s`
 if [[ "$PLATFORM" == "mingw"* ]]; then
 	PLATFORM="windows"
@@ -29,6 +31,11 @@ fi
 
 if [ ! -f "$BOOTSTRAPPREMAKE" ]; then
 	echo "not found any premake for bootstrap, place it to $BIN"
+	if [[ "$PLATFORM" != "windows" ]]; then
+		BOOTSTRAPPREMAKE=$BIN/premake5
+		echo "try get it"
+		cd $BIN && curl -L "https://github.com/premake/premake-core/releases/download/v5.0.0.alpha4/premake-5.0.0.alpha4-macosx.tar.gz" | tar xz 
+	fi
 	exit 1
 fi
 

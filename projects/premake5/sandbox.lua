@@ -184,7 +184,7 @@ solution( ProjectName )
    		kind 'StaticLib'
    		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
    		targetname ('yajl_' .. platform_dir)
-   		local lua_files = {
+   		local yajl_files = {
 			'yajl.c', 'yajl_alloc.c', 'yajl_buf.c', 'yajl_encode.c', 'yajl_gen.c', 'yajl_lex.c', 'yajl_parser.c',
 			'yajl_tree.c', 
 		}
@@ -197,7 +197,7 @@ solution( ProjectName )
 				'cp ' .. path.getabsolute(sandbox_dir..'/yajl/src/api') .. '/*.h ' .. path.getabsolute(sandbox_dir..'/include/yajl/')
 			}
 		end
-		files(append_path(sandbox_dir .. '/yajl/src/',lua_files))
+		files(append_path(sandbox_dir .. '/yajl/src/',yajl_files))
 
 		configuration "Debug"
    			targetsuffix "_d"
