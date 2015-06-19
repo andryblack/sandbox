@@ -286,10 +286,15 @@ solution( ProjectName )
 		}
 
 		if use.MyGUI then
+			files {
+				sandbox_dir .. '/sandbox/mygui/**.h',
+				sandbox_dir .. '/sandbox/mygui/**.cpp',
+			}
 			includedirs {
 				sandbox_dir .. '/MyGUI/MyGUIEngine/include',
 			}
 			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+			defines 'SB_USE_MYGUI'
 		end
 
 		if use.Chipmunk then
@@ -472,6 +477,7 @@ solution( ProjectName )
 		if use.MyGUI then
 			includedirs { sandbox_dir .. '/MyGUI/MyGUIEngine/include' }
 			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+			defines 'SB_USE_MYGUI'
 		end
 
 		if use_network then

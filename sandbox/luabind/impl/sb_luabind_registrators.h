@@ -110,7 +110,7 @@ namespace Sandbox {
                 sb_assert(lua_istable(m_L, -1));
                 lua_createtable(m_L, 2, 0);                     /// props tbl
                 lua_pushcclosure(m_L, prop.setter, 0);    /// props tbl func
-                lua_setfield(m_L, -2, __set);                  /// props tbl
+                lua_rawseti(m_L, -2, __set);                  /// props tbl
                 lua_setfield(m_L, -2, prop.name);               /// props
                 lua_pop(m_L, 1);
             }

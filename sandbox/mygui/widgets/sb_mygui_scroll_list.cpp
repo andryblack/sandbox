@@ -8,7 +8,7 @@
 
 #include "sb_mygui_scroll_list.h"
 #include "luabind/sb_luabind.h"
-#include "luabind/sb_luabind_wrapper.h"
+#include "sb_lua_context.h"
 #include "MyGUI_Gui.h"
 #include "MyGUI_ILayer.h"
 #include "MyGUI_InputManager.h"
@@ -29,7 +29,7 @@ namespace Sandbox {
         
         class LuaScrollListDelegate : public ScrollListDelegate {
         private:
-            luabind::wrapper m_obj;
+            LuaContext m_obj;
         public:
             LuaScrollListDelegate(lua_State* L, int idx) {
                 lua_pushvalue(L, idx);
@@ -42,20 +42,20 @@ namespace Sandbox {
                 return m_obj.call_self<size_t>("getItemsCount");
             }
             virtual MyGUI::Any getItemData(size_t idx) {
-                luabind::wrapper_ptr data = m_obj.call_self<luabind::wrapper_ptr>("getItemData",idx);
+                LuaContextPtr data = m_obj.call_self<LuaContextPtr>("getItemData",idx);
                 return MyGUI::Any(data);
             }
             virtual void createWidget(MyGUI::Widget* w) {
                 m_obj.call_self("createWidget",w);
             }
             virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) {
-                luabind::wrapper_ptr* data_ptr = m_list->getItemDataAt<luabind::wrapper_ptr>(di.index,false);
+                LuaContextPtr* data_ptr = m_list->getItemDataAt<LuaContextPtr>(di.index,false);
                 if (data_ptr) {
                     m_obj.call_self("updateWidget",w,*data_ptr,di);
                 }
             }
             virtual void onItemClick(size_t idx) {
-                luabind::wrapper_ptr* data_ptr = m_list->getItemDataAt<luabind::wrapper_ptr>(idx,false);
+                LuaContextPtr* data_ptr = m_list->getItemDataAt<LuaContextPtr>(idx,false);
                 if (data_ptr) {
                     m_obj.call_self("onItemClick",*data_ptr,idx);
                 }
