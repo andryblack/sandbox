@@ -167,7 +167,7 @@ namespace Sandbox {
             
             virtual void* lock(MyGUI::TextureUsage _access) {
                 if (!m_texture) return 0;
-                m_image = GHL_CreateImage(getWidth(), getHeight(), GHL::IMAGE_FORMAT_RGBA);
+                m_image = GHL_CreateImage(m_texture->GetRealWidth(), m_texture->GetRealHeight(), GHL::IMAGE_FORMAT_RGBA);
                 return m_image->GetDataPtr();
             }
             
@@ -242,6 +242,10 @@ namespace Sandbox {
         
         void RenderManager::destroyVertexBuffer(MyGUI::IVertexBuffer* _buffer) {
             delete _buffer;
+        }
+        
+        float RenderManager::getDisplayScale() const {
+            return m_resources->GetScale();
         }
         
         MyGUI::ITexture* RenderManager::createTexture(const std::string& _name) {

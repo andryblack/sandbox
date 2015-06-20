@@ -18,12 +18,12 @@ namespace Sandbox {
     
     Texture::Texture(const sb::string& file, float scale,bool premul, GHL::UInt32 w, GHL::UInt32 h) :
     m_texture(0),m_file(file),m_original_w(w),
-    m_original_h(h),m_width(w),m_height(h),m_live_ticks(0),m_filtered(false),m_tiled(false){
+    m_original_h(h),m_width(w),m_height(h),m_live_ticks(0),m_filtered(false),m_tiled(false),m_scale(scale){
         m_need_premultiply = premul;
     }
     
     Texture::Texture(GHL::Texture* tex, float scale, GHL::UInt32 w, GHL::UInt32 h) :
-    m_texture(tex),m_file(),m_original_w(w),m_original_h(h),m_live_ticks(0),m_filtered(false),m_tiled(false){
+    m_texture(tex),m_file(),m_original_w(w),m_original_h(h),m_live_ticks(0),m_filtered(false),m_tiled(false),m_scale(scale){
         m_need_premultiply = false;
         if (m_texture) {
             m_width = m_texture->GetWidth();

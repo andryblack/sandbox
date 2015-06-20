@@ -84,6 +84,7 @@ namespace Sandbox {
             void    timerFrame(float dt);
             void    drawFrame();
             
+            virtual float getDisplayScale() const;
             class Texture;
         private:
             sb::map<sb::string,Texture*>  m_textures;

@@ -49,8 +49,10 @@ namespace Sandbox {
         bool GetFiltered() const { return m_filtered; }
         void SetTiled(bool t) ;
         bool GetTiled() const { return m_tiled; }
-        GHL::UInt32 GetWidth() const { return m_width; }
-        GHL::UInt32 GetHeight() const { return m_height; }
+        GHL::UInt32 GetWidth() const { return m_width * m_scale; }
+        GHL::UInt32 GetHeight() const { return m_height * m_scale; }
+        GHL::UInt32 GetRealWidth() const { return m_width; }
+        GHL::UInt32 GetRealHeight() const { return m_height; }
 	    GHL::UInt32 GetOriginalWidth() const { return m_original_w; }
         GHL::UInt32 GetOriginalHeight() const { return m_original_h; }
         size_t GetLiveTicks() const { return m_live_ticks; }

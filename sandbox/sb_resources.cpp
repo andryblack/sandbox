@@ -131,7 +131,7 @@ namespace Sandbox {
                 }
                 texture->SetData(0,0,subimg);
                 subimg->Release();
-                output.push_back(Image(TexturePtr(new Texture(texture,variant?1.0:m_scale)),0,0,float(ipw),float(iph)));
+                output.push_back(Image(TexturePtr(new Texture(texture,variant?1.0f/m_scale:1.0f)),0,0,float(ipw),float(iph)));
                 output.back().SetHotspot(Vector2f(-float(x),-float(y)));
                 x+=ipw;
                 texture->DiscardInternal();
@@ -260,7 +260,7 @@ namespace Sandbox {
             return TexturePtr();
         }
         
-        TexturePtr ptr = TexturePtr(new Texture(fn, (variant?1.0:m_scale), need_premultiply,img_w,img_h));
+        TexturePtr ptr = TexturePtr(new Texture(fn, (variant?1.0/m_scale:1.0), need_premultiply,img_w,img_h));
 		
         GHL::UInt32 tw = 0;//next_pot( img->GetWidth() );
         GHL::UInt32 th = 0;//next_pot( img->GetHeight() );
