@@ -81,6 +81,7 @@ namespace Sandbox {
         bool RestoreAppProfile();
         void StoreAppProfile();
         
+        virtual void OnResize();
         
     private:
 		GHL::System*	m_system;
@@ -104,6 +105,8 @@ namespace Sandbox {
 		ThreadsMgr*		m_main_thread;
 		Scene*			m_main_scene;
         sb::list<RTScenePtr>    m_rt_scenes;
+        GHL::UInt32     m_width;
+        GHL::UInt32     m_height;
 		
 		bool		m_clear_buffer;
 		Color		m_clear_color;

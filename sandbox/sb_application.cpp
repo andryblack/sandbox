@@ -52,6 +52,7 @@ SB_META_PROPERTY(width)
 SB_META_PROPERTY(height)
 SB_META_PROPERTY(fullscreen)
 SB_META_PROPERTY(depth)
+SB_META_PROPERTY(screen_dpi)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -280,6 +281,9 @@ namespace Sandbox {
 
 		m_lua->DoFile("settings.lua");
         ctx->SetValue("settings", (GHL::Settings*)(0));
+        
+        m_width = settings->width;
+        m_height = settings->height;
 	}
 	///
 	bool GHL_CALL Application::Load() {
@@ -317,8 +321,8 @@ namespace Sandbox {
         ctx->SetValue("application.scene", m_main_scene);
 		m_main_thread = new ThreadsMgr();
         ctx->SetValue("application.thread", m_main_thread);
-        ctx->SetValue("application.size.width", m_render->GetWidth() );
-        ctx->SetValue("application.size.height", m_render->GetHeight() );
+        ctx->SetValue("application.size.width", m_width );
+        ctx->SetValue("application.size.height", m_height );
         m_graphics->Load(m_render);
         
         
@@ -329,6 +333,15 @@ namespace Sandbox {
 	}
 	///
 	bool GHL_CALL Application::OnFrame( GHL::UInt32 usecs ) {
+        
+        GHL::UInt32 width = m_render->GetWidth();
+        GHL::UInt32 height = m_render->GetHeight();
+        if (width != m_width || height != m_height) {
+            m_width = width;
+            m_height = height;
+            OnResize();
+        }
+        
 		m_frames++;
 		m_frames_time+=usecs;
 		if (m_frames_time>=1000000) {
@@ -587,6 +600,19 @@ namespace Sandbox {
             }
         }
 	}
+    
+    void Application::OnResize() {
+        if (m_lua) {
+            LuaContextPtr ctx = m_lua->GetGlobalContext();
+            if (ctx) {
+                ctx->SetValue("application.size.width", m_width );
+                ctx->SetValue("application.size.height", m_height );
+                if (m_lua->GetGlobalContext()->GetValue<bool>("application.onResize")) {
+                    m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onResize");
+                }
+            }
+        }
+    }
 	///
 	void GHL_CALL Application::Release(  ) {
         StoreAppProfile();
