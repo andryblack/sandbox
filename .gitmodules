@@ -19,3 +19,6 @@
 [submodule "pugixml"]
 	path = pugixml
 	url = git@github.com:zeux/pugixml.git
+[submodule "MyGUI"]
+	path = MyGUI
+	url = git@github.com:andryblack/mygui-1.git
