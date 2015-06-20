@@ -11,6 +11,7 @@
 #include <sbstd/sb_assert.h>
 #include <ghl_image.h>
 #include "sb_geometry.h"
+#include "sb_resources.h"
 
 namespace Sandbox {
 	
@@ -23,6 +24,7 @@ namespace Sandbox {
         m_vertexes.reserve(512);
         m_vertexes2tex.reserve(512);
 		m_indexes.reserve(512);
+        m_scale = 1.0f;
 	}
 	
 	Graphics::~Graphics() {
@@ -46,7 +48,7 @@ namespace Sandbox {
             GHL::Image* img = GHL_CreateImage(1, 1, GHL::IMAGE_FORMAT_RGBA);
             img->Fill(0xFF000000);
             GHL::Texture* tex = render->CreateTexture(1,1,GHL::TEXTURE_FORMAT_RGBA,img);
-            m_fake_tex_black = TexturePtr(new Texture(tex));
+            m_fake_tex_black = TexturePtr(new Texture(tex,1.0f));
 			img->Release();
             tex->DiscardInternal();
 		}
@@ -815,8 +817,11 @@ namespace Sandbox {
 		m_transform = Transform2d();
 		m_shader = ShaderPtr();
         m_calc2_tex = false;
-		SetProjectionMatrix(Matrix4f::ortho(0,float(render->GetWidth()),
-											float(render->GetHeight()),0,-10,10));
+        
+        float draw_scale = m_scale * m_resources->GetScale();
+        
+		SetProjectionMatrix(Matrix4f::ortho(0,float(render->GetWidth())/draw_scale,
+											float(render->GetHeight())/draw_scale,0,-10,10));
 		SetViewMatrix(Matrix4f::identity());
 		SetViewport(Recti(0,0,render->GetWidth(),render->GetHeight()));
 		SetClipRect(GetViewport());

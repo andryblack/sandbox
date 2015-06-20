@@ -147,6 +147,8 @@ namespace Sandbox {
         GHL::UInt32 GetScreenWidth() const { if (m_render) return m_render->GetWidth(); return 0;}
 		GHL::UInt32 GetScreenHeight() const { if (m_render) return m_render->GetHeight(); return 0;}
         
+        void SetScale(float scale);
+        float GetScele() const { return m_scale; }
    private:
         Resources*  m_resources;
 		GHL::Render* m_render;
@@ -155,6 +157,7 @@ namespace Sandbox {
         
 		Transform2d     m_transform;
         Transform2d     m_mask_transform;
+        float           m_scale;
         
 		Matrix4f	m_projection_matrix;
 		Matrix4f	m_view_matrix;

@@ -38,9 +38,10 @@ namespace Sandbox {
         bool    m_tiled;
         bool    m_need_premultiply;
         BitmaskPtr              m_bitmask;
+        float   m_scale;
 	public:
-		explicit Texture(const sb::string& file, bool premul, GHL::UInt32 w, GHL::UInt32 h);
-        explicit Texture(GHL::Texture* tes,GHL::UInt32 w=0, GHL::UInt32 h=0);
+		explicit Texture(const sb::string& file,float scale, bool premul, GHL::UInt32 w, GHL::UInt32 h);
+        explicit Texture(GHL::Texture* tes,float scale, GHL::UInt32 w=0, GHL::UInt32 h=0);
 		~Texture();
 		GHL::Texture* Present(Resources* resources);
         BitmaskPtr GetBitmask(Resources* resources);

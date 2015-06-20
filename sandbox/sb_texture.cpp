@@ -16,13 +16,13 @@ namespace Sandbox {
     const size_t TEXTURE_TTL = 16;
     
     
-    Texture::Texture(const sb::string& file, bool premul, GHL::UInt32 w, GHL::UInt32 h) :
+    Texture::Texture(const sb::string& file, float scale,bool premul, GHL::UInt32 w, GHL::UInt32 h) :
     m_texture(0),m_file(file),m_original_w(w),
     m_original_h(h),m_width(w),m_height(h),m_live_ticks(0),m_filtered(false),m_tiled(false){
         m_need_premultiply = premul;
     }
     
-    Texture::Texture(GHL::Texture* tex, GHL::UInt32 w, GHL::UInt32 h) :
+    Texture::Texture(GHL::Texture* tex, float scale, GHL::UInt32 w, GHL::UInt32 h) :
     m_texture(tex),m_file(),m_original_w(w),m_original_h(h),m_live_ticks(0),m_filtered(false),m_tiled(false){
         m_need_premultiply = false;
         if (m_texture) {
@@ -46,7 +46,8 @@ namespace Sandbox {
     
     GHL::Texture* Texture::Present(Resources* resources) {
         if (!m_texture) {
-            m_texture = resources->LoadTexture( m_file , m_need_premultiply );
+            bool variant = false;
+            m_texture = resources->LoadTexture( m_file ,variant, m_need_premultiply );
             if (m_texture) {
                 m_texture->SetMinFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
                 m_texture->SetMagFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);

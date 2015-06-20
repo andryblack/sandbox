@@ -19,11 +19,16 @@ namespace Sandbox {
 	class Scene : public Container {
         SB_META_OBJECT
 	public:
+        Scene();
         /// draw scene
 		virtual void Draw(Graphics& g) const;
         /// update
         void Update( float dt );
+        
+        void SetScale( float scale );
+        float GetScale() const;
     private:
+        float   m_scale;
 	};
     typedef sb::intrusive_ptr<Scene> ScenePtr;
 }

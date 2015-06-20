@@ -43,6 +43,7 @@ namespace Sandbox {
 		
 		void SetBasePath(const char* path);
 		GHL::DataStream* OpenFile(const char* fn);
+        GHL::DataStream* OpenFileVariant(const char* fn,bool& variant);
         
         ImagePtr CreateImageFromData( const GHL::Data* data );
 		
@@ -61,10 +62,11 @@ namespace Sandbox {
 		const std::string& GetBasePath() const { return m_base_path;}
 		
 		TexturePtr CreateTexture( GHL::UInt32 w, 
-                                 GHL::UInt32 h, 
+                                 GHL::UInt32 h,
+                                 float scale,
                                  bool alpha, 
                                  const GHL::Image* data);
-        GHL::Texture* LoadTexture( const sb::string& filename , bool premultiply);
+        GHL::Texture* LoadTexture( const sb::string& filename , bool& variant, bool premultiply);
         BitmaskPtr LoadBitmask( const sb::string& filename );
         
         size_t  GetLiveTicks() const { return m_live_ticks; }
@@ -72,8 +74,10 @@ namespace Sandbox {
         size_t  GetMemoryLimit() const { return m_memory_limit; }
         size_t  GetMemoryUsed() const { return m_memory_used; }
         
-        RenderTargetPtr CreateRenderTarget(int w, int h, bool alpha, bool depth);
+        void SetResourcesVariant(float scale,const sb::string& postfix);
         
+        RenderTargetPtr CreateRenderTarget(int w, int h, float scale,bool alpha, bool depth);
+        float GetScale() const { return m_scale; }
         void    ProcessMemoryMgmt();
     private:
 		GHL::VFS* m_vfs;
@@ -84,10 +88,10 @@ namespace Sandbox {
 		friend class Atlaser;
 		
         GHL::Texture* InternalCreateTexture( int w,int h, bool alpha,bool fill);
-		GHL::Image* LoadImage(const char* file,const char** ext = 0);
+		GHL::Image* LoadImage(const char* file,bool& variant,const char** ext = 0);
 		bool ImageHaveAlpha(const GHL::Image* img) const;
 		bool ConvertImage(GHL::Image* img,GHL::Texture* tex) const;
-        bool GetImageInfo(sb::string& file,GHL::UInt32& w,GHL::UInt32& h);
+        bool GetImageInfo(sb::string& file,bool& variant,GHL::UInt32& w,GHL::UInt32& h);
 
         typedef sb::map<sb::string,TexturePtr > TexturesCacheMap;
         TexturesCacheMap m_textures;
@@ -106,6 +110,8 @@ namespace Sandbox {
         GHL::Image* ImageFromStream( GHL::DataStream* ds );
         
         GHL::Texture* CreateTexture( GHL::Image* img , bool premultiply, const sb::string& file, const sb::string& ext);
+        float       m_scale;
+        sb::string  m_res_variant;
 	};
 }
 

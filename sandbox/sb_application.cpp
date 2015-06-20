@@ -84,6 +84,7 @@ SB_META_METHOD(AddScene)
 SB_META_METHOD(RemoveScene)
 SB_META_METHOD(SetMouseContext)
 SB_META_METHOD(SetKeyboardContext)
+SB_META_METHOD(SetResourcesVariant)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 SB_META_END_KLASS_BIND()
@@ -145,6 +146,7 @@ namespace Sandbox {
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
         m_sound_mgr->SetSoundsDir("sound");
+        m_render_scale = 1.0f;
         
         //const char* test = "{\"val\":41,\"id\":\"CgkInqr15dUFEAIQAw\"}";
         //sb::map<sb::string,sb::string> res;
@@ -301,6 +303,7 @@ namespace Sandbox {
         ctx->SetValue("application.resources", m_resources);
         ctx->SetValue("application.sound", m_sound_mgr);
 
+        
 		m_lua->DoFile("load.lua");
         
 #ifdef SB_USE_MYGUI
@@ -317,13 +320,13 @@ namespace Sandbox {
 		if (!LoadResources(*m_resources))
 			return false;
         
-		m_main_scene = new Scene();
+        m_main_scene = new Scene();
         ctx->SetValue("application.scene", m_main_scene);
 		m_main_thread = new ThreadsMgr();
         ctx->SetValue("application.thread", m_main_thread);
-        ctx->SetValue("application.size.width", m_width );
-        ctx->SetValue("application.size.height", m_height );
         m_graphics->Load(m_render);
+        ctx->SetValue("application.size.width", float(m_width) / (m_graphics->GetScele() * m_resources->GetScale()));
+        ctx->SetValue("application.size.height", float(m_height) / (m_graphics->GetScele() * m_resources->GetScale()) );
         
         
         
@@ -556,8 +559,13 @@ namespace Sandbox {
             m_keyboard_ctx->call_self("onChar",ch);
         }
 	}
+    void Application::TransformMouse(GHL::Int32& x,GHL::Int32& y) {
+        x *= 1.0f / (m_resources->GetScale()*m_graphics->GetScele());
+        y *= 1.0f / (m_resources->GetScale()*m_graphics->GetScele());
+    }
 	///
 	void GHL_CALL Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+        TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key));
 #endif
@@ -567,6 +575,7 @@ namespace Sandbox {
     }
 	///
 	void GHL_CALL Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+        TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectMouseMove(x, y, 0);
 #endif
@@ -576,6 +585,7 @@ namespace Sandbox {
     }
 	///
 	void GHL_CALL Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+        TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
         MyGUI::InputManager::getInstance().injectMouseRelease(x, y, mygui::translate_key(key));
 #endif
@@ -605,8 +615,8 @@ namespace Sandbox {
         if (m_lua) {
             LuaContextPtr ctx = m_lua->GetGlobalContext();
             if (ctx) {
-                ctx->SetValue("application.size.width", m_width );
-                ctx->SetValue("application.size.height", m_height );
+                ctx->SetValue("application.size.width", float(m_width) / m_graphics->GetScele() * m_resources->GetScale() );
+                ctx->SetValue("application.size.height", float(m_height) / m_graphics->GetScele() * m_resources->GetScale() );
                 if (m_lua->GetGlobalContext()->GetValue<bool>("application.onResize")) {
                     m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onResize");
                 }
@@ -624,6 +634,8 @@ namespace Sandbox {
 		delete this;
 	}
 	
-    
+    void Application::SetResourcesVariant(float scale,const sb::string& postfix) {
+        m_resources->SetResourcesVariant(scale, postfix);
+    }
     
 }

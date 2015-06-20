@@ -51,6 +51,7 @@ namespace Sandbox {
                                    sb::string& result );
         
         void SetDrawDebugInfo(bool draw);
+        void SetResourcesVariant(float scale,const sb::string& postfix);
     protected:
 		Application();
 		virtual ~Application();
@@ -83,6 +84,7 @@ namespace Sandbox {
         
         virtual void OnResize();
         
+        void TransformMouse(GHL::Int32& x,GHL::Int32& y);
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -107,6 +109,7 @@ namespace Sandbox {
         sb::list<RTScenePtr>    m_rt_scenes;
         GHL::UInt32     m_width;
         GHL::UInt32     m_height;
+        float           m_render_scale;
 		
 		bool		m_clear_buffer;
 		Color		m_clear_color;

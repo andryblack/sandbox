@@ -34,6 +34,7 @@ namespace Sandbox {
 			
         m_memory_limit = 20 * 1024 * 1024;
         m_memory_used = 0;
+        m_scale = 1.0f;
 	}
 	
     void Resources::Init(GHL::Render* render,GHL::ImageDecoder* image) {
@@ -50,13 +51,29 @@ namespace Sandbox {
 
 	GHL::DataStream* Resources::OpenFile(const char* filename) {
 		std::string fn = m_base_path + filename;
-		GHL::DataStream* ds = m_vfs->OpenFile(fn.c_str());
-		if (!ds) {
-			LogError(MODULE) << "Failed open file " << filename;
-			LogError(MODULE) << "full path : " << fn;
-		}
-		return ds;
+        return m_vfs->OpenFile(fn.c_str());
 	}
+    
+    GHL::DataStream* Resources::OpenFileVariant(const char* fn,bool& variant) {
+        variant = false;
+        GHL::DataStream* ds = 0;
+        if (!m_res_variant.empty()) {
+            const char* dotpos = ::strchr(fn, '.');
+            if (dotpos) {
+                sb::string var = sb::string(fn,dotpos) + m_res_variant + "." + sb::string(dotpos+1);
+                ds = OpenFile(var.c_str());
+                if (ds) {
+                    variant = true;
+                    return ds;
+                }
+            }
+        }
+        ds = OpenFile(fn);
+        if (!ds) {
+            LogError(MODULE) << "Failed open file " << fn;
+        }
+        return ds;
+    }
 	
     GHL::Texture* Resources::InternalCreateTexture( int w,int h, bool alpha,bool fill) {
         if (!m_render) {
@@ -83,7 +100,8 @@ namespace Sandbox {
 	}
     
     bool Resources::LoadImageSubdivs(const char* filename, std::vector<Image>& output,GHL::UInt32& width,GHL::UInt32& height) {
-        GHL::Image* img = LoadImage(filename);
+        bool variant = false;
+        GHL::Image* img = LoadImage(filename,variant);
         if (!img) return false;
         GHL::UInt32 w = img->GetWidth();
         GHL::UInt32 h = img->GetHeight();
@@ -113,7 +131,7 @@ namespace Sandbox {
                 }
                 texture->SetData(0,0,subimg);
                 subimg->Release();
-                output.push_back(Image(TexturePtr(new Texture(texture)),0,0,float(ipw),float(iph)));
+                output.push_back(Image(TexturePtr(new Texture(texture,variant?1.0:m_scale)),0,0,float(ipw),float(iph)));
                 output.back().SetHotspot(Vector2f(-float(x),-float(y)));
                 x+=ipw;
                 texture->DiscardInternal();
@@ -132,23 +150,23 @@ namespace Sandbox {
         return img;
     }
     
-	GHL::Image* Resources::LoadImage(const char* filename,const char** ext) {
+	GHL::Image* Resources::LoadImage(const char* filename,bool &variant,const char** ext) {
         
         if (!m_vfs) {
             LogError(MODULE) << "VFS not initialized";
             return 0;
         }
-		std::string fn = m_base_path + filename;
+		std::string fn = filename;
 		GHL::DataStream* ds = 0;
 		if (fn.find_last_of('.')>fn.find_last_of("/")) {
-			ds = m_vfs->OpenFile(fn.c_str());
+            ds = OpenFileVariant(filename,variant);
 		}
 		if (!ds) {
 			std::string file = fn+".png";
-			ds = m_vfs->OpenFile( file.c_str() );
+			ds = OpenFileVariant( file.c_str() , variant );
 			if ( !ds ) {
 				file = fn+".tga";
-				ds = m_vfs->OpenFile( file.c_str() );
+				ds = OpenFileVariant( file.c_str() , variant);
 				if ( !ds ) {
 					LogError(MODULE) <<"error opening file " << fn;
 					return 0;
@@ -169,7 +187,7 @@ namespace Sandbox {
 		return img;
 	}
     
-    bool Resources::GetImageInfo(sb::string& file,GHL::UInt32& w,GHL::UInt32& h) {
+    bool Resources::GetImageInfo(sb::string& file,bool &variant,GHL::UInt32& w,GHL::UInt32& h) {
         if (!m_image) {
             LogError(MODULE) << "image decoder not initialized";
             return false;
@@ -179,17 +197,17 @@ namespace Sandbox {
             return false;
         }
         
-        std::string fn = m_base_path + file;
+        std::string fn = file;
 		GHL::DataStream* ds = 0;
 		if (file.find_last_of('.')!=file.npos) {
-			ds = m_vfs->OpenFile(fn.c_str());
+			ds = OpenFileVariant(fn.c_str(),variant);
 		}
 		if (!ds) {
 			std::string ifile = fn+".png";
-			ds = m_vfs->OpenFile( ifile.c_str() );
+			ds = OpenFileVariant( ifile.c_str() , variant);
 			if ( !ds ) {
 				ifile = fn+".tga";
-				ds = m_vfs->OpenFile( ifile.c_str() );
+				ds = OpenFileVariant( ifile.c_str() , variant );
 				if ( !ds ) {
 					LogError(MODULE) <<"error opening file " << fn;
 					return 0;
@@ -212,7 +230,7 @@ namespace Sandbox {
 		return true;
     }
     
-	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,bool alpha, const GHL::Image* data) {
+	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,float scale,bool alpha, const GHL::Image* data) {
         GHL::UInt32 tw = next_pot( w );
         GHL::UInt32 th = next_pot( h );
         bool setData = ( tw == w ) && ( th == h );
@@ -220,7 +238,7 @@ namespace Sandbox {
                                                         th,alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,
                                                         setData ? data : 0);
 		if (data && !setData) texture->SetData(0,0,data);
-        return TexturePtr( new Texture(texture,w,h));
+        return TexturePtr( new Texture(texture,scale,w,h));
 	}
 	
 	
@@ -237,11 +255,12 @@ namespace Sandbox {
     
         GHL::UInt32 img_w = 0;
         GHL::UInt32 img_h = 0;
-        if (!GetImageInfo(fn,img_w,img_h)) {
+        bool variant = false;
+        if (!GetImageInfo(fn,variant,img_w,img_h)) {
             return TexturePtr();
         }
         
-        TexturePtr ptr = TexturePtr(new Texture(fn,need_premultiply,img_w,img_h));
+        TexturePtr ptr = TexturePtr(new Texture(fn, (variant?1.0:m_scale), need_premultiply,img_w,img_h));
 		
         GHL::UInt32 tw = 0;//next_pot( img->GetWidth() );
         GHL::UInt32 th = 0;//next_pot( img->GetHeight() );
@@ -318,9 +337,9 @@ namespace Sandbox {
         texture->DiscardInternal();
         return texture;
     }
-    GHL::Texture* Resources::LoadTexture( const sb::string& filename , bool premultiply ) {
+    GHL::Texture* Resources::LoadTexture( const sb::string& filename , bool& variant, bool premultiply ) {
         const char* ext = "";
-		GHL::Image* img = LoadImage(filename.c_str(),&ext);
+		GHL::Image* img = LoadImage(filename.c_str(),variant,&ext);
 		if (!img) {
 			return 0;
 		}
@@ -334,7 +353,8 @@ namespace Sandbox {
     
     BitmaskPtr Resources::LoadBitmask( const sb::string& filename ) {
         const char* ext = "";
-        GHL::Image* img = LoadImage(filename.c_str(),&ext);
+        bool variant = false;
+        GHL::Image* img = LoadImage(filename.c_str(),variant,&ext);
         if (!img) {
             return BitmaskPtr();
         }
@@ -491,11 +511,11 @@ namespace Sandbox {
 	}
 	
 	    
-    RenderTargetPtr Resources::CreateRenderTarget(int w, int h, bool alpha, bool depth) {
+    RenderTargetPtr Resources::CreateRenderTarget(int w, int h, float scale, bool alpha, bool depth) {
         sb_assert(w>0);
         sb_assert(h>0);
-        GHL::UInt32 nw = next_pot(w);
-        GHL::UInt32 nh = next_pot(h);
+        GHL::UInt32 nw = next_pot(w*scale);
+        GHL::UInt32 nh = next_pot(h*scale);
         sb_assert(m_render);
         GHL::RenderTarget* rt = m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth);
         /*
@@ -504,7 +524,12 @@ namespace Sandbox {
             m_render->Clear(1, 0, 0, 1, 0);
             m_render->EndScene();
         }*/
-        return RenderTargetPtr( new RenderTarget(rt));
+        return RenderTargetPtr( new RenderTarget(rt,scale));
+    }
+    
+    void Resources::SetResourcesVariant(float scale,const sb::string& postfix) {
+        m_scale = scale;
+        m_res_variant = postfix;
     }
     
     size_t    Resources::FreeMemory(size_t need_release,bool full) {

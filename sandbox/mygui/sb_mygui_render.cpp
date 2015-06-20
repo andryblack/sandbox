@@ -143,12 +143,12 @@ namespace Sandbox {
             
             virtual void createManual(int _width, int _height, MyGUI::TextureUsage _usage, MyGUI::PixelFormat _format) {
                 if (_usage == MyGUI::TextureUsage::RenderTarget) {
-                    m_target = m_resources->CreateRenderTarget(_width,_height,true,false);
+                    m_target = m_resources->CreateRenderTarget(_width,_height,m_resources->GetScale(),true,false);
                     m_texture = m_target->GetTexture();
                     setSize(_width, _height);
                 } else {
                     if (_format == MyGUI::PixelFormat::R8G8B8A8) {
-                        m_texture = m_resources->CreateTexture(_width, _height, true, 0);
+                        m_texture = m_resources->CreateTexture(_width, _height, m_resources->GetScale(), true, 0);
                     }
                 }
             }
