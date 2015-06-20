@@ -4,9 +4,6 @@
 [submodule "freetype"]
 	path = freetype
 	url = git://git.sv.gnu.org/freetype/freetype2.git
-[submodule "MyGUI"]
-	path = MyGUI
-	url = git@github.com:andryblack/MyGUI.git
 [submodule "GHL"]
 	path = GHL
 	url = git@github.com:andryblack/GHL.git
