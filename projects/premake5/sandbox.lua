@@ -130,128 +130,23 @@ solution( ProjectName )
 	dofile('ghl.lua')
 
    	if use.Chipmunk then
-		project 'chipmunk'
-			kind 'StaticLib'
-
-			targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
-
-			targetname ('chipmunk_' .. platform_dir)
-
-			buildoptions {'-std=c99' }
-
-			files {
-				sandbox_dir .. '/chipmunk/include/**.h',
-				sandbox_dir .. '/chipmunk/src/**.c'
-			}
-
-			includedirs {
-				sandbox_dir .. '/chipmunk/include/chipmunk'
-			}
-
-			configuration "Debug"
-	   			targetsuffix "_d"
+		dofile('chipmunk.lua')
 	end
-
-	project 'pugixml'
-		kind 'StaticLib'
-		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
-		targetname ('pugixml_' .. platform_dir)
-		files(append_path(sandbox_dir .. '/pugixml/src/',{'*.cpp','*.hpp'}))
-		configuration "Debug"
-   			targetsuffix "_d"
-
+	
+	dofile('pugixml.lua')
     dofile('lua.lua')
-  --  	project 'lua'
-  --  		kind 'StaticLib'
-
-		-- targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
-
-		-- targetname ('lua_' .. platform_dir)
-
-		-- local lua_files = {
-		-- 	'lapi.c', 'lauxlib.c', 'lbaselib.c', 'lbitlib.c', 'lcode.c', 'lcorolib.c', 'lctype.c',
-		-- 	'ldblib.c', 'ldebug.c', 'ldo.c', 'ldump.c', 'lfunc.c', 'lgc.c', 'llex.c', 'lmathlib.c',
-		-- 	'lmem.c', 'loadlib.c', 'lobject.c', 'lopcodes.c', 'lparser.c', 'lstate.c', 'lstring.c',
-		-- 	'lstrlib.c', 'ltable.c', 'ltablib.c', 'ltm.c', 'lundump.c', 'lvm.c', 'lzio.c'
-		-- }
-		-- files(append_path(sandbox_dir .. '/lua/src/',lua_files))
-
-
-		-- configuration "Debug"
-  --  			targetsuffix "_d"
-
-   	project 'yajl'
-   		kind 'StaticLib'
-   		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
-   		targetname ('yajl_' .. platform_dir)
-   		local yajl_files = {
-			'yajl.c', 'yajl_alloc.c', 'yajl_buf.c', 'yajl_encode.c', 'yajl_gen.c', 'yajl_lex.c', 'yajl_parser.c',
-			'yajl_tree.c', 
-		}
-		includedirs {
-				sandbox_dir .. '/include',
-		}
-		if not os.is('windows') then
-			prebuildcommands {
-				'mkdir -p ' .. path.getabsolute(sandbox_dir..'/include/yajl'),
-				'cp ' .. path.getabsolute(sandbox_dir..'/yajl/src/api') .. '/*.h ' .. path.getabsolute(sandbox_dir..'/include/yajl/')
-			}
-		end
-		files(append_path(sandbox_dir .. '/yajl/src/',yajl_files))
-
-		configuration "Debug"
-   			targetsuffix "_d"
-
+  	dofile('yajl.lua')
+   	
    	if use.Freetype then
-	   	project 'freetype'
-	   		kind 'StaticLib'
-	   		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
-
-			targetname ('freetype_' .. platform_dir)
-
-			local freetype_files = {
-				'autofit/afangles.c',
-	            'autofit/afcjk.c',
-	            'autofit/afdummy.c',
-	            'autofit/afglobal.c',
-	            'autofit/afhints.c',
-	            'autofit/afindic.c',
-	            'autofit/aflatin.c',
-	            'autofit/afloader.c',
-	            'autofit/afmodule.c',
-	            'autofit/afpic.c',
-	            'autofit/afwarp.c',
-
-				'base/ftbase.c',
-				'base/ftbitmap.c',
-				'base/ftinit.c',
-				'base/ftsystem.c',
-				'base/ftwinfnt.c',
-
-				'cff/cff.c',
-				'raster/raster.c',
-				'sfnt/sfnt.c',
-				'smooth/smooth.c',
-				'truetype/truetype.c',
-				'type42/type42.c',
-				'winfonts/winfnt.c'
-			}
-			files(append_path(sandbox_dir .. '/freetype/src/',freetype_files))
-
-			defines 'FT2_BUILD_LIBRARY'
-			defines 'DARWIN_NO_CARBON'
-
-			includedirs {
-				sandbox_dir .. '/include',
-				sandbox_dir .. '/freetype/include'
-			}
-
-			configuration "Debug"
-	   			targetsuffix "_d"
+	   	dofile('freetype.lua')
 	end
 
 	if use.MyGUI then
 		dofile('mygui.lua')
+	end
+
+	if use.Spine then
+		dofile('spine-runtime.lua')
 	end
 
 	project 'Sandbox'
@@ -260,7 +155,7 @@ solution( ProjectName )
 
 		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
 
-		targetname ('Sandbox_' .. platform_dir)
+		targetname ('Sandbox-' .. platform_dir)
 
 		
 		files {
@@ -297,6 +192,17 @@ solution( ProjectName )
 			defines 'SB_USE_MYGUI'
 		end
 
+		if use.Spine then
+			files {
+				sandbox_dir .. '/sandbox/spine/**.h',
+				sandbox_dir .. '/sandbox/spine/**.cpp',
+			}
+			includedirs {
+				sandbox_dir .. '/spine-runtime-c/include',
+			}
+			defines 'SB_USE_SPINE'
+		end
+
 		if use.Chipmunk then
 			files {
 				sandbox_dir .. '/sandbox/chipmunk/*.cpp',
@@ -314,7 +220,7 @@ solution( ProjectName )
 
 
 		configuration "Debug"
-   			targetsuffix "_d"
+   			targetsuffix "-debug"
    			defines 'SB_DEBUG'
 
 	project( ProjectName )
@@ -340,12 +246,20 @@ solution( ProjectName )
 
 		if use.MyGUI then
 			links { 'MyGUI' }
+			includedirs { sandbox_dir .. '/MyGUI/MyGUIEngine/include' }
+			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+			defines 'SB_USE_MYGUI'
 		end
 		if use.Freetype then
 			links { 'freetype' }
 		end
 		if use.Chipmunk then
 			links { 'chipmunk' }
+			includedirs { sandbox_dir .. '/chipmunk/include' }
+		end
+		if use.Spine then
+			links { 'spine-runtime' }
+			defines 'SB_USE_SPINE'
 		end
 		if os.is('ios') then
 			files { sandbox_dir .. '/projects/osx/main.mm',
@@ -470,15 +384,6 @@ solution( ProjectName )
 			sandbox_dir .. '/sandbox',
 		}
 
-		if use.Chipmunk then
-			includedirs { sandbox_dir .. '/chipmunk/include' }
-		end
-
-		if use.MyGUI then
-			includedirs { sandbox_dir .. '/MyGUI/MyGUIEngine/include' }
-			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
-			defines 'SB_USE_MYGUI'
-		end
 
 		if use_network then
 			defines 'SB_USE_NETWORK'

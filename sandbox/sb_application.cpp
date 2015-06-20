@@ -108,6 +108,10 @@ namespace Sandbox {
     }
 #endif
     
+#ifdef SB_USE_SPINE
+    void register_spine( lua_State* lua );
+#endif
+    
     
 	Application::Application() {
 		m_system = 0;
@@ -185,6 +189,9 @@ namespace Sandbox {
         register_keys(lua->GetVM());
 #ifdef SB_USE_MYGUI
         mygui::register_mygui(lua->GetVM());
+#endif
+#ifdef SB_USE_SPINE
+        register_spine(lua->GetVM());
 #endif
 #ifdef SB_USE_NETWORK
         BindNetwork(lua);

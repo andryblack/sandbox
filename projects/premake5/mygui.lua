@@ -4,7 +4,7 @@ project 'MyGUI'
 
 	targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
 
-	targetname ('MyGUI_' .. platform_dir)
+	targetname ('MyGUI-' .. platform_dir)
 
 	files {
 		sandbox_dir .. '/MyGUI/MyGUIEngine/**.h',
@@ -20,4 +20,4 @@ project 'MyGUI'
 	defines 'MYGUI_CONFIG_INCLUDE="<../../../sandbox/mygui/sb_mygui_config.h>"'
 
 	configuration "Debug"
-			targetsuffix "_d"
+			targetsuffix "-debug"

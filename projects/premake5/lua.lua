@@ -10,7 +10,7 @@ project 'lua'
 
 		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
 
-		targetname ('lua_' .. platform_dir)
+		targetname ('lua-' .. platform_dir)
 
 		local lua_files = {
 			'lapi.c', 'lauxlib.c', 'lbaselib.c', 'lbitlib.c', 'lcode.c', 'lcorolib.c', 'lctype.c',

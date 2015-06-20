@@ -33,7 +33,7 @@ namespace Sandbox {
 	
 	
 	class Atlaser;
-
+   
 	class Resources : public FileProvider {
 	public:
 		Resources(GHL::VFS* vfs);

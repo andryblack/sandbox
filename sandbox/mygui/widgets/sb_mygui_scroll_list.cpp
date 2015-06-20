@@ -308,7 +308,7 @@ namespace Sandbox {
                 
                 float speed = m_move_speed;
                 
-                float dist = fabs(m_scroll_target-crnt_pos);
+                float dist = std::abs(m_scroll_target-crnt_pos);
                 speed = dist * 5;
                 if (speed<min_speed)
                     speed=min_speed;
@@ -368,7 +368,7 @@ namespace Sandbox {
                 int crnt_scroll = getScroll();
                 int new_scroll = crnt_scroll + delta_scroll;
                 if (m_state == state_wait_scroll) {
-                    if (fabs((new_scroll-m_scroll_begin))>min_scroll_distance) {
+                    if (std::abs((new_scroll-m_scroll_begin))>min_scroll_distance) {
                         m_state = state_manual_scroll;
                         MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
                         //getClientWidget()->setEnabled(false);
@@ -386,7 +386,7 @@ namespace Sandbox {
                 if (m_border_dempth > 0) {
                     int err = norm - new_scroll;
                     
-                    float derr = fabs(err)/m_border_dempth;
+                    float derr = std::abs(err)/m_border_dempth;
                     if (derr>1.0f) {
                         derr = 1.0f;
                     } else if (derr<0.0f) {

@@ -13,7 +13,7 @@ project 'GHL'
 
 		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
 
-		targetname ('GHL_' .. platform_dir)
+		targetname ('GHL-' .. platform_dir)
 
 		local zlib_files = { 'inffixed.h', 'inftrees.c', 'inftrees.h', 'adler32.c', 'crc32.c', 'crc32.h', 'crypt.h',
 							 'deflate.c', 'deflate.h', 'inffast.c', 'inffast.h', 'inflate.c', 'inflate.h', 'ioapi.h',
@@ -205,5 +205,5 @@ project 'GHL'
 		}
 
 		configuration "Debug"
-   			targetsuffix "_d"
+   			targetsuffix "-debug"
    			defines "GHL_DEBUG"
