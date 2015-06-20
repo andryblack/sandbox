@@ -53,8 +53,8 @@ namespace Sandbox {
         GHL::UInt32 GetHeight() const { return m_height * m_scale; }
         GHL::UInt32 GetRealWidth() const { return m_width; }
         GHL::UInt32 GetRealHeight() const { return m_height; }
-	    GHL::UInt32 GetOriginalWidth() const { return m_original_w; }
-        GHL::UInt32 GetOriginalHeight() const { return m_original_h; }
+	    GHL::UInt32 GetOriginalWidth() const { return m_original_w* m_scale; }
+        GHL::UInt32 GetOriginalHeight() const { return m_original_h* m_scale; }
         size_t GetLiveTicks() const { return m_live_ticks; }
         size_t Release();
         size_t GetMemoryUsage() const;
