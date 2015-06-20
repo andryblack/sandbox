@@ -61,6 +61,7 @@
 #include "MyGUI_ControllerFadeAlpha.h"
 #include "MyGUI_ControllerPosition.h"
 #include "MyGUI_ControllerEdgeHide.h"
+#include "MyGUI_ControllerRepeatClick.h"
 
 #include "MyGUI_InputManager.h"
 
@@ -588,8 +589,10 @@ SB_META_DECLARE_OBJECT(MyGUI::ControllerItem, MyGUI::IObject)
 SB_META_DECLARE_OBJECT(MyGUI::ControllerPosition, MyGUI::ControllerItem)
 SB_META_DECLARE_OBJECT(MyGUI::ControllerFadeAlpha, MyGUI::ControllerItem)
 SB_META_DECLARE_OBJECT(MyGUI::ControllerEdgeHide, MyGUI::ControllerItem)
+SB_META_DECLARE_OBJECT(MyGUI::ControllerRepeatClick, MyGUI::ControllerItem)
 
 SB_META_DECLARE_OBJECT(MyGUI::SubSkinStateInfo, MyGUI::IStateInfo)
+SB_META_DECLARE_OBJECT(MyGUI::RotatingSkinStateInfo, MyGUI::IStateInfo)
 SB_META_DECLARE_OBJECT(MyGUI::EditTextStateInfo, MyGUI::IStateInfo)
 SB_META_DECLARE_OBJECT(MyGUI::TileRectStateInfo, MyGUI::IStateInfo)
 
