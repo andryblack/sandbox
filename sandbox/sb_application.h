@@ -50,6 +50,7 @@ namespace Sandbox {
                                    const char* argument,
                                    sb::string& result );
         
+        void SetDrawDebugInfo(bool draw);
     protected:
 		Application();
 		virtual ~Application();
@@ -80,6 +81,7 @@ namespace Sandbox {
         bool RestoreAppProfile();
         void StoreAppProfile();
         
+        
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -97,6 +99,7 @@ namespace Sandbox {
 		size_t			m_frames;
 		GHL::UInt32		m_frames_time;
 		float			m_fps;
+        bool            m_draw_debug_info;
 		void DrawDebugInfo();
 		ThreadsMgr*		m_main_thread;
 		Scene*			m_main_scene;

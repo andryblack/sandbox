@@ -83,6 +83,7 @@ SB_META_METHOD(AddScene)
 SB_META_METHOD(RemoveScene)
 SB_META_METHOD(SetMouseContext)
 SB_META_METHOD(SetKeyboardContext)
+SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 SB_META_END_KLASS_BIND()
 
@@ -126,6 +127,12 @@ namespace Sandbox {
         m_batches_rt = 0.0f;
         m_sound_enabled = true;
         m_music_enabled = true;
+#ifdef SB_DEBUG
+        m_draw_debug_info = true;
+#else
+        m_draw_debug_info = false;
+#endif
+        
 #ifdef SB_USE_MYGUI
         m_gui_data_manager = 0;
         m_gui = 0;
@@ -367,8 +374,8 @@ namespace Sandbox {
         m_batches = m_batches * 0.875f + 0.125f*batches;    /// interpolate 4 frames
         m_render->SetupBlend(true,GHL::BLEND_FACTOR_SRC_ALPHA,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
         
-        
-		DrawDebugInfo();
+        if (m_draw_debug_info)
+            DrawDebugInfo();
 		m_render->EndScene();
         
         m_resources->ProcessMemoryMgmt();
@@ -398,8 +405,6 @@ namespace Sandbox {
     }
 	
 	void Application::DrawDebugInfo() {
-        //return;
-#ifdef SB_DEBUG
 		char buf[128];
 		sb::snprintf(buf,128,"fps:%0.2f",m_fps);
 		m_render->SetProjectionMatrix(Matrix4f::ortho(0.0f,
@@ -423,7 +428,6 @@ namespace Sandbox {
         sb::snprintf(buf,128,"objects:%d",int(meta::object::count()));
         m_render->DebugDrawText( 10, y, buf );
         y += 11;
-#endif
 	}
     
     void    Application::AddScene( const RTScenePtr& scene ) {
@@ -511,6 +515,9 @@ namespace Sandbox {
                 sd->Release();
             }
         }
+    }
+    void Application::SetDrawDebugInfo(bool draw) {
+        m_draw_debug_info = draw;
     }
 	///
 	void GHL_CALL Application::OnKeyDown( GHL::Key k ) {

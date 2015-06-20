@@ -62,6 +62,8 @@
 #include "MyGUI_ControllerPosition.h"
 #include "MyGUI_ControllerEdgeHide.h"
 
+#include "MyGUI_InputManager.h"
+
 #include "sb_image.h"
 
 #include "MyGUI_CommonStateInfo.h"
@@ -615,6 +617,13 @@ SB_META_STATIC_METHOD(getInstancePtr)
 SB_META_METHOD(destroyWidget)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(MyGUI::InputManager, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::InputManager)
+SB_META_STATIC_METHOD(getInstancePtr)
+SB_META_METHOD(addWidgetModal)
+SB_META_METHOD(removeWidgetModal)
+SB_META_END_KLASS_BIND()
+
 
 static int gui_find_widget_proxy(lua_State* L) {
     MyGUI::Gui* self = Sandbox::luabind::stack<MyGUI::Gui*>::get(L, 1);
@@ -668,6 +677,8 @@ namespace Sandbox {
             
             luabind::ExternClass<CachedWidget>(lua);
             luabind::ExternClass<SceneWidget>(lua);
+            
+            luabind::ExternClass<MyGUI::InputManager>(lua);
             
             register_ScrollList(lua);
         }
