@@ -119,7 +119,7 @@ static sb::string append_path(const sb::string& dir, const sb::string& name) {
     return res;
 }
 
-SB_META_DECLARE_KLASS(Application, void);
+SB_META_DECLARE_OBJECT(Application, void);
 SB_META_BEGIN_KLASS_BIND(Application)
 SB_META_METHOD(check_texture)
 SB_META_METHOD(load_texture)
@@ -167,7 +167,18 @@ Application::Application() : m_lua(0),m_vfs(0) {
     m_vfs = GHL_CreateVFS();
     m_image_decoder = GHL_CreateImageDecoder();
     
-    lua_State* L = m_lua->GetVM();
+    
+
+#if defined( GHL_PLATFORM_MAC )
+    m_platform = "osx";
+#elif defined( GHL_PLATFORM_WIN )
+    m_platform = "windows";
+#else
+    m_platform = "unknown";
+#endif
+}
+
+void Application::Bind(lua_State* L) {
     
     static const luaL_Reg loadedlibs[] = {
         {LUA_OSLIBNAME, luaopen_os},
@@ -189,14 +200,6 @@ Application::Application() : m_lua(0),m_vfs(0) {
     Sandbox::luabind::Class<Texture>(L);
     Sandbox::luabind::Class<TextureData>(L);
     Sandbox::luabind::ExternClass<Application>(L);
-
-#if defined( GHL_PLATFORM_MAC )
-    m_platform = "osx";
-#elif defined( GHL_PLATFORM_WIN )
-    m_platform = "windows";
-#else
-    m_platform = "unknown";
-#endif
 }
 
 Application::~Application() {
@@ -257,9 +260,12 @@ TextureDataPtr Application::load_texture( const sb::string& file ) {
 bool Application::store_texture( const sb::string& file , const TextureDataPtr& data ) {
     if (!data) return false;
     const GHL::Data* d = m_image_decoder->Encode(data->GetImage(), GHL::IMAGE_FILE_FORMAT_PNG);
-    if (!d)
+    if (!d) {
+        Sandbox::LogError() << "failed encode texture to " << file;
         return false;
+    }
     if (!m_vfs->WriteFile(append_path(m_dst_dir, file).c_str(), d)) {
+        Sandbox::LogError() << "failed store texture to " << file;
         d->Release();
         return false;
     }
@@ -268,6 +274,8 @@ bool Application::store_texture( const sb::string& file , const TextureDataPtr& 
 }
 
 int Application::run() {
+    Bind(m_lua->GetVM());
+
     m_lua->GetGlobalContext()->SetValue("application", this);
     m_lua->GetGlobalContext()->SetValue("platform",m_platform);
     

@@ -40,6 +40,7 @@ public:
 typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 
 class Application : public Sandbox::FileProvider {
+    SB_META_OBJECT
 public:
 	Application();
 	~Application();
@@ -55,6 +56,8 @@ public:
 protected:
     /// FileProvider
     virtual GHL::DataStream* OpenFile(const char* fn);
+    Sandbox::LuaVM* GetLua() { return m_lua; }
+    virtual void Bind(lua_State* L);
 private:
 	Sandbox::LuaVM*	m_lua;
     GHL::VFS*   m_vfs;

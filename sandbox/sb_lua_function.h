@@ -27,7 +27,7 @@ namespace Sandbox {
     typedef sb::shared_ptr<LuaFunction> LuaFunctionPtr;
     namespace luabind {
         template <>
-        struct stack<LuaFunctionPtr> : public stack<sb::shared_ptr<LuaReference> >{};
+        struct stack<LuaFunctionPtr> : stack_lua_object_ptr<LuaFunction> {};
     }
 }
 

@@ -47,6 +47,7 @@ namespace Sandbox {
         
         LuaContextPtr   GetGlobalContext();
         LuaContextPtr   CreateContext();
+        LuaContextPtr   CreateObject();
 
         bool   LoadScript(GHL::DataStream* ds,const char* name,const LuaContextPtr& env);
         

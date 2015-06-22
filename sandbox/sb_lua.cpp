@@ -400,6 +400,13 @@ namespace Sandbox {
         return ctx;
     }
     
+    LuaContextPtr   LuaVM::CreateObject() {
+        lua_newtable(m_L);
+        LuaContextPtr ctx(new LuaContext());
+        ctx->SetObject(m_L);
+        return ctx;
+    }
+    
     LuaContextPtr   LuaVM::GetGlobalContext() {
         lua_getglobal(m_L, "_G");
         LuaContextPtr ctx(new LuaContext());

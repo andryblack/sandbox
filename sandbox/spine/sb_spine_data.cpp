@@ -4,6 +4,7 @@
 #include <ghl_data_stream.h>
 #include <ghl_data.h>
 #include "sb_texture.h"
+#include <sbstd/sb_assert.h>
 
 SB_META_DECLARE_OBJECT(Sandbox::SpineData, Sandbox::meta::object)
 
@@ -26,7 +27,6 @@ extern "C" void _spAtlasPage_disposeTexture (spAtlasPage* self){
 
 extern "C" char* _spUtil_readFile (const char* path, int* length){
     sb_assert(false && "invalid call");
-    sb_terminate();
     return 0;
 }
 

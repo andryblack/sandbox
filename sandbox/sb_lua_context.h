@@ -29,6 +29,7 @@ namespace Sandbox {
         using luabind::impl::wrapper_base::call_self;
         
         sb::intrusive_ptr<LuaContext> CreateInherited();
+        sb::intrusive_ptr<LuaContext> CreateChild(const char* name);
         
         template <class T>
         inline T GetValue(const char* path) {
@@ -85,17 +86,7 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<LuaContext> LuaContextPtr;
     namespace luabind {
         template <>
-        struct stack<LuaContextPtr> : public stack<sb::intrusive_ptr<LuaReference> >{
-            static LuaContextPtr get(lua_State* L, int idx) {
-                if (lua_isnil(L, idx)) {
-                    return LuaContextPtr();
-                }
-                LuaContextPtr res(new LuaContext());
-                lua_pushvalue(L, idx);
-                res->SetObject(L);
-                return res;
-            }
-        };
+        struct stack<LuaContextPtr> : stack_lua_object_ptr<LuaContext> {};
     }
 }
 

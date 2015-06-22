@@ -58,26 +58,27 @@ namespace Sandbox {
                 }
             }
         };
-        template <>
-        struct stack<sb::intrusive_ptr<LuaReference> >{
-            static void push( lua_State* L, const sb::intrusive_ptr<LuaReference>& val ) {
+        template <class T>
+        struct stack_lua_object_ptr {
+            static void push( lua_State* L, const sb::intrusive_ptr<T>& val ) {
                 if (val) {
                     stack<LuaReference>::push(L, *val);
                 } else {
                     lua_pushnil(L);
                 }
             }
-            static sb::intrusive_ptr<LuaReference> get(lua_State* L, int idx) {
+            static sb::intrusive_ptr<T> get(lua_State* L, int idx) {
                 if (lua_isnil(L, idx)) {
-                    return sb::intrusive_ptr<LuaReference>();
+                    return sb::intrusive_ptr<T>();
                 }
-                sb::intrusive_ptr<LuaReference> res(new LuaReference());
+                sb::intrusive_ptr<T> res(new T());
                 lua_pushvalue(L, idx);
                 res->SetObject(L);
                 return res;
             }
         };
-                
+        template <>
+        struct stack<sb::intrusive_ptr<LuaReference> > : stack_lua_object_ptr<LuaReference> {};
     }
 }
 
