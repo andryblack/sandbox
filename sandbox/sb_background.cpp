@@ -19,6 +19,10 @@ namespace Sandbox {
         
     }
     
+    void Background::SetFullScreen(bool fs) {
+        m_fullscreen = fs;
+    }
+    
     void Background::Draw(Sandbox::Graphics &g) const {
         Transform2d tr = g.GetTransform();
         if (m_fullscreen && (m_width!=g.GetScreenWidth()||m_height!=g.GetScreenHeight()) && (m_width) && (m_height)) {

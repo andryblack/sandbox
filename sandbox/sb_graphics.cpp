@@ -177,9 +177,9 @@ namespace Sandbox {
         bool flush = false;
 		if (m_texture!=texture) {
             flush = true;
-            const GHL::Texture* tex = texture->Present(m_resources);
-            m_itw = 1.0f / tex->GetWidth();
-            m_ith = 1.0f / tex->GetHeight();
+            //const GHL::Texture* tex = texture->Present(m_resources);
+            m_itw = 1.0f / texture->GetWidth();
+            m_ith = 1.0f / texture->GetHeight();
         } else if (m_ptype!=GHL::PRIMITIVE_TYPE_TRIANGLES) {
             flush = true;
         }

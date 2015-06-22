@@ -107,6 +107,7 @@ namespace Sandbox {
         GHL::UInt32 h = img->GetHeight();
         width = w;
         height = h;
+        float scale = variant?1.0f/m_scale:1.0f;
         GHL::UInt32 y = 0;
         while ( y < h ) {
             GHL::UInt32 oh = h - y;
@@ -131,12 +132,17 @@ namespace Sandbox {
                 }
                 texture->SetData(0,0,subimg);
                 subimg->Release();
-                output.push_back(Image(TexturePtr(new Texture(texture,variant?1.0f/m_scale:1.0f)),0,0,float(ipw),float(iph)));
-                output.back().SetHotspot(Vector2f(-float(x),-float(y)));
+                output.push_back(Image(TexturePtr(new Texture(texture,scale)),0,0,float(ipw)*scale,float(iph)*scale));
+                output.back().SetHotspot(Vector2f(-float(x)*scale,-float(y)*scale));
                 x+=ipw;
                 texture->DiscardInternal();
             }
             y+=iph;
+        }
+        img->Release();
+        if (variant) {
+            width = float(width)/m_scale;
+            height = float(height)/m_scale;
         }
         return true;
     }
@@ -165,13 +171,13 @@ namespace Sandbox {
 			std::string file = fn+".png";
 			ds = OpenFileVariant( file.c_str() , variant );
 			if ( !ds ) {
-				file = fn+".tga";
+				file = fn+".jpg";
 				ds = OpenFileVariant( file.c_str() , variant);
 				if ( !ds ) {
 					LogError(MODULE) <<"error opening file " << fn;
 					return 0;
 				} else {
-                    if (ext) *ext = "tga";
+                    if (ext) *ext = "jpg";
                 }
 			} else {
                 if (ext) *ext = "png";
@@ -206,13 +212,13 @@ namespace Sandbox {
 			std::string ifile = fn+".png";
 			ds = OpenFileVariant( ifile.c_str() , variant);
 			if ( !ds ) {
-				ifile = fn+".tga";
+				ifile = fn+".jpg";
 				ds = OpenFileVariant( ifile.c_str() , variant );
 				if ( !ds ) {
 					LogError(MODULE) <<"error opening file " << fn;
 					return 0;
 				} else {
-                    file += ".tga";
+                    file += ".jpg";
                 }
 			} else {
                 file += ".png";
