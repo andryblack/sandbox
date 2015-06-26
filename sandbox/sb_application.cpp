@@ -100,6 +100,7 @@ namespace Sandbox {
     void register_thread( lua_State* lua );
 	void register_controller( lua_State* lua );
     void register_keys( lua_State* lua );
+    void register_skelet( lua_State* lua );
     
 #ifdef SB_USE_MYGUI
     namespace mygui {
@@ -193,6 +194,7 @@ namespace Sandbox {
 #ifdef SB_USE_SPINE
         register_spine(lua->GetVM());
 #endif
+        register_skelet(lua->GetVM());
 #ifdef SB_USE_NETWORK
         BindNetwork(lua);
 #endif

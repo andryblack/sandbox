@@ -4,6 +4,8 @@
 #include <ghl_image.h>
 #include <ghl_image_decoder.h>
 
+#include "SconverSpine.h"
+
 extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
@@ -124,6 +126,7 @@ SB_META_BEGIN_KLASS_BIND(Application)
 SB_META_METHOD(check_texture)
 SB_META_METHOD(load_texture)
 SB_META_METHOD(store_texture)
+SB_META_METHOD(convert_spine)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(Texture, Sandbox::meta::object)
@@ -264,15 +267,37 @@ bool Application::store_texture( const sb::string& file , const TextureDataPtr& 
         Sandbox::LogError() << "failed encode texture to " << file;
         return false;
     }
-    if (!m_vfs->WriteFile(append_path(m_dst_dir, file).c_str(), d)) {
+    bool res = store_file(file, d);
+    d->Release();
+    return res;
+}
+
+bool Application::store_file(  const sb::string& file , const GHL::Data* data ) {
+    if (!data) return false;
+    if (!m_vfs->WriteFile(append_path(m_dst_dir, file).c_str(), data)) {
         Sandbox::LogError() << "failed store texture to " << file;
-        d->Release();
         return false;
     }
-    d->Release();
     return true;
 }
 
+bool Application::premultiply_image( const sb::string& src, const sb::string& dst ) {
+    TextureDataPtr data = load_texture(src);
+    if (data) {
+        data->PremultiplyAlpha();
+        return store_texture(dst, data);
+    }
+    return false;
+}
+
+bool Application::convert_spine(const sb::string& atlas, const sb::string& skelet, const sb::string& outfile) {
+    ConverterSpine convert;
+    if (!convert.Load(atlas.c_str(), skelet.c_str(), this))
+        return false;
+    convert.Export(outfile.c_str(),this);
+
+    return true;
+}
 int Application::run() {
     Bind(m_lua->GetVM());
 

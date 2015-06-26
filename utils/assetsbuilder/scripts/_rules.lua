@@ -6,8 +6,13 @@ local _M = {}
 _M.assets_rules = {}
 
 local img = require '_images'
+local convert_spine = require '_convert_spine'
 
 for k,v in pairs(img.assets_rules) do
+	_M.assets_rules[k] = v
+end
+
+for k,v in pairs(convert_spine.assets_rules) do
 	_M.assets_rules[k] = v
 end
 
@@ -107,6 +112,7 @@ function _M.apply_rules( rules )
 	make_dst_tree(dst_tree)
 	copy_files(rules.copy_files or {})
 	img.apply( rules )
+	convert_spine.apply( rules )
 end
 
 return _M

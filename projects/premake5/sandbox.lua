@@ -168,6 +168,8 @@ solution( ProjectName )
 			sandbox_dir .. '/sandbox/meta/**.cpp',
 			sandbox_dir .. '/sandbox/json/**.h',
 			sandbox_dir .. '/sandbox/json/**.cpp',
+			sandbox_dir .. '/sandbox/skelet/**.h',
+			sandbox_dir .. '/sandbox/skelet/**.cpp',
 		}
 
 		includedirs {

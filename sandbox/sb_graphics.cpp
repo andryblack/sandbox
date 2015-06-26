@@ -214,8 +214,8 @@ namespace Sandbox {
         BeginDrawImage(img);
 		const float w = img.GetWidth();
 		const float h = img.GetHeight();
-		x-=img.GetHotspot().x*w/img.GetTextureW();
-        y-=img.GetHotspot().y*h/img.GetTextureH();
+		x-=img.GetHotspot().x*w/img.GetTextureDrawW();
+        y-=img.GetHotspot().y*h/img.GetTextureDrawH();
 		
         appendQuad();
 		
@@ -223,18 +223,33 @@ namespace Sandbox {
 		
         if (!m_calc2_tex)
         {
-            appendVertex(x,y,
-                                 img.GetTextureX()*m_itw,
-                         img.GetTextureY()*m_ith,clr);
-            appendVertex(x+w,y,
-                                 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
-                         img.GetTextureY()*m_ith,clr);
-            appendVertex(x,y+h,
-                                 img.GetTextureX()*m_itw,
-                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
-            appendVertex(x+w,y+h,
-                                 img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
-                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+            if (img.GetRotated()) {
+                appendVertex(x+w,y,
+                             img.GetTextureX()*m_itw,
+                             img.GetTextureY()*m_ith,clr);
+                appendVertex(x+w,y+h,
+                             img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                             img.GetTextureY()*m_ith,clr);
+                appendVertex(x,y,
+                             img.GetTextureX()*m_itw,
+                             img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+                appendVertex(x,y+h,
+                             img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                             img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+            } else {
+                appendVertex(x,y,
+                                     img.GetTextureX()*m_itw,
+                             img.GetTextureY()*m_ith,clr);
+                appendVertex(x+w,y,
+                                     img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                             img.GetTextureY()*m_ith,clr);
+                appendVertex(x,y+h,
+                                     img.GetTextureX()*m_itw,
+                             img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+                appendVertex(x+w,y+h,
+                                     img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                             img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+            }
         }  else {
             appendVertex2(x,y,
                          img.GetTextureX()*m_itw,

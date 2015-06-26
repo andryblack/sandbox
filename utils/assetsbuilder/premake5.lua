@@ -88,6 +88,8 @@
 
 	dofile('lua.lua')
 	dofile('ghl.lua')
+	dofile('spine-runtime.lua')
+	dofile('pugixml.lua')
 
 	project "AssetsBuilder"
 		targetname  "assetsbuilder"
@@ -99,6 +101,8 @@
 			path.join(sandbox_dir,'include'),
 			path.join(sandbox_dir,'ghl','include'),
 			path.join(sandbox_dir,'sandbox'),
+			path.join(sandbox_dir,'spine-runtime-c','include'),
+			path.join(sandbox_dir,'pugixml','src'),
 		}
 
 		
@@ -119,14 +123,23 @@
 			'sb_log.*',
 			'sb_data.*',
 			'sb_lua_context.*',
+            'sb_resources.*',
+            'sb_texture.*',
+            'sb_rendertarget.*',
+            'sb_shader.*',
+            'sb_bitmask.*',
 			'sb_memory_mgr.*',
+			'sb_base64.*',
 			'meta/**',
 			'luabind/**',
+			'skelet/sb_skelet_data.*',
 			}))
 
 		links {
 			'GHL',
-			'lua', 
+			'lua',
+			'spine-runtime',
+			'pugixml',
 		} 
 		-- excludes
 		-- {
