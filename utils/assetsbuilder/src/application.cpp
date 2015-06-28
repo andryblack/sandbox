@@ -4,7 +4,7 @@
 #include <ghl_image.h>
 #include <ghl_image_decoder.h>
 
-#include "SconverSpine.h"
+#include "spine_convert.h"
 
 extern "C" {
 #include <lua.h>
@@ -291,7 +291,7 @@ bool Application::premultiply_image( const sb::string& src, const sb::string& ds
 }
 
 bool Application::convert_spine(const sb::string& atlas, const sb::string& skelet, const sb::string& outfile) {
-    ConverterSpine convert;
+    SpineConvert convert;
     if (!convert.Load(atlas.c_str(), skelet.c_str(), this))
         return false;
     convert.Export(outfile.c_str(),this);

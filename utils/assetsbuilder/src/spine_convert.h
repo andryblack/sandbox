@@ -6,36 +6,32 @@
 //
 //
 
-#ifndef __AssetsBuilder__SconverSpine__
-#define __AssetsBuilder__SconverSpine__
+#ifndef __AssetsBuilder__spine_convert__
+#define __AssetsBuilder__spine_convert__
+
+#include "skeleton_convert.h"
 
 #include <stdio.h>
 #include <sb_file_provider.h>
 #include <spine/spine.h>
 #include <skelet/sb_skelet_data.h>
-#include <sbstd/sb_string.h>
-#include <sbstd/sb_map.h>
 #include <pugixml.hpp>
 
 class Application;
-class ConverterSpine {
+class SpineConvert : public SkeletonConvert {
 private:
     spAtlas*   m_atlas;
     spSkeletonData* m_skeleton;
     spAnimationStateData* m_state;
-    sb::string  m_dir;
-    sb::string  m_out_dir;
     sb::string  m_atlas_name;
     void ExportAtlas(Application* app);
     void ExportAnimation();
-    pugi::xml_document   m_doc;
-    sb::map<sb::string, size_t> m_image_map;
 public:
-    ConverterSpine();
-    ~ConverterSpine();
+    SpineConvert();
+    ~SpineConvert();
     bool Load(const char* atlas, const char* skelet,
               Sandbox::FileProvider* file_provider);
     void Export(const char* file, Application* app);
 };
 
-#endif /* defined(__AssetsBuilder__SconverSpine__) */
+#endif /* defined(__AssetsBuilder__spine_convert__) */

@@ -1,12 +1,12 @@
 //
-//  SconverSpine.cpp
+//
 //  AssetsBuilder
 //
 //  Created by AndryBlack on 24/06/15.
 //
 //
 
-#include "SconverSpine.h"
+#include "spine_convert.h"
 #include <ghl_data_stream.h>
 #include <ghl_data.h>
 #include <fstream>
@@ -39,17 +39,17 @@ extern "C" char* _spUtil_readFile (const char* path, int* length){
     return 0;
 }
 
-ConverterSpine::ConverterSpine() : m_atlas(0),m_skeleton(0),m_state(0) {
+SpineConvert::SpineConvert() : m_atlas(0),m_skeleton(0),m_state(0) {
     
 }
 
-ConverterSpine::~ConverterSpine() {
+SpineConvert::~SpineConvert() {
     if (m_atlas) spAtlas_dispose(m_atlas);
     if (m_state) spAnimationStateData_dispose(m_state);
     if (m_skeleton) spSkeletonData_dispose(m_skeleton);
 }
 
-bool ConverterSpine::Load(const char *atlas_file,
+bool SpineConvert::Load(const char *atlas_file,
                           const char *skeleton_file,
                           Sandbox::FileProvider *file_provider) {
     
@@ -96,51 +96,39 @@ bool ConverterSpine::Load(const char *atlas_file,
     m_state = spAnimationStateData_create(m_skeleton);
     return true;
 }
-void ConverterSpine::ExportAtlas(Application* app) {
-    pugi::xml_node textures = m_doc.document_element().append_child("textures");
+void SpineConvert::ExportAtlas(Application* app) {
     spAtlasPage* page = m_atlas->pages;
-    int index = 0;
     while (page) {
-        pugi::xml_node texture = textures.append_child("texture");
-        texture.append_attribute("file").set_value(page->name);
-        texture.append_attribute("premultiplied").set_value(true);
+        atlas& a = add_atlas(page->name, true);
         spAtlasRegion* region = m_atlas->regions;
         while (region) {
             if (region->page == page) {
-                ++index;
-                pugi::xml_node image = texture.append_child("image");
-                image.append_attribute("x").set_value(region->x);
-                image.append_attribute("y").set_value(region->y);
-                image.append_attribute("w").set_value(region->rotate ? region->height : region->width);
-                image.append_attribute("h").set_value(region->rotate ? region->width : region->height);
-                image.append_attribute("r").set_value(bool(region->rotate));
-                image.append_attribute("index").set_value(index);
-                image.append_attribute("name").set_value(region->name);
-                m_image_map[region->name]=index;
+                image& img = add_image(a, region->name);
+                img.x = region->x;
+                img.y = region->y;
+                img.w = (region->rotate ? region->height : region->width);
+                img.h = (region->rotate ? region->width : region->height);
+                img.r = (bool(region->rotate));
             }
             region = region->next;
         }
         app->premultiply_image(m_dir + "/" + page->name, m_out_dir + "/" + page->name);
         page = page->next;
     }
+    write_atlases();
 }
 
 static const float export_fps = 24.0f;
 
-void ConverterSpine::ExportAnimation() {
+void SpineConvert::ExportAnimation() {
     
-    pugi::xml_node nodes = m_doc.document_element().append_child("nodes");
-    nodes.append_attribute("count").set_value(m_skeleton->slotsCount);
     for (int i=0;i<m_skeleton->slotsCount;++i) {
-        pugi::xml_node n = nodes.append_child("node");
-        n.append_attribute("name").set_value(m_skeleton->slots[i]->name);
-        n.append_attribute("index").set_value(static_cast<unsigned int>(i));
+        add_node(m_skeleton->slots[i]->name);
     }
+    write_nodes();
     
     spAnimationState* state = spAnimationState_create(m_state);
     spSkeleton* skeleton = spSkeleton_create(m_skeleton);
-    
-    pugi::xml_node animations = m_doc.document_element().append_child("animations");
     
     for (int i=0;i<m_skeleton->animationsCount;++i) {
         spAnimation* anim = m_skeleton->animations[i];
@@ -148,28 +136,20 @@ void ConverterSpine::ExportAnimation() {
         if (frames<1) {
             frames = 1;
         }
-        
-        pugi::xml_node a = animations.append_child("animation");
-        a.append_attribute("name").set_value(anim->name);
-        a.append_attribute("fps").set_value(export_fps);
-        a.append_attribute("frames").set_value(static_cast<unsigned int>(frames));
-        a.append_attribute("compression").set_value("zlib");
-        a.append_attribute("encoding").set_value("base64");
-       
-        Sandbox::VectorData<float>* data = new Sandbox::VectorData<float>();
-        data->vector().resize((4+2+1+1)*frames*m_skeleton->slotsCount);
-        
+        animation& a = add_animation(anim->name, export_fps);
         
         float delta = 1.0f / export_fps;
         spAnimationState_setAnimation(state, 0, anim, false);
-        float* dst = data->vector().data();
+       
         for (size_t f = 0;f<frames;++f ) {
+            frame& fr = add_frame(a);
             spAnimationState_update(state, delta);
             spAnimationState_apply(state, skeleton);
             spSkeleton_updateWorldTransform(skeleton);
             for (int s=0;s<skeleton->slotsCount;s++) {
                 spSlot* slot = skeleton->drawOrder[s];
                 spBone* bone = slot->bone;
+                frame::node& n = add_frame_node(fr);
                 
                 //ox = v.x+m.matrix[0*2+0]*x + m.matrix[1*2+0]*y;
                 //oy = v.y+m.matrix[0*2+1]*x + m.matrix[1*2+1]*y;
@@ -189,8 +169,8 @@ void ConverterSpine::ExportAnimation() {
                 
                 size_t img = 0;
                 if (slot->attachment) {
-                    sb::map<sb::string, size_t>::const_iterator it = m_image_map.find(slot->attachment->name);
-                    if (it!=m_image_map.end()) {
+                    sb::map<sb::string, int>::const_iterator it = m_image_indexes.find(slot->attachment->name);
+                    if (it!=m_image_indexes.end()) {
                         img = it->second;
                     }
                     if (slot->attachment->type == SP_ATTACHMENT_REGION) {
@@ -211,38 +191,25 @@ void ConverterSpine::ExportAnimation() {
                     }
                 }
                 
-                *dst++ = skeleton->a * slot->a;
-                *dst++ = tr.m.matrix[0];
-                *dst++ = tr.m.matrix[1];
-                *dst++ = tr.m.matrix[2];
-                *dst++ = tr.m.matrix[3];
-                *dst++ = tr.v.x;
-                *dst++ = tr.v.y;
+                tr = Sandbox::Transform2d().scale(1.0f,-1.0f) * tr;
                 
-                *reinterpret_cast<GHL::UInt32*>(dst) = img;
-                ++dst;
+                n.tr = tr;
+                n.a = skeleton->a * slot->a;
+                n.image = img;
+                
             }
         }
-        GHL::Data* compressed = GHL_PackZlib(data);
-        a.append_child(pugi::node_pcdata).set_value(Sandbox::Base64Encode(compressed->GetData(), compressed->GetSize()).c_str());
-        compressed->Release();
-        data->Release();
+       
     }
     spAnimationState_dispose(state);
     spSkeleton_dispose(skeleton);
+    write_animations();
 }
 
-struct xml_writer : public pugi::xml_writer {
-    Sandbox::VectorData<GHL::Byte>* sdata;
-    virtual void write(const void* data, size_t size) {
-        size_t idx = sdata->vector().size();
-        sdata->vector().resize(idx+size);
-        ::memcpy(sdata->vector().data()+idx, data, size);
-    }
-};
 
 
-void ConverterSpine::Export(const char *file,Application* app) {
+
+void SpineConvert::Export(const char *file,Application* app) {
     const char* last_slash = ::strrchr(file, '/');
     if (last_slash) {
         m_out_dir.assign(file,last_slash);
@@ -250,9 +217,5 @@ void ConverterSpine::Export(const char *file,Application* app) {
     m_doc.root().append_child("skeleton");
     ExportAtlas(app);
     ExportAnimation();
-    xml_writer writer;
-    writer.sdata = new Sandbox::VectorData<GHL::Byte>();;
-    m_doc.save(writer);
-    app->store_file(file, writer.sdata);
-    writer.sdata->Release();
+    store_xml(file, app);
 }

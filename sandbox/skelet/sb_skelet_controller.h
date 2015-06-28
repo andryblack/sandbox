@@ -3,6 +3,9 @@
 
 #include "sb_thread.h"
 #include "sb_transform2d.h"
+#include "sb_event.h"
+#include <sbstd/sb_string.h>
+#include <sbstd/sb_list.h>
 
 namespace Sandbox {
     
@@ -17,16 +20,26 @@ namespace Sandbox {
     public:
         explicit SkeletController( const SkeletonDataPtr& data );
         virtual bool Update(float dt);
-        void StartAnimation(const char* name,bool loop);
+        void StartAnimation(const char* name,int loop);
+        void AddAnimation(const char* name,int loop);
         void ApplyFrame();
         void AddObject(const SkeletObjectPtr& obj);
+        
+        void SetEndEvent(const EventPtr& e) { m_end_event = e;}
+        const EventPtr& GetEndEvent() const { return m_end_event; }
     private:
         size_t  m_crnt_frame;
         float   m_frame_time;
         SkeletonDataPtr     m_data;
         SkeletonAnimation*  m_animation;
-        bool    m_loop;
+        int    m_loop;
         sb::vector<SkeletObjectPtr> m_objects;
+        EventPtr    m_end_event;
+        struct AnimationEntry {
+            sb::string name;
+            int loop;
+        };
+        sb::list<AnimationEntry> m_added_animations;
     };
     
 }
