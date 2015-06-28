@@ -18,6 +18,8 @@ SkeletonConvert::image& SkeletonConvert::add_image(SkeletonConvert::atlas& atlas
     m_image_indexes[name]=m_image_index;
     ++m_image_index;
     image& img = atlas.images[name];
+    img.hsx = 0;
+    img.hsy = 0;
     return img;
 }
 
@@ -68,6 +70,8 @@ void SkeletonConvert::write_atlases() {
             image.append_attribute("w").set_value(iit->second.w);
             image.append_attribute("h").set_value(iit->second.h);
             image.append_attribute("r").set_value(iit->second.r);
+            image.append_attribute("hsx").set_value(iit->second.hsx);
+            image.append_attribute("hsy").set_value(iit->second.hsy);
             image.append_attribute("index").set_value(m_image_indexes[iit->first]);
             image.append_attribute("name").set_value(iit->first.c_str());
             
@@ -92,6 +96,15 @@ void SkeletonConvert::write_nodes() {
     }
 }
 
+void SkeletonConvert::post_scale(float s) {
+    for (sb::vector<animation>::iterator anim = m_animations.begin();anim!=m_animations.end();++anim) {
+        for (sb::vector<frame>::iterator fit = anim->frames.begin();fit!=anim->frames.end();++fit) {
+            for (sb::vector<frame::node>::iterator nit = fit->nodes.begin();nit!=fit->nodes.end();++nit) {
+                nit->tr.scale(s);
+            }
+        }
+    }
+}
 void SkeletonConvert::write_animations() {
     pugi::xml_node animations = m_doc.document_element().append_child("animations");
     for (sb::vector<animation>::const_iterator anim = m_animations.begin();anim!=m_animations.end();++anim) {

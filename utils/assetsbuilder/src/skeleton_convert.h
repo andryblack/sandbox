@@ -22,6 +22,8 @@ protected:
         float w;
         float h;
         bool r;
+        float hsx;
+        float hsy;
     };
     struct atlas {
         sb::string filename;
@@ -63,6 +65,8 @@ protected:
     void write_nodes();
     void write_animations();
     bool store_xml(const sb::string& file, Application* app);
+    
+    void post_scale(float s);
 };
 
 #endif /*SKELETON_CONVERT_H_INCLUDED*/

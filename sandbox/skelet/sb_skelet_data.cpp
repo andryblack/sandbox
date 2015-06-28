@@ -99,6 +99,7 @@ namespace Sandbox {
                         img->SetSize(iit->attribute("h").as_float(),iit->attribute("w").as_float());
                     }
                     res->SetImage(iit->attribute("index").as_uint(),iit->attribute("name").value(),img);
+                    img->SetHotspot(Sandbox::Vector2f(iit->attribute("hsx").as_float(),iit->attribute("hsy").as_float()));
                 }
             }
         }
