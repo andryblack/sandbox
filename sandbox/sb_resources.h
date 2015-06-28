@@ -75,6 +75,7 @@ namespace Sandbox {
         size_t  GetMemoryUsed() const { return m_memory_used; }
         
         void SetResourcesVariant(float scale,const sb::string& postfix);
+        const sb::string& GetResourcesPostfix() const { return m_res_variant; }
         
         RenderTargetPtr CreateRenderTarget(int w, int h, float scale,bool alpha, bool depth);
         float GetScale() const { return m_scale; }

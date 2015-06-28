@@ -312,9 +312,6 @@ namespace Sandbox {
         ctx->SetValue("application.resources", m_resources);
         ctx->SetValue("application.sound", m_sound_mgr);
 
-        
-		m_lua->DoFile("load.lua");
-        
 #ifdef SB_USE_MYGUI
         m_gui_data_manager = new mygui::DataManager(m_resources);
         m_gui_render = new mygui::RenderManager(m_graphics, m_resources);
@@ -325,6 +322,10 @@ namespace Sandbox {
         mygui::register_widgets();
         mygui::setup_singletons(m_lua);
 #endif
+
+        
+		m_lua->DoFile("load.lua");
+        
         
 		if (!LoadResources(*m_resources))
 			return false;
@@ -576,7 +577,9 @@ namespace Sandbox {
 	void GHL_CALL Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
-        MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key));
+        if (MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key)) ||
+            MyGUI::InputManager::getInstance().isModalAny())
+            return;
 #endif
         if (m_mouse_ctx) {
             m_mouse_ctx->call_self("onDown",key,x,y);
@@ -586,7 +589,9 @@ namespace Sandbox {
 	void GHL_CALL Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
-        MyGUI::InputManager::getInstance().injectMouseMove(x, y, 0);
+        if (MyGUI::InputManager::getInstance().injectMouseMove(x, y, 0)||
+            MyGUI::InputManager::getInstance().isModalAny())
+            return;
 #endif
         if (m_mouse_ctx) {
             m_mouse_ctx->call_self("onMove",key,x,y);
@@ -596,7 +601,9 @@ namespace Sandbox {
 	void GHL_CALL Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
-        MyGUI::InputManager::getInstance().injectMouseRelease(x, y, mygui::translate_key(key));
+        if (MyGUI::InputManager::getInstance().injectMouseRelease(x, y, mygui::translate_key(key))||
+            MyGUI::InputManager::getInstance().isModalAny())
+            return;
 #endif
         if (m_mouse_ctx) {
             m_mouse_ctx->call_self("onUp",key,x,y);
