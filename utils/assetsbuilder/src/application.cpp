@@ -3,6 +3,7 @@
 #include <sb_log.h>
 #include <ghl_image.h>
 #include <ghl_image_decoder.h>
+#include <json/sb_json.h>
 
 #include "spine_convert.h"
 
@@ -114,6 +115,8 @@ static const luaL_Reg string_functions[] = {
 bool (*sb_terminate_handler)() = 0;
 
 static sb::string append_path(const sb::string& dir, const sb::string& name) {
+    if (!name.empty() && name[0]=='/')
+        return name;
     sb::string res = dir;
     if (!res.empty() && res[res.length()-1]!='/')
         res.append("/");
@@ -203,6 +206,7 @@ void Application::Bind(lua_State* L) {
     Sandbox::luabind::Class<Texture>(L);
     Sandbox::luabind::Class<TextureData>(L);
     Sandbox::luabind::ExternClass<Application>(L);
+    Sandbox::register_json(L);
 }
 
 Application::~Application() {
@@ -237,6 +241,9 @@ GHL::DataStream* Application::OpenFile(const char* fn) {
     return m_vfs->OpenFile(append_path(m_src_dir, fn).c_str());
 }
 
+sb::string Application::get_output_filename( const char* name ) {
+    return append_path(m_dst_dir, name);
+}
 
 TexturePtr Application::check_texture( const sb::string& file ) {
     GHL::DataStream* ds = m_vfs->OpenFile(append_path(m_src_dir, file).c_str());

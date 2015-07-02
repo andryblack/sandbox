@@ -90,6 +90,7 @@
 	dofile('ghl.lua')
 	dofile('spine-runtime.lua')
 	dofile('pugixml.lua')
+	dofile('yajl.lua')
 
 	project "AssetsBuilder"
 		targetname  "assetsbuilder"
@@ -130,6 +131,7 @@
             'sb_bitmask.*',
 			'sb_memory_mgr.*',
 			'sb_base64.*',
+			'json/sb_json.*',
 			'meta/**',
 			'luabind/**',
 			'skelet/sb_skelet_data.*',
@@ -140,6 +142,7 @@
 			'lua',
 			'spine-runtime',
 			'pugixml',
+			'yajl',
 		} 
 		-- excludes
 		-- {

@@ -60,6 +60,7 @@ protected:
     virtual GHL::DataStream* OpenFile(const char* fn);
     Sandbox::LuaVM* GetLua() { return m_lua; }
     virtual void Bind(lua_State* L);
+    sb::string get_output_filename( const char* name );
 private:
 	Sandbox::LuaVM*	m_lua;
     GHL::VFS*   m_vfs;
