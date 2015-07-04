@@ -131,6 +131,7 @@
             'sb_bitmask.*',
 			'sb_memory_mgr.*',
 			'sb_base64.*',
+			'sb_file_provider.*',
 			'json/sb_json.*',
 			'meta/**',
 			'luabind/**',

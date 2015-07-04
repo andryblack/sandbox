@@ -12,6 +12,9 @@ extern "C" {
 #include <ghl_data.h>
 #include "sb_log.h"
 
+#include <ghl_data_stream.h>
+#include "sb_file_provider.h"
+
 namespace Sandbox {
     
     struct parse_context {
@@ -303,6 +306,9 @@ namespace Sandbox {
         encode_context ctx;
         yajl_gen g = yajl_gen_alloc(0);
         yajl_gen_config(g,yajl_gen_print_callback,&yajl_encode_print,&ctx);
+        if (lua_isboolean(L, 2) && lua_toboolean(L, 2)) {
+            yajl_gen_config(g,yajl_gen_beautify, 1);
+        }
         if (lua_gettop(L)>0) {
             do_json_encode(L,1,g);
         }
@@ -311,11 +317,51 @@ namespace Sandbox {
         return 1;
     }
     
+    static int json_load(lua_State* L) {
+        const char* file = luaL_checkstring(L, 1);
+        FileProvider* res = luabind::stack<FileProvider*>::get(L, 2);
+        if (!res) {
+            luaL_argerror(L, 2, "must be 'Sandbox::Resources'");
+        }
+        GHL::DataStream* ds = res->OpenFile(file);
+        if (!ds) {
+            luaL_error(L, "opening file %s", file);
+        }
+        GHL::Data* data = GHL_ReadAllData(ds);
+        sb_assert(data);
+        ds->Release();
+        
+        yajl_callbacks cb;
+        fill_parse_callbacks(cb);
+        parse_context ctx;
+        ctx.L = L;
+        ctx.stack_depth = 0;
+        
+        yajl_handle h = yajl_alloc(&cb, 0, &ctx);
+        yajl_status s = yajl_parse(h,reinterpret_cast<const unsigned char * >(data->GetData()),data->GetSize());
+        if (s == yajl_status_ok) {
+            s = yajl_complete_parse(h);
+        }
+        if (s!=yajl_status_ok) {
+            unsigned char* err_text = yajl_get_error(h, 1,reinterpret_cast<const unsigned char * >(data->GetData()),data->GetSize());
+            lua_pop(L, ctx.stack_depth);
+            lua_pushnil(L);
+            lua_pushstring(L, reinterpret_cast<const char*>(err_text));
+            yajl_free_error(h,err_text);
+            yajl_free(h);
+            return 2;
+        }
+        yajl_free(h);
+        return ctx.stack_depth;
+    }
+    
     void register_json(lua_State* L) {
         LUA_CHECK_STACK(0);
         lua_newtable(L);
         lua_pushcfunction(L, &json_parse);
         lua_setfield(L, -2, "decode");
+        lua_pushcfunction(L, &json_load);
+        lua_setfield(L, -2, "load");
         lua_pushcfunction(L, &json_encode);
         lua_setfield(L, -2, "encode");
         lua_setglobal(L, "json");
