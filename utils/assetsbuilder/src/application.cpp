@@ -124,7 +124,7 @@ static sb::string append_path(const sb::string& dir, const sb::string& name) {
     return res;
 }
 
-SB_META_DECLARE_OBJECT(Application, void);
+SB_META_DECLARE_OBJECT(Application, Sandbox::FileProvider);
 SB_META_BEGIN_KLASS_BIND(Application)
 SB_META_METHOD(check_texture)
 SB_META_METHOD(load_texture)
