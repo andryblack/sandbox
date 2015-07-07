@@ -47,5 +47,11 @@ namespace Sandbox {
 	void Processor::Stop() {
 		m_started = false;
 	}
+    
+    void Processor::Restart() {
+        if (!m_started) {
+            Start();
+        }
+    }
 
 }

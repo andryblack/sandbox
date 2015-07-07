@@ -33,16 +33,22 @@ namespace Sandbox {
 			c->RemoveObject(o);
 		}
 		o->SetParent(this);
+        float order = o->GetOrder();
+        for (std::vector<SceneObjectPtr>::iterator it = m_objects.begin();it!=m_objects.end();++it) {
+            if ((*it)->GetOrder() > order ) {
+                m_objects.insert(it, o);
+                return;
+            }
+        }
 		m_objects.push_back(o);
 	}
-    void Container::InsertBefore(const SceneObjectPtr& ob,const SceneObjectPtr& o) {
-        sb_assert(o && "null object");
-		if (Container* c=o->GetParent()) {
-			c->RemoveObject(o);
-		}
-		o->SetParent(this);
-        sb::vector<SceneObjectPtr>::iterator it = std::find(m_objects.begin(),m_objects.end(),ob);
-        m_objects.insert(it, o);
+    
+    static bool sort_by_order_pred( const SceneObjectPtr& a, const SceneObjectPtr& b) {
+        return a->GetOrder() < b->GetOrder();
+    }
+    
+    void Container::SortByOrder() {
+        std::sort(m_objects.begin(), m_objects.end(), sort_by_order_pred);
     }
     
 	void Container::RemoveObject(const SceneObjectPtr& obj) {
@@ -60,6 +66,11 @@ namespace Sandbox {
 		m_objects.clear();
 	}
 	
+    void Container::DrawChilds( Graphics& g ) const {
+        for (std::vector<SceneObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();++i) {
+            if ((*i)->GetVisible()) (*i)->Draw(g);
+        }
+    }
 	void Container::Draw(Graphics& g) const {
         if (m_objects.empty()) return;
         
@@ -72,9 +83,7 @@ namespace Sandbox {
             m_color->Apply(g);
         }
         
-        for (std::vector<SceneObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();++i) {
-			if ((*i)->GetVisible()) (*i)->Draw(g);
-		}
+        DrawChilds(g);
 
         if (m_color) {
             g.SetColor(clr);
@@ -95,20 +104,6 @@ namespace Sandbox {
         for (std::vector<SceneObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
 			if ((*i)->GetVisible()) (*i)->Update(dt);
 		}
-    }
-    
-    void Container::MoveToTop( SceneObject* obj ) {
-        std::vector<SceneObjectPtr>::iterator i = m_objects.begin();
-        for ( ;i!=m_objects.end();i++) {
-			if (i->get()==obj) {
-                break;
-            }
-		}
-        if (i!=m_objects.end()) {
-            SceneObjectPtr o = *i;
-            m_objects.erase(i);
-            m_objects.push_back(o);
-        }
     }
     
     

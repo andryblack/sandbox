@@ -47,7 +47,10 @@ namespace Sandbox {
         
     SkeletonDataPtr SkeletonData::Load(const char* filename, Resources* resources) {
         GHL::DataStream* ds = resources->OpenFile(filename);
-        if (!ds) return SkeletonDataPtr();
+        if (!ds) {
+            LogError() << "not found skeleton file " << filename;
+            return SkeletonDataPtr();
+        }
         GHL::Data* data = GHL_ReadAllData(ds);
         ds->Release();
         if (!data)

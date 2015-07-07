@@ -19,7 +19,7 @@ SB_META_DECLARE_OBJECT(Sandbox::SceneObjectWithPosition, Sandbox::SceneObject)
 namespace Sandbox {
 
 
-	SceneObject::SceneObject() : m_parent(0) ,m_visible(true){
+	SceneObject::SceneObject() : m_parent(0) ,m_visible(true),m_order(0.0f){
 	}
 	
 	SceneObject::~SceneObject() {
@@ -29,12 +29,6 @@ namespace Sandbox {
 	void SceneObject::SetParent(Container* parent) {
 		m_parent = parent;
 	}
-    
-    void SceneObject::MoveToTop() {
-        if (m_parent) {
-            m_parent->MoveToTop(this);
-        }
-    }
     
     Scene* SceneObject::GetScene() const {
         Container* c = GetParent();
@@ -78,6 +72,13 @@ namespace Sandbox {
         Vector2f res = v;
         GlobalToLocalImpl(res);
         return res;
+    }
+    
+    void SceneObject::SetOrder(float order) {
+        m_order = order;
+        if (m_parent) {
+            m_parent->SortByOrder();
+        }
     }
     
     void SceneObjectWithPosition::GlobalToLocalImpl(Vector2f& v) const {

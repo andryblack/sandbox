@@ -46,7 +46,7 @@ namespace Sandbox {
 	
 	void ThreadsMgr::AddThread(const ThreadPtr& t) {
 		sb_assert( t && "null thread" );
-		//std::vector<ThreadPtr>::iterator it = std::find(m_threads.begin(),m_threads.end(),t);
+        //std::vector<ThreadPtr>::iterator it = std::find(m_threads.begin(),m_threads.end(),t);
 		std::vector<ThreadPtr>::iterator it = std::find(m_added_threads.begin(),m_added_threads.end(),t);
 		if (it==m_added_threads.end()) {
 			it = std::find(m_removed_threads.begin(),m_removed_threads.end(),t);

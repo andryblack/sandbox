@@ -35,10 +35,11 @@ namespace Sandbox {
 		
 		float GetTime() const { return m_all_time;}
 		void SetTime(float t) { m_all_time = t;}
-		
-		void Start();
+        
+        void Start();
 		void Stop();
-		
+        void Restart();
+        
 		bool GetInverted() const { return m_inverted;}
 		void SetInverted(bool i) { m_inverted = i;}
 	private:

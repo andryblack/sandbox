@@ -31,9 +31,11 @@ namespace Sandbox {
         /// visible
 		void SetVisible(bool v) { m_visible = v;}
 		bool GetVisible() const { return m_visible;}
+        // order
+        float GetOrder() const { return m_order; }
+        void SetOrder(float order);
         
         Vector2f GlobalToLocal(const Vector2f& v) const;
-        void MoveToTop();
         Transform2d GetTransform() const;
         Vector2f LocalToGlobal(const Vector2f& v) const;
         
@@ -48,6 +50,7 @@ namespace Sandbox {
 		void SetParent(Container* parent);
 		Container* m_parent;
 		bool	m_visible;
+        float   m_order;
 	};
 	typedef sb::intrusive_ptr<SceneObject> SceneObjectPtr;
     

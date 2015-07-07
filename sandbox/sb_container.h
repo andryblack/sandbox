@@ -25,8 +25,7 @@ namespace Sandbox {
 		void Reserve(size_t size);
 		virtual void Draw(Graphics& g) const;
 		void AddObject(const SceneObjectPtr& o);
-		void InsertBefore(const SceneObjectPtr& ob,const SceneObjectPtr& o);
-        void RemoveObject(const SceneObjectPtr& obj);
+		void RemoveObject(const SceneObjectPtr& obj);
 		void Clear();
         
         void Update( float dt );
@@ -40,13 +39,14 @@ namespace Sandbox {
         void SetTranslate(const Vector2f& tr);
         Vector2f GetTranslate() const;
     
+        void SortByOrder();
     protected:
     	void UpdateChilds( float dt );
 		sb::vector<SceneObjectPtr> m_objects;
         virtual void GlobalToLocalImpl(Vector2f& v) const;
         virtual void GetTransformImpl(Transform2d& tr) const;
+        virtual void DrawChilds( Graphics& g ) const;
     private:
-        void MoveToTop( SceneObject* obj );
         friend class SceneObject;
         TransformModificatorPtr     m_transform;
         ColorModificatorPtr         m_color;
