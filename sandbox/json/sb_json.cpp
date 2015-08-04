@@ -355,6 +355,28 @@ namespace Sandbox {
         return ctx.stack_depth;
     }
     
+    static int cjson_encode(lua_State* L) {
+        int results = json_encode(L);
+        if (results>1) {
+            if (lua_isnil(L, -2)) {
+                lua_remove(L, -2);
+                lua_error(L);
+            }
+        }
+        return results;
+    }
+    
+    static int cjson_decode(lua_State* L) {
+        int results = json_parse(L);
+        if (results>1) {
+            if (lua_isnil(L, -2)) {
+                lua_remove(L, -2);
+                lua_error(L);
+            }
+        }
+        return results;
+    }
+    
     void register_json(lua_State* L) {
         LUA_CHECK_STACK(0);
         lua_newtable(L);
@@ -364,7 +386,24 @@ namespace Sandbox {
         lua_setfield(L, -2, "load");
         lua_pushcfunction(L, &json_encode);
         lua_setfield(L, -2, "encode");
+        lua_pushvalue(L, -1);
         lua_setglobal(L, "json");
+        
+        lua_getglobal(L, "package"); // json, package
+        sb_assert(lua_istable(L, -1));
+        lua_getfield(L, -1, "loaded"); // json, package, loaded
+        sb_assert(lua_istable(L, -1));
+        lua_pushvalue(L, -3); // json, package, loaded, json
+        lua_setfield(L, -2, "cjson.safe");
+        
+        lua_newtable(L);
+        lua_pushcfunction(L, &cjson_decode);
+        lua_setfield(L, -2, "decode");
+        lua_pushcfunction(L, &cjson_encode);
+        lua_setfield(L, -2, "encode");
+        lua_setfield(L, -2, "cjson");
+        
+        lua_pop(L, 3);
     }
     
     sb::string convert_to_json(const LuaContextPtr& tctx) {
