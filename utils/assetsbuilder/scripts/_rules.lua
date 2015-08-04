@@ -33,6 +33,22 @@ local function copy_files_pattern( pattern )
 	
 end
 
+local function copy_files_pattern_to( src, pattern, dst )
+	if type(pattern) ~= 'string' then
+		error('copy_files_pattern string expected got ' .. type(pattern) )
+	end
+	--print('copy_files_pattern:',pattern)
+	local files = os.matchfiles(path.join(src_path,src,pattern))
+	for k,v in ipairs(files) do
+		local f = path.getrelative(src_path,v)
+		local fn = path.getrelative(src,f)
+		--print('copy file',k,f)
+		rules.copy_files[f]=path.join(dst,fn)
+		rules.dest_files[path.join(dst,fn)]=true
+	end
+	
+end
+
 function _M.assets_rules.copy_file( file )
 	local src = file[1]
 	local dst = file[2] or src
@@ -50,6 +66,10 @@ function _M.assets_rules.copy_files( file_or_filelist )
 	else
 		error('copy_files table or string expected got ' .. type(file_or_filelist))
 	end
+end
+
+function _M.assets_rules.copy_files_to( src, pattern, dst )
+	copy_files_pattern_to(src, pattern, dst)
 end
 
 
