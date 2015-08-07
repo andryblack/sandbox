@@ -72,7 +72,7 @@ namespace Sandbox {
             luabind::stack<const char*>::push(L,res.c_str());
             return 1;
         }
-        luabind::stack<bool>::push(L, false);
+        luabind::stack<const char*>::push(L, 0);
         luabind::stack<const char*>::push(L,res.c_str());
         return 2;
     }
