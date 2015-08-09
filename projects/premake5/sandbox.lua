@@ -26,6 +26,7 @@ solution( ProjectName )
 	configurations { 'Debug', 'Release' }
 
 	if os.is('android') then
+		android_abis {'armeabi'}
 		android_stl('gnustl_static')
 		android_activity('com.sandboxgames.NativeActivity')
 		android_libs(path.getabsolute(path.join(sandbox_dir,'projects/android/libs','sandbox_lib')))
@@ -48,6 +49,9 @@ solution( ProjectName )
 				'com.google.android.gms.games.APP_ID=@string/app_id',
 				'com.google.android.gms.version=@integer/google_play_services_version'
 			}
+		end
+		if AndroidConfig.permissions then
+			android_permissions( AndroidConfig.permissions )
 		end
 	end
 

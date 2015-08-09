@@ -90,6 +90,8 @@ function manifest.generateManifest(sln,cfg)
         			_x(3,'android:value="%s" />',val)
 			end
 		
+		
+
 		_x(1, '</application>')
 
 	-- SDK version
@@ -104,9 +106,12 @@ function manifest.generateManifest(sln,cfg)
 	end
 
 	-- Permissions
-	-- for _,v in ipairs(cfg.permissions) do
-	--     _x(1, '<uses-permission android:name="android.permission.%s" />', v)
-	-- end
+	if sln.android_permissions then
+		for _,v in ipairs(sln.android_permissions) do
+		     _x(1, '<uses-permission android:name="android.permission.%s" />', v)
+		end
+	end
+
 	 
 	_p('</manifest>')
 end

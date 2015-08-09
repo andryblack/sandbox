@@ -354,6 +354,12 @@ namespace Sandbox {
             m_height = height;
             OnResize();
         }
+
+#ifdef SB_USE_NETWORK
+        if (m_network) {
+            m_network->Process();
+        }
+#endif
         
 		m_frames++;
 		m_frames_time+=usecs;

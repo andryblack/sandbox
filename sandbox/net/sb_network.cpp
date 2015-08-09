@@ -261,5 +261,9 @@ namespace Sandbox {
             }
         }
     }
+
+    void Network::Process() {
+        if (m_net) m_net->Process();
+    }
     
 }

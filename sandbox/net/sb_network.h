@@ -152,6 +152,7 @@ namespace Sandbox {
                        const sb::string& cookie) {
             m_cookie[host]=cookie;
         }
+        void Process();
     private:
         GHL::Network* m_net;
         Resources*  m_resources;
