@@ -52,6 +52,7 @@ namespace Sandbox {
         
         bool GetError() const { return m_error; }
         bool GetCompleted() const { return m_completed; }
+        GHL::UInt32 GetStatusCode() const { return m_status_code; }
         size_t GetReceivedSize() const { return m_received_size; }
         typedef sb::map<sb::string, sb::string> headers_map_t;
         
@@ -64,6 +65,7 @@ namespace Sandbox {
         headers_map_t   m_headers;
         bool    m_completed;
         bool    m_error;
+        GHL::UInt32 m_status_code;
         size_t  m_received_size;
         headers_map_t   m_received_headers;
         sb::string  m_error_text;

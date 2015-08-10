@@ -14,7 +14,9 @@
 
 namespace Sandbox {
     
-    NetworkRequestBase::NetworkRequestBase(const sb::string& url) : m_url(url),m_completed(false),m_error(false),m_received_size(0) {}
+    NetworkRequestBase::NetworkRequestBase(const sb::string& url) : m_url(url),m_completed(false),m_error(false),m_received_size(0) {
+        m_status_code = 0;
+    }
     NetworkRequestBase::~NetworkRequestBase() {
         
     }
@@ -47,7 +49,7 @@ namespace Sandbox {
     
     /// received response
     void GHL_CALL NetworkRequestBase::OnResponse(GHL::UInt32 status) {
-        
+        m_status_code = status;
     }
     /// received header
     void GHL_CALL NetworkRequestBase::OnHeader(const char* name,const char* value) {
