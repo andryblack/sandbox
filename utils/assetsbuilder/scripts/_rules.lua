@@ -16,26 +16,26 @@ for k,v in pairs(convert_spine.assets_rules) do
 	_M.assets_rules[k] = v
 end
 
+local action_copy_files = 'copy_files'
+local action_compile_files = 'compile_files'
 
-
-local function copy_files_pattern( pattern )
+local function process_files_pattern( pattern , action )
 	if type(pattern) ~= 'string' then
-		error('copy_files_pattern string expected got ' .. type(pattern) )
+		error('process_files_pattern string expected got ' .. type(pattern) )
 	end
 	--print('copy_files_pattern:',pattern)
 	local files = os.matchfiles(path.join(src_path,pattern))
 	for k,v in ipairs(files) do
 		local f = path.getrelative(src_path,v)
 		--print('copy file',k,f)
-		rules.copy_files[f]=f
+		rules[assert(action)][f]=f
 		rules.dest_files[f]=true
 	end
-	
 end
 
-local function copy_files_pattern_to( src, pattern, dst )
+local function process_files_pattern_to( src, pattern, dst , action)
 	if type(pattern) ~= 'string' then
-		error('copy_files_pattern string expected got ' .. type(pattern) )
+		error('process_files_pattern_to string expected got ' .. type(pattern) )
 	end
 	--print('copy_files_pattern:',pattern)
 	local files = os.matchfiles(path.join(src_path,src,pattern))
@@ -43,7 +43,7 @@ local function copy_files_pattern_to( src, pattern, dst )
 		local f = path.getrelative(src_path,v)
 		local fn = path.getrelative(src,f)
 		--print('copy file',k,f)
-		rules.copy_files[f]=path.join(dst,fn)
+		rules[assert(action)][f]=path.join(dst,fn)
 		rules.dest_files[path.join(dst,fn)]=true
 	end
 	
@@ -56,20 +56,43 @@ function _M.assets_rules.copy_file( file )
 	rules.dest_files[dst]=true
 end
 
+function _M.assets_rules.compile_file( file )
+	local src = file[1]
+	local dst = file[2] or src
+	rules.compile_files[src]=dst
+	rules.dest_files[dst]=true
+end
+
 function _M.assets_rules.copy_files( file_or_filelist )
 	if type(file_or_filelist) == 'table' then
 		for _,v in ipairs(file_or_filelist) do
-			copy_files_pattern(v)
+			process_files_pattern(v,action_copy_files)
 		end
 	elseif type(file_or_filelist) == 'string' then
-		copy_files_pattern(file_or_filelist)
+		process_files_pattern(file_or_filelist,action_copy_files)
 	else
 		error('copy_files table or string expected got ' .. type(file_or_filelist))
 	end
 end
 
+function _M.assets_rules.compile_files( file_or_filelist )
+	if type(file_or_filelist) == 'table' then
+		for _,v in ipairs(file_or_filelist) do
+			process_files_pattern(v,action_compile_files)
+		end
+	elseif type(file_or_filelist) == 'string' then
+		process_files_pattern(file_or_filelist,action_compile_files)
+	else
+		error('compile_files table or string expected got ' .. type(file_or_filelist))
+	end
+end
+
 function _M.assets_rules.copy_files_to( src, pattern, dst )
-	copy_files_pattern_to(src, pattern, dst)
+	process_files_pattern_to(src, pattern, dst, action_copy_files)
+end
+
+function _M.assets_rules.compile_files_to( src, pattern, dst )
+	process_files_pattern_to(src, pattern, dst, action_compile_files)
 end
 
 
@@ -120,6 +143,19 @@ local function copy_files( files )
 	end
 end
 
+local function compile_files( files )
+	for v,dst in pairs(files) do
+		if dst then
+			print('compile',v)
+			local shunk = loadfile(path.join(src_path,v),'t')
+			local binary = string.dump(shunk)
+			local out = assert(io.open(path.join(dst_path,dst),'wb'))
+			out:write(binary)
+			out:close()
+		end
+	end
+end
+
 function _M.apply_rules( rules )
 	local dst_tree = {}
 	for v,marker in pairs(rules.dest_files or {}) do
@@ -131,6 +167,7 @@ function _M.apply_rules( rules )
 	print('make destination directories at ' .. tostring(dst_path))
 	make_dst_tree(dst_tree)
 	copy_files(rules.copy_files or {})
+	compile_files(rules.compile_files or {})
 	img.apply( rules )
 	convert_spine.apply( rules )
 end

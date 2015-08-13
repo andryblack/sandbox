@@ -100,7 +100,7 @@
 		includedirs { 
 			path.join(sandbox_dir,'lua','src'),
 			path.join(sandbox_dir,'include'),
-			path.join(sandbox_dir,'ghl','include'),
+			path.join(sandbox_dir,'GHL','include'),
 			path.join(sandbox_dir,'sandbox'),
 			path.join(sandbox_dir,'spine-runtime-c','include'),
 			path.join(sandbox_dir,'pugixml','src'),
@@ -112,6 +112,7 @@
 			"*.txt", "**.lua",
 			"src/**.h", "src/**.c",
 			"src/**.cpp",
+			path.join(sandbox_dir,'GHL','src/winlib/winlib_posix_time.cpp'),
 			"../premake5/src/host/path_*.c",
 			"../premake5/src/host/string_*.c",
 			"../premake5/src/host/os_*.c",

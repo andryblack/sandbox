@@ -31,6 +31,7 @@ local sandbox = {
 
 rules = {
 	copy_files = {},
+	compile_files = {},
 	dest_files = {}
 }
 
