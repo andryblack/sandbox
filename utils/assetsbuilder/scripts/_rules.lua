@@ -147,7 +147,7 @@ local function compile_files( files )
 	for v,dst in pairs(files) do
 		if dst then
 			print('compile',v)
-			local shunk = loadfile(path.join(src_path,v),'t')
+			local shunk = assert(loadfile(path.getabsolute(path.join(src_path,v)),'t'))
 			local binary = string.dump(shunk)
 			local out = assert(io.open(path.join(dst_path,dst),'wb'))
 			out:write(binary)

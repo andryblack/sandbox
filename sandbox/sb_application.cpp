@@ -422,7 +422,7 @@ namespace Sandbox {
     double Application::GetTimeUSec() const {
         GHL::TimeValue tv;
         GHL_SystemGetTime(&tv);
-        return tv.secs * 1000000 + tv.usecs;
+        return double(tv.secs) * 1000000 + tv.usecs;
     }
 	
 	
