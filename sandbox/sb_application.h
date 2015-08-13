@@ -52,6 +52,8 @@ namespace Sandbox {
         
         void SetDrawDebugInfo(bool draw);
         void SetResourcesVariant(float scale,const sb::string& postfix);
+        
+        double GetTimeUSec() const;
     protected:
 		Application();
 		virtual ~Application();

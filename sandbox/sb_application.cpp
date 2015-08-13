@@ -85,6 +85,7 @@ SB_META_METHOD(RemoveScene)
 SB_META_METHOD(SetMouseContext)
 SB_META_METHOD(SetKeyboardContext)
 SB_META_METHOD(SetResourcesVariant)
+SB_META_PROPERTY_RO(TimeUSec, GetTimeUSec)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 SB_META_END_KLASS_BIND()
@@ -417,6 +418,12 @@ namespace Sandbox {
         
 		return true;
 	}
+    
+    double Application::GetTimeUSec() const {
+        GHL::TimeValue tv;
+        GHL_SystemGetTime(&tv);
+        return tv.secs * 1000000 + tv.usecs;
+    }
 	
 	
 	void Application::DrawFrame(Graphics&) const {

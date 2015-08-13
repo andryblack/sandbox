@@ -118,7 +118,7 @@ namespace Sandbox {
     }
 	
     static int lua_os_time_func(lua_State* L) {
-        lua_pushnumber(L, GHL_SystemGetTime());
+        lua_pushnumber(L, GHL_SystemGetTime(0));
         return 1;
     }
 	
