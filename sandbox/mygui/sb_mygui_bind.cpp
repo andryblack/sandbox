@@ -549,6 +549,11 @@ SB_META_DECLARE_OBJECT(MyGUI::SimpleText, MyGUI::EditText)
 SB_META_DECLARE_OBJECT(MyGUI::TabControl, MyGUI::Widget)
 
 SB_META_DECLARE_OBJECT(MyGUI::ProgressBar, MyGUI::Widget)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ProgressBar)
+SB_META_PROPERTY_RW(progressPosition, getProgressPosition, setProgressPosition)
+SB_META_PROPERTY_RW(progressRange, getProgressRange, setProgressRange)
+SB_META_PROPERTY_WO(trackColour, setTrackColour)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::MultiListBox, MyGUI::Widget)
 
@@ -688,6 +693,7 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::Window>(lua);
             luabind::ExternClass<MyGUI::DDContainer>(lua);
             luabind::ExternClass<MyGUI::ItemBox>(lua);
+            luabind::ExternClass<MyGUI::ProgressBar>(lua);
             
             luabind::ExternClass<CachedWidget>(lua);
             luabind::ExternClass<SceneWidget>(lua);
