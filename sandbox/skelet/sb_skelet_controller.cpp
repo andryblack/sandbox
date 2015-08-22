@@ -63,6 +63,7 @@ namespace Sandbox {
         m_crnt_frame = 0;
         m_frame_time = 0;
         m_loop = loop;
+        ApplyFrame();
     }
     
     void SkeletController::AddObject(const SkeletObjectPtr& obj) {
