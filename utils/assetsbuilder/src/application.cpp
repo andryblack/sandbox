@@ -143,6 +143,7 @@ SB_META_BEGIN_KLASS_BIND(TextureData)
 SB_META_CONSTRUCTOR((int,int))
 SB_META_METHOD(PremultiplyAlpha)
 SB_META_METHOD(Place)
+SB_META_METHOD(SetAlpha)
 SB_META_END_KLASS_BIND()
 
 TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(GHL_CreateImage(w, h, GHL::IMAGE_FORMAT_RGBA)) {
@@ -166,6 +167,11 @@ void TextureData::PremultiplyAlpha() {
 
 void TextureData::Place( GHL::UInt32 x, GHL::UInt32 y, const sb::intrusive_ptr<TextureData>& img ) {
     m_data->Draw(x, y, img->GetImage());
+}
+
+bool TextureData::SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex ) {
+    if (!m_data) return false;
+    return m_data->SetAlpha(alpha_tex->GetImage());
 }
 
 Application::Application() : m_lua(0),m_vfs(0) {

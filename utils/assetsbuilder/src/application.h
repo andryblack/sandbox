@@ -36,6 +36,7 @@ public:
     void PremultiplyAlpha();
     const GHL::Image* GetImage() const { return m_data; }
     void Place( GHL::UInt32 x, GHL::UInt32 y, const sb::intrusive_ptr<TextureData>& img );
+    bool SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex );
 };
 typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 
