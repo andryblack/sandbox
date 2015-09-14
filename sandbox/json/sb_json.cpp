@@ -368,6 +368,7 @@ namespace Sandbox {
         ctx.stack_depth = 0;
         
         yajl_handle h = yajl_alloc(&cb, 0, &ctx);
+        yajl_config(h,yajl_allow_comments,1);
         yajl_status s = yajl_parse(h,reinterpret_cast<const unsigned char * >(data->GetData()),data->GetSize());
         if (s == yajl_status_ok) {
             s = yajl_complete_parse(h);
