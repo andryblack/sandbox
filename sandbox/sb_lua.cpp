@@ -121,10 +121,18 @@ namespace Sandbox {
         lua_pushnumber(L, GHL_SystemGetTime(0));
         return 1;
     }
+    static int lua_os_timems_func(lua_State* L) {
+        GHL::TimeValue tv;
+        GHL_SystemGetTime(&tv);
+        lua_pushnumber(L,tv.secs*1000+lua_Number(tv.usecs)/1000 );
+        return 1;
+    }
+    
 	
 	int lua_os_open_func (lua_State *L) {
         static const luaL_Reg os_funcs_impl[] = {
 			{"time", lua_os_time_func},
+            {"timems", lua_os_timems_func},
 			{NULL, NULL}
 		};
         luaL_newlib(L, os_funcs_impl);
