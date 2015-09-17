@@ -109,6 +109,9 @@ void SpineConvert::ExportAtlas(Application* app) {
                 img.w = (region->rotate ? region->height : region->width);
                 img.h = (region->rotate ? region->width : region->height);
                 img.r = (bool(region->rotate));
+                float oy = (region->originalHeight-region->height-region->offsetY);
+                img.hsx = region->originalWidth / 2 - region->offsetX;//-(region->rotate ? oy : region->offsetX);
+                img.hsy = region->originalHeight / 2 - oy;//-(region->rotate ? region->offsetX : oy);
             }
             region = region->next;
         }
@@ -178,13 +181,13 @@ void SpineConvert::ExportAnimation() {
                         
                         float regionScaleX = ra->width / ra->regionOriginalWidth * ra->scaleX;
                         float regionScaleY = ra->height / ra->regionOriginalHeight * ra->scaleY;
-                        float localX = -ra->width / 2 * ra->scaleX + ra->regionOffsetX * regionScaleX;
-                        float localY = -ra->height / 2 * ra->scaleY + ra->regionOffsetY * regionScaleY;
+                        //float localX = -ra->width / 2 * ra->scaleX + ra->regionOffsetX * regionScaleX;
+                        //float localY = -ra->height / 2 * ra->scaleY + ra->regionOffsetY * regionScaleY;
                         float radians = ra->rotation * M_PI / 180.0f;
                         Sandbox::Transform2d trAttachment;
                         trAttachment.translate(ra->x,ra->y);
                         trAttachment.rotate(radians);
-                        trAttachment.translate(localX, -localY);
+                        //trAttachment.translate(localX, -localY);
                         trAttachment.scale(regionScaleX,-regionScaleY);
                         tr =  tr * trAttachment;
                         
