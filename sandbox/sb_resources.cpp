@@ -164,7 +164,10 @@ namespace Sandbox {
         }
 		std::string fn = filename;
 		GHL::DataStream* ds = 0;
-		if (fn.find_last_of('.')>fn.find_last_of("/")) {
+        size_t last_dot = fn.find_last_of('.');
+        size_t last_slash = fn.find_last_of('/');
+        
+		if (last_dot!=fn.npos && ( last_slash == fn.npos || last_dot > last_slash) ) {
             ds = OpenFileVariant(filename,variant);
 		}
 		if (!ds) {
