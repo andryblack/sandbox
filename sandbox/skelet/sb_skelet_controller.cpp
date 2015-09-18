@@ -70,6 +70,13 @@ namespace Sandbox {
         m_objects.push_back(obj);
     }
     
+    void SkeletController::SetFrame(size_t frame) {
+        if (!m_animation)
+            return;
+        m_crnt_frame = frame % m_animation->GetFrames();
+        ApplyFrame();
+    }
+    
     void SkeletController::ApplyFrame() {
         if (!m_animation)
             return;

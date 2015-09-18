@@ -74,9 +74,12 @@ namespace Sandbox {
 		
 		GHL::VFS* GetVFS() const { return m_vfs;}
 		GHL::Render* GetRender() const { return m_render;}
+        GHL::ImageDecoder* GetImageDecoder() const { return m_image_decoder; }
 		LuaVM* GetLua() const { return m_lua;}
 		ThreadsMgr* GetThreads() const { return m_main_thread;}
 		Resources* GetResources() const { return m_resources;}
+        Graphics* GetGraphics() const { return m_graphics; }
+        Scene* GetScene() const { return m_main_scene; }
 		
 		void SetClearColor(const Color& c);
         void SetTitle(const sb::string& title);

@@ -27,6 +27,9 @@ namespace Sandbox {
         
         void SetEndEvent(const EventPtr& e) { m_end_event = e;}
         const EventPtr& GetEndEvent() const { return m_end_event; }
+        
+        SkeletonAnimation* GetAnimation() { return m_animation; }
+        void SetFrame( size_t frame );
     private:
         size_t  m_crnt_frame;
         float   m_frame_time;
@@ -41,7 +44,7 @@ namespace Sandbox {
         };
         sb::list<AnimationEntry> m_added_animations;
     };
-    
+    typedef sb::intrusive_ptr<SkeletController> SkeletControllerPtr;
 }
 
 #endif /*SB_SKELET_CONTROLLER_H_INCLUDED*/
