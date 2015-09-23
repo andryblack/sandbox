@@ -21,11 +21,11 @@ local function load_images( dir  )
 				rules.copy_files[filename]=true
 			else
 				local pm = rules.premultiply_images or {}
-				pm[filename] = true
+				pm[filename] = filename
 				rules.premultiply_images = pm
 				v.premultiplied = true
 			end
-			rules.dest_files[filename]=true
+			rules.dest_files[filename]=filename
 			v._name = k
 			v._path = dir
 			ctx.textures[k] = v
@@ -95,8 +95,8 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 		local path = path.join(v._path,v._name .. '.' .. v.type)
 		a:add_image( {width=v.texture_info.width+2, height=v.texture_info.height+2, src = v, 
 			premultiply = rules.premultiply_images[path]} )
-		rules.dest_files[path] = false
-		rules.premultiply_images[path] = false
+		rules.dest_files[path] = nil
+		rules.premultiply_images[path] = nil
 		v._atlas = a
 	end
 	a:build()
@@ -303,10 +303,14 @@ function _M.apply( rules )
 	print('premultiply images')
 	for k,v in pairs(pmi) do
 		if v then
-			
 			local t = assert(application:load_texture(k))
 			t:PremultiplyAlpha()
-			assert(application:store_texture(k,t),'failed store texture to ' .. k)
+			print('premultiply',k)
+			if type(v) == 'string' then
+				assert(application:store_texture(v,t),'failed store texture to ' .. v)
+			else
+				assert(application:store_texture(k,t),'failed store texture to ' .. k)
+			end
 		end
 	end
 end

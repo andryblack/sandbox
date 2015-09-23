@@ -18,6 +18,7 @@ end
 
 local action_copy_files = 'copy_files'
 local action_compile_files = 'compile_files'
+local action_premultiply_images = 'premultiply_images'
 
 local function process_files_pattern( pattern , action )
 	if type(pattern) ~= 'string' then
@@ -29,7 +30,7 @@ local function process_files_pattern( pattern , action )
 		local f = path.getrelative(src_path,v)
 		--print('copy file',k,f)
 		rules[assert(action)][f]=f
-		rules.dest_files[f]=true
+		rules.dest_files[f]=f
 	end
 end
 
@@ -42,25 +43,37 @@ local function process_files_pattern_to( src, pattern, dst , action)
 	for k,v in ipairs(files) do
 		local f = path.getrelative(src_path,v)
 		local fn = path.getrelative(src,f)
-		--print('copy file',k,f)
-		rules[assert(action)][f]=path.join(dst,fn)
-		rules.dest_files[path.join(dst,fn)]=true
+		local r = rules[assert(action)] 
+		if not r then
+			r = {}
+			rules[assert(action)] = r
+		end
+		--print('process_files_pattern_to',f,fn,action)
+		r[f]=path.join(dst,fn)
+		rules.dest_files[path.join(dst,fn)]=f
 	end
 	
 end
 
 function _M.assets_rules.copy_file( file )
+
 	local src = file[1]
 	local dst = file[2] or src
+
+	if rules.dest_files[dst] then
+		print('skip',src,dst,rules.dest_files[dst])
+		return
+	end
+
 	rules.copy_files[src]=dst
-	rules.dest_files[dst]=true
+	rules.dest_files[dst]=src
 end
 
 function _M.assets_rules.compile_file( file )
 	local src = file[1]
 	local dst = file[2] or src
 	rules.compile_files[src]=dst
-	rules.dest_files[dst]=true
+	rules.dest_files[dst]=src
 end
 
 function _M.assets_rules.copy_files( file_or_filelist )
@@ -94,6 +107,11 @@ end
 function _M.assets_rules.compile_files_to( src, pattern, dst )
 	process_files_pattern_to(src, pattern, dst, action_compile_files)
 end
+
+function _M.assets_rules.premultiply_images_to( src, pattern, dst )
+	process_files_pattern_to(src, pattern, dst, action_premultiply_images)
+end
+
 
 
 local function expand_dirs( p , d )
@@ -138,7 +156,11 @@ local function copy_files( files )
 	for v,dst in pairs(files) do
 		if dst then
 			print('copy',v)
-			assert(os.copyfile(path.join(src_path,v),path.join(dst_path,dst)))
+			if type(dst) == 'string' then
+				assert(os.copyfile(path.join(src_path,v),path.join(dst_path,dst)))
+			else
+				assert(os.copyfile(path.join(src_path,v),path.join(dst_path,v)))
+			end
 		end
 	end
 end
