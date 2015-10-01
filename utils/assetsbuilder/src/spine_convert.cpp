@@ -13,7 +13,10 @@
 #include "skelet/sb_skelet_data.h"
 #include <sb_data.h>
 #include <sb_base64.h>
+#include <sb_log.h>
 #include "application.h"
+
+SB_META_DECLARE_OBJECT(SpineConvert, SkeletonConvert)
 
 
 extern "C" void _spAtlasPage_createTexture (spAtlasPage* self, const char* path){
@@ -63,7 +66,10 @@ bool SpineConvert::Load(const char *atlas_file,
         m_atlas_name = atlas_name;
     }
     GHL::DataStream* ds = file_provider->OpenFile(atlas_file);
-    if (!ds) return false;
+    if (!ds) {
+        Sandbox::LogError() << "not found " << atlas_file;
+        return false;
+    }
     GHL::Data* data = GHL_ReadAllData(ds);
     ds->Release();
     if (!data)
@@ -82,8 +88,10 @@ bool SpineConvert::Load(const char *atlas_file,
     
     spSkeletonJson* json = spSkeletonJson_create(m_atlas);
     ds = file_provider->OpenFile(skeleton_file);
-    if (!ds)
+    if (!ds) {
+        Sandbox::LogError() << "not found " << skeleton_file;
         return false;
+    }
     data = GHL_ReadAllData(ds);
     ds->Release();
     if (!data)
@@ -115,7 +123,11 @@ void SpineConvert::ExportAtlas(Application* app) {
             }
             region = region->next;
         }
-        app->premultiply_image(m_dir + "/" + page->name, m_out_dir + "/" + page->name);
+        sb::string output_name = m_out_name;
+        output_name += "_";
+        output_name += page->name;
+        a.filename = output_name;
+        app->premultiply_image(m_dir + "/" + page->name, m_out_dir + "/" + output_name);
         page = page->next;
     }
     write_atlases();
@@ -142,6 +154,8 @@ void SpineConvert::ExportAnimation() {
         animation& a = add_animation(anim->name, export_fps);
         
         float delta = 1.0f / export_fps;
+        spSkeleton_setBonesToSetupPose(skeleton);
+        
         spAnimationState_setAnimation(state, 0, anim, false);
        
         for (size_t f = 0;f<frames;++f ) {
@@ -212,9 +226,15 @@ void SpineConvert::ExportAnimation() {
 
 
 
+
 void SpineConvert::Export(const char *file,Application* app) {
     const char* last_slash = ::strrchr(file, '/');
     if (last_slash) {
+        m_out_name = last_slash + 1;
+        size_t dotpos = m_out_name.rfind('.');
+        if (dotpos!=m_out_name.npos) {
+            m_out_name.resize(dotpos);
+        }
         m_out_dir.assign(file,last_slash);
     }
     m_doc.root().append_child("skeleton");

@@ -5,6 +5,15 @@ local _M = {}
 
 _M.assets_rules = {}
 
+
+function _M.assets_rules.require_version( v )
+	if not host_version or host_version < v then
+		print('required host version ',v,'but run on',host_version)
+		print('please update utils')
+		os.exit(1)
+	end
+end
+
 local img = require '_images'
 local convert_spine = require '_convert_spine'
 
@@ -75,6 +84,7 @@ function _M.assets_rules.compile_file( file )
 	rules.compile_files[src]=dst
 	rules.dest_files[dst]=src
 end
+
 
 function _M.assets_rules.copy_files( file_or_filelist )
 	if type(file_or_filelist) == 'table' then

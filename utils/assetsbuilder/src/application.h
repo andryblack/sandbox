@@ -12,6 +12,9 @@ namespace GHL {
     struct Image;
 }
 
+class SkeletonConvert;
+class SpineConvert;
+
 class Texture : public Sandbox::meta::object {
     SB_META_OBJECT
 private:
@@ -53,7 +56,11 @@ public:
     TextureDataPtr load_texture( const sb::string& file );
     bool store_texture( const sb::string& file , const TextureDataPtr& data );
     bool store_file(  const sb::string& file , const GHL::Data* data );
-    bool convert_spine(const sb::string& atlas, const sb::string& skelet, const sb::string& outfolder);
+    sb::intrusive_ptr<SpineConvert> open_spine(const sb::string& atlas,
+                                                const sb::string& skelet );
+    bool convert_spine(const sb::string& atlas,
+                       const sb::string& skelet,
+                       const sb::string& outfolder);
     bool premultiply_image( const sb::string& src, const sb::string& dst );
 	int run();
 protected:

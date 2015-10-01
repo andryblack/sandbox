@@ -13,6 +13,8 @@ extern "C" {
 #include <lualib.h>
 }
 
+static const double VERSION = 1.0;
+
 #include <luabind/sb_luabind.h>
 
 #if LUA_VERSION_NUM >= 502
@@ -130,6 +132,15 @@ SB_META_METHOD(check_texture)
 SB_META_METHOD(load_texture)
 SB_META_METHOD(store_texture)
 SB_META_METHOD(convert_spine)
+SB_META_METHOD(open_spine)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(SkeletonConvert)
+SB_META_METHOD(RenameAnimation)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(SpineConvert)
+SB_META_METHOD(Export)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(Texture, Sandbox::meta::object)
@@ -212,6 +223,8 @@ void Application::Bind(lua_State* L) {
     Sandbox::luabind::Class<Texture>(L);
     Sandbox::luabind::Class<TextureData>(L);
     Sandbox::luabind::ExternClass<Application>(L);
+    Sandbox::luabind::ExternClass<SkeletonConvert>(L);
+    Sandbox::luabind::ExternClass<SpineConvert>(L);
     Sandbox::register_json(L);
 }
 
@@ -311,11 +324,21 @@ bool Application::convert_spine(const sb::string& atlas, const sb::string& skele
 
     return true;
 }
+
+sb::intrusive_ptr<SpineConvert> Application::open_spine(const sb::string& atlas,
+                                           const sb::string& skelet ) {
+    sb::intrusive_ptr<SpineConvert> res(new SpineConvert);
+    if (!res->Load(atlas.c_str(), skelet.c_str(), this))
+        return sb::intrusive_ptr<SpineConvert>();
+    return res;
+}
+
 int Application::run() {
     Bind(m_lua->GetVM());
 
     m_lua->GetGlobalContext()->SetValue("application", this);
     m_lua->GetGlobalContext()->SetValue("platform",m_platform);
+    m_lua->GetGlobalContext()->SetValue("host_version", VERSION);
     
     if (!m_lua->DoFile("_init.lua")) {
         Sandbox::LogError() << "failed exec init script, check path " << m_scripts_dir;

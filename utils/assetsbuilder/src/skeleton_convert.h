@@ -9,11 +9,13 @@
 
 class Application;
 
-class SkeletonConvert {
+class SkeletonConvert : public Sandbox::meta::object {
+    SB_META_OBJECT
 protected:
     pugi::xml_document   m_doc;
     sb::string  m_dir;
     sb::string  m_out_dir;
+    sb::string  m_out_name;
     int m_image_index;
     SkeletonConvert();
     struct image {
@@ -67,6 +69,9 @@ protected:
     bool store_xml(const sb::string& file, Application* app);
     
     void post_scale(float s);
+    sb::map<sb::string, sb::string> m_anim_rename;
+public:
+    bool RenameAnimation(const char* from, const char* to);
 };
 
 #endif /*SKELETON_CONVERT_H_INCLUDED*/

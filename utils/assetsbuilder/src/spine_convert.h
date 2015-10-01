@@ -16,9 +16,11 @@
 #include <spine/spine.h>
 #include <skelet/sb_skelet_data.h>
 #include <pugixml.hpp>
+#include <sbstd/sb_map.h>
 
 class Application;
 class SpineConvert : public SkeletonConvert {
+    SB_META_OBJECT
 private:
     spAtlas*   m_atlas;
     spSkeletonData* m_skeleton;
@@ -32,6 +34,8 @@ public:
     bool Load(const char* atlas, const char* skelet,
               Sandbox::FileProvider* file_provider);
     void Export(const char* file, Application* app);
+    
+    
 };
 
 #endif /* defined(__AssetsBuilder__spine_convert__) */

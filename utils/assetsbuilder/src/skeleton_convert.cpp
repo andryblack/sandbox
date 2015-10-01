@@ -3,6 +3,8 @@
 #include <sb_data.h>
 #include <sb_base64.h>
 
+SB_META_DECLARE_OBJECT(SkeletonConvert, Sandbox::meta::object)
+
 SkeletonConvert::SkeletonConvert() : m_image_index(1),m_nodes_count(0) {
     
 }
@@ -44,6 +46,10 @@ SkeletonConvert::animation& SkeletonConvert::add_animation( const sb::string& na
     m_animations.push_back(animation());
     m_animations.back().name = name;
     m_animations.back().fps = fps;
+    sb::map<sb::string, sb::string>::const_iterator it = m_anim_rename.find(name);
+    if (it!=m_anim_rename.end()) {
+        m_animations.back().name = it->second;
+    }
     return m_animations.back();
 }
 
@@ -105,6 +111,17 @@ void SkeletonConvert::post_scale(float s) {
         }
     }
 }
+
+bool SkeletonConvert::RenameAnimation(const char* from, const char* to) {
+    for (sb::vector<animation>::iterator anim = m_animations.begin();anim!=m_animations.end();++anim) {
+        if (anim->name == from) {
+            anim->name = to;
+            return true;
+        }
+    }
+    m_anim_rename[from]=to;
+    return true;
+}
 void SkeletonConvert::write_animations() {
     pugi::xml_node animations = m_doc.document_element().append_child("animations");
     for (sb::vector<animation>::const_iterator anim = m_animations.begin();anim!=m_animations.end();++anim) {
@@ -112,6 +129,7 @@ void SkeletonConvert::write_animations() {
         a.append_attribute("name").set_value(anim->name.c_str());
         a.append_attribute("fps").set_value(anim->fps);
         a.append_attribute("frames").set_value((unsigned int)anim->frames.size());
+        a.append_attribute("duration").set_value(float(anim->frames.size())/anim->fps);
         a.append_attribute("compression").set_value("zlib");
         a.append_attribute("encoding").set_value("base64");
         
