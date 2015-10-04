@@ -10,9 +10,13 @@
 
 #include "sb_mygui_scroll_list.h"
 #include "sb_mygui_cached_widget.h"
+#include "sb_mygui_scene_widget.h"
+#include "sb_mygui_mask_image.h"
+
 
 #include "MyGUI_WidgetManager.h"
 #include "MyGUI_FactoryManager.h"
+
 
 namespace Sandbox {
     
@@ -23,12 +27,16 @@ namespace Sandbox {
             
             factory.registerFactory<ScrollList>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.registerFactory<CachedWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            factory.registerFactory<SceneWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            factory.registerFactory<MaskImageWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
         }
         void unregister_widgets() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
             
+            factory.unregisterFactory<SceneWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<ScrollList>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<CachedWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            factory.unregisterFactory<MaskImageWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
         }
 
     }

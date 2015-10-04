@@ -25,34 +25,7 @@ namespace Sandbox {
     namespace mygui {
         
         
-        class VertexBuffer : public MyGUI::IVertexBuffer {
-        public:
-            VertexBuffer() {
-                m_data = new VectorData<MyGUI::Vertex>();
-            }
-            ~VertexBuffer() {
-                m_data->Release();
-            }
-            virtual void setVertexCount(size_t _value) {
-                m_data->vector().resize(_value);
-            }
-            virtual size_t getVertexCount() {
-                return m_data->vector().size();
-            }
-            
-            virtual MyGUI::Vertex* lock() {
-                return m_data->vector().data();
-            }
-            virtual void unlock() {
                 
-            }
-            const void* GetData() {
-                return m_data->GetData();
-            }
-        private:
-            VectorData<MyGUI::Vertex>*  m_data;
-        };
-        
         RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res) : m_graphics(g),m_resources(res),m_render(0) {
             
         }
@@ -61,7 +34,8 @@ namespace Sandbox {
             if (m_render) {
                 m_graphics->EndNative(m_render);
                 Transform2d tr = m_graphics->GetTransform();
-                m_graphics->SetTransform(tr.translated(-m_rt_info.leftOffset, -m_rt_info.topOffset));
+            
+                //m_graphics->SetTransform(tr.translated(-m_rt_info.leftOffset, -m_rt_info.topOffset));
                 scene->Draw(*m_graphics);
                 m_graphics->SetTransform(tr);
                 m_render = m_graphics->BeginNative();
@@ -102,123 +76,121 @@ namespace Sandbox {
         }
 
         
-        class RenderManager::Texture : public MyGUI::ITexture, public RenderTargetImpl {
-        public:
-            Texture( const sb::string& name, Graphics* graphics,Resources* res) : RenderTargetImpl(graphics,res),m_name(name),m_image(0) {
+        TextureImpl::TextureImpl( const sb::string& name, Graphics* graphics,Resources* res) : RenderTargetImpl(graphics,res),m_name(name),m_image(0) {
                 
             }
             
-            virtual void begin() {
-                if (m_target) {
-                    GHL::RenderTarget* rt = m_target->GetNative();
-                    GHL::Render* render = m_resources->GetRender();
-                    render->BeginScene(rt);
-                    m_graphics->BeginScene(render);
-                    m_graphics->Clear(Color(0,0,0,0), 0);
-                    RenderTargetImpl::begin();
+        TextureImpl::TextureImpl( const sb::string& name, Graphics* graphics,Resources* res,
+                   RenderTargetPtr rt ) : RenderTargetImpl(graphics,res),m_name(name),m_image(0) {
+            m_target = rt;
+            m_texture = m_target->GetTexture();
+            int _width = m_texture->GetWidth();
+            int _height = m_texture->GetHeight();
+            setSize(_width, _height);
+        }
+            
+        void TextureImpl::begin() {
+            if (m_target) {
+                GHL::RenderTarget* rt = m_target->GetNative();
+                GHL::Render* render = m_resources->GetRender();
+                render->BeginScene(rt);
+                m_graphics->BeginScene(render);
+                m_graphics->Clear(Color(0,0,0,0), 0);
+                RenderTargetImpl::begin();
+            }
+        }
+        void TextureImpl::doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
+            RenderTargetImpl::doRender(_buffer, _texture, _count);
+        }
+        void TextureImpl::end() {
+            GHL::Render* render = m_render;
+            RenderTargetImpl::end();
+            m_graphics->EndScene();
+            if (render) {
+                render->EndScene();
+            }
+        }
+            
+        MyGUI::IRenderTarget* TextureImpl::getRenderTarget()
+        {
+            if (m_target)
+                return this;
+            return 0;
+        }
+            
+            
+            
+        void TextureImpl::createManual(int _width, int _height, MyGUI::TextureUsage _usage, MyGUI::PixelFormat _format) {
+            if (_usage == MyGUI::TextureUsage::RenderTarget) {
+                m_target = m_resources->CreateRenderTarget(_width,_height,m_resources->GetScale(),true,false);
+                m_texture = m_target->GetTexture();
+                setSize(_width, _height);
+            } else {
+                if (_format == MyGUI::PixelFormat::R8G8B8A8) {
+                    m_texture = m_resources->CreateTexture(_width, _height, m_resources->GetScale(), true, 0);
                 }
             }
-            virtual void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
-                RenderTargetImpl::doRender(_buffer, _texture, _count);
-            }
-            virtual void end() {
-                GHL::Render* render = m_render;
-                RenderTargetImpl::end();
-                m_graphics->EndScene();
-                if (render) {
-                    render->EndScene();
-                }
-            }
+        }
             
-            virtual MyGUI::IRenderTarget* getRenderTarget()
-            {
-                if (m_target)
-                    return this;
-                return 0;
-            }
+        void TextureImpl::loadFromFile(const std::string& _filename) {
+            m_texture = m_resources->GetTexture(_filename.c_str(), false);
+        }
             
-            virtual const std::string& getName() const {
-                return m_name;
-            }
-            
-            virtual void createManual(int _width, int _height, MyGUI::TextureUsage _usage, MyGUI::PixelFormat _format) {
-                if (_usage == MyGUI::TextureUsage::RenderTarget) {
-                    m_target = m_resources->CreateRenderTarget(_width,_height,m_resources->GetScale(),true,false);
-                    m_texture = m_target->GetTexture();
-                    setSize(_width, _height);
-                } else {
-                    if (_format == MyGUI::PixelFormat::R8G8B8A8) {
-                        m_texture = m_resources->CreateTexture(_width, _height, m_resources->GetScale(), true, 0);
-                    }
-                }
-            }
-            
-            virtual void loadFromFile(const std::string& _filename) {
-                m_texture = m_resources->GetTexture(_filename.c_str(), false);
-            }
-            
-            virtual void saveToFile(const std::string& _filename) {
-                
-            }
+        
           
-            virtual void destroy() {
-                m_texture.reset();
-            }
+        void TextureImpl::destroy() {
+            m_texture.reset();
+        }
             
-            virtual void* lock(MyGUI::TextureUsage _access) {
-                if (!m_texture) return 0;
-                m_image = GHL_CreateImage(m_texture->GetRealWidth(), m_texture->GetRealHeight(), GHL::IMAGE_FORMAT_RGBA);
-                return m_image->GetDataPtr();
-            }
+        void* TextureImpl::lock(MyGUI::TextureUsage _access) {
+            if (!m_texture) return 0;
+            m_image = GHL_CreateImage(m_texture->GetRealWidth(), m_texture->GetRealHeight(), GHL::IMAGE_FORMAT_RGBA);
+            return m_image->GetDataPtr();
+        }
             
-            virtual void unlock() {
-                if (m_image && m_texture) {
-                    GHL::Texture* tex = m_texture->Present(m_resources);
-                    {
-                        //m_image->PremultiplyAlpha();
-                    }
-                    tex->SetData(0, 0, m_image,0);
-                    m_image->Release();
-                    m_image = 0;
-                    tex->DiscardInternal();
+        void TextureImpl::unlock() {
+            if (m_image && m_texture) {
+                GHL::Texture* tex = m_texture->Present(m_resources);
+                {
+                    //m_image->PremultiplyAlpha();
                 }
+                tex->SetData(0, 0, m_image,0);
+                m_image->Release();
+                m_image = 0;
+                tex->DiscardInternal();
             }
+        }
+        
+        int TextureImpl::getWidth() {
+            return m_texture ? m_texture->GetWidth() : 0;
+        }
+        int TextureImpl::getHeight() {
+            return m_texture ? m_texture->GetHeight() : 0;
+        }
             
-            virtual bool isLocked() {
-                return m_image!=0;
-            }
+        MyGUI::PixelFormat TextureImpl::getFormat() {
+            return MyGUI::PixelFormat::R8G8B8A8;
+        }
+        MyGUI::TextureUsage TextureImpl::getUsage() {
+            return MyGUI::TextureUsage::Default;
+        }
+        size_t TextureImpl::getNumElemBytes() {
+            return 0;
+        }
+        const GHL::Texture* TextureImpl::Present() {
+            return m_texture ? m_texture->Present(m_resources) : reinterpret_cast<GHL::Texture*>((void*)(0));
+        }
+        
+        RenderTargetImpl::RenderTargetImpl() : m_draw_mask(0) {
             
-            virtual int getWidth() {
-                return m_texture ? m_texture->GetWidth() : 0;
-            }
-            virtual int getHeight() {
-                return m_texture ? m_texture->GetHeight() : 0;
-            }
-            
-            virtual MyGUI::PixelFormat getFormat() {
-                return MyGUI::PixelFormat::R8G8B8A8;
-            }
-            virtual MyGUI::TextureUsage getUsage() {
-                return MyGUI::TextureUsage::Default;
-            }
-            virtual size_t getNumElemBytes() {
-                return 0;
-            }
-            const GHL::Texture* Present() {
-                return m_texture ? m_texture->Present(m_resources) : reinterpret_cast<GHL::Texture*>((void*)(0));
-            }
-        private:
-            sb::string  m_name;
-            TexturePtr  m_texture;
-            RenderTargetPtr m_target;
-            GHL::Image* m_image;
-        };
+        }
         
         
         void RenderTargetImpl::doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
             if (m_render) {
-                VertexBuffer* vb = reinterpret_cast<VertexBuffer*>(_buffer);
-                RenderManager::Texture* tex = reinterpret_cast<RenderManager::Texture*>(_texture);
+                endRenderMask();
+                VertexBufferImpl* vb = reinterpret_cast<VertexBufferImpl*>(_buffer);
+                TextureImpl* tex = reinterpret_cast<TextureImpl*>(_texture);
                 if (vb && tex) {
                     m_render->SetTexture(tex->Present());
                     m_render->DrawPrimitivesFromMemory(GHL::PRIMITIVE_TYPE_TRIANGLES,
@@ -228,6 +200,32 @@ namespace Sandbox {
             }
         }
 
+        void    RenderTargetImpl::startRenderMask( MyGUI::ITexture* tex_mask ) {
+            TextureImpl* tex = reinterpret_cast<TextureImpl*>(tex_mask);
+            if (m_draw_mask == tex) {
+                return;
+            }
+            m_draw_mask = tex;
+            if (m_render) {
+                m_render->SetTexture(m_draw_mask->Present(),1);
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
+                m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
+            }
+        }
+        
+        void    RenderTargetImpl::endRenderMask() {
+            if (!m_draw_mask) {
+                return;
+            }
+            if (m_render) {
+                m_render->SetTexture(0,1);
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
+                m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
+            }
+            m_draw_mask = 0;
+        }
+        
+        
         RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res) {
             m_graphics = graphics;
             setSize(m_resources->GetRender()->GetWidth(),
@@ -237,7 +235,7 @@ namespace Sandbox {
         }
         
         MyGUI::IVertexBuffer* RenderManager::createVertexBuffer() {
-            return new VertexBuffer();
+            return new VertexBufferImpl();
         }
         
         void RenderManager::destroyVertexBuffer(MyGUI::IVertexBuffer* _buffer) {
@@ -250,26 +248,34 @@ namespace Sandbox {
         
         MyGUI::ITexture* RenderManager::createTexture(const std::string& _name) {
             sb_assert(m_textures.find(_name)==m_textures.end());
-            Texture* tex = new Texture(_name,m_graphics,m_resources);
+            
+            TextureImpl* tex = new TextureImpl(_name,m_graphics,m_resources);
             m_textures[_name] = tex;
             return tex;
         }
         
         void RenderManager::destroyTexture(MyGUI::ITexture* _texture) {
             if (!_texture) return;
-            Texture* tex = reinterpret_cast<Texture*>(_texture);
-            sb::map<sb::string, Texture*>::iterator it = m_textures.find(tex->getName());
+            TextureImpl* tex = reinterpret_cast<TextureImpl*>(_texture);
+            sb::map<sb::string, TextureImpl*>::iterator it = m_textures.find(tex->getName());
             sb_assert(it!=m_textures.end());
             m_textures.erase(it);
             delete tex;
         }
         
         MyGUI::ITexture* RenderManager::getTexture(const std::string& _name) {
-            sb::map<sb::string, Texture*>::iterator it = m_textures.find(_name);
+            sb::map<sb::string, TextureImpl*>::iterator it = m_textures.find(_name);
             if (it!=m_textures.end()) {
                 return it->second;
             }
             return 0;
+        }
+        
+        MyGUI::ITexture* RenderManager::wrapRT(const std::string& _name,const RenderTargetPtr& rt ) {
+            sb_assert(m_textures.find(_name)==m_textures.end());
+            TextureImpl* tex = new TextureImpl(_name,m_graphics,m_resources,rt);
+            m_textures[_name] = tex;
+            return tex;
         }
         
         const MyGUI::IntSize& RenderManager::getViewSize() const {

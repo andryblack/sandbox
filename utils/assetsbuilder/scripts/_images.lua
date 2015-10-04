@@ -175,9 +175,7 @@ local function apply_images( dir, data )
 		if path ~= '' then
 			path = path .. '/'
 		end
-		if prefix ~= '' then
-			prefix = prefix .. '_'
-		end
+		
 		for k,v in pairs(g) do
 			func(prefix .. k .. '_', v.data[name],path .. v.path)
 			expand_group(v,func,prefix..k..'_',name)

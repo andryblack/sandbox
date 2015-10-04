@@ -4,6 +4,7 @@
 #include "meta/sb_meta.h"
 #include "MyGUI_RenderItem.h"
 #include "MyGUI_ITexture.h"
+#include "widgets/sb_mygui_mask_image.h"
 
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ColorizedSubSkinStateInfo,MyGUI::SubSkinStateInfo)
@@ -84,6 +85,18 @@ namespace Sandbox {
                 quad->vertex[MyGUI::VertexQuad::CornerRT2].colour =
                 quad->vertex[MyGUI::VertexQuad::CornerRB].colour & 0x00FFFFFF;
             }
+            if (mAlign.isTop()) {
+                quad->vertex[MyGUI::VertexQuad::CornerLT].colour =
+                quad->vertex[MyGUI::VertexQuad::CornerRT].colour =
+                quad->vertex[MyGUI::VertexQuad::CornerRT2].colour =
+                quad->vertex[MyGUI::VertexQuad::CornerLT].colour & 0x00FFFFFF;
+            }
+            if (mAlign.isBottom()) {
+                quad->vertex[MyGUI::VertexQuad::CornerLB].colour =
+                quad->vertex[MyGUI::VertexQuad::CornerRB].colour =
+                quad->vertex[MyGUI::VertexQuad::CornerLB2].colour =
+                quad->vertex[MyGUI::VertexQuad::CornerLB].colour & 0x00FFFFFF;
+            }
         }
         
         void register_skin() {
@@ -93,6 +106,9 @@ namespace Sandbox {
                         
             factory.registerFactory<ColorizedSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.registerFactory<CopySubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            factory.registerFactory<MaskSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            
+            factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSubSkin");
         }
         
         void unregister_skin() {
@@ -100,6 +116,8 @@ namespace Sandbox {
             factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ColorizedSubSkin");
             factory.unregisterFactory<ColorizedSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<CopySubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            factory.unregisterFactory<MaskSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSubSkin");
         }
         
     }

@@ -41,7 +41,9 @@ namespace Sandbox {
             typedef U T::* prop_ptr;
             const char* name;
             prop_ptr prop;
-            property_holder( const char* name, prop_ptr prop ) : name(name),prop(prop){}
+            property_holder( const char* name, prop_ptr prop ) : name(name),prop(prop){
+                sb_assert(name && *name!='"');
+            }
         };
         template <class T,class U> 
         static inline property_holder<T, U> property( const char* name, U T::* prop ) {
@@ -51,7 +53,9 @@ namespace Sandbox {
         template <class T,class Getter> struct property_holder_ro {
             const char* name;
             Getter getter;
-            property_holder_ro( const char* name, Getter getter ) : name(name),getter(getter){}
+            property_holder_ro( const char* name, Getter getter ) : name(name),getter(getter){
+                sb_assert(name && *name!='"');
+            }
         };
         template <class T,class U> 
         static inline property_holder_ro<T,U (T::*)() const> property_ro( const char* name,U (T::*getter)() const) {
@@ -64,7 +68,9 @@ namespace Sandbox {
         template <class T,class Setter> struct property_holder_wo {
             const char* name;
             Setter setter;
-            property_holder_wo( const char* name, Setter setter ) : name(name),setter(setter){}
+            property_holder_wo( const char* name, Setter setter ) : name(name),setter(setter){
+                sb_assert(name && *name!='"');
+            }
         };
         template <class T,class U>
         static inline property_holder_wo<T,void (T::*)(U)> property_wo( const char* name,void (T::*setter)(U)) {
@@ -83,7 +89,9 @@ namespace Sandbox {
             const char* name;
             Getter getter;
             Setter setter;
-            property_holder_rw( const char* name, Getter getter, Setter setter ) : name(name),getter(getter),setter(setter){}
+            property_holder_rw( const char* name, Getter getter, Setter setter ) : name(name),getter(getter),setter(setter){
+                sb_assert(name && *name!='"');
+            }
         };
         template <class T,class U> 
         static inline property_holder_rw<T,U (T::*)() const,void(T::*)(U)> property_rw( const char* name,
@@ -107,7 +115,9 @@ namespace Sandbox {
         template <class Func> struct method_holder {
             const char* name;
             Func func;
-            method_holder( const char* name,Func func ) : name(name),func(func){}
+            method_holder( const char* name,Func func ) : name(name),func(func){
+                sb_assert(name && *name!='"');
+            }
         };
         template <typename Func> 
         static inline method_holder<Func> method( const char* name, Func func ) {

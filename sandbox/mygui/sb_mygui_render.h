@@ -16,6 +16,8 @@
 #include <sbstd/sb_string.h>
 
 #include "sb_scene.h"
+#include <ghl_render.h>
+#include "sb_data.h"
 
 namespace GHL {
     struct Render;
@@ -25,11 +27,47 @@ namespace Sandbox {
     
     class Resources;
     class Graphics;
+    class Texture;
+    typedef sb::intrusive_ptr<Texture> TexturePtr;
+    
+    class RenderTarget;
+    typedef sb::intrusive_ptr<RenderTarget> RenderTargetPtr;
     
     namespace mygui {
         
+        class VertexBufferImpl : public MyGUI::IVertexBuffer {
+        public:
+            VertexBufferImpl() {
+
+            }
+            virtual void setVertexCount(size_t _value) {
+                m_data.resize(_value);
+            }
+            virtual size_t getVertexCount() {
+                return m_data.size();
+            }
+            
+            virtual MyGUI::Vertex* lock() {
+                return reinterpret_cast<MyGUI::Vertex*>(m_data.data());
+            }
+            virtual void unlock() {
+                
+            }
+            const void* GetData() {
+                return m_data.data();
+            }
+            
+            sb::vector<GHL::Vertex>& data() { return m_data; }
+        private:
+            sb::vector<GHL::Vertex>  m_data;
+        };
+
+        
+        class TextureImpl;
+        
         class RenderTargetImpl : public MyGUI::IRenderTarget {
         public:
+            RenderTargetImpl();
             virtual void begin();
             virtual void end();
             
@@ -39,6 +77,11 @@ namespace Sandbox {
             
             void    drawScene(const ScenePtr& scene);
             
+            void    startRenderMask( MyGUI::ITexture* tex_mask );
+            void    endRenderMask();
+            
+            GHL::Render* render() { return m_render; }
+            Resources* resources() { return m_resources; }
         protected:
             RenderTargetImpl( Graphics* graphics, Resources* resources );
             Graphics*       m_graphics;
@@ -47,7 +90,47 @@ namespace Sandbox {
             MyGUI::IntSize  m_rendertarget_size;
             void setSize(int width,int height);
             GHL::Render*    m_render;
+            TextureImpl*    m_draw_mask;
         };
+        
+        class TextureImpl : public MyGUI::ITexture, public RenderTargetImpl {
+        public:
+            TextureImpl( const sb::string& name, Graphics* graphics,Resources* res);
+            TextureImpl( const sb::string& name, Graphics* graphics,Resources* res,
+                        RenderTargetPtr rt );
+            
+            virtual void begin();
+            virtual void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
+            void end();
+            
+            virtual MyGUI::IRenderTarget* getRenderTarget();
+            virtual const std::string& getName() const { return m_name; }
+            virtual void createManual(int _width, int _height, MyGUI::TextureUsage _usage, MyGUI::PixelFormat _format);
+            virtual void loadFromFile(const std::string& _filename);
+            virtual void saveToFile(const std::string& _filename) {
+                
+            }
+            virtual void destroy();
+
+            virtual void* lock(MyGUI::TextureUsage _access);
+            virtual void unlock();
+            virtual bool isLocked() {
+                return m_image!=0;
+            }
+            virtual int getWidth();
+            virtual int getHeight();
+            
+            virtual MyGUI::PixelFormat getFormat();
+            virtual MyGUI::TextureUsage getUsage();
+            virtual size_t getNumElemBytes();
+            const GHL::Texture* Present();
+        private:
+            sb::string  m_name;
+            TexturePtr  m_texture;
+            RenderTargetPtr m_target;
+            GHL::Image* m_image;
+        };
+        
         class RenderManager : public MyGUI::RenderManager, public RenderTargetImpl {
         public:
             explicit RenderManager( Graphics* graphics, Resources* resources );
@@ -85,9 +168,13 @@ namespace Sandbox {
             void    drawFrame();
             
             virtual float getDisplayScale() const;
-            class Texture;
+            
+            
+            
+            MyGUI::ITexture* wrapRT( const sb::string& name, const RenderTargetPtr& rt );
         private:
-            sb::map<sb::string,Texture*>  m_textures;
+            sb::map<sb::string,TextureImpl*>  m_textures;
+            
         };
         
     }

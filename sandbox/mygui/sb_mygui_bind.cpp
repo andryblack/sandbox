@@ -70,6 +70,7 @@
 #include "MyGUI_CommonStateInfo.h"
 
 #include "widgets/sb_mygui_scene_widget.h"
+#include "widgets/sb_mygui_mask_image.h"
 
 namespace Sandbox {
     
@@ -368,9 +369,27 @@ SB_META_PROPERTY(right)
 SB_META_PROPERTY(bottom)
 SB_META_END_KLASS_BIND()
 
+static int create_colour(lua_State* L) {
+    if (lua_isstring(L, 2)) {
+        Sandbox::luabind::stack<MyGUI::Colour>::push(L, MyGUI::Colour::parse(lua_tostring(L, 2)));
+    } else {
+        if (lua_gettop(L)>4) {
+            Sandbox::luabind::stack<MyGUI::Colour>::push(L, MyGUI::Colour(lua_tonumber(L, 2),
+                                                                          lua_tonumber(L, 3),
+                                                                          lua_tonumber(L, 4),
+                                                                          lua_tonumber(L, 5)));
+        } else {
+            Sandbox::luabind::stack<MyGUI::Colour>::push(L, MyGUI::Colour(lua_tonumber(L, 2),
+                                                                          lua_tonumber(L, 3),
+                                                                          lua_tonumber(L, 4)));
+        }
+    }
+    return 1;
+}
+
 SB_META_DECLARE_KLASS(MyGUI::Colour, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Colour)
-SB_META_CONSTRUCTOR((float,float,float,float))
+bind( constructor(&create_colour) );
 SB_META_PROPERTY(red)
 SB_META_PROPERTY(green)
 SB_META_PROPERTY(blue)
@@ -443,6 +462,10 @@ bind(method("eventMouseButtonReleased", delegate_bind<MyGUI::Widget,
             &MyGUI::WidgetInput::eventMouseButtonReleased>::lua_func));
 
 SB_META_METHOD(findWidget)
+
+SB_META_METHOD(getChildCount)
+SB_META_METHOD(getChildAt)
+
 SB_META_METHOD(setProperty)
 SB_META_METHOD(changeWidgetSkin)
 
@@ -492,7 +515,7 @@ SB_META_DECLARE_OBJECT(MyGUI::MenuItem, MyGUI::Button)
 
 SB_META_DECLARE_OBJECT(MyGUI::Window, MyGUI::TextBox)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Window)
-SB_META_PROPERTY_RW("movable", getMovable, setMovable)
+SB_META_PROPERTY_RW(movable, getMovable, setMovable)
 SB_META_METHOD(setVisibleSmooth)
 SB_META_METHOD(destroySmooth)
 SB_META_END_KLASS_BIND()
@@ -515,7 +538,7 @@ SB_META_DECLARE_OBJECT(MyGUI::ListBox, MyGUI::Widget)
 
 SB_META_DECLARE_OBJECT(MyGUI::DDContainer, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::DDContainer)
-SB_META_PROPERTY_RW("needDragDrop", getNeedDragDrop, setNeedDragDrop)
+SB_META_PROPERTY_RW(needDragDrop, getNeedDragDrop, setNeedDragDrop)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ItemBox, MyGUI::DDContainer)
@@ -537,7 +560,7 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::CachedWidget)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::SceneWidget)
-SB_META_PROPERTY_RW("Scene", getScene, setScene)
+SB_META_PROPERTY_RW(scene, getScene, setScene)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::Canvas, MyGUI::Widget)
@@ -643,6 +666,10 @@ SB_META_METHOD(addWidgetModal)
 SB_META_METHOD(removeWidgetModal)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::MaskImageWidget)
+SB_META_PROPERTY_RW(image,getImage,setImage)
+SB_META_END_KLASS_BIND()
+
 
 static int gui_find_widget_proxy(lua_State* L) {
     MyGUI::Gui* self = Sandbox::luabind::stack<MyGUI::Gui*>::get(L, 1);
@@ -697,6 +724,7 @@ namespace Sandbox {
             
             luabind::ExternClass<CachedWidget>(lua);
             luabind::ExternClass<SceneWidget>(lua);
+            luabind::ExternClass<MaskImageWidget>(lua);
             
             luabind::ExternClass<MyGUI::InputManager>(lua);
             
