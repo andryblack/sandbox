@@ -254,6 +254,7 @@ struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate4<A1, A2, A3, A4>, obj 
         lua_pushvalue(L, 2);
         delegate->SetObject(L);
         MultiDelegate& md(t->*obj);
+        md.clear();
         md += delegate;
         return 0;
     }
@@ -268,6 +269,7 @@ struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate2<A1, A2>, obj > {
         lua_pushvalue(L, 2);
         delegate->SetObject(L);
         MultiDelegate& md(t->*obj);
+        md.clear();
         md += delegate;
         return 0;
     }
@@ -282,6 +284,7 @@ struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate1<A1>, obj > {
         lua_pushvalue(L, 2);
         delegate->SetObject(L);
         MultiDelegate& md(t->*obj);
+        md.clear();
         md += delegate;
         return 0;
     }
@@ -296,6 +299,7 @@ struct delegate_bind<O,T,MyGUI::delegates::CDelegate2<A1, A2>, obj > {
         lua_pushvalue(L, 2);
         delegate->SetObject(L);
         MultiDelegate& md(t->*obj);
+        md.clear();
         md = delegate;
         return 0;
     }
@@ -310,6 +314,7 @@ struct delegate_bind<O,T,MyGUI::delegates::CDelegate3<A1, A2, A3>, obj > {
         lua_pushvalue(L, 2);
         delegate->SetObject(L);
         MultiDelegate& md(t->*obj);
+        md.clear();
         md = delegate;
         return 0;
     }

@@ -208,9 +208,11 @@ namespace Sandbox {
         
         std::string fn = file;
 		GHL::DataStream* ds = 0;
-		if (file.find_last_of('.')!=file.npos) {
+        size_t dotpos = file.find_last_of('.');
+		if (dotpos!=file.npos) {
 			ds = OpenFileVariant(fn.c_str(),variant);
-		}
+            fn.resize(dotpos);
+        }
 		if (!ds) {
 			std::string ifile = fn+".png";
 			ds = OpenFileVariant( ifile.c_str() , variant);
@@ -221,10 +223,10 @@ namespace Sandbox {
 					LogError(MODULE) <<"error opening file " << fn;
 					return 0;
 				} else {
-                    file += ".jpg";
+                    file = ifile;
                 }
 			} else {
-                file += ".png";
+                file = ifile;
             }
 		}
         GHL::ImageInfo info;

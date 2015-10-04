@@ -118,6 +118,18 @@ function _M.assets_rules.compile_files_to( src, pattern, dst )
 	process_files_pattern_to(src, pattern, dst, action_compile_files)
 end
 
+function _M.assets_rules.premultiply_images( file_or_filelist )
+	if type(file_or_filelist) == 'table' then
+		for _,v in ipairs(file_or_filelist) do
+			process_files_pattern(v,action_premultiply_images)
+		end
+	elseif type(file_or_filelist) == 'string' then
+		process_files_pattern(file_or_filelist,action_premultiply_images)
+	else
+		error('premultiply_images table or string expected got ' .. type(file_or_filelist))
+	end
+end
+
 function _M.assets_rules.premultiply_images_to( src, pattern, dst )
 	process_files_pattern_to(src, pattern, dst, action_premultiply_images)
 end

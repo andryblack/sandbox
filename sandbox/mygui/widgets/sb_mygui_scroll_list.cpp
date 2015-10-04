@@ -196,7 +196,7 @@ namespace Sandbox {
             }
         }
         void ScrollList::handleCoordItem(MyGUI::ItemBox*, MyGUI::IntCoord& coords, bool drag) {
-            if (m_visible_count) {
+            if (m_visible_count && getClientWidget()) {
                 if (getVerticalAlignment()) {
                     coords.width = getClientWidget()->getSize().width / m_num_subitems;
                     coords.height = getClientWidget()->getSize().height / m_visible_count;
@@ -208,7 +208,7 @@ namespace Sandbox {
             
         }
         void ScrollList::handleDrawItem(MyGUI::ItemBox*, MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) {
-            if (m_delegate) {
+            if (m_delegate && di.update) {
                 m_delegate->updateWidget(w, di);
             }
         }
@@ -357,11 +357,12 @@ namespace Sandbox {
                 }
                 if (!layer) return;
                 MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
+                pos_in_layer -= getAbsolutePosition();
                 MyGUI::IntPoint move = pos_in_layer - m_scroll_prev_pos;
                 
                 int delta_scroll = 0;
                 if (getVerticalAlignment()) {
-                    delta_scroll = move.top;
+                    delta_scroll = -move.top;
                 } else {
                     delta_scroll = -move.left;
                 }
@@ -424,8 +425,10 @@ namespace Sandbox {
                 }
                 if (!layer) return;
                 MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
+                pos_in_layer -= getAbsolutePosition();
                 if (m_state == state_none || m_state == state_free_scroll) {
-                    if (getCoord().inside(pos_in_layer)) {
+                    if (pos_in_layer.left > 0 && pos_in_layer.top > 0 &&
+                        pos_in_layer.left < getWidth() && pos_in_layer.top < getHeight()) {
                         m_state = state_wait_scroll;
                         //LogInfo() << "set wait scroll";
                         m_scroll_prev_pos = pos_in_layer;

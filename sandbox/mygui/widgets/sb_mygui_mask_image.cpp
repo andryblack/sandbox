@@ -44,6 +44,11 @@ namespace Sandbox {
                         int w = mCroppedParent->getWidth();
                         int h = mCroppedParent->getHeight();
                         
+                        const MyGUI::RenderTargetInfo& info = _target->getInfo();
+                        
+                        x-=info.leftOffset;
+                        y-=info.topOffset;
+                        
                         float itw = 1.0f / img->GetTexture()->GetWidth();
                         float ith = 1.0f / img->GetTexture()->GetHeight();
                         

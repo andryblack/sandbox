@@ -50,7 +50,7 @@ namespace Sandbox {
             m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
             m_render = m_graphics->BeginNative();
             if (m_render) {
-                m_render->SetupBlend(true,GHL::BLEND_FACTOR_SRC_ALPHA,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
+                m_render->SetupBlend(true,GHL::BLEND_FACTOR_ONE,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
                 m_render->SetupFaceCull(false);
             }
         }
