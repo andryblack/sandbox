@@ -1,4 +1,5 @@
 #include "sb_json.h"
+#include <algorithm>
 
 extern "C" {
 #include <yajl/yajl_parse.h>
