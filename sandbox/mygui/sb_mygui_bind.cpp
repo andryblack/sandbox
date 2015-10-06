@@ -135,6 +135,19 @@ namespace Sandbox {
         
         template <>
         struct stack<const MyGUI::MouseButton&> : stack<MyGUI::MouseButton> {};
+        
+        template <>
+        struct stack<MyGUI::WidgetStyle> {
+            static void push( lua_State* L, const MyGUI::WidgetStyle& val ) {
+                stack<int>::push(L, val.getValue());
+            }
+            static MyGUI::WidgetStyle get( lua_State* L, int idx ) {
+                return MyGUI::WidgetStyle(static_cast<MyGUI::WidgetStyle::Enum>(stack<int>::get(L, idx)));
+            }
+        };
+        
+        template <>
+        struct stack<const MyGUI::WidgetStyle&> : stack<MyGUI::WidgetStyle> {};
 
     }
 }
@@ -337,6 +350,7 @@ SB_META_PROPERTY_RO(isBottom, isBottom)
 SB_META_PROPERTY_RO(isVStretch, isVStretch)
 SB_META_PROPERTY_RO(isStretch, isStretch)
 SB_META_PROPERTY_RO(isDefault, isDefault)
+SB_META_STATIC_METHOD(parse)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::IntPoint, void)
@@ -438,6 +452,18 @@ SB_META_ENUM_BIND(MyGUI::MouseButton,namespace MyGUI,
 
 SB_META_DECLARE_OBJECT(MyGUI::IObject, void)
 
+SB_META_DECLARE_KLASS(MyGUI::WidgetStyle,void);
+SB_META_ENUM_BIND(MyGUI::WidgetStyle,namespace MyGUI,
+                  SB_META_ENUM_MEMBER_ITEM(Child,WidgetStyle::Child)
+                  SB_META_ENUM_MEMBER_ITEM(Popup,WidgetStyle::Popup)
+                  SB_META_ENUM_MEMBER_ITEM(Overlapped,WidgetStyle::Overlapped))
+
+//SB_META_DECLARE_KLASS(MyGUI::WidgetStyle, void)
+//SB_META_BEGIN_KLASS_BIND(MyGUI::WidgetStyle)
+//SB_META_CONSTRUCTOR((MyGUI::WidgetStyle::Enum))
+//SB_META_STATIC_METHOD(parse)
+//SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_OBJECT(MyGUI::Widget, MyGUI::ICroppedRectangle)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Widget)
 SB_META_PROPERTY_RO(name, getName)
@@ -476,6 +502,14 @@ SB_META_METHOD(changeWidgetSkin)
 
 
 bind(method("createWidget", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(const std::string&, const std::string&, const MyGUI::IntCoord&, MyGUI::Align, const std::string& _name)>(&MyGUI::Widget::createWidgetT)));
+bind(method("createWidgetS", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(MyGUI::WidgetStyle,
+                                                                          const std::string&,
+                                                                          const std::string&,
+                                                                          const MyGUI::IntCoord&,
+                                                                          MyGUI::Align,
+                                                                          const std::string& _layer,
+                                                                          const std::string& _name)>(&MyGUI::Widget::createWidgetT)));
+
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ISubWidget, MyGUI::ICroppedRectangle)
@@ -559,6 +593,7 @@ bind(method("requestCoordItem", delegate_bind<MyGUI::ItemBox,
 
 SB_META_METHOD(addItem)
 SB_META_METHOD(getIndexByWidget)
+SB_META_METHOD(getWidgetByIndex)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::CachedWidget)
@@ -702,9 +737,14 @@ namespace Sandbox {
         void register_ScrollArea(lua_State* L);
         
         void register_mygui( lua_State* lua ) {
+            
+            luabind::RawClass<MyGUI::WidgetStyle>(lua);
+            //luabind::Enum<MyGUI::WidgetStyle::Enum>(lua);
+            
             luabind::RawClass<MyGUI::MouseButton>(lua);
             
             luabind::RawClass<MyGUI::Align>(lua);
+            //luabind::RawClass<MyGUI::WidgetStyle>(lua);
             luabind::RawClass<MyGUI::IntPoint>(lua);
             luabind::RawClass<MyGUI::IntSize>(lua);
             luabind::RawClass<MyGUI::IntCoord>(lua);
