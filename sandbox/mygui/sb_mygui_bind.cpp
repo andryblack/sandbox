@@ -699,6 +699,7 @@ namespace Sandbox {
     namespace mygui {
         
         void register_ScrollList(lua_State* L);
+        void register_ScrollArea(lua_State* L);
         
         void register_mygui( lua_State* lua ) {
             luabind::RawClass<MyGUI::MouseButton>(lua);
@@ -734,6 +735,7 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::InputManager>(lua);
             
             register_ScrollList(lua);
+            register_ScrollArea(lua);
         }
         
         void setup_singletons( LuaVM* lua ) {

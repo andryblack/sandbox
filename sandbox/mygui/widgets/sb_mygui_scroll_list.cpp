@@ -298,6 +298,8 @@ namespace Sandbox {
         }
         
         void ScrollList::frameEntered(float dt) {
+            if (!getVisible())
+                return;
             if (m_state!=state_free_scroll) {
                 return;
             }
@@ -343,11 +345,15 @@ namespace Sandbox {
         }
         
         MyGUI::ILayerItem* ScrollList::getLayerItemByPoint(int _left, int _top) const {
+            if (!getInheritedVisible())
+                return 0;
             if (m_state == state_manual_scroll && _checkPoint(_left, _top)) return const_cast<ScrollList*>(this);
             return Base::getLayerItemByPoint(_left, _top);
         }
         
         void ScrollList::handleGlobalMouseMove(int x,int y) {
+            if (!getInheritedVisible())
+                return;
             if (m_state == state_wait_scroll || m_state == state_manual_scroll) {
                 MyGUI::ILayer* layer = getLayer();
                 MyGUI::Widget* parent = getParent();
@@ -416,6 +422,8 @@ namespace Sandbox {
         }
         
         void ScrollList::handleGlobalMousePressed(int x,int y, MyGUI::MouseButton _id) {
+            if (!getVisible())
+                return;
             if (_id == MyGUI::MouseButton::Left) {
                 MyGUI::ILayer* layer = getLayer();
                 MyGUI::Widget* parent = getParent();
@@ -441,6 +449,7 @@ namespace Sandbox {
         }
         
         void ScrollList::handleGlobalMouseReleased(int x,int y, MyGUI::MouseButton _id) {
+            
             if (_id == MyGUI::MouseButton::Left) {
                 if (m_state == state_manual_scroll || m_state == state_wait_scroll) {
                     if (m_state == state_manual_scroll) {
