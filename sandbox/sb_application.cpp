@@ -166,6 +166,8 @@ namespace Sandbox {
     	delete m_sound_mgr;
 #if SB_USE_MYGUI
         if (m_gui) {
+            MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
+            
             mygui::unregister_skin();
             mygui::unregister_widgets();
             m_gui->shutdown();
@@ -322,6 +324,9 @@ namespace Sandbox {
         mygui::register_skin();
         mygui::register_widgets();
         mygui::setup_singletons(m_lua);
+        
+        MyGUI::LanguageManager::getInstance().eventRequestTag =
+            MyGUI::newDelegate(this,&Application::get_mygui_localization);
 #endif
 
         
@@ -666,5 +671,14 @@ namespace Sandbox {
     void Application::SetResourcesVariant(float scale,const sb::string& postfix) {
         m_resources->SetResourcesVariant(scale, postfix);
     }
+    
+#ifdef SB_USE_MYGUI
+    void Application::get_mygui_localization(const MyGUI::UString& key, MyGUI::UString& value) {
+        LuaContextPtr localization = m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("localization");
+        if (localization) {
+            value.assign( localization->GetValueRaw<sb::string>(key.asUTF8_c_str()) );
+        }
+    }
+#endif
     
 }

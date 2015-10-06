@@ -508,20 +508,13 @@ namespace Sandbox {
                 stack<const char*>::push(L, val.c_str());
             }
             static sb::string get( lua_State* L, int idx) {
-                return stack<const char*>::get(L,idx);
-            }
-        };
-        
-        template <>
-        struct stack<const sb::string&> {
-            static void push( lua_State* L, const sb::string& val ) {
-                stack<const char*>::push(L, val.c_str());
-            }
-            static sb::string get( lua_State* L, int idx) {
                 const char* val = stack<const char*>::get(L,idx);
                 return val ? val : "";
             }
         };
+        
+        template <>
+        struct stack<const sb::string&> : stack<sb::string> {};
     
         template <class T>
         struct stack<const T&> {

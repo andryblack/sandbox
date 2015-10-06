@@ -18,6 +18,7 @@
 
 namespace MyGUI {
     class Gui;
+    class UString;
 }
 
 namespace Sandbox {
@@ -131,6 +132,7 @@ namespace Sandbox {
         mygui::DataManager*     m_gui_data_manager;
         mygui::RenderManager*   m_gui_render;
         MyGUI::Gui* m_gui;
+        void get_mygui_localization(const MyGUI::UString & key,MyGUI::UString& value);
 #endif
 #ifdef SB_USE_NETWORK
         Network*    m_network;

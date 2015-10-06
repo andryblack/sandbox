@@ -41,6 +41,17 @@ namespace Sandbox {
             lua_pop(L,2);
             return val;
         }
+        
+        template <class T>
+        inline T GetValueRaw(const char* name) {
+            lua_State* L = GetVM();
+            LUA_CHECK_STACK(0)
+            GetObject(L);
+            lua_getfield(L, -1, name);
+            T val = luabind::stack<T>::get(L,-1);
+            lua_pop(L,2);
+            return val;
+        }
 
         template <class T>
         inline void SetValue( const char* path, const sb::shared_ptr<T>& t ) {
