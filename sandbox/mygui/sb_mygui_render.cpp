@@ -218,6 +218,7 @@ namespace Sandbox {
                 return;
             }
             if (m_render) {
+                m_render->SetShader(0);
                 m_render->SetTexture(0,1);
                 m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
                 m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);

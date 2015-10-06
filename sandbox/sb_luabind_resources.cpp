@@ -21,7 +21,8 @@
 #include "sb_utf.h"
 #include "sb_tilemap.h"
 
-SB_META_DECLARE_KLASS(Sandbox::Shader, void)
+
+
 
 static int sb_color_constructor(lua_State* L) {
     Sandbox::Color c;
@@ -116,6 +117,18 @@ SB_META_PROPERTY_RO(Width,GetWidth)
 SB_META_PROPERTY_RO(Height,GetHeight)
 SB_META_PROPERTY_RW(Texture,GetTexture,SetTexture)
 SB_META_PROPERTY_RW(Hotspot,GetHotspot,SetHotspot)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderUniform)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderFloatUniform)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderVec2Uniform)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::Shader)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ImageBox, Sandbox::Image)
@@ -245,6 +258,10 @@ namespace Sandbox {
         luabind::ExternClass<UTF8>(lua);
         luabind::Class<TileMapLayer>(lua);
         luabind::Class<TileMap>(lua);
+        luabind::ExternClass<ShaderUniform>(lua);
+        luabind::ExternClass<ShaderFloatUniform>(lua);
+        luabind::ExternClass<ShaderVec2Uniform>(lua);
+        luabind::ExternClass<Shader>(lua);
         
     }
 

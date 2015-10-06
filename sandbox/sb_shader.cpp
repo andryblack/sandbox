@@ -15,6 +15,7 @@
 SB_META_DECLARE_OBJECT(Sandbox::ShaderUniform, void)
 SB_META_DECLARE_OBJECT(Sandbox::ShaderFloatUniform, Sandbox::ShaderUniform)
 SB_META_DECLARE_OBJECT(Sandbox::ShaderVec2Uniform, Sandbox::ShaderUniform)
+SB_META_DECLARE_OBJECT(Sandbox::Shader, void)
 
 namespace Sandbox {
 

@@ -134,6 +134,9 @@ namespace Sandbox {
         class RenderManager : public MyGUI::RenderManager, public RenderTargetImpl {
         public:
             explicit RenderManager( Graphics* graphics, Resources* resources );
+            
+            
+            static RenderManager& getInstance() { return static_cast<RenderManager&>(MyGUI::RenderManager::getInstance()); }
             /** Create vertex buffer.
              This method should create vertex buffer with triangles list type,
              each vertex have position, colour, texture coordinates.

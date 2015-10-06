@@ -434,24 +434,9 @@ namespace Sandbox {
         
     }
     
-    static void change_shader_extension(std::string& filename) {
-        size_t dotpos = filename.find('.');
-        if (dotpos!=filename.npos) {
-            filename.resize(dotpos);
-#if defined(GHL_PLATFORM_FLASH)
-            filename += ".agal";
-#else
-            filename += ".glsl";
-#endif
-        }
-    }
-	
 	ShaderPtr Resources::GetShader(const char* vfn,const char* ffn) {
 		std::string vfilename = vfn;
 		std::string ffilename = ffn;
-        
-        change_shader_extension(vfilename);
-        change_shader_extension(ffilename);
         
         
 		std::string name = vfilename+"+"+ffilename;

@@ -14,6 +14,7 @@
 #include "MyGUI_Widget.h"
 #include "MyGUI_SubSkin.h"
 #include "sb_image.h"
+#include "sb_shader.h"
 #include <ghl_render.h>
 
 namespace Sandbox {
@@ -35,14 +36,19 @@ namespace Sandbox {
             MaskImageWidget();
             ~MaskImageWidget();
             
-            void initialiseOverride();
+            void setPropertyOverride(const std::string& _key, const std::string& _value);
             
-            void setImage(const ImagePtr& img) { m_image = img; }
+            void setImage(const ImagePtr& img) { m_image = img; update_shader(); }
             const ImagePtr& getImage() const { return m_image; }
             
+            void setShader(const ShaderPtr& s) { m_shader = s; update_shader(); }
+            const ShaderPtr& getShader() const { return m_shader; }
+            
+        protected:
+            void update_shader();
         private:
             ImagePtr    m_image;
-            sb::string  m_mask_skin;
+            ShaderPtr   m_shader;
         };
     }
 }

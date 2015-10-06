@@ -58,6 +58,7 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<ShaderVec2Uniform> ShaderVec2UniformPtr;
     
 	class Shader : public sb::ref_countered_base_not_copyable {
+        SB_META_OBJECT
 	public:
 		explicit Shader( GHL::ShaderProgram* prg);
 		~Shader();
