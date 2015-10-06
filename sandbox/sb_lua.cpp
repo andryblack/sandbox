@@ -313,11 +313,17 @@ namespace Sandbox {
         
         sb::string path = this_->m_base_path;
         const char *begin = name;
-        for (const char* s = name; *s; ++s) {
-            if (*s=='.') {
-                path.append(begin, s);
-                path.append("/");
-                begin = s+1;
+        if (*begin!='.' && *begin!='/') {
+            for (const char* s = name; *s; ++s) {
+                if (*s=='.') {
+                    if (s[1]=='.') {
+                        ++s;
+                    } else {
+                        path.append(begin, s);
+                        path.append("/");
+                        begin = s+1;
+                    }
+                }
             }
         }
         path.append(begin);

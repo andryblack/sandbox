@@ -257,6 +257,9 @@ GHL::DataStream* Application::OpenFile(const char* fn) {
     if (fn[0]=='_') {
         return m_vfs->OpenFile(append_path(m_scripts_dir, fn).c_str());
     }
+    if (fn[0]=='/') {
+        return m_vfs->OpenFile(fn);
+    }
     return m_vfs->OpenFile(append_path(m_src_dir, fn).c_str());
 }
 
