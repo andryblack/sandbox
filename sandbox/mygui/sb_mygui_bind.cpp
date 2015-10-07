@@ -596,12 +596,7 @@ SB_META_METHOD(getIndexByWidget)
 SB_META_METHOD(getWidgetByIndex)
 SB_META_END_KLASS_BIND()
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::CachedWidget)
-SB_META_END_KLASS_BIND()
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::SceneWidget)
-SB_META_PROPERTY_RW(scene, getScene, setScene)
-SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::Canvas, MyGUI::Widget)
 
@@ -706,9 +701,7 @@ SB_META_METHOD(addWidgetModal)
 SB_META_METHOD(removeWidgetModal)
 SB_META_END_KLASS_BIND()
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::MaskImageWidget)
-SB_META_PROPERTY_RW(image,getImage,setImage)
-SB_META_END_KLASS_BIND()
+
 
 
 static int gui_find_widget_proxy(lua_State* L) {
@@ -733,8 +726,7 @@ SB_META_END_KLASS_BIND()
 namespace Sandbox {
     namespace mygui {
         
-        void register_ScrollList(lua_State* L);
-        void register_ScrollArea(lua_State* L);
+        void register_widgets(lua_State* L);
         
         void register_mygui( lua_State* lua ) {
             
@@ -768,14 +760,11 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ItemBox>(lua);
             luabind::ExternClass<MyGUI::ProgressBar>(lua);
             
-            luabind::ExternClass<CachedWidget>(lua);
-            luabind::ExternClass<SceneWidget>(lua);
-            luabind::ExternClass<MaskImageWidget>(lua);
+            
             
             luabind::ExternClass<MyGUI::InputManager>(lua);
             
-            register_ScrollList(lua);
-            register_ScrollArea(lua);
+            register_widgets(lua);
         }
         
         void setup_singletons( LuaVM* lua ) {
