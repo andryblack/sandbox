@@ -25,6 +25,8 @@ namespace Sandbox {
     
     Color Color::FromString( const char* str ) {
         if (!str) return Color(0,0,0,1);
+        if (*str=='#')
+            ++str;
         size_t len = ::strlen(str);
         GHL::Byte c[4];
         if (len>=6) {

@@ -18,6 +18,7 @@
 #include "MyGUI_ResourceManager.h"
 #include "MyGUI_Align.h"
 #include "MyGUI_WidgetManager.h"
+#include "MyGUI_ControllerManager.h"
 
 #include "MyGUI_TextBox.h"
 #include "MyGUI_Window.h"
@@ -287,6 +288,22 @@ struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate2<A1, A2>, obj > {
         return 0;
     }
 };
+template <class O,class T,class A0,class A1,class A2,MyGUI::EventPairAddParameter<A0, MyGUI::delegates::CMultiDelegate2<A1, A2> > T::*obj>
+struct delegate_bind<O,T,MyGUI::EventPairAddParameter<A0, MyGUI::delegates::CMultiDelegate2<A1, A2> >, obj > {
+    typedef LuaDelegate2<A1,A2> LuaDelegate;
+    typedef MyGUI::delegates::IDelegate2<A1,A2>* IDelegatePtr;
+    typedef MyGUI::EventPairAddParameter<A0, MyGUI::delegates::CMultiDelegate2<A1, A2> > MultiDelegate;
+    static int lua_func( lua_State* L ) {
+        O* t = Sandbox::luabind::stack<O*>::get(L,1);
+        LuaDelegate* delegate = new LuaDelegate();
+        lua_pushvalue(L, 2);
+        delegate->SetObject(L);
+        MultiDelegate& md(t->*obj);
+        //md.clear();
+        md += IDelegatePtr(delegate);
+        return 0;
+    }
+};
 template <class O,class T,class A1,MyGUI::delegates::CMultiDelegate1<A1> T::*obj>
 struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate1<A1>, obj > {
     typedef LuaDelegate1<A1> LuaDelegate;
@@ -476,6 +493,7 @@ SB_META_PROPERTY_RO(parent, getParent)
 SB_META_PROPERTY_RO(clientWidget, getClientWidget)
 SB_META_PROPERTY_WO(colour, setColour)
 SB_META_PROPERTY_RW(alpha, getAlpha,setAlpha)
+SB_META_PROPERTY_RW(depth, getDepth,setDepth)
 
 bind(method("eventMouseButtonClick", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
@@ -660,10 +678,35 @@ SB_META_DECLARE_OBJECT(MyGUI::RotatingSkin, MyGUI::ISubWidgetRect)
 SB_META_DECLARE_OBJECT(MyGUI::PolygonalSkin, MyGUI::ISubWidgetRect)
 
 SB_META_DECLARE_OBJECT(MyGUI::ControllerItem, MyGUI::IObject)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ControllerItem)
+bind(method("eventPreAction", delegate_bind<MyGUI::ControllerItem,
+            MyGUI::ControllerItem,
+            MyGUI::EventPairAddParameter<MyGUI::EventHandle_WidgetPtr, MyGUI::EventHandle_WidgetPtrControllerItemPtr>,
+            &MyGUI::ControllerItem::eventPreAction>::lua_func));
+bind(method("eventPostAction", delegate_bind<MyGUI::ControllerItem,
+            MyGUI::ControllerItem,
+            MyGUI::EventPairAddParameter<MyGUI::EventHandle_WidgetPtr, MyGUI::EventHandle_WidgetPtrControllerItemPtr>,
+            &MyGUI::ControllerItem::eventPostAction>::lua_func));
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_OBJECT(MyGUI::ControllerPosition, MyGUI::ControllerItem)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ControllerPosition)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_OBJECT(MyGUI::ControllerFadeAlpha, MyGUI::ControllerItem)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ControllerFadeAlpha)
+SB_META_PROPERTY_WO(alpha, setAlpha)
+SB_META_PROPERTY_WO(coef, setCoef)
+SB_META_PROPERTY_WO(enabled, setEnabled)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_OBJECT(MyGUI::ControllerEdgeHide, MyGUI::ControllerItem)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ControllerEdgeHide)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_OBJECT(MyGUI::ControllerRepeatClick, MyGUI::ControllerItem)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ControllerRepeatClick)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::SubSkinStateInfo, MyGUI::IStateInfo)
 SB_META_DECLARE_OBJECT(MyGUI::RotatingSkinStateInfo, MyGUI::IStateInfo)
@@ -680,6 +723,7 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_KLASS(MyGUI::LayerManager, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::LayerManager)
 SB_META_STATIC_METHOD(getInstancePtr)
+SB_META_METHOD(attachToLayerNode)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::ResourceManager, void)
@@ -688,21 +732,14 @@ SB_META_STATIC_METHOD(getInstancePtr)
 SB_META_METHOD(load)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(MyGUI::WidgetManager, void)
-SB_META_BEGIN_KLASS_BIND(MyGUI::WidgetManager)
+
+SB_META_DECLARE_KLASS(MyGUI::ControllerManager, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ControllerManager)
 SB_META_STATIC_METHOD(getInstancePtr)
-SB_META_METHOD(destroyWidget)
+SB_META_METHOD(createItem)
+SB_META_METHOD(addItem)
+SB_META_METHOD(removeItem)
 SB_META_END_KLASS_BIND()
-
-SB_META_DECLARE_KLASS(MyGUI::InputManager, void)
-SB_META_BEGIN_KLASS_BIND(MyGUI::InputManager)
-SB_META_STATIC_METHOD(getInstancePtr)
-SB_META_METHOD(addWidgetModal)
-SB_META_METHOD(removeWidgetModal)
-SB_META_END_KLASS_BIND()
-
-
-
 
 static int gui_find_widget_proxy(lua_State* L) {
     MyGUI::Gui* self = Sandbox::luabind::stack<MyGUI::Gui*>::get(L, 1);
@@ -717,11 +754,27 @@ static int gui_find_widget_proxy(lua_State* L) {
     return 1;
 }
 
+
 SB_META_DECLARE_KLASS(MyGUI::Gui, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Gui)
 SB_META_STATIC_METHOD(getInstancePtr)
+SB_META_METHOD(destroyWidget)
+bind(method("createWidget", static_cast<MyGUI::Widget*(MyGUI::Gui::*)(const std::string&, const std::string&, const MyGUI::IntCoord&, MyGUI::Align, const std::string& _layer, const std::string& _name)>(&MyGUI::Gui::createWidgetT)));
 bind( method( "findWidget" , &gui_find_widget_proxy ) );
 SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(MyGUI::InputManager, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::InputManager)
+SB_META_STATIC_METHOD(getInstancePtr)
+SB_META_METHOD(addWidgetModal)
+SB_META_METHOD(removeWidgetModal)
+SB_META_END_KLASS_BIND()
+
+
+
+
+
+
 
 namespace Sandbox {
     namespace mygui {
@@ -749,7 +802,6 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::LayoutManager>(lua);
             luabind::ExternClass<MyGUI::LayerManager>(lua);
             luabind::ExternClass<MyGUI::ResourceManager>(lua);
-            luabind::ExternClass<MyGUI::WidgetManager>(lua);
             luabind::ExternClass<MyGUI::Gui>(lua);
 
             luabind::ExternClass<MyGUI::TextBox>(lua);
@@ -763,6 +815,15 @@ namespace Sandbox {
             
             
             luabind::ExternClass<MyGUI::InputManager>(lua);
+            
+            luabind::ExternClass<MyGUI::ControllerManager>(lua);
+            
+            luabind::ExternClass<MyGUI::ControllerItem>(lua);
+            luabind::ExternClass<MyGUI::ControllerPosition>(lua);
+            luabind::ExternClass<MyGUI::ControllerFadeAlpha>(lua);
+            luabind::ExternClass<MyGUI::ControllerEdgeHide>(lua);
+            luabind::ExternClass<MyGUI::ControllerRepeatClick>(lua);
+            
             
             register_widgets(lua);
         }

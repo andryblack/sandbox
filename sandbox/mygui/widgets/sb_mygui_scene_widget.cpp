@@ -43,6 +43,11 @@ namespace Sandbox {
                 m_texture = static_cast<Sandbox::mygui::RenderManager&>(MyGUI::RenderManager::getInstance()).wrapRT(texture_name, rt);
                 
                 setRenderItemTexture(m_texture);
+                
+                /// wtf?
+                int depth = getDepth();
+                setDepth(depth+1);
+                setDepth(depth);
             }
         }
         
