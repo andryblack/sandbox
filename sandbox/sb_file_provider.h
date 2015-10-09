@@ -9,6 +9,10 @@ namespace Sandbox {
     class FileProvider {
     public:
         virtual GHL::DataStream* OpenFile(const char* fn) = 0;
+        virtual GHL::DataStream* OpenFileVariant(const char* fn,bool& variant) {
+            variant = false;
+            return OpenFile(fn);
+        }
 
     };
 

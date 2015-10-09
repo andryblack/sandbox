@@ -57,7 +57,8 @@ namespace Sandbox {
         
         
         MyGUI::IDataStream* DataManager::getData(const std::string& _name) {
-            GHL::DataStream* ds = m_file_provider->OpenFile(_name.c_str());
+            bool variant = false;
+            GHL::DataStream* ds = m_file_provider->OpenFileVariant(_name.c_str(),variant);
             if (!ds) return 0;
             return new DataStream(ds);
         }
