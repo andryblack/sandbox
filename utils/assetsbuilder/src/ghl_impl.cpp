@@ -4,6 +4,9 @@
 #include <iostream>
 #include <time.h>
 
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
 
 GHL_API void GHL_CALL GHL_Log( GHL::LogLevel level,const char* message) {
     static const char* levelName[] = {
@@ -14,6 +17,10 @@ GHL_API void GHL_CALL GHL_Log( GHL::LogLevel level,const char* message) {
         "V:",
         "D:"
     };
-    
+#ifdef _MSC_VER
+	OutputDebugStringA(message);
+	OutputDebugStringA("\n");
+#endif
+
     std::cout << levelName[level] << message << std::endl;
 }

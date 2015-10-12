@@ -8,6 +8,7 @@
 
 #include "sb_mygui_scene_widget.h"
 #include "../sb_mygui_render.h"
+#include <sbstd/sb_platform.h>
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::SceneWidget, MyGUI::Widget)
 
@@ -37,7 +38,7 @@ namespace Sandbox {
                 Sandbox::RenderTargetPtr rt = m_scene->GetTarget();
                 
                 char buf[128];
-                snprintf(buf, 128, "scene_rt_%p_%p",this,rt.get());
+                sb::snprintf(buf, 128, "scene_rt_%p_%p",this,rt.get());
                 sb::string texture_name =  buf;
                 
                 m_texture = static_cast<Sandbox::mygui::RenderManager&>(MyGUI::RenderManager::getInstance()).wrapRT(texture_name, rt);

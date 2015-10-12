@@ -33,11 +33,11 @@ local function process_files_pattern( pattern , action )
 	if type(pattern) ~= 'string' then
 		error('process_files_pattern string expected got ' .. type(pattern) )
 	end
-	--print('copy_files_pattern:',pattern)
+	--print('process_files_pattern:',pattern,action)
 	local files = os.matchfiles(path.join(src_path,pattern))
 	for k,v in ipairs(files) do
 		local f = path.getrelative(src_path,v)
-		--print('copy file',k,f)
+		--print(action,k,f)
 		rules[assert(action)][f]=f
 		rules.dest_files[f]=f
 	end
@@ -141,7 +141,9 @@ local function expand_dirs( p , d )
 	for part in p:gmatch("[^/]+") do
 		dir = dir .. part
 
-		if (part ~= "" and not path.isabsolute(part) and not os.isdir(dir)) then
+		if (part ~= "" and not path.isabsolute(part)
+			-- and not os.isdir(dir)) 
+			) then
 			local cd = d[part] or {}
 			d[part] = cd
 			d = cd

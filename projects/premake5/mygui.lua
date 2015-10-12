@@ -17,7 +17,11 @@ project 'MyGUI'
 		sandbox_dir .. '/freetype/include'
 	}
 
-	defines 'MYGUI_CONFIG_INCLUDE="<../../../sandbox/mygui/sb_mygui_config.h>"'
+	if os.is('windows') then
+		defines 'MYGUI_CONFIG_INCLUDE="../../../sandbox/mygui/sb_mygui_config.h"'
+	else
+		defines 'MYGUI_CONFIG_INCLUDE="<../../../sandbox/mygui/sb_mygui_config.h>"'
+	end
 
 	configuration "Debug"
 			targetsuffix "-debug"

@@ -13,6 +13,7 @@
 #include "MyGUI_Gui.h"
 #include "MyGUI_LayerNode.h"
 #include "../sb_mygui_render.h"
+#include <sbstd/sb_platform.h>
 
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::CachedWidget, MyGUI::Widget)
@@ -28,7 +29,7 @@ namespace Sandbox {
             m_replaced_layer = new MyGUI::SharedLayerNode(0,0);
             m_texture_name = get_type_info()->name;
             char buf[128];
-            snprintf(buf, 128, "_%p",this);
+			sb::snprintf(buf, 128, "_%p", this);
             m_texture_name += buf;
         }
         

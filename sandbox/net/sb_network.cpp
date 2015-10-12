@@ -77,6 +77,7 @@ namespace Sandbox {
     /// received data
     void GHL_CALL NetworkRequest::OnData(const GHL::Byte* data,GHL::UInt32 size) {
         NetworkRequestBase::OnData(data, size);
+		//LogDebug() << "received data: " << sb::string(reinterpret_cast<const char*>(data), size);
         m_data.append(reinterpret_cast<const char*>(data),size);
     }
     

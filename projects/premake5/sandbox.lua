@@ -77,7 +77,7 @@ solution( ProjectName )
 		end
 		gccprefix ( flascc_sdk_dir .. '/usr/bin/' )
 		buildoptions {'-Wno-write-strings', '-Wno-trigraphs' }
-	else
+	elseif platform_id ~= 'windows' then
 		table.insert(hide_options,'-fvisibility=hidden')
 	end
 
@@ -194,7 +194,11 @@ solution( ProjectName )
 			includedirs {
 				sandbox_dir .. '/MyGUI/MyGUIEngine/include',
 			}
-			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+			if os.is('windows') then
+				defines 'MYGUI_CONFIG_INCLUDE="mygui/sb_mygui_config.h"'
+			else
+				defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+			end
 			defines 'SB_USE_MYGUI'
 		end
 
@@ -253,7 +257,11 @@ solution( ProjectName )
 		if use.MyGUI then
 			links { 'MyGUI' }
 			includedirs { sandbox_dir .. '/MyGUI/MyGUIEngine/include' }
-			defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+			if os.is('windows') then
+				defines 'MYGUI_CONFIG_INCLUDE="mygui/sb_mygui_config.h"'
+			else
+				defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+			end
 			defines 'SB_USE_MYGUI'
 		end
 		if use.Freetype then
@@ -301,6 +309,9 @@ solution( ProjectName )
 				'OpenGL32',
 				'WinMM'
 			}
+			if use_network then
+				links { 'Winhttp', }
+			end
 		elseif os.is('android') then
 			files { sandbox_dir .. '/projects/android/main.cpp',
 					sandbox_dir .. '/projects/android/sb_android_extension.cpp' }
