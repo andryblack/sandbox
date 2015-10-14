@@ -41,6 +41,8 @@ namespace Sandbox {
                         target->startRenderMask(texture);
                         if (shader) {
                             shader->Set(render);
+                        } else {
+                            render->SetShader(0);
                         }
                         render->SetTexture(img->GetTexture()->Present(target->resources()),0);
                         
@@ -81,6 +83,12 @@ namespace Sandbox {
         
         MaskImageWidget::~MaskImageWidget() {
             
+        }
+        
+        void MaskImageWidget::setShader(const ShaderPtr &s ) {
+             m_shader = s;
+             update_shader();
+             _updateView();
         }
         
         void MaskImageWidget::update_shader() {

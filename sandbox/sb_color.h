@@ -12,6 +12,8 @@
 
 #include <ghl_types.h>
 
+struct lua_State;
+
 namespace Sandbox {
 
 	/**
@@ -79,6 +81,19 @@ namespace Sandbox {
         
         static Color FromString( const char* str );
     };
+    
+    namespace luabind {
+        template <class T>
+        struct stack;
+        template <>
+        struct stack<Color> {
+            static void push( lua_State* L, const Color& val );
+            static Color get( lua_State* L, int idx );
+        };
+        template <>
+        struct stack<const Color&> : stack<Color> {};
+        
+    }
 	
 }
 

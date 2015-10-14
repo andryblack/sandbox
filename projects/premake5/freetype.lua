@@ -24,6 +24,8 @@ project 'freetype'
 		'base/ftinit.c',
 		'base/ftsystem.c',
 		'base/ftwinfnt.c',
+		'base/ftstroke.c',
+		'base/ftglyph.c',
 
 		'cff/cff.c',
 		'raster/raster.c',

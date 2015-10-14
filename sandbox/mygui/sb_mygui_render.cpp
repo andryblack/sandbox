@@ -187,6 +187,7 @@ namespace Sandbox {
         
         
         void RenderTargetImpl::doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
+            endRenderObject();
             if (m_render) {
                 endRenderMask();
                 VertexBufferImpl* vb = reinterpret_cast<VertexBufferImpl*>(_buffer);
@@ -224,6 +225,19 @@ namespace Sandbox {
                 m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
             }
             m_draw_mask = 0;
+        }
+        
+        void    RenderTargetImpl::endRenderObject() {
+            if (m_render) {
+                return;
+            }
+            RenderTargetImpl::begin();
+        }
+        
+        void    RenderTargetImpl::startRenderObject() {
+            if (m_render) {
+                RenderTargetImpl::end();
+            }
         }
         
         

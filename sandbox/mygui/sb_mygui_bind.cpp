@@ -121,7 +121,19 @@ namespace Sandbox {
         };
         
         template <>
-        struct stack<const MyGUI::Any&> : stack<MyGUI::Any> {};
+        struct stack<MyGUI::Colour> {
+            static void push( lua_State* L, const MyGUI::Colour& val ) {
+                stack_help<MyGUI::Colour, false>::push(L, val);
+            }
+            static MyGUI::Colour get( lua_State* L, int idx ) {
+                int type = lua_type(L, idx);
+                if (type == LUA_TSTRING)
+                    return MyGUI::Colour::parse(lua_tostring(L, idx));
+                return stack_help<MyGUI::Colour, false>::get(L, idx);
+            }
+        };
+        template <>
+        struct stack<const MyGUI::Colour&> : stack<MyGUI::Colour> {};
         
         
         template <>

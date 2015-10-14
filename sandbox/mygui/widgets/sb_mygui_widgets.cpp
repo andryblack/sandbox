@@ -14,6 +14,7 @@
 #include "sb_mygui_mask_image.h"
 #include "sb_mygui_scroll_area.h"
 #include "sb_mygui_text_widget.h"
+#include "sb_mygui_scene_object.h"
 
 #include "MyGUI_WidgetManager.h"
 #include "MyGUI_FactoryManager.h"
@@ -29,6 +30,11 @@ SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::MaskImageWidget)
 SB_META_PROPERTY_RW(image,getImage,setImage)
+SB_META_PROPERTY_RW(shader, getShader, setShader)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::SceneObjectWidget)
+SB_META_PROPERTY_RW(object,getObject,setObject)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::TextWidget)
@@ -47,6 +53,7 @@ namespace Sandbox {
             factory.registerFactory<SceneWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.registerFactory<MaskImageWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.registerFactory<TextWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            factory.registerFactory<SceneObjectWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
         }
         void unregister_widgets() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
@@ -57,6 +64,7 @@ namespace Sandbox {
             factory.unregisterFactory<CachedWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<MaskImageWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<TextWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            factory.unregisterFactory<SceneObjectWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
         }
 
         
@@ -73,6 +81,7 @@ namespace Sandbox {
             
             luabind::ExternClass<MaskImageWidget>(L);
             luabind::ExternClass<TextWidget>(L);
+            luabind::ExternClass<SceneObjectWidget>(L);
         }
     }
     

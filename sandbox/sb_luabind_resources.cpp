@@ -20,9 +20,41 @@
 #include "sb_rendertarget.h"
 #include "sb_utf.h"
 #include "sb_tilemap.h"
+#include "sb_freetype_font.h"
 
-
-
+namespace Sandbox {
+    namespace luabind {
+        
+        void stack<Color>::push( lua_State* L, const Sandbox::Color& val ) {
+            stack_help<Color, false>::push(L, val);
+        }
+        
+        
+        Color stack<Color>::get( lua_State* L, int idx ) {
+            int t = lua_type(L, idx);
+            Sandbox::Color c;
+            if (t == LUA_TTABLE) {
+                LUA_CHECK_STACK(0)
+                size_t indx = 0;
+                lua_pushnil(L);
+                while (lua_next(L, idx) != 0) {
+                    if (indx==0) c.r = float(lua_tonumber(L, -1));
+                    else if (indx==1) c.g = float(lua_tonumber(L, -1));
+                    else if (indx==2) c.b = float(lua_tonumber(L, -1));
+                    else if (indx==3) c.a = float(lua_tonumber(L, -1));
+                    ++indx;
+                    /* removes 'value'; keeps 'key' for next iteration */
+                    lua_pop(L, 1);
+                }
+            } else if (t == LUA_TSTRING) {
+                c = Sandbox::Color::FromString(lua_tostring(L, idx));
+            } else {
+                c = stack_help<Color, false>::get(L, idx);
+            }
+            return c;
+        }
+    }
+}
 
 static int sb_color_constructor(lua_State* L) {
     Sandbox::Color c;
@@ -60,6 +92,7 @@ static int sb_color_constructor(lua_State* L) {
     Sandbox::luabind::stack<Sandbox::Color>::push(L, c);
     return 1;
 }
+
 
 SB_META_DECLARE_KLASS(Sandbox::Color, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Color)
@@ -169,6 +202,36 @@ SB_META_METHOD(SetXHeight)
 SB_META_METHOD(FixupChars)
 SB_META_END_KLASS_BIND()
 
+static int Sandbox_FreeTypeFont_Load(lua_State* L) {
+    Sandbox::Resources* res = Sandbox::luabind::stack<Sandbox::Resources*>::get(L, 1);
+    if (!res) {
+        luaL_argerror(L, 1, "need Resources");
+    }
+    if (!lua_isstring(L, 2)) {
+        luaL_argerror(L, 2, "need string");
+    }
+    if (!lua_istable(L, 3)) {
+        luaL_argerror(L, 3, "need table");
+    }
+    const char* filename = lua_tostring(L, 2);
+    Sandbox::FreeTypeFontConfig config;
+    lua_getfield(L, 3, "size");
+    config.size = lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, 3, "outline");
+    config.outline = lua_toboolean(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, 3, "dpi");
+    config.dpi = lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    Sandbox::luabind::stack<sb::intrusive_ptr<Sandbox::FreeTypeFont> >::push(L, Sandbox::FreeTypeFont::Load(res, filename, config));
+    return 1;
+}
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::FreeTypeFont)
+bind( static_method( "Load" , &Sandbox_FreeTypeFont_Load ) );
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::FileProvider)
 SB_META_END_KLASS_BIND()
 
@@ -245,6 +308,7 @@ namespace Sandbox {
         luabind::RawClass<Recti>(lua);
         luabind::Class<Font>(lua);
         luabind::Class<BitmapFont>(lua);
+        luabind::ExternClass<FreeTypeFont>(lua);
         luabind::Enum<FontAlign>(lua);
         luabind::Class<Image>(lua);
         luabind::Class<ImageBox>(lua);

@@ -5,7 +5,7 @@
 #include "MyGUI_RenderItem.h"
 #include "MyGUI_ITexture.h"
 #include "widgets/sb_mygui_mask_image.h"
-
+#include "widgets/sb_mygui_scene_object.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ColorizedSubSkinStateInfo,MyGUI::SubSkinStateInfo)
 
@@ -105,8 +105,10 @@ namespace Sandbox {
             factory.registerFactory<ColorizedSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.registerFactory<CopySubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.registerFactory<MaskSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            factory.registerFactory<ObjectSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             
             factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSubSkin");
+            factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ObjectSubSkin");
         }
         
         void unregister_skin() {
@@ -115,7 +117,9 @@ namespace Sandbox {
             factory.unregisterFactory<ColorizedSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<CopySubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<MaskSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            factory.unregisterFactory<ObjectSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSubSkin");
+            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ObjectSubSkin");
         }
         
     }

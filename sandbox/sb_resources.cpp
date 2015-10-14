@@ -70,7 +70,7 @@ namespace Sandbox {
         }
         ds = OpenFile(fn);
         if (!ds) {
-            LogError(MODULE) << "Failed open file " << fn;
+            //LogError(MODULE) << "Failed open file " << fn;
         }
         return ds;
     }
@@ -177,7 +177,7 @@ namespace Sandbox {
 				file = fn+".jpg";
 				ds = OpenFileVariant( file.c_str() , variant);
 				if ( !ds ) {
-					LogError(MODULE) <<"error opening file " << fn;
+					LogError(MODULE) <<"failed opening file " << fn;
 					return 0;
 				} else {
                     if (ext) *ext = "jpg";
@@ -220,7 +220,7 @@ namespace Sandbox {
 				ifile = fn+".jpg";
 				ds = OpenFileVariant( ifile.c_str() , variant );
 				if ( !ds ) {
-					LogError(MODULE) <<"error opening file " << fn;
+					LogError(MODULE) <<"failed opening file " << fn;
 					return 0;
 				} else {
                     file = ifile;

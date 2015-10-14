@@ -41,7 +41,7 @@ namespace Sandbox {
             void setImage(const ImagePtr& img) { m_image = img; update_shader(); }
             const ImagePtr& getImage() const { return m_image; }
             
-            void setShader(const ShaderPtr& s) { m_shader = s; update_shader(); }
+            void setShader(const ShaderPtr& s);
             const ShaderPtr& getShader() const { return m_shader; }
             
         protected:

@@ -78,10 +78,13 @@ namespace Sandbox {
             void    drawScene(const ScenePtr& scene);
             
             void    startRenderMask( MyGUI::ITexture* tex_mask );
+            void    startRenderObject();
             void    endRenderMask();
+            void    endRenderObject();
             
             GHL::Render* render() { return m_render; }
             Resources* resources() { return m_resources; }
+            Graphics* graphics() { return m_graphics; }
         protected:
             RenderTargetImpl( Graphics* graphics, Resources* resources );
             Graphics*       m_graphics;
