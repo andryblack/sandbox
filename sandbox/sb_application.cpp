@@ -85,6 +85,7 @@ SB_META_METHOD(RemoveScene)
 SB_META_METHOD(SetMouseContext)
 SB_META_METHOD(SetKeyboardContext)
 SB_META_METHOD(SetResourcesVariant)
+SB_META_METHOD(SetRenderScale)
 SB_META_PROPERTY_RO(TimeUSec, GetTimeUSec)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
@@ -152,7 +153,6 @@ namespace Sandbox {
         SetResourcesBasePath("data");
         SetLuaBasePath("scripts");
         m_sound_mgr->SetSoundsDir("sound");
-        m_render_scale = 1.0f;
         
         //const char* test = "{\"val\":41,\"id\":\"CgkInqr15dUFEAIQAw\"}";
         //sb::map<sb::string,sb::string> res;
@@ -329,8 +329,9 @@ namespace Sandbox {
             MyGUI::newDelegate(this,&Application::get_mygui_localization);
 #endif
 
+        UpdateScreenSize();
         
-		m_lua->DoFile("load.lua");
+        m_lua->DoFile("load.lua");
         
         
 		if (!LoadResources(*m_resources))
@@ -341,8 +342,7 @@ namespace Sandbox {
 		m_main_thread = new ThreadsMgr();
         ctx->SetValue("application.thread", m_main_thread);
         m_graphics->Load(m_render);
-        ctx->SetValue("application.size.width", float(m_width) / (m_graphics->GetScele() * m_resources->GetScale()));
-        ctx->SetValue("application.size.height", float(m_height) / (m_graphics->GetScele() * m_resources->GetScale()) );
+       
         
         
         
@@ -350,6 +350,14 @@ namespace Sandbox {
 		m_lua->DoFile("main.lua");
 		return true;
 	}
+    
+    void Application::UpdateScreenSize() {
+        if (!m_lua)
+            return;
+        LuaContextPtr ctx = m_lua->GetGlobalContext();
+        ctx->SetValue("application.size.width", float(m_width) / (m_graphics->GetScele() * m_resources->GetScale()));
+        ctx->SetValue("application.size.height", float(m_height) / (m_graphics->GetScele() * m_resources->GetScale()) );
+    }
 	///
 	bool GHL_CALL Application::OnFrame( GHL::UInt32 usecs ) {
         
@@ -396,7 +404,7 @@ namespace Sandbox {
 							m_clear_color.g,
 							m_clear_color.b,
 							m_clear_color.a,0);
-		m_graphics->BeginScene(m_render);
+		m_graphics->BeginScene(m_render,false);
         if (m_main_scene)
             m_main_scene->Draw(*m_graphics);
 #ifdef SB_USE_MYGUI
@@ -649,8 +657,7 @@ namespace Sandbox {
         if (m_lua) {
             LuaContextPtr ctx = m_lua->GetGlobalContext();
             if (ctx) {
-                ctx->SetValue("application.size.width", float(m_width) / m_graphics->GetScele() * m_resources->GetScale() );
-                ctx->SetValue("application.size.height", float(m_height) / m_graphics->GetScele() * m_resources->GetScale() );
+                UpdateScreenSize();
                 if (m_lua->GetGlobalContext()->GetValue<bool>("application.onResize")) {
                     m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onResize");
                 }
@@ -670,6 +677,12 @@ namespace Sandbox {
 	
     void Application::SetResourcesVariant(float scale,const sb::string& postfix) {
         m_resources->SetResourcesVariant(scale, postfix);
+        UpdateScreenSize();
+    }
+    
+    void Application::SetRenderScale(float scale) {
+        m_graphics->SetScale(scale);
+        UpdateScreenSize();
     }
     
 #ifdef SB_USE_MYGUI

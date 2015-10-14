@@ -47,7 +47,7 @@ namespace Sandbox {
 		void Load(GHL::Render* render);
 		
 		/// @brief begin draw scene
-		void BeginScene(GHL::Render* render);
+		void BeginScene(GHL::Render* render, bool target);
         
         /// clear scene
         void Clear( const Color& clr , float depth );
@@ -152,6 +152,7 @@ namespace Sandbox {
    private:
         Resources*  m_resources;
 		GHL::Render* m_render;
+        bool m_render_to_target;
 		GHL::Texture* m_fake_tex_white;
         TexturePtr  m_fake_tex_black;
         

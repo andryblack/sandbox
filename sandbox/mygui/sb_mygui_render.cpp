@@ -94,7 +94,7 @@ namespace Sandbox {
                 GHL::RenderTarget* rt = m_target->GetNative();
                 GHL::Render* render = m_resources->GetRender();
                 render->BeginScene(rt);
-                m_graphics->BeginScene(render);
+                m_graphics->BeginScene(render,true);
                 m_graphics->Clear(Color(0,0,0,0), 0);
                 RenderTargetImpl::begin();
             }
@@ -130,10 +130,16 @@ namespace Sandbox {
                     m_texture = m_resources->CreateTexture(_width, _height, m_resources->GetScale(), true, 0);
                 }
             }
+            if (m_texture) {
+                m_texture->SetFiltered(true);
+            }
         }
             
         void TextureImpl::loadFromFile(const std::string& _filename) {
             m_texture = m_resources->GetTexture(_filename.c_str(), false);
+            if (m_texture) {
+                m_texture->SetFiltered(true);
+            }
         }
             
         

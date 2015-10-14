@@ -20,7 +20,7 @@ namespace Sandbox {
     
     size_t RTScene::Draw(GHL::Render *r,Graphics& g) {
         r->BeginScene(m_rt->GetNative());
-        g.BeginScene(r);
+        g.BeginScene(r,true);
         Scene::Draw(g);
         size_t res = g.EndScene();
         r->EndScene();

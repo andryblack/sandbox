@@ -814,9 +814,10 @@ namespace Sandbox {
 	}
 		
 		
-	void Graphics::BeginScene(GHL::Render* render) {
+	void Graphics::BeginScene(GHL::Render* render, bool target) {
         sb_assert( (m_render==0) && "scene already started" );
 		m_render = render;
+        m_render_to_target = target;
 		m_blend_mode = BLEND_MODE_COPY;
 		m_render->SetupBlend(false);
 		m_texture = TexturePtr();
@@ -833,7 +834,7 @@ namespace Sandbox {
 		m_shader = ShaderPtr();
         m_calc2_tex = false;
         
-        float draw_scale = m_scale * m_resources->GetScale();
+        float draw_scale = (target ? 1.0f : m_scale) * m_resources->GetScale();
         
 		SetProjectionMatrix(Matrix4f::ortho(0,float(render->GetWidth())/draw_scale,
 											float(render->GetHeight())/draw_scale,0,-10,10));
@@ -875,7 +876,7 @@ namespace Sandbox {
 	void Graphics::EndNative(GHL::Render* render) {
         size_t prev_batches = m_batches;
 		if (render) {
-			BeginScene(render);
+			BeginScene(render,m_render_to_target);
             m_batches+=prev_batches;
 		}
 	}
@@ -885,4 +886,7 @@ namespace Sandbox {
         return tex->Present(m_resources);
     }
 	
+    void Graphics::SetScale( float scale ) {
+        m_scale = scale;
+    }
 }
