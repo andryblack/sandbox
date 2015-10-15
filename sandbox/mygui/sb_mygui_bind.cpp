@@ -572,6 +572,8 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_OBJECT(MyGUI::TextBox, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::TextBox)
 SB_META_PROPERTY_RW(caption, getCaption, setCaption)
+SB_META_PROPERTY_RW(textAlign, getTextAlign, setTextAlign)
+SB_META_PROPERTY_RW(textColour, getTextColour, setTextColour)
 SB_META_END_KLASS_BIND()
 
 

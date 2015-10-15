@@ -204,7 +204,8 @@ namespace Sandbox {
         }
         
         const char* stack<const char*>::get( lua_State* L, int idx ) {
-            return lua_tostring(L, idx);
+            const char* res = lua_tostring(L, idx);
+            return res ? res : "";
         }
 
         
