@@ -14,8 +14,14 @@ function _M.assets_rules.require_version( v )
 	end
 end
 
+
+
 local img = require '_images'
 local convert_spine = require '_convert_spine'
+
+function _M.assets_rules.use_variant( v , scale )
+	img.use_variants[v]=scale
+end
 
 for k,v in pairs(img.assets_rules) do
 	_M.assets_rules[k] = v

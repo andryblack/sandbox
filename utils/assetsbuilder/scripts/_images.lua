@@ -2,6 +2,7 @@
 local _M = {}
 
 _M.assets_rules = {}
+_M.use_variants = {}
 
 local atlas = require '_atlas'
 
@@ -17,7 +18,8 @@ local function load_images( dir  )
 			local filename = path.join(dir,k .. '.' .. assert(v.type,'not found type for ' .. k .. ' at ' .. dir))
 			local tex = assert(application:check_texture(filename),'failed check texture ' .. filename)
 			v.texture_info = tex
-			if v.premultiplied then
+			local premultiplied = v.premultiplied
+			if premultiplied then
 				rules.copy_files[filename]=true
 			else
 				local pm = rules.premultiply_images or {}
@@ -29,6 +31,25 @@ local function load_images( dir  )
 			v._name = k
 			v._path = dir
 			ctx.textures[k] = v
+
+			if _M.use_variants then
+				for vk,vv in pairs(_M.use_variants) do
+					local vname = path.join(dir,k .. vk.. '.' .. v.type)
+					local vtex = application:check_texture(vname)
+					if vtex then
+						if premultiplied then
+							rules.copy_files[vname]=true
+							print('copy variant',vname)
+						else
+							rules.premultiply_images[vname] = vname
+							print('premultiply variant',vname)
+						end
+						rules.dest_files[vname]=vname
+					else
+						print('not found varian for',filename)
+					end
+				end
+			end
 		end
 	end
 	function sandbox._images( images )
