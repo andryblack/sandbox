@@ -44,6 +44,10 @@ namespace Sandbox {
         unsigned int next =  next_pot( val );
         return next == val ? val : next / 2;
     }
+    
+    struct Vector2f;
+    Vector2f intersect_lines(const Vector2f& a1, const Vector2f& a2, const Vector2f& b1, const Vector2f& b2);
+    bool intersect(const Vector2f& a1, const Vector2f& a2, const Vector2f& b1, const Vector2f& b2, Vector2f& res);
 }
 
 #endif /*SB_MATH_H*/

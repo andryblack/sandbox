@@ -47,6 +47,7 @@ namespace Sandbox {
         float th;
     };
     
+    
     static void build_corner( const Sandbox::Vector2f& p,
 							 const Sandbox::Vector2f& dir_l,
 							 const Sandbox::Vector2f& dir_r,
@@ -76,38 +77,63 @@ namespace Sandbox {
         if (cw > 0) {
 			
             
+/*
+         out_l out_m_l
+  -----------1--3--4 outer_pnt
+             |  |\/|
+             |  |/\|
+        mid_l*--2--5 out_m_r
+             | /|p |
+             |/ |  |
+  -----------06-*--7 out_r
+    inner_pnt|mid_r|
+          */
+
             buffer->add_vertex(inner_pnt,buffer->tx,buffer->ty+buffer->th*cw);
             buffer->add_vertex(out_l,buffer->tx,buffer->ty-buffer->th*cw);
             buffer->add_vertex(p,buffer->tx,buffer->ty);
             buffer->add_vertex(out_m_l,buffer->tx,buffer->ty-buffer->th*cw);
             buffer->add_vertex(outer_pnt,buffer->tx,buffer->ty-buffer->th*cw);
             buffer->add_vertex(out_m_r,buffer->tx,buffer->ty-buffer->th*cw);
-            buffer->add_vertex(out_r,buffer->tx,buffer->ty-buffer->th*cw);
             buffer->add_vertex(inner_pnt,buffer->tx,buffer->ty+buffer->th*cw);
-			
+            buffer->add_vertex(out_r,buffer->tx,buffer->ty-buffer->th*cw);
+            
             buffer->add_triangle(0,1,2);
             buffer->add_triangle(2,1,3);
             buffer->add_triangle(3,4,2);
             buffer->add_triangle(2,4,5);
-            buffer->add_triangle(5,6,2);
-            buffer->add_triangle(6,7,2);
+            buffer->add_triangle(2,5,7);
+            buffer->add_triangle(6,2,7);
 			
         } else {
 			
+/*
+    inner_pnt|mid_r|
+  -----------17-*--6 out_r
+             |  |\/|
+             |  |/\|
+        mid_l*--2--5 out_m_r
+             | /|\ |
+             |/ | \|
+  -----------0--3--4 outer_pnt
+         out_l  out_m_l
+ 
+             */
+
             buffer->add_vertex(out_l,buffer->tx,buffer->ty-buffer->th*cw);
             buffer->add_vertex(inner_pnt,buffer->tx,buffer->ty+buffer->th*cw);
             buffer->add_vertex(p,buffer->tx,buffer->ty);
             buffer->add_vertex(out_m_l,buffer->tx,buffer->ty-buffer->th*cw);
             buffer->add_vertex(outer_pnt,buffer->tx,buffer->ty-buffer->th*cw);
             buffer->add_vertex(out_m_r,buffer->tx,buffer->ty-buffer->th*cw);
-            buffer->add_vertex(inner_pnt,buffer->tx,buffer->ty+buffer->th*cw);
             buffer->add_vertex(out_r,buffer->tx,buffer->ty-buffer->th*cw);
-			
-            buffer->add_triangle(1,0,2);
-            buffer->add_triangle(2,0,3);
-            buffer->add_triangle(3,4,2);
-            buffer->add_triangle(2,4,5);
-            buffer->add_triangle(5,7,2);
+            buffer->add_vertex(inner_pnt,buffer->tx,buffer->ty+buffer->th*cw);
+            
+            buffer->add_triangle(0,1,2);
+            buffer->add_triangle(0,2,3);
+            buffer->add_triangle(3,2,4);
+            buffer->add_triangle(2,5,4);
+            buffer->add_triangle(2,6,5);
             buffer->add_triangle(7,6,2);
         }
     }
@@ -142,10 +168,10 @@ namespace Sandbox {
         width*=0.5f;
         ctx.W = width;
         
-        float tx = img.GetTextureX() / img.GetTexture()->GetWidth();
-        float ty = img.GetTextureY() / img.GetTexture()->GetHeight();
-        float tw = img.GetTextureW() / img.GetTexture()->GetWidth();
-        float th = img.GetTextureH() / img.GetTexture()->GetHeight();
+        float tx = img.GetTexture() ? (img.GetTextureX() / img.GetTexture()->GetWidth()) : 0.0f;
+        float ty = img.GetTexture() ? (img.GetTextureY() / img.GetTexture()->GetHeight()) : 0.0f;
+        float tw = img.GetTexture() ? (img.GetTextureW() / img.GetTexture()->GetWidth()) : 1.0f;
+        float th = img.GetTexture() ? (img.GetTextureH() / img.GetTexture()->GetHeight()) : 1.0f;
         
         
         ctx.tx = tx + tw*0.5f;
@@ -170,12 +196,12 @@ namespace Sandbox {
 //     (0)---(2)---(4)--
 //        
         /// left dot
-        ctx.add_triangle(0,3,1);
-        ctx.add_triangle(0,2,3);
+        ctx.add_triangle(1,3,0);
+        ctx.add_triangle(0,3,2);
 		
         /// first segment
-        ctx.add_triangle(2,5,3);
-        ctx.add_triangle(2,4,5);
+        ctx.add_triangle(2,3,5);
+        ctx.add_triangle(2,5,4);
 		
         ctx.ibase+=4;
 		
@@ -183,8 +209,8 @@ namespace Sandbox {
 			Sandbox::Vector2f dir_r = get_dir_next(points,i);
             build_corner(points[i],dir_l,dir_r,&ctx);
             ctx.ibase+=corner_vertexes-2;
-            ctx.add_triangle(0,2,1);
-            ctx.add_triangle(0,2,3);
+            ctx.add_triangle(1,3,0);
+            ctx.add_triangle(0,3,2);
             ctx.ibase+=2;
             dir_l = dir_r;
         }
@@ -199,8 +225,8 @@ namespace Sandbox {
         ctx.add_vertex(points.back()+dir_l*img.GetWidth()*0.5f+dir_l.normal()*width,tx+tw,ty+th);
         ctx.add_vertex(points.back()+dir_l*img.GetWidth()*0.5f-dir_l.normal()*width,tx+tw,ty);
         /// right dot
-        ctx.add_triangle(0,3,1);
-        ctx.add_triangle(0,2,3);
+        ctx.add_triangle(0,1,3);
+        ctx.add_triangle(0,3,2);
         
         sb_assert(buffer.vertexes.size()==vtcs);
         sb_assert(buffer.indexes.size()==indxs);
@@ -227,10 +253,10 @@ namespace Sandbox {
         width*=0.5f;
         ctx.W = width;
         
-        float tx = img.GetTextureX() / img.GetTexture()->GetWidth();
-        float ty = img.GetTextureY() / img.GetTexture()->GetHeight();
-        float tw = img.GetTextureW() / img.GetTexture()->GetWidth();
-        float th = img.GetTextureH() / img.GetTexture()->GetHeight();
+        float tx = img.GetTexture() ? (img.GetTextureX() / img.GetTexture()->GetWidth()) : 0.0f;
+        float ty = img.GetTexture() ? (img.GetTextureY() / img.GetTexture()->GetHeight()) : 0.0f;
+        float tw = img.GetTexture() ? (img.GetTextureW() / img.GetTexture()->GetWidth()) : 1.0f;
+        float th = img.GetTexture() ? (img.GetTextureH() / img.GetTexture()->GetHeight()) : 1.0f;
         
         
         ctx.tx = tx + tw*0.5f;
@@ -240,14 +266,20 @@ namespace Sandbox {
         sb_assert(points.size()>=2);
 		Sandbox::Vector2f dir_l = (points[0]-points.back()).unit();
         
-    
+        //     (1)---(3)
+        //      |    /|
+        //      |   / |
+        //      |  /  |
+        //      | /   |
+        //      |/    |
+        //     (0)---(2)
 		
         for (size_t i=0;i<points.size();i++) {
 			Sandbox::Vector2f dir_r = get_dir_next(points,i);
             build_corner(points[i],dir_l,dir_r,&ctx);
             ctx.ibase+=corner_vertexes-2;
-            ctx.add_triangle(0,2,1);
-            ctx.add_triangle(0,2,3);
+            ctx.add_triangle(1,3,0);
+            ctx.add_triangle(0,3,2);
             ctx.ibase+=2;
             dir_l = dir_r;
         }
