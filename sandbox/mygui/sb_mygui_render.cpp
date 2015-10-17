@@ -241,6 +241,7 @@ namespace Sandbox {
         }
         
         void    RenderTargetImpl::startRenderObject() {
+            endRenderMask();
             if (m_render) {
                 RenderTargetImpl::end();
             }

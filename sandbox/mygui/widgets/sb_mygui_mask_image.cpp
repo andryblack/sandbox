@@ -35,8 +35,9 @@ namespace Sandbox {
                         return;
                     }
                     
-                   
+                    target->endRenderObject();
                     GHL::Render* render = target->render();
+                    
                     if (render) {
                         target->startRenderMask(texture);
                         if (shader) {
@@ -71,6 +72,8 @@ namespace Sandbox {
                             v2.t2y = v.ty;
                         }
                         render->DrawPrimitivesFromMemory(GHL::PRIMITIVE_TYPE_TRIANGLES, GHL::VERTEX_TYPE_2_TEX, m_vdata.data(), m_vdata.size(), 0, m_vdata.size()/3);
+                    } else {
+                        sb_assert(false);
                     }
                 }
             }
