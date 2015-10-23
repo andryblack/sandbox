@@ -10,12 +10,10 @@ project 'yajl'
 		includedirs {
 				sandbox_dir .. '/include',
 		}
-		if not os.is('windows') then
-			prebuildcommands {
-				'mkdir -p ' .. path.getabsolute(sandbox_dir..'/include/yajl'),
-				'cp ' .. path.getabsolute(sandbox_dir..'/yajl/src/api') .. '/*.h ' .. path.getabsolute(sandbox_dir..'/include/yajl/')
+		prebuildcommands {
+				'{MKDIR} ' .. path.getabsolute(sandbox_dir..'/include/yajl'),
+				'{COPY} ' .. path.getabsolute(sandbox_dir..'/yajl/src/api') .. '/*.h ' .. path.getabsolute(sandbox_dir..'/include/yajl/')
 			}
-		end
 		files(utils.append_path(sandbox_dir .. '/yajl/src/',yajl_files))
 
 		configuration "Debug"
