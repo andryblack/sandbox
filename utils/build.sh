@@ -12,6 +12,8 @@ if [[ "$PLATFORM" == "mingw"* ]]; then
 	PLATFORM="windows"
 elif [[ "$PLATFORM" == "MINGW32"* ]]; then
 	PLATFORM="windows"
+elif [[ "$PLATFORM" == "MINGW64"* ]]; then
+	PLATFORM="windows"
 fi
 
 TARGET=gmake
