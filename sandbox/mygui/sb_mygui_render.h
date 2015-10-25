@@ -102,6 +102,8 @@ namespace Sandbox {
             TextureImpl( const sb::string& name, Graphics* graphics,Resources* res,
                         RenderTargetPtr rt );
             
+            void WrapRT( RenderTargetPtr rt );
+            
             virtual void begin();
             virtual void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
             void end();
@@ -177,7 +179,7 @@ namespace Sandbox {
             
             
             
-            MyGUI::ITexture* wrapRT( const sb::string& name, const RenderTargetPtr& rt );
+            void wrapRT( MyGUI::ITexture* texture, const RenderTargetPtr& rt );
         private:
             sb::map<sb::string,TextureImpl*>  m_textures;
             

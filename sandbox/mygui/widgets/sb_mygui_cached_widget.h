@@ -23,23 +23,18 @@ namespace Sandbox {
             CachedWidget();
             ~CachedWidget();
             
-            virtual void attachItemToNode(MyGUI::ILayer* _layer, MyGUI::ILayerNode* _node);
             virtual void onWidgetCreated(MyGUI::Widget* _widget);
             
             virtual void addChildItem(LayerItem* _item);
             virtual void removeChildItem(LayerItem* _item);
 
-            // наследуемся он LayerInfo
-            virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
-            virtual const MyGUI::IntCoord& getLayerItemCoord() const;
-                
+            
         protected:
             void initialiseOverride();
             void shutdownOverride();
             
             virtual void doRenderToTarget(MyGUI::IRenderTarget* rt);
         private:
-            MyGUI::IRenderTarget*   m_rt;
             MyGUI::ITexture*        m_texture;
             
             MyGUI::SharedLayerNode*  m_replaced_layer;

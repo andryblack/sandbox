@@ -24,12 +24,15 @@ namespace Sandbox {
             ~SceneWidget();
             
             void initialiseOverride();
+            void shutdownOverride();
             
             const RTScenePtr& getScene() const { return m_scene; }
             void setScene( const RTScenePtr& scene );
         private:
             MyGUI::ITexture*    m_texture;
+            sb::string      m_texture_name;
             RTScenePtr    m_scene;
+            
         };
     }
 }

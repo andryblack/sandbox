@@ -88,6 +88,14 @@ namespace Sandbox {
             int _height = m_texture->GetHeight();
             setSize(_width, _height);
         }
+        
+        void TextureImpl::WrapRT( RenderTargetPtr rt ) {
+            m_target = rt;
+            m_texture = m_target->GetTexture();
+            int _width = m_texture->GetWidth();
+            int _height = m_texture->GetHeight();
+            setSize(_width, _height);
+        }
             
         void TextureImpl::begin() {
             if (m_target) {
@@ -293,11 +301,10 @@ namespace Sandbox {
             return 0;
         }
         
-        MyGUI::ITexture* RenderManager::wrapRT(const std::string& _name,const RenderTargetPtr& rt ) {
-            sb_assert(m_textures.find(_name)==m_textures.end());
-            TextureImpl* tex = new TextureImpl(_name,m_graphics,m_resources,rt);
-            m_textures[_name] = tex;
-            return tex;
+        void RenderManager::wrapRT(MyGUI::ITexture* texture,const RenderTargetPtr& rt ) {
+            if (!texture) return;
+            TextureImpl* tex = static_cast<TextureImpl*>(texture);
+            tex->WrapRT(rt);
         }
         
         const MyGUI::IntSize& RenderManager::getViewSize() const {
