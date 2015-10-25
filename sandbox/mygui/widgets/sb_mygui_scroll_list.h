@@ -53,6 +53,7 @@ namespace Sandbox {
             
             void moveNext();
             void movePrev();
+            void moveToPage(int idx);
             
             virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
         protected:

@@ -82,6 +82,7 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ScrollList)
 bind( property_wo( "delegate", &setDelegateImpl ) );
 SB_META_METHOD(moveNext)
 SB_META_METHOD(movePrev)
+SB_META_METHOD(moveToPage)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -283,6 +284,14 @@ namespace Sandbox {
         
         void ScrollList::moveNext() {
             m_scroll_target = normalizeScrollValue(m_scroll_target+getItemSize());
+            if (m_state==state_none || m_state == state_free_scroll) {
+                m_move_speed += getItemSize() * 2.0f;
+                m_state = state_free_scroll;
+            }
+        }
+        
+        void ScrollList::moveToPage(int idx) {
+            m_scroll_target = normalizeScrollValue(getItemSize()*idx);
             if (m_state==state_none || m_state == state_free_scroll) {
                 m_move_speed += getItemSize() * 2.0f;
                 m_state = state_free_scroll;

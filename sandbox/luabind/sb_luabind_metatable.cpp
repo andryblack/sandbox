@@ -192,6 +192,12 @@ namespace Sandbox {
                     lua_remove(L, -2);          /// mt res
                     lua_remove(L, -2);          /// res
                     lua_rawgeti(L, -1, mt_indexes::__get); /// res get
+                    if (!lua_isfunction(L, -1)) {
+                        char buf[128];
+                        sb::snprintf(buf, 128, "%s: get writeonly field: %s",lua_tostring(L, self_index),lua_tostring(L, 2));
+                        lua_pushstring(L, buf);
+                        lua_error(L);
+                    }
                     sb_assert(lua_isfunction(L, -1));
                     lua_remove(L, -2);          /// get
                     lua_pushvalue(L, 1);        /// get obj
@@ -261,6 +267,12 @@ namespace Sandbox {
                     lua_remove(L, -2);          /// mt res
                     lua_remove(L, -2);          /// res
                     lua_rawgeti(L, -1, mt_indexes::__set); /// res set
+                    if (!lua_isfunction(L, -1)) {
+                        char buf[128];
+                        sb::snprintf(buf, 128, "%s: set readonly field: %s",lua_tostring(L, self_indx),lua_tostring(L, 2));
+                        lua_pushstring(L, buf);
+                        lua_error(L);
+                    }
                     sb_assert(lua_isfunction(L, -1));
                     lua_remove(L, -2);          /// set
                     lua_pushvalue(L, 1);        /// set obj
