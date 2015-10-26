@@ -94,6 +94,7 @@ namespace Sandbox {
             void setSize(int width,int height);
             GHL::Render*    m_render;
             TextureImpl*    m_draw_mask;
+            bool            m_render_object;
         };
         
         class TextureImpl : public MyGUI::ITexture, public RenderTargetImpl {

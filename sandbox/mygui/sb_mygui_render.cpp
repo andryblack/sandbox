@@ -27,11 +27,13 @@ namespace Sandbox {
         
                 
         RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res) : m_graphics(g),m_resources(res),m_render(0) {
-            
+            m_render_object = 0;
+            m_draw_mask = 0;
         }
         
         void RenderTargetImpl::drawScene(const ScenePtr &scene) {
             if (m_render) {
+                sb_assert(m_render);
                 m_graphics->EndNative(m_render);
                 Transform2d tr = m_graphics->GetTransform();
             
@@ -39,6 +41,7 @@ namespace Sandbox {
                 scene->Draw(*m_graphics);
                 m_graphics->SetTransform(tr);
                 m_render = m_graphics->BeginNative();
+                sb_assert(m_render);
             }
         }
         
@@ -49,6 +52,7 @@ namespace Sandbox {
         void RenderTargetImpl::begin() {
             m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
             m_render = m_graphics->BeginNative();
+            sb_assert(m_render);
             if (m_render) {
                 m_render->SetupBlend(true,GHL::BLEND_FACTOR_ONE,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
                 m_render->SetupFaceCull(false);
@@ -57,7 +61,7 @@ namespace Sandbox {
         
         void RenderTargetImpl::end() {
             if (m_render) {
-                m_render->SetupFaceCull(true);
+                m_render->SetupFaceCull(false);
                 m_graphics->EndNative(m_render);
                 m_render = 0;
             }
@@ -111,6 +115,8 @@ namespace Sandbox {
             RenderTargetImpl::doRender(_buffer, _texture, _count);
         }
         void TextureImpl::end() {
+            endRenderMask();
+            endRenderObject();
             GHL::Render* render = m_render;
             RenderTargetImpl::end();
             m_graphics->EndScene();
@@ -196,7 +202,7 @@ namespace Sandbox {
         }
         
         RenderTargetImpl::RenderTargetImpl() : m_draw_mask(0) {
-            
+            m_render_object = false;
         }
         
         
@@ -242,17 +248,25 @@ namespace Sandbox {
         }
         
         void    RenderTargetImpl::endRenderObject() {
-            if (m_render) {
+            if (!m_render_object) {
                 return;
             }
+            m_render_object = false;
+            sb_assert(!m_render);
             RenderTargetImpl::begin();
+            sb_assert(m_render);
         }
         
         void    RenderTargetImpl::startRenderObject() {
-            endRenderMask();
-            if (m_render) {
-                RenderTargetImpl::end();
+            if (m_render_object) {
+                sb_assert(!m_render);
+                return;
             }
+            m_render_object = true;
+            endRenderMask();
+            sb_assert(m_render);
+            RenderTargetImpl::end();
+            sb_assert(!m_render);
         }
         
         

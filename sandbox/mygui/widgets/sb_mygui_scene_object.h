@@ -32,7 +32,7 @@ namespace Sandbox {
             SceneObjectWidget();
             ~SceneObjectWidget();
             
-            void setObject(const SceneObjectPtr& object) { m_object = object; }
+            void setObject(const SceneObjectPtr& object);
             const SceneObjectPtr& getObject() const { return m_object; }
         private:
             SceneObjectPtr  m_object;

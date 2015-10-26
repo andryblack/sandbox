@@ -54,7 +54,11 @@ namespace Sandbox {
         SceneObjectWidget::~SceneObjectWidget() {
             
         }
-                
+        
+        void SceneObjectWidget::setObject(const SceneObjectPtr &object) {
+            m_object = object;
+            _updateView();
+        }
         
     }
 }
