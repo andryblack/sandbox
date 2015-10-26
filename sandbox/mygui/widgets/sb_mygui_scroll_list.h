@@ -32,6 +32,7 @@ namespace Sandbox {
             virtual void createWidget(MyGUI::Widget* w) = 0;
             virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) = 0;
             virtual void onItemClick(size_t idx) = 0;
+            virtual void onBeginScroll() = 0;
         };
         typedef sb::shared_ptr<ScrollListDelegate> ScrollListDelegatePtr;
         

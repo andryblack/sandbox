@@ -60,6 +60,10 @@ namespace Sandbox {
                     m_obj.call_self("onItemClick",*data_ptr,idx);
                 }
             }
+            virtual void onBeginScroll() {
+                if (m_obj.GetValue<bool>("onBeginScroll"))
+                    m_obj.call_self("onBeginScroll");
+            }
         };
     }
 }
@@ -386,6 +390,9 @@ namespace Sandbox {
                 if (m_state == state_wait_scroll) {
                     if (std::abs((new_scroll-m_scroll_begin))>min_scroll_distance) {
                         m_state = state_manual_scroll;
+                        if (m_delegate) {
+                            m_delegate->onBeginScroll();
+                        }
                         MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
                         //getClientWidget()->setEnabled(false);
                         MyGUI::Widget* w = MyGUI::InputManager::getInstance().getMouseFocusWidget();
