@@ -33,6 +33,8 @@ namespace Sandbox {
             virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) = 0;
             virtual void onItemClick(size_t idx) = 0;
             virtual void onBeginScroll() = 0;
+            virtual void onEndScroll() = 0;
+            virtual void onFreeScroll() = 0;
         };
         typedef sb::shared_ptr<ScrollListDelegate> ScrollListDelegatePtr;
         
@@ -55,6 +57,11 @@ namespace Sandbox {
             void moveNext();
             void movePrev();
             void moveToPage(int idx);
+            
+            void setPage(int page);
+            int getPage() const;
+            
+            int getTargetPage() const;
             
             virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
         protected:
@@ -92,6 +99,8 @@ namespace Sandbox {
             int     getItemSize() const;
             int     getScrollAreaSize() const;
             int     getScrollContentSize() const;
+            
+            void startFreeScroll();
             
             enum State {
                 state_none,

@@ -135,6 +135,23 @@ namespace Sandbox {
         return Vector2f();
     }
     
+    void Container::SetScale(float s) {
+        GetTransformModificator()->SetScale(s);
+    }
+    float Container::GetScale() const {
+        if (m_transform) return m_transform->GetScale();
+        return 1.0f;
+    }
+    
+    void Container::SetAngle(float a) {
+        GetTransformModificator()->SetAngle(a);
+    }
+    float Container::GetAngle() const {
+        if (m_transform) return m_transform->GetAngle();
+        return 0.0f;
+    }
+
+    
     void Container::GlobalToLocalImpl(Vector2f& v) const {
         SceneObject::GlobalToLocalImpl(v);
         if (m_transform) {

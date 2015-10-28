@@ -247,6 +247,7 @@ local function apply_images( dir, data )
 					f('rect',v.rect),
 					f('hotspot',v.hotspot),
 					f('size',v.size),
+					f('offsets',v.offsets),
 					'},')
 		end
 	end 

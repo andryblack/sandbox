@@ -135,6 +135,8 @@ SB_META_METHOD(SetTransformModificator)
 SB_META_METHOD(GetColorModificator)
 SB_META_METHOD(SetColorModificator)
 SB_META_PROPERTY_RW_DEF(Translate)
+SB_META_PROPERTY_RW_DEF(Scale)
+SB_META_PROPERTY_RW_DEF(Angle)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::BlendMode,void);

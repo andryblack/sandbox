@@ -38,6 +38,12 @@ namespace Sandbox {
         
         void SetTranslate(const Vector2f& tr);
         Vector2f GetTranslate() const;
+        
+        void SetScale(float s);
+        float GetScale() const;
+        
+        void SetAngle(float a);
+        float GetAngle() const;
     
         void SortByOrder();
     protected:

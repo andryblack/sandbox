@@ -23,7 +23,7 @@ namespace Sandbox {
     namespace mygui {
         
         
-        CachedWidget::CachedWidget() {
+        CachedWidget::CachedWidget() : m_render_content(false) {
             m_texture = 0;
             m_replaced_layer = new MyGUI::SharedLayerNode(0,0);
             m_texture_name = get_type_info()->name;
@@ -53,6 +53,17 @@ namespace Sandbox {
             }
         }
         
+        void CachedWidget::setPropertyOverride(const std::string& _key, const std::string& _value) {
+            if (_key == "ForceRender") {
+                m_render_content = MyGUI::utility::parseBool(_value);
+            } else
+            {
+                Base::setPropertyOverride(_key, _value);
+                return;
+            }
+            
+            eventChangeProperty(this, _key, _value);
+        }
         
         void CachedWidget::onWidgetCreated(MyGUI::Widget* _widget) {
             Base::onWidgetCreated(_widget);
@@ -82,7 +93,7 @@ namespace Sandbox {
                 m_texture->createManual(size.width, size.height, MyGUI::TextureUsage::RenderTarget, MyGUI::PixelFormat::R8G8B8A8);
                 _updateView();
             } else {
-                if (!m_replaced_layer->isOutOfDate())
+                if (!m_replaced_layer->isOutOfDate() && !m_render_content)
                     return;
             }
 

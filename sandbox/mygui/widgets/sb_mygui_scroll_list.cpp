@@ -64,6 +64,14 @@ namespace Sandbox {
                 if (m_obj.GetValue<bool>("onBeginScroll"))
                     m_obj.call_self("onBeginScroll");
             }
+            virtual void onEndScroll() {
+                if (m_obj.GetValue<bool>("onEndScroll"))
+                    m_obj.call_self("onEndScroll");
+            }
+            virtual void onFreeScroll() {
+                if (m_obj.GetValue<bool>("onFreeScroll"))
+                    m_obj.call_self("onFreeScroll");
+            }
         };
     }
 }
@@ -87,6 +95,8 @@ bind( property_wo( "delegate", &setDelegateImpl ) );
 SB_META_METHOD(moveNext)
 SB_META_METHOD(movePrev)
 SB_META_METHOD(moveToPage)
+SB_META_PROPERTY_RW(page, getPage, setPage)
+SB_META_PROPERTY_RW(targetPage, getTargetPage, moveToPage)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -290,7 +300,7 @@ namespace Sandbox {
             m_scroll_target = normalizeScrollValue(m_scroll_target+getItemSize());
             if (m_state==state_none || m_state == state_free_scroll) {
                 m_move_speed += getItemSize() * 2.0f;
-                m_state = state_free_scroll;
+                startFreeScroll();
             }
         }
         
@@ -298,15 +308,36 @@ namespace Sandbox {
             m_scroll_target = normalizeScrollValue(getItemSize()*idx);
             if (m_state==state_none || m_state == state_free_scroll) {
                 m_move_speed += getItemSize() * 2.0f;
-                m_state = state_free_scroll;
+                startFreeScroll();
             }
+        }
+        
+        void ScrollList::startFreeScroll() {
+            if (m_state!=state_free_scroll) {
+                m_state = state_free_scroll;
+                if (m_delegate) {
+                    m_delegate->onFreeScroll();
+                }
+            }
+        }
+        
+        int ScrollList::getTargetPage() const {
+            return (m_scroll_target + getItemSize() / 2) / getItemSize();
+        }
+        
+        void ScrollList::setPage(int page) {
+            setScroll(normalizeScrollValue(getItemSize()*page));
+        }
+        
+        int ScrollList::getPage() const {
+            return (getScroll() + getItemSize() / 2) / getItemSize();
         }
         
         void ScrollList::movePrev() {
             m_scroll_target = normalizeScrollValue(m_scroll_target-getItemSize());
             if (m_state==state_none || m_state == state_free_scroll) {
                 m_move_speed += getItemSize() * 2.0f;
-                m_state = state_free_scroll;
+                startFreeScroll();
             }
         }
         
@@ -353,7 +384,13 @@ namespace Sandbox {
             } else {
                 m_move_speed = 0;
                 m_move_accum = 0;
-                m_state = state_none;
+                if (m_state != state_none) {
+                    m_state = state_none;
+                    if (m_delegate) {
+                        m_delegate->onEndScroll();
+                    }
+                }
+               
             }
         }
         
@@ -481,7 +518,7 @@ namespace Sandbox {
                     
                     m_scroll_target = normalizeScrollValue(m_scroll_target);
                     
-                    m_state = state_free_scroll;
+                    startFreeScroll();
                     //LogInfo() << "set animate scroll";
                 } else {
                     //m_state = state_none;

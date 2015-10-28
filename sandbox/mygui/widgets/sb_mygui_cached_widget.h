@@ -32,6 +32,7 @@ namespace Sandbox {
         protected:
             void initialiseOverride();
             void shutdownOverride();
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             
             virtual void doRenderToTarget(MyGUI::IRenderTarget* rt);
         private:
@@ -40,6 +41,8 @@ namespace Sandbox {
             MyGUI::SharedLayerNode*  m_replaced_layer;
             void frameEntered(float dt);
             std::string m_texture_name;
+            
+            bool    m_render_content;
         };
         
     }
