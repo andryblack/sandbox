@@ -626,6 +626,8 @@ bind(method("requestCoordItem", delegate_bind<MyGUI::ItemBox,
 SB_META_METHOD(addItem)
 SB_META_METHOD(getIndexByWidget)
 SB_META_METHOD(getWidgetByIndex)
+SB_META_METHOD(redrawItemAt)
+SB_META_METHOD(redrawAllItems)
 SB_META_END_KLASS_BIND()
 
 
