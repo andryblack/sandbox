@@ -11,6 +11,7 @@
 #define SB_COLOR_H
 
 #include <ghl_types.h>
+#include <sbstd/sb_string.h>
 
 struct lua_State;
 
@@ -80,6 +81,7 @@ namespace Sandbox {
 		}
         
         static Color FromString( const char* str );
+        sb::string ToStringRGB() const;
     };
     
     namespace luabind {

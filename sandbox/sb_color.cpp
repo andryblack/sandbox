@@ -11,6 +11,7 @@
 
 namespace Sandbox {
     
+    static const char hex_chars[] = "0123456789abcdef";
     
     static inline int conv_hex_char(int c) {
         if ( (c>='0')&&(c<='9')) return c-'0';
@@ -40,6 +41,20 @@ namespace Sandbox {
             }
         }
         return from_bytes(c);
+    }
+    
+    sb::string Color::ToStringRGB() const {
+        char buf[8] = {'#','0','0','0','0','0','0',0};
+        GHL::Byte v = conv_float(r);
+        buf[1]=hex_chars[v>>4];
+        buf[2]=hex_chars[v&0xf];
+        v = conv_float(g);
+        buf[3]=hex_chars[v>>4];
+        buf[4]=hex_chars[v&0xf];
+        v = conv_float(b);
+        buf[5]=hex_chars[v>>4];
+        buf[6]=hex_chars[v&0xf];
+        return buf;
     }
 
 }
