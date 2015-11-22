@@ -635,6 +635,9 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_OBJECT(MyGUI::Canvas, MyGUI::Widget)
 
 SB_META_DECLARE_OBJECT(MyGUI::ScrollView, MyGUI::Widget)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ScrollView)
+SB_META_PROPERTY_RW(canvasSize,getCanvasSize,setCanvasSize)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::SimpleText, MyGUI::EditText)
 
@@ -825,6 +828,7 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ImageBox>(lua);
             luabind::ExternClass<MyGUI::Window>(lua);
             luabind::ExternClass<MyGUI::DDContainer>(lua);
+            luabind::ExternClass<MyGUI::ScrollView>(lua);
             luabind::ExternClass<MyGUI::ItemBox>(lua);
             luabind::ExternClass<MyGUI::ProgressBar>(lua);
             

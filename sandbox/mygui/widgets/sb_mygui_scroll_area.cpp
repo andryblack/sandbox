@@ -236,7 +236,7 @@ namespace Sandbox {
                     new_scroll.top = crnt_scroll.top + delta_scroll.top * (1.0f - derr);
                     
                 } else {
-                    new_scroll.left = norm.left;
+                    new_scroll.top = norm.top;
                 }
 
                 
