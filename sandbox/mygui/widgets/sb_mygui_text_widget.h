@@ -22,6 +22,9 @@ namespace Sandbox {
             TextWidget();
             ~TextWidget();
             
+            void setWordWrap(bool wrap);
+            bool getWordWrap() const;
+            
             void setPropertyOverride(const std::string& _key, const std::string& _value);
         protected:
         };

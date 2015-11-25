@@ -38,6 +38,7 @@ SB_META_PROPERTY_RW(object,getObject,setObject)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::TextWidget)
+SB_META_PROPERTY_RW(wordWrap, getWordWrap, setWordWrap)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {

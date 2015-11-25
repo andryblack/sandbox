@@ -86,10 +86,54 @@ namespace Sandbox {
                 return MyGUI::UString(stack<const char*>::get(L, idx));
             }
         };
-        
         template <>
         struct stack<const MyGUI::UString&> : stack<MyGUI::UString> {};
         
+        
+        template <>
+        struct stack<MyGUI::IntPoint> {
+            static void push( lua_State* L, const MyGUI::IntPoint& val ) {
+                stack_help<MyGUI::IntPoint, false>::push(L, val);
+            }
+            static MyGUI::IntPoint get( lua_State* L, int idx ) {
+                if (lua_istable(L, idx)) {
+                    MyGUI::IntPoint res;
+                    lua_rawgeti(L, idx, 1);
+                    res.left = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 2);
+                    res.top = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    return  res;
+                }
+                return stack_help<MyGUI::IntPoint, false>::get(L, idx);
+            }
+        };
+        template <>
+        struct stack<const MyGUI::IntPoint&> : stack<MyGUI::IntPoint> {};
+        
+        template <>
+        struct stack<MyGUI::IntSize> {
+            static void push( lua_State* L, const MyGUI::IntSize& val ) {
+                stack_help<MyGUI::IntSize, false>::push(L, val);
+            }
+            static MyGUI::IntSize get( lua_State* L, int idx ) {
+                if (lua_istable(L, idx)) {
+                    MyGUI::IntSize res;
+                    lua_rawgeti(L, idx, 1);
+                    res.width = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 2);
+                    res.height = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    return  res;
+                }
+                return stack_help<MyGUI::IntSize, false>::get(L, idx);
+            }
+        };
+        template <>
+        struct stack<const MyGUI::IntSize&> : stack<MyGUI::IntSize> {};
+                
         template <>
         struct stack<MyGUI::Any> {
             static void push( lua_State* L, const MyGUI::Any& val ) {
@@ -134,6 +178,21 @@ namespace Sandbox {
         };
         template <>
         struct stack<const MyGUI::Colour&> : stack<MyGUI::Colour> {};
+        
+        template <>
+        struct stack<MyGUI::Align> {
+            static void push( lua_State* L, const MyGUI::Align& val ) {
+                stack_help<MyGUI::Align, false>::push(L, val);
+            }
+            static MyGUI::Align get( lua_State* L, int idx ) {
+                int type = lua_type(L, idx);
+                if (type == LUA_TSTRING)
+                    return MyGUI::Align::parse(lua_tostring(L, idx));
+                return stack_help<MyGUI::Align, false>::get(L, idx);
+            }
+        };
+        template <>
+        struct stack<const MyGUI::Align&> : stack<MyGUI::Align> {};
         
         
         template <>
@@ -362,9 +421,6 @@ struct delegate_bind<O,T,MyGUI::delegates::CDelegate3<A1, A2, A3>, obj > {
     }
 };
 
-
-
-
 SB_META_DECLARE_KLASS(MyGUI::Align, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Align)
 SB_META_CONSTRUCTOR(())
@@ -522,6 +578,9 @@ bind(method("eventMouseButtonReleased", delegate_bind<MyGUI::Widget,
             MyGUI::EventHandle_WidgetIntIntButton,
             &MyGUI::WidgetInput::eventMouseButtonReleased>::lua_func));
 
+SB_META_METHOD(detachFromWidget)
+SB_META_METHOD(attachToWidget)
+
 SB_META_METHOD(findWidget)
 
 SB_META_METHOD(getChildCount)
@@ -571,6 +630,7 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::TextBox, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::TextBox)
+SB_META_PROPERTY_RO(textSize, getTextSize)
 SB_META_PROPERTY_RW(caption, getCaption, setCaption)
 SB_META_PROPERTY_RW(textAlign, getTextAlign, setTextAlign)
 SB_META_PROPERTY_RW(textColour, getTextColour, setTextColour)
