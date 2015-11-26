@@ -30,6 +30,8 @@ namespace Sandbox {
         
         SkeletonAnimation* GetAnimation() { return m_animation; }
         void SetFrame( size_t frame );
+        
+        bool IsComplete() const { return !m_animation; }
     private:
         size_t  m_crnt_frame;
         float   m_frame_time;

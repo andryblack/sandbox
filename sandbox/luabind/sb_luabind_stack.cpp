@@ -98,8 +98,10 @@ namespace Sandbox {
             if (res) {
                 LogError(LuabindModule) << " Failed script call method '" << name << "'" ;
                 LogError(LuabindModule) << lua_tostring(L, -1) ;
+                lua_pop(L, 2);
+            } else {
+                lua_remove(L, -1-ress);
             }
-            lua_remove(L, -1-ress);
         }
         
         

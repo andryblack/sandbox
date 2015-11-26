@@ -809,7 +809,8 @@ namespace Sandbox {
 		if (m_clip_rect==m_viewport) {
 			m_render->SetupScisor( false );
 		} else {
-			m_render->SetupScisor( true, rect.x,rect.y, rect.w,rect.h);
+            float draw_scale = (m_render_to_target ? 1.0f : m_scale) * m_resources->GetScale();
+			m_render->SetupScisor( true, rect.x * draw_scale,rect.y * draw_scale, rect.w * draw_scale,rect.h*draw_scale);
 		}
 	}
 		
@@ -839,7 +840,7 @@ namespace Sandbox {
 		SetProjectionMatrix(Matrix4f::ortho(0,float(render->GetWidth())/draw_scale,
 											float(render->GetHeight())/draw_scale,0,-10,10));
 		SetViewMatrix(Matrix4f::identity());
-		SetViewport(Recti(0,0,render->GetWidth(),render->GetHeight()));
+		SetViewport(Recti(0,0,render->GetWidth() / draw_scale ,render->GetHeight() / draw_scale ));
 		SetClipRect(GetViewport());
         m_render->SetTexture(0,0);
         m_render->SetTexture(0,1);

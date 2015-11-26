@@ -13,7 +13,6 @@
 #include "sb_matrix4.h"
 #include "sb_transform2d.h"
 
-
 SB_META_DECLARE_KLASS(Sandbox::Vector2f, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Vector2f)
 SB_META_CONSTRUCTOR((float,float))

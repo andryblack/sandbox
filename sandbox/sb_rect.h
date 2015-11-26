@@ -12,6 +12,7 @@
 
 #include "sb_vector2.h"
 #include <sbstd/sb_algorithm.h>
+#include "luabind/sb_luabind_stack.h"
 
 namespace Sandbox {
 	
@@ -34,6 +35,9 @@ namespace Sandbox {
         
         Vector2f GetTopLeft() const {
             return Vector2f( x,y );
+        }
+        Vector2f GetBottomRight() const {
+            return Vector2f( x + w, y + h);
         }
         Vector2f GetSize() const {
             return Vector2f( w, h );
@@ -68,6 +72,37 @@ namespace Sandbox {
 	typedef Rect<float> Rectf;
 	typedef Rect<int> Recti;
 	
+    namespace luabind {
+        template <class T>
+        struct stack<Rect<T> > {
+            typedef stack_help<Rect<T>, false > help;
+            static void push( lua_State* L, const Rect<T>& val ) {
+                help::push(L,val);
+            }
+            static Rect<T> get( lua_State* L, int idx ) {
+                if (lua_istable(L, idx)) {
+                    Rect<T> res;
+                    lua_rawgeti(L, idx, 1);
+                    res.x = lua_tonumber(L, -1);
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 2);
+                    res.y = lua_tonumber(L, -1);
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 3);
+                    res.w = lua_tonumber(L, -1);
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 4);
+                    res.h = lua_tonumber(L, -1);
+                    lua_pop(L, 1);
+                    return  res;
+                }
+                return help::get(L,idx);
+            }
+        };
+        template <class T>
+        struct stack<const Rect<T>&> : stack<Rect<T> > {};
+        
+    }
 }
 
 #endif /*SB_RECT_H*/

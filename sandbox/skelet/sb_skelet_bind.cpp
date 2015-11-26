@@ -18,6 +18,7 @@ SB_META_METHOD(StartAnimation)
 SB_META_METHOD(AddAnimation)
 SB_META_METHOD(AddObject)
 SB_META_PROPERTY_RW_DEF(EndEvent)
+SB_META_PROPERTY_RO(IsComplete, IsComplete)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::SkeletObject)

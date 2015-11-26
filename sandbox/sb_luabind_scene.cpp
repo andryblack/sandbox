@@ -22,6 +22,7 @@
 #include "sb_debug_geometry.h"
 #include "sb_rt_scene.h"
 #include "sb_geomerty_buffer.h"
+#include "sb_container_clip.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::SceneObject)
 SB_META_PROPERTY_RW(Visible,GetVisible,SetVisible)
@@ -158,6 +159,11 @@ SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Mode,GetMode,SetMode)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerClip)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW(Rect,GetRect,SetRect)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerMask)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Mode,GetMode,SetMode)
@@ -238,6 +244,7 @@ namespace Sandbox {
         luabind::Enum<BlendMode>(lua);
         luabind::Enum<MaskMode>(lua);
         luabind::Class<ContainerBlend>(lua);
+        luabind::Class<ContainerClip>(lua);
         luabind::Class<ContainerMask>(lua);
         luabind::Class<TransformModificator>(lua);
         luabind::Class<ColorModificator>(lua);
