@@ -53,6 +53,7 @@ namespace Sandbox {
             size_t getSubItems() const { return m_num_subitems; }
             
             void setScrollBounds(int b);
+            void setCentered(bool c);
             
             void moveNext();
             void movePrev();
@@ -73,6 +74,7 @@ namespace Sandbox {
             ScrollListDelegatePtr   m_delegate;
             size_t  m_visible_count;
             size_t  m_num_subitems;
+            bool    m_centered;
             
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             

@@ -126,6 +126,7 @@ namespace Sandbox {
             m_scroll_target = 0;
             m_state = state_none;
             m_border_dempth = 100;
+            m_centered = false;
         }
         
         ScrollList::~ScrollList() {
@@ -160,6 +161,8 @@ namespace Sandbox {
             /// @wproperty{ItemBox, VerticalAlignment, bool} bounds.
             else if (_key == "ScrollBounds")
                 setScrollBounds(MyGUI::utility::parseValue<int>(_value));
+            else if (_key == "Centered")
+                setCentered(MyGUI::utility::parseValue<bool>(_value));
             else
             {
                 Base::setPropertyOverride(_key, _value);
@@ -193,6 +196,13 @@ namespace Sandbox {
             m_border_dempth = b;
         }
         
+        void ScrollList::setCentered(bool c) {
+            if (m_centered != c) {
+                m_centered = c;
+                updateFromResize();
+            }
+        }
+        
         void ScrollList::setDelegate(const ScrollListDelegatePtr &delegate) {
             removeAllItems();
             m_delegate = delegate;
@@ -202,6 +212,7 @@ namespace Sandbox {
             for (size_t i=0;i<count;++i) {
                 addItem(m_delegate->getItemData(i));
             }
+            setScroll(normalizeScrollValue(0));
         }
         
         void ScrollList::handleCreateWidgetItem(MyGUI::ItemBox*, MyGUI::Widget* w) {
@@ -292,6 +303,11 @@ namespace Sandbox {
                 val = max_scroll;
             if (val<0) {
                 val = 0;
+            }
+            if (m_centered) {
+                if (getItemCount() < m_visible_count) {
+                    val = -(getScrollAreaSize() - getItemSize() * getItemCount())/2;
+                }
             }
             return val;
         }
