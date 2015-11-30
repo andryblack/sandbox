@@ -45,6 +45,7 @@ namespace Sandbox {
             ~ScrollList();
             
             void setDelegate(const ScrollListDelegatePtr& delegate);
+            void updateData();
             
             void setVisibleCount(size_t count);
             size_t getVisibleCount() const { return m_visible_count; }

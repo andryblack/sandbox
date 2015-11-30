@@ -95,6 +95,7 @@ bind( property_wo( "delegate", &setDelegateImpl ) );
 SB_META_METHOD(moveNext)
 SB_META_METHOD(movePrev)
 SB_META_METHOD(moveToPage)
+SB_META_METHOD(updateData)
 SB_META_PROPERTY_RW(page, getPage, setPage)
 SB_META_PROPERTY_RW(targetPage, getTargetPage, moveToPage)
 SB_META_END_KLASS_BIND()
@@ -208,6 +209,16 @@ namespace Sandbox {
             m_delegate = delegate;
             if (!m_delegate) return;
             m_delegate->setScrollList(this);
+            size_t count = m_delegate->getItemsCount();
+            for (size_t i=0;i<count;++i) {
+                addItem(m_delegate->getItemData(i));
+            }
+            setScroll(normalizeScrollValue(0));
+        }
+        
+        void ScrollList::updateData() {
+            removeAllItems();
+            if (!m_delegate) return;
             size_t count = m_delegate->getItemsCount();
             for (size_t i=0;i<count;++i) {
                 addItem(m_delegate->getItemData(i));
