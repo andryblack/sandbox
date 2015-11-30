@@ -71,26 +71,29 @@ namespace Sandbox {
 		return d->buffer;
 	}
 	
-	static int lua_print_func (lua_State *L) {
+	
+    
+    template <GHL::LogLevel level>
+    static int lua_log_func(lua_State* L) {
         int n = lua_gettop(L);  /* number of arguments */
         int i;
         lua_getglobal(L, "tostring");
-        LogInfo log_info("Lua:Scripts");
+        Logger log_print(level,"script");
         for (i=1; i<=n; i++) {
-		    const char *s;
-		    lua_pushvalue(L, -1);  /* function to be called */
-		    lua_pushvalue(L, i);   /* value to print */
-		    lua_call(L, 1, 1);
-		    s = lua_tostring(L, -1);  /* get result */
-		    if (s == NULL)
-		      return luaL_error(L, LUA_QL("tostring") " must return a string to "
-		                           LUA_QL("print"));
-			  if (i>1) log_info << "\t";
-			  log_info << s;  
-		    lua_pop(L, 1);  /* pop result */
-		  }
+            const char *s;
+            lua_pushvalue(L, -1);  /* function to be called */
+            lua_pushvalue(L, i);   /* value to print */
+            lua_call(L, 1, 1);
+            s = lua_tostring(L, -1);  /* get result */
+            if (s == NULL)
+                return luaL_error(L, LUA_QL("tostring") " must return a string to "
+                                  LUA_QL("print"));
+            if (i>1) log_print << "\t";
+            log_print << s;
+            lua_pop(L, 1);  /* pop result */
+        }
         lua_pop(L, 1); // func
-      	  return 0;
+        return 0;
     }
 		
 	
@@ -173,7 +176,7 @@ namespace Sandbox {
       
         static const luaL_Reg base_funcs_impl[] = {
 			{"dofile", lua_dofile_func},
-			{"print", lua_print_func},
+			{"print",   lua_log_func<GHL::LOG_LEVEL_INFO>},
             //{"require",lua_require_func},
             {"loadfile",lua_loadfile_func},
 			{NULL, NULL}
@@ -188,6 +191,19 @@ namespace Sandbox {
         lua_pushcclosure(m_L, &LuaVM::lua_module_searcher, 1);
         lua_rawseti(m_L,-2,1);
         luabind::lua_set_value(m_L, "package.searchers");
+        
+        lua_createtable(m_L, 0, 6);
+        static const luaL_Reg log_funcs_impl[] = {
+            {"fatal",   lua_log_func<GHL::LOG_LEVEL_FATAL>},
+            {"error",   lua_log_func<GHL::LOG_LEVEL_ERROR>},
+            {"warning", lua_log_func<GHL::LOG_LEVEL_WARNING>},
+            {"info",    lua_log_func<GHL::LOG_LEVEL_INFO>},
+            {"verbose", lua_log_func<GHL::LOG_LEVEL_VERBOSE>},
+            {"debug",   lua_log_func<GHL::LOG_LEVEL_DEBUG>},
+            {NULL, NULL}
+        };
+        luaL_setfuncs(m_L,  log_funcs_impl,0);
+        luabind::lua_set_value(m_L, "log");
         
 		lua_atpanic(m_L, &at_panic_func);
         
