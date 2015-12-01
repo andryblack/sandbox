@@ -213,6 +213,7 @@ namespace Sandbox {
 	///
 	void GHL_CALL Application::SetVFS( GHL::VFS* vfs ) {
 		m_vfs = vfs;
+        Logger::StartSession(m_vfs);
 	}
 	///
 	void GHL_CALL Application::SetRender( GHL::Render* render ) {

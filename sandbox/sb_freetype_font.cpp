@@ -9,6 +9,8 @@
 #include <ghl_texture.h>
 #include <ghl_image.h>
 
+#include "sb_log.h"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_SIZES_H

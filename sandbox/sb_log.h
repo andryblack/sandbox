@@ -10,6 +10,10 @@
 #include <ghl_types.h>
 #include <sbstd/sb_string.h>
 
+namespace GHL {
+    struct VFS;
+}
+
 namespace Sandbox {
     
     class Logger {
@@ -21,6 +25,7 @@ namespace Sandbox {
             m_stream << val;
             return *this;
         }
+        static void StartSession(GHL::VFS* vfs);
     private:
         Logger( const Logger& );
         Logger& operator = (const Logger&);
