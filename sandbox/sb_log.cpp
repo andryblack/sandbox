@@ -77,9 +77,12 @@ namespace Sandbox {
         if (file_logger.opened()) {
             file_logger.AddMessage(m_level, m_stream.str().c_str());
         }
-#ifdef SB_DEBUG
-        GHL_Log(m_level, m_stream.str().c_str());
+#ifndef SB_DEBUG
+        else
 #endif
+        {
+            GHL_Log(m_level, m_stream.str().c_str());
+        }
     }
     
     void format_memory( char* buf, size_t size, size_t mem,const char* caption ) {
