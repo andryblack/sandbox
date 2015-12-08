@@ -107,11 +107,7 @@ namespace Sandbox {
             }
         }
         res->SetNodesCount(nodes_count);
-        for (pugi::xml_node_iterator it = nodes.begin();it!=nodes.end();++it) {
-            size_t index = it->attribute("index").as_uint();
-            sb_assert(index < nodes_count);
-            res->AddNodeMap(it->attribute("name").value(), index);
-        }
+        
         for (pugi::xml_node_iterator it = animations.begin();it!=animations.end();++it) {
             SkeletonAnimationPtr anim(new SkeletonAnimation());
             anim->SetFPS(it->attribute("fps").as_float());
@@ -166,11 +162,6 @@ namespace Sandbox {
         return res;
     }
     
-    
-    void SkeletonData::AddNodeMap(const sb::string& name, size_t node_indx ) {
-        sb_assert(node_indx<m_nodes_count);
-        m_nodes_map[name]=node_indx;
-    }
     static const SkeletonAnimationPtr empty;
     const SkeletonAnimationPtr& SkeletonData::GetAnimation(const sb::string& name) const {
         sb::map<sb::string,SkeletonAnimationPtr>::const_iterator it = m_animations.find(name);

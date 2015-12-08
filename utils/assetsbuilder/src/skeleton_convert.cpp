@@ -88,18 +88,12 @@ void SkeletonConvert::write_atlases() {
 }
 
 void SkeletonConvert::add_node(const sb::string& name) {
-    m_node_indexes[name]=m_nodes_count;
     ++m_nodes_count;
 }
 
 void SkeletonConvert::write_nodes() {
     pugi::xml_node nodes = m_doc.document_element().append_child("nodes");
     nodes.append_attribute("count").set_value(m_nodes_count);
-    for (sb::map<sb::string, int>::const_iterator it = m_node_indexes.begin();it!=m_node_indexes.end();++it) {
-        pugi::xml_node n = nodes.append_child("node");
-        n.append_attribute("name").set_value(it->first.c_str());
-        n.append_attribute("index").set_value(it->second);
-    }
 }
 
 void SkeletonConvert::post_scale(float s) {
@@ -123,6 +117,7 @@ bool SkeletonConvert::RenameAnimation(const char* from, const char* to) {
     return true;
 }
 void SkeletonConvert::write_animations() {
+    bool raw = true;
     pugi::xml_node animations = m_doc.document_element().append_child("animations");
     for (sb::vector<animation>::const_iterator anim = m_animations.begin();anim!=m_animations.end();++anim) {
         pugi::xml_node a = animations.append_child("animation");
@@ -130,34 +125,63 @@ void SkeletonConvert::write_animations() {
         a.append_attribute("fps").set_value(anim->fps);
         a.append_attribute("frames").set_value((unsigned int)anim->frames.size());
         a.append_attribute("duration").set_value(float(anim->frames.size())/anim->fps);
-        a.append_attribute("compression").set_value("zlib");
-        a.append_attribute("encoding").set_value("base64");
         
-        Sandbox::VectorData<float>* data = new Sandbox::VectorData<float>();
-        data->vector().resize((4+2+1+1)*anim->frames.size()*m_nodes_count);
-        float* dst = data->vector().data();
+        if (raw) {
         
-        for (sb::vector<frame>::const_iterator fit = anim->frames.begin();fit!=anim->frames.end();++fit) {
-            sb_assert(fit->nodes.size()==m_nodes_count);
+            a.append_attribute("compression").set_value("zlib");
+            a.append_attribute("encoding").set_value("base64");
             
-            for (sb::vector<frame::node>::const_iterator nit = fit->nodes.begin();nit!=fit->nodes.end();++nit) {
-                *dst++ = nit->a;
-                *dst++ = nit->tr.m.matrix[0];
-                *dst++ = nit->tr.m.matrix[1];
-                *dst++ = nit->tr.m.matrix[2];
-                *dst++ = nit->tr.m.matrix[3];
-                *dst++ = nit->tr.v.x;
-                *dst++ = nit->tr.v.y;
+            Sandbox::VectorData<float>* data = new Sandbox::VectorData<float>();
+            data->vector().resize((4+2+1+1)*anim->frames.size()*m_nodes_count);
+            float* dst = data->vector().data();
+            
+            for (sb::vector<frame>::const_iterator fit = anim->frames.begin();fit!=anim->frames.end();++fit) {
+                sb_assert(fit->nodes.size()==m_nodes_count);
                 
-                *reinterpret_cast<GHL::UInt32*>(dst) = nit->image;
-                ++dst;
+                for (sb::vector<frame::node>::const_iterator nit = fit->nodes.begin();nit!=fit->nodes.end();++nit) {
+                    *dst++ = nit->a;
+                    *dst++ = nit->tr.m.matrix[0];
+                    *dst++ = nit->tr.m.matrix[1];
+                    *dst++ = nit->tr.m.matrix[2];
+                    *dst++ = nit->tr.m.matrix[3];
+                    *dst++ = nit->tr.v.x;
+                    *dst++ = nit->tr.v.y;
+                    
+                    *reinterpret_cast<GHL::UInt32*>(dst) = nit->image;
+                    ++dst;
+                }
             }
+            
+            GHL::Data* compressed = GHL_PackZlib(data);
+            a.append_child(pugi::node_pcdata).set_value(Sandbox::Base64Encode(compressed->GetData(), compressed->GetSize()).c_str());
+            compressed->Release();
+            data->Release();
+        } else {
+            a.append_attribute("compression").set_value("none");
+            a.append_attribute("encoding").set_value("none");
+            
+            for (sb::vector<frame>::const_iterator fit = anim->frames.begin();fit!=anim->frames.end();++fit) {
+                sb_assert(fit->nodes.size()==m_nodes_count);
+                pugi::xml_node f = a.append_child("frame");
+                
+                for (sb::vector<frame::node>::const_iterator nit = fit->nodes.begin();nit!=fit->nodes.end();++nit) {
+                    pugi::xml_node n = f.append_child("n");
+                    n.append_attribute("a").set_value(nit->a);
+                    char buff[128];
+                    ::snprintf(buff, 128, "%f %f %f %f %f %f",
+                               nit->tr.m.matrix[0],
+                               nit->tr.m.matrix[1],
+                               nit->tr.m.matrix[2],
+                               nit->tr.m.matrix[3],
+                               nit->tr.v.x,
+                               nit->tr.v.y);
+                    n.append_attribute("m").set_value(buff);
+                    n.append_attribute("i").set_value(nit->image);
+                   
+                }
+            }
+
         }
-        
-        GHL::Data* compressed = GHL_PackZlib(data);
-        a.append_child(pugi::node_pcdata).set_value(Sandbox::Base64Encode(compressed->GetData(), compressed->GetSize()).c_str());
-        compressed->Release();
-        data->Release();
         
     }
 }

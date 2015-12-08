@@ -97,10 +97,14 @@ bool SpineConvert::Load(const char *atlas_file,
     if (!data)
         return false;
     m_skeleton = spSkeletonJson_readSkeletonData(json, reinterpret_cast<const char*>(data->GetData()));
+    if (json->error) {
+        Sandbox::LogError() << "parsing skeleton error: '" << json->error << "'";
+    }
     spSkeletonJson_dispose(json);
     data->Release();
-    if (!m_skeleton)
+    if (!m_skeleton) {
         return false;
+    }
     m_state = spAnimationStateData_create(m_skeleton);
     return true;
 }
@@ -152,9 +156,13 @@ void SpineConvert::ExportAnimation() {
             frames = 1;
         }
         animation& a = add_animation(anim->name, export_fps);
+        if (a.name == "Idle") {
+            int x = 1;
+        }
         
         float delta = 1.0f / export_fps;
-        spSkeleton_setBonesToSetupPose(skeleton);
+        
+        spSkeleton_setToSetupPose(skeleton);
         
         spAnimationState_setAnimation(state, 0, anim, false);
        
@@ -189,6 +197,8 @@ void SpineConvert::ExportAnimation() {
                     sb::map<sb::string, int>::const_iterator it = m_image_indexes.find(slot->attachment->name);
                     if (it!=m_image_indexes.end()) {
                         img = it->second;
+                    } else {
+                        Sandbox::LogWarning() << "not found attachment image " << slot->attachment->name;
                     }
                     if (slot->attachment->type == SP_ATTACHMENT_REGION) {
                         spRegionAttachment* ra = (spRegionAttachment*)slot->attachment;
@@ -205,6 +215,8 @@ void SpineConvert::ExportAnimation() {
                         trAttachment.scale(regionScaleX,-regionScaleY);
                         tr =  tr * trAttachment;
                         
+                    } else {
+                        Sandbox::LogWarning() << "unexpected attachment type " << slot->attachment->type;
                     }
                 }
                 

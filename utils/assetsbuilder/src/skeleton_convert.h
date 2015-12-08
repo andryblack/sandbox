@@ -38,7 +38,6 @@ protected:
     bool get_image(const sb::string& name,image& img);
 
     int m_nodes_count;
-    sb::map<sb::string,int> m_node_indexes;
     
     struct frame {
         struct node {

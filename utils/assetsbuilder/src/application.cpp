@@ -13,7 +13,7 @@ extern "C" {
 #include <lualib.h>
 }
 
-static const double VERSION = 1.0;
+static const double VERSION = 1.1;
 
 #include <luabind/sb_luabind.h>
 
