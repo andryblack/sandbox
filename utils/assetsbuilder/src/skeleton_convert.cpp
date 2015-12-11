@@ -2,6 +2,7 @@
 #include "application.h"
 #include <sb_data.h>
 #include <sb_base64.h>
+#include <sbstd/sb_platform.h>
 
 SB_META_DECLARE_OBJECT(SkeletonConvert, Sandbox::meta::object)
 
@@ -168,7 +169,7 @@ void SkeletonConvert::write_animations() {
                     pugi::xml_node n = f.append_child("n");
                     n.append_attribute("a").set_value(nit->a);
                     char buff[128];
-                    ::snprintf(buff, 128, "%f %f %f %f %f %f",
+                    sb::snprintf(buff, 128, "%f %f %f %f %f %f",
                                nit->tr.m.matrix[0],
                                nit->tr.m.matrix[1],
                                nit->tr.m.matrix[2],
