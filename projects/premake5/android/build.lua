@@ -33,8 +33,10 @@ function build.projectrules(sln)
 		_x(1,'cp -r %s ${config}/lib/',v)
 	end
 	_p('')
+	local install_projects = ''
+
 	for prj in solution.eachproject(sln) do
-		local install_projects = ''
+		
 		if prj.kind == premake.WINDOWEDAPP then
 			local vprj = premake.esc(prj.name)
 
@@ -61,10 +63,13 @@ function build.projectrules(sln)
 				install_projects = vprj .. '-apk-install'
 			end
 			_p('')
+
 		end
-		_p('install: %s',install_projects)
+		
 	end
 
+	_p('install: %s',install_projects)
+	_p('')
 end
 
 function build.cleanrules( sln )
@@ -125,18 +130,21 @@ function build.generate_solution(sln)
 	if sdk_dir then
 		_x('SDK := %s',sdk_dir)
 	end
+	_x('')
 
 	_x('ifeq (,$(NDK))')
 	_x(1,'NDK_BUILD := ndk-build')
 	_x('else')
 	_x(1,'NDK_BUILD := $(NDK)/ndk-build')
 	_x('endif')
+	_x('')
 
 	_x('ifeq (,$(SDK))')
 	_x(1,'ANDROID := android')
 	_x('else')
 	_x(1,'ANDROID := $(SDK)/tools/android')
 	_x('endif')
+	_x('')
 
 	local ant = os.getenv ('ANT')
 	if ant then
@@ -144,13 +152,12 @@ function build.generate_solution(sln)
 	else
 		_x('ANT ?= ant')
 	end
-
-
+	_x('')
 
 	_x('ifndef verbose')
 	_x(1,'verbose = 0')
 	_x('endif')
-
+	_x('')
 
 	build.projects(sln)
 
@@ -167,13 +174,18 @@ function build.generate_solution(sln)
 			build.buildCmds(cfg,'prebuild',prj)
 			_p('endif')
 		end
+		_p('')
 	end
 end
 
 function build.generate_ant_build( sln, cfg )
 	_p('asset.dir=../assets')
 	_p('resource.absolute.dir=${basedir}/../res')
-	_p('out.dir=../../../bin/android')
+	for prj in solution.eachproject(sln) do
+		if prj.kind == premake.WINDOWEDAPP then
+			_p('out.dir=' .. path.getrelative(path.join(sln.location,cfg.shortname),prj.targetdir))
+		end
+	end
 	_p('out.other.absolute.dir=${basedir}/bin')
 	_p('out.classes.absolute.dir=${out.other.absolute.dir}/classes')
 	_p('out.res.absolute.dir=${out.other.absolute.dir}/res')
