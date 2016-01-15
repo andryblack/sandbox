@@ -72,8 +72,8 @@ function build.cleanrules( sln )
 	for prj in solution.eachproject(sln) do
 		if prj.kind == premake.WINDOWEDAPP then
 			_p(1,'@echo "==== Cleaning %s ===="', prj.name, cfgvar)
-			local prjdir = path.join( prj.name, ndk.JNI)
-			_x(1,'@cd ${config} && ${NDK_BUILD} -C %s clean',prjdir)
+			_x(1,'@cd ${config} && ${NDK_BUILD} NDK_MODULE_PATH=%s V=$(verbose) clean ',sln.android_modules_path or '')
+			_x(1,'@cd ${config} && ${ANT} ${config} clean')
 			_p('')
 		end
 	end
