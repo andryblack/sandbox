@@ -3,6 +3,7 @@
 
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_string.h>
+#include <sbstd/sb_algorithm.h>
 
 #include <ghl_data.h>
 #include <ghl_data_stream.h>
