@@ -371,6 +371,17 @@ namespace Sandbox {
         float ost = img.GetOffsetT()*h/img.GetTextureH();
         float osb = img.GetOffsetB()*h/img.GetTextureH();
         
+        if ( size.x < (osl + osr) ) {
+            float sx = size.x / (osl + osr);
+            osl *= sx;
+            osr *= sx;
+        }
+        if (size.y < (ost + osb)) {
+            float sy = size.y / (ost + osb);
+            ost *= sy;
+            osb *= sy;
+        }
+        
         float x2 = x1 + osl;
         float x3 = x4 - osr;
         float y2 = y1 + ost;
