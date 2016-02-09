@@ -79,7 +79,7 @@ namespace Sandbox {
     static int yajl_parse_integer(void * ctx, long long integerVal) {
         parse_context* c = static_cast<parse_context*>(ctx);
         c->on_pre_value();
-        lua_pushinteger(c->L, integerVal);
+        lua_pushnumber(c->L, integerVal);
         ++c->stack_depth;
         c->on_value();
         return 1;
