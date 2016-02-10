@@ -49,6 +49,7 @@ public:
 	Application();
 	~Application();
 
+    void set_update_only(bool u);
 	void set_paths(const sb::string& scripts, const sb::string& src, const sb::string& dst);
 	void set_platform(const sb::string& platform);
 
@@ -77,6 +78,7 @@ private:
     sb::string  m_dst_dir;
     sb::string  m_src_dir;
     sb::string  m_platform;
+    bool        m_update_only;
 };
 
 #endif /*APPLICATION_H_INCLUDED*/

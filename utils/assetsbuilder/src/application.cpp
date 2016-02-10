@@ -13,7 +13,7 @@ extern "C" {
 #include <lualib.h>
 }
 
-static const double VERSION = 1.1;
+static const double VERSION = 1.2;
 
 #include <luabind/sb_luabind.h>
 
@@ -185,7 +185,7 @@ bool TextureData::SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex ) {
     return m_data->SetAlpha(alpha_tex->GetImage());
 }
 
-Application::Application() : m_lua(0),m_vfs(0) {
+Application::Application() : m_lua(0),m_vfs(0),m_update_only(false) {
 	m_lua = new Sandbox::LuaVM(this);
     m_vfs = GHL_CreateVFS();
     m_image_decoder = GHL_CreateImageDecoder();
@@ -236,6 +236,10 @@ Application::~Application() {
     if (m_image_decoder) {
         GHL_DestroyImageDecoder(m_image_decoder);
     }
+}
+
+void Application::set_update_only(bool u){
+    m_update_only = u;
 }
 
 void Application::set_paths(const sb::string& scripts, const sb::string& src, const sb::string& dst) {
@@ -342,6 +346,7 @@ int Application::run() {
     m_lua->GetGlobalContext()->SetValue("application", this);
     m_lua->GetGlobalContext()->SetValue("platform",m_platform);
     m_lua->GetGlobalContext()->SetValue("host_version", VERSION);
+    m_lua->GetGlobalContext()->SetValue("update_only", m_update_only);
     
     if (!m_lua->DoFile("_init.lua")) {
         Sandbox::LogError() << "failed exec init script, check path " << m_scripts_dir;

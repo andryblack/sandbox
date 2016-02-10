@@ -321,6 +321,14 @@ override(os, "stat", function(base, p)
 	return base(p)
 end)
 
+
+function os.check_file_new( src, dst )
+	local s1 = assert(os.stat(src))
+	local s2 = os.stat(dst)
+	if not s2 then return true end
+	return s1.mtime > s2.mtime
+end
+
 function load_sandbox( file , mt, init_data )
 	local data = init_data or {}
     setmetatable(data,{__index=mt or {}})

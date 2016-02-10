@@ -45,6 +45,7 @@ local function process_files_pattern( pattern , action )
 		local f = path.getrelative(src_path,v)
 		--print(action,k,f)
 		rules[assert(action)][f]=f
+		assert(not rules.dest_files[f],'conflict rules for file ' .. f)
 		rules.dest_files[f]=f
 	end
 end
@@ -65,6 +66,7 @@ local function process_files_pattern_to( src, pattern, dst , action)
 		end
 		--print('process_files_pattern_to',f,fn,action)
 		r[f]=path.join(dst,fn)
+		assert(not rules.dest_files[path.join(dst,fn)],'conflict rules for file ' .. path.join(dst,fn))
 		rules.dest_files[path.join(dst,fn)]=f
 	end
 	
@@ -75,11 +77,7 @@ function _M.assets_rules.copy_file( file )
 	local src = file[1]
 	local dst = file[2] or src
 
-	if rules.dest_files[dst] then
-		print('skip',src,dst,rules.dest_files[dst])
-		return
-	end
-
+	assert(not rules.dest_files[dst],'conflict rules for file ' .. dst)
 	rules.copy_files[src]=dst
 	rules.dest_files[dst]=src
 end
@@ -87,6 +85,7 @@ end
 function _M.assets_rules.compile_file( file )
 	local src = file[1]
 	local dst = file[2] or src
+	assert(not rules.dest_files[dst],'conflict rules for file ' .. dst)
 	rules.compile_files[src]=dst
 	rules.dest_files[dst]=src
 end
@@ -182,14 +181,26 @@ local function make_dst_tree( rules )
 	doit('',rules)
 end
 
+
+
+local function do_copy_file( src, dst  )
+	if update_only then
+		if not os.check_file_new(src,dst) then
+			print('skip not new')
+			return true
+		end
+	end
+	return os.copyfile(src,dst)
+end
+
 local function copy_files( files )
 	for v,dst in pairs(files) do
 		if dst then
-			print('copy',v)
+			print('copy',v)	
 			if type(dst) == 'string' then
-				assert(os.copyfile(path.join(src_path,v),path.join(dst_path,dst)))
+				assert(do_copy_file(path.join(src_path,v),path.join(dst_path,dst)))
 			else
-				assert(os.copyfile(path.join(src_path,v),path.join(dst_path,v)))
+				assert(do_copy_file(path.join(src_path,v),path.join(dst_path,v)))
 			end
 		end
 	end

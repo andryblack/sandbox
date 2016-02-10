@@ -18,6 +18,7 @@ local function load_images( dir  )
 			local filename = path.join(dir,k .. '.' .. assert(v.type,'not found type for ' .. k .. ' at ' .. dir))
 			local tex = assert(application:check_texture(filename),'failed check texture ' .. filename)
 			v.texture_info = tex
+
 			local premultiplied = v.premultiplied
 			if premultiplied then
 				rules.copy_files[filename]=true
@@ -27,6 +28,7 @@ local function load_images( dir  )
 				rules.premultiply_images = pm
 				v.premultiplied = true
 			end
+			assert(not rules.dest_files[filename],'conflict rules for file ' .. filename)
 			rules.dest_files[filename]=filename
 			v._name = k
 			v._path = dir
@@ -44,6 +46,7 @@ local function load_images( dir  )
 							rules.premultiply_images[vname] = vname
 							print('premultiply variant',vname)
 						end
+						assert(not rules.dest_files[vname],'conflict rules for file ',vname)
 						rules.dest_files[vname]=vname
 					else
 						print('not found varian for',filename)
@@ -308,6 +311,18 @@ local function apply_images( dir, data )
 	end
 end
 
+local function do_premultiply_file( src, dst  )
+	if update_only then
+		if not os.check_file_new(path.join(src_path,src),path.join(dst_path,dst)) then
+			print('skip not new')
+			return true
+		end
+	end
+	local t = assert(application:load_texture(src))
+	t:PremultiplyAlpha()
+	return application:store_texture(dst,t)
+end
+
 function _M.apply( rules )
 
 	local images = rules.images or {}
@@ -323,13 +338,11 @@ function _M.apply( rules )
 	print('premultiply images')
 	for k,v in pairs(pmi) do
 		if v then
-			local t = assert(application:load_texture(k))
-			t:PremultiplyAlpha()
 			print('premultiply',k)
 			if type(v) == 'string' then
-				assert(application:store_texture(v,t),'failed store texture to ' .. v)
+				assert(do_premultiply_file(k,v),'failed store texture to ' .. v)
 			else
-				assert(application:store_texture(k,t),'failed store texture to ' .. k)
+				assert(do_premultiply_file(k,k),'failed store texture to ' .. k)
 			end
 		end
 	end

@@ -1,9 +1,13 @@
 
-if os.isdir(dst_path) then
-	assert(os.rmdir(dst_path))
+if not update_only then
+	if os.isdir(dst_path) then
+		assert(os.rmdir(dst_path))
+		assert(os.mkdir(dst_path))
+	elseif os.isfile(dst_path) then
+		error('destionation path is file')
+	end
+else
 	assert(os.mkdir(dst_path))
-elseif os.isfile(dst_path) then
-	error('destionation path is file')
 end
 
 local function wrap( t )

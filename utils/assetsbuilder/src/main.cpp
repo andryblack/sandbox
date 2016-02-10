@@ -13,6 +13,7 @@ static int usage(const char* path) {
 	std::cout << "  --scripts=SCRIPTS_DIR required  path to scripts" << std::endl;
 	std::cout << "  --src=SRC             required  source dir" << std::endl;
 	std::cout << "  --dst=DST             required  destination dir" << std::endl;
+	std::cout << "  --update              optional	update only" << std::endl;
 	std::cout << "  --platform=PLATFORM   optional  destination platform" << std::endl;
 	std::cout << "  --help                          show this information" << std::endl;
 	std::cout << "platforms:" << std::endl;
@@ -54,6 +55,7 @@ int main(int argc, char** argv) {
 	sb::string dst_dir;
 	sb::string scripts_dir;
 	sb::string platform;
+	bool update_only = false;
 
 	for(int i=1;i<argc;++i) {
 		if (::strcmp(argv[i],"--help")==0) {
@@ -71,6 +73,8 @@ int main(int argc, char** argv) {
 			dst_dir = get_argument(arg);
 		} else if (strncmp(opt+2,"platform",8)==0) {
 			platform = get_argument(arg);
+		} else if (strncmp(opt+2,"update",8)==0) {
+			update_only = true;
 		} else {
 			return error(std::string("unknown option ") + opt);
 		}
@@ -94,6 +98,7 @@ int main(int argc, char** argv) {
 		return error(std::string("invalid scripts path: ") + scripts_dir);
 	}
 	Application app;
+	app.set_update_only(update_only);
 	app.set_paths(scripts_dir,src_dir,dst_dir);
 	app.set_platform(platform);
 	return app.run();
