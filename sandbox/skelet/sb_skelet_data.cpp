@@ -169,6 +169,10 @@ namespace Sandbox {
             return empty;
         return it->second;
     }
+    
+    bool SkeletonData::HasAnimation( const sb::string& name ) const {
+        return m_animations.find(name) != m_animations.end();
+    }
     static const ImagePtr empty_image;
     const ImagePtr& SkeletonData::GetImage(size_t index) const {
         if (index >= m_images.size()) {

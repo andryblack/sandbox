@@ -66,6 +66,11 @@ namespace Sandbox {
         ApplyFrame();
     }
     
+    bool SkeletController::HasAnimation(const char* name) const {
+        if (!m_data) return false;
+        return  m_data->HasAnimation(name);
+    }
+    
     void SkeletController::AddObject(const SkeletObjectPtr& obj) {
         m_objects.push_back(obj);
     }

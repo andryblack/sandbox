@@ -58,6 +58,7 @@ namespace Sandbox {
         const SkeletonAnimationPtr& GetAnimation(const sb::string& name) const;
         const ImagePtr& GetImage(size_t index) const;
         void SetImage(size_t index,const sb::string& name, const ImagePtr& img);
+        bool HasAnimation( const sb::string& name ) const;
     };
     
 }

@@ -24,6 +24,7 @@ namespace Sandbox {
         void AddAnimation(const char* name,int loop);
         void ApplyFrame();
         void AddObject(const SkeletObjectPtr& obj);
+        bool HasAnimation(const char* name) const;
         
         void SetEndEvent(const EventPtr& e) { m_end_event = e;}
         const EventPtr& GetEndEvent() const { return m_end_event; }
