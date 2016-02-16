@@ -558,6 +558,13 @@ static sb::string widget_getUserString(const MyGUI::Widget* w,const char* key) {
 static void widget_setUserString( MyGUI::Widget* w,const char* key,const char* value) {
     w->setUserString(key,value);
 }
+static void widget_updateChilds( MyGUI::Widget* w) {
+    if (w) {
+        w->_updateChilds();
+    }
+}
+
+
 SB_META_DECLARE_OBJECT(MyGUI::Widget, MyGUI::ICroppedRectangle)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Widget)
 SB_META_PROPERTY_RO(name, getName)
@@ -601,6 +608,7 @@ SB_META_METHOD(changeWidgetSkin)
 bind( method( "isUserString" , &widget_isUserString ) );
 bind( method( "getUserString" , &widget_getUserString ) );
 bind( method( "setUserString" , &widget_setUserString ) );
+bind( method( "updateChilds" , &widget_updateChilds ) );
 
 bind(method("createWidget", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(const std::string&, const std::string&, const MyGUI::IntCoord&, MyGUI::Align, const std::string& _name)>(&MyGUI::Widget::createWidgetT)));
 bind(method("createWidgetS", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(MyGUI::WidgetStyle,
