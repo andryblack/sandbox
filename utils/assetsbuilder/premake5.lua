@@ -122,6 +122,7 @@
 
 		files(utils.append_path(sandbox_dir .. '/sandbox/',{
 			'sb_lua.*',
+			'sb_lua_io.*',
 			'sb_log.*',
 			'sb_data.*',
 			'sb_lua_context.*',

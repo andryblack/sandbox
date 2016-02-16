@@ -143,7 +143,7 @@ namespace Sandbox {
     }
     
     ////////////////////////////////////////////////////////////
-    
+    void lua_io_register( lua_State* L, FileProvider* provider );
     
     LuaVM::LuaVM(FileProvider *resources ) :
         m_resources( resources ), 
@@ -206,6 +206,8 @@ namespace Sandbox {
         luabind::lua_set_value(m_L, "log");
         
 		lua_atpanic(m_L, &at_panic_func);
+        
+        lua_io_register(m_L,m_resources);
         
         g_terminate_context = m_L;
 #ifdef SB_DEBUG

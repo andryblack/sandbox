@@ -52,6 +52,7 @@ namespace Sandbox {
         bool   LoadScript(GHL::DataStream* ds,const char* name,const LuaContextPtr& env);
         
         void DoGC();
+        FileProvider* GetResources() { return m_resources; }
     private:
         FileProvider*  m_resources;
         lua_State*  m_L;
