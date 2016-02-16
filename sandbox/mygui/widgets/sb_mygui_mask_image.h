@@ -13,8 +13,10 @@
 #include "sb_rt_scene.h"
 #include "MyGUI_Widget.h"
 #include "MyGUI_SubSkin.h"
+#include "MyGUI_MainSkin.h"
 #include "sb_image.h"
 #include "sb_shader.h"
+#include "sb_rect.h"
 #include <ghl_render.h>
 
 namespace Sandbox {
@@ -29,6 +31,16 @@ namespace Sandbox {
         private:
             sb::vector<GHL::Vertex2Tex> m_vdata;
         };
+        
+        class MaskSetSubSkin : public MyGUI::MainSkin {
+            MYGUI_RTTI_DERIVED( MaskSetSubSkin )
+        public:
+            MaskSetSubSkin();
+            virtual void doManualRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
+            virtual void doRender();
+        private:
+        };
+        
         
         class MaskImageWidget : public MyGUI::Widget {
             MYGUI_RTTI_DERIVED( MaskImageWidget )

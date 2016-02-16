@@ -5,6 +5,7 @@
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSubSkin,MyGUI::SubSkin)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskImageWidget,MyGUI::Widget)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSetSubSkin,MyGUI::MainSkin)
 
 
 namespace Sandbox {
@@ -25,16 +26,45 @@ namespace Sandbox {
                     TextureImpl* texture = static_cast<TextureImpl*>(_texture);
                     MyGUI::Widget* widget_p = static_cast<MyGUI::Widget*>(mCroppedParent);
                     MaskImageWidget* widget = widget_p->castType<MaskImageWidget>(false);
-                    if (!widget)
-                        return;
                     
-                    ImagePtr    img = widget->getImage();
-                    ShaderPtr   shader = widget->getShader();
-                    if (!img || !img->GetTexture()) {
+                    ShaderPtr shader;
+                    const GHL::Texture* fill_texture = 0;
+                    MyGUI::FloatRect fill_texture_uv;
+                    
+                    if (widget) {
+                        ImagePtr    img = widget->getImage();
+                        if (img) {
+                            fill_texture = img->GetTexture()->Present(target->resources());
+                            float itw = 1.0f / img->GetTexture()->GetWidth();
+                            float ith = 1.0f / img->GetTexture()->GetHeight();
+                            
+                            fill_texture_uv.set( img->GetTextureX() * itw,
+                                                img->GetTextureY() * ith,
+                                                (img->GetTextureX() + img->GetTextureW()) * itw,
+                                                (img->GetTextureY() + img->GetTextureH()) * ith);
+                        }
+                        shader = widget->getShader();
+                    }
+                    if (!fill_texture) {
+                        MyGUI::ISubWidgetRect* main = widget->getSubWidgetMain();
+                        if (main) {
+                            MaskSetSubSkin* sub = main->castType<MaskSetSubSkin>(false);
+                            if (sub) {
+                                MyGUI::ITexture* tex = sub->getTexture();
+                                fill_texture_uv = sub->getUVSet();
+                                if (tex) {
+                                    fill_texture = static_cast<TextureImpl*>(tex)->Present();
+                                }
+                            }
+                        }
+                    }
+                    
+                    
+                    if (!fill_texture) {
                         _target->doRender(_buffer, _texture, _count);
                         return;
                     }
-                    
+                                        
                     target->endRenderObject();
                     GHL::Render* render = target->render();
                     
@@ -45,7 +75,7 @@ namespace Sandbox {
                         } else {
                             render->SetShader(0);
                         }
-                        render->SetTexture(img->GetTexture()->Present(target->resources()),0);
+                        render->SetTexture(fill_texture,0);
                         
                         int x = mCroppedParent->getAbsoluteLeft();
                         int y = mCroppedParent->getAbsoluteTop();
@@ -57,17 +87,14 @@ namespace Sandbox {
                         x-=info.leftOffset;
                         y-=info.topOffset;
                         
-                        float itw = 1.0f / img->GetTexture()->GetWidth();
-                        float ith = 1.0f / img->GetTexture()->GetHeight();
-                        
                         m_vdata.resize(_count);
                         for (size_t i=0;i<_count;++i) {
                             GHL::Vertex2Tex& v2 = m_vdata[i];
                             GHL::Vertex& v = buffer->data()[i];
                             v2.x = v.x; v2.y = v.y; v2.z = v.z;
                             v2.color[0] = v.color[0]; v2.color[1] = v.color[1]; v2.color[2] = v.color[2]; v2.color[3] = v.color[3];
-                            v2.tx = (img->GetTextureX()+img->GetTextureW()*(v.x - x)/w)*itw;
-                            v2.ty = (img->GetTextureY()+img->GetTextureH()*(v.y - y)/h)*ith;
+                            v2.tx = (fill_texture_uv.left+fill_texture_uv.width()*(v.x - x)/w);
+                            v2.ty = (fill_texture_uv.top+fill_texture_uv.height()*(v.y - y)/h);
                             v2.t2x = v.tx;
                             v2.t2y = v.ty;
                         }
@@ -77,6 +104,19 @@ namespace Sandbox {
                     }
                 }
             }
+        }
+        
+        MaskSetSubSkin::MaskSetSubSkin() {
+            mSeparate = true;
+        }
+        
+        
+        void MaskSetSubSkin::doManualRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
+            
+        }
+        
+        void MaskSetSubSkin::doRender() {
+            
         }
         
         
