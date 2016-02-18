@@ -247,6 +247,10 @@ void Application::set_paths(const sb::string& scripts, const sb::string& src, co
     m_scripts_dir = scripts;
     m_src_dir = src;
 }
+
+void Application::set_arguments(const sb::vector<sb::string>& arguments) {
+    m_arguments = arguments;
+}
 void Application::set_platform(const sb::string& platform) {
     if (!platform.empty()) {
         m_platform = platform;
@@ -347,6 +351,7 @@ int Application::run() {
     m_lua->GetGlobalContext()->SetValue("platform",m_platform);
     m_lua->GetGlobalContext()->SetValue("host_version", VERSION);
     m_lua->GetGlobalContext()->SetValue("update_only", m_update_only);
+    m_lua->GetGlobalContext()->SetValue("app_arguments", m_arguments);
     
     if (!m_lua->DoFile("_init.lua")) {
         Sandbox::LogError() << "failed exec init script, check path " << m_scripts_dir;

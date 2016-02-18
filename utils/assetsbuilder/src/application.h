@@ -2,6 +2,7 @@
 #define APPLICATION_H_INCLUDED
 
 #include <sbstd/sb_string.h>
+#include <sbstd/sb_vector.h>
 #include <sb_lua.h>
 #include <sb_file_provider.h>
 #include <ghl_vfs.h>
@@ -52,6 +53,7 @@ public:
     void set_update_only(bool u);
 	void set_paths(const sb::string& scripts, const sb::string& src, const sb::string& dst);
 	void set_platform(const sb::string& platform);
+    void set_arguments(const sb::vector<sb::string>& arguments);
 
     TexturePtr check_texture( const sb::string& file );
     TextureDataPtr load_texture( const sb::string& file );
@@ -79,6 +81,7 @@ private:
     sb::string  m_src_dir;
     sb::string  m_platform;
     bool        m_update_only;
+    sb::vector<sb::string> m_arguments;
 };
 
 #endif /*APPLICATION_H_INCLUDED*/
