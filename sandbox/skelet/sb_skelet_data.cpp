@@ -13,7 +13,7 @@ SB_META_DECLARE_OBJECT(Sandbox::SkeletonData,Sandbox::meta::object)
 
 namespace Sandbox {
     
-    SkeletonAnimation::SkeletonAnimation() : m_data(0),m_fps(15.0),m_nodes(0),m_frames(0) {}
+    SkeletonAnimation::SkeletonAnimation(const sb::string& name) : m_name(name), m_data(0),m_fps(15.0),m_nodes(0),m_frames(0) {}
     
     SkeletonAnimation::~SkeletonAnimation() {
         delete [] m_data;
@@ -33,10 +33,10 @@ namespace Sandbox {
         return m_data[frame*m_nodes+node];
     }
     
-    void SkeletonData::AddAnimation(const sb::string& name, const SkeletonAnimationPtr& animation) {
+    void SkeletonData::AddAnimation(const SkeletonAnimationPtr& animation) {
         sb_assert(animation);
         sb_assert(animation->GetNodesCount()==m_nodes_count);
-        m_animations[name] = animation;
+        m_animations[animation->GetName()] = animation;
     }
     
     union data_read_u {
@@ -109,7 +109,7 @@ namespace Sandbox {
         res->SetNodesCount(nodes_count);
         
         for (pugi::xml_node_iterator it = animations.begin();it!=animations.end();++it) {
-            SkeletonAnimationPtr anim(new SkeletonAnimation());
+            SkeletonAnimationPtr anim(new SkeletonAnimation(it->attribute("name").value()));
             anim->SetFPS(it->attribute("fps").as_float());
             size_t frames = it->attribute("frames").as_uint();
             SkeletonNodeFrame* pdata = anim->AllocData(nodes_count, frames);
@@ -157,7 +157,7 @@ namespace Sandbox {
                     ++pdata;
                 }
             }
-            res->AddAnimation(it->attribute("name").value(), anim);
+            res->AddAnimation(anim);
         }
         return res;
     }

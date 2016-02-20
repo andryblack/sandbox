@@ -19,6 +19,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         explicit SkeletController( const SkeletonDataPtr& data );
+        void ChangeData( const SkeletonDataPtr& data );
         virtual bool Update(float dt);
         void StartAnimation(const char* name,int loop);
         void AddAnimation(const char* name,int loop);
@@ -31,6 +32,7 @@ namespace Sandbox {
         
         SkeletonAnimation* GetAnimation() { return m_animation; }
         void SetFrame( size_t frame );
+        void SetTime( float time );
         
         bool IsComplete() const { return !m_animation; }
     private:

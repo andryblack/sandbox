@@ -24,14 +24,16 @@ namespace Sandbox {
     class SkeletonAnimation : public meta::object {
         SB_META_OBJECT
     private:
+        sb::string          m_name;
         SkeletonNodeFrame*  m_data;
         float               m_fps;
         size_t              m_nodes;
         size_t              m_frames;
     public:
-        SkeletonAnimation();
+        explicit SkeletonAnimation( const sb::string& name );
         ~SkeletonAnimation();
         SkeletonNodeFrame* AllocData(size_t nodes,size_t frames);
+        const sb::string& GetName() const { return m_name; }
         float GetFPS() const { return m_fps; }
         void SetFPS(float fps) { m_fps = fps; }
         size_t GetFrames() const { return m_frames; }
@@ -53,7 +55,7 @@ namespace Sandbox {
     public:
         size_t GetNodesCount() const { return m_nodes_count; }
         void SetNodesCount(size_t n) { m_nodes_count = n; }
-        void AddAnimation(const sb::string& name, const SkeletonAnimationPtr& animation);
+        void AddAnimation( const SkeletonAnimationPtr& animation);
         static SkeletonDataPtr Load(const char* file, Resources* resources);
         const SkeletonAnimationPtr& GetAnimation(const sb::string& name) const;
         const ImagePtr& GetImage(size_t index) const;

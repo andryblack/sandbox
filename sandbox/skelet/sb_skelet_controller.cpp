@@ -66,6 +66,19 @@ namespace Sandbox {
         ApplyFrame();
     }
     
+    void SkeletController::ChangeData( const SkeletonDataPtr& data ) {
+        sb_assert(data);
+        if (m_data) {
+            if (m_animation) {
+                m_animation = data->GetAnimation( m_animation->GetName() ).get();
+            }
+        }
+        m_data = data;
+        m_crnt_frame = 0;
+        m_frame_time = 0;
+        ApplyFrame();
+    }
+    
     bool SkeletController::HasAnimation(const char* name) const {
         if (!m_data) return false;
         return  m_data->HasAnimation(name);
@@ -80,6 +93,14 @@ namespace Sandbox {
             return;
         m_crnt_frame = frame % m_animation->GetFrames();
         ApplyFrame();
+    }
+    
+    void SkeletController::SetTime( float time ) {
+        if (!m_animation)
+            return;
+        size_t frames = time * m_animation->GetFPS();
+        m_crnt_frame = frames % m_animation->GetFrames();
+        m_frame_time = time - frames / m_animation->GetFPS();
     }
     
     void SkeletController::ApplyFrame() {
