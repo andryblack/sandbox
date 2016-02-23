@@ -563,6 +563,12 @@ static void widget_updateChilds( MyGUI::Widget* w) {
         w->_updateChilds();
     }
 }
+static void widget_destroyAllChilds( MyGUI::Widget* w) {
+    if (w) {
+        while (w->getChildCount() != 0)
+            MyGUI::WidgetManager::getInstance().destroyWidget(w->getChildAt(0));
+    }
+}
 
 
 SB_META_DECLARE_OBJECT(MyGUI::Widget, MyGUI::ICroppedRectangle)
@@ -609,6 +615,7 @@ bind( method( "isUserString" , &widget_isUserString ) );
 bind( method( "getUserString" , &widget_getUserString ) );
 bind( method( "setUserString" , &widget_setUserString ) );
 bind( method( "updateChilds" , &widget_updateChilds ) );
+bind( method( "destroyAllChilds" , &widget_destroyAllChilds ) );
 
 bind(method("createWidget", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(const std::string&, const std::string&, const MyGUI::IntCoord&, MyGUI::Align, const std::string& _name)>(&MyGUI::Widget::createWidgetT)));
 bind(method("createWidgetS", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(MyGUI::WidgetStyle,
