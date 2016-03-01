@@ -33,7 +33,7 @@ namespace Sandbox {
                     
                     if (widget) {
                         ImagePtr    img = widget->getImage();
-                        if (img) {
+                        if (img && img->GetTexture()) {
                             fill_texture = img->GetTexture()->Present(target->resources());
                             float itw = 1.0f / img->GetTexture()->GetWidth();
                             float ith = 1.0f / img->GetTexture()->GetHeight();
