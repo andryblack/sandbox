@@ -27,8 +27,8 @@ namespace Sandbox {
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ScrollArea, MyGUI::ScrollView)
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ScrollArea)
-SB_META_PROPERTY_RW("manualScroll",manualScroll,setManualScroll)
-SB_META_PROPERTY_WO("scrollPos", setScrollPos)
+SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
+SB_META_PROPERTY_WO(scrollPos, setScrollPos)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
