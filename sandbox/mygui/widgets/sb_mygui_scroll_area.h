@@ -26,6 +26,11 @@ namespace Sandbox {
             ~ScrollArea();
             
             void setScrollBounds(int b);
+            
+            void setManualScroll(bool s);
+            bool manualScroll() const { return m_manual_scroll; }
+            
+            void setScrollPos(const MyGUI::IntPoint& p);
           
             virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
         protected:
@@ -58,6 +63,7 @@ namespace Sandbox {
             MyGUI::IntPoint normalizeScrollValue(const MyGUI::IntPoint& val) const;
             
             int m_border_dempth;
+            bool    m_manual_scroll;
         };
         
         

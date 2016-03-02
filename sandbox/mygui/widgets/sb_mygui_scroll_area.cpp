@@ -27,6 +27,8 @@ namespace Sandbox {
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ScrollArea, MyGUI::ScrollView)
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ScrollArea)
+SB_META_PROPERTY_RW("manualScroll",manualScroll,setManualScroll)
+SB_META_PROPERTY_WO("scrollPos", setScrollPos)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -47,6 +49,7 @@ namespace Sandbox {
             m_scroll_target.top = 0;
             m_state = state_none;
             m_border_dempth = 100;
+            m_manual_scroll = true;
         }
         
         ScrollArea::~ScrollArea() {
@@ -72,6 +75,8 @@ namespace Sandbox {
             /// @wproperty{ItemBox, VisibleCount, size_t} visible cells count.
             if (_key == "ScrollBounds")
                 setScrollBounds(MyGUI::utility::parseValue<int>(_value));
+            else if (_key == "ManualScroll")
+                setManualScroll(MyGUI::utility::parseValue<bool>(_value));
             else
             {
                 Base::setPropertyOverride(_key, _value);
@@ -83,6 +88,11 @@ namespace Sandbox {
         
         void ScrollArea::setScrollBounds(int b) {
             m_border_dempth = b;
+        }
+        
+        void ScrollArea::setManualScroll(bool s) {
+            m_manual_scroll = s;
+            m_state = state_none;
         }
         
         
@@ -169,6 +179,8 @@ namespace Sandbox {
         
         void ScrollArea::handleGlobalMouseMove(int x,int y) {
             if (!getInheritedVisible())
+                return;
+            if (!m_manual_scroll)
                 return;
             if (m_state == state_wait_scroll || m_state == state_manual_scroll) {
                 MyGUI::ILayer* layer = getLayer();
@@ -260,6 +272,8 @@ namespace Sandbox {
         void ScrollArea::handleGlobalMousePressed(int x,int y, MyGUI::MouseButton _id) {
             if (!getVisible())
                 return;
+            if (!m_manual_scroll)
+                return;
             if (_id == MyGUI::MouseButton::Left) {
                 MyGUI::ILayer* layer = getLayer();
                 MyGUI::Widget* parent = getParent();
@@ -286,7 +300,8 @@ namespace Sandbox {
         }
         
         void ScrollArea::handleGlobalMouseReleased(int x,int y, MyGUI::MouseButton _id) {
-            
+            if (!m_manual_scroll)
+                return;
             if (_id == MyGUI::MouseButton::Left) {
                 if (m_state == state_manual_scroll || m_state == state_wait_scroll) {
                     if (m_state == state_manual_scroll) {
@@ -338,6 +353,11 @@ namespace Sandbox {
             return val;
         }
         
+        
+        void ScrollArea::setScrollPos(const MyGUI::IntPoint& p) {
+            m_scroll_target = normalizeScrollValue(p);
+            m_state=state_free_scroll;
+        }
         
         
         
