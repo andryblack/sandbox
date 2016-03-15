@@ -107,7 +107,7 @@ namespace Sandbox {
         }
         
         MaskSetSubSkin::MaskSetSubSkin() {
-            mSeparate = true;
+            mSeparate = false;
         }
         
         
