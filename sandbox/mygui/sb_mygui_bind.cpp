@@ -680,6 +680,10 @@ SB_META_METHOD(destroySmooth)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ScrollBar, MyGUI::Widget)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ScrollBar)
+SB_META_PROPERTY_RW(scrollPosition, getScrollPosition, setScrollPosition)
+SB_META_PROPERTY_RW(scrollRange, getScrollRange, setScrollRange)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::MenuControl, MyGUI::Widget)
 
@@ -919,6 +923,7 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ScrollView>(lua);
             luabind::ExternClass<MyGUI::ItemBox>(lua);
             luabind::ExternClass<MyGUI::ProgressBar>(lua);
+            luabind::ExternClass<MyGUI::ScrollBar>(lua);
             
             
             
