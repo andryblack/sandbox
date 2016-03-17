@@ -683,6 +683,10 @@ SB_META_DECLARE_OBJECT(MyGUI::ScrollBar, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ScrollBar)
 SB_META_PROPERTY_RW(scrollPosition, getScrollPosition, setScrollPosition)
 SB_META_PROPERTY_RW(scrollRange, getScrollRange, setScrollRange)
+bind(method("eventScrollChangePosition", delegate_bind<MyGUI::ScrollBar,
+            MyGUI::ScrollBar,
+            MyGUI::EventHandle_ScrollBarPtrSizeT,
+            &MyGUI::ScrollBar::eventScrollChangePosition>::lua_func));
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::MenuControl, MyGUI::Widget)
