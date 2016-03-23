@@ -19,6 +19,7 @@
 #include "MyGUI_Align.h"
 #include "MyGUI_WidgetManager.h"
 #include "MyGUI_ControllerManager.h"
+#include "MyGUI_FontManager.h"
 
 #include "MyGUI_TextBox.h"
 #include "MyGUI_Window.h"
@@ -72,6 +73,8 @@
 
 #include "widgets/sb_mygui_scene_widget.h"
 #include "widgets/sb_mygui_mask_image.h"
+
+#include "sb_utf.h"
 
 namespace Sandbox {
     
@@ -753,9 +756,26 @@ SB_META_DECLARE_OBJECT(MyGUI::MultiListItem, MyGUI::TextBox)
 
 SB_META_DECLARE_OBJECT(MyGUI::ISerializable, MyGUI::IObject)
 
+static int mygui_ifont_get_string_width( MyGUI::IFont* font, const char* str) {
+    if (!font || !str) return 0;
+    int w = 0;
+    while(*str) {
+        Sandbox::UTF32Char ch = 0;
+        str = Sandbox::get_char(str,ch);
+        MyGUI::GlyphInfo* glyph = font->getGlyphInfo(ch);
+        if (glyph)
+            w += glyph->bearingX + glyph->advance;
+    }
+    return w;
+}
+
 SB_META_DECLARE_OBJECT(MyGUI::IResource, MyGUI::ISerializable)
 SB_META_DECLARE_OBJECT(MyGUI::IPointer, MyGUI::IResource)
 SB_META_DECLARE_OBJECT(MyGUI::IFont, MyGUI::IResource)
+SB_META_BEGIN_KLASS_BIND(MyGUI::IFont)
+SB_META_METHOD(getDefaultHeight)
+bind( method( "getStringWidth" , &mygui_ifont_get_string_width ) );
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::IStateInfo, MyGUI::ISerializable)
 
@@ -780,9 +800,13 @@ SB_META_DECLARE_OBJECT(MyGUI::ResourceImageSetPointer, MyGUI::IPointer)
 SB_META_DECLARE_OBJECT(MyGUI::ResourceManualPointer, MyGUI::IPointer)
 
 SB_META_DECLARE_OBJECT(MyGUI::ResourceManualFont, MyGUI::IFont)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ResourceManualFont)
+SB_META_END_KLASS_BIND()
 
 #ifdef MYGUI_USE_FREETYPE
 SB_META_DECLARE_OBJECT(MyGUI::ResourceTrueTypeFont, MyGUI::IFont)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ResourceTrueTypeFont)
+SB_META_END_KLASS_BIND()
 #endif
 
 SB_META_DECLARE_OBJECT(MyGUI::ResourceLayout, MyGUI::IResource)
@@ -856,6 +880,13 @@ SB_META_METHOD(addItem)
 SB_META_METHOD(removeItem)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(MyGUI::FontManager, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::FontManager)
+SB_META_STATIC_METHOD(getInstancePtr)
+SB_META_METHOD(getByName)
+SB_META_PROPERTY_RW(defaultFont,getDefaultFont,setDefaultFont)
+SB_META_END_KLASS_BIND()
+
 static int gui_find_widget_proxy(lua_State* L) {
     MyGUI::Gui* self = Sandbox::luabind::stack<MyGUI::Gui*>::get(L, 1);
     MyGUI::Widget* w = 0;
@@ -917,6 +948,7 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::LayoutManager>(lua);
             luabind::ExternClass<MyGUI::LayerManager>(lua);
             luabind::ExternClass<MyGUI::ResourceManager>(lua);
+            luabind::ExternClass<MyGUI::FontManager>(lua);
             luabind::ExternClass<MyGUI::Gui>(lua);
 
             luabind::ExternClass<MyGUI::TextBox>(lua);
@@ -929,7 +961,11 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ProgressBar>(lua);
             luabind::ExternClass<MyGUI::ScrollBar>(lua);
             
-            
+            luabind::ExternClass<MyGUI::IFont>(lua);
+#ifdef MYGUI_USE_FREETYPE
+            luabind::ExternClass<MyGUI::ResourceTrueTypeFont>(lua);
+#endif
+            luabind::ExternClass<MyGUI::ResourceManualFont>(lua);
             
             luabind::ExternClass<MyGUI::InputManager>(lua);
             
