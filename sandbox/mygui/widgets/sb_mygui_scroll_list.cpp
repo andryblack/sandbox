@@ -219,9 +219,11 @@ namespace Sandbox {
             if (!m_delegate) return;
             m_delegate->setScrollList(this);
             size_t count = m_delegate->getItemsCount();
+            beginBatchAddItems();
             for (size_t i=0;i<count;++i) {
-                addItem(m_delegate->getItemData(i));
+                batchAddItem(m_delegate->getItemData(i));
             }
+            endBatchAddItems();
             setScroll(normalizeScrollValue(0));
         }
         
@@ -229,9 +231,11 @@ namespace Sandbox {
             removeAllItems();
             if (!m_delegate) return;
             size_t count = m_delegate->getItemsCount();
+            beginBatchAddItems();
             for (size_t i=0;i<count;++i) {
-                addItem(m_delegate->getItemData(i));
+                batchAddItem(m_delegate->getItemData(i));
             }
+            endBatchAddItems();
             setScroll(normalizeScrollValue(0));
         }
         
