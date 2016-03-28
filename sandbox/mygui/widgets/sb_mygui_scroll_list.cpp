@@ -98,6 +98,7 @@ SB_META_METHOD(moveToPage)
 SB_META_METHOD(updateData)
 SB_META_PROPERTY_RW(page, getPage, setPage)
 SB_META_PROPERTY_RW(targetPage, getTargetPage, moveToPage)
+SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -128,6 +129,7 @@ namespace Sandbox {
             m_state = state_none;
             m_border_dempth = 100;
             m_centered = false;
+            m_manual_scroll = true;
         }
         
         ScrollList::~ScrollList() {
@@ -164,6 +166,8 @@ namespace Sandbox {
                 setScrollBounds(MyGUI::utility::parseValue<int>(_value));
             else if (_key == "Centered")
                 setCentered(MyGUI::utility::parseValue<bool>(_value));
+            else if (_key == "ManualScroll")
+                setManualScroll(MyGUI::utility::parseValue<bool>(_value));
             else
             {
                 Base::setPropertyOverride(_key, _value);
@@ -202,6 +206,11 @@ namespace Sandbox {
                 m_centered = c;
                 updateFromResize();
             }
+        }
+        
+        void ScrollList::setManualScroll(bool s) {
+            m_manual_scroll = s;
+            m_state = state_none;
         }
         
         void ScrollList::setDelegate(const ScrollListDelegatePtr &delegate) {
@@ -431,6 +440,8 @@ namespace Sandbox {
         void ScrollList::handleGlobalMouseMove(int x,int y) {
             if (!getInheritedVisible())
                 return;
+            if (!m_manual_scroll)
+                return;
             if (m_state == state_wait_scroll || m_state == state_manual_scroll) {
                 MyGUI::ILayer* layer = getLayer();
                 MyGUI::Widget* parent = getParent();
@@ -504,6 +515,8 @@ namespace Sandbox {
         void ScrollList::handleGlobalMousePressed(int x,int y, MyGUI::MouseButton _id) {
             if (!getVisible())
                 return;
+            if (!m_manual_scroll)
+                return;
             if (_id == MyGUI::MouseButton::Left) {
                 MyGUI::ILayer* layer = getLayer();
                 MyGUI::Widget* parent = getParent();
@@ -529,7 +542,8 @@ namespace Sandbox {
         }
         
         void ScrollList::handleGlobalMouseReleased(int x,int y, MyGUI::MouseButton _id) {
-            
+            if (!m_manual_scroll)
+                return;
             if (_id == MyGUI::MouseButton::Left) {
                 if (m_state == state_manual_scroll || m_state == state_wait_scroll) {
                     if (m_state == state_manual_scroll) {

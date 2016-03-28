@@ -53,6 +53,9 @@ namespace Sandbox {
             void setSubItems(size_t count);
             size_t getSubItems() const { return m_num_subitems; }
             
+            void setManualScroll(bool s);
+            bool manualScroll() const { return m_manual_scroll; }
+            
             void setScrollBounds(int b);
             void setCentered(bool c);
             
@@ -118,6 +121,7 @@ namespace Sandbox {
             int normalizeScrollValue(int val) const;
             
             int m_border_dempth;
+            bool    m_manual_scroll;
         };
         
         
