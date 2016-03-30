@@ -31,6 +31,33 @@ namespace Sandbox {
                 case GHL::KEY_7: return MyGUI::KeyCode::Seven;
                 case GHL::KEY_8: return MyGUI::KeyCode::Eight;
                 case GHL::KEY_9: return MyGUI::KeyCode::Nine;
+                
+                case GHL::KEY_A: return MyGUI::KeyCode::A;
+                case GHL::KEY_B: return MyGUI::KeyCode::B;
+                case GHL::KEY_C: return MyGUI::KeyCode::C;
+                case GHL::KEY_D: return MyGUI::KeyCode::D;
+                case GHL::KEY_E: return MyGUI::KeyCode::E;
+                case GHL::KEY_F: return MyGUI::KeyCode::F;
+                case GHL::KEY_G: return MyGUI::KeyCode::G;
+                case GHL::KEY_H: return MyGUI::KeyCode::H;
+                case GHL::KEY_I: return MyGUI::KeyCode::I;
+                case GHL::KEY_J: return MyGUI::KeyCode::J;
+                case GHL::KEY_K: return MyGUI::KeyCode::K;
+                case GHL::KEY_L: return MyGUI::KeyCode::L;
+                case GHL::KEY_M: return MyGUI::KeyCode::M;
+                case GHL::KEY_N: return MyGUI::KeyCode::N;
+                case GHL::KEY_O: return MyGUI::KeyCode::O;
+                case GHL::KEY_P: return MyGUI::KeyCode::P;
+                case GHL::KEY_Q: return MyGUI::KeyCode::Q;
+                case GHL::KEY_R: return MyGUI::KeyCode::R;
+                case GHL::KEY_S: return MyGUI::KeyCode::S;
+                case GHL::KEY_T: return MyGUI::KeyCode::T;
+                case GHL::KEY_U: return MyGUI::KeyCode::U;
+                case GHL::KEY_V: return MyGUI::KeyCode::V;
+                case GHL::KEY_W: return MyGUI::KeyCode::W;
+                case GHL::KEY_X: return MyGUI::KeyCode::X;
+                case GHL::KEY_Y: return MyGUI::KeyCode::Y;
+                case GHL::KEY_Z: return MyGUI::KeyCode::Z;
                     
                 
 

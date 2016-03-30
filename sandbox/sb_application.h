@@ -19,6 +19,7 @@
 namespace MyGUI {
     class Gui;
     class UString;
+    class Widget;
 }
 
 namespace Sandbox {
@@ -94,6 +95,17 @@ namespace Sandbox {
         virtual void OnResize();
         
         void TransformMouse(GHL::Int32& x,GHL::Int32& y);
+        ///
+        virtual void OnMouseDown( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) ;
+        ///
+        virtual void OnMouseMove( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) ;
+        ///
+        virtual void OnMouseUp( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) ;
+        ///
+        virtual void OnDeactivated() ;
+        ///
+        virtual void OnActivated() ;
+        
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -135,6 +147,7 @@ namespace Sandbox {
         mygui::RenderManager*   m_gui_render;
         MyGUI::Gui* m_gui;
         void get_mygui_localization(const MyGUI::UString & key,MyGUI::UString& value);
+        void mygui_change_key_focus( MyGUI::Widget* w );
 #endif
 #ifdef SB_USE_NETWORK
         Network*    m_network;
@@ -156,22 +169,8 @@ namespace Sandbox {
 		virtual bool GHL_CALL Load() ;
 		///
 		virtual bool GHL_CALL OnFrame( GHL::UInt32 usecs ) ;
-		///
-		virtual void GHL_CALL OnKeyDown( GHL::Key key ) ;
-		///
-		virtual void GHL_CALL OnKeyUp( GHL::Key key ) ;
-		///
-		virtual void GHL_CALL OnChar( GHL::UInt32 ch ) ;
-		///
-		virtual void GHL_CALL OnMouseDown( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) ;
-		///
-		virtual void GHL_CALL OnMouseMove( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) ;
-		///
-		virtual void GHL_CALL OnMouseUp( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) ;
-		///
-		virtual void GHL_CALL OnDeactivated() ;
-		///
-		virtual void GHL_CALL OnActivated() ;
+        ///
+        virtual void GHL_CALL OnEvent( const GHL::Event* event );
 		///
 		virtual void GHL_CALL Release(  ) ;
 		

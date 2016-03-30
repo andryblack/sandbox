@@ -362,6 +362,26 @@ struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate2<A1, A2>, obj > {
         return 0;
     }
 };
+
+template <class O,class T,class A0,class A1,
+MyGUI::EventPair<MyGUI::delegates::CMultiDelegate1<A0>, MyGUI::delegates::CMultiDelegate1<A1> > T::*obj>
+struct delegate_bind<O,T,MyGUI::EventPair<MyGUI::delegates::CMultiDelegate1<A0>, MyGUI::delegates::CMultiDelegate1<A1> >, obj > {
+    typedef LuaDelegate1<A1> LuaDelegate;
+    typedef MyGUI::delegates::IDelegate1<A1>* IDelegatePtr;
+    typedef MyGUI::EventPair<MyGUI::delegates::CMultiDelegate1<A0>, MyGUI::delegates::CMultiDelegate1<A1> > MultiDelegate;
+    static int lua_func( lua_State* L ) {
+        O* t = Sandbox::luabind::stack<O*>::get(L,1);
+        LuaDelegate* delegate = new LuaDelegate();
+        lua_pushvalue(L, 2);
+        delegate->SetObject(L);
+        MultiDelegate& md(t->*obj);
+        //md.clear();
+        md += IDelegatePtr(delegate);
+        return 0;
+    }
+};
+
+
 template <class O,class T,class A0,class A1,class A2,MyGUI::EventPairAddParameter<A0, MyGUI::delegates::CMultiDelegate2<A1, A2> > T::*obj>
 struct delegate_bind<O,T,MyGUI::EventPairAddParameter<A0, MyGUI::delegates::CMultiDelegate2<A1, A2> >, obj > {
     typedef LuaDelegate2<A1,A2> LuaDelegate;
@@ -697,6 +717,16 @@ SB_META_DECLARE_OBJECT(MyGUI::MenuControl, MyGUI::Widget)
 SB_META_DECLARE_OBJECT(MyGUI::PopupMenu, MyGUI::MenuControl)
 
 SB_META_DECLARE_OBJECT(MyGUI::EditBox, MyGUI::TextBox)
+SB_META_BEGIN_KLASS_BIND(MyGUI::EditBox)
+bind(method("eventEditSelectAccept", delegate_bind<MyGUI::EditBox,
+            MyGUI::EditBox,
+            MyGUI::EventPair<MyGUI::EventHandle_WidgetVoid, MyGUI::EventHandle_EditPtr>,
+            &MyGUI::EditBox::eventEditSelectAccept>::lua_func));
+bind(method("eventEditTextChange", delegate_bind<MyGUI::EditBox,
+            MyGUI::EditBox,
+            MyGUI::EventPair<MyGUI::EventHandle_WidgetVoid, MyGUI::EventHandle_EditPtr>,
+            &MyGUI::EditBox::eventEditTextChange>::lua_func));
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ComboBox, MyGUI::EditBox)
 
@@ -960,6 +990,8 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ItemBox>(lua);
             luabind::ExternClass<MyGUI::ProgressBar>(lua);
             luabind::ExternClass<MyGUI::ScrollBar>(lua);
+            
+            luabind::ExternClass<MyGUI::EditBox>(lua);
             
             luabind::ExternClass<MyGUI::IFont>(lua);
 #ifdef MYGUI_USE_FREETYPE

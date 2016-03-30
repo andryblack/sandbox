@@ -23,6 +23,7 @@
 #include <ghl_render.h>
 #include <ghl_system.h>
 #include <ghl_keys.h>
+#include <ghl_event.h>
 
 #ifdef SB_USE_MYGUI
 #include "MyGUI_Gui.h"
@@ -328,6 +329,8 @@ namespace Sandbox {
         
         MyGUI::LanguageManager::getInstance().eventRequestTag =
             MyGUI::newDelegate(this,&Application::get_mygui_localization);
+        MyGUI::InputManager::getInstance().eventChangeKeyFocus +=
+            MyGUI::newDelegate(this,&Application::mygui_change_key_focus);
 #endif
 
         UpdateScreenSize();
@@ -572,36 +575,53 @@ namespace Sandbox {
     void Application::SetDrawDebugInfo(bool draw) {
         m_draw_debug_info = draw;
     }
-	///
-	void GHL_CALL Application::OnKeyDown( GHL::Key k ) {
+    
+    void GHL_CALL Application::OnEvent( const GHL::Event* event ) {
+        switch( event->type ) {
+            case GHL::EVENT_TYPE_KEY_PRESS:
 #ifdef SB_USE_MYGUI
-        MyGUI::InputManager::getInstance().injectKeyPress(mygui::translate_key(k));
+                MyGUI::InputManager::getInstance().injectKeyPress(
+                                                                  mygui::translate_key(event->data.key_press.key),
+                                                                  event->data.key_press.charcode);
 #endif
-        if (m_keyboard_ctx) {
-            m_keyboard_ctx->call_self("onKeyDown",k);
-        }
-	}
-	///
-	void GHL_CALL Application::OnKeyUp( GHL::Key k) {
+                if (m_keyboard_ctx) {
+                    m_keyboard_ctx->call_self("onKeyDown",event->data.key_press.key);
+                    if (event->data.key_press.charcode)
+                        m_keyboard_ctx->call_self("onChar",event->data.key_press.charcode);
+                }
+                break;
+            case GHL::EVENT_TYPE_KEY_RELEASE:
 #ifdef SB_USE_MYGUI
-        MyGUI::InputManager::getInstance().injectKeyRelease(mygui::translate_key(k));
+                MyGUI::InputManager::getInstance().injectKeyRelease(mygui::translate_key(event->data.key_release.key));
 #endif
-        if (m_keyboard_ctx) {
-            m_keyboard_ctx->call_self("onKeyUp",k);
+                if (m_keyboard_ctx) {
+                    m_keyboard_ctx->call_self("onKeyUp",event->data.key_release.key);
+                }
+                break;
+            case GHL::EVENT_TYPE_MOUSE_PRESS:
+                OnMouseDown(event->data.mouse_press.button, event->data.mouse_press.x, event->data.mouse_press.y);
+                break;
+            case GHL::EVENT_TYPE_MOUSE_MOVE:
+                OnMouseMove(event->data.mouse_move.button, event->data.mouse_move.x, event->data.mouse_move.y);
+                break;
+            case GHL::EVENT_TYPE_MOUSE_RELEASE:
+                OnMouseUp(event->data.mouse_release.button, event->data.mouse_release.x, event->data.mouse_release.y);
+                break;
+            case GHL::EVENT_TYPE_ACTIVATE:
+                OnActivated();
+                break;
+            case GHL::EVENT_TYPE_DEACTIVATE:
+                OnDeactivated();
+                break;
         }
-	}
-	///
-	void GHL_CALL Application::OnChar( GHL::UInt32 ch) {
-        if (m_keyboard_ctx) {
-            m_keyboard_ctx->call_self("onChar",ch);
-        }
-	}
+    }
+	
     void Application::TransformMouse(GHL::Int32& x,GHL::Int32& y) {
         x *= 1.0f / (m_resources->GetScale()*m_graphics->GetScele());
         y *= 1.0f / (m_resources->GetScale()*m_graphics->GetScele());
     }
 	///
-	void GHL_CALL Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+	void Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key)) ||
@@ -613,7 +633,7 @@ namespace Sandbox {
         }
     }
 	///
-	void GHL_CALL Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+	void Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstance().injectMouseMove(x, y, 0)||
@@ -625,7 +645,7 @@ namespace Sandbox {
         }
     }
 	///
-	void GHL_CALL Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
+	void Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstance().injectMouseRelease(x, y, mygui::translate_key(key))||
@@ -637,7 +657,7 @@ namespace Sandbox {
         }
     }
 	///
-	void GHL_CALL Application::OnDeactivated() {
+	void Application::OnDeactivated() {
         if (m_lua) {
             if (m_lua->GetGlobalContext()->GetValue<bool>("application.onDeactivated")) {
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onDeactivated");
@@ -646,7 +666,7 @@ namespace Sandbox {
         StoreAppProfile();
 	}
 	///
-	void GHL_CALL Application::OnActivated() {
+	void Application::OnActivated() {
         if (m_lua) {
             if (m_lua->GetGlobalContext()->GetValue<bool>("application.onActivate")) {
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onActivate");
@@ -691,6 +711,13 @@ namespace Sandbox {
         LuaContextPtr localization = m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("localization");
         if (localization) {
             value.assign( localization->GetValueRaw<sb::string>(key.asUTF8_c_str()) );
+        }
+    }
+    void Application::mygui_change_key_focus( MyGUI::Widget* w ) {
+        if (w) {
+            m_system->ShowKeyboard();
+        } else {
+            m_system->HideKeyboard();
         }
     }
 #endif
