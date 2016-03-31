@@ -30,7 +30,11 @@ function build.projectrules(sln)
 	_x(1,'mkdir -p ${config}/lib')
 	_x(1,'rm -Rf ${config}/lib/*')
 	for _,v in ipairs( sln.android_libs or {} ) do
-		_x(1,'cp -r %s ${config}/lib/',v)
+		if path.getextension(path.getname(v))~='.jar' then
+			_x(1,'cp -r %s ${config}/lib/',v)
+		else
+			_x(1,'cp -r %s ${config}/libs/',v)
+		end
 	end
 	_p('')
 	local install_projects = ''
@@ -42,7 +46,9 @@ function build.projectrules(sln)
 
 			_p('%s-update: android_libs %s-jni', vprj, vprj)
 			for _,v in ipairs( sln.android_libs or {} ) do
-				_x(1,'@cd ${config}/lib/%s && ${ANDROID} update lib-project -p . --target android-%s',path.getname(v),tostring(target_api))
+				if path.getextension(path.getname(v))~='.jar' then
+					_x(1,'@cd ${config}/lib/%s && ${ANDROID} update lib-project -p . --target android-%s',path.getname(v),tostring(target_api))
+				end
 			end
 			_x(1,'@cd ${config} && ${ANDROID} update project -p . -n %s --target android-%s',vprj, tostring(target_api))
 			_p('')
@@ -201,9 +207,12 @@ function build.generate_ant_build( sln, cfg )
 		_x('key.alias=%s',sln.android_key_alias)
 	end
 	for i,v in ipairs( sln.android_libs or {} ) do
-		_x('android.library.reference.%d=lib/%s',i,path.getname(v))
+		if path.getextension(path.getname(v))~='.jar' then
+			_x('android.library.reference.%d=lib/%s',i,path.getname(v))
+		end
 	end
 	_p('source.dir=../src')
+	_p('jar.libs.dir=libs')
 end
 
 return build
