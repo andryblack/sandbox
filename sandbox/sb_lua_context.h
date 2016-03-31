@@ -28,6 +28,7 @@ namespace Sandbox {
         using luabind::impl::wrapper_base::call;
         using luabind::impl::wrapper_base::call_self;
         
+        sb::intrusive_ptr<LuaContext> Create();
         sb::intrusive_ptr<LuaContext> CreateInherited();
         sb::intrusive_ptr<LuaContext> CreateChild(const char* name);
         

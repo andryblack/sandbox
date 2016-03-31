@@ -30,6 +30,20 @@ namespace Sandbox {
         return ctx;
     }
     
+    sb::intrusive_ptr<LuaContext> LuaContext::Create() {
+        if (!Valid()) return LuaContextPtr();
+        luabind::LuaVMHelperPtr helper = GetHelper();
+        if (!helper) return LuaContextPtr();
+        lua_State* L = helper->lua;
+        LUA_CHECK_STACK(0)
+        LuaContextPtr ctx(new LuaContext);
+        GetObject(L);
+        lua_newtable(L);
+        ctx->SetObject(L);
+        lua_pop(L, 1);
+        return ctx;
+    }
+    
     sb::intrusive_ptr<LuaContext> LuaContext::CreateChild(const char* name) {
         if (!Valid()) return LuaContextPtr();
         luabind::LuaVMHelperPtr helper = GetHelper();
