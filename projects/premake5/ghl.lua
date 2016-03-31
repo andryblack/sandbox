@@ -204,7 +204,7 @@ project 'GHL'
 			end
 		end
 
-		includedirs {
+		sysincludedirs {
 			sandbox_dir .. '/GHL/include'
 		}
 

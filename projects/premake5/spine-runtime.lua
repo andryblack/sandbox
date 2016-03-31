@@ -15,7 +15,7 @@ project 'spine-runtime'
 	
 	files(utils.append_path(sandbox_dir .. '/spine-runtime-c/',srcfiles))
 
-	includedirs {
+	sysincludedirs {
 				sandbox_dir .. '/spine-runtime-c/include'
 			}
 

@@ -52,7 +52,7 @@ int os_is64bit(lua_State* L);
 int os_isdir(lua_State* L);
 int os_isfile(lua_State* L);
 int os_islink(lua_State* L);
-int os_locate(lua_State* L);
+//int os_locate(lua_State* L);
 int os_matchdone(lua_State* L);
 int os_matchisfile(lua_State* L);
 int os_matchname(lua_State* L);
@@ -90,7 +90,7 @@ static const luaL_Reg os_functions[] = {
     { "getversion",  os_getversion  },
     { "isfile",      os_isfile      },
     { "islink",      os_islink      },
-    { "locate",      os_locate      },
+    //{ "locate",      os_locate      },
     { "matchdone",   os_matchdone   },
     { "matchisfile", os_matchisfile },
     { "matchname",   os_matchname   },

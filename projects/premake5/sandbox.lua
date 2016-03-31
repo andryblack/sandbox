@@ -176,14 +176,18 @@ solution( ProjectName )
 			sandbox_dir .. '/sandbox/skelet/**.cpp',
 		}
 
-		includedirs {
+		sysincludedirs {
 			sandbox_dir .. '/GHL/include',
 			sandbox_dir .. '/include',
-			sandbox_dir .. '/sandbox',
+			
 			sandbox_dir .. '/freetype/include',
 			sandbox_dir .. '/yajl/src/api',
 			sandbox_dir .. '/pugixml/src',
 			sandbox_dir .. '/lua/src'
+		}
+
+		includedirs {
+			sandbox_dir .. '/sandbox',
 		}
 
 		if use.MyGUI then
@@ -195,9 +199,9 @@ solution( ProjectName )
 				sandbox_dir .. '/MyGUI/MyGUIEngine/include',
 			}
 			if os.is('windows') then
-				defines 'MYGUI_CONFIG_INCLUDE="mygui/sb_mygui_config.h"'
+				defines 'MYGUI_CONFIG_INCLUDE="sb_mygui_config.h"'
 			else
-				defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+				defines 'MYGUI_CONFIG_INCLUDE="<sb_mygui_config.h>"'
 			end
 			defines 'SB_USE_MYGUI'
 		end
@@ -207,7 +211,7 @@ solution( ProjectName )
 				sandbox_dir .. '/sandbox/spine/**.h',
 				sandbox_dir .. '/sandbox/spine/**.cpp',
 			}
-			includedirs {
+			sysincludedirs {
 				sandbox_dir .. '/spine-runtime-c/include',
 			}
 			defines 'SB_USE_SPINE'
@@ -260,7 +264,7 @@ solution( ProjectName )
 			if os.is('windows') then
 				defines 'MYGUI_CONFIG_INCLUDE="mygui/sb_mygui_config.h"'
 			else
-				defines 'MYGUI_CONFIG_INCLUDE="<mygui/sb_mygui_config.h>"'
+				defines 'MYGUI_CONFIG_INCLUDE="<sb_mygui_config.h>"'
 			end
 			defines 'SB_USE_MYGUI'
 		end
@@ -395,7 +399,7 @@ solution( ProjectName )
 			
 		-- end
 
-		includedirs {
+		sysincludedirs {
 			sandbox_dir .. '/GHL/include',
 			sandbox_dir .. '/include',
 			sandbox_dir .. '/sandbox',

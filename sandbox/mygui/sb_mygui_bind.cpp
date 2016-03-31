@@ -8,8 +8,8 @@
 
 #include "sb_mygui_bind.h"
 #include "sb_lua_context.h"
-#include <luabind/sb_luabind.h>
-#include <luabind/sb_luabind_function.h>
+#include "luabind/sb_luabind.h"
+#include "luabind/sb_luabind_function.h"
 #include "../sb_lua.h"
 
 #include "MyGUI_LayoutManager.h"

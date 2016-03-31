@@ -308,7 +308,8 @@ function ndk.generateMakefile(prj,cfg)
 	ndk.writeStrings('LOCAL_STATIC_LIBRARIES', '', static_libs )
 
 	_p('# Include paths')
-	ndk.writeRelativePaths('LOCAL_C_INCLUDES', local_path, cfg.includedirs, true)
+
+	ndk.writeRelativePaths('LOCAL_C_INCLUDES', local_path, table.join(cfg.includedirs,cfg.sysincludedirs), true)
 	_p('')
 
 	

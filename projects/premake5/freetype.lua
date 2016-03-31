@@ -44,7 +44,7 @@ project 'freetype'
 	defines 'FT2_BUILD_LIBRARY'
 	defines 'DARWIN_NO_CARBON'
 
-	includedirs {
+	sysincludedirs {
 		sandbox_dir .. '/include',
 		sandbox_dir .. '/freetype/include'
 	}

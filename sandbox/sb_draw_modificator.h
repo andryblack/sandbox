@@ -9,7 +9,7 @@
 #ifndef __sr_osx__sb_draw_modificator__
 #define __sr_osx__sb_draw_modificator__
 
-#include <meta/sb_meta.h>
+#include "meta/sb_meta.h"
 #include <sbstd/sb_vector.h>
 #include "sb_color.h"
 #include "sb_transform2d.h"

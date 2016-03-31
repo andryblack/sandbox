@@ -161,7 +161,7 @@ function build.generate_solution(sln)
 
 	build.projects(sln)
 
-	make.solutionPhonyRule(sln)
+	make.workspacePhonyRule(sln)
 	--make.groupRules(sln)
 
 	build.projectrules(sln)

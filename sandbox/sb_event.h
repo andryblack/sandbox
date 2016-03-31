@@ -11,7 +11,7 @@
 #define SB_EVENT_H
 
 #include <sbstd/sb_intrusive_ptr.h>
-#include <luabind/sb_luabind_stack.h>
+#include "luabind/sb_luabind_stack.h"
 
 namespace Sandbox {
 

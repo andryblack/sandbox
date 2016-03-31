@@ -115,7 +115,22 @@
 			path.join(sandbox_dir,'GHL','src/winlib/winlib_posix_time.cpp'),
 			"../premake5/src/host/path_*.c",
 			"../premake5/src/host/string_*.c",
-			"../premake5/src/host/os_*.c",
+			"../premake5/src/host/os_chdir.c",
+			"../premake5/src/host/os_chmod.c",
+			"../premake5/src/host/os_copyfile.c",
+			"../premake5/src/host/os_pathsearch.c",
+			"../premake5/src/host/os_match.c",
+			"../premake5/src/host/os_stat.c",
+			"../premake5/src/host/os_rmdir.c",
+			"../premake5/src/host/os_getcwd.c",
+			"../premake5/src/host/os_isfile.c",
+			"../premake5/src/host/os_uuid.c",
+			"../premake5/src/host/os_realpath.c",
+			"../premake5/src/host/os_mkdir.c",
+			"../premake5/src/host/os_getversion.c",
+			"../premake5/src/host/os_is64bit.c",
+			"../premake5/src/host/os_isdir.c",
+			"../premake5/src/host/os_islink.c",
 		}
 
 		

@@ -11,7 +11,7 @@ project 'MyGUI'
 		sandbox_dir .. '/MyGUI/MyGUIEngine/**.cpp'
 	}
 
-	includedirs {
+	sysincludedirs {
 		sandbox_dir .. '/MyGUI/MyGUIEngine/include',
 		sandbox_dir .. '/include',
 		sandbox_dir .. '/freetype/include'
@@ -20,7 +20,7 @@ project 'MyGUI'
 	if os.is('windows') then
 		defines 'MYGUI_CONFIG_INCLUDE="../../../sandbox/mygui/sb_mygui_config.h"'
 	else
-		defines 'MYGUI_CONFIG_INCLUDE="<../../../sandbox/mygui/sb_mygui_config.h>"'
+		defines 'MYGUI_CONFIG_INCLUDE="<sb_mygui_config.h>"'
 	end
 
 	configuration "Debug"

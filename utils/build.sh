@@ -36,13 +36,18 @@ if [ ! -f "$BOOTSTRAPPREMAKE" ]; then
 	if [[ "$PLATFORM" != "windows" ]]; then
 		BOOTSTRAPPREMAKE=$BIN/premake5
 		echo "try get it"
-		cd $BIN && curl -L "https://github.com/premake/premake-core/releases/download/v5.0.0.alpha4/premake-5.0.0.alpha4-macosx.tar.gz" | tar xz 
+		cd $BIN && curl -L "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha8/premake-5.0.0-alpha8-macosx.tar.gz" | tar xz 
 	fi
 	exit 1
 fi
 
 echo "rebuild premake5"
 cd $UTILS/premake5
+rm -rf src/host/scripts.c
+rm -rf *.make
+rm -rf Makefile
+rm -Rf obj
+$BOOTSTRAPPREMAKE clean
 $BOOTSTRAPPREMAKE embed || exit 1
 $BOOTSTRAPPREMAKE $TARGET || exit 1
 $MAKE config=release || exit 1
