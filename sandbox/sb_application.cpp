@@ -28,6 +28,7 @@
 #ifdef SB_USE_MYGUI
 #include "MyGUI_Gui.h"
 #include "MyGUI_InputManager.h"
+#include "MyGUI_EditBox.h"
 
 #include "mygui/sb_mygui_keys.h"
 #include "mygui/sb_mygui_data_manager.h"
@@ -714,7 +715,7 @@ namespace Sandbox {
         }
     }
     void Application::mygui_change_key_focus( MyGUI::Widget* w ) {
-        if (w) {
+        if (w && w->isType<MyGUI::EditBox>()) {
             m_system->ShowKeyboard();
         } else {
             m_system->HideKeyboard();
