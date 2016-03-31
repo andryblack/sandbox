@@ -15,6 +15,7 @@
 #include "sb_mygui_scroll_area.h"
 #include "sb_mygui_text_widget.h"
 #include "sb_mygui_scene_object.h"
+#include "sb_mygui_text_edit.h"
 
 #include "MyGUI_WidgetManager.h"
 #include "MyGUI_FactoryManager.h"
@@ -41,6 +42,11 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::TextWidget)
 SB_META_PROPERTY_RW(wordWrap, getWordWrap, setWordWrap)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::TextEdit)
+SB_META_PROPERTY_RW(placeholder, getPlaceholder, setPlaceholder)
+SB_META_END_KLASS_BIND()
+
+
 namespace Sandbox {
     
     namespace mygui {
@@ -55,10 +61,12 @@ namespace Sandbox {
             factory.registerFactory<MaskImageWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.registerFactory<TextWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.registerFactory<SceneObjectWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            factory.registerFactory<TextEdit>(MyGUI::WidgetManager::getInstance().getCategoryName());
         }
         void unregister_widgets() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
             
+            factory.unregisterFactory<TextEdit>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<SceneWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<ScrollList>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<ScrollArea>(MyGUI::WidgetManager::getInstance().getCategoryName());
@@ -83,6 +91,7 @@ namespace Sandbox {
             luabind::ExternClass<MaskImageWidget>(L);
             luabind::ExternClass<TextWidget>(L);
             luabind::ExternClass<SceneObjectWidget>(L);
+            luabind::ExternClass<TextEdit>(L);
         }
     }
     
