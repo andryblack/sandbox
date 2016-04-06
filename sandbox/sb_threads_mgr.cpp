@@ -15,7 +15,7 @@ SB_META_DECLARE_OBJECT(Sandbox::PermanentThreadsMgr, Sandbox::ThreadsMgr)
 
 namespace Sandbox {
 
-    ThreadsMgr::ThreadsMgr() : m_drop_empty(true) {
+    ThreadsMgr::ThreadsMgr() : m_drop_empty(true),m_speed(1.0f) {
 	}
 	
 	ThreadsMgr::~ThreadsMgr() {
@@ -34,9 +34,10 @@ namespace Sandbox {
 				m_threads.push_back(m_added_threads[i]);
 		}
 		m_added_threads.clear();
+        float sdt = dt * m_speed;
 		std::vector<ThreadPtr>::iterator i = m_threads.begin();
 		while (i!=m_threads.end()) {
-			if ((*i)->Update(dt))
+			if ((*i)->Update(sdt))
 				i = m_threads.erase(i);
 			else
 				i++;

@@ -29,11 +29,15 @@ namespace Sandbox {
         
         bool GetDropEmpty() const { return m_drop_empty; }
         void SetDropEmpty(bool d) { m_drop_empty = d; }
+        
+        float GetSpeed() const { return m_speed; }
+        void SetSpeed(float s) { m_speed = s; }
 	private:
 		std::vector<ThreadPtr> m_threads;
 		std::vector<ThreadPtr> m_added_threads;
 		std::vector<ThreadPtr> m_removed_threads;
         bool    m_drop_empty;
+        float   m_speed;
 	};
     
     class PermanentThreadsMgr : public ThreadsMgr {
