@@ -29,6 +29,8 @@ function build.projectrules(sln)
 	_p('android_libs:')
 	_x(1,'mkdir -p ${config}/lib')
 	_x(1,'rm -Rf ${config}/lib/*')
+	_x(1,'mkdir -p ${config}/libs')
+	_x(1,'rm -Rf ${config}/libs/*')
 	for _,v in ipairs( sln.android_libs or {} ) do
 		if path.getextension(path.getname(v))~='.jar' then
 			_x(1,'cp -r %s ${config}/lib/',v)
