@@ -8,12 +8,13 @@ namespace Sandbox {
     SkeletController::SkeletController(const SkeletonDataPtr& data ) : m_data(data),m_animation(0) {
         m_crnt_frame = 0;
         m_frame_time = 0;
+        m_started = false;
         m_loop = 0;
     }
     
     
     bool SkeletController::Update(float dt) {
-        if (m_animation) {
+        if (m_animation && m_started) {
             bool stop = false;
             m_frame_time += dt;
             size_t frames_drop = m_frame_time * m_animation->GetFPS();
@@ -32,7 +33,7 @@ namespace Sandbox {
                     if (m_end_event) {
                         m_end_event->Emmit();
                     }
-                    m_animation = 0;
+                    m_started = false;
                     if (!m_added_animations.empty()) {
                         StartAnimation(m_added_animations.front().name.c_str(), m_added_animations.front().loop);
                         m_added_animations.pop_front();
@@ -46,7 +47,7 @@ namespace Sandbox {
     }
     
     void SkeletController::AddAnimation(const char *name, int loop) {
-        if (!m_animation) {
+        if (!m_animation || !m_started) {
             StartAnimation(name, loop);
         } else {
             AnimationEntry e = { name , loop };
@@ -58,12 +59,17 @@ namespace Sandbox {
         
     }
     
-    void SkeletController::StartAnimation(const char* name,int loop) {
+    void SkeletController::SetAnimation(const char *name) {
         m_animation = m_data->GetAnimation(name).get();
         m_crnt_frame = 0;
         m_frame_time = 0;
-        m_loop = loop;
         ApplyFrame();
+    }
+    
+    void SkeletController::StartAnimation(const char* name,int loop) {
+        SetAnimation(name);
+        m_loop = loop;
+        m_started = true;
     }
     
     void SkeletController::ChangeData( const SkeletonDataPtr& data ) {
@@ -101,6 +107,13 @@ namespace Sandbox {
         size_t frames = time * m_animation->GetFPS();
         m_crnt_frame = frames % m_animation->GetFrames();
         m_frame_time = time - frames / m_animation->GetFPS();
+    }
+    
+    float SkeletController::GetCurrentAnimationLength() const {
+        return m_animation ? (m_animation->GetFrames() / m_animation->GetFPS()) : 0.0f;
+    }
+    size_t SkeletController::GetCurrentAnimationFrames() const {
+        return m_animation ? m_animation->GetFrames() : 0;
     }
     
     void SkeletController::ApplyFrame() {

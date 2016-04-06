@@ -22,6 +22,7 @@ namespace Sandbox {
         void ChangeData( const SkeletonDataPtr& data );
         virtual bool Update(float dt);
         void StartAnimation(const char* name,int loop);
+        void SetAnimation(const char* name);
         void AddAnimation(const char* name,int loop);
         void ApplyFrame();
         void AddObject(const SkeletObjectPtr& obj);
@@ -34,10 +35,14 @@ namespace Sandbox {
         void SetFrame( size_t frame );
         void SetTime( float time );
         
+        float GetCurrentAnimationLength() const;
+        size_t GetCurrentAnimationFrames() const;
+        
         bool IsComplete() const { return !m_animation; }
     private:
         size_t  m_crnt_frame;
         float   m_frame_time;
+        bool    m_started;
         SkeletonDataPtr     m_data;
         SkeletonAnimation*  m_animation;
         int    m_loop;
