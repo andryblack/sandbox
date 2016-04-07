@@ -28,7 +28,8 @@ solution( ProjectName )
 	if os.is('android') then
 		android_abis {'armeabi'}
 		android_stl('gnustl_static')
-		android_activity(AndroidConfig.activity or 'com.sandboxgames.NativeActivity')
+		android_activity(AndroidConfig.activity or 'com.sandboxgames.Activity')
+		android_libs(path.getabsolute(path.join(sandbox_dir,'GHL/src/android_ghl')))
 		android_libs(path.getabsolute(path.join(sandbox_dir,'projects/android/libs','sandbox_lib')))
 		android_api_level(AndroidConfig.api_level or 9)
 		android_target_api_level(AndroidConfig.target_api_level or 14)

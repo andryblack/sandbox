@@ -47,11 +47,15 @@ function build.projectrules(sln)
 			local vprj = premake.esc(prj.name)
 
 			_p('%s-update: android_libs %s-jni', vprj, vprj)
+			_p(1,'@echo "==== Building %s-update ===="', vprj)
 			for _,v in ipairs( sln.android_libs or {} ) do
 				if path.getextension(path.getname(v))~='.jar' then
+					_p(1,'@echo "==== Updating lib at %s ===="', path.getname(v))
 					_x(1,'@cd ${config}/lib/%s && ${ANDROID} update lib-project -p . --target android-%s',path.getname(v),tostring(target_api))
+					_x(1,'@cd ${config}/lib/%s && ${ANT} ${config}',path.getname(v))
 				end
 			end
+			_p(1,'@echo "==== Updating project %s ===="', vprj)
 			_x(1,'@cd ${config} && ${ANDROID} update project -p . -n %s --target android-%s',vprj, tostring(target_api))
 			_p(1,'@if [ -f proguard.txt ]; then cp proguard.txt ${config}/ ;fi')
 			_p('')
