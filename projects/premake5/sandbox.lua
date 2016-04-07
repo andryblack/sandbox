@@ -28,7 +28,7 @@ solution( ProjectName )
 	if os.is('android') then
 		android_abis {'armeabi'}
 		android_stl('gnustl_static')
-		android_activity('com.sandboxgames.NativeActivity')
+		android_activity(AndroidConfig.activity or 'com.sandboxgames.NativeActivity')
 		android_libs(path.getabsolute(path.join(sandbox_dir,'projects/android/libs','sandbox_lib')))
 		android_api_level(AndroidConfig.api_level or 9)
 		android_target_api_level(AndroidConfig.target_api_level or 14)
@@ -44,6 +44,7 @@ solution( ProjectName )
 			android_modules_path( path.getabsolute(sandbox_dir) )
 			local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
 			android_libs(path.join(sdk_dir,'extras/google/google_play_services/libproject','google-play-services_lib'))
+			android_libs(path.join(sdk_dir,'extras/android/support/v4/android-support-v4.jar'))
 			flags{ "C++11" }
 			android_metadata {
 				'com.google.android.gms.games.APP_ID=@string/app_id',

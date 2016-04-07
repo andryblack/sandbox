@@ -53,6 +53,7 @@ function build.projectrules(sln)
 				end
 			end
 			_x(1,'@cd ${config} && ${ANDROID} update project -p . -n %s --target android-%s',vprj, tostring(target_api))
+			_p(1,'@if [ -f proguard.txt ]; then cp proguard.txt ${config}/ ;fi')
 			_p('')
 			_p('%s-jni: prebuild-%s', vprj, vprj)
 			_p(1,'@echo "==== Building %s jni ===="', prj.name)
@@ -208,9 +209,11 @@ function build.generate_ant_build( sln, cfg )
 	if sln.android_key_alias then
 		_x('key.alias=%s',sln.android_key_alias)
 	end
+	local ii = 1
 	for i,v in ipairs( sln.android_libs or {} ) do
 		if path.getextension(path.getname(v))~='.jar' then
-			_x('android.library.reference.%d=lib/%s',i,path.getname(v))
+			_x('android.library.reference.%d=lib/%s',ii,path.getname(v))
+			ii = ii + 1
 		end
 	end
 	_p('source.dir=../src')
