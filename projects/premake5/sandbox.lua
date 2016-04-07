@@ -33,6 +33,7 @@ solution( ProjectName )
 		android_api_level(AndroidConfig.api_level or 9)
 		android_target_api_level(AndroidConfig.target_api_level or 14)
 		android_packagename( AndroidConfig.package or 'com.sandbox.example')
+		android_toolchain( AndroidConfig.toolchain or '4.8' )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 		if AndroidConfig.keystore and AndroidConfig.keyalias then
 			android_key_store(AndroidConfig.keystore)

@@ -169,7 +169,7 @@ function ndk.generateAppMakefile(sln, cfg)
 
 	
 	ndk.writeStrings('APP_CPPFLAGS', '', flags)
-	_p('NDK_TOOLCHAIN_VERSION := 4.8')
+	_p('NDK_TOOLCHAIN_VERSION := %s', sln.android_toolchain or '4.8')
 
 	_p('')			
 end

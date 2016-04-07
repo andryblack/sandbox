@@ -28,6 +28,12 @@ api.register {
 	}
 }
 
+api.register {
+	name = "android_toolchain",
+	scope = "solution",
+	kind = "string"
+}
+
 -- Specify android jni API level
 api.register {
 	name = "android_api_level",
