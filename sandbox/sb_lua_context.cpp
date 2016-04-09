@@ -72,6 +72,20 @@ namespace Sandbox {
         return L;
     }
     
+    lua_State* LuaContext::get_state_with_array_on_top() {
+        if (!Valid()) return 0;
+        luabind::LuaVMHelperPtr helper = GetHelper();
+        if (!helper) return 0;
+        lua_State* L = helper->lua;
+        LUA_CHECK_STACK(2)
+        GetObject(L);
+        lua_len(L,-1);
+        int len = lua_tointeger(L, -1);
+        lua_pop(L, 1);
+        lua_pushinteger(L, len + 1);
+        return L;
+    }
+    
     void LuaContext::set_value_on_top_of_stack_to_table(lua_State* L) {
         LUA_CHECK_STACK(-3)
         lua_rawset(L, -3);

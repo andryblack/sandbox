@@ -21,6 +21,7 @@ namespace Sandbox {
     class LuaContext : public luabind::impl::wrapper_base {
     private:
         lua_State* get_state_with_table_on_top(const char* path);
+        lua_State* get_state_with_array_on_top();
         void set_value_on_top_of_stack_to_table(lua_State* L);
     public:
         explicit LuaContext();
@@ -88,6 +89,47 @@ namespace Sandbox {
         template <class T>
         inline void SetValue( const char* path, T* t ) {
             lua_State* L = get_state_with_table_on_top(path);
+            if (!L) return;
+            LUA_CHECK_STACK(-2)
+            luabind::stack<T*>::push(L,t);
+            set_value_on_top_of_stack_to_table(L);
+        }
+        
+        
+        template <class T>
+        inline void AddValue(  const sb::shared_ptr<T>& t ) {
+            lua_State* L = get_state_with_array_on_top();
+            LUA_CHECK_STACK(-2)
+            if (!L) return;
+            luabind::stack<sb::shared_ptr<T> >::push(L,t);
+            set_value_on_top_of_stack_to_table(L);
+        }
+        template <class T>
+        inline void AddValue(  typename sb::type_traits<T>::parameter_type t ) {
+            lua_State* L = get_state_with_array_on_top();
+            if (!L) return;
+            LUA_CHECK_STACK(-2)
+            luabind::stack<T>::push(L,t);
+            set_value_on_top_of_stack_to_table(L);
+        }
+        template <class T>
+        inline void AddValue(  T t ) {
+            lua_State* L = get_state_with_array_on_top();
+            if (!L) return;
+            LUA_CHECK_STACK(-2)
+            luabind::stack<T>::push(L,t);
+            set_value_on_top_of_stack_to_table(L);
+        }
+        inline void AddValue(  const char* t ) {
+            lua_State* L = get_state_with_array_on_top();
+            if (!L) return;
+            LUA_CHECK_STACK(-2)
+            luabind::stack<const char*>::push(L,t);
+            set_value_on_top_of_stack_to_table(L);
+        }
+        template <class T>
+        inline void AddValue(  T* t ) {
+            lua_State* L = get_state_with_array_on_top();
             if (!L) return;
             LUA_CHECK_STACK(-2)
             luabind::stack<T*>::push(L,t);
