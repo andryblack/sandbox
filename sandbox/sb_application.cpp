@@ -614,6 +614,27 @@ namespace Sandbox {
             case GHL::EVENT_TYPE_DEACTIVATE:
                 OnDeactivated();
                 break;
+            case GHL::EVENT_TYPE_SOFT_KEYBOARD_SHOW:
+                if (m_lua) {
+                    if (m_lua->GetGlobalContext()->GetValue<bool>("application.onSoftKeyboardShow")) {
+                        float size_scale = 1.0f / (m_resources->GetScale()*m_graphics->GetScele());
+                        m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
+                        ->call("onSoftKeyboardShow",
+                               Recti(event->data.soft_keyboard_show.x * size_scale,
+                                     event->data.soft_keyboard_show.y * size_scale,
+                                     event->data.soft_keyboard_show.w * size_scale,
+                                     event->data.soft_keyboard_show.h * size_scale));
+                    }
+                }
+                break;
+            case GHL::EVENT_TYPE_SOFT_KEYBOARD_HIDE:
+                if (m_lua) {
+                    if (m_lua->GetGlobalContext()->GetValue<bool>("application.onSoftKeyboardHide")) {
+                        m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
+                        ->call("onSoftKeyboardHide");
+                    }
+                }
+                break;
         }
     }
 	
