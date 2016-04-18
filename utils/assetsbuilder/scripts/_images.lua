@@ -141,6 +141,12 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 			--print(v.src._path,v.src._name)
 			local tpath = path.join(v.src._path,v.src._name .. '.' .. v.src.type)
 			local i = assert(application:load_texture(tpath),'failed load texture ' .. tpath)
+			if v.src.aname and v.src.atype then
+				local alpha_image_fn = rules.alpha_file_format(src)
+				local apath = path.join(v.src._path,v.src.aname .. '.' .. v.src.atype)
+				local ai = assert(application:load_texture(apath),'failed load alpha texture ' .. apath)
+				i:SetAlpha(ai)
+			end
 			if v.premultiply then
 				i:PremultiplyAlpha()
 			end
@@ -319,6 +325,15 @@ local function do_premultiply_file( src, dst  )
 		end
 	end
 	local t = assert(application:load_texture(src))
+	if rules.alpha_file_format then
+		local alpha_image_fn = rules.alpha_file_format(src)
+		if alpha_image_fn then
+			local at = application:load_texture(alpha_image_fn)
+			if at then
+				t:SetAlpha(at)
+			end
+		end
+	end
 	t:PremultiplyAlpha()
 	return application:store_texture(dst,t)
 end

@@ -223,6 +223,12 @@ local function compile_files( files )
 	end
 end
 
+function _M.assets_rules.set_alpha_file_format( func )
+
+	rules.alpha_file_format = func
+
+end
+
 function _M.apply_rules( rules )
 	local dst_tree = {}
 	for v,marker in pairs(rules.dest_files or {}) do

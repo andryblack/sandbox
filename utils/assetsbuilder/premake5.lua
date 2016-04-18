@@ -98,14 +98,21 @@
 		kind        "ConsoleApp"
 		
 		includedirs { 
+			
+			
+			path.join(sandbox_dir,'sandbox'),
+			
+			
+		}
+
+		sysincludedirs {
 			path.join(sandbox_dir,'lua','src'),
 			path.join(sandbox_dir,'include'),
 			path.join(sandbox_dir,'GHL','include'),
-			path.join(sandbox_dir,'sandbox'),
-			path.join(sandbox_dir,'spine-runtime-c','include'),
 			path.join(sandbox_dir,'pugixml','src'),
+			path.join(sandbox_dir,'spine-runtime-c','include'),
+			path.join(sandbox_dir,'sandbox'),
 		}
-
 		
 		files
 		{
