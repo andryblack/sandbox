@@ -42,9 +42,14 @@ local function process_files_pattern( pattern , action )
 	--print('process_files_pattern:',pattern,action)
 	local files = os.matchfiles(path.join(src_path,pattern))
 	for k,v in ipairs(files) do
-		local f = path.getrelative(src_path,v)
-		--print(action,k,f)
-		rules[assert(action)][f]=f
+		local f = path.getrelative(src_path,v) or v
+		print(action,k,f,rules)
+		local r = rules[assert(action)] 
+		if not r then
+			r = {}
+			rules[action] = r
+		end
+		r[f]=f
 		assert(not rules.dest_files[f],'conflict rules for file ' .. f)
 		rules.dest_files[f]=f
 	end

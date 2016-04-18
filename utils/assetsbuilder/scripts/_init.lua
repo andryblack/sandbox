@@ -338,7 +338,7 @@ function load_sandbox( file , mt, init_data )
     	error("expected function, got " .. type(f) .. "(" .. tostring(f) .. ")" ,2)
     end
     local res = f()
-    setmetatable(data,nil)
+    --setmetatable(data,nil)
     return data,res
 end
 

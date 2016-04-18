@@ -24,7 +24,13 @@ local function load_images( dir  )
 				rules.copy_files[filename]=true
 			else
 				local pm = rules.premultiply_images or {}
-				pm[filename] = filename
+				local texobj = { dst = filename }
+				if v.aname then
+					texobj.aname = path.join(dir,v.aname)
+					texobj.dst = path.join(dir,k .. '.png')
+					v.type = 'png'
+				end
+				pm[filename] = texobj 
 				rules.premultiply_images = pm
 				v.premultiplied = true
 			end
@@ -141,9 +147,8 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 			--print(v.src._path,v.src._name)
 			local tpath = path.join(v.src._path,v.src._name .. '.' .. v.src.type)
 			local i = assert(application:load_texture(tpath),'failed load texture ' .. tpath)
-			if v.src.aname and v.src.atype then
-				local alpha_image_fn = rules.alpha_file_format(src)
-				local apath = path.join(v.src._path,v.src.aname .. '.' .. v.src.atype)
+			if v.src.aname  then
+				local apath = path.join(v.src._path,v.src.aname )
 				local ai = assert(application:load_texture(apath),'failed load alpha texture ' .. apath)
 				i:SetAlpha(ai)
 			end
@@ -161,7 +166,7 @@ end
 
 local function apply_images( dir, data )
 	local fn = path.join(dir,'images.lua')
-	print('henerate',fn)
+	print('generate',fn)
 	local file = assert(io.open ( path.join(dst_path,fn) , 'w'))
 	
 	local function f(name,val,def)
@@ -317,25 +322,33 @@ local function apply_images( dir, data )
 	end
 end
 
-local function do_premultiply_file( src, dst  )
+local function do_premultiply_file( src, dstconf  )
+	local conf = { dst = dstconf }
+	if type(dstconf) == 'table' then
+		conf = dstconf
+	end
+
 	if update_only then
-		if not os.check_file_new(path.join(src_path,src),path.join(dst_path,dst)) then
+		if not os.check_file_new(path.join(src_path,src),path.join(dst_path,conf.dst)) then
 			print('skip not new')
 			return true
 		end
 	end
 	local t = assert(application:load_texture(src))
-	if rules.alpha_file_format then
-		local alpha_image_fn = rules.alpha_file_format(src)
-		if alpha_image_fn then
-			local at = application:load_texture(alpha_image_fn)
+	local aimage = conf.aname
+	if not aimage and type(dstconf) == 'string' then
+		aimage = rules.alpha_file_format(src)
+	end
+	if aimage then
+		if aimage then
+			local at = application:load_texture(aimage)
 			if at then
 				t:SetAlpha(at)
 			end
 		end
 	end
 	t:PremultiplyAlpha()
-	return application:store_texture(dst,t)
+	return application:store_texture(conf.dst,t)
 end
 
 function _M.apply( rules )
@@ -354,7 +367,9 @@ function _M.apply( rules )
 	for k,v in pairs(pmi) do
 		if v then
 			print('premultiply',k)
-			if type(v) == 'string' then
+			if type(v) == 'table' then
+				assert(do_premultiply_file(k,v),'failed store texture to ' .. v.dst)
+			elseif type(v) == 'string' then
 				assert(do_premultiply_file(k,v),'failed store texture to ' .. v)
 			else
 				assert(do_premultiply_file(k,k),'failed store texture to ' .. k)
