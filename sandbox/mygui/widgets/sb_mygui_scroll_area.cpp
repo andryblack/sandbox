@@ -162,7 +162,7 @@ namespace Sandbox {
                         //m_move_speed = 0;
                     }
                 }
-                if (mRealClient) mRealClient->setPosition(crnt_pos);
+                setViewOffset(crnt_pos);
             } else {
                 m_move_speed = MyGUI::FloatPoint(0,0);
                 m_move_accum = MyGUI::FloatPoint(0,0);
@@ -206,13 +206,14 @@ namespace Sandbox {
                     if ((std::abs((new_scroll.left-m_scroll_begin.left))>min_scroll_distance)||
                         (std::abs((new_scroll.top-m_scroll_begin.top))>min_scroll_distance)) {
                         m_state = state_manual_scroll;
-                        MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
-                        //getClientWidget()->setEnabled(false);
-                        MyGUI::Widget* w = MyGUI::InputManager::getInstance().getMouseFocusWidget();
-                        if (w) {
-                            //w->_riseMouseButtonReleased(0, 0, MyGUI::MouseButton::Left);
-                        }
+//                        MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
+//                        //getClientWidget()->setEnabled(false);
+//                        MyGUI::Widget* w = MyGUI::InputManager::getInstance().getMouseFocusWidget();
+//                        if (w) {
+//                            //w->_riseMouseButtonReleased(0, 0, MyGUI::MouseButton::Left);
+//                        }
                         LogInfo() << "set manual scroll";
+                        MyGUI::InputManager::getInstance().setMouseFocusWidget(this);
                     }
                 }
                 
@@ -250,9 +251,8 @@ namespace Sandbox {
                 } else {
                     new_scroll.top = norm.top;
                 }
-
                 
-                if (mRealClient) mRealClient->setPosition(new_scroll);
+                setViewOffset(new_scroll);
                 
                 new_scroll = getViewOffset();
                 m_scroll_prev_pos = pos_in_layer;
@@ -285,8 +285,11 @@ namespace Sandbox {
                 MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
                 pos_in_layer -= getAbsolutePosition();
                 if (m_state == state_none || m_state == state_free_scroll) {
-                    if (pos_in_layer.left > 0 && pos_in_layer.top > 0 &&
-                        pos_in_layer.left < getWidth() && pos_in_layer.top < getHeight()) {
+                    MyGUI::IntRect client_rect = MyGUI::IntRect(0,0,getWidth(),getHeight());
+                    if (mClient) {
+                        client_rect = MyGUI::IntRect(mClient->getLeft(),mClient->getTop(),mClient->getWidth(),mClient->getHeight());
+                    }
+                    if (client_rect.inside(pos_in_layer)) {
                         m_state = state_wait_scroll;
                         //LogInfo() << "set wait scroll";
                         m_scroll_prev_pos = pos_in_layer;

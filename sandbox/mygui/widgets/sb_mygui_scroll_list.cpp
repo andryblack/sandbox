@@ -472,13 +472,14 @@ namespace Sandbox {
                         if (m_delegate) {
                             m_delegate->onBeginScroll();
                         }
-                        MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
-                        //getClientWidget()->setEnabled(false);
-                        MyGUI::Widget* w = MyGUI::InputManager::getInstance().getMouseFocusWidget();
-                        if (w) {
-                            //w->_riseMouseButtonReleased(0, 0, MyGUI::MouseButton::Left);
-                        }
+//                        MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
+//                        //getClientWidget()->setEnabled(false);
+//                        MyGUI::Widget* w = MyGUI::InputManager::getInstance().getMouseFocusWidget();
+//                        if (w) {
+//                            //w->_riseMouseButtonReleased(0, 0, MyGUI::MouseButton::Left);
+//                        }
                         LogInfo() << "set manual scroll";
+                        MyGUI::InputManager::getInstance().setMouseFocusWidget(this);
                     }
                 }
                 
