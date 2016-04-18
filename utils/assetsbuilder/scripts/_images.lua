@@ -336,7 +336,7 @@ local function do_premultiply_file( src, dstconf  )
 	end
 	local t = assert(application:load_texture(src))
 	local aimage = conf.aname
-	if not aimage and type(dstconf) == 'string' then
+	if not aimage and type(dstconf) == 'string' and rules.alpha_file_format then
 		aimage = rules.alpha_file_format(src)
 	end
 	if aimage then
