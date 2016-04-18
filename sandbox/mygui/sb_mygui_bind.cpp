@@ -766,6 +766,8 @@ SB_META_DECLARE_OBJECT(MyGUI::Canvas, MyGUI::Widget)
 SB_META_DECLARE_OBJECT(MyGUI::ScrollView, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ScrollView)
 SB_META_PROPERTY_RW(canvasSize,getCanvasSize,setCanvasSize)
+SB_META_PROPERTY_RO(contentSize, getContentSize)
+SB_META_PROPERTY_RO(viewSize, getViewSize)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::SimpleText, MyGUI::EditText)
