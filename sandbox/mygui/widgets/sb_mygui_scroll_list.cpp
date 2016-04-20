@@ -121,6 +121,7 @@ namespace Sandbox {
             requestDrawItem = MyGUI::newDelegate(this,&ScrollList::handleDrawItem);
             //eventMouseItemActivate += MyGUI::newDelegate(this,&ScrollList::handleItemActivate);
             setNeedDragDrop(false);
+            m_item_size = 0;
             m_visible_count = 1;
             m_num_subitems = 1;
             m_move_accum  = 0.0f;
@@ -159,6 +160,8 @@ namespace Sandbox {
             /// @wproperty{ItemBox, VisibleCount, size_t} visible cells count.
             if (_key == "VisibleCount")
                 setVisibleCount(MyGUI::utility::parseValue<size_t>(_value));
+            else if (_key == "ItemSize")
+                setItemSize(MyGUI::utility::parseValue<int>(_value));
             else if (_key == "SubItemsCount")
                 setSubItems(MyGUI::utility::parseValue<size_t>(_value));
             /// @wproperty{ItemBox, VerticalAlignment, bool} bounds.
@@ -183,7 +186,17 @@ namespace Sandbox {
             if (m_visible_count == count)
                 return;
             m_visible_count = count;
+            if (m_visible_count!=0)
+                m_item_size = 0;
             //mCountItemInLine = -1;
+            updateFromResize();
+        }
+        
+        void ScrollList::setItemSize(int size) {
+            m_item_size = size;
+            if (size > 0) {
+                m_visible_count = 0;
+            }
             updateFromResize();
         }
         
@@ -254,6 +267,14 @@ namespace Sandbox {
                     coords.width = getClientWidget()->getSize().width / m_visible_count;
                     coords.height = getClientWidget()->getSize().height / m_num_subitems;
                 }
+            } else if (m_item_size > 0 && getClientWidget()) {
+                if (getVerticalAlignment()) {
+                    coords.width = getClientWidget()->getSize().width / m_num_subitems;
+                    coords.height = m_item_size;
+                } else {
+                    coords.width = m_item_size;
+                    coords.height = getClientWidget()->getSize().height / m_num_subitems;
+                }
             }
             
         }
@@ -305,6 +326,8 @@ namespace Sandbox {
         }
         
         int     ScrollList::getItemSize() const {
+            if (m_item_size >0 || m_visible_count == 0)
+                return m_item_size;
             return getScrollAreaSize() / m_visible_count;
         }
         
@@ -329,8 +352,9 @@ namespace Sandbox {
                 val = 0;
             }
             if (m_centered) {
-                if (getItemCount() < m_visible_count) {
-                    val = -(getScrollAreaSize() - getItemSize() * getItemCount())/2;
+                int conent_size = getItemSize() * getItemCount();
+                if (conent_size < getScrollAreaSize()) {
+                    val = - (getScrollAreaSize() - conent_size)/2;
                 }
             }
             return val;

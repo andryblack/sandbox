@@ -50,6 +50,9 @@ namespace Sandbox {
             void setVisibleCount(size_t count);
             size_t getVisibleCount() const { return m_visible_count; }
             
+            void setItemSize(int size);
+            int getItemSize() const;
+            
             void setSubItems(size_t count);
             size_t getSubItems() const { return m_num_subitems; }
             
@@ -76,6 +79,7 @@ namespace Sandbox {
             void frameEntered(float dt);
         private:
             ScrollListDelegatePtr   m_delegate;
+            int     m_item_size;
             size_t  m_visible_count;
             size_t  m_num_subitems;
             bool    m_centered;
@@ -102,7 +106,6 @@ namespace Sandbox {
             
             void    setScroll(int pos);
             int     getScroll() const;
-            int     getItemSize() const;
             int     getScrollAreaSize() const;
             int     getScrollContentSize() const;
             
