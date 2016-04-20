@@ -79,6 +79,12 @@ namespace Sandbox {
 		/// shader
 		ShaderPtr GetShader() const { return m_shader; }
 		void SetShader(const ShaderPtr& sh);
+        
+        /// depth
+        bool GetDepthWrite() const { return m_depth_write; }
+        bool GetDepthTest() const { return m_depth_test; }
+        void SetDepthWrite(bool write);
+        void SetDepthTest(bool test);
 
         /// mask
         void SetMask(MaskMode mode, const TexturePtr& mask_tex,const Transform2d& tr);
@@ -172,6 +178,8 @@ namespace Sandbox {
         float       m_itw;
         float       m_ith;
 		ShaderPtr	m_shader;
+        bool        m_depth_write;
+        bool        m_depth_test;
 		GHL::PrimitiveType	m_ptype;
         GHL::UInt32      m_primitives;
 		std::vector<GHL::Vertex> m_vertexes;

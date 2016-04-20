@@ -746,6 +746,21 @@ namespace Sandbox {
 
 	}
     
+    void Graphics::SetDepthWrite(bool write) {
+        if (write != m_depth_write) {
+            Flush();
+            m_depth_write = write;
+            m_render->SetupDepthTest(m_depth_test,GHL::COMPARE_FUNC_LEQUAL,m_depth_write);
+        }
+    }
+    void Graphics::SetDepthTest(bool test) {
+        if (test != m_depth_test) {
+            Flush();
+            m_depth_test = test;
+            m_render->SetupDepthTest(m_depth_test,GHL::COMPARE_FUNC_LEQUAL,m_depth_write);
+        }
+    }
+    
     void Graphics::SetMask(MaskMode mode, const TexturePtr& mask_tex,const Transform2d& tr) {
         SetMaskTexture(mask_tex);
         SetMaskMode(mode);
@@ -845,6 +860,8 @@ namespace Sandbox {
 		m_transform = Transform2d();
 		m_shader = ShaderPtr();
         m_calc2_tex = false;
+        m_depth_test = false;
+        m_depth_write = false;
         
         float draw_scale = (target ? 1.0f : m_scale) * m_resources->GetScale();
         
@@ -859,6 +876,7 @@ namespace Sandbox {
         m_render->SetVertexBuffer(0);
         m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
         m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
+        m_render->SetupDepthTest(m_depth_test,GHL::COMPARE_FUNC_LEQUAL,m_depth_write);
     }
 	size_t Graphics::EndScene() {
 		sb_assert( (m_render!=0) && "scene not started" );
