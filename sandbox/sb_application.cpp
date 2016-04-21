@@ -586,7 +586,7 @@ namespace Sandbox {
                                                                   event->data.key_press.charcode);
 #endif
                 if (m_keyboard_ctx) {
-                    m_keyboard_ctx->call_self("onKeyDown",event->data.key_press.key);
+                    m_keyboard_ctx->call_self("onKeyDown",event->data.key_press.key,event->data.key_press.modificators);
                     if (event->data.key_press.charcode)
                         m_keyboard_ctx->call_self("onChar",event->data.key_press.charcode);
                 }

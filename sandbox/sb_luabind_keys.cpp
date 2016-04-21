@@ -10,6 +10,14 @@ SB_META_ENUM_BIND(GHL::MouseButton,namespace GHL,
                   SB_META_ENUM_ITEM(MOUSE_BUTTON_MIDDLE)
                   )
 
+SB_META_DECLARE_KLASS(GHL::KeyMod,void);
+SB_META_ENUM_BIND(GHL::KeyMod,namespace GHL,
+                  SB_META_ENUM_ITEM(KEYMOD_SHIFT)
+                  SB_META_ENUM_ITEM(KEYMOD_ALT)
+                  SB_META_ENUM_ITEM(KEYMOD_CTRL)
+                  SB_META_ENUM_ITEM(KEYMOD_COMMAND)
+                  )
+
 SB_META_DECLARE_KLASS(GHL::Key,void);
 SB_META_ENUM_BIND(GHL::Key,namespace GHL,
                   SB_META_ENUM_ITEM(KEY_NONE)
@@ -133,6 +141,7 @@ namespace Sandbox {
     
     void register_keys( lua_State* lua ) {
         luabind::Enum<GHL::MouseButton>(lua);
+        luabind::Enum<GHL::KeyMod>(lua);
         luabind::Enum<GHL::Key>(lua);
     }
 
