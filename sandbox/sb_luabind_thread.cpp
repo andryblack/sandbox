@@ -14,6 +14,7 @@
 
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Thread)
+SB_META_METHOD(Update)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ThreadsMgr)
