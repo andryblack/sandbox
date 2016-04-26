@@ -381,23 +381,6 @@ struct delegate_bind<O,T,MyGUI::EventPair<MyGUI::delegates::CMultiDelegate1<A0>,
     }
 };
 
-
-template <class O,class T,class A0,class A1,class A2,MyGUI::EventPairAddParameter<A0, MyGUI::delegates::CMultiDelegate2<A1, A2> > T::*obj>
-struct delegate_bind<O,T,MyGUI::EventPairAddParameter<A0, MyGUI::delegates::CMultiDelegate2<A1, A2> >, obj > {
-    typedef LuaDelegate2<A1,A2> LuaDelegate;
-    typedef MyGUI::delegates::IDelegate2<A1,A2>* IDelegatePtr;
-    typedef MyGUI::EventPairAddParameter<A0, MyGUI::delegates::CMultiDelegate2<A1, A2> > MultiDelegate;
-    static int lua_func( lua_State* L ) {
-        O* t = Sandbox::luabind::stack<O*>::get(L,1);
-        LuaDelegate* delegate = new LuaDelegate();
-        lua_pushvalue(L, 2);
-        delegate->SetObject(L);
-        MultiDelegate& md(t->*obj);
-        //md.clear();
-        md += IDelegatePtr(delegate);
-        return 0;
-    }
-};
 template <class O,class T,class A1,MyGUI::delegates::CMultiDelegate1<A1> T::*obj>
 struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate1<A1>, obj > {
     typedef LuaDelegate1<A1> LuaDelegate;
@@ -622,6 +605,11 @@ bind(method("eventMouseButtonReleased", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
             MyGUI::EventHandle_WidgetIntIntButton,
             &MyGUI::WidgetInput::eventMouseButtonReleased>::lua_func));
+
+bind(method("eventMouseDrag", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetIntIntButton,
+            &MyGUI::WidgetInput::eventMouseDrag>::lua_func));
 
 SB_META_METHOD(detachFromWidget)
 SB_META_METHOD(attachToWidget)
@@ -852,11 +840,11 @@ SB_META_DECLARE_OBJECT(MyGUI::ControllerItem, MyGUI::IObject)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ControllerItem)
 bind(method("eventPreAction", delegate_bind<MyGUI::ControllerItem,
             MyGUI::ControllerItem,
-            MyGUI::EventPairAddParameter<MyGUI::EventHandle_WidgetPtr, MyGUI::EventHandle_WidgetPtrControllerItemPtr>,
+            MyGUI::EventHandle_WidgetPtrControllerItemPtr,
             &MyGUI::ControllerItem::eventPreAction>::lua_func));
 bind(method("eventPostAction", delegate_bind<MyGUI::ControllerItem,
             MyGUI::ControllerItem,
-            MyGUI::EventPairAddParameter<MyGUI::EventHandle_WidgetPtr, MyGUI::EventHandle_WidgetPtrControllerItemPtr>,
+            MyGUI::EventHandle_WidgetPtrControllerItemPtr,
             &MyGUI::ControllerItem::eventPostAction>::lua_func));
 SB_META_END_KLASS_BIND()
 
