@@ -106,6 +106,8 @@ namespace Sandbox {
         ///
         virtual void OnActivated() ;
         
+        virtual void OnSystemSet();
+        
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;

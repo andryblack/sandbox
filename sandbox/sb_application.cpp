@@ -204,6 +204,10 @@ namespace Sandbox {
         BindNetwork(lua);
 #endif
     }
+    
+    void Application::OnSystemSet() {
+        
+    }
 	
 	///
 	void GHL_CALL Application::SetSystem( GHL::System* sys ) {
@@ -211,6 +215,7 @@ namespace Sandbox {
         if (!m_title.empty()) {
             SetTitle(m_title);
         }
+        OnSystemSet();
 	}
 	///
 	void GHL_CALL Application::SetVFS( GHL::VFS* vfs ) {
