@@ -9,6 +9,11 @@
 
 class Application;
 
+enum blend_mode {
+    blend_mode_normal,
+    blend_mode_additive,
+};
+
 class SkeletonConvert : public Sandbox::meta::object {
     SB_META_OBJECT
 protected:
@@ -18,6 +23,9 @@ protected:
     sb::string  m_out_name;
     int m_image_index;
     SkeletonConvert();
+    
+    
+
     struct image {
         float x;
         float y;
@@ -36,16 +44,22 @@ protected:
     sb::map<sb::string, int> m_image_indexes;
     int get_image_index(const sb::string& name);
     bool get_image(const sb::string& name,image& img);
-
-    int m_nodes_count;
+    
+    struct node {
+        sb::string name;
+        blend_mode blend;
+    };
+    sb::vector<node> m_nodes;
+    sb::map<sb::string, int> m_nodes_indexes;
     
     struct frame {
-        struct node {
+        struct slot {
             float a;
             Sandbox::Transform2d tr;
             int image;
+            int node;
         };
-        sb::vector<node> nodes;
+        sb::vector<slot> slots;
     };
     struct animation {
         sb::string name;
@@ -58,9 +72,9 @@ protected:
     image& add_image(atlas& atlas,const sb::string& name);
     animation& add_animation( const sb::string& name, float fps );
     frame& add_frame( animation& a );
-    frame::node& add_frame_node(frame& f);
+    frame::slot& add_frame_slot(frame& f);
     
-    void add_node(const sb::string& name);
+    node& add_node(const sb::string& name);
     
     void write_atlases();
     void write_nodes();

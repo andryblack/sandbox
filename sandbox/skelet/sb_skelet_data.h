@@ -2,7 +2,7 @@
 #define SB_SKELET_DATA_H_INCLUDED
 
 #include "sb_transform2d.h"
-
+#include "sb_graphics.h"
 
 namespace GHL {
     struct Data;
@@ -17,6 +17,7 @@ namespace Sandbox {
         Transform2d transform;
         float   alpha;
         size_t  image;
+        size_t  node;
     };
     
     class Resources;
@@ -42,6 +43,11 @@ namespace Sandbox {
     };
     typedef sb::intrusive_ptr<SkeletonAnimation> SkeletonAnimationPtr;
 
+    struct SkeletonNodeData {
+        sb::string name;
+        BlendMode blend;
+    };
+    
     class SkeletonData;
     typedef sb::intrusive_ptr<SkeletonData> SkeletonDataPtr;
     class SkeletonData : public meta::object {
@@ -49,15 +55,18 @@ namespace Sandbox {
     public:
     private:
         sb::map<sb::string,SkeletonAnimationPtr>    m_animations;
-        size_t  m_nodes_count;
         sb::vector<ImagePtr>    m_images;
         sb::map<sb::string,size_t> m_images_map;
+        
+        sb::vector<SkeletonNodeData> m_nodes;
     public:
-        size_t GetNodesCount() const { return m_nodes_count; }
-        void SetNodesCount(size_t n) { m_nodes_count = n; }
+        void AddNode(const SkeletonNodeData& n) { m_nodes.push_back(n); }
+        size_t GetNodesCount() const { return m_nodes.size(); }
+        const sb::vector<SkeletonNodeData>& GetNodes() const { return m_nodes; }
         void AddAnimation( const SkeletonAnimationPtr& animation);
         static SkeletonDataPtr Load(const char* file, Resources* resources);
         const SkeletonAnimationPtr& GetAnimation(const sb::string& name) const;
+        const SkeletonNodeData& GetNode(size_t idx) const;
         const ImagePtr& GetImage(size_t index) const;
         void SetImage(size_t index,const sb::string& name, const ImagePtr& img);
         bool HasAnimation( const sb::string& name ) const;

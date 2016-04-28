@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <sb_file_provider.h>
 #include <spine/spine.h>
-#include <skelet/sb_skelet_data.h>
+//#include <skelet/sb_skelet_data.h>
 #include <pugixml.hpp>
 #include <sbstd/sb_map.h>
 

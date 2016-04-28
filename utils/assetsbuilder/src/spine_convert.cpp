@@ -142,7 +142,9 @@ static const float export_fps = 24.0f;
 void SpineConvert::ExportAnimation() {
     
     for (int i=0;i<m_skeleton->slotsCount;++i) {
-        add_node(m_skeleton->slots[i]->name);
+        node& n = add_node(m_skeleton->slots[i]->name);
+        if (m_skeleton->slots[i]->blendMode == SP_BLEND_MODE_ADDITIVE)
+            n.blend = blend_mode_additive;
     }
     write_nodes();
     
@@ -156,10 +158,7 @@ void SpineConvert::ExportAnimation() {
             frames = 1;
         }
         animation& a = add_animation(anim->name, export_fps);
-        if (a.name == "Idle") {
-            int x = 1;
-        }
-        
+                
         float delta = 1.0f / export_fps;
         
         spSkeleton_setToSetupPose(skeleton);
@@ -174,7 +173,7 @@ void SpineConvert::ExportAnimation() {
             for (int s=0;s<skeleton->slotsCount;s++) {
                 spSlot* slot = skeleton->drawOrder[s];
                 spBone* bone = slot->bone;
-                frame::node& n = add_frame_node(fr);
+                frame::slot& n = add_frame_slot(fr);
                 
                 //ox = v.x+m.matrix[0*2+0]*x + m.matrix[1*2+0]*y;
                 //oy = v.y+m.matrix[0*2+1]*x + m.matrix[1*2+1]*y;
@@ -225,7 +224,12 @@ void SpineConvert::ExportAnimation() {
                 n.tr = tr;
                 n.a = skeleton->a * slot->a;
                 n.image = img;
-                
+                sb::map<sb::string,int>::const_iterator nit = m_nodes_indexes.find(slot->data->name);
+                if (nit != m_nodes_indexes.end()) {
+                    n.node = nit->second;
+                } else {
+                    n.node = 0;
+                }
             }
         }
        

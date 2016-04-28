@@ -1,4 +1,5 @@
 #include "application.h"
+
 #include <sb_lua_context.h>
 #include <sb_log.h>
 #include <ghl_image.h>
@@ -13,7 +14,7 @@ extern "C" {
 #include <lualib.h>
 }
 
-static const double VERSION = 1.2;
+static const double VERSION = 1.4;
 
 #include <luabind/sb_luabind.h>
 

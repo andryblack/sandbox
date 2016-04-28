@@ -35,7 +35,7 @@ namespace Sandbox {
     
     void SkeletonData::AddAnimation(const SkeletonAnimationPtr& animation) {
         sb_assert(animation);
-        sb_assert(animation->GetNodesCount()==m_nodes_count);
+        sb_assert(animation->GetNodesCount()==m_nodes.size());
         m_animations[animation->GetName()] = animation;
     }
     
@@ -73,6 +73,13 @@ namespace Sandbox {
             return SkeletonDataPtr();
         }
         pugi::xml_node n = doc.document_element();
+        pugi::xml_attribute version = n.attribute("version");
+        bool version1_compatible = false;
+        if (!version || version.as_int()!=2) {
+            LogError() << "deprecated version " << filename;
+            version1_compatible = true;
+            //return SkeletonDataPtr();
+        }
         pugi::xml_node textures = n.child("textures");
         pugi::xml_node nodes = n.child("nodes");
         if (!nodes)
@@ -82,6 +89,19 @@ namespace Sandbox {
             return SkeletonDataPtr();
         size_t nodes_count = nodes.attribute("count").as_uint();
         SkeletonDataPtr res(new SkeletonData());
+        for (pugi::xml_node_iterator nit = nodes.begin(); nit!=nodes.end(); ++nit) {
+            SkeletonNodeData node;
+            node.name = nit->attribute("name").value();
+            node.blend = BLEND_MODE_ALPHABLEND;
+            if (::strcmp(nit->attribute("blend").value(),"add")==0) {
+                node.blend = BLEND_MODE_ADDITIVE;
+            }
+            res->AddNode(node);
+        }
+        if (res->GetNodesCount()!=nodes_count) {
+            LogError() << "invalid nodes count";
+            return SkeletonDataPtr();
+        }
         if (textures) {
             for (pugi::xml_node_iterator it = textures.begin(); it!=textures.end(); ++it) {
                 const char* file = it->attribute("file").value();
@@ -106,7 +126,7 @@ namespace Sandbox {
                 }
             }
         }
-        res->SetNodesCount(nodes_count);
+       
         
         for (pugi::xml_node_iterator it = animations.begin();it!=animations.end();++it) {
             SkeletonAnimationPtr anim(new SkeletonAnimation(it->attribute("name").value()));
@@ -152,7 +172,13 @@ namespace Sandbox {
                     pdata->transform.m.matrix[3] = *src++;
                     pdata->transform.v.x = *src++;
                     pdata->transform.v.y = *src++;
-                    pdata->image = *reinterpret_cast<const GHL::UInt32*>(src);
+                    if (version1_compatible) {
+                        pdata->image = *reinterpret_cast<const GHL::UInt32*>(src);
+                        pdata->node = 0;
+                    } else {
+                        pdata->image = *reinterpret_cast<const GHL::UInt16*>(reinterpret_cast<const GHL::Byte*>(src)+0);
+                        pdata->node = *reinterpret_cast<const GHL::UInt16*>(reinterpret_cast<const GHL::Byte*>(src)+2);
+                    }
                     src++;
                     ++pdata;
                 }
@@ -168,6 +194,13 @@ namespace Sandbox {
         if (it == m_animations.end())
             return empty;
         return it->second;
+    }
+    
+    static const SkeletonNodeData empty_node = {"nil",BLEND_MODE_ALPHABLEND};
+    const SkeletonNodeData& SkeletonData::GetNode(size_t idx) const {
+        if (idx < m_nodes.size())
+            return m_nodes[idx];
+        return empty_node;
     }
     
     bool SkeletonData::HasAnimation( const sb::string& name ) const {

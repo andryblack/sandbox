@@ -92,8 +92,12 @@ namespace Sandbox {
     
     void SkeletController::AddObject(const SkeletObjectPtr& obj) {
         m_objects.push_back(obj);
+        InitObjectNodes(obj);
     }
     
+    void SkeletController::InitObjectNodes(const SkeletObjectPtr& /*obj*/) {
+        
+    }
     void SkeletController::SetFrame(size_t frame) {
         if (!m_animation)
             return;
@@ -122,7 +126,8 @@ namespace Sandbox {
         for (sb::vector<SkeletObjectPtr>::const_iterator it = m_objects.begin();it!=m_objects.end();++it ) {
             for (size_t i = 0; i < m_data->GetNodesCount();++i ) {
                 const SkeletonNodeFrame& frame = m_animation->GetNodeFrame(m_crnt_frame, i);
-                (*it)->SetNode(i, frame.transform, frame.alpha, m_data->GetImage(frame.image));
+                const SkeletonNodeData& node = m_data->GetNode(frame.node);
+                (*it)->SetSlot(i,node,frame,m_data->GetImage(frame.image));
             }
         }
     }

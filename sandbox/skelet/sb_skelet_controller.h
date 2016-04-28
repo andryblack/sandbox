@@ -53,6 +53,7 @@ namespace Sandbox {
             int loop;
         };
         sb::list<AnimationEntry> m_added_animations;
+        void InitObjectNodes(const SkeletObjectPtr& obj);
     };
     typedef sb::intrusive_ptr<SkeletController> SkeletControllerPtr;
 }

@@ -6,7 +6,7 @@
 
 SB_META_DECLARE_OBJECT(SkeletonConvert, Sandbox::meta::object)
 
-SkeletonConvert::SkeletonConvert() : m_image_index(1),m_nodes_count(0) {
+SkeletonConvert::SkeletonConvert() : m_image_index(1) {
     
 }
 
@@ -59,9 +59,16 @@ SkeletonConvert::frame& SkeletonConvert::add_frame( SkeletonConvert::animation& 
     return a.frames.back();
 }
 
-SkeletonConvert::frame::node& SkeletonConvert::add_frame_node(frame& f) {
-    f.nodes.push_back(frame::node());
-    return f.nodes.back();
+SkeletonConvert::frame::slot& SkeletonConvert::add_frame_slot(frame& f) {
+    f.slots.push_back(frame::slot());
+    return f.slots.back();
+}
+
+static const char* blend_to_string( blend_mode b) {
+    if (b == blend_mode_additive) {
+        return "add";
+    }
+    return "blend";
 }
 
 void SkeletonConvert::write_atlases() {
@@ -81,26 +88,34 @@ void SkeletonConvert::write_atlases() {
             image.append_attribute("hsy").set_value(iit->second.hsy);
             image.append_attribute("index").set_value(m_image_indexes[iit->first]);
             image.append_attribute("name").set_value(iit->first.c_str());
-            
-            
+           
             
         }
     }
 }
 
-void SkeletonConvert::add_node(const sb::string& name) {
-    ++m_nodes_count;
+SkeletonConvert::node& SkeletonConvert::add_node(const sb::string& name) {
+    m_nodes.push_back(node());
+    m_nodes.back().name = name;
+    m_nodes.back().blend = blend_mode_normal;
+    m_nodes_indexes[name] = m_nodes.size() - 1;
+    return m_nodes.back();
 }
 
 void SkeletonConvert::write_nodes() {
     pugi::xml_node nodes = m_doc.document_element().append_child("nodes");
-    nodes.append_attribute("count").set_value(m_nodes_count);
+    nodes.append_attribute("count").set_value((int)m_nodes.size());
+    for (sb::vector<node>::const_iterator it = m_nodes.begin();it!=m_nodes.end();++it) {
+        pugi::xml_node n = nodes.append_child("node");
+        n.append_attribute("name").set_value(it->name.c_str());
+        n.append_attribute("blend").set_value(blend_to_string(it->blend));
+    }
 }
 
 void SkeletonConvert::post_scale(float s) {
     for (sb::vector<animation>::iterator anim = m_animations.begin();anim!=m_animations.end();++anim) {
         for (sb::vector<frame>::iterator fit = anim->frames.begin();fit!=anim->frames.end();++fit) {
-            for (sb::vector<frame::node>::iterator nit = fit->nodes.begin();nit!=fit->nodes.end();++nit) {
+            for (sb::vector<frame::slot>::iterator nit = fit->slots.begin();nit!=fit->slots.end();++nit) {
                 nit->tr.scale(s);
             }
         }
@@ -119,6 +134,7 @@ bool SkeletonConvert::RenameAnimation(const char* from, const char* to) {
 }
 void SkeletonConvert::write_animations() {
     bool raw = true;
+    m_doc.document_element().append_attribute("version").set_value(2);
     pugi::xml_node animations = m_doc.document_element().append_child("animations");
     for (sb::vector<animation>::const_iterator anim = m_animations.begin();anim!=m_animations.end();++anim) {
         pugi::xml_node a = animations.append_child("animation");
@@ -133,13 +149,13 @@ void SkeletonConvert::write_animations() {
             a.append_attribute("encoding").set_value("base64");
             
             Sandbox::VectorData<float>* data = new Sandbox::VectorData<float>();
-            data->vector().resize((4+2+1+1)*anim->frames.size()*m_nodes_count);
+            data->vector().resize((4+2+1+1)*anim->frames.size()*m_nodes.size());
             float* dst = data->vector().data();
             
             for (sb::vector<frame>::const_iterator fit = anim->frames.begin();fit!=anim->frames.end();++fit) {
-                sb_assert(fit->nodes.size()==m_nodes_count);
+                sb_assert(fit->slots.size()==m_nodes.size());
                 
-                for (sb::vector<frame::node>::const_iterator nit = fit->nodes.begin();nit!=fit->nodes.end();++nit) {
+                for (sb::vector<frame::slot>::const_iterator nit = fit->slots.begin();nit!=fit->slots.end();++nit) {
                     *dst++ = nit->a;
                     *dst++ = nit->tr.m.matrix[0];
                     *dst++ = nit->tr.m.matrix[1];
@@ -148,7 +164,8 @@ void SkeletonConvert::write_animations() {
                     *dst++ = nit->tr.v.x;
                     *dst++ = nit->tr.v.y;
                     
-                    *reinterpret_cast<GHL::UInt32*>(dst) = nit->image;
+                    *reinterpret_cast<GHL::UInt16*>(reinterpret_cast<GHL::Byte*>(dst)+0) = nit->image;
+                    *reinterpret_cast<GHL::UInt16*>(reinterpret_cast<GHL::Byte*>(dst)+2) = nit->node;
                     ++dst;
                 }
             }
@@ -162,10 +179,10 @@ void SkeletonConvert::write_animations() {
             a.append_attribute("encoding").set_value("none");
             
             for (sb::vector<frame>::const_iterator fit = anim->frames.begin();fit!=anim->frames.end();++fit) {
-                sb_assert(fit->nodes.size()==m_nodes_count);
+                sb_assert(fit->slots.size()==m_nodes.size());
                 pugi::xml_node f = a.append_child("frame");
                 
-                for (sb::vector<frame::node>::const_iterator nit = fit->nodes.begin();nit!=fit->nodes.end();++nit) {
+                for (sb::vector<frame::slot>::const_iterator nit = fit->slots.begin();nit!=fit->slots.end();++nit) {
                     pugi::xml_node n = f.append_child("n");
                     n.append_attribute("a").set_value(nit->a);
                     char buff[128];
@@ -178,7 +195,7 @@ void SkeletonConvert::write_animations() {
                                nit->tr.v.y);
                     n.append_attribute("m").set_value(buff);
                     n.append_attribute("i").set_value(nit->image);
-                   
+                    n.append_attribute("n").set_value(nit->node);
                 }
             }
 
