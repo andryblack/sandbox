@@ -12,6 +12,7 @@
 #include "MyGUI_Gui.h"
 #include "MyGUI_ILayer.h"
 #include "MyGUI_InputManager.h"
+#include "MyGUI_ScrollBar.h"
 
 #include "sb_log.h"
 
@@ -316,7 +317,11 @@ namespace Sandbox {
             }
             resetCurrentActiveItem();
             setContentPosition(idiff);
-            //setViewOffset(idiff);
+            
+            if (nullptr != mVScroll)
+                mVScroll->setScrollPosition(getContentPosition().top);
+            if (nullptr != mHScroll)
+                mHScroll->setScrollPosition(getContentPosition().left);
         }
         
         int     ScrollList::getScroll() const {
