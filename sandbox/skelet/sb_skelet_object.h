@@ -16,7 +16,7 @@ namespace Sandbox {
         SB_META_OBJECT
     private:
         Transform2d m_transform;
-        float       m_alpha;
+        Sandbox::Color       m_color;
         ImagePtr    m_image;
         BlendMode   m_blend;
     public:

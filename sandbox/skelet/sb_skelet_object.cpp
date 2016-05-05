@@ -7,7 +7,7 @@ SB_META_DECLARE_OBJECT(Sandbox::SkeletObject,Sandbox::SceneObject)
 
 namespace Sandbox {
     
-    SkeletonNode::SkeletonNode() : m_alpha(1.0f),m_blend(BLEND_MODE_ALPHABLEND) {}
+    SkeletonNode::SkeletonNode() : m_color(1.0f,1.0f,1.0f,1.0f),m_blend(BLEND_MODE_ALPHABLEND) {}
     
     void SkeletonNode::Draw(Graphics& g) const {
         if (!m_image) return;
@@ -15,7 +15,7 @@ namespace Sandbox {
         Color c = g.GetColor();
         BlendMode b = g.GetBlendMode();
         g.SetTransform(tr * m_transform);
-        g.SetColor(c * Color(1.0f,1.0f,1.0f,m_alpha));
+        g.SetColor(c * m_color);
         g.SetBlendMode(m_blend);
         g.DrawImage(*m_image,0,0);
         //g.DrawCircle(Vector2f(0,0), 3);
@@ -28,7 +28,7 @@ namespace Sandbox {
         m_blend = node.blend;
     }
     void SkeletonNode::SetFrame(const SkeletonNodeFrame &frame) {
-        m_alpha = frame.alpha;
+        m_color = frame.color;
         m_transform = frame.transform;
     }
     

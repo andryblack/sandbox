@@ -75,9 +75,11 @@ namespace Sandbox {
         pugi::xml_node n = doc.document_element();
         pugi::xml_attribute version = n.attribute("version");
         bool version1_compatible = false;
-        if (!version || version.as_int()!=2) {
+        bool version2_compatible = false;
+        if (!version || version.as_int()<3) {
             LogError() << "deprecated version " << filename;
-            version1_compatible = true;
+            version1_compatible = version.as_int()<2;
+            version2_compatible = version.as_int()<3;
             //return SkeletonDataPtr();
         }
         pugi::xml_node textures = n.child("textures");
@@ -165,7 +167,12 @@ namespace Sandbox {
             const float* src = reinterpret_cast<const float*>(d->GetData());
             for (size_t i=0;i<frames;++i) {
                 for (size_t n=0;n<nodes_count;++n) {
-                    pdata->alpha = *src++;
+                    if (version2_compatible) {
+                        pdata->color = Sandbox::Color(1,1,1,*src++); 
+                    } else {
+                        pdata->color = Sandbox::Color(*reinterpret_cast<const GHL::UInt32*>(src));
+                        ++src;
+                    }
                     pdata->transform.m.matrix[0] = *src++;
                     pdata->transform.m.matrix[1] = *src++;
                     pdata->transform.m.matrix[2] = *src++;

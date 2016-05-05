@@ -15,7 +15,7 @@ namespace Sandbox {
     
     struct SkeletonNodeFrame {
         Transform2d transform;
-        float   alpha;
+        Color   color;
         size_t  image;
         size_t  node;
     };

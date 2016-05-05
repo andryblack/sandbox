@@ -134,7 +134,7 @@ bool SkeletonConvert::RenameAnimation(const char* from, const char* to) {
 }
 void SkeletonConvert::write_animations() {
     bool raw = true;
-    m_doc.document_element().append_attribute("version").set_value(2);
+    m_doc.document_element().append_attribute("version").set_value(3);
     pugi::xml_node animations = m_doc.document_element().append_child("animations");
     for (sb::vector<animation>::const_iterator anim = m_animations.begin();anim!=m_animations.end();++anim) {
         pugi::xml_node a = animations.append_child("animation");
@@ -156,7 +156,8 @@ void SkeletonConvert::write_animations() {
                 sb_assert(fit->slots.size()==m_nodes.size());
                 
                 for (sb::vector<frame::slot>::const_iterator nit = fit->slots.begin();nit!=fit->slots.end();++nit) {
-                    *dst++ = nit->a;
+                    *reinterpret_cast<GHL::UInt32*>(dst) = nit->clr.hw();
+                    dst++;
                     *dst++ = nit->tr.m.matrix[0];
                     *dst++ = nit->tr.m.matrix[1];
                     *dst++ = nit->tr.m.matrix[2];
@@ -184,7 +185,10 @@ void SkeletonConvert::write_animations() {
                 
                 for (sb::vector<frame::slot>::const_iterator nit = fit->slots.begin();nit!=fit->slots.end();++nit) {
                     pugi::xml_node n = f.append_child("n");
-                    n.append_attribute("a").set_value(nit->a);
+                    n.append_attribute("a").set_value(nit->clr.a);
+                    n.append_attribute("r").set_value(nit->clr.r);
+                    n.append_attribute("g").set_value(nit->clr.g);
+                    n.append_attribute("b").set_value(nit->clr.b);
                     char buff[128];
                     sb::snprintf(buff, 128, "%f %f %f %f %f %f",
                                nit->tr.m.matrix[0],

@@ -6,6 +6,7 @@
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_vector.h>
 #include <sb_transform2d.h>
+#include <sb_color.h>
 
 class Application;
 
@@ -54,7 +55,7 @@ protected:
     
     struct frame {
         struct slot {
-            float a;
+            Sandbox::Color clr;
             Sandbox::Transform2d tr;
             int image;
             int node;

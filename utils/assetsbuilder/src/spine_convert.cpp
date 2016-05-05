@@ -222,7 +222,7 @@ void SpineConvert::ExportAnimation() {
                 tr = Sandbox::Transform2d().scale(1.0f,-1.0f) * tr;
                 
                 n.tr = tr;
-                n.a = skeleton->a * slot->a;
+                n.clr = Sandbox::Color(skeleton->r,skeleton->g,skeleton->b,skeleton->a) * Sandbox::Color(slot->r,slot->g,slot->b,slot->a);
                 n.image = img;
                 sb::map<sb::string,int>::const_iterator nit = m_nodes_indexes.find(slot->data->name);
                 if (nit != m_nodes_indexes.end()) {
