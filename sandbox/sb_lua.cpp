@@ -31,6 +31,8 @@ extern "C" {
 #include "sb_lua_context.h"
 #include "sb_data.h"
 
+#define SB_USE_MEM_MGR
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::BinaryData)
 SB_META_END_KLASS_BIND()
 
@@ -148,9 +150,11 @@ namespace Sandbox {
     LuaVM::LuaVM(FileProvider *resources ) :
         m_resources( resources ), 
         m_L(0),
-        m_mem_use(0)
+        m_mem_mgr(0)
     {
+#ifdef SB_USE_MEM_MGR
         m_mem_mgr = new MemoryMgr();
+#endif
         m_L = lua_newstate(&LuaVM::lua_alloc_func,this);
         
         static const luaL_Reg loadedlibs[] = {
@@ -226,9 +230,6 @@ namespace Sandbox {
 #endif
             lua_close(m_L);
             m_L = 0;
-        }
-        if (m_mem_use) {
-            LogWarning() << "Lua unfree " << format_memory(m_mem_use);
         }
         delete m_mem_mgr;
     }
@@ -414,11 +415,9 @@ namespace Sandbox {
 			if (ptr) _this->free(ptr,osize);
 			return NULL;
 		}
-		else if (nsize > osize) {
+		else {
             GHL::Byte* new_data = _this->realloc(ptr,osize,nsize);
 			return new_data;
-		} else {
-			_this->resize(ptr,osize,nsize);
 		}
 		return ptr;
 	}
@@ -447,37 +446,35 @@ namespace Sandbox {
     }
     
     sb::string LuaVM::GetMemoryUsed() const {
-        sb::string res = sb::string("lua:") + format_memory(m_mem_use) +
-        "/"+format_memory(m_mem_mgr->allocated());
-        return res;
+#ifdef SB_USE_MEM_MGR
+        return sb::string("lua:") + format_memory(lua_gc(m_L,LUA_GCCOUNT,0)*1024) +
+                "/"+format_memory(m_mem_mgr->allocated());
+#else
+        return sb::string("lua:") + format_memory(lua_gc(m_L,LUA_GCCOUNT,0)*1024);
+#endif
     }
     GHL::Byte* LuaVM::alloc(size_t size) {
-		m_mem_use+=GHL::UInt32(size);
+#ifdef SB_USE_MEM_MGR
 		return m_mem_mgr->alloc(size);
+#else
+        return (GHL::Byte*)::malloc(size);
+#endif
 	}
 	void LuaVM::free(GHL::Byte* data,size_t size) {
-		sb_assert(m_mem_use>=size);
-		m_mem_use-=GHL::UInt32(size);
+#ifdef SB_USE_MEM_MGR
 		m_mem_mgr->free(data,size);
+#else
+        ::free(data);
+#endif
 	}
-	void LuaVM::resize(GHL::Byte*,size_t osize,size_t nsize) {
-		sb_assert(m_mem_use>=osize);
-		m_mem_use-=GHL::UInt32(osize);
-		m_mem_use+=GHL::UInt32(nsize);
-	}
+	
     
     GHL::Byte* LuaVM::realloc(GHL::Byte* ptr,size_t osize,size_t nsize) {
-        sb_assert(m_mem_use>=osize);
-        m_mem_use-=GHL::UInt32(osize);
-        m_mem_use+=GHL::UInt32(nsize);
+#ifdef SB_USE_MEM_MGR
         GHL::Byte* res = m_mem_mgr->realloc(ptr,osize, nsize);
-        if (!res) {
-            res = m_mem_mgr->alloc(nsize);
-            if (osize) {
-                ::memcpy(res,ptr,osize);
-            }
-            m_mem_mgr->free(ptr,osize);
-        }
         return res;
+#else
+        return (GHL::Byte*)::realloc(ptr,nsize);
+#endif
     }
 }

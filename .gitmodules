@@ -22,3 +22,6 @@
 [submodule "MyGUI"]
 	path = MyGUI
 	url = git@github.com:andryblack/mygui-1.git
+[submodule "tlsf"]
+	path = tlsf
+	url = git@github.com:andryblack/tlsf-1.git

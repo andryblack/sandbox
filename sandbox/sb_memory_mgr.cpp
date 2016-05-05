@@ -9,99 +9,70 @@
 #include "sb_memory_mgr.h"
 #include "sb_math.h"
 #include "sb_log.h"
+#include <tlsf.h>
 
 namespace Sandbox {
     
     
-    MemoryMgr::MemoryMgr() {
-        m_block_pools[0] = new block_pool<16,32>();
-        m_block_pools[1] = new block_pool<32,128>();
-        m_block_pools[2] = new block_pool<64,1024>();
-        m_block_pools[3] = new block_pool<128,1024>();
-        m_block_pools[4] = new block_pool<256,1024>();
-        m_block_pools[5] = new block_pool<512,1024>();
-        
+    
+    
+    MemoryMgr::MemoryMgr() : m_tlsf(0){
+       
+        m_tlsf = tlsf_create_with_pool(m_initial,INITIAL_SIZE);
 #ifdef SB_MEMORY_MGR_STAT
         m_total_allocated = 0;
 #endif
+        
     }
     
-    MemoryMgr::block_pool_base* MemoryMgr::pool_for_size(size_t size) {
-        if (size<=512) {
-            if (size<=16) return m_block_pools[0];
-            if (size<=32) return m_block_pools[1];
-            if (size<=64) return m_block_pools[2];
-            if (size<=128) return m_block_pools[3];
-            if (size<=256) return m_block_pools[4];
-            return m_block_pools[5];
-        }
-        return 0;
-    }
     
     MemoryMgr::~MemoryMgr() {
 #ifdef SB_MEMORY_MGR_STAT
         LogInfo() << "==== memory mgr statistics ====";
         LogInfo() << "total allocated: " << format_memory(GHL::UInt32(m_total_allocated));
-        static const size_t block_sizes[blocks_allocators] = {
-            16,32,64,128,256,512
-        };
-
+        LogInfo() << "pools: " << m_pools.size();
 #endif
-        for (size_t i=0;i<blocks_allocators;++i) {
-#ifdef SB_MEMORY_MGR_STAT
-            size_t total = 0;
-            size_t pages = 0;
-            block_pool_base* bp = m_block_pools[i];
-            while (bp) {
-                total += bp->allocated;
-                bp = bp->next;
-                ++pages;
-            }
-
-            LogInfo() << "block " << block_sizes[i] << "b allocated:" << format_memory(GHL::UInt32(total*block_sizes[i])) << " in " << pages << " pages(" << format_memory(GHL::UInt32(m_block_pools[i]->page_size*pages))<<")";
-#endif            
-            delete m_block_pools[i];
+        for (size_t i=0;i<m_pools.size();++i) {
+            tlsf_remove_pool(m_tlsf, m_pools[i]->pool);
+            delete m_pools[i];
         }
+        tlsf_destroy(m_tlsf);
+    }
+    
+    void MemoryMgr::append_pool() {
+        pool_block_t* block = new pool_block_t();
+        block->pool = tlsf_add_pool(m_tlsf, block->mem, POOL_SIZE);
+        m_pools.push_back(block);
     }
     
     GHL::Byte* MemoryMgr::alloc( size_t size ) {
 #ifdef SB_MEMORY_MGR_STAT
         m_total_allocated+=size;
 #endif
-        block_pool_base* pool = pool_for_size(size);
-        if (pool) {
-            return pool->alloc();
+        void* data = tlsf_malloc(m_tlsf,size);
+        if (!data) {
+            append_pool();
+            data = tlsf_malloc(m_tlsf,size);
         }
-        return new GHL::Byte[ size ];
+        return static_cast<GHL::Byte*>(data);
     }
     void MemoryMgr::free( GHL::Byte* ptr , size_t size) {
-        block_pool_base* pool = pool_for_size(size);
-        if (pool) {
-            pool->free(ptr);
-            return;
-        }
-        delete [] ptr;
+        tlsf_free(m_tlsf, ptr);
     }
     
     GHL::Byte* MemoryMgr::realloc( GHL::Byte* ptr, size_t size,size_t nsize ) {
-        block_pool_base* pool = pool_for_size(size); {
-            if (pool) {
-                if (pool->realloc(ptr, nsize))
-                    return ptr;
-            }
+#ifdef SB_MEMORY_MGR_STAT
+        m_total_allocated+=nsize;
+#endif
+        void* data = tlsf_realloc(m_tlsf,ptr,nsize);
+        if (!data) {
+            append_pool();
+            data = tlsf_realloc(m_tlsf,ptr,nsize);
         }
-        return 0;
+        return static_cast<GHL::Byte*>(data);
     }
     
     GHL::UInt32 MemoryMgr::allocated() const {
-        GHL::UInt32 res = 0;
-        for (size_t i=0;i<blocks_allocators;++i) {
-            block_pool_base* bp = m_block_pools[i];
-            while (bp) {
-                res+=bp->page_size;
-                bp = bp->next;
-            }
-        }
-        return res;
+        return INITIAL_SIZE + m_pools.size() * POOL_SIZE;
     }
 }

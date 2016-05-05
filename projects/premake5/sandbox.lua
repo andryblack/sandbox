@@ -143,6 +143,7 @@ solution( ProjectName )
 	dofile('pugixml.lua')
     dofile('lua.lua')
   	dofile('yajl.lua')
+  	dofile('tlsf.lua')
    	
    	if use.Freetype then
 	   	dofile('freetype.lua')
@@ -177,6 +178,8 @@ solution( ProjectName )
 			sandbox_dir .. '/sandbox/json/**.cpp',
 			sandbox_dir .. '/sandbox/skelet/**.h',
 			sandbox_dir .. '/sandbox/skelet/**.cpp',
+			sandbox_dir .. '/sandbox/tlsf/**.c',
+			sandbox_dir .. '/sandbox/tlsf/**.h',
 		}
 
 		sysincludedirs {
@@ -186,7 +189,8 @@ solution( ProjectName )
 			sandbox_dir .. '/freetype/include',
 			sandbox_dir .. '/yajl/src/api',
 			sandbox_dir .. '/pugixml/src',
-			sandbox_dir .. '/lua/src'
+			sandbox_dir .. '/lua/src',
+			sandbox_dir .. '/tlsf'
 		}
 
 		includedirs {
@@ -258,6 +262,7 @@ solution( ProjectName )
 			'pugixml',
 			'lua', 
 			'yajl',
+			'tlsf',
 			'GHL'
 		} )
 

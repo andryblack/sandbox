@@ -56,15 +56,13 @@ namespace Sandbox {
     private:
         FileProvider*  m_resources;
         lua_State*  m_L;
-        GHL::UInt32 m_mem_use;
         sb::string m_base_path;
 		GHL::Byte* alloc(size_t size);
         static int lua_module_searcher(lua_State *L);
         static int lua_loadfile_func(lua_State* L);
         static int lua_dofile_func(lua_State* L);
 		void free(GHL::Byte* data,size_t size);
-		void resize(GHL::Byte* data,size_t osize,size_t nsize);
-        GHL::Byte* realloc(GHL::Byte* data,size_t osize,size_t nsize);
+		GHL::Byte* realloc(GHL::Byte* data,size_t osize,size_t nsize);
         static void* lua_alloc_func (void *ud, void *_ptr, size_t osize,size_t nsize);
         MemoryMgr*  m_mem_mgr;
         bool DoFileImpl(const char* name,int results);
