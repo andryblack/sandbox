@@ -91,6 +91,7 @@
 	dofile('spine-runtime.lua')
 	dofile('pugixml.lua')
 	dofile('yajl.lua')
+	dofile('tlsf.lua')
 
 	project "AssetsBuilder"
 		targetname  "assetsbuilder"
@@ -112,6 +113,7 @@
 			path.join(sandbox_dir,'pugixml','src'),
 			path.join(sandbox_dir,'spine-runtime-c','include'),
 			path.join(sandbox_dir,'sandbox'),
+			path.join(sandbox_dir,'tlsf'),
 		}
 		
 		files
@@ -168,6 +170,7 @@
 			'spine-runtime',
 			'pugixml',
 			'yajl',
+			'tlsf'
 		} 
 		-- excludes
 		-- {
