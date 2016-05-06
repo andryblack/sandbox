@@ -205,7 +205,7 @@ namespace Sandbox {
     }
     static void do_json_string(lua_State* L,int indx,yajl_gen g) {
         size_t len = 0;
-        const char* str = lua_tolstring(L,-2,&len);
+        const char* str = lua_tolstring(L,indx,&len);
         if (!str || len == 0) {
             yajl_gen_string(g, reinterpret_cast<const unsigned char*>("unknown"),7 );
         } else {
@@ -283,10 +283,11 @@ namespace Sandbox {
             lua_pushnil(L);
             while (lua_next(L, -2) != 0) {
                 /* uses 'key' (at index -2) and 'value' (at index -1) */
-                do_json_string(L, -2, g);
-                do_json_encode(L, -1, g, sort_keys);
+                lua_pushvalue(L, -2); // k v k
+                do_json_string(L, -1, g);
+                do_json_encode(L, -2, g, sort_keys);
                 /* removes 'value'; keeps 'key' for next iteration */
-                lua_pop(L, 1);
+                lua_pop(L, 2);
             }
             yajl_gen_map_close(g);
         }
