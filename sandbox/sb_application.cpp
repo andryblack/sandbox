@@ -552,8 +552,12 @@ namespace Sandbox {
         if (m_lua && m_vfs) {
             sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
             path += "/profile.json";
+            LogInfo() << "load profile from " << path;
             GHL::DataStream* ds = m_vfs->OpenFile(path.c_str());
-            if (!ds) return false;
+            if (!ds) {
+                LogError() << "open " << path << " failed";
+                return false;
+            }
             GHL::Data* d = GHL_ReadAllData( ds );
             ds->Release();
             if (!d) return false;
@@ -573,7 +577,9 @@ namespace Sandbox {
                 sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
                 path += "/profile.json";
                 LogVerbose() << "store profile to " << path;
-                m_vfs->WriteFile(path.c_str(), sd);
+                if (!m_vfs->WriteFile(path.c_str(), sd)) {
+                    LogError() << "failed write " << path;
+                }
                 sd->Release();
             }
         }
