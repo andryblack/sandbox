@@ -109,7 +109,7 @@ namespace Sandbox {
             factory.registerFactory<ObjectSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             
             factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSubSkin");
-            factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSetSubSkin");
+            factory.registerFactory<MaskSetSubSkinState>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSetSubSkin");
             factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ObjectSubSkin");
         }
         

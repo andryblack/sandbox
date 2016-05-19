@@ -7,10 +7,29 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSubSkin,MyGUI::SubSkin)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskImageWidget,MyGUI::Widget)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSetSubSkin,MyGUI::MainSkin)
 
+SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSetSubSkinState,MyGUI::SubSkinStateInfo)
 
 namespace Sandbox {
     namespace mygui {
         
+        
+        MaskSetSubSkinState::MaskSetSubSkinState() : m_texture(0) {}
+        void MaskSetSubSkinState::deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) {
+            std::string texture = _node->getParent()->findAttribute("texture");
+            if (texture.empty()) {
+                texture = _node->getParent()->getParent()->findAttribute("texture");
+            }
+            // tags replacement support for Skins
+            if (_version >= MyGUI::Version(1, 1))
+            {
+                texture = MyGUI::LanguageManager::getInstance().replaceTags(texture);
+            }
+            m_texture = MyGUI::RenderManager::getInstance().getTexture(texture);
+            
+            const MyGUI::IntSize& size = MyGUI::texture_utility::getTextureSize(texture);
+            const MyGUI::IntCoord& coord = MyGUI::IntCoord::parse(_node->findAttribute("offset"));
+            setRect(MyGUI::CoordConverter::convertTextureCoord(coord, size));
+        }
         
         MaskSubSkin::MaskSubSkin() {
             mSeparate = true;
@@ -106,7 +125,7 @@ namespace Sandbox {
             }
         }
         
-        MaskSetSubSkin::MaskSetSubSkin() {
+        MaskSetSubSkin::MaskSetSubSkin() : m_texture(0) {
             mSeparate = false;
         }
         
@@ -117,6 +136,11 @@ namespace Sandbox {
         
         void MaskSetSubSkin::doRender() {
             
+        }
+        
+        void MaskSetSubSkin::setStateData(MyGUI::IStateInfo* _data) {
+            m_texture = _data->castType<MaskSetSubSkinState>()->get_texture();
+            MyGUI::MainSkin::setStateData(_data);
         }
         
         
