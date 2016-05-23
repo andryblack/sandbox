@@ -17,7 +17,7 @@ project 'GHL'
 
 		local zlib_files = { 'inffixed.h', 'inftrees.c', 'inftrees.h', 'adler32.c', 'crc32.c', 'crc32.h', 'crypt.h',
 							 'deflate.c', 'deflate.h', 'inffast.c', 'inffast.h', 'inflate.c', 'inflate.h', 'ioapi.h',
-							 'zconf.h',  'zlib.h', 'zutil.c', 'zutil.h', 'trees.h', 'trees.c'}
+							 'zconf.h',  'zlib.h', 'zutil.c', 'zutil.h', 'trees.h', 'trees.c', 'compress.c', 'uncompr.c'}
 
 		files(append_path(ghl_src .. '/zlib/',zlib_files))
 
