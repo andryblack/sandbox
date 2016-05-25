@@ -11,8 +11,7 @@ project 'GHL'
 
 		local ghl_src = sandbox_dir .. '/GHL/src/'
 
-		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
-
+		targetdir(libs_dir)
 		targetname ('GHL-' .. platform_dir)
 
 		local zlib_files = { 'inffixed.h', 'inftrees.c', 'inftrees.h', 'adler32.c', 'crc32.c', 'crc32.h', 'crypt.h',

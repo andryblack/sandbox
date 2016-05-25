@@ -47,6 +47,14 @@ static bool is_dir(const sb::string& path) {
 	return false;
 }
 
+#ifndef EXTERNAL_APP_FACTORY
+static Application* create_application() {
+    return new Application();
+}
+#else
+Application* create_application();
+#endif
+
 int main(int argc, char** argv) {
 	if (argc < 2) {
 		return usage(argv[0]);
@@ -97,9 +105,11 @@ int main(int argc, char** argv) {
 	if (!is_dir(scripts_dir)) {
 		return error(std::string("invalid scripts path: ") + scripts_dir);
 	}
-	Application app;
-	app.set_update_only(update_only);
-	app.set_paths(scripts_dir,src_dir,dst_dir);
-	app.set_platform(platform);
-	return app.run();
+	Application* app = create_application();
+	app->set_update_only(update_only);
+	app->set_paths(scripts_dir,src_dir,dst_dir);
+	app->set_platform(platform);
+	int result = app->run();
+    delete app;
+    return result;
 }

@@ -1,8 +1,6 @@
 project 'chipmunk'
 			kind 'StaticLib'
-
-			targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
-
+			targetdir(libs_dir)
 			targetname ('chipmunk-' .. platform_dir)
 
 			buildoptions {'-std=c99' }

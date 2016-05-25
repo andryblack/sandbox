@@ -125,10 +125,14 @@ solution( ProjectName )
 
 	print('platform_dir:',platform_dir)
 
+
+
 	local loc = _WORKING_DIR .. '/projects/' .. platform_dir
 	location ( loc ) 
 	
 	objdir( _WORKING_DIR .. '/build/' .. platform_dir )
+
+	libs_dir = _WORKING_DIR .. '/build/lib/' .. platform_dir
 
 	language "C++"
 

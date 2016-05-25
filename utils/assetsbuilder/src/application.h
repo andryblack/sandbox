@@ -48,7 +48,7 @@ class Application : public Sandbox::FileProvider {
     SB_META_OBJECT
 public:
 	Application();
-	~Application();
+	virtual ~Application();
 
     void set_update_only(bool u);
 	void set_paths(const sb::string& scripts, const sb::string& src, const sb::string& dst);
@@ -59,14 +59,17 @@ public:
     TextureDataPtr load_texture( const sb::string& file );
     bool store_texture( const sb::string& file , const TextureDataPtr& data );
     bool store_file(  const sb::string& file , const GHL::Data* data );
+    bool write_text_file( const sb::string& file , const char* data  );
     sb::intrusive_ptr<SpineConvert> open_spine(const sb::string& atlas,
                                                 const sb::string& skelet );
     bool convert_spine(const sb::string& atlas,
                        const sb::string& skelet,
                        const sb::string& outfolder);
     bool premultiply_image( const sb::string& src, const sb::string& dst );
+    
 	int run();
 protected:
+    virtual double GetVersion() const;
     /// FileProvider
     virtual GHL::DataStream* OpenFile(const char* fn);
     Sandbox::LuaVM* GetLua() { return m_lua; }

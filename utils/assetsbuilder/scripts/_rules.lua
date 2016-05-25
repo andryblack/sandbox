@@ -14,7 +14,10 @@ function _M.assets_rules.require_version( v )
 	end
 end
 
-
+local call_functions = {}
+function _M.assets_rules.call( v )
+	table.insert(call_functions,v)
+end
 
 local img = require '_images'
 local convert_spine = require '_convert_spine'
@@ -246,6 +249,11 @@ function _M.apply_rules( rules )
 	make_dst_tree(dst_tree)
 	copy_files(rules.copy_files or {})
 	compile_files(rules.compile_files or {})
+
+	for _,v in ipairs(call_functions) do
+		v(_G)
+	end
+
 	img.apply( rules )
 	convert_spine.apply( rules )
 end

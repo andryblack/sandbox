@@ -91,6 +91,40 @@ namespace Sandbox {
         }
         sb::string& string() { return m_data; }
         const sb::string& string() const { return m_data; }
+        void append(const char* str) { m_data.append(str) ;}
+    };
+    
+    class InlinedData : public GHL::Data {
+    private:
+        const void* m_data;
+        size_t m_size;
+    public:
+        explicit InlinedData(const void* data, size_t size) : m_data(data),m_size(size) {}
+        /// Data size
+        virtual GHL::UInt32 GHL_CALL	GetSize() const {
+            return m_size;
+        }
+        /// Const data ptr
+        virtual const GHL::Byte* GHL_CALL	GetData() const {
+            return static_cast<const GHL::Byte*>(m_data);
+        }
+        /// set data
+        virtual void GHL_CALL	SetData( GHL::UInt32 , const GHL::Byte* , GHL::UInt32  ) {
+            sb_assert(false);
+        }
+        /// clone data
+        virtual Data* GHL_CALL  Clone() const {
+            return GHL_HoldData(GetData(), GetSize());
+        }
+        
+        /// add reference
+        virtual void GHL_CALL AddRef() const {
+            sb_assert(false);
+        }
+        /// release reference
+        virtual void GHL_CALL Release() const {
+            sb_assert(false);
+        }
     };
     
     class BinaryData : public meta::object {

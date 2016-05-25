@@ -5,6 +5,7 @@
 #include <ghl_image.h>
 #include <ghl_image_decoder.h>
 #include <json/sb_json.h>
+#include <sb_data.h>
 
 #include "spine_convert.h"
 
@@ -134,6 +135,7 @@ SB_META_METHOD(load_texture)
 SB_META_METHOD(store_texture)
 SB_META_METHOD(convert_spine)
 SB_META_METHOD(open_spine)
+SB_META_METHOD(write_text_file)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(SkeletonConvert)
@@ -200,6 +202,10 @@ Application::Application() : m_lua(0),m_vfs(0),m_update_only(false) {
 #else
     m_platform = "unknown";
 #endif
+}
+
+double Application::GetVersion() const {
+    return VERSION;
 }
 
 void Application::Bind(lua_State* L) {
@@ -310,6 +316,10 @@ bool Application::store_texture( const sb::string& file , const TextureDataPtr& 
     return res;
 }
 
+bool Application::write_text_file( const sb::string& file , const char* data  ) {
+    Sandbox::InlinedData v(data,::strlen(data));
+    return store_file(file, &v);
+}
 bool Application::store_file(  const sb::string& file , const GHL::Data* data ) {
     if (!data) return false;
     if (!m_vfs->WriteFile(append_path(m_dst_dir, file).c_str(), data)) {
@@ -350,7 +360,7 @@ int Application::run() {
 
     m_lua->GetGlobalContext()->SetValue("application", this);
     m_lua->GetGlobalContext()->SetValue("platform",m_platform);
-    m_lua->GetGlobalContext()->SetValue("host_version", VERSION);
+    m_lua->GetGlobalContext()->SetValue("host_version", GetVersion());
     m_lua->GetGlobalContext()->SetValue("update_only", m_update_only);
     m_lua->GetGlobalContext()->SetValue("app_arguments", m_arguments);
     

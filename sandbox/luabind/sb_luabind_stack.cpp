@@ -31,16 +31,21 @@ namespace Sandbox {
                 lua_pop(L, 2);
                 return 1;
             }
-            int nargs = 2;
+            lua_remove(L, -2);
+           
             if (lua_isstring(L,1))
                 lua_pushvalue(L, 1);  /* pass error message */
             else {
-                lua_pushvalue(L, 1);
                 lua_pushstring(L, "error");
-                nargs = 3;
             }
             lua_pushinteger(L, 1);  /* skip this function and traceback */
-            lua_call(L, nargs, 1);  /* call debug.traceback */
+            int res = lua_pcall(L, 2, 1, 0);
+            
+            if (res) {
+                LogError(LuabindModule) << " Failed debug.traceback " ;
+                LogError(LuabindModule) << lua_tostring(L, -1) ;
+            }
+
             return 1;
         }
         

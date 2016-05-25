@@ -4,7 +4,7 @@ project 'spine-runtime'
 
 		kind 'StaticLib'
 
-	targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+	targetdir (libs_dir)
 
 	targetname ('spine-runtime-' .. platform_dir)
 

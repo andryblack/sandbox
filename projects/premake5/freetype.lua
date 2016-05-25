@@ -1,8 +1,7 @@
 local utils = require 'utils'
 project 'freetype'
 		kind 'StaticLib'
-		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
-
+	targetdir(libs_dir)
 	targetname ('freetype-' .. platform_dir)
 
 	local freetype_files = {

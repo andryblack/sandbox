@@ -31,7 +31,9 @@ extern "C" {
 #include "sb_lua_context.h"
 #include "sb_data.h"
 
+#ifndef SB_DNT_USE_MEM_MGR
 #define SB_USE_MEM_MGR
+#endif
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::BinaryData)
 SB_META_END_KLASS_BIND()

@@ -7,9 +7,7 @@ end
 
 project 'lua'
    		kind 'StaticLib'
-
-		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
-
+   		targetdir(libs_dir)
 		targetname ('lua-' .. platform_dir)
 
 		local lua_files = {

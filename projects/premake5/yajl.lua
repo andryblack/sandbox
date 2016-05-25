@@ -1,7 +1,7 @@
 local utils = require 'utils'
 project 'yajl'
    		kind 'StaticLib'
-   		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+   		targetdir(libs_dir)
    		targetname ('yajl-' .. platform_dir)
    		local yajl_files = {
 			'yajl.c', 'yajl_alloc.c', 'yajl_buf.c', 'yajl_encode.c', 'yajl_gen.c', 'yajl_lex.c', 'yajl_parser.c',
