@@ -21,6 +21,7 @@ end
 
 local img = require '_images'
 local convert_spine = require '_convert_spine'
+local luapp = require '_luapp'
 
 function _M.assets_rules.use_variant( v , scale )
 	img.use_variants[v]=scale
@@ -222,7 +223,9 @@ local function compile_files( files )
 			local source_data = source:read('*a')
 			source:close()
 
-			local shunk = assert(load(source_data,dst,'t'))
+			local pp_source = assert(luapp.preprocess(source_data))
+
+			local shunk = assert(load(pp_source,dst,'t'))
 			local binary = string.dump(shunk)
 			local out = assert(io.open(path.join(dst_path,dst),'wb'))
 			out:write(binary)
