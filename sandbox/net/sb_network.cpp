@@ -9,6 +9,7 @@
 #include "sb_network.h"
 #include "sb_data.h"
 #include <ghl_data.h>
+#include <ghl_data_stream.h>
 #include "sb_log.h"
 #include "sb_resources.h"
 
@@ -111,6 +112,37 @@ namespace Sandbox {
         ReleaseData();
     }
 #endif
+    
+    
+    
+    NetworkFileRequest::NetworkFileRequest(const sb::string& url, GHL::WriteStream* ws) : NetworkRequestBase(url),m_ds(ws) {
+        m_ds->AddRef();
+    }
+    
+    NetworkFileRequest::~NetworkFileRequest() {
+        ReleaseData();
+    }
+    
+    void GHL_CALL NetworkFileRequest::OnComplete() {
+        NetworkRequestBase::OnComplete();
+        ReleaseData();
+    }
+    
+    void NetworkFileRequest::ReleaseData() {
+        if (m_ds) {
+            m_ds->Flush();
+            m_ds->Close();
+            m_ds->Release();
+            m_ds = 0;
+        }
+    }
+    
+    void NetworkFileRequest::OnData(const GHL::Byte *data, GHL::UInt32 size) {
+        if (m_ds) {
+            m_ds->Write(data, size);
+        }
+    }
+    
     Network::Network(Resources* res) : m_resources(res) {
         m_net = GHL_CreateNetwork();
     }
@@ -136,6 +168,19 @@ namespace Sandbox {
         return request;
     }
 #endif
+    
+    NetworkFileRequestPtr Network::GETFile(const sb::string& url,const sb::string& filename) {
+        if (!m_net) return NetworkFileRequestPtr();
+        GHL::WriteStream* ds = m_resources->OpenWrite(filename.c_str(),true);
+        if (!ds) {
+            return NetworkFileRequestPtr();
+        }
+        NetworkFileRequestPtr request(new NetworkFileRequest(url,ds));
+        ApplyCookie(request);
+        if (!m_net->Get(request.get()))
+            return NetworkFileRequestPtr();
+        return request;
+    }
     NetworkRequestPtr Network::SimplePOST(const sb::string& url, const sb::string& data) {
         if (!m_net) return NetworkRequestPtr();
         NetworkRequestPtr request(new NetworkRequest(url));
@@ -256,7 +301,7 @@ namespace Sandbox {
         return request;
     }
     
-    void Network::ApplyCookie(const NetworkRequestPtr& req) {
+    void Network::ApplyCookie(const NetworkRequestBaseBtr& req) {
         const char* url = req->GetURL();
         for (sb::map<sb::string, sb::string>::const_iterator it = m_cookie.begin();it!=m_cookie.end();++it) {
             if (strncmp(url, it->first.c_str(), it->first.length())==0) {

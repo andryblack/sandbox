@@ -4,7 +4,7 @@
 #include <ghl_data.h>
 #include <pugixml.hpp>
 #include "sb_log.h"
-#include "sb_base64.h"
+#include "utils/sb_base64.h"
 #include "sb_data.h"
 #include "sb_image.h"
 

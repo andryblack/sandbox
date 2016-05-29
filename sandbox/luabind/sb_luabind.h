@@ -68,6 +68,13 @@ namespace Sandbox {
             lua_pop(L, 1);
         }
         
+        class Namespace : public impl::namespace_registrator {
+        private:
+            const char* m_name;
+        public:
+            explicit Namespace(lua_State* L, const char* name);
+            ~Namespace();
+        };
         
     }
     

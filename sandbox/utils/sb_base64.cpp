@@ -119,7 +119,13 @@ namespace Sandbox {
         return d;
     }
     
-    sb::string Base64Encode(const GHL::Byte* data,size_t size) {
+    sb::string Base64Encode(const char* str) {
+        sb::string ret;
+        base64_encode(reinterpret_cast<const GHL::Byte*>(str),::strlen(str),ret);
+        return ret;
+    }
+    
+    sb::string Base64EncodeData(const GHL::Byte* data,size_t size) {
         sb::string ret;
         base64_encode(data,size,ret);
         return ret;

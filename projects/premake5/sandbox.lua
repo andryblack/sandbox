@@ -182,8 +182,9 @@ solution( ProjectName )
 			sandbox_dir .. '/sandbox/json/**.cpp',
 			sandbox_dir .. '/sandbox/skelet/**.h',
 			sandbox_dir .. '/sandbox/skelet/**.cpp',
-			sandbox_dir .. '/sandbox/tlsf/**.c',
-			sandbox_dir .. '/sandbox/tlsf/**.h',
+			sandbox_dir .. '/sandbox/utils/**.cpp',
+			sandbox_dir .. '/sandbox/utils/**.c',
+			sandbox_dir .. '/sandbox/utils/**.h',
 		}
 
 		sysincludedirs {

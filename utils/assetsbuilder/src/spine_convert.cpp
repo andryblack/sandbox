@@ -12,7 +12,7 @@
 #include <fstream>
 #include "skelet/sb_skelet_data.h"
 #include <sb_data.h>
-#include <sb_base64.h>
+#include <utils/sb_base64.h>
 #include <sb_log.h>
 #include "application.h"
 

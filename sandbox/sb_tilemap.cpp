@@ -5,7 +5,7 @@
 #include "sb_file_provider.h"
 #include "sb_log.h"
 #include <pugixml.hpp>
-#include "sb_base64.h"
+#include "utils/sb_base64.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::TileMapLayer, Sandbox::meta::object)
 SB_META_DECLARE_OBJECT(Sandbox::TileMap, Sandbox::meta::object)

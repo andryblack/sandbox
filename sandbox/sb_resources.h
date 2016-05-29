@@ -27,6 +27,7 @@ namespace GHL {
 	struct VertexShader;
 	struct FragmentShader;
 	struct DataStream;
+    struct WriteStream;
     struct Data;
 }
 namespace Sandbox {
@@ -39,11 +40,12 @@ namespace Sandbox {
 		Resources(GHL::VFS* vfs);
 		~Resources();
         
-        void Init(GHL::Render* render,GHL::ImageDecoder* image);
+        virtual void Init(GHL::Render* render,GHL::ImageDecoder* image);
 		
 		void SetBasePath(const char* path);
 		GHL::DataStream* OpenFile(const char* fn);
         GHL::DataStream* OpenFileVariant(const char* fn,bool& variant);
+        GHL::WriteStream* OpenWrite(const char* fn,bool remove);
         
         ImagePtr CreateImageFromData( const GHL::Data* data );
 		
@@ -80,11 +82,14 @@ namespace Sandbox {
         RenderTargetPtr CreateRenderTarget(int w, int h, float scale,bool alpha, bool depth);
         float GetScale() const { return m_scale; }
         void    ProcessMemoryMgmt();
+    protected:
+        
     private:
 		GHL::VFS* m_vfs;
 		GHL::Render* m_render;
 		GHL::ImageDecoder* m_image;
-		std::string	m_base_path;
+		sb::string	m_base_path;
+        sb::string  m_cache_path;
 		
 		friend class Atlaser;
 		

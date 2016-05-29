@@ -235,10 +235,14 @@ namespace Sandbox {
 		m_sound = sound;
 	}
     
+    Resources* Application::CreateResourcesManager() {
+        return new Resources(m_vfs);
+    }
+    
     ///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
 		sb_assert( m_vfs );
-        m_resources = new Resources(m_vfs);
+        m_resources = CreateResourcesManager();
 		
         std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);
 		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
@@ -307,6 +311,10 @@ namespace Sandbox {
         m_width = settings->width;
         m_height = settings->height;
 	}
+    
+    void Application::InitResources() {
+        
+    }
 	///
 	bool GHL_CALL Application::Load() {
         ConfigureDevice( m_system );
@@ -323,6 +331,7 @@ namespace Sandbox {
         ctx->SetValue("application.resources", m_resources);
         ctx->SetValue("application.sound", m_sound_mgr);
 
+        InitResources();
 #ifdef SB_USE_MYGUI
         m_gui_data_manager = new mygui::DataManager(m_resources);
         m_gui_render = new mygui::RenderManager(m_graphics, m_resources);
@@ -367,6 +376,14 @@ namespace Sandbox {
         LuaContextPtr ctx = m_lua->GetGlobalContext();
         ctx->SetValue("application.size.width", float(m_width) / (m_graphics->GetScele() * m_resources->GetScale()));
         ctx->SetValue("application.size.height", float(m_height) / (m_graphics->GetScele() * m_resources->GetScale()) );
+    }
+    
+    Network* Application::GetNetwork() {
+#ifdef SB_USE_NETWORK
+        return m_network;
+#else
+        return 0;
+#endif
     }
 	///
 	bool GHL_CALL Application::OnFrame( GHL::UInt32 usecs ) {

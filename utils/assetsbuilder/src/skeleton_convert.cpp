@@ -1,7 +1,7 @@
 #include "skeleton_convert.h"
 #include "application.h"
 #include <sb_data.h>
-#include <sb_base64.h>
+#include <utils/sb_base64.h>
 #include <sbstd/sb_platform.h>
 
 SB_META_DECLARE_OBJECT(SkeletonConvert, Sandbox::meta::object)
@@ -172,7 +172,7 @@ void SkeletonConvert::write_animations() {
             }
             
             GHL::Data* compressed = GHL_PackZlib(data);
-            a.append_child(pugi::node_pcdata).set_value(Sandbox::Base64Encode(compressed->GetData(), compressed->GetSize()).c_str());
+            a.append_child(pugi::node_pcdata).set_value(Sandbox::Base64EncodeData(compressed->GetData(), compressed->GetSize()).c_str());
             compressed->Release();
             data->Release();
         } else {

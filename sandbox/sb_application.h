@@ -108,6 +108,9 @@ namespace Sandbox {
         
         virtual void OnSystemSet();
         
+        virtual Resources* CreateResourcesManager();
+        virtual void InitResources();
+        Network* GetNetwork();
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;

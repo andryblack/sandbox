@@ -11,7 +11,8 @@ namespace Sandbox {
     
     sb::string Base64Decode(const char* src);
     GHL::Data* Base64DecodeData(const char* src);
-    sb::string Base64Encode(const GHL::Byte* data,size_t size);
+    sb::string Base64EncodeData(const GHL::Byte* data,size_t size);
+    sb::string Base64Encode(const char* src);
     
 }
 

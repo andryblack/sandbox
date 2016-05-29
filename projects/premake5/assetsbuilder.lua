@@ -143,6 +143,7 @@
 			'json/sb_json.*',
 			'meta/**',
 			'luabind/**',
+			'utils/**',
 			'skelet/sb_skelet_data.*',
 			}))
 

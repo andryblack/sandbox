@@ -251,6 +251,20 @@ namespace Sandbox {
                 return 1;
             }
         };
+        class namespace_registrator : public registrator_base {
+        public:
+            explicit namespace_registrator( lua_State* L ) : registrator_base(L) {}
+            template <class Func>
+            void operator()( const meta::static_method_holder<Func>& func ) {
+                sb_assert(lua_istable(m_L, -1));
+                lua_pushstring(m_L, func.name);
+                Func* ptr =
+                reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// name ud
+                *ptr = func.func;
+                lua_pushcclosure(m_L, &method_helper<Func,1>::call, 1); /// name method
+                lua_rawset(this->m_L, -3);
+            }
+        };
         
         template <class Type>
         class is_wrapper_helper

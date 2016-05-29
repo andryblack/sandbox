@@ -51,5 +51,13 @@ namespace Sandbox {
             lua_pushnil(L);
             lua_setglobal(L, helper_name);
         }
+        
+        Namespace::Namespace(lua_State* L, const char* name) : impl::namespace_registrator(L),m_name(name) {
+            lua_create_metatable(L);
+        }
+        
+        Namespace::~Namespace() {
+            luabind::lua_set_value(m_L,m_name);
+        }
     }
 }

@@ -18,6 +18,10 @@
 #include "sb_data.h"
 #include "sb_image.h"
 
+namespace GHL {
+    struct WriteStream;
+}
+
 namespace Sandbox {
     
     class Resources;
@@ -70,6 +74,7 @@ namespace Sandbox {
         headers_map_t   m_received_headers;
         sb::string  m_error_text;
     };
+    typedef sb::intrusive_ptr<NetworkRequestBase> NetworkRequestBaseBtr;
     
     class NetworkRequest : public NetworkRequestBase {
     public:
@@ -95,6 +100,18 @@ namespace Sandbox {
     private:
         VectorData<GHL::Byte>*   m_data;
     };
+    
+    class NetworkFileRequest : public NetworkRequestBase {
+    public:
+        explicit NetworkFileRequest(const sb::string& url, GHL::WriteStream* wd);
+        ~NetworkFileRequest();
+        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size);
+        virtual void GHL_CALL OnComplete();
+    protected:
+        void ReleaseData();
+        GHL::WriteStream*   m_ds;
+    };
+    typedef sb::intrusive_ptr<NetworkFileRequest> NetworkFileRequestPtr;
     
 #ifndef SB_NO_RESOURCES
     class ImageRequest : public NetworkDataRequest {
@@ -150,6 +167,7 @@ namespace Sandbox {
         NetworkRequestPtr SimplePOST(const sb::string& url, const sb::string& data);
         NetworkRequestPtr POST(const sb::string& url,
                                const NetworkPostDataPtr& data);
+        NetworkFileRequestPtr GETFile(const sb::string& url,const sb::string& filename);
         void SetCookie(const sb::string& host,
                        const sb::string& cookie) {
             m_cookie[host]=cookie;
@@ -159,7 +177,7 @@ namespace Sandbox {
         GHL::Network* m_net;
         Resources*  m_resources;
         sb::map<sb::string,sb::string> m_cookie;
-        void ApplyCookie(const NetworkRequestPtr& req);
+        void ApplyCookie(const NetworkRequestBaseBtr& req);
     };
     
 }

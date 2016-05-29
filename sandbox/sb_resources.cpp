@@ -40,6 +40,7 @@ namespace Sandbox {
     void Resources::Init(GHL::Render* render,GHL::ImageDecoder* image) {
         m_render = render;
         m_image = image;
+        m_cache_path = m_vfs->GetDir(GHL::DIR_TYPE_CACHE);
     }
 	Resources::~Resources() {
 		
@@ -53,6 +54,13 @@ namespace Sandbox {
 		std::string fn = m_base_path + filename;
         return m_vfs->OpenFile(fn.c_str());
 	}
+    
+    GHL::WriteStream* Resources::OpenWrite(const char* filename,bool remove) {
+        if (remove) {
+            m_vfs->DoRemoveFile(filename);
+        }
+        return m_vfs->OpenFileWrite(filename);
+    }
     
     GHL::DataStream* Resources::OpenFileVariant(const char* fn,bool& variant) {
         variant = false;
