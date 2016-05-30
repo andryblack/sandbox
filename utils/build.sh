@@ -3,7 +3,7 @@
 ROOT=$(git rev-parse --show-toplevel)
 BIN=$ROOT/bin
 UTILS=$ROOT/utils
-MAKE=make
+MAKE="make -j4"
 
 mkdir -p $BIN
 
@@ -57,6 +57,7 @@ cd $UTILS
 
 echo "rebuild assetsbuilder"
 cd $UTILS/assetsbuilder
+rm -rf Makefile obj *.make
 $PREMAKE5 --scripts=$ROOT/projects/premake5 $TARGET || exit 1
 $MAKE config=release || exit 1
 cp $UTILS/assetsbuilder/bin/release/* $BIN
