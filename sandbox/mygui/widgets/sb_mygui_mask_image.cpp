@@ -18,15 +18,17 @@ namespace Sandbox {
             std::string texture = _node->getParent()->findAttribute("texture");
             if (texture.empty()) {
                 texture = _node->getParent()->getParent()->findAttribute("texture");
-            }
+            } 
             // tags replacement support for Skins
             if (_version >= MyGUI::Version(1, 1))
             {
                 texture = MyGUI::LanguageManager::getInstance().replaceTags(texture);
             }
-            m_texture = MyGUI::RenderManager::getInstance().getTexture(texture);
             
             const MyGUI::IntSize& size = MyGUI::texture_utility::getTextureSize(texture);
+            
+            m_texture = MyGUI::RenderManager::getInstance().getTexture(texture);
+            
             const MyGUI::IntCoord& coord = MyGUI::IntCoord::parse(_node->findAttribute("offset"));
             setRect(MyGUI::CoordConverter::convertTextureCoord(coord, size));
         }
