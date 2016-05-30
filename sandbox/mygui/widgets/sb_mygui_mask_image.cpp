@@ -18,7 +18,7 @@ namespace Sandbox {
             std::string texture = _node->getParent()->findAttribute("texture");
             if (texture.empty()) {
                 texture = _node->getParent()->getParent()->findAttribute("texture");
-            } 
+            }
             // tags replacement support for Skins
             if (_version >= MyGUI::Version(1, 1))
             {

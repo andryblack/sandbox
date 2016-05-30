@@ -295,9 +295,19 @@ namespace Sandbox {
         
         static int setter_indexer (lua_State *L)
 		{
+            LUA_CHECK_STACK(0);
             if (!native_setter_indexer(L,1)) {
                 char buf[128];
-                sb::snprintf(buf, 128, "%s: set unknown field: %s",lua_tostring(L, 1),lua_tostring(L, 2));
+                lua_getglobal(L, "tostring");
+                
+                sb::string object;
+                if (lua_isfunction(L, -1)) {
+                    lua_pushvalue(L, 1);
+                    lua_call(L, 1, 1);
+                    object = lua_tostring(L, -1);
+                }
+                lua_pop(L, 1);
+                sb::snprintf(buf, 128, "%s: set unknown field: %s",object.c_str(),lua_tostring(L, 2));
                 lua_pushstring(L, buf);
                 lua_error(L);
             }

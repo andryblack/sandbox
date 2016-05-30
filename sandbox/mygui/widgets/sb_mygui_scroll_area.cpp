@@ -11,6 +11,7 @@
 #include "MyGUI_Gui.h"
 #include "MyGUI_ILayer.h"
 #include "MyGUI_InputManager.h"
+#include "MyGUI_ScrollBar.h"
 
 #include "sb_log.h"
 
@@ -93,6 +94,12 @@ namespace Sandbox {
         void ScrollArea::setManualScroll(bool s) {
             m_manual_scroll = s;
             m_state = state_none;
+            if (mVScroll) {
+                mVScroll->setEnabled(s);
+            }
+            if (mHScroll) {
+                mHScroll->setEnabled(s);
+            }
         }
         
         
@@ -175,6 +182,13 @@ namespace Sandbox {
                 return 0;
             if (m_state == state_manual_scroll && _checkPoint(_left, _top)) return const_cast<ScrollArea*>(this);
             return Base::getLayerItemByPoint(_left, _top);
+        }
+        
+        void ScrollArea::notifyScrollChangePosition(MyGUI::ScrollBar* _sender, size_t _position) {
+            if (!m_manual_scroll)
+                return;
+            m_state = state_none;
+            MyGUI::ScrollView::notifyScrollChangePosition(_sender, _position);
         }
         
         void ScrollArea::handleGlobalMouseMove(int x,int y) {

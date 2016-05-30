@@ -47,12 +47,12 @@ namespace Sandbox {
             if (!mRenderItem) return;
             MyGUI::ITexture* tex = mRenderItem->getTexture();
             if (tex) {
-                int left = mCurrentCoord.left;
-                int top = mCurrentCoord.top;
+                int left = mCoord.left;
+                int top = mCoord.top;
                 r.set(float(left)/tex->getWidth(),
                       float(top)/tex->getHeight(),
-                      float(left+mCurrentCoord.width)/tex->getWidth(),
-                      float(top+mCurrentCoord.height)/tex->getHeight());
+                      float(left+mCoord.width)/tex->getWidth(),
+                      float(top+mCoord.height)/tex->getHeight());
                 Base::_setUVSet(r);
             }
             

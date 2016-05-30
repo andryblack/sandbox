@@ -38,6 +38,7 @@ namespace Sandbox {
             void shutdownOverride();
             
             void frameEntered(float dt);
+            virtual void notifyScrollChangePosition(MyGUI::ScrollBar* _sender, size_t _position);
         private:
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             
