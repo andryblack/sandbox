@@ -25,7 +25,7 @@ SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     
-    void register_math( lua_State* lua ) {
+    void register_utils( lua_State* lua ) {
         luabind::Namespace ns(lua,"Sandbox.utils");
         ns( Sandbox::meta::static_method( "Md5Sum" , &Sandbox::MD5Sum) );
         ns( Sandbox::meta::static_method( "Base64Decode" , &Sandbox::Base64Decode) );

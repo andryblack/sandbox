@@ -119,6 +119,18 @@ namespace Sandbox {
         return d;
     }
     
+    sb::string Base64Decode(const char* src) {
+        sb::string ret;
+        VectorData<GHL::Byte>* d = new VectorData<GHL::Byte>();
+        if (!base64_decode(src, d->vector())) {
+            d->Release();
+            return ret;
+        }
+        ret.assign(reinterpret_cast<const char*>(d->GetData()),d->GetSize());
+        d->Release();
+        return ret;
+    }
+    
     sb::string Base64Encode(const char* str) {
         sb::string ret;
         base64_encode(reinterpret_cast<const GHL::Byte*>(str),::strlen(str),ret);

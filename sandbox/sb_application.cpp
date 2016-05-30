@@ -99,6 +99,7 @@ bool (*sb_terminate_handler)() = 0;
 namespace Sandbox {
     
     void register_math( lua_State* lua );
+    void register_utils( lua_State* lua );
     void register_resources( lua_State* lua );
 	void register_scene( lua_State* lua );
     void register_thread( lua_State* lua );
@@ -187,6 +188,7 @@ namespace Sandbox {
     
     void Application::BindModules( LuaVM* lua) {
         register_math(lua->GetVM());
+        register_utils(lua->GetVM());
         register_resources(lua->GetVM());
         register_scene(lua->GetVM());
         register_thread(lua->GetVM());
