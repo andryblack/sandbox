@@ -250,8 +250,9 @@ namespace Sandbox {
     }
     
 	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,float scale,bool alpha, const GHL::Image* data) {
-        GHL::UInt32 tw = next_pot( w );
-        GHL::UInt32 th = next_pot( h );
+        GHL::UInt32 tw = 0;
+        GHL::UInt32 th = 0;
+        GetTextureSize(w, h, tw, th, false);
         bool setData = ( tw == w ) && ( th == h );
 		GHL::Texture* texture = m_render->CreateTexture(tw,
                                                         th,alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,
@@ -281,10 +282,10 @@ namespace Sandbox {
         
         TexturePtr ptr = TexturePtr(new Texture(fn, (variant?1.0/m_scale:1.0), need_premultiply,img_w,img_h));
 		
-        GHL::UInt32 tw = 0;//next_pot( img->GetWidth() );
-        GHL::UInt32 th = 0;//next_pot( img->GetHeight() );
+        GHL::UInt32 tw = 0;
+        GHL::UInt32 th = 0;
         
-        GetTextureSize(img_w, img_h, tw, th);
+        GetTextureSize(img_w, img_h, tw, th,false);
         
         ptr->SetTextureSize(tw,th);
         
@@ -292,9 +293,15 @@ namespace Sandbox {
         return ptr;
 	}
     
-    void Resources::GetTextureSize( GHL::UInt32 w,GHL::UInt32 h, GHL::UInt32& tw, GHL::UInt32& th ) const {
-        tw = next_pot( w );
-        th = next_pot( h );
+    void Resources::GetTextureSize( GHL::UInt32 w,GHL::UInt32 h, GHL::UInt32& tw, GHL::UInt32& th , bool target) const {
+        sb_assert(m_render);
+        if (m_render->IsFeatureSupported(target ? GHL::RENDER_FEATURE_NPOT_TARGET : GHL::RENDER_FEATURE_NPOT_TEXTURES)) {
+            tw = w;
+            th = h;
+        } else {
+            tw = next_pot( w );
+            th = next_pot( h );
+        }
     }
     GHL::Texture* Resources::CreateTexture( GHL::Image* img , bool premultiply, const sb::string& filename,const sb::string& ext) {
         GHL::TextureFormat tfmt;
@@ -312,10 +319,10 @@ namespace Sandbox {
 			LogError(MODULE) <<"unsupported format file " << filename;
 			return 0;
 		}
-		GHL::UInt32 tw = 0;//next_pot( img->GetWidth() );
-        GHL::UInt32 th = 0;//next_pot( img->GetHeight() );
+		GHL::UInt32 tw = 0;
+        GHL::UInt32 th = 0;
         
-        GetTextureSize(img->GetWidth(), img->GetHeight(), tw, th);
+        GetTextureSize(img->GetWidth(), img->GetHeight(), tw, th,false);
         
         size_t mem = tw * th * bpp;
         size_t need_release = 0;
@@ -518,8 +525,9 @@ namespace Sandbox {
     RenderTargetPtr Resources::CreateRenderTarget(int w, int h, float scale, bool alpha, bool depth) {
         sb_assert(w>0);
         sb_assert(h>0);
-        GHL::UInt32 nw = next_pot(w*scale);
-        GHL::UInt32 nh = next_pot(h*scale);
+        GHL::UInt32 nw = 0;
+        GHL::UInt32 nh = 0;
+        GetTextureSize(w*scale, h*scale, nw, nh,true);
         sb_assert(m_render);
         GHL::RenderTarget* rt = m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth);
         /*

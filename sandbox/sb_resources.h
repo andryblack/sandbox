@@ -110,7 +110,7 @@ namespace Sandbox {
         size_t    m_memory_used;
         size_t    FreeMemory(size_t mem,bool full);
         
-        void GetTextureSize( GHL::UInt32 w,GHL::UInt32 h, GHL::UInt32& tw, GHL::UInt32& th ) const;
+        void GetTextureSize( GHL::UInt32 w,GHL::UInt32 h, GHL::UInt32& tw, GHL::UInt32& th , bool target) const;
         
         GHL::Image* ImageFromData( const GHL::Data* data );
         GHL::Image* ImageFromStream( GHL::DataStream* ds );
