@@ -233,7 +233,9 @@ namespace Sandbox {
             lua_close(m_L);
             m_L = 0;
         }
+#ifdef SB_USE_MEM_MGR
         delete m_mem_mgr;
+#endif
     }
     
 

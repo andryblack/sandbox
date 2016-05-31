@@ -353,7 +353,7 @@ namespace Sandbox {
         const char* file = luaL_checkstring(L, 1);
         FileProvider* res = luabind::stack<FileProvider*>::get(L, 2);
         if (!res) {
-            luaL_argerror(L, 2, "must be 'Sandbox::Resources'");
+            luaL_argerror(L, 2, "must be 'Sandbox::FileProvider'");
         }
         GHL::DataStream* ds = res->OpenFile(file);
         if (!ds) {
