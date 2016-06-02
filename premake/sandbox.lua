@@ -30,7 +30,7 @@ solution( ProjectName )
 		android_stl('gnustl_static')
 		android_activity(AndroidConfig.activity or 'com.sandboxgames.Activity')
 		android_libs(path.getabsolute(path.join(sandbox_dir,'GHL/src/android_ghl')))
-		android_libs(path.getabsolute(path.join(sandbox_dir,'projects/android/libs','sandbox_lib')))
+		android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','sandbox_lib')))
 		android_api_level(AndroidConfig.api_level or 9)
 		android_target_api_level(AndroidConfig.target_api_level or 14)
 		android_packagename( AndroidConfig.package or 'com.sandbox.example')
@@ -191,11 +191,10 @@ solution( ProjectName )
 			sandbox_dir .. '/GHL/include',
 			sandbox_dir .. '/include',
 			
-			sandbox_dir .. '/freetype/include',
-			sandbox_dir .. '/yajl/src/api',
-			sandbox_dir .. '/pugixml/src',
-			sandbox_dir .. '/lua/src',
-			sandbox_dir .. '/tlsf'
+			sandbox_dir .. '/external/freetype/include',
+			sandbox_dir .. '/external/yajl/src/api',
+			sandbox_dir .. '/external/pugixml/src',
+			sandbox_dir .. '/external/tlsf'
 		}
 
 		includedirs {
@@ -208,7 +207,7 @@ solution( ProjectName )
 				sandbox_dir .. '/sandbox/mygui/**.cpp',
 			}
 			includedirs {
-				sandbox_dir .. '/MyGUI/MyGUIEngine/include',
+				sandbox_dir .. '/external/MyGUI/MyGUIEngine/include',
 			}
 			if os.is('windows') then
 				defines 'MYGUI_CONFIG_INCLUDE="sb_mygui_config.h"'
@@ -224,7 +223,7 @@ solution( ProjectName )
 				sandbox_dir .. '/sandbox/spine/**.cpp',
 			}
 			sysincludedirs {
-				sandbox_dir .. '/spine-runtime-c/include',
+				sandbox_dir .. '/external/spine-runtime-c/include',
 			}
 			defines 'SB_USE_SPINE'
 		end
@@ -273,7 +272,7 @@ solution( ProjectName )
 
 		if use.MyGUI then
 			links { 'MyGUI' }
-			includedirs { sandbox_dir .. '/MyGUI/MyGUIEngine/include' }
+			includedirs { sandbox_dir .. '/external/MyGUI/MyGUIEngine/include' }
 			if os.is('windows') then
 				defines 'MYGUI_CONFIG_INCLUDE="mygui/sb_mygui_config.h"'
 			else
@@ -286,16 +285,16 @@ solution( ProjectName )
 		end
 		if use.Chipmunk then
 			links { 'chipmunk' }
-			includedirs { sandbox_dir .. '/chipmunk/include' }
+			includedirs { sandbox_dir .. '/external/chipmunk/include' }
 		end
 		if use.Spine then
 			links { 'spine-runtime' }
 			defines 'SB_USE_SPINE'
 		end
 		if os.is('ios') then
-			files { sandbox_dir .. '/projects/osx/main.mm',
-					sandbox_dir .. '/projects/osx/*.cpp',
-					sandbox_dir .. '/projects/osx/*.h' }
+			files { sandbox_dir .. '/platform/ios/main.mm',
+					sandbox_dir .. '/platform/ios/*.cpp',
+					sandbox_dir .. '/platform/ios/*.h' }
 			links {
 				'Foundation.framework', 
 				'QuartzCore.framework', 
@@ -306,22 +305,22 @@ solution( ProjectName )
 				'AudioToolbox.framework',
 				'CoreMotion.framework' }
 		elseif os.is('macosx') then
-			files { sandbox_dir .. '/projects/osx/main.mm',
-					sandbox_dir .. '/projects/osx/*.cpp',
-					sandbox_dir .. '/projects/osx/*.h' }
+			files { sandbox_dir .. '/platform/osx/main.mm',
+					sandbox_dir .. '/platform/osx/*.cpp',
+					sandbox_dir .. '/platform/osx/*.h' }
 			links { 
 				'OpenGL.framework', 
 				'OpenAL.framework',
 				'Cocoa.framework',
 				'AudioToolbox.framework' }
 		elseif os.is('flash') then
-			files { sandbox_dir .. '/projects/flash/*.cpp' }
+			files { sandbox_dir .. '/platform/flash/*.cpp' }
 			links {
 				'AS3++',
 				'Flash++'
 			}
 		elseif os.is('windows') then
-			files { sandbox_dir .. '/projects/windows/*.cpp' }
+			files { sandbox_dir .. '/platform/windows/*.cpp' }
 			links {
 				'OpenGL32',
 				'WinMM'
@@ -330,8 +329,8 @@ solution( ProjectName )
 				links { 'Winhttp', }
 			end
 		elseif os.is('android') then
-			files { sandbox_dir .. '/projects/android/main.cpp',
-					sandbox_dir .. '/projects/android/sb_android_extension.cpp' }
+			files { sandbox_dir .. '/platform/android/main.cpp',
+					sandbox_dir .. '/platform/android/sb_android_extension.cpp' }
 			links {
 				'android',
 				'log',
@@ -341,13 +340,13 @@ solution( ProjectName )
 				'GLESv2'
 			}
 			if use.AndroidGooglePlayService then
-				files { sandbox_dir .. '/projects/android/gps_extension.cpp' }
-				includedirs { sandbox_dir .. '/gpg-cpp-sdk/android/include' }
+				files { sandbox_dir .. '/platform/android/gps_extension.cpp' }
+				includedirs { sandbox_dir .. '/external/gpg-cpp-sdk/android/include' }
 				android_ndk_static_libs {
 					'gpg-1',
 				}
 				android_ndk_modules {
-					'gpg-cpp-sdk/android'
+					'external/gpg-cpp-sdk/android'
 				}
 			end
 		end

@@ -5,14 +5,14 @@ project 'MyGUI'
 	targetname ('MyGUI-' .. platform_dir)
 
 	files {
-		sandbox_dir .. '/MyGUI/MyGUIEngine/**.h',
-		sandbox_dir .. '/MyGUI/MyGUIEngine/**.cpp'
+		sandbox_dir .. '/external/MyGUI/MyGUIEngine/**.h',
+		sandbox_dir .. '/external/MyGUI/MyGUIEngine/**.cpp'
 	}
 
 	sysincludedirs {
-		sandbox_dir .. '/MyGUI/MyGUIEngine/include',
+		sandbox_dir .. '/external/MyGUI/MyGUIEngine/include',
 		sandbox_dir .. '/include',
-		sandbox_dir .. '/freetype/include'
+		sandbox_dir .. '/external/freetype/include'
 	}
 
 	if os.is('windows') then

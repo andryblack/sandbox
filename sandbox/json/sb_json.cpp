@@ -5,9 +5,10 @@ extern "C" {
 #include <yajl/yajl_parse.h>
 #include <yajl/yajl_gen.h>
 
-#include "../lua/src/lua.h"
-#include "../lua/src/lauxlib.h"
-#include "../lua/src/lualib.h"
+#include <lua/lua.h>
+#include <lua/lauxlib.h>
+#include <lua/lualib.h>
+    
 }
 #include "luabind/sb_luabind_stack.h"
 #include <ghl_data.h>

@@ -58,7 +58,7 @@ cd $UTILS
 echo "rebuild assetsbuilder"
 cd $UTILS/assetsbuilder
 rm -rf Makefile obj *.make
-$PREMAKE5 --scripts=$ROOT/projects/premake5 $TARGET || exit 1
+$PREMAKE5 --scripts=$ROOT/premake $TARGET || exit 1
 $MAKE config=release || exit 1
 cp $UTILS/assetsbuilder/bin/release/* $BIN
 cd $UTILS

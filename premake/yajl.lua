@@ -10,11 +10,11 @@ project 'yajl'
 		sysincludedirs {
 				sandbox_dir .. '/include',
 		}
-		prebuildcommands {
-				'{MKDIR} ' .. path.getabsolute(sandbox_dir..'/include/yajl'),
-				'{COPY} ' .. path.getabsolute(sandbox_dir..'/yajl/src/api') .. '/*.h ' .. path.getabsolute(sandbox_dir..'/include/yajl/')
-			}
-		files(utils.append_path(sandbox_dir .. '/yajl/src/',yajl_files))
+		os.mkdir(path.getabsolute(sandbox_dir..'/include/yajl'))
+		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api') .. '/*.h',
+			path.getabsolute(sandbox_dir..'/include/yajl/'))
+		
+		files(utils.append_path(sandbox_dir .. '/external/yajl/src/',yajl_files))
 
 		configuration "Debug"
    			targetsuffix "-debug"

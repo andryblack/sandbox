@@ -19,8 +19,8 @@
 #include <sbstd/sb_vector.h>
 
 extern "C" {
-#include "../../lua/src/lua.h"
-#include "../../lua/src/lauxlib.h"
+#include <lua/lua.h>
+#include <lua/lauxlib.h>
 }
 
 #include "sb_luabind_metatable.h"

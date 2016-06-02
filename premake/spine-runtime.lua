@@ -13,10 +13,10 @@ project 'spine-runtime'
 		'include/spine/*.h'
 	}
 	
-	files(utils.append_path(sandbox_dir .. '/spine-runtime-c/',srcfiles))
+	files(utils.append_path(sandbox_dir .. '/external/spine-runtime-c/',srcfiles))
 
 	sysincludedirs {
-				sandbox_dir .. '/spine-runtime-c/include'
+				sandbox_dir .. '/external/spine-runtime-c/include'
 			}
 
 	configuration "Debug"

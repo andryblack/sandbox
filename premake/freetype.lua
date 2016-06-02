@@ -38,14 +38,14 @@ project 'freetype'
 		'pshinter/pshinter.c',
 		--'type1/type1.c',
 	}
-	files(utils.append_path(sandbox_dir .. '/freetype/src/',freetype_files))
+	files(utils.append_path(sandbox_dir .. '/external/freetype/src/',freetype_files))
 
 	defines 'FT2_BUILD_LIBRARY'
 	defines 'DARWIN_NO_CARBON'
 
 	sysincludedirs {
 		sandbox_dir .. '/include',
-		sandbox_dir .. '/freetype/include'
+		sandbox_dir .. '/external/freetype/include'
 	}
 
 	configuration "Debug"

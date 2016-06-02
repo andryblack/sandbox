@@ -85,13 +85,13 @@
 		}
 
 		sysincludedirs {
-			path.join(sandbox_dir,'lua','src'),
 			path.join(sandbox_dir,'include'),
+			path.join(sandbox_dir,'include/lua'),
 			path.join(sandbox_dir,'GHL','include'),
-			path.join(sandbox_dir,'pugixml','src'),
-			path.join(sandbox_dir,'spine-runtime-c','include'),
+			path.join(sandbox_dir,'external/pugixml','src'),
+			path.join(sandbox_dir,'external/spine-runtime-c','include'),
 			path.join(sandbox_dir,'sandbox'),
-			path.join(sandbox_dir,'tlsf'),
+			path.join(sandbox_dir,'external/tlsf'),
 		}
 		
 		files(utils.append_path(sandbox_dir .. '/utils/assetsbuilder/',
