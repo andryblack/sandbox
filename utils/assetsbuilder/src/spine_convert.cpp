@@ -183,10 +183,10 @@ void SpineConvert::ExportAnimation() {
                 
 
                 Sandbox::Transform2d tr;
-                tr.m.matrix[0*2+0] = bone->m00;
-                tr.m.matrix[0*2+1] = bone->m10;
-                tr.m.matrix[1*2+0] = bone->m01;
-                tr.m.matrix[1*2+1] = bone->m11;
+                tr.m.matrix[0*2+0] = bone->a;
+                tr.m.matrix[0*2+1] = bone->c;
+                tr.m.matrix[1*2+0] = bone->b;
+                tr.m.matrix[1*2+1] = bone->d;
                 tr.v.x = skeleton->x + bone->worldX;
                 tr.v.y = skeleton->y + bone->worldY;
                 
@@ -202,6 +202,14 @@ void SpineConvert::ExportAnimation() {
                     if (slot->attachment->type == SP_ATTACHMENT_REGION) {
                         spRegionAttachment* ra = (spRegionAttachment*)slot->attachment;
                         
+                        //float regionScaleX = ra->width / ra->regionOriginalWidth * self->scaleX;
+                        //float regionScaleY = ra->height / ra->regionOriginalHeight * self->scaleY;
+                        //float localX = -ra->width / 2 * ra->scaleX + ra->regionOffsetX * regionScaleX;
+                        //float localY = -ra->height / 2 * ra->scaleY + ra->regionOffsetY * regionScaleY;
+                        //float localX2 = localX + ra->regionWidth * regionScaleX;
+                        //float localY2 = localY + ra->regionHeight * regionScaleY;
+                        //float radians = ra->rotation * DEG_RAD;
+                        
                         float regionScaleX = ra->width / ra->regionOriginalWidth * ra->scaleX;
                         float regionScaleY = ra->height / ra->regionOriginalHeight * ra->scaleY;
                         //float localX = -ra->width / 2 * ra->scaleX + ra->regionOffsetX * regionScaleX;
@@ -209,6 +217,7 @@ void SpineConvert::ExportAnimation() {
                         float radians = ra->rotation * M_PI / 180.0f;
                         Sandbox::Transform2d trAttachment;
                         trAttachment.translate(ra->x,ra->y);
+                        //trAttachment.scale(1.0,-1.0);
                         trAttachment.rotate(radians);
                         //trAttachment.translate(localX, -localY);
                         trAttachment.scale(regionScaleX,-regionScaleY);
