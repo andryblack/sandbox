@@ -13,6 +13,16 @@ namespace Sandbox {
     static const char* prev_log = "prev_log.txt";
     static GHL::Byte rn[] = {'\n'};
     
+    
+    static const char* level_descr[] = {
+        "F:",
+        "E:",
+        "W:",
+        "I:",
+        "V:",
+        "D:"
+    };
+
     class GHLLogger : public GHL::Logger {
         GHL::WriteStream*   m_file;
     public:
@@ -22,6 +32,7 @@ namespace Sandbox {
         }
         virtual void GHL_CALL AddMessage( GHL::LogLevel level, const char* message ) {
             if (m_file) {
+                m_file->Write(reinterpret_cast<const GHL::Byte*>(level_descr[level]), 2);
                 m_file->Write(reinterpret_cast<const GHL::Byte*>(message), ::strlen(message));
                 m_file->Write(rn, sizeof(rn));
             }
@@ -44,15 +55,6 @@ namespace Sandbox {
     
     static GHLLogger file_logger;
     
-    static const char* level_descr[] = {
-        ": FATAL :",
-        ": ERROR :",
-        ":WARNING:",
-        ": INFO  :",
-        ":VERBOSE:",
-        ": DEBUG :"
-    };
-    
     void Logger::StartSession(GHL::VFS* vfs) {
 #if !defined(GHL_PLATFORM_EMSCRIPTEN) && !defined(GHL_PLATFORM_FLASH)
         sb::string path = vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
@@ -72,7 +74,7 @@ namespace Sandbox {
     }
     
     Logger::Logger( GHL::LogLevel level , const char* module) :  m_module(module),m_level( level ){
-        m_stream << "[" << (m_module ? m_module : "Sandbox") << "]" << level_descr[m_level];
+        m_stream << "[" << (m_module ? m_module : "Sandbox") << "] ";
     }
     
     Logger::~Logger() {
