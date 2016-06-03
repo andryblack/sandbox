@@ -54,6 +54,7 @@ namespace Sandbox {
     };
     
     void Logger::StartSession(GHL::VFS* vfs) {
+#if !defined(GHL_PLATFORM_EMSCRIPTEN) && !defined(GHL_PLATFORM_FLASH)
         sb::string path = vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
         if (!path.empty()) {
             if (path[path.length()-1]!='/') {
@@ -67,6 +68,7 @@ namespace Sandbox {
             GHL_Log(GHL::LOG_LEVEL_INFO, (sb::string("start writing ") + dst_path).c_str() );
             GHL_SetLogger(&file_logger);
         }
+#endif
     }
     
     Logger::Logger( GHL::LogLevel level , const char* module) :  m_module(module),m_level( level ){

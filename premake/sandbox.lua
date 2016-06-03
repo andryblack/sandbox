@@ -18,11 +18,17 @@ if not AndroidConfig then
 end
 
 
+
 use_network = use.Network
 
 swf_size = SwfSize or { Width = 800, Height = 600}
 
 solution( ProjectName )
+
+	if os.is('emscripten') then
+		toolset 'emcc'
+	end
+
 	configurations { 'Debug', 'Release' }
 
 	if os.is('android') then
@@ -111,6 +117,8 @@ solution( ProjectName )
          defines { "NDEBUG" }
     if platform_id == 'flash' then
     	buildoptions { '-O4' }
+    elseif platform_id == 'emscripten' then
+    	buildoptions { '-O2' }
     else
     	flags { "OptimizeSpeed" }    
    	end
@@ -349,6 +357,15 @@ solution( ProjectName )
 					'external/gpg-cpp-sdk/android'
 				}
 			end
+		elseif os.is('emscripten') then
+			files { sandbox_dir .. '/platform/emscripten/*.cpp' }
+			links {
+				'SDL'
+			}
+			linkoptions  {
+				'-s USE_SDL=2',
+				'-s FULL_ES2=1'
+			}
 		end
 
 

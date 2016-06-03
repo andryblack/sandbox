@@ -74,7 +74,11 @@ project 'GHL'
 			use_opengl = not ghl_disable_media
 		end
 
-		local use_opengles = use_opengl and ( os.is('ios') or os.is('android') )
+		if os.is('emscripten') then
+			use_opengl = true
+		end
+
+		local use_opengles = use_opengl and ( os.is('ios') or os.is('android') or os.is('emscripten') )
 
 		if use_openal then
 			files {
@@ -134,6 +138,10 @@ project 'GHL'
 		elseif os.is('android') then
 			files { ghl_src .. 'vfs/vfs_posix.*',
 				ghl_src .. 'vfs/vfs_android.*',}
+		elseif os.is('emscripten') then
+			files { ghl_src .. 'vfs/vfs_emscripten.*',
+				ghl_src .. 'vfs/vfs_posix.*',
+				ghl_src .. 'vfs/ghl_vfs_factory.*'}
 		else
 			files { ghl_src .. 'vfs/vfs_posix.*', }
 		end
@@ -198,6 +206,17 @@ project 'GHL'
 				if use_network then
 					files {
 						ghl_src .. 'net/android/ghl_net_android.cpp'
+					}
+				end
+			elseif os.is('emscripten') then
+				defines 'GHL_NO_ES1'
+				files {
+					ghl_src .. 'winlib/winlib_sdl.*',
+					ghl_src .. 'winlib/winlib_posix_time.cpp',
+				}
+				if use_network then
+					files {
+						ghl_src .. 'net/emscripten/ghl_net_emscripten.cpp'
 					}
 				end
 			end

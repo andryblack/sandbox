@@ -31,6 +31,13 @@ newoption {
 table.insert(premake.option.get('os').allowed,{'android',"Google android"})
 include( 'android/android.lua' )
 
+
+-- emscripten
+table.insert(premake.option.get('os').allowed,{'emscripten','Emscripten web build'})
+include( 'emscripten.lua' )
+
+
+
 --
 -- Allows copying directories.
 -- It uses the premake4 patterns (**=recursive match, *=file match)

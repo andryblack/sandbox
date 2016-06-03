@@ -245,6 +245,9 @@ namespace Sandbox {
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
 		sb_assert( m_vfs );
         m_resources = CreateResourcesManager();
+        sb_assert(m_resources);
+
+        LogInfo() << "Application::FillSettings";
 		
         std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);
 		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
@@ -289,6 +292,10 @@ namespace Sandbox {
         ctx->SetValue("platform.os", "android");
 #endif
         
+#ifdef GHL_PLATFORM_EMSCRIPTEN
+        ctx->SetValue("platform.os", "emscripten");
+#endif
+        
         luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
         luabind::RawClass<GHL::Settings>(m_lua->GetVM());
         
@@ -312,6 +319,8 @@ namespace Sandbox {
         
         m_width = settings->width;
         m_height = settings->height;
+
+        LogInfo() << "Application::FillSettings <<<";
 	}
     
     void Application::InitResources() {
@@ -319,6 +328,7 @@ namespace Sandbox {
     }
 	///
 	bool GHL_CALL Application::Load() {
+        LogInfo() << "Application::Load";
         ConfigureDevice( m_system );
         PlatformExtension::OnLoadAll(this);
         m_graphics = new Graphics(m_resources);
@@ -344,6 +354,7 @@ namespace Sandbox {
         mygui::register_widgets();
         mygui::setup_singletons(m_lua);
         
+        sb_assert( MyGUI::InputManager::getInstancePtr());
         MyGUI::LanguageManager::getInstance().eventRequestTag =
             MyGUI::newDelegate(this,&Application::get_mygui_localization);
         MyGUI::InputManager::getInstance().eventChangeKeyFocus +=
@@ -369,6 +380,7 @@ namespace Sandbox {
         
 		OnLoaded();
 		m_lua->DoFile("main.lua");
+        LogInfo() << "Application::Load <<< ";
 		return true;
 	}
     
@@ -611,6 +623,7 @@ namespace Sandbox {
         switch( event->type ) {
             case GHL::EVENT_TYPE_KEY_PRESS:
 #ifdef SB_USE_MYGUI
+                if (MyGUI::InputManager::getInstancePtr())
                 MyGUI::InputManager::getInstance().injectKeyPress(
                                                                   mygui::translate_key(event->data.key_press.key),
                                                                   event->data.key_press.charcode);
@@ -623,6 +636,7 @@ namespace Sandbox {
                 break;
             case GHL::EVENT_TYPE_KEY_RELEASE:
 #ifdef SB_USE_MYGUI
+                if (MyGUI::InputManager::getInstancePtr())
                 MyGUI::InputManager::getInstance().injectKeyRelease(mygui::translate_key(event->data.key_release.key));
 #endif
                 if (m_keyboard_ctx) {
@@ -676,6 +690,7 @@ namespace Sandbox {
 	void Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
+       if (MyGUI::InputManager::getInstancePtr())
         if (MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key)) ||
             MyGUI::InputManager::getInstance().isModalAny())
             return;
@@ -688,6 +703,7 @@ namespace Sandbox {
 	void Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
+        if (MyGUI::InputManager::getInstancePtr())
         if (MyGUI::InputManager::getInstance().injectMouseMove(x, y, 0)||
             MyGUI::InputManager::getInstance().isModalAny())
             return;
@@ -700,6 +716,7 @@ namespace Sandbox {
 	void Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
+        if (MyGUI::InputManager::getInstancePtr())
         if (MyGUI::InputManager::getInstance().injectMouseRelease(x, y, mygui::translate_key(key))||
             MyGUI::InputManager::getInstance().isModalAny())
             return;
