@@ -314,20 +314,24 @@ namespace Sandbox {
             return 0;
 		}
 
+        static const void* get_object_raw_ptr( data_holder* holder ) {
+            void* res = 0;
+            if ( holder->type == data_holder::raw_data ) {
+                res = holder+1;
+            } else if ( holder->type == data_holder::raw_ptr ) {
+                res = *reinterpret_cast<void**>(holder+1);
+            } else if ( holder->type == data_holder::shared_ptr ) {
+                res = *(reinterpret_cast<void**>(holder+1)+1); // hack
+            } else if ( holder->type == data_holder::intrusive_ptr ) {
+                res = *reinterpret_cast<void**>(holder+1);
+            }
+            return res;
+        }
         
         static int object_to_string( lua_State* L ) {
             if (lua_isuserdata(L, 1)) {
                 data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, 1));
-                void* res = 0;
-                if ( holder->type == data_holder::raw_data ) {
-                    res = holder+1;
-                } else if ( holder->type == data_holder::raw_ptr ) {
-                    res = *reinterpret_cast<void**>(holder+1);
-                } else if ( holder->type == data_holder::shared_ptr ) {
-                    res = *(reinterpret_cast<void**>(holder+1)+1); // hack
-                } else if ( holder->type == data_holder::intrusive_ptr ) {
-                    res = *reinterpret_cast<void**>(holder+1);
-                }
+                const void* res = get_object_raw_ptr(holder);
                 char buf[128];
                 sb::snprintf(buf, 128, "object<%s>:%p",holder->info->name,res);
                 lua_pushstring(L, buf);
@@ -335,6 +339,22 @@ namespace Sandbox {
             }
             return 0;
         }
+        
+        static int object_compare( lua_State* L ) {
+            if (lua_isuserdata(L, 1) && lua_isuserdata(L, 2)) {
+                data_holder* holder1 = reinterpret_cast<data_holder*>(lua_touserdata(L, 1));
+                data_holder* holder2 = reinterpret_cast<data_holder*>(lua_touserdata(L, 2));
+                if (holder1->info != holder2->info) {
+                    lua_pushboolean(L, 0);
+                } else {
+                    lua_pushboolean(L,get_object_raw_ptr(holder1) == get_object_raw_ptr(holder2) ? 1 : 0);
+                }
+            } else {
+                lua_pushboolean(L, 0);
+            }
+            return 1;
+        }
+
         
         void lua_create_metatable(lua_State* L) {
             lua_createtable(L, 5, 7);
@@ -352,6 +372,8 @@ namespace Sandbox {
 			lua_setfield(L, -2, "__newindex");               /// mntbl raw_ptr
             lua_pushcfunction(L, &object_to_string);               /// mntbl raw_ptr object_to_string
 			lua_setfield(L, -2, "__tostring");               /// mntbl raw_ptr
+            lua_pushcfunction(L, &object_compare);               /// mntbl raw_ptr object_to_string
+            lua_setfield(L, -2, "__eq");               /// mntbl raw_ptr
             lua_rawgeti(L, -2, mt_indexes::__props);                 /// mntbl raw_ptr props
             lua_rawseti(L, -2, mt_indexes::__props);                 /// mntbl raw_ptr
             lua_rawgeti(L, -2, mt_indexes::__methods);                 /// mntbl raw_ptr methods
