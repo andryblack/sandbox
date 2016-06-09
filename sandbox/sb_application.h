@@ -51,6 +51,7 @@ namespace Sandbox {
         virtual bool CallExtension( const char* method,
                                    const char* argument,
                                    sb::string& result );
+        virtual void OnExtensionResponse(const char* method,const char* data);
         
         void SetDrawDebugInfo(bool draw);
         void SetResourcesVariant(float scale,const sb::string& postfix);

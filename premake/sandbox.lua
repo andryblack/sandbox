@@ -300,9 +300,10 @@ solution( ProjectName )
 			defines 'SB_USE_SPINE'
 		end
 		if os.is('ios') then
-			files { sandbox_dir .. '/platform/ios/main.mm',
+			files { sandbox_dir .. '/platform/ios/*.mm',
 					sandbox_dir .. '/platform/ios/*.cpp',
 					sandbox_dir .. '/platform/ios/*.h' }
+			includedirs { sandbox_dir .. '/platform/ios' }
 			links {
 				'Foundation.framework', 
 				'QuartzCore.framework', 
@@ -311,7 +312,8 @@ solution( ProjectName )
 				'OpenGLES.framework', 
 				'OpenAL.framework',
 				'AudioToolbox.framework',
-				'CoreMotion.framework' }
+				'CoreMotion.framework',
+				'StoreKit.framework' }
 		elseif os.is('macosx') then
 			files { sandbox_dir .. '/platform/osx/main.mm',
 					sandbox_dir .. '/platform/osx/*.cpp',

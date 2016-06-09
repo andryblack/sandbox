@@ -597,7 +597,7 @@ namespace Sandbox {
         }
     };
     
-    bool json_parse(const char* data,sb::map<sb::string,sb::string>& res) {
+    bool json_parse_object(const char* data,sb::map<sb::string,sb::string>& res) {
         yajl_callbacks cb;
         json_parse_map ctx(res);
         ctx.fill_callbacks(cb);
@@ -618,4 +618,100 @@ namespace Sandbox {
         yajl_free(h);
         return true;
     }
+    
+    struct json_parse_array_s {
+        sb::vector<sb::string>& res;
+        sb::string* out_val;
+        int depth;
+        explicit json_parse_array_s(sb::vector<sb::string>& r) : res(r),out_val(0),depth(0) {}
+        
+        static int yajl_parse_null(void * ctx) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->out_val) {
+                c->out_val->assign("null");
+                c->out_val = 0;
+                return 1;
+            }
+            return 0;
+        }
+        static int yajl_parse_boolean(void * ctx, int boolVal) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->out_val) {
+                c->out_val->assign(boolVal == 0 ? "false" : "true");
+                c->out_val = 0;
+                return 1;
+            }
+            return 0;
+        }
+        
+        static int yajl_parse_number(void * ctx, const char * numberVal,
+                                     size_t numberLen) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->out_val) {
+                c->out_val->assign(numberVal,numberVal+numberLen);
+                c->out_val = 0;
+                return 1;
+            }
+            return 0;
+        }
+        
+        /** strings are returned as pointers into the JSON text when,
+         * possible, as a result, they are _not_ null padded */
+        static int yajl_parse_string(void * ctx, const unsigned char * stringVal,
+                                     size_t stringLen) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->out_val) {
+                c->out_val->assign(stringVal,stringVal+stringLen);
+                c->out_val = 0;
+                return 1;
+            }
+            return 0;
+        }
+        
+        static int yajl_parse_start_map(void * ctx) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->depth == 0) {
+                c->depth++;
+                return 1;
+            }
+            return 0;
+        }
+        static int yajl_parse_map_key(void * ctx, const unsigned char * key,
+                                      size_t stringLen) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            sb::string key_s(key,key+stringLen);
+            c->out_val = &(c->res[key_s]);
+            return 1;
+        }
+        static int yajl_parse_end_map(void * ctx) {
+            json_parse_map* c = static_cast<json_parse_map*>(ctx);
+            if (c->depth == 1) {
+                c->depth--;
+                return 1;
+            }
+            return 0;
+        }
+        
+        static int yajl_parse_start_array(void * ctx) {
+            return 0;
+        }
+        static int yajl_parse_end_array(void * ctx) {
+            return 0;
+        }
+        
+        static void fill_callbacks(yajl_callbacks& cb) {
+            cb.yajl_null = &json_parse_map::yajl_parse_null;
+            cb.yajl_boolean = &json_parse_map::yajl_parse_boolean;
+            cb.yajl_integer = 0;
+            cb.yajl_double = 0;
+            cb.yajl_number = &json_parse_map::yajl_parse_number;
+            cb.yajl_string = &json_parse_map::yajl_parse_string;
+            cb.yajl_start_map = &json_parse_map::yajl_parse_start_map;
+            cb.yajl_map_key = &json_parse_map::yajl_parse_map_key;
+            cb.yajl_end_map = &json_parse_map::yajl_parse_end_map;
+            cb.yajl_start_array = &json_parse_map::yajl_parse_start_array;
+            cb.yajl_end_array = &json_parse_map::yajl_parse_end_array;
+        }
+    };
+    
 }

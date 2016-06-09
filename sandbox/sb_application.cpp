@@ -775,6 +775,19 @@ namespace Sandbox {
         UpdateScreenSize();
     }
     
+    
+    bool Application::CallExtension(const char* method, const char* args, sb::string& res ) {
+        return PlatformExtension::ProcessAll(this,method,args,res);
+    }
+    
+    void Application::OnExtensionResponse(const char* method,const char* data) {
+        if (m_lua) {
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onExtensionResponse")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onExtensionResponse",method,data);
+            }
+        }
+    }
+    
 #ifdef SB_USE_MYGUI
     void Application::get_mygui_localization(const MyGUI::UString& key, MyGUI::UString& value) {
         LuaContextPtr localization = m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("localization");
