@@ -113,7 +113,7 @@ namespace Sandbox {
         
         appendQuad();
 		
-		GHL::UInt32 clr = (m_color).hw();
+		GHL::UInt32 clr = (m_color).hw_premul();
         
         const GHL::Texture* t = texture->Present(m_resources);
 		
@@ -219,7 +219,7 @@ namespace Sandbox {
 		
         appendQuad();
 		
-		GHL::UInt32 clr = (m_color).hw();
+		GHL::UInt32 clr = (m_color).hw_premul();
 		
         if (!m_calc2_tex)
         {
@@ -275,7 +275,7 @@ namespace Sandbox {
 		
         appendQuad();
 		
-		GHL::UInt32 clr = (m_color*_clr).hw();
+		GHL::UInt32 clr = (m_color*_clr).hw_premul();
 		if (!m_calc2_tex)
         {
             appendVertex(x,y,
@@ -316,7 +316,7 @@ namespace Sandbox {
 		
         appendQuad();
 		
-		GHL::UInt32 clr = (m_color*_clr).hw();
+		GHL::UInt32 clr = (m_color*_clr).hw_premul();
 		
         if (!m_calc2_tex)
         {
@@ -413,7 +413,7 @@ namespace Sandbox {
             stepy = stepy / count_y;
         }
         
-		GHL::UInt32 clr = m_color.hw();
+		GHL::UInt32 clr = m_color.hw_premul();
 		
         appendQuad();
         {
@@ -539,7 +539,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
 #ifndef GHL_PLATFORM_FLASH
 		BeginDrawLines();
-		GHL::UInt32 clr = m_color.hw();
+		GHL::UInt32 clr = m_color.hw_premul();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+0);
 		m_indexes.push_back(base+1);
@@ -552,7 +552,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
 #ifndef GHL_PLATFORM_FLASH
 		BeginDrawLines();
-		GHL::UInt32 clr = (m_color*clr_).hw();
+		GHL::UInt32 clr = (m_color*clr_).hw_premul();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+0);
 		m_indexes.push_back(base+1);
@@ -569,7 +569,7 @@ namespace Sandbox {
 		Flush();
 		m_texture = TexturePtr();
         m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
-		GHL::UInt32 clr = m_color.hw();
+		GHL::UInt32 clr = m_color.hw_premul();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		for (GHL::UInt16 i=0;i<static_cast<GHL::UInt16>(points.size());i++) {
 			m_indexes.push_back(base+i);
@@ -588,7 +588,7 @@ namespace Sandbox {
 		Flush();
 		m_texture = TexturePtr();
         m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
-		GHL::UInt32 clr = (m_color*clr_).hw();
+		GHL::UInt32 clr = (m_color*clr_).hw_premul();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		for (GHL::UInt16 i=0;i<static_cast<GHL::UInt16>(points.size());i++) {
 			m_indexes.push_back(base+i);
@@ -610,7 +610,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
 #ifndef GHL_PLATFORM_FLASH
 		BeginDrawCircle();
-		GHL::UInt32 clr = m_color.hw();
+		GHL::UInt32 clr = m_color.hw_premul();
 		DrawCircle(pos,r,clr);
 		Flush();
 #endif
@@ -619,7 +619,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
 #ifndef GHL_PLATFORM_FLASH
 		BeginDrawCircle();
-		GHL::UInt32 clr = (m_color*clr_).hw(); 
+		GHL::UInt32 clr = (m_color*clr_).hw_premul();
 		DrawCircle(pos,r,clr);
 		Flush();
 #endif
@@ -669,7 +669,7 @@ namespace Sandbox {
             
             appendQuad();
             
-            GHL::UInt32 clr = (m_color * p.color).hw();
+            GHL::UInt32 clr = (m_color * p.color).hw_premul();
             
             if (!m_calc2_tex)
             {
@@ -705,7 +705,7 @@ namespace Sandbox {
 							 geomentry.vertexes[i].y,
 							 geomentry.vertexes[i].tx,
 							 geomentry.vertexes[i].ty,
-							 (Color(*reinterpret_cast<const GHL::UInt32*>(geomentry.vertexes[i].color))*m_color).hw());
+							 (Color(*reinterpret_cast<const GHL::UInt32*>(geomentry.vertexes[i].color))*m_color).hw_premul());
             }
         } 
 		if (geomentry.texture) {

@@ -61,9 +61,15 @@ namespace Sandbox {
 		
         GHL::UInt32 hw() const { return
 			(alpha() << 24) |
-			(red()) |
-			(green()<<8) |
-			(blue()<<16);}
+			(conv_float(r)) |
+			(conv_float(g)<<8) |
+			(conv_float(b)<<16);}
+        
+        GHL::UInt32 hw_premul() const { return
+            (alpha() << 24) |
+            (red()) |
+            (green()<<8) |
+            (blue()<<16);}
 		
         /// operators
         Color operator * (const Color& other) const {

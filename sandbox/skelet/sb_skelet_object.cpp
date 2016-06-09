@@ -11,6 +11,8 @@ namespace Sandbox {
     
     void SkeletonNode::Draw(Graphics& g) const {
         if (!m_image) return;
+        if (m_color.a<=0.0f)
+            return;
         Transform2d tr = g.GetTransform();
         Color c = g.GetColor();
         BlendMode b = g.GetBlendMode();

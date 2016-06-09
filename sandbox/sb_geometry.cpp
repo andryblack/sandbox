@@ -155,7 +155,7 @@ namespace Sandbox {
         buffer.texture = img.GetTexture();
         BuildLineContext ctx;
         ctx.buffer = &buffer;
-        ctx.color = color.hw();
+        ctx.color = color.hw_premul();
         ctx.ibase = 0;
         ctx.z = 0;
         
@@ -239,7 +239,7 @@ namespace Sandbox {
         buffer.texture = img.GetTexture();
         BuildLineContext ctx;
         ctx.buffer = &buffer;
-        ctx.color = color.hw();
+        ctx.color = color.hw_premul();
         ctx.ibase = 0;
         ctx.z = 0;
         
@@ -307,7 +307,7 @@ namespace Sandbox {
         buffer.texture = img.GetTexture();
         BuildFillContext ctx;
         ctx.buffer = &buffer;
-        ctx.color = color.hw();
+        ctx.color = color.hw_premul();
         ctx.ibase = 0;
         ctx.z = 0;
         ctx.transform = tr;
