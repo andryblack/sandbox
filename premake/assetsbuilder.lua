@@ -131,6 +131,7 @@
 			'sb_lua_io.*',
 			'sb_log.*',
 			'sb_data.*',
+			'sb_color.*',
 			'sb_lua_context.*',
             'sb_resources.*',
             'sb_texture.*',

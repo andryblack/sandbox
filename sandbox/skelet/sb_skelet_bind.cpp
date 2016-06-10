@@ -11,6 +11,9 @@
 SB_META_BEGIN_KLASS_BIND(Sandbox::SkeletonData)
 SB_META_STATIC_METHOD(Load)
 SB_META_METHOD(HasAnimation)
+SB_META_METHOD(DumpTextures)
+SB_META_METHOD(DumpNodes)
+SB_META_METHOD(DumpAnimation)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::SkeletController)

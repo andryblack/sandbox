@@ -66,6 +66,7 @@ public:
                        const sb::string& skelet,
                        const sb::string& outfolder);
     bool premultiply_image( const sb::string& src, const sb::string& dst );
+    bool rebuild_image( const sb::string& src, const sb::string& dst );
     
 	int run();
 protected:

@@ -33,6 +33,16 @@ namespace Sandbox {
         return m_data[frame*m_nodes+node];
     }
     
+    void SkeletonAnimation::Dump() const {
+        for (size_t frame = 0; frame < m_frames; ++frame ) {
+            LogDebug() << "frame " << frame;
+            for (size_t node = 0;node < m_nodes; ++node) {
+                const SkeletonNodeFrame& n = GetNodeFrame(frame, node);
+                LogDebug() << "n " << n.image << " " << n.node << " " << n.color.ToStringRGB() << " " << n.color.a;
+            }
+        }
+    }
+    
     void SkeletonData::AddAnimation(const SkeletonAnimationPtr& animation) {
         sb_assert(animation);
         sb_assert(animation->GetNodesCount()==m_nodes.size());
@@ -46,6 +56,7 @@ namespace Sandbox {
     };
         
     SkeletonDataPtr SkeletonData::Load(const char* filename, Resources* resources) {
+        sb_assert(resources);
         GHL::DataStream* ds = resources->OpenFile(filename);
         if (!ds) {
             LogError() << "not found skeleton file " << filename;
@@ -208,6 +219,31 @@ namespace Sandbox {
         if (idx < m_nodes.size())
             return m_nodes[idx];
         return empty_node;
+    }
+    
+    void SkeletonData::DumpTextures() const {
+        size_t idx = 0;
+        for (sb::vector<ImagePtr>::const_iterator it = m_images.begin();it!=m_images.end();++it) {
+            LogDebug() << "tex " << idx << " " << ((*it) ? ( (*it)->GetTexture()->GetName().c_str() ) : ("null"));
+            ++idx;
+        }
+    }
+    
+    void SkeletonData::DumpNodes() const {
+        size_t idx = 0;
+        for (sb::vector<SkeletonNodeData>::const_iterator it = m_nodes.begin();it!=m_nodes.end();++it) {
+            LogDebug() << "node " << idx << " " << it->name;
+            ++idx;
+        }
+    }
+    
+    void SkeletonData::DumpAnimation(const sb::string &name) const {
+        SkeletonAnimationPtr animation = GetAnimation(name);
+        if (animation) {
+            animation->Dump();
+        } else {
+            LogDebug() << "(empty)";
+        }
     }
     
     bool SkeletonData::HasAnimation( const sb::string& name ) const {

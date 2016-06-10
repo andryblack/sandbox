@@ -43,7 +43,7 @@ extern "C" char* _spUtil_readFile (const char* path, int* length){
 }
 
 SpineConvert::SpineConvert() : m_atlas(0),m_skeleton(0),m_state(0) {
-    
+    m_premultiply_images = false;
 }
 
 SpineConvert::~SpineConvert() {
@@ -131,7 +131,11 @@ void SpineConvert::ExportAtlas(Application* app) {
         output_name += "_";
         output_name += page->name;
         a.filename = output_name;
-        app->premultiply_image(m_dir + "/" + page->name, m_out_dir + "/" + output_name);
+        if (m_premultiply_images) {
+            app->premultiply_image(m_dir + "/" + page->name, m_out_dir + "/" + output_name);
+        } else {
+            app->rebuild_image(m_dir + "/" + page->name, m_out_dir + "/" + output_name);
+        }
         page = page->next;
     }
     write_atlases();

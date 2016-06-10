@@ -28,6 +28,7 @@ private:
     sb::string  m_atlas_name;
     void ExportAtlas(Application* app);
     void ExportAnimation();
+    bool    m_premultiply_images;
 public:
     SpineConvert();
     ~SpineConvert();

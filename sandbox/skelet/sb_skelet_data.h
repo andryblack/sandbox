@@ -40,6 +40,7 @@ namespace Sandbox {
         size_t GetFrames() const { return m_frames; }
         size_t GetNodesCount() const { return m_nodes; }
         const SkeletonNodeFrame& GetNodeFrame(size_t frame,size_t node) const;
+        void Dump() const;
     };
     typedef sb::intrusive_ptr<SkeletonAnimation> SkeletonAnimationPtr;
 
@@ -70,6 +71,9 @@ namespace Sandbox {
         const ImagePtr& GetImage(size_t index) const;
         void SetImage(size_t index,const sb::string& name, const ImagePtr& img);
         bool HasAnimation( const sb::string& name ) const;
+        void DumpTextures() const;
+        void DumpNodes() const;
+        void DumpAnimation(const sb::string& name) const;
     };
     
 }

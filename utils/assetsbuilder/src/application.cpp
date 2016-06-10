@@ -338,6 +338,14 @@ bool Application::premultiply_image( const sb::string& src, const sb::string& ds
     return false;
 }
 
+bool Application::rebuild_image( const sb::string& src, const sb::string& dst ) {
+    TextureDataPtr data = load_texture(src);
+    if (data) {
+        return store_texture(dst, data);
+    }
+    return false;
+}
+
 bool Application::convert_spine(const sb::string& atlas, const sb::string& skelet, const sb::string& outfile) {
     SpineConvert convert;
     if (!convert.Load(atlas.c_str(), skelet.c_str(), this))
