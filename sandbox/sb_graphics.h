@@ -154,7 +154,7 @@ namespace Sandbox {
 		GHL::UInt32 GetScreenHeight() const { if (m_render) return m_render->GetHeight(); return 0;}
         
         void SetScale(float scale);
-        float GetScele() const { return m_scale; }
+        float GetScale() const { return m_scale; }
    private:
         Resources*  m_resources;
 		GHL::Render* m_render;

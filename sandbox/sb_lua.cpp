@@ -157,6 +157,11 @@ namespace Sandbox {
 #ifdef SB_USE_MEM_MGR
         m_mem_mgr = new MemoryMgr();
 #endif
+        Create();
+    }
+    
+    void LuaVM::Create() {
+        sb_assert(!m_L);
         m_L = lua_newstate(&LuaVM::lua_alloc_func,this);
         
         static const luaL_Reg loadedlibs[] = {
@@ -172,26 +177,26 @@ namespace Sandbox {
             {LUA_DBLIBNAME, luaopen_debug},
             {NULL, NULL}
         };
-
-		const luaL_Reg *lib;
+        
+        const luaL_Reg *lib;
         /* call open functions from 'loadedlibs' and set results to global table */
         for (lib = loadedlibs; lib->func; lib++) {
             luaL_requiref(m_L, lib->name, lib->func, 1);
             lua_pop(m_L, 1);  /* remove lib */
         }
-      
+        
         static const luaL_Reg base_funcs_impl[] = {
-			{"dofile", lua_dofile_func},
-			{"print",   lua_log_func<GHL::LOG_LEVEL_INFO>},
+            {"dofile", lua_dofile_func},
+            {"print",   lua_log_func<GHL::LOG_LEVEL_INFO>},
             //{"require",lua_require_func},
             {"loadfile",lua_loadfile_func},
-			{NULL, NULL}
-		};
+            {NULL, NULL}
+        };
         lua_rawgeti(m_L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
         lua_pushlightuserdata(m_L, this);
         luaL_setfuncs(m_L,  base_funcs_impl,1);
         lua_pop(m_L, 1);
-
+        
         lua_createtable(m_L, 1, 0);
         lua_pushlightuserdata(m_L, this);
         lua_pushcclosure(m_L, &LuaVM::lua_module_searcher, 1);
@@ -211,7 +216,7 @@ namespace Sandbox {
         luaL_setfuncs(m_L,  log_funcs_impl,0);
         luabind::lua_set_value(m_L, "log");
         
-		lua_atpanic(m_L, &at_panic_func);
+        lua_atpanic(m_L, &at_panic_func);
         
         lua_io_register(m_L,m_resources);
         
@@ -224,6 +229,13 @@ namespace Sandbox {
     }
     
     LuaVM::~LuaVM() {
+        Destroy();
+#ifdef SB_USE_MEM_MGR
+        delete m_mem_mgr;
+#endif
+    }
+    
+    void LuaVM::Destroy() {
         if (m_L) {
             luabind::Deinitialize(m_L);
             g_terminate_context = 0;
@@ -233,12 +245,12 @@ namespace Sandbox {
             lua_close(m_L);
             m_L = 0;
         }
-#ifdef SB_USE_MEM_MGR
-        delete m_mem_mgr;
-#endif
     }
-    
 
+    void LuaVM::Restart() {
+        Destroy();
+        Create();
+    }
     
     void LuaVM::SetBasePath(const char *path) {
         m_base_path = path;

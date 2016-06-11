@@ -58,6 +58,7 @@ namespace Sandbox {
         void SetRenderScale(float scale);
         
         double GetTimeUSec() const;
+        void Restart() { m_need_restart = true; }
     protected:
 		Application();
 		virtual ~Application();
@@ -112,6 +113,11 @@ namespace Sandbox {
         virtual Resources* CreateResourcesManager();
         virtual void InitResources();
         Network* GetNetwork();
+        
+        void InitLua();
+        
+        void ReleaseGUI();
+        virtual void DoRestart();
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -158,6 +164,7 @@ namespace Sandbox {
 #ifdef SB_USE_NETWORK
         Network*    m_network;
 #endif
+        bool    m_need_restart;
     public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys );

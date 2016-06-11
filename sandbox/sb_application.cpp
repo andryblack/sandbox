@@ -88,6 +88,7 @@ SB_META_METHOD(SetMouseContext)
 SB_META_METHOD(SetKeyboardContext)
 SB_META_METHOD(SetResourcesVariant)
 SB_META_METHOD(SetRenderScale)
+SB_META_METHOD(Restart)
 SB_META_PROPERTY_RO(TimeUSec, GetTimeUSec)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
@@ -157,6 +158,8 @@ namespace Sandbox {
         SetLuaBasePath("scripts");
         m_sound_mgr->SetSoundsDir("sound");
         
+        m_need_restart = false;
+        
         //const char* test = "{\"val\":41,\"id\":\"CgkInqr15dUFEAIQAw\"}";
         //sb::map<sb::string,sb::string> res;
         //json_parse(test, res);
@@ -165,8 +168,20 @@ namespace Sandbox {
 	Application::~Application() {
         delete m_main_thread;
 		delete m_main_scene;
-		delete m_lua;
+		
+        delete m_lua;
     	delete m_sound_mgr;
+
+        ReleaseGUI();
+        
+#ifdef SB_USE_NETWORK
+        delete  m_network;
+#endif
+		delete m_resources;
+		delete m_graphics;
+  	}
+    
+    void Application::ReleaseGUI() {
 #if SB_USE_MYGUI
         if (m_gui) {
             MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
@@ -176,15 +191,13 @@ namespace Sandbox {
             m_gui->shutdown();
         }
         delete m_gui;
+        m_gui = 0;
         delete m_gui_render;
+        m_gui_render = 0;
         delete m_gui_data_manager;
+        m_gui_data_manager = 0;
 #endif
-#ifdef SB_USE_NETWORK
-        delete  m_network;
-#endif
-		delete m_resources;
-		delete m_graphics;
-  	}
+    }
     
     void Application::BindModules( LuaVM* lua) {
         register_math(lua->GetVM());
@@ -244,6 +257,7 @@ namespace Sandbox {
     ///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
 		sb_assert( m_vfs );
+        sb_assert(!m_resources);
         m_resources = CreateResourcesManager();
         sb_assert(m_resources);
 
@@ -258,9 +272,10 @@ namespace Sandbox {
 		m_resources->SetBasePath(base_path.c_str());
 
 #ifdef SB_USE_NETWORK
+        sb_assert(!m_network);
         m_network = new Network(m_resources);
 #endif
-        
+        sb_assert(!m_lua);
         m_lua = new LuaVM(m_resources);
         
 		base_path=m_lua_base_path;
@@ -268,22 +283,36 @@ namespace Sandbox {
 			base_path+="/";
 		m_lua->SetBasePath(base_path.c_str());
 		
+        InitLua();
+
+        LuaContextPtr ctx = m_lua->GetGlobalContext();
+        ctx->SetValue("settings", settings);
+        m_lua->DoFile("settings.lua");
+        ctx->SetValue("settings", (GHL::Settings*)(0));
+        
+        m_width = settings->width;
+        m_height = settings->height;
+
+        LogInfo() << "Application::FillSettings <<<";
+	}
+    
+    void Application::InitLua() {
         LuaContextPtr ctx = m_lua->GetGlobalContext();
         
         
-		
+        
 #ifdef GHL_PLATFORM_IOS
         ctx->SetValue("platform.os", "iOS");
 #endif
-
+        
 #ifdef GHL_PLATFORM_MAC
         ctx->SetValue("platform.os", "OSX");
 #endif
-
+        
 #ifdef GHL_PLATFORM_WIN
         ctx->SetValue("platform.os", "WIN32");
 #endif
-    
+        
 #ifdef GHL_PLATFORM_FLASH
         ctx->SetValue("platform.os", "flash");
 #endif
@@ -299,10 +328,9 @@ namespace Sandbox {
         luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
         luabind::RawClass<GHL::Settings>(m_lua->GetVM());
         
-		BindModules( m_lua );
-
+        BindModules( m_lua );
+        
         ctx->SetValue("application.app", this);
-        ctx->SetValue("settings", settings);
         
         if (!RestoreAppProfile()) {
             ctx->SetValue("application.profile.first_start", true );
@@ -313,15 +341,8 @@ namespace Sandbox {
 #ifdef SB_USE_NETWORK
         ctx->SetValue("application.network", m_network);
 #endif
-
-		m_lua->DoFile("settings.lua");
-        ctx->SetValue("settings", (GHL::Settings*)(0));
         
-        m_width = settings->width;
-        m_height = settings->height;
-
-        LogInfo() << "Application::FillSettings <<<";
-	}
+    }
     
     void Application::InitResources() {
         
@@ -331,12 +352,14 @@ namespace Sandbox {
         LogInfo() << "Application::Load";
         ConfigureDevice( m_system );
         PlatformExtension::OnLoadAll(this);
-        m_graphics = new Graphics(m_resources);
-        sb_assert(m_resources);
-        sb_assert(m_render);
-        sb_assert(m_image_decoder);
-		m_resources->Init(m_render, m_image_decoder);
-        m_sound_mgr->Init(m_sound,m_resources);
+        if (!m_graphics) {
+            m_graphics = new Graphics(m_resources);
+            sb_assert(m_resources);
+            sb_assert(m_render);
+            sb_assert(m_image_decoder);
+            m_resources->Init(m_render, m_image_decoder);
+            m_sound_mgr->Init(m_sound,m_resources);
+        }
         
         LuaContextPtr ctx = m_lua->GetGlobalContext();
         
@@ -345,9 +368,12 @@ namespace Sandbox {
 
         InitResources();
 #ifdef SB_USE_MYGUI
+        sb_assert(!m_gui_data_manager);
         m_gui_data_manager = new mygui::DataManager(m_resources);
+        sb_assert(!m_gui_render);
         m_gui_render = new mygui::RenderManager(m_graphics, m_resources);
         
+        sb_assert(!m_gui);
         m_gui = new MyGUI::Gui();
         m_gui->initialise("");
         mygui::register_skin();
@@ -362,15 +388,17 @@ namespace Sandbox {
 #endif
 
         UpdateScreenSize();
-        
+        sb_assert(m_lua);
         m_lua->DoFile("load.lua");
         
         
 		if (!LoadResources(*m_resources))
 			return false;
         
+        sb_assert(!m_main_scene);
         m_main_scene = new Scene();
         ctx->SetValue("application.scene", m_main_scene);
+        sb_assert(!m_main_thread);
 		m_main_thread = new ThreadsMgr();
         ctx->SetValue("application.thread", m_main_thread);
         m_graphics->Load(m_render);
@@ -384,12 +412,32 @@ namespace Sandbox {
 		return true;
 	}
     
+    void Application::DoRestart() {
+        StoreAppProfile();
+        
+        if (m_lua) {
+            m_lua->Restart();
+            InitLua();
+        }
+        delete m_main_thread;
+        delete m_main_scene;
+        m_main_scene = 0;
+        m_main_thread = 0;
+        ReleaseGUI();
+        
+        UpdateScreenSize();
+        Load();
+    }
+    
     void Application::UpdateScreenSize() {
         if (!m_lua)
             return;
+        float graphics_scal = m_graphics->GetScale();
+        float resources_scale = m_resources->GetScale();
+        LogInfo() << "[app] UpdateScreenSize g:" << graphics_scal << " r:" << resources_scale << " s:" << m_width << "x" << m_height;
         LuaContextPtr ctx = m_lua->GetGlobalContext();
-        ctx->SetValue("application.size.width", float(m_width) / (m_graphics->GetScele() * m_resources->GetScale()));
-        ctx->SetValue("application.size.height", float(m_height) / (m_graphics->GetScele() * m_resources->GetScale()) );
+        ctx->SetValue("application.size.width", float(m_width) / (graphics_scal * resources_scale));
+        ctx->SetValue("application.size.height", float(m_height) / (graphics_scal * resources_scale));
     }
     
     Network* Application::GetNetwork() {
@@ -401,7 +449,10 @@ namespace Sandbox {
     }
 	///
 	bool GHL_CALL Application::OnFrame( GHL::UInt32 usecs ) {
-        
+        if (m_need_restart) {
+            m_need_restart = false;
+            DoRestart();
+        }
         GHL::UInt32 width = m_render->GetWidth();
         GHL::UInt32 height = m_render->GetHeight();
         if (width != m_width || height != m_height) {
@@ -661,7 +712,7 @@ namespace Sandbox {
             case GHL::EVENT_TYPE_SOFT_KEYBOARD_SHOW:
                 if (m_lua) {
                     if (m_lua->GetGlobalContext()->GetValue<bool>("application.onSoftKeyboardShow")) {
-                        float size_scale = 1.0f / (m_resources->GetScale()*m_graphics->GetScele());
+                        float size_scale = 1.0f / (m_resources->GetScale()*m_graphics->GetScale());
                         m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
                         ->call("onSoftKeyboardShow",
                                Recti(event->data.soft_keyboard_show.x * size_scale,
@@ -683,8 +734,8 @@ namespace Sandbox {
     }
 	
     void Application::TransformMouse(GHL::Int32& x,GHL::Int32& y) {
-        x *= 1.0f / (m_resources->GetScale()*m_graphics->GetScele());
-        y *= 1.0f / (m_resources->GetScale()*m_graphics->GetScele());
+        x *= 1.0f / (m_resources->GetScale()*m_graphics->GetScale());
+        y *= 1.0f / (m_resources->GetScale()*m_graphics->GetScale());
     }
 	///
 	void Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
@@ -766,11 +817,13 @@ namespace Sandbox {
 	}
 	
     void Application::SetResourcesVariant(float scale,const sb::string& postfix) {
+        sb_assert(m_resources);
         m_resources->SetResourcesVariant(scale, postfix);
         UpdateScreenSize();
     }
     
     void Application::SetRenderScale(float scale) {
+        sb_assert(m_graphics);
         m_graphics->SetScale(scale);
         UpdateScreenSize();
     }

@@ -41,6 +41,9 @@ namespace Sandbox {
         ~LuaVM();
         void SetBasePath(const char* path);
         bool DoFile(const char* fn);
+        
+        void Restart();
+        
         sb::string GetMemoryUsed() const;
         
         lua_State* GetVM() { return m_L; }
@@ -54,6 +57,9 @@ namespace Sandbox {
         void DoGC();
         FileProvider* GetResources() { return m_resources; }
     private:
+        void Create();
+        void Destroy();
+        
         FileProvider*  m_resources;
         lua_State*  m_L;
         sb::string m_base_path;
