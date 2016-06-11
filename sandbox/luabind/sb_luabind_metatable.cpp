@@ -18,14 +18,7 @@ namespace Sandbox {
     namespace luabind {
         static const char* const LuabindModule = "Sanbox:luabind";
         
-        namespace mt_indexes {
-            static const int __parent = 1;
-            static const int __props = 2;
-            static const int __methods = 3;
-            static const int __get = 1;
-            static const int __set = 2;
-        }
-        
+                
         void lua_unregistered_error( lua_State* L, 
                                     const char* type ) {
             char buf[128];
@@ -114,8 +107,7 @@ namespace Sandbox {
                 return;
             get_table( L, InplaceString(holder.info->name) );   /// obj mntbl
             sb_assert(lua_istable(L, -1));
-            lua_pushliteral(L, "__metatable");
-            lua_rawget(L, -2);                          /// obj mntbl mt
+            lua_rawgeti(L, -1, mt_indexes::__metatable);   /// obj mntbl mt
             sb_assert(lua_istable(L, -1));
             lua_setmetatable(L, -3);                    /// obj mntbl
             lua_pop(L, 1);
@@ -378,7 +370,7 @@ namespace Sandbox {
             lua_rawseti(L, -2, mt_indexes::__props);                 /// mntbl raw_ptr
             lua_rawgeti(L, -2, mt_indexes::__methods);                 /// mntbl raw_ptr methods
             lua_rawseti(L, -2, mt_indexes::__methods);                 /// mntbl raw_ptr
-            lua_setfield(L, -2, "__metatable");               /// mntbl 
+            lua_rawseti(L, -2, mt_indexes::__metatable);  /// mntbl
         }
         
         
@@ -388,7 +380,7 @@ namespace Sandbox {
             if (info->parent.info!=meta::type<void>::info() ) {
                 lua_get_create_table(L,info->parent.info->name,2);  /// [metatatable] ptbl
                 lua_rawseti(L, -2, mt_indexes::__parent);
-                lua_getfield(L, -1, "__metatable");
+                lua_rawgeti(L, -1, mt_indexes::__metatable);
                 lua_rawgeti(L, -2, mt_indexes::__parent);                 /// mntbl raw_ptr parent
                 lua_rawseti(L, -2, mt_indexes::__parent);                 /// mntbl raw_ptr
                 lua_pop(L, 1);
@@ -410,7 +402,7 @@ namespace Sandbox {
         
         void lua_register_enum_metatable(lua_State* L,const meta::type_info* info,lua_CFunction compare) {
             sb_assert(info->parent.info==meta::type<void>::info());
-            lua_getfield(L, -1, "__metatable"); // mn mt
+            lua_rawgeti(L, -1, mt_indexes::__metatable); // mn mt
             lua_pushcclosure(L, compare, 0);    // mn mt cmp
             lua_setfield(L, -2,"__eq");         // mn mt
             lua_pop(L, 1);                      // mn

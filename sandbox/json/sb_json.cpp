@@ -360,6 +360,7 @@ namespace Sandbox {
         if (!ds) {
             luaL_error(L, "opening file %s", file);
         }
+        lua_gc(L, LUA_GCSTOP, 1);
         GHL::Data* data = GHL_ReadAllData(ds);
         sb_assert(data);
         ds->Release();
@@ -376,6 +377,7 @@ namespace Sandbox {
         if (s == yajl_status_ok) {
             s = yajl_complete_parse(h);
         }
+        lua_gc(L, LUA_GCRESTART,1);
         if (s!=yajl_status_ok) {
             unsigned char* err_text = yajl_get_error(h, 1,reinterpret_cast<const unsigned char * >(data->GetData()),data->GetSize());
             lua_pop(L, ctx.stack_depth);

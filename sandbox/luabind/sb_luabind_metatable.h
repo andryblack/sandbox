@@ -16,6 +16,15 @@ struct lua_State;
 namespace Sandbox {
     namespace luabind {
         
+        namespace mt_indexes {
+            static const int __parent = 1;
+            static const int __props = 2;
+            static const int __methods = 3;
+            static const int __metatable = 4;
+            static const int __get = 1;
+            static const int __set = 2;
+        }
+
         struct data_holder;
         void lua_get_create_table(lua_State* L,const char* name,int prealloc);
         void lua_set_metatable( lua_State* L, const data_holder& holder );

@@ -268,7 +268,6 @@ namespace Sandbox {
         
         sb::string fn = filename;
         
-        
         if (TexturePtr tex = m_textures[fn]) {
 			return tex;
 		}
@@ -276,6 +275,9 @@ namespace Sandbox {
         GHL::UInt32 img_w = 0;
         GHL::UInt32 img_h = 0;
         bool variant = false;
+        
+        sb::string original_name = fn;
+        
         if (!GetImageInfo(fn,variant,img_w,img_h)) {
             return TexturePtr();
         }
@@ -289,7 +291,7 @@ namespace Sandbox {
         
         ptr->SetTextureSize(tw,th);
         
-		m_textures[fn]=ptr;
+		m_textures[original_name]=ptr;
         return ptr;
 	}
     
@@ -348,9 +350,7 @@ namespace Sandbox {
 			bpp = 4;
 		}
 		
-        m_memory_used += texture->GetWidth() * texture->GetHeight() * bpp;
-        
-		if (!setData) {
+        if (!setData) {
             fillData->Release();
             //LogWarning(MODULE) << "image " << filename << "." << ext<< " NPOT " <<
             //img->GetWidth() << "x" << img->GetHeight() << " -> " <<
@@ -364,6 +364,7 @@ namespace Sandbox {
         return texture;
     }
     GHL::Texture* Resources::LoadTexture( const sb::string& filename , bool& variant, bool premultiply ) {
+        LogDebug() << "load texture " << filename;
         const char* ext = "";
 		GHL::Image* img = LoadImage(filename.c_str(),variant,&ext);
 		if (!img) {
@@ -373,6 +374,10 @@ namespace Sandbox {
         GHL::Texture* texture = CreateTexture(img, premultiply, filename, ext);
 		
         img->Release();
+        
+        if (texture) {
+            m_memory_used += texture->GetMemoryUsage();
+        }
         
         return texture;
     }
@@ -555,17 +560,18 @@ namespace Sandbox {
                 if (need_release) {
                     size_t lt = t->GetLiveTicks();
                     if ( lt && lt < m_live_ticks ) {
+                        
+                        size_t released = t->Release();
+                        memory_used-=released;
+                        if (released>need_release) {
+                            need_release = 0;
+                        } else {
+                            need_release -= released;
+                        }
+                        
                         if (t->unique()) {
                             t.reset();
                             m_textures.erase(it);
-                        } else {
-                            size_t released = t->Release();
-                            memory_used-=released;
-                            if (released>need_release) {
-                                need_release = 0;
-                            } else {
-                                need_release -= released;
-                            }
                         }
                     }
                 } else {

@@ -155,9 +155,8 @@ namespace Sandbox {
             }
             template <class Func>
             void operator()( const meta::operator_holder<Func>& func ) {
-                sb_assert(lua_istable(m_L, -1)); 
-                lua_pushliteral(m_L, "__metatable");
-                lua_rawget(m_L, -2 );                 /// metatable
+                sb_assert(lua_istable(m_L, -1));
+                lua_rawgeti(m_L, -1, mt_indexes::__metatable);/// metatable
                 sb_assert(lua_istable(m_L, -1)); 
                 Func* ptr = 
                 reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// methods ud
