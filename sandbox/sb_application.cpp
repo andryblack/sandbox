@@ -408,6 +408,15 @@ namespace Sandbox {
         
 		OnLoaded();
 		m_lua->DoFile("main.lua");
+        
+        if (!m_url.empty()) {
+            if (m_lua && m_lua->GetGlobalContext()->GetValue<bool>("application.onOpenURL")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
+                ->call("onOpenURL",m_url);
+            }
+            m_url.clear();
+        }
+        
         LogInfo() << "Application::Load <<< ";
 		return true;
 	}
@@ -728,6 +737,14 @@ namespace Sandbox {
                         m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
                         ->call("onSoftKeyboardHide");
                     }
+                }
+                break;
+            case GHL::EVENT_TYPE_HANDLE_URL:
+                if (m_lua && m_lua->GetGlobalContext()->GetValue<bool>("application.onOpenURL")) {
+                    m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
+                    ->call("onOpenURL",event->data.handle_url.url);
+                } else {
+                    m_url = event->data.handle_url.url;
                 }
                 break;
         }

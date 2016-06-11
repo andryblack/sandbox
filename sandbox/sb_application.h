@@ -165,6 +165,7 @@ namespace Sandbox {
         Network*    m_network;
 #endif
         bool    m_need_restart;
+        sb::string  m_url;
     public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys );
