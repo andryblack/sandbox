@@ -4,6 +4,8 @@
 #include <ghl_types.h>
 #include "sb_log.h"
 
+#include "luabind/sb_luabind_stack.h"
+
 namespace Sandbox {
     
     static const sb::string base64_chars =
@@ -107,6 +109,59 @@ namespace Sandbox {
         return true;
     }
 
+    int lua_Base64Decode(lua_State* L) {
+        size_t data_len = 0;
+        const char* encoded_string = luaL_checklstring(L, 1, &data_len);
+        const char* encoded_string_end = encoded_string + data_len;
+        luaL_Buffer buffer;
+        luaL_buffinit(L, &buffer);
+        
+        int i = 0;
+        int j = 0;
+        
+        GHL::Byte char_array_4[4], char_array_3[3];
+        
+        while (encoded_string != encoded_string_end) {
+            if (*encoded_string == '=')
+                break;
+            size_t p = base64_chars.find(*encoded_string);
+            if (p == base64_chars.npos) {
+                if (!isspace(*encoded_string)) {
+                    LogError() << "invalid character " << int(*encoded_string);
+                    return false;
+                }
+                ++encoded_string;
+                continue;
+            }
+            ++encoded_string;
+            char_array_4[i++] = p;
+            if (i ==4) {
+                
+                char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+                char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+                char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+                
+                luaL_addlstring(&buffer, reinterpret_cast<const char*>(char_array_3), 3);
+                i = 0;
+            }
+        }
+        
+        if (i) {
+            for (j = i; j <4; j++)
+                char_array_4[j] = 0;
+            
+            
+            char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+            char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+            
+            for (j = 0; (j < i - 1); j++)
+                luaL_addlstring(&buffer, reinterpret_cast<const char*>(&char_array_3[j]), 1);
+        }
+        
+        luaL_pushresult(&buffer);
+        return 1;
+    }
     
     GHL::Data* Base64DecodeData(const char* src) {
         if (!src)

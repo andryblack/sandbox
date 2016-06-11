@@ -263,6 +263,12 @@ namespace Sandbox {
                 lua_pushcclosure(m_L, &method_helper<Func,1>::call, 1); /// name method
                 lua_rawset(this->m_L, -3);
             }
+            void operator()( const meta::static_method_holder<int(*)(lua_State*)>& func ) {
+                sb_assert(lua_istable(m_L, -1));
+                lua_pushstring(m_L, func.name);
+                lua_pushcclosure(m_L, func.func, 0); /// name method
+                lua_rawset(this->m_L, -3);
+            }
         };
         
         template <class Type>
