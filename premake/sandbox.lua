@@ -39,20 +39,18 @@ solution( ProjectName )
 		android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','sandbox_lib')))
 		android_api_level(AndroidConfig.api_level or 9)
 		android_target_api_level(AndroidConfig.target_api_level or 14)
+		android_build_api_level(AndroidConfig.build_api_level or 23)
 		android_packagename( AndroidConfig.package or 'com.sandbox.example')
 		android_toolchain( AndroidConfig.toolchain or '4.8' )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
-		if AndroidConfig.keystore and AndroidConfig.keyalias then
-			android_key_store(AndroidConfig.keystore)
-			android_key_alias(AndroidConfig.keyalias)
-		end
 		android_packageversion( AndroidConfig.versioncode or 1)
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
-		if use.AndroidGooglePlayService then
+		if use.AndroidGooglePlayService or use.IAP then
 			android_modules_path( path.getabsolute(sandbox_dir) )
-			local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
-			android_libs(path.join(sdk_dir,'extras/google/google_play_services/libproject','google-play-services_lib'))
-			android_libs(path.join(sdk_dir,'extras/android/support/v4/android-support-v4.jar'))
+			--local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
+			android_dependencies('com.google.android.gms:play-services-games:9.0.2')
+			--android_libs(path.join(sdk_dir,'extras/google/google_play_services/libproject','google-play-services_lib'))
+			--android_libs(path.join(sdk_dir,'extras/android/support/v4/android-support-v4.jar'))
 			flags{ "C++11" }
 			android_metadata {
 				'com.google.android.gms.games.APP_ID=@string/app_id',
@@ -61,6 +59,9 @@ solution( ProjectName )
 		end
 		if AndroidConfig.permissions then
 			android_permissions( AndroidConfig.permissions )
+		end
+		if use.IAP then
+			android_permissions( 'com.android.vending.BILLING' )
 		end
 	end
 
@@ -140,8 +141,13 @@ solution( ProjectName )
 	
 	objdir( _WORKING_DIR .. '/build/' .. platform_dir )
 
-	libs_dir = _WORKING_DIR .. '/build/lib/' .. platform_dir
-
+	function configure_lib_targetdir()
+		configuration 'Debug'
+		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir .. '/' .. 'debug')
+		configuration 'Release'
+		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir .. '/' .. 'release')
+		configuration {}
+	end
 	language "C++"
 
 	
@@ -173,7 +179,8 @@ solution( ProjectName )
 
 		kind 'StaticLib'
 
-		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir)
+		configure_lib_targetdir()
+		
 
 		targetname ('Sandbox-' .. platform_dir)
 
@@ -251,9 +258,35 @@ solution( ProjectName )
 			defines 'SB_USE_NETWORK'
 		end
 
+		if os.is('ios') then
+			includedirs { sandbox_dir .. '/platform/ios' }
+			files { sandbox_dir .. '/platform/ios/sb_ios_extension.*',
+					sandbox_dir .. '/platform/ios/main.*',}
+			if UseModules.IAP then
+				files { sandbox_dir .. '/platform/ios/iap_extension.*',}
+			end
+		elseif os.is('macosx') then
+			files { sandbox_dir .. '/platform/osx/main.mm',
+					sandbox_dir .. '/platform/osx/*.cpp',
+					sandbox_dir .. '/platform/osx/*.h' }
+		elseif os.is('flash') then
+			files { sandbox_dir .. '/platform/flash/*.cpp' }
+		elseif os.is('windows') then
+			files { sandbox_dir .. '/platform/windows/*.cpp' }
+		elseif os.is('android') then
+			files { sandbox_dir .. '/platform/android/sb_android_extension.cpp' }
+			if use.AndroidGooglePlayService or use.IAP then
+				files { sandbox_dir .. '/platform/android/gps_extension.cpp' }
+				includedirs { sandbox_dir .. '/external/gpg-cpp-sdk/android/include' }
+				if use.IAP then
+					files { sandbox_dir .. '/platform/android/iap_extension.cpp' }
+				end
+			end
+		elseif os.is( 'emscripten' ) then
+			files { sandbox_dir .. '/platform/emscripten/*.cpp' }
+		end
 
 		configuration "Debug"
-   			targetsuffix "-debug"
    			defines 'SB_DEBUG'
 
 	project( ProjectName )
@@ -262,12 +295,12 @@ solution( ProjectName )
 
 		targetdir (_WORKING_DIR .. '/bin/' .. platform_dir)
 
-		libdirs { _WORKING_DIR .. '/lib/' .. platform_dir }
+		configuration 'Debug'
+		libdirs { _WORKING_DIR .. '/lib/' .. platform_dir .. '/debug' }
+		configuration 'Release'
+		libdirs { _WORKING_DIR .. '/lib/' .. platform_dir .. '/release' }
+		configuration {}
 
-		local libs_postfix = ''
-		if os.is('macosx') then
-			libs_postfix = '-OSX'
-		end
 
 		links( {
 			'Sandbox', 
@@ -300,10 +333,6 @@ solution( ProjectName )
 			defines 'SB_USE_SPINE'
 		end
 		if os.is('ios') then
-			files { sandbox_dir .. '/platform/ios/*.mm',
-					sandbox_dir .. '/platform/ios/*.cpp',
-					sandbox_dir .. '/platform/ios/*.h' }
-			includedirs { sandbox_dir .. '/platform/ios' }
 			links {
 				'Foundation.framework', 
 				'QuartzCore.framework', 
@@ -315,22 +344,18 @@ solution( ProjectName )
 				'CoreMotion.framework',
 				'StoreKit.framework' }
 		elseif os.is('macosx') then
-			files { sandbox_dir .. '/platform/osx/main.mm',
-					sandbox_dir .. '/platform/osx/*.cpp',
-					sandbox_dir .. '/platform/osx/*.h' }
 			links { 
 				'OpenGL.framework', 
 				'OpenAL.framework',
 				'Cocoa.framework',
 				'AudioToolbox.framework' }
 		elseif os.is('flash') then
-			files { sandbox_dir .. '/platform/flash/*.cpp' }
 			links {
 				'AS3++',
 				'Flash++'
 			}
 		elseif os.is('windows') then
-			files { sandbox_dir .. '/platform/windows/*.cpp' }
+			
 			links {
 				'OpenGL32',
 				'WinMM'
@@ -339,8 +364,7 @@ solution( ProjectName )
 				links { 'Winhttp', }
 			end
 		elseif os.is('android') then
-			files { sandbox_dir .. '/platform/android/main.cpp',
-					sandbox_dir .. '/platform/android/sb_android_extension.cpp' }
+			files { sandbox_dir .. '/platform/android/main.cpp' }
 			links {
 				'android',
 				'log',
@@ -349,9 +373,8 @@ solution( ProjectName )
 				'GLESv1_CM',
 				'GLESv2'
 			}
-			if use.AndroidGooglePlayService then
-				files { sandbox_dir .. '/platform/android/gps_extension.cpp' }
-				includedirs { sandbox_dir .. '/external/gpg-cpp-sdk/android/include' }
+			
+			if use.AndroidGooglePlayService or use.IAP then
 				android_ndk_static_libs {
 					'gpg-1',
 				}
@@ -359,8 +382,9 @@ solution( ProjectName )
 					'external/gpg-cpp-sdk/android'
 				}
 			end
+
 		elseif os.is('emscripten') then
-			files { sandbox_dir .. '/platform/emscripten/*.cpp' }
+			
 			links {
 				'SDL'
 			}
@@ -449,6 +473,11 @@ solution( ProjectName )
 					'-O4'
 				}
 			end
+			if os.is('android') then
+				android_key_store(path.getabsolute(path.join(_WORKING_DIR,AndroidConfig.keystore)))
+				android_key_alias(AndroidConfig.keyalias)
+			end
+
 		
 		configuration "Debug"
    			defines 'SB_DEBUG'

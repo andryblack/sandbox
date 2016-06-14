@@ -5,9 +5,15 @@ if not platform_dir then
 	platform_dir = os.get()
 end
 
+if not configure_lib_targetdir then
+	function configure_lib_targetdir(  )
+		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir )
+	end
+end
+
 project 'lua'
    		kind 'StaticLib'
-   		targetdir(libs_dir)
+   		configure_lib_targetdir()
 		targetname ('lua-' .. platform_dir)
 
 		local lua_files = {
@@ -30,5 +36,4 @@ project 'lua'
 		files(utils.append_path(sandbox_dir .. '/external/lua/src/',lua_files))
 
 
-		configuration "Debug"
-   			targetsuffix "_d"
+		

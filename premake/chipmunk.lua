@@ -1,6 +1,6 @@
 project 'chipmunk'
 			kind 'StaticLib'
-			targetdir(libs_dir)
+			configure_lib_targetdir()
 			targetname ('chipmunk-' .. platform_dir)
 
 			buildoptions {'-std=c99' }
@@ -14,5 +14,4 @@ project 'chipmunk'
 				sandbox_dir .. '/external/chipmunk/include/chipmunk'
 			}
 
-			configuration "Debug"
-	   			targetsuffix "-debug"
+			

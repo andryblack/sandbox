@@ -48,6 +48,13 @@ api.register {
 	kind = "number"
 }
 
+-- Specify android java build API level
+api.register {
+	name = "android_build_api_level",
+	scope = "solution",
+	kind = "number"
+}
+
 -- Specify android STL support
 api.register {
 	name = "android_stl",
@@ -69,41 +76,41 @@ api.register {
 -- Specify android package name
 api.register {
 	name = "android_packagename",
-	scope = "solution",
+	scope = "project",
 	kind = "string"
 }
 
 -- Specify android package version
 api.register {
 	name = "android_packageversion",
-	scope = "solution",
+	scope = "project",
 	kind = "integer"
 }
 
 api.register {
 	name = "android_packageversionname",
-	scope = "solution",
+	scope = "project",
 	kind = "string"
 }
 
 -- Specify android activity name
 api.register {
 	name = "android_activity",
-	scope = "solution",
+	scope = "project",
 	kind = "string"
 }
 
 -- Specify applicaton permissions
 api.register {
 	name = "android_permissions",
-	scope = "solution",
+	scope = "project",
 	kind = "string",
 	list = true
 }
 
 api.register {
 	name = "android_metadata",
-	scope = 'solution',
+	scope = 'project',
 	kind = 'string',
 	list = true
 }
@@ -111,7 +118,7 @@ api.register {
 -- Specify applicaton orientation
 api.register {
 	name = "android_screenorientation",
-	scope = "solution",
+	scope = "project",
 	kind = "string",
 	allowed = {
 		'landscape',
@@ -123,12 +130,12 @@ api.register {
 
 api.register {
 	name = "android_key_store",
-	scope = "solution",
-	kind = "string"
+	scope = "config",
+	kind = "path"
 }
 api.register {
 	name = "android_key_alias",
-	scope = "solution",
+	scope = "config",
 	kind = "string"
 }
 
@@ -139,6 +146,12 @@ api.register {
 	name = "android_modules_path",
 	scope = "solution",
 	kind = "string"
+}
+
+api.register {
+	name = "android_assets_path",
+	scope = "config",
+	kind = "path"
 }
 
 api.register {
@@ -157,10 +170,18 @@ api.register {
 
 api.register {
 	name = "android_libs",
-	scope = 'solution',
+	scope = 'project',
 	kind = 'string',
 	list = true
 }
+
+api.register {
+	name = "android_dependencies",
+	scope = 'project',
+	kind = 'string',
+	list = true
+}
+
 
 newoption {
 	trigger = "android-ndk-dir",
@@ -195,11 +216,11 @@ newaction {
 	},
 	onsolution = function( sln )
 		ndk.onsolution(sln)
-		manifest.onsolution(sln)
 		build.onsolution(sln)
 	end,
 	onproject = function( prj )
 		ndk.onproject(prj)
+		manifest.onproject(prj)
 	end,
 	oncleansolution = function( sln )
 		ndk.oncleansolution(sln)

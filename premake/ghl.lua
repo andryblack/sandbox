@@ -11,7 +11,8 @@ project 'GHL'
 
 		local ghl_src = sandbox_dir .. '/GHL/src/'
 
-		targetdir(libs_dir)
+		configure_lib_targetdir()
+		
 		targetname ('GHL-' .. platform_dir)
 
 		local zlib_files = { 'inffixed.h', 'inftrees.c', 'inftrees.h', 'adler32.c', 'crc32.c', 'crc32.h', 'crypt.h',
@@ -227,5 +228,4 @@ project 'GHL'
 		}
 
 		configuration "Debug"
-   			targetsuffix "-debug"
    			defines "GHL_DEBUG"

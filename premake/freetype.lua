@@ -1,7 +1,7 @@
 local utils = require 'utils'
 project 'freetype'
 		kind 'StaticLib'
-	targetdir(libs_dir)
+	configure_lib_targetdir()
 	targetname ('freetype-' .. platform_dir)
 
 	local freetype_files = {
@@ -47,6 +47,3 @@ project 'freetype'
 		sandbox_dir .. '/include',
 		sandbox_dir .. '/external/freetype/include'
 	}
-
-	configuration "Debug"
-			targetsuffix "-debug"

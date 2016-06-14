@@ -4,7 +4,7 @@ project 'spine-runtime'
 
 		kind 'StaticLib'
 
-	targetdir (libs_dir)
+	configure_lib_targetdir()
 
 	targetname ('spine-runtime-' .. platform_dir)
 
@@ -19,5 +19,4 @@ project 'spine-runtime'
 				sandbox_dir .. '/external/spine-runtime-c/include'
 			}
 
-	configuration "Debug"
-			targetsuffix "_d"
+	

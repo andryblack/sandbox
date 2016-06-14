@@ -19,8 +19,8 @@ namespace Sandbox {
 }
 
 
-extern "C" __attribute__ ((visibility ("default")))
-void Java_com_sandboxgames_Activity_nativeOnActivityCreated(
+extern "C" JNIEXPORT
+void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityCreated(
                                                                   JNIEnv *env,
                                                                   jobject thiz,
                                                                   jobject activity,
@@ -35,8 +35,8 @@ void Java_com_sandboxgames_Activity_nativeOnActivityCreated(
         ext = ext->GetNext();
     }
 }
-extern "C" __attribute__ ((visibility ("default")))
-void Java_com_sandboxgames_Activity_nativeOnActivityDestroyed(
+extern "C" JNIEXPORT
+void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityDestroyed(
                                                                     JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -47,8 +47,8 @@ void Java_com_sandboxgames_Activity_nativeOnActivityDestroyed(
         ext = ext->GetNext();
     }
 }
-extern "C" __attribute__ ((visibility ("default")))
-void Java_com_sandboxgames_Activity_nativeOnActivityPaused(
+extern "C" JNIEXPORT
+void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityPaused(
                                                                  JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -59,8 +59,8 @@ void Java_com_sandboxgames_Activity_nativeOnActivityPaused(
         ext = ext->GetNext();
     }
 }
-extern "C" __attribute__ ((visibility ("default")))
-void Java_com_sandboxgames_Activity_nativeOnActivityResumed(
+extern "C" JNIEXPORT
+void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityResumed(
                                                                   JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -71,8 +71,8 @@ void Java_com_sandboxgames_Activity_nativeOnActivityResumed(
         ext = ext->GetNext();
     }
 }
-extern "C" __attribute__ ((visibility ("default")))
-void Java_com_sandboxgames_Activity_nativeOnActivitySaveInstanceState(
+extern "C" JNIEXPORT
+void JNICALL Java_com_sandboxgames_Activity_nativeOnActivitySaveInstanceState(
                                                                             JNIEnv *env, jobject thiz, jobject activity, jobject out_state) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -83,8 +83,8 @@ void Java_com_sandboxgames_Activity_nativeOnActivitySaveInstanceState(
         ext = ext->GetNext();
     }
 }
-extern "C" __attribute__ ((visibility ("default")))
-void Java_com_sandboxgames_Activity_nativeOnActivityStarted(
+extern "C" JNIEXPORT
+void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityStarted(
                                                                   JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -95,8 +95,8 @@ void Java_com_sandboxgames_Activity_nativeOnActivityStarted(
         ext = ext->GetNext();
     }
 }
-extern "C" __attribute__ ((visibility ("default")))
-void Java_com_sandboxgames_Activity_nativeOnActivityStopped(
+extern "C" JNIEXPORT
+void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityStopped(
                                                                   JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -107,8 +107,8 @@ void Java_com_sandboxgames_Activity_nativeOnActivityStopped(
         ext = ext->GetNext();
     }
 }
-extern "C" __attribute__ ((visibility ("default")))
-void Java_com_sandboxgames_Activity_nativeOnActivityResult(
+extern "C" JNIEXPORT
+void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityResult(
                                                                  JNIEnv *env,
                                                                  jobject thiz,
                                                                  jobject activity,

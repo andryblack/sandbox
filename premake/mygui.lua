@@ -1,7 +1,7 @@
 project 'MyGUI'
 
 	kind 'StaticLib'
-	targetdir(libs_dir)
+	configure_lib_targetdir()
 	targetname ('MyGUI-' .. platform_dir)
 
 	files {
@@ -20,6 +20,3 @@ project 'MyGUI'
 	else
 		defines 'MYGUI_CONFIG_INCLUDE="<sb_mygui_config.h>"'
 	end
-
-	configuration "Debug"
-			targetsuffix "-debug"

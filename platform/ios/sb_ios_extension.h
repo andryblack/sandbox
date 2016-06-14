@@ -1,7 +1,7 @@
 #ifndef SB_IOS_EXTENSION_H_INCLUDED
 #define SB_IOS_EXTENSION_H_INCLUDED
 
-#include <sb_extension.h>
+#include "sb_extension.h"
 
 namespace Sandbox {
     

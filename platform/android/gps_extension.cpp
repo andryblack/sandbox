@@ -140,7 +140,7 @@ public:
                          sb::string& res) {
         if (::strcmp("GPSSendScores",method)==0) {
             sb::map<sb::string,sb::string> data;
-            if (Sandbox::json_parse(args,data)) {
+            if (Sandbox::json_parse_object(args,data)) {
                 SubmitHighScore(data["id"].c_str(),::atoll(data["val"].c_str()));
                 res = "success";
             }

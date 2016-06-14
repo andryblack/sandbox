@@ -1,7 +1,7 @@
 local utils = require 'utils'
 project 'yajl'
    		kind 'StaticLib'
-   		targetdir(libs_dir)
+   		configure_lib_targetdir()
    		targetname ('yajl-' .. platform_dir)
    		local yajl_files = {
 			'yajl.c', 'yajl_alloc.c', 'yajl_buf.c', 'yajl_encode.c', 'yajl_gen.c', 'yajl_lex.c', 'yajl_parser.c',
@@ -16,5 +16,4 @@ project 'yajl'
 		
 		files(utils.append_path(sandbox_dir .. '/external/yajl/src/',yajl_files))
 
-		configuration "Debug"
-   			targetsuffix "-debug"
+		
