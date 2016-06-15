@@ -10,34 +10,34 @@ int ghl_android_app_main(int argc,char** argv) {
 }
 
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityCreated(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityCreated(
                                                                   JNIEnv *env,
                                                                   jobject thiz,
                                                                   jobject activity,
                                                                   jobject saved_instance_state);
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityDestroyed(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityDestroyed(
                                                                     JNIEnv *env, jobject thiz, jobject activity);
 
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityPaused(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityPaused(
                                                                  JNIEnv *env, jobject thiz, jobject activity);
 
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityResumed(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityResumed(
                                                                   JNIEnv *env, jobject thiz, jobject activity);
 
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivitySaveInstanceState(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivitySaveInstanceState(
                                                                             JNIEnv *env, jobject thiz, jobject activity, jobject out_state) ;
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityStarted(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityStarted(
                                                                   JNIEnv *env, jobject thiz, jobject activity) ;
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityStopped(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityStopped(
                                                                   JNIEnv *env, jobject thiz, jobject activity) ;
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityResult(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityResult(
                                                                  JNIEnv *env,
                                                                  jobject thiz,
                                                                  jobject activity,
@@ -46,11 +46,11 @@ void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityResult(
                                                                  jobject data) ;
 volatile void* __prevent_strip_symbols;
 volatile void prevent_strip_symbols() {
-    __prevent_strip_symbols = (void*)&Java_com_sandboxgames_Activity_nativeOnActivityCreated;
-    __prevent_strip_symbols = (void*)&Java_com_sandboxgames_Activity_nativeOnActivityDestroyed;
-    __prevent_strip_symbols = (void*)&Java_com_sandboxgames_Activity_nativeOnActivityPaused;
-    __prevent_strip_symbols = (void*)&Java_com_sandboxgames_Activity_nativeOnActivityResumed;
-    __prevent_strip_symbols = (void*)&Java_com_sandboxgames_Activity_nativeOnActivitySaveInstanceState;
-    __prevent_strip_symbols = (void*)&Java_com_sandboxgames_Activity_nativeOnActivityStopped;
-    __prevent_strip_symbols = (void*)&Java_com_sandboxgames_Activity_nativeOnActivityResult;
+    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityCreated;
+    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityDestroyed;
+    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityPaused;
+    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityResumed;
+    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivitySaveInstanceState;
+    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityStopped;
+    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityResult;
 }

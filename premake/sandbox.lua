@@ -35,7 +35,7 @@ solution( ProjectName )
 		android_abis {'armeabi'}
 		android_stl('gnustl_static')
 		android_activity(AndroidConfig.activity or 'com.sandboxgames.Activity')
-		android_libs(path.getabsolute(path.join(sandbox_dir,'GHL/src/android_ghl')))
+		android_libs(path.getabsolute(path.join(sandbox_dir,'GHL/src/android_ghl','src')))
 		android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','sandbox_lib')))
 		android_api_level(AndroidConfig.api_level or 9)
 		android_target_api_level(AndroidConfig.target_api_level or 14)
@@ -56,6 +56,9 @@ solution( ProjectName )
 				'com.google.android.gms.games.APP_ID=@string/app_id',
 				'com.google.android.gms.version=@integer/google_play_services_version'
 			}
+		end
+		if use.IAP then
+			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib')))
 		end
 		if AndroidConfig.permissions then
 			android_permissions( AndroidConfig.permissions )

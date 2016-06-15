@@ -20,7 +20,7 @@ namespace Sandbox {
 
 
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityCreated(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityCreated(
                                                                   JNIEnv *env,
                                                                   jobject thiz,
                                                                   jobject activity,
@@ -36,7 +36,7 @@ void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityCreated(
     }
 }
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityDestroyed(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityDestroyed(
                                                                     JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -48,7 +48,7 @@ void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityDestroyed(
     }
 }
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityPaused(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityPaused(
                                                                  JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -60,7 +60,7 @@ void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityPaused(
     }
 }
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityResumed(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityResumed(
                                                                   JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -72,7 +72,7 @@ void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityResumed(
     }
 }
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivitySaveInstanceState(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivitySaveInstanceState(
                                                                             JNIEnv *env, jobject thiz, jobject activity, jobject out_state) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -84,7 +84,7 @@ void JNICALL Java_com_sandboxgames_Activity_nativeOnActivitySaveInstanceState(
     }
 }
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityStarted(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityStarted(
                                                                   JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -96,7 +96,7 @@ void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityStarted(
     }
 }
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityStopped(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityStopped(
                                                                   JNIEnv *env, jobject thiz, jobject activity) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
@@ -108,7 +108,7 @@ void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityStopped(
     }
 }
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandboxgames_Activity_nativeOnActivityResult(
+void JNICALL Java_com_sandbox_Activity_nativeOnActivityResult(
                                                                  JNIEnv *env,
                                                                  jobject thiz,
                                                                  jobject activity,
