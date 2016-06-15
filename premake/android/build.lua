@@ -124,6 +124,11 @@ end
 function build.generate_app_build_gradle( sln , prj )
 	premake.eol("\n")
 
+	print('use versions:')
+	print('\tandroid_api_level',tostring(sln.android_api_level))
+	print('\tandroid_target_api_level',tostring(sln.android_target_api_level))
+	print('\tandroid_build_api_level',tostring(sln.android_build_api_level))
+	
 	local target_api = sln.android_target_api_level or sln.android_api_level or 14
 
 	_x("apply plugin: 'com.android.application'")
