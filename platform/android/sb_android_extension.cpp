@@ -1,11 +1,23 @@
 #include "sb_android_extension.h"
 #include <sb_application.h>
+#include <ghl_system.h>
 
 namespace Sandbox {
     
     static AndroidPlatformExtension*& root() {
         static AndroidPlatformExtension* r = 0;
         return r;
+    }
+
+    ANativeActivity* AndroidPlatformExtension::GetNativeActivity(Application* app) {
+        GHL::System* sys = app->GetSystem();
+        if (!sys)
+            return 0;
+        ANativeActivity* activity = 0;
+        if (sys->GetDeviceData(GHL::DEVICE_DATA_APPLICATION,&activity)) {
+            return activity;
+        }
+        return 0;
     }
     
     AndroidPlatformExtension::AndroidPlatformExtension() : m_next(root()) {
@@ -108,7 +120,7 @@ void JNICALL Java_com_sandbox_Activity_nativeOnActivityStopped(
     }
 }
 extern "C" JNIEXPORT
-void JNICALL Java_com_sandbox_Activity_nativeOnActivityResult(
+jboolean JNICALL Java_com_sandbox_Activity_nativeOnActivityResult(
                                                                  JNIEnv *env,
                                                                  jobject thiz,
                                                                  jobject activity,
@@ -117,10 +129,13 @@ void JNICALL Java_com_sandbox_Activity_nativeOnActivityResult(
                                                                  jobject data) {
     Sandbox::AndroidPlatformExtension* ext = Sandbox::root();
     while (ext) {
-        ext->nativeOnActivityResult(
+        if (ext->nativeOnActivityResult(
                                      env,
                                      thiz,
-                                     activity,request_code,result_code,data);
+                                     activity,request_code,result_code,data)) {
+            return JNI_TRUE;
+        }
         ext = ext->GetNext();
     }
+    return JNI_FALSE;
 }

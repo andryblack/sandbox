@@ -44,6 +44,7 @@ void JNICALL Java_com_sandbox_Activity_nativeOnActivityResult(
                                                                  jint request_code,
                                                                  jint result_code,
                                                                  jobject data) ;
+void ensure_iap_extension_not_stripped();
 volatile void* __prevent_strip_symbols;
 volatile void prevent_strip_symbols() {
     __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityCreated;
@@ -53,4 +54,5 @@ volatile void prevent_strip_symbols() {
     __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivitySaveInstanceState;
     __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityStopped;
     __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityResult;
+    ensure_iap_extension_not_stripped();
 }

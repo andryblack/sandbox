@@ -111,27 +111,22 @@ class GPSExtension : public Sandbox::AndroidPlatformExtension {
 public:
     virtual void OnLoad(Sandbox::Application* app) {
         Sandbox::LogInfo() << "GPSExtension::OnLoad";
-        GHL::System* sys = app->GetSystem();
-        if (sys) {
-            ANativeActivity* activity = 0;
-            if (sys->GetDeviceData(GHL::DEVICE_DATA_APPLICATION,&activity)) {
-                // gpg-cpp: Set platform intiialization
-                Sandbox::LogInfo() << "GPSExtension AndroidInitialization";
-                gpg::AndroidInitialization::ANativeActivity_onCreate(activity,0,0);
-                
-                // Get the platform configuration.
-                gpg::AndroidPlatformConfiguration platform_configuration;
-                platform_configuration.SetActivity(activity->clazz);
-                
-                // Now, create the game service (see StateManager.cpp)
-                // and pass in our callback
-                InitServices(platform_configuration);
-                
-            } else {
-                Sandbox::LogError() << "GPSExtension : not found acivity";
-            }
+        ANativeActivity* activity = GetNativeActivity(app);
+        if (activity) {
+            // gpg-cpp: Set platform intiialization
+            Sandbox::LogInfo() << "GPSExtension AndroidInitialization";
+            gpg::AndroidInitialization::ANativeActivity_onCreate(activity,0,0);
+            
+            // Get the platform configuration.
+            gpg::AndroidPlatformConfiguration platform_configuration;
+            platform_configuration.SetActivity(activity->clazz);
+            
+            // Now, create the game service (see StateManager.cpp)
+            // and pass in our callback
+            InitServices(platform_configuration);
+            
         } else {
-            Sandbox::LogError() << "GPSExtension : not found system";
+            Sandbox::LogError() << "GPSExtension : not found activity";
         }
     }
     virtual bool Process(Sandbox::Application* app,
@@ -219,7 +214,7 @@ public:
         gpg::AndroidSupport::OnActivityStopped(env,activity);
     }
     
-    virtual void nativeOnActivityResult(
+    virtual bool nativeOnActivityResult(
                                         JNIEnv *env,
                                         jobject thiz,
                                         jobject activity,
@@ -227,5 +222,6 @@ public:
                                         jint result_code,
                                         jobject data) {
         gpg::AndroidSupport::OnActivityResult(env,activity,request_code,result_code,data);
+        return false;
     }
 } gps_extension;

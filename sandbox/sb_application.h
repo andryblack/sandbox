@@ -45,7 +45,7 @@ namespace Sandbox {
         void    RemoveScene( const RTScenePtr& scene );
         void    SetMouseContext(const LuaContextPtr& ctx );
         void    SetKeyboardContext(const LuaContextPtr& ctx );
-  	
+        
         GHL::System* GetSystem() const { return m_system;}
         
         virtual bool CallExtension( const char* method,

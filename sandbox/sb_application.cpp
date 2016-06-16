@@ -198,7 +198,7 @@ namespace Sandbox {
         m_gui_data_manager = 0;
 #endif
     }
-    
+        
     void Application::BindModules( LuaVM* lua) {
         register_math(lua->GetVM());
         register_utils(lua->GetVM());

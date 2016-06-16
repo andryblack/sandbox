@@ -157,6 +157,14 @@ function build.generate_app_build_gradle( sln , prj )
 		end
 	end
 
+	local aidl_dirs = {}
+	if prj.android_aidl then
+		for _,v in ipairs(prj.android_aidl) do
+			local p = '../' .. path.getrelative(sln.location,v)
+			table.insert(aidl_dirs,"'" .. p .. "'")
+		end
+	end
+
     _x(1,'sourceSets {')
     _x(2,'main {')
     _x(3,"manifest.srcFile 'AndroidManifest.xml'")
@@ -164,6 +172,9 @@ function build.generate_app_build_gradle( sln , prj )
     _x(3,"resources.srcDirs = ['../src']")
     _x(3,"res.srcDirs = ['../res']")
     _x(3,"assets.srcDirs = []")
+    if next(aidl_dirs) then
+    	_x(3,"aidl.srcDirs = [" .. table.concat(aidl_dirs,',') .. "]")
+    end
     --_x(3,"jniLibs.srcDir 'jni'")
     _x(2,'}')
     for cfg in project.eachconfig(prj) do

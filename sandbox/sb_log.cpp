@@ -6,13 +6,26 @@
 
 #include <sbstd/sb_platform.h>
 #include <ghl_vfs.h>
+#include "meta/sb_meta.h"
+
+
+
 
 namespace Sandbox {
+    
+    
     
     static const char* curr_log = "curr_log.txt";
     static const char* prev_log = "prev_log.txt";
     static GHL::Byte rn[] = {'\n'};
     
+    bool Logger::m_enable_platform_log =
+#ifdef SB_DEBUG
+    true
+#else
+    false
+#endif
+    ;
     
     static const char* level_descr[] = {
         "F:",
@@ -81,9 +94,8 @@ namespace Sandbox {
         if (file_logger.opened()) {
             file_logger.AddMessage(m_level, m_stream.str().c_str());
         }
-#ifndef SB_DEBUG
-        else
-#endif
+
+        if (m_enable_platform_log)
         {
             GHL_Log(m_level, m_stream.str().c_str());
         }

@@ -119,6 +119,7 @@
 // Sent when the transaction array has changed (additions or state changes).  Client should check state of transactions and finish as appropriate.
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray<SKPaymentTransaction *> *)transactions {
     for (SKPaymentTransaction *transaction in transactions) {
+        const char* method = "iap_purchase";
         NSString* request_id = [NSString stringWithFormat:@"%p",transaction.payment];
         NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:5];
         [dict setObject:request_id forKey:@"request_id"];
@@ -145,6 +146,7 @@
                 [dict setObject:transaction.transactionIdentifier forKey:@"transaction"];
                 break;
             case SKPaymentTransactionStateRestored:
+                method = "iap_restore_payments";
                 //[self restoreTransaction:transaction];
                 [dict setObject:@"restored" forKey:@"state"];
                 [dict setObject:transaction.transactionIdentifier forKey:@"transaction"];
@@ -157,7 +159,7 @@
         if (m_application) {
             NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:dict options:nil error:nil];
             NSString* newStr = [[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding];
-            m_application->OnExtensionResponse("iap_purchase",newStr.UTF8String);
+            m_application->OnExtensionResponse(method,newStr.UTF8String);
             [newStr release];
         }
     }

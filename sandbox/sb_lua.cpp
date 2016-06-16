@@ -38,6 +38,8 @@ extern "C" {
 SB_META_BEGIN_KLASS_BIND(Sandbox::BinaryData)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_NAMED_KLASS(Sandbox::Logger, "log")
+
 namespace Sandbox {
 	
     static const char* MODULE = "Sanbox:Lua";
@@ -98,6 +100,19 @@ namespace Sandbox {
         }
         lua_pop(L, 1); // func
         return 0;
+    }
+    
+    namespace meta {
+        template <> template <class U> void bind_type<Logger>::bind(U& bind) {
+            typedef Logger ThisType;(void)bind;
+            bind(static_method("debug", &lua_log_func<GHL::LOG_LEVEL_DEBUG>));
+            bind(static_method("verbose", &lua_log_func<GHL::LOG_LEVEL_VERBOSE>));
+            bind(static_method("info", &lua_log_func<GHL::LOG_LEVEL_INFO>));
+            bind(static_method("warning", &lua_log_func<GHL::LOG_LEVEL_WARNING>));
+            bind(static_method("error", &lua_log_func<GHL::LOG_LEVEL_ERROR>));
+            bind(static_method("fatal", &lua_log_func<GHL::LOG_LEVEL_FATAL>));
+            SB_META_STATIC_METHOD(SetPlatformLogEnabled)
+        }
     }
 		
 	
@@ -203,18 +218,7 @@ namespace Sandbox {
         lua_rawseti(m_L,-2,1);
         luabind::lua_set_value(m_L, "package.searchers");
         
-        lua_createtable(m_L, 0, 6);
-        static const luaL_Reg log_funcs_impl[] = {
-            {"fatal",   lua_log_func<GHL::LOG_LEVEL_FATAL>},
-            {"error",   lua_log_func<GHL::LOG_LEVEL_ERROR>},
-            {"warning", lua_log_func<GHL::LOG_LEVEL_WARNING>},
-            {"info",    lua_log_func<GHL::LOG_LEVEL_INFO>},
-            {"verbose", lua_log_func<GHL::LOG_LEVEL_VERBOSE>},
-            {"debug",   lua_log_func<GHL::LOG_LEVEL_DEBUG>},
-            {NULL, NULL}
-        };
-        luaL_setfuncs(m_L,  log_funcs_impl,0);
-        luabind::lua_set_value(m_L, "log");
+        luabind::ExternClass<Logger>(m_L);
         
         lua_atpanic(m_L, &at_panic_func);
         

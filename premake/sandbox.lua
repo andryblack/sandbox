@@ -58,7 +58,8 @@ solution( ProjectName )
 			}
 		end
 		if use.IAP then
-			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib')))
+			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib','src')))
+			android_aidl(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib','aidl')))
 		end
 		if AndroidConfig.permissions then
 			android_permissions( AndroidConfig.permissions )
@@ -278,12 +279,14 @@ solution( ProjectName )
 			files { sandbox_dir .. '/platform/windows/*.cpp' }
 		elseif os.is('android') then
 			files { sandbox_dir .. '/platform/android/sb_android_extension.cpp' }
+			files { sandbox_dir .. '/platform/android/jni_utils.cpp' }
 			if use.AndroidGooglePlayService or use.IAP then
 				files { sandbox_dir .. '/platform/android/gps_extension.cpp' }
 				includedirs { sandbox_dir .. '/external/gpg-cpp-sdk/android/include' }
-				if use.IAP then
-					files { sandbox_dir .. '/platform/android/iap_extension.cpp' }
-				end
+				
+			end
+			if use.IAP then
+				files { sandbox_dir .. '/platform/android/iap_extension.cpp' }
 			end
 		elseif os.is( 'emscripten' ) then
 			files { sandbox_dir .. '/platform/emscripten/*.cpp' }

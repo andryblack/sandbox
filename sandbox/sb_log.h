@@ -26,12 +26,14 @@ namespace Sandbox {
             return *this;
         }
         static void StartSession(GHL::VFS* vfs);
+        static void SetPlatformLogEnabled(bool e) { m_enable_platform_log = e; }
     private:
         Logger( const Logger& );
         Logger& operator = (const Logger&);
         const char*     m_module;
         GHL::LogLevel       m_level;
         std::stringstream   m_stream;
+        static bool m_enable_platform_log;
     };
     
     class EmptyLogger {

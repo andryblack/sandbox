@@ -5,48 +5,56 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 
 public class Activity  extends com.GHL.Activity {
-    
 
+    @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         nativeOnActivityCreated(this, savedInstanceState);
     }
-    
+
+    @Override
     protected void onDestroy(){
         super.onDestroy();
         nativeOnActivityDestroyed(this);
     }
-    
+
+    @Override
     protected void onPause(){
         super.onPause();
         nativeOnActivityPaused(this);
     }
-    
+
+    @Override
     protected void onResume(){
         super.onResume();
         nativeOnActivityResumed(this);
     }
-    
+
+    @Override
     protected void onStart(){
         super.onStart();
         nativeOnActivityStarted(this);
     }
-    
+
+    @Override
     protected void onStop(){
         super.onStop();
         nativeOnActivityStopped(this);
     }
-    
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         nativeOnActivitySaveInstanceState(this, outState);
     }
-    
+
+    @Override
     protected void onActivityResult(int requestCode,
                                         int resultCode,
                                         Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        nativeOnActivityResult(this, requestCode, resultCode, data);
+        if (!nativeOnActivityResult(this, requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
     
     // Implemented in C++.
@@ -58,7 +66,7 @@ public class Activity  extends com.GHL.Activity {
                                                                   Bundle outState);
     private static native void nativeOnActivityStarted(Activity activity);
     private static native void nativeOnActivityStopped(Activity activity);
-    private static native void nativeOnActivityResult(Activity activity,
+    private static native boolean nativeOnActivityResult(Activity activity,
                                                             int requestCode,
                                                             int resultCode,
                                                             Intent data);
