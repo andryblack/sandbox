@@ -132,6 +132,13 @@ public class IAPHelper  {
         public String getOriginalJson() { return mOriginalJson; }
         public String getSignature() { return mSignature; }
 
+        public String getTransaction() throws JSONException {
+            JSONObject obj = new JSONObject();
+            obj.put("ticket",getOriginalJson());
+            obj.put("signature",getSignature());
+            return obj.toString();
+        }
+
         @Override
         public String toString() { return "PurchaseInfo:" + mOriginalJson; }
     }
@@ -884,11 +891,16 @@ public class IAPHelper  {
         boolean result = false;
         try {
             for (Purchase purchase: m_purchase_map.values()) {
-                logDebug("check purchase :" + purchase.getSku() + " transaction:" + purchase.getSignature());
-                if (purchase.getSignature().equals(signature)) {
-                    logDebug("found purchase for confirm " + purchase.getSku());
-                    consumeAsync(purchase);
-                    result = true;
+                try {
+                    String transaction = purchase.getTransaction();
+                    logDebug("check purchase :" + purchase.getSku() + " transaction:" + transaction);
+                    if (transaction.equals(signature)) {
+                        logDebug("found purchase for confirm " + purchase.getSku());
+                        consumeAsync(purchase);
+                        result = true;
+                    }
+                } catch ( JSONException e) {
+                    logError(e.toString());
                 }
             }
         } catch ( IabAsyncInProgressException e) {
@@ -916,7 +928,7 @@ public class IAPHelper  {
                 JSONObject obj = new JSONObject();
                 obj.put("product_id", purchase.getSku());
                 obj.put("state", "restored");
-                obj.put("transaction", purchase.getSignature());
+                obj.put("transaction", purchase.getTransaction());
                 nativeProcessResponse(m_native_object, "iap_restore_payments", obj.toString());
             } catch ( JSONException e) {
                 logError(e.toString());
@@ -956,7 +968,7 @@ public class IAPHelper  {
             obj.put("result",result.toJson());
             obj.put("state",result.isSuccess() ? "purchased" : "failed");
             if (info != null) {
-                obj.put("transaction",info.getSignature());
+                obj.put("transaction",info.getTransaction());
                 m_purchase_map.put(info.getSku(),info);
             }
             nativeProcessResponse(m_native_object,"iap_purchase",obj.toString());
