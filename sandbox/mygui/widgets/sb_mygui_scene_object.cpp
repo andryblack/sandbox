@@ -4,7 +4,7 @@
 #include "MyGUI_RenderItem.h"
 #include "sb_graphics.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ObjectSubSkin,MyGUI::SubSkin)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ObjectSubSkin,MyGUI::ISubWidgetRect)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::SceneObjectWidget,MyGUI::Widget)
 
 
@@ -12,14 +12,26 @@ namespace Sandbox {
     namespace mygui {
         
         
-        ObjectSubSkin::ObjectSubSkin() {
-            mSeparate = true;
+        ObjectSubSkin::ObjectSubSkin() : mNode(0),mRenderItem(0){
+            //LogInfo() << "ObjectSubSkin::ObjectSubSkin";
+        }
+        
+        void ObjectSubSkin::createDrawItem( MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node) {
+            //LogInfo() << "ObjectSubSkin::createDrawItem";
+            mNode = _node;
+            mRenderItem = mNode->addToRenderItem(this, true, true);
+            mRenderItem->addDrawItem(this);
+        }
+        void ObjectSubSkin::destroyDrawItem() {
+            //LogInfo() << "ObjectSubSkin::destroyDrawItem";
+            mNode = nullptr;
+            mRenderItem->removeDrawItem(this);
+            mRenderItem = nullptr;
         }
         
         
-        void ObjectSubSkin::doManualRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
-            if (mRenderItem && mCroppedParent) {
-                MyGUI::IRenderTarget* _target = mRenderItem->getRenderTarget();
+        void ObjectSubSkin::doRender(MyGUI::IRenderTarget* _target) {
+            if (mCroppedParent) {
                 if (_target) {
                     RenderTargetImpl* target = static_cast<RenderTargetImpl*>(_target);
                     MyGUI::Widget* widget_p = static_cast<MyGUI::Widget*>(mCroppedParent);
@@ -37,11 +49,14 @@ namespace Sandbox {
                     
                     x-=info.leftOffset;
                     y-=info.topOffset;
-                    
-                    target->startRenderObject();
-                    target->graphics()->SetColor(Sandbox::Color(GHL::UInt32(mCurrentColour)));
-                    target->graphics()->SetTransform(Sandbox::Transform2d().translated(x, y));
+                  
+                    Transform2d tr = target->graphics()->GetTransform();
+                    Color c = target->graphics()->GetColor();
+                    target->graphics()->SetColor(c*Sandbox::Color(m_colour.red,m_colour.green,m_colour.blue,m_colour.alpha));
+                    target->graphics()->SetTransform(tr.translated(x, y));
                     object->Draw(*target->graphics());
+                    target->graphics()->SetColor(c);
+                    target->graphics()->SetTransform(tr);
                 }
             }
         }

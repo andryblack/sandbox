@@ -113,6 +113,9 @@ namespace Sandbox {
         void DrawImageBox(const ImageBox& img, const Vector2f& pos, const Vector2f& size);
         /// @}
         
+        void BeginDrawTriangles(const TexturePtr& texture);
+        void AppendVertex(const Vector2f& pos, const Vector2f& tex, const Color& clr);
+        
         /// fill rect by pattern
         void FillRect( const TexturePtr& texture, const Rectf& rect);
 		

@@ -18,12 +18,18 @@ namespace Sandbox {
     
     namespace mygui {
         
-        class ObjectSubSkin : public MyGUI::SubSkin {
+        class ObjectSubSkin : public MyGUI::ISubWidgetRect {
             MYGUI_RTTI_DERIVED( ObjectSubSkin )
         public:
             ObjectSubSkin();
-            virtual void doManualRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
+            virtual void createDrawItem(MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node);
+            virtual void destroyDrawItem();
+            virtual void doRender(MyGUI::IRenderTarget*);
+            virtual void _setColour(const MyGUI::Colour& _value) { m_colour = _value; }
         private:
+            MyGUI::Colour   m_colour;
+            MyGUI::ILayerNode* mNode;
+            MyGUI::RenderItem* mRenderItem;
         };
         
         class SceneObjectWidget : public MyGUI::Widget {

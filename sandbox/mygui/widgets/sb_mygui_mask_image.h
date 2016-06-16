@@ -29,7 +29,7 @@ namespace Sandbox {
             MYGUI_RTTI_DERIVED( MaskSubSkin )
         public:
             MaskSubSkin();
-            virtual void doManualRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
+            virtual void doRender(MyGUI::IRenderTarget* _target);
         private:
             sb::vector<GHL::Vertex2Tex> m_vdata;
         };
@@ -49,8 +49,8 @@ namespace Sandbox {
             MYGUI_RTTI_DERIVED( MaskSetSubSkin )
         public:
             MaskSetSubSkin();
-            virtual void doManualRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
-            virtual void doRender();
+            
+            virtual void doRender(MyGUI::IRenderTarget* _target);
             virtual void setStateData(MyGUI::IStateInfo* _data);
             MyGUI::ITexture* getTexture() {
                 if (m_texture) {

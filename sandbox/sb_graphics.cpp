@@ -191,6 +191,39 @@ namespace Sandbox {
         m_ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
     }
 	
+    void Graphics::BeginDrawTriangles(const TexturePtr& texture) {
+        if (m_texture != texture) {
+            Flush();
+        }
+        if (m_ptype != GHL::PRIMITIVE_TYPE_TRIANGLES) {
+            Flush();
+        }
+        m_texture = texture;
+        m_ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
+    }
+    
+    void Graphics::AppendVertex(const Vector2f& pos, const Vector2f& tex, const Color& clr) {
+        GHL::UInt32 hclr = (m_color * clr).hw_premul();
+        if (m_calc2_tex) {
+            m_indexes.push_back(static_cast<GHL::UInt16>(m_vertexes2tex.size()));
+            appendVertex2(pos.x,pos.y,
+                          tex.x,
+                          tex.y,hclr);
+            if ((m_vertexes2tex.size() % 3) == 0) {
+                m_primitives++;
+            }
+        } else {
+            m_indexes.push_back(static_cast<GHL::UInt16>(m_vertexes.size()));
+            appendVertex(pos.x,pos.y,
+                         tex.x,
+                         tex.y,hclr);
+            if ((m_vertexes.size() % 3) == 0) {
+                m_primitives++;
+            }
+
+        }
+    }
+    
 	void Graphics::appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3) {
 		GHL::UInt16 base = m_calc2_tex ? static_cast<GHL::UInt16>(m_vertexes2tex.size()) : static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+i1);

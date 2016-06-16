@@ -46,8 +46,8 @@ namespace Sandbox {
         public:
             virtual void _setUVSet(const MyGUI::FloatRect& _rect);
             virtual void _updateView();
-            virtual void createDrawItem(MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node);
-            virtual void doRender();
+            virtual void createDrawItem(MyGUI::ITexture* _texture,  MyGUI::ILayerNode* _node);
+            virtual void doRender(MyGUI::IRenderTarget* _target);
         private:
         };
         

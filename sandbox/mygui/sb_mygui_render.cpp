@@ -17,7 +17,9 @@
 #include <ghl_image.h>
 #include <ghl_texture.h>
 #include "sb_transform2d.h"
+#include "MyGUI_VertexData.h"
 
+SB_META_DECLARE_OBJECT(MyGUI::ITexture, MyGUI::IObject)
 
 namespace Sandbox {
     
@@ -26,23 +28,13 @@ namespace Sandbox {
         
         
                 
-        RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res) : m_graphics(g),m_resources(res),m_render(0) {
-            m_render_object = 0;
-            m_draw_mask = 0;
+        RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res) : m_graphics(g),m_resources(res) {
         }
         
         void RenderTargetImpl::drawScene(const ScenePtr &scene) {
-            if (m_render) {
-                sb_assert(m_render);
-                m_graphics->EndNative(m_render);
-                Transform2d tr = m_graphics->GetTransform();
-            
-                //m_graphics->SetTransform(tr.translated(-m_rt_info.leftOffset, -m_rt_info.topOffset));
-                scene->Draw(*m_graphics);
-                m_graphics->SetTransform(tr);
-                m_render = m_graphics->BeginNative();
-                sb_assert(m_render);
-            }
+            Transform2d tr = m_graphics->GetTransform();
+            scene->Draw(*m_graphics);
+            m_graphics->SetTransform(tr);
         }
         
         const MyGUI::RenderTargetInfo& RenderTargetImpl::getInfo() {
@@ -51,20 +43,11 @@ namespace Sandbox {
         
         void RenderTargetImpl::begin() {
             m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
-            m_render = m_graphics->BeginNative();
-            sb_assert(m_render);
-            if (m_render) {
-                m_render->SetupBlend(true,GHL::BLEND_FACTOR_ONE,GHL::BLEND_FACTOR_SRC_ALPHA_INV);
-                m_render->SetupFaceCull(false);
-            }
+            m_graphics->BeginDrawTriangles(TexturePtr());
         }
         
         void RenderTargetImpl::end() {
-            if (m_render) {
-                m_render->SetupFaceCull(false);
-                m_graphics->EndNative(m_render);
-                m_render = 0;
-            }
+            m_graphics->Flush();
         }
         
         void RenderTargetImpl::setSize(int width, int height) {
@@ -106,23 +89,24 @@ namespace Sandbox {
                 GHL::RenderTarget* rt = m_target->GetNative();
                 GHL::Render* render = m_resources->GetRender();
                 render->BeginScene(rt);
-                m_graphics->BeginScene(render,true);
-                m_graphics->Clear(Color(0,0,0,0), 0);
+                render->Clear(0, 0, 0, 0, 0);
+                m_graphics->BeginScene(render, true);
                 RenderTargetImpl::begin();
             }
         }
-        void TextureImpl::doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
-            RenderTargetImpl::doRender(_buffer, _texture, _count);
+        void TextureImpl::setTexture(MyGUI::ITexture* _texture) {
+            RenderTargetImpl::setTexture(_texture);
         }
+        
+        void TextureImpl::addVertex(const MyGUI::Vertex& v) {
+            RenderTargetImpl::addVertex(v);
+        }
+        
         void TextureImpl::end() {
-            endRenderMask();
-            endRenderObject();
-            GHL::Render* render = m_render;
             RenderTargetImpl::end();
             m_graphics->EndScene();
-            if (render) {
-                render->EndScene();
-            }
+            GHL::Render* render = m_resources->GetRender();
+            render->EndScene();
         }
             
         MyGUI::IRenderTarget* TextureImpl::getRenderTarget()
@@ -197,77 +181,31 @@ namespace Sandbox {
         size_t TextureImpl::getNumElemBytes() {
             return 0;
         }
-        const GHL::Texture* TextureImpl::Present() {
-            return m_texture ? m_texture->Present(m_resources) : reinterpret_cast<GHL::Texture*>((void*)(0));
+        
+        RenderTargetImpl::RenderTargetImpl()  {
+            
         }
         
-        RenderTargetImpl::RenderTargetImpl() : m_draw_mask(0) {
-            m_render_object = false;
-        }
-        
-        
-        void RenderTargetImpl::doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) {
-            endRenderObject();
-            if (m_render) {
-                endRenderMask();
-                VertexBufferImpl* vb = reinterpret_cast<VertexBufferImpl*>(_buffer);
-                TextureImpl* tex = reinterpret_cast<TextureImpl*>(_texture);
-                if (vb && tex) {
-                    m_render->SetTexture(tex->Present());
-                    m_render->DrawPrimitivesFromMemory(GHL::PRIMITIVE_TYPE_TRIANGLES,
-                                                GHL::VERTEX_TYPE_SIMPLE, vb->GetData(),
-                                                _count, 0, _count/3);
-                }
-            }
-        }
-
-        void    RenderTargetImpl::startRenderMask( MyGUI::ITexture* tex_mask ) {
-            TextureImpl* tex = reinterpret_cast<TextureImpl*>(tex_mask);
-            if (m_draw_mask == tex) {
-                return;
-            }
-            m_draw_mask = tex;
-            if (m_render) {
-                m_render->SetTexture(m_draw_mask->Present(),1);
-                m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
-                m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
+        void RenderTargetImpl::setTexture(MyGUI::ITexture *_texture) {
+            if (_texture) {
+                TextureImpl* tex = static_cast<TextureImpl*>(_texture);
+                m_graphics->BeginDrawTriangles(tex->GetTexture());
+            } else {
+                m_graphics->BeginDrawTriangles(TexturePtr());
             }
         }
         
-        void    RenderTargetImpl::endRenderMask() {
-            if (!m_draw_mask) {
-                return;
-            }
-            if (m_render) {
-                m_render->SetShader(0);
-                m_render->SetTexture(0,1);
-                m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
-                m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE, GHL::TEX_ARG_CURRENT, GHL::TEX_ARG_TEXTURE, 1);
-            }
-            m_draw_mask = 0;
+        void RenderTargetImpl::addVertex(const MyGUI::Vertex &v) {
+            m_graphics->AppendVertex(Sandbox::Vector2f(v.x,v.y), Sandbox::Vector2f(v.u,v.v), Color(v.colour));
         }
         
-        void    RenderTargetImpl::endRenderObject() {
-            if (!m_render_object) {
-                return;
+        void RenderTargetImpl::addQuad(const MyGUI::VertexQuad& q) {
+            for (int i=0;i<MyGUI::VertexQuad::VertexCount;++i) {
+                const MyGUI::Vertex& v(q.vertex[i]);
+                m_graphics->AppendVertex(Sandbox::Vector2f(v.x,v.y), Sandbox::Vector2f(v.u,v.v), Color(v.colour));
             }
-            m_render_object = false;
-            sb_assert(!m_render);
-            RenderTargetImpl::begin();
-            sb_assert(m_render);
         }
         
-        void    RenderTargetImpl::startRenderObject() {
-            if (m_render_object) {
-                sb_assert(!m_render);
-                return;
-            }
-            m_render_object = true;
-            endRenderMask();
-            sb_assert(m_render);
-            RenderTargetImpl::end();
-            sb_assert(!m_render);
-        }
         
         
         RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res) {
@@ -277,15 +215,7 @@ namespace Sandbox {
             
             onResizeView(m_rendertarget_size);
         }
-        
-        MyGUI::IVertexBuffer* RenderManager::createVertexBuffer() {
-            return new VertexBufferImpl();
-        }
-        
-        void RenderManager::destroyVertexBuffer(MyGUI::IVertexBuffer* _buffer) {
-            delete _buffer;
-        }
-        
+                
         float RenderManager::getDisplayScale() const {
             return m_resources->GetScale();
         }
@@ -323,10 +253,6 @@ namespace Sandbox {
         
         const MyGUI::IntSize& RenderManager::getViewSize() const {
             return m_rendertarget_size;
-        }
-        
-        MyGUI::VertexColourType RenderManager::getVertexFormat() {
-            return MyGUI::VertexColourType::ColourABGR;
         }
         
         bool RenderManager::isFormatSupported(MyGUI::PixelFormat _format, MyGUI::TextureUsage _usage) {

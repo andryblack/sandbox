@@ -34,35 +34,7 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<RenderTarget> RenderTargetPtr;
     
     namespace mygui {
-        
-        class VertexBufferImpl : public MyGUI::IVertexBuffer {
-        public:
-            VertexBufferImpl() {
-
-            }
-            virtual void setVertexCount(size_t _value) {
-                m_data.resize(_value);
-            }
-            virtual size_t getVertexCount() {
-                return m_data.size();
-            }
-            
-            virtual MyGUI::Vertex* lock() {
-                return reinterpret_cast<MyGUI::Vertex*>(m_data.data());
-            }
-            virtual void unlock() {
                 
-            }
-            const void* GetData() {
-                return m_data.data();
-            }
-            
-            sb::vector<GHL::Vertex>& data() { return m_data; }
-        private:
-            sb::vector<GHL::Vertex>  m_data;
-        };
-
-        
         class TextureImpl;
         
         class RenderTargetImpl : public MyGUI::IRenderTarget {
@@ -71,18 +43,14 @@ namespace Sandbox {
             virtual void begin();
             virtual void end();
             
-            virtual void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
+            virtual void setTexture(MyGUI::ITexture* _texture) ;
+            virtual void addVertex(const MyGUI::Vertex& v) ;
+            virtual void addQuad(const MyGUI::VertexQuad& q);
             
             virtual const MyGUI::RenderTargetInfo& getInfo();
             
             void    drawScene(const ScenePtr& scene);
             
-            void    startRenderMask( MyGUI::ITexture* tex_mask );
-            void    startRenderObject();
-            void    endRenderMask();
-            void    endRenderObject();
-            
-            GHL::Render* render() { return m_render; }
             Resources* resources() { return m_resources; }
             Graphics* graphics() { return m_graphics; }
         protected:
@@ -92,9 +60,6 @@ namespace Sandbox {
             MyGUI::RenderTargetInfo m_rt_info;
             MyGUI::IntSize  m_rendertarget_size;
             void setSize(int width,int height);
-            GHL::Render*    m_render;
-            TextureImpl*    m_draw_mask;
-            bool            m_render_object;
         };
         
         class TextureImpl : public MyGUI::ITexture, public RenderTargetImpl {
@@ -106,7 +71,10 @@ namespace Sandbox {
             void WrapRT( RenderTargetPtr rt );
             
             virtual void begin();
-            virtual void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count);
+            
+            virtual void setTexture(MyGUI::ITexture* _texture) ;
+            virtual void addVertex(const MyGUI::Vertex& v) ;
+
             void end();
             
             virtual MyGUI::IRenderTarget* getRenderTarget();
@@ -129,7 +97,7 @@ namespace Sandbox {
             virtual MyGUI::PixelFormat getFormat();
             virtual MyGUI::TextureUsage getUsage();
             virtual size_t getNumElemBytes();
-            const GHL::Texture* Present();
+            const TexturePtr& GetTexture() { return m_texture; }
         private:
             sb::string  m_name;
             TexturePtr  m_texture;
@@ -143,13 +111,6 @@ namespace Sandbox {
             
             
             static RenderManager& getInstance() { return static_cast<RenderManager&>(MyGUI::RenderManager::getInstance()); }
-            /** Create vertex buffer.
-             This method should create vertex buffer with triangles list type,
-             each vertex have position, colour, texture coordinates.
-             */
-            virtual MyGUI::IVertexBuffer* createVertexBuffer();
-            /** Destroy vertex buffer */
-            virtual void destroyVertexBuffer(MyGUI::IVertexBuffer* _buffer);
             
             /** Create empty texture instance */
             virtual MyGUI::ITexture* createTexture(const std::string& _name);
@@ -160,9 +121,6 @@ namespace Sandbox {
             
             //FIXME возможно перенести в структуру о рендер таргете
             virtual const MyGUI::IntSize& getViewSize() const;
-            
-            /** Get current vertex colour type */
-            virtual MyGUI::VertexColourType getVertexFormat();
             
             /** Check if texture format supported by hardware */
             virtual bool isFormatSupported(MyGUI::PixelFormat _format, MyGUI::TextureUsage _usage);
