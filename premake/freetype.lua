@@ -5,17 +5,7 @@ project 'freetype'
 	targetname ('freetype-' .. platform_dir)
 
 	local freetype_files = {
-		'autofit/afangles.c',
-        'autofit/afcjk.c',
-        'autofit/afdummy.c',
-        'autofit/afglobal.c',
-        'autofit/afhints.c',
-        'autofit/afindic.c',
-        'autofit/aflatin.c',
-        'autofit/afloader.c',
-        'autofit/afmodule.c',
-        'autofit/afpic.c',
-        'autofit/afwarp.c',
+		'autofit/autofit.c',
 
 		'base/ftbase.c',
 		'base/ftbitmap.c',
