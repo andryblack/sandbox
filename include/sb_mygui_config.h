@@ -6,7 +6,6 @@
 #define MYGUI_DONT_USE_OBSOLETE
 #define MYGUI_USE_PREMULTIPLIED_ALPHA
 
-#define MYGUI_USE_FREETYPE
 #if !defined(__FLASHPLAYER__) && !defined(__ANDROID__) && (!defined(__clang__))
 #define MYGUI_DONT_REPLACE_NULLPTR
 #endif

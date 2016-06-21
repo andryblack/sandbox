@@ -12,7 +12,6 @@ project 'MyGUI'
 	sysincludedirs {
 		sandbox_dir .. '/external/MyGUI/MyGUIEngine/include',
 		sandbox_dir .. '/include',
-		sandbox_dir .. '/external/freetype/include'
 	}
 
 	if os.is('windows') then

@@ -103,59 +103,94 @@ namespace Sandbox {
             
             // текущие цвета
             MyGUI::uint32 colour = mCurrentColourNative;
-            MyGUI::uint32 selectedColour =  colour | 0x00FFFFFF;
             
             const MyGUI::VectorLineInfo& textViewData = mTextView.getData();
             
-            float top = (float)(-mViewOffset.top + mCoord.top);
+            
             
             MyGUI::FloatRect vertexRect;
             
-            
-            size_t index = 0;
-            
-            for (MyGUI::VectorLineInfo::const_iterator line = textViewData.begin(); line != textViewData.end(); ++line)
-            {
-                float left = (float)(float(line->offset)*m_scale - mViewOffset.left + mCoord.left);
-                
-                for (MyGUI::VectorCharInfo::const_iterator sim = line->simbols.begin(); sim != line->simbols.end(); ++sim)
-                {
-                    if (sim->isColour())
-                    {
-                        colour = sim->getColour() | (colour & 0xFF000000);
-                        selectedColour = colour | 0x00FFFFFF;
-                        continue;
-                    }
+            // Render the glyph shadow, if any.
+            if (mShadow) {
+                for (size_t pass=0;pass<mFont->getNumPasses();++pass) {
+                    MyGUI::FloatSize offset = mFont->getOffset(pass);
+                    float  top = (float)(-mViewOffset.top + mCoord.top) + offset.height * m_scale;
                     
-                    float fullAdvance = sim->getBearingX() + sim->getAdvance();
-                                        
-                    _target->setTexture(sim->getTexture());
-                    
-                    // Render the glyph shadow, if any.
-                    if (mShadow)
+                    for (MyGUI::VectorLineInfoLines::const_iterator line = textViewData.lines.begin(); line != textViewData.lines.end(); ++line)
                     {
-                        vertexRect.left = left + (sim->getBearingX() + 1.0f)*m_scale;
-                        vertexRect.top = top + (sim->getBearingY() + 1.0f)*m_scale;
-                        vertexRect.right = vertexRect.left + sim->getWidth() * m_scale;
-                        vertexRect.bottom = vertexRect.top + sim->getHeight() * m_scale;
+                        float left = (float)(float(line->offset)*m_scale - mViewOffset.left + mCoord.left) + offset.width * m_scale;
                         
-                        drawGlyph(renderTargetInfo, _target, vertexCount, vertexRect, sim->getUVRect(), mShadowColourNative);
+                        for (MyGUI::VectorCharInfo::const_iterator sim = line->simbols.begin(); sim != line->simbols.end(); ++sim)
+                        {
+                            if (sim->isColour())
+                            {
+                                continue;
+                            }
+                            
+                            float fullAdvance = sim->getAdvance();
+                            const MyGUI::GlyphInfo* info = mFont->getGlyphInfo(pass, sim->getChar());
+                            if (info) {
+                                _target->setTexture(info->texture);
+                                vertexRect.left = left + (info->bearingX * textViewData.scale + 1.0f)*m_scale;
+                                vertexRect.top = top + (info->bearingY * textViewData.scale + 1.0f)*m_scale;
+                                vertexRect.right = vertexRect.left + info->width * textViewData.scale * m_scale;
+                                vertexRect.bottom = vertexRect.top + info->height * textViewData.scale * m_scale;
+                                drawGlyph(renderTargetInfo, _target, vertexCount, vertexRect, info->uvRect, mShadowColourNative);
+                            }
+                            
+                            
+                            left += fullAdvance * m_scale;
+                        }
+                        
+                        top += mFontHeight * m_scale;
+                    }
+                }
+            }
+            
+            
+            
+            for (size_t pass=0;pass<mFont->getNumPasses();++pass) {
+                MyGUI::Colour pass_colour;
+                bool fixed_color = mFont->getColour(pass, pass_colour);
+                if (fixed_color) {
+                    pass_colour.alpha *= mAlpha;
+                    colour = MyGUI::texture_utility::toColourARGB(pass_colour);
+                } else {
+                    colour = mCurrentColourNative;
+                }
+                MyGUI::FloatSize offset = mFont->getOffset(pass);
+                float  top = (float)(-mViewOffset.top + mCoord.top) + offset.height;
+                
+                for (MyGUI::VectorLineInfoLines::const_iterator line = textViewData.lines.begin(); line != textViewData.lines.end(); ++line)
+                {
+                    float left = (float)(float(line->offset)*m_scale - mViewOffset.left + mCoord.left) + offset.width * m_scale;
+                    
+                    for (MyGUI::VectorCharInfo::const_iterator sim = line->simbols.begin(); sim != line->simbols.end(); ++sim)
+                    {
+                        if (sim->isColour())
+                        {
+                            if (!fixed_color) {
+                                colour = sim->getColour() | (colour & 0xFF000000);
+                            }
+                            continue;
+                        }
+                        
+                        float fullAdvance = sim->getAdvance();
+                        const MyGUI::GlyphInfo* info = mFont->getGlyphInfo(pass, sim->getChar());
+                        if (info) {
+                            _target->setTexture(info->texture);
+                            vertexRect.left = left + (info->bearingX * textViewData.scale )*m_scale;
+                            vertexRect.top = top + (info->bearingY * textViewData.scale )*m_scale;
+                            vertexRect.right = vertexRect.left + info->width * textViewData.scale * m_scale;
+                            vertexRect.bottom = vertexRect.top + info->height * textViewData.scale * m_scale;
+                            drawGlyph(renderTargetInfo, _target, vertexCount, vertexRect, info->uvRect, colour);
+                        }
+                        
+                        left += fullAdvance * m_scale;
                     }
                     
-                    // Render the glyph itself.
-                    vertexRect.left = left + sim->getBearingX() * m_scale;
-                    vertexRect.top = top + sim->getBearingY() * m_scale;
-                    vertexRect.right = vertexRect.left + sim->getWidth() * m_scale;
-                    vertexRect.bottom = vertexRect.top + sim->getHeight() * m_scale;
-                    
-                    drawGlyph(renderTargetInfo, _target, vertexCount, vertexRect, sim->getUVRect(), colour);
-                    
-                    left += fullAdvance * m_scale;
-                    ++index;
+                    top += mFontHeight * m_scale;
                 }
-                
-                top += mFontHeight * m_scale;
-                ++index;
             }
             
            

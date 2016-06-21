@@ -52,7 +52,6 @@
 #include "MyGUI_ResourceImageSetPointer.h"
 #include "MyGUI_ResourceManualPointer.h"
 #include "MyGUI_ResourceManualFont.h"
-#include "MyGUI_ResourceTrueTypeFont.h"
 #include "MyGUI_SharedLayer.h"
 #include "MyGUI_OverlappedLayer.h"
 #include "MyGUI_ResourceLayout.h"
@@ -73,6 +72,9 @@
 
 #include "widgets/sb_mygui_scene_widget.h"
 #include "widgets/sb_mygui_mask_image.h"
+#include "font/sb_mygui_ft_font.h"
+#include "font/sb_mygui_ft_font_ol.h"
+#include "font/sb_mygui_multipass_font.h"
 
 #include "sb_utf.h"
 
@@ -782,7 +784,7 @@ static int mygui_ifont_get_string_width( MyGUI::IFont* font, const char* str) {
     while(*str) {
         Sandbox::UTF32Char ch = 0;
         str = Sandbox::get_char(str,ch);
-        MyGUI::GlyphInfo* glyph = font->getGlyphInfo(ch);
+        MyGUI::GlyphInfo* glyph = font->getGlyphInfo(-1,ch);
         if (glyph)
             w += glyph->bearingX + glyph->advance;
     }
@@ -823,11 +825,17 @@ SB_META_DECLARE_OBJECT(MyGUI::ResourceManualFont, MyGUI::IFont)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ResourceManualFont)
 SB_META_END_KLASS_BIND()
 
-#ifdef MYGUI_USE_FREETYPE
-SB_META_DECLARE_OBJECT(MyGUI::ResourceTrueTypeFont, MyGUI::IFont)
-SB_META_BEGIN_KLASS_BIND(MyGUI::ResourceTrueTypeFont)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFont, MyGUI::IFont)
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceTrueTypeFont)
 SB_META_END_KLASS_BIND()
-#endif
+
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFontOutline, Sandbox::mygui::ResourceTrueTypeFont)
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceTrueTypeFontOutline)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceMultipassFont, MyGUI::IFont)
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceMultipassFont)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ResourceLayout, MyGUI::IResource)
 SB_META_DECLARE_OBJECT(MyGUI::ResourceSkin, MyGUI::IResource)
@@ -984,9 +992,9 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::EditBox>(lua);
             
             luabind::ExternClass<MyGUI::IFont>(lua);
-#ifdef MYGUI_USE_FREETYPE
-            luabind::ExternClass<MyGUI::ResourceTrueTypeFont>(lua);
-#endif
+            luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFont>(lua);
+            luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFontOutline>(lua);
+            luabind::ExternClass<Sandbox::mygui::ResourceMultipassFont>(lua);
             luabind::ExternClass<MyGUI::ResourceManualFont>(lua);
             
             luabind::ExternClass<MyGUI::InputManager>(lua);
