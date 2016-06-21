@@ -112,6 +112,13 @@ namespace Sandbox {
             
             // Render the glyph shadow, if any.
             if (mShadow) {
+                MyGUI::Colour shadowColour = MyGUI::Colour::Black;
+                std::map<std::string,MyGUI::Colour>::const_iterator it = mPassColour.find("Shadow");
+                if (it != mPassColour.end()) {
+                    shadowColour = it->second;
+                }
+                shadowColour.alpha *= mAlpha;
+                MyGUI::uint32 clr = MyGUI::texture_utility::toColourARGB(shadowColour);
                 for (size_t pass=0;pass<mFont->getNumPasses();++pass) {
                     MyGUI::FloatSize offset = mFont->getOffset(pass);
                     float  top = (float)(-mViewOffset.top + mCoord.top) + offset.height * m_scale;
@@ -135,7 +142,7 @@ namespace Sandbox {
                                 vertexRect.top = top + (info->bearingY * textViewData.scale + 1.0f)*m_scale;
                                 vertexRect.right = vertexRect.left + info->width * textViewData.scale * m_scale;
                                 vertexRect.bottom = vertexRect.top + info->height * textViewData.scale * m_scale;
-                                drawGlyph(renderTargetInfo, _target, vertexCount, vertexRect, info->uvRect, mShadowColourNative);
+                                drawGlyph(renderTargetInfo, _target, vertexCount, vertexRect, info->uvRect, clr);
                             }
                             
                             
@@ -150,9 +157,10 @@ namespace Sandbox {
             
             
             for (size_t pass=0;pass<mFont->getNumPasses();++pass) {
-                MyGUI::Colour pass_colour;
-                bool fixed_color = mFont->getColour(pass, pass_colour);
+                std::map<std::string,MyGUI::Colour>::const_iterator clrit = mPassColour.find(mFont->getPassName(pass));
+                bool fixed_color = clrit != mPassColour.end();
                 if (fixed_color) {
+                    MyGUI::Colour pass_colour = clrit->second;
                     pass_colour.alpha *= mAlpha;
                     colour = MyGUI::texture_utility::toColourARGB(pass_colour);
                 } else {

@@ -28,14 +28,8 @@ namespace Sandbox {
                             if (!mMainFont || MyGUI::utility::parseBool(node->findAttribute("main"))) {
                                 mMainFont = font;
                             }
-                            
+                            pass.mName = node->findAttribute("name");
                             std::string value;
-                            if (node->findAttribute("colour",value)) {
-                                pass.mColour = MyGUI::utility::parseValue<MyGUI::Colour>(value);
-                                pass.mUseColour = true;
-                            } else {
-                                pass.mUseColour = false;
-                            }
                             if (node->findAttribute("offset",value)) {
                                 pass.mOffset = MyGUI::utility::parseValue<MyGUI::FloatSize>(value);
                             }
@@ -65,12 +59,11 @@ namespace Sandbox {
             return res;
         }
         
-        bool ResourceMultipassFont::getColour( size_t pass, MyGUI::Colour& clr ) {
+        std::string ResourceMultipassFont::getPassName( size_t pass ) {
             if (pass < mPasses.size()) {
-                clr = mPasses[pass].mColour;
-                return mPasses[pass].mUseColour;
+                return mPasses[pass].mName;
             }
-            return false;
+            return "";
         }
         
         MyGUI::FloatSize ResourceMultipassFont::getOffset( size_t pass ) {

@@ -20,13 +20,12 @@ namespace Sandbox {
             virtual MyGUI::GlyphInfo* getGlyphInfo( int pass, MyGUI::Char _id);
             
             virtual int getDefaultHeight();
-            virtual bool getColour( size_t pass, MyGUI::Colour& clr );
+            virtual std::string getPassName( size_t pass );
             virtual MyGUI::FloatSize getOffset( size_t pass );
         private:
             struct Pass {
+                std::string mName;
                 MyGUI::IFont*   mFont;
-                bool    mUseColour;
-                MyGUI::Colour   mColour;
                 MyGUI::FloatSize  mOffset;
             };
             std::vector<Pass> mPasses;
