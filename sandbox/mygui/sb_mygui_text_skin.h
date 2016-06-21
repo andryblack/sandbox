@@ -25,6 +25,7 @@ namespace Sandbox {
             
         private:
         protected:
+            virtual void updateRawData();
             float   m_scale;
            
         };

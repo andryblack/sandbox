@@ -11,7 +11,7 @@ namespace Sandbox {
         
         AutoSizeText::AutoSizeText() {
             mIsAddCursorWidth = false;
-            m_scale = 0.5f;
+            m_scale = 1.0f;
         }
         
         AutoSizeText::~AutoSizeText() {
@@ -22,25 +22,57 @@ namespace Sandbox {
             
         }
         
-        void AutoSizeText::doRender(MyGUI::IRenderTarget* _target) {
-            bool _update = mRenderItem->getCurrentUpdate();
-            if (_update)
-                mTextOutDate = true;
+        void AutoSizeText::updateRawData() {
+            if (nullptr == mFont)
+                return;
+            // сбрасывам флаги
+            mTextOutDate = false;
             
+            int width = -1;
+            if (mWordWrap)
+            {
+                width = mCoord.width / m_scale;
+                // обрезать слова нужно по шарине, которую мы реально используем
+                if (mIsAddCursorWidth)
+                    width -= 2;
+            }
+            
+            mTextView.update(mCaption, mFont, mFontHeight, mTextAlign, width);
+        }
+        
+        void AutoSizeText::doRender(MyGUI::IRenderTarget* _target) {
+                        
             if (nullptr == mFont)
                 return;
             if (!mVisible || mEmptyView)
                 return;
             
-            if (mTextOutDate)
-                updateRawData();
-            
-            const MyGUI::IntSize& size = mTextView.getViewSize();
-            
-            if (size.width > mCoord.width) {
-                m_scale = float(mCoord.width) / float(size.width);
-            } else {
+            if (mTextOutDate) {
                 m_scale = 1.0f;
+                updateRawData();
+            }
+            
+            MyGUI::IntSize size = mTextView.getViewSize();
+            
+            float hscale = 1.0f;
+            if (size.width > mCoord.width) {
+                hscale = float(mCoord.width) / float(size.width);
+                if (hscale < m_scale) {
+                    m_scale = hscale;
+                }
+            } else if (!mWordWrap) {
+                m_scale = 1.0f;
+            }
+            
+            if (mWordWrap) {
+                while ((size.height*m_scale) > mCoord.height) {
+                    m_scale -= 0.125f/4;
+                    if (m_scale < 0.125f) {
+                        m_scale = 0.125f;
+                    }
+                    updateRawData();
+                    size = mTextView.getViewSize();
+                }
             }
             
             if (mTextAlign.isRight())
