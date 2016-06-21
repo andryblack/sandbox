@@ -66,7 +66,30 @@
 		dofile('tlsf.lua')
 	end
 
+	function _M.premake_files( ... )
 		
+		files(utils.append_path(sandbox_dir .. '/utils/premake5/src/host/',{
+			"path_*.c",
+			"string_*.c",
+			"os_chdir.c",
+			"os_chmod.c",
+			"os_copyfile.c",
+			"os_pathsearch.c",
+			"os_match.c",
+			"os_stat.c",
+			"os_rmdir.c",
+			"os_getcwd.c",
+			"os_isfile.c",
+			"os_uuid.c",
+			"os_realpath.c",
+			"os_mkdir.c",
+			"os_getversion.c",
+			"os_is64bit.c",
+			"os_isdir.c",
+			"os_islink.c",
+		}))
+		
+	end
 
 	function _M.configure_project()
 	
@@ -105,26 +128,7 @@
 			path.join(sandbox_dir,'GHL','src/winlib/winlib_posix_time.cpp'),
 		}
 
-		files(utils.append_path(sandbox_dir .. '/utils/premake5/src/host/',{
-			"path_*.c",
-			"string_*.c",
-			"os_chdir.c",
-			"os_chmod.c",
-			"os_copyfile.c",
-			"os_pathsearch.c",
-			"os_match.c",
-			"os_stat.c",
-			"os_rmdir.c",
-			"os_getcwd.c",
-			"os_isfile.c",
-			"os_uuid.c",
-			"os_realpath.c",
-			"os_mkdir.c",
-			"os_getversion.c",
-			"os_is64bit.c",
-			"os_isdir.c",
-			"os_islink.c",
-		}))
+		_M.premake_files()
 
 		files(utils.append_path(sandbox_dir .. '/sandbox/',{
 			'sb_lua.*',
