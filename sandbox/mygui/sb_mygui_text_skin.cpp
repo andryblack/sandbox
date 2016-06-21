@@ -109,51 +109,7 @@ namespace Sandbox {
             
             
             MyGUI::FloatRect vertexRect;
-            
-            // Render the glyph shadow, if any.
-            if (mShadow) {
-                MyGUI::Colour shadowColour = MyGUI::Colour::Black;
-                std::map<std::string,MyGUI::Colour>::const_iterator it = mPassColour.find("Shadow");
-                if (it != mPassColour.end()) {
-                    shadowColour = it->second;
-                }
-                shadowColour.alpha *= mAlpha;
-                MyGUI::uint32 clr = MyGUI::texture_utility::toColourARGB(shadowColour);
-                for (size_t pass=0;pass<mFont->getNumPasses();++pass) {
-                    MyGUI::FloatSize offset = mFont->getOffset(pass);
-                    float  top = (float)(-mViewOffset.top + mCoord.top) + offset.height * m_scale;
-                    
-                    for (MyGUI::VectorLineInfoLines::const_iterator line = textViewData.lines.begin(); line != textViewData.lines.end(); ++line)
-                    {
-                        float left = (float)(float(line->offset)*m_scale - mViewOffset.left + mCoord.left) + offset.width * m_scale;
                         
-                        for (MyGUI::VectorCharInfo::const_iterator sim = line->simbols.begin(); sim != line->simbols.end(); ++sim)
-                        {
-                            if (sim->isColour())
-                            {
-                                continue;
-                            }
-                            
-                            float fullAdvance = sim->getAdvance();
-                            const MyGUI::GlyphInfo* info = mFont->getGlyphInfo(pass, sim->getChar());
-                            if (info) {
-                                _target->setTexture(info->texture);
-                                vertexRect.left = left + (info->bearingX * textViewData.scale + 1.0f)*m_scale;
-                                vertexRect.top = top + (info->bearingY * textViewData.scale + 1.0f)*m_scale;
-                                vertexRect.right = vertexRect.left + info->width * textViewData.scale * m_scale;
-                                vertexRect.bottom = vertexRect.top + info->height * textViewData.scale * m_scale;
-                                drawGlyph(renderTargetInfo, _target, vertexCount, vertexRect, info->uvRect, clr);
-                            }
-                            
-                            
-                            left += fullAdvance * m_scale;
-                        }
-                        
-                        top += mFontHeight * m_scale;
-                    }
-                }
-            }
-            
             
             
             for (size_t pass=0;pass<mFont->getNumPasses();++pass) {
