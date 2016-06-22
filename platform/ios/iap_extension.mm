@@ -37,7 +37,32 @@
     [productsRequest performSelector:@selector(start) withObject:nil afterDelay:0.01];
     return [NSString stringWithFormat:@"%p",productsRequest];
 }
+-(void) doPaymentResponse:(SKPaymentTransaction*) transaction {
+    
+    NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                                    transaction.payment.productIdentifier,@"product_id",
+                                                                    @"purchased",@"state",
+                                                                    [self getReceiptForTransaction:transaction],@"transaction",
+                                                                    nil] options:nil error:nil];
+    
+    NSString* newStr = [[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding];
+    m_application->OnExtensionResponse("iap_purchase",newStr.UTF8String);
+    [newStr release];
+}
+
 -(NSString*) performPayment:(NSString*) productIdentifier {
+    for (SKPaymentTransaction *transaction in [[SKPaymentQueue defaultQueue] transactions]) {
+        if ([transaction.payment.productIdentifier isEqualToString:productIdentifier]) {
+            if (transaction.transactionState == SKPaymentTransactionStatePurchased) {
+                
+                // already purchased, go back
+                if (m_application) {
+                    [self performSelector:@selector(doPaymentResponse:) withObject:transaction afterDelay:0.01];
+                    return [NSString stringWithFormat:@"%p",transaction.payment];
+                }
+            }
+        }
+    }
     SKProduct* product = [m_products objectForKey:productIdentifier];
     if (!product) {
         return nil;
