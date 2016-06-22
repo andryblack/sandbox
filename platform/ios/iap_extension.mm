@@ -59,7 +59,7 @@
 
 -(BOOL)confirmTransaction:(NSString*)transactionIdentifier {
     for (SKPaymentTransaction *transaction in [[SKPaymentQueue defaultQueue] transactions]) {
-        if (transaction.transactionIdentifier && [transaction.transactionIdentifier isEqual:transactionIdentifier]) {
+        if ([[self getReceiptForTransaction:transaction] isEqual:transactionIdentifier]) {
             [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
             return TRUE;
         }
@@ -69,6 +69,7 @@
 
 // SKRequestDelegate
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error {
+    NSLog(@"[iap] request:%@didFailWithError:%@",[request description],[error description]);
     if (m_application) {
         NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:[NSDictionary dictionaryWithObjectsAndKeys:
                                                                         [NSString stringWithFormat:@"%p",request],@"request_id",
@@ -115,6 +116,32 @@
     [request release];
 }
 
+- (NSString*) getReceiptForTransaction:(SKPaymentTransaction*) transaction {
+    // Load the receipt from the app bundle.
+    NSBundle* b = [NSBundle mainBundle];
+    if ([b respondsToSelector:@selector(appStoreReceiptURL)]) {
+        NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
+        if (!receiptURL) {
+            return @"error:nourl";
+        }
+        NSData *receipt = [NSData dataWithContentsOfURL:receiptURL];
+        if (!receipt) {
+            return @"error:nodata";
+        }
+        if (receipt) { /* No local receipt -- handle the error. */
+            return [receipt base64EncodedStringWithOptions:0];
+        }
+    } else {
+        NSData* receipt = transaction.transactionReceipt;
+        if (receipt) {
+            sb::string base64 = Sandbox::Base64EncodeData((const GHL::Byte*)receipt.bytes, receipt.length);
+            return [NSString stringWithUTF8String:base64.c_str()];
+        }
+    }
+    return @"error";
+    
+}
+
 // SKPaymentTransactionObserver protocol method
 // Sent when the transaction array has changed (additions or state changes).  Client should check state of transactions and finish as appropriate.
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray<SKPaymentTransaction *> *)transactions {
@@ -123,6 +150,7 @@
         NSString* request_id = [NSString stringWithFormat:@"%p",transaction.payment];
         NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:5];
         [dict setObject:request_id forKey:@"request_id"];
+        NSLog(@"[iap] paymentQueue:updatedTransactions:%@",[transaction description]);
         if (transaction.payment)
             [dict setObject:transaction.payment.productIdentifier forKey:@"product_id"];
         switch (transaction.transactionState) {
@@ -143,13 +171,13 @@
             case SKPaymentTransactionStatePurchased:
                 //[self completeTransaction:transaction];
                 [dict setObject:@"purchased" forKey:@"state"];
-                [dict setObject:transaction.transactionIdentifier forKey:@"transaction"];
+                [dict setObject:[self getReceiptForTransaction:transaction] forKey:@"transaction"];
                 break;
             case SKPaymentTransactionStateRestored:
                 method = "iap_restore_payments";
                 //[self restoreTransaction:transaction];
                 [dict setObject:@"restored" forKey:@"state"];
-                [dict setObject:transaction.transactionIdentifier forKey:@"transaction"];
+                [dict setObject:[self getReceiptForTransaction:transaction] forKey:@"transaction"];
                 break;
             default:
                 // For debugging
