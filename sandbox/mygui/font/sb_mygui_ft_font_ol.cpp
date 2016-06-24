@@ -71,7 +71,7 @@ namespace Sandbox
                             FT_BitmapGlyph ft_bitmap_glyph = (FT_BitmapGlyph) glyph;
                             
                             
-                            float bearingX = _ftFace->glyph->metrics.horiBearingX / 64.0f;
+                            float bearingX = ft_bitmap_glyph->left;
                             
                             // The following calculations aren't currently needed but are kept here for future use.
                             // float ascent = _glyph->metrics.horiBearingY / 64.0f;
@@ -83,7 +83,7 @@ namespace Sandbox
                                                   ft_bitmap_glyph->bitmap.rows,
                                                   (_ftFace->glyph->advance.x / 64.0f),
                                                   bearingX,
-                                                  floor(_fontAscent - (_ftFace->glyph->metrics.horiBearingY / 64.0f) ));
+                                                  floor(_fontAscent - ft_bitmap_glyph->top ));
                             
                             res = createGlyph(_glyphIndex, info, _glyphHeightMap);
                             
