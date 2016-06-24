@@ -6,12 +6,12 @@
 //
 //
 
-#ifndef __Sandbox__sb_mygui_mask_image__
-#define __Sandbox__sb_mygui_mask_image__
+#ifndef __Sandbox__sb_mygui_mask_text__
+#define __Sandbox__sb_mygui_mask_text__
 
 #include "meta/sb_meta.h"
 #include "sb_rt_scene.h"
-#include "MyGUI_Widget.h"
+#include "MyGUI_TextBox.h"
 #include "MyGUI_SubSkin.h"
 #include "MyGUI_MainSkin.h"
 #include "MyGUI_CommonStateInfo.h"
@@ -19,24 +19,25 @@
 #include "sb_shader.h"
 #include "sb_rect.h"
 #include <ghl_render.h>
+#include <sbstd/sb_map.h>
+#include <sbstd/sb_string.h>
 
 namespace Sandbox {
     
     namespace mygui {
+                   
         
         
-                
-        
-        class MaskImageWidget : public MyGUI::Widget {
-            MYGUI_RTTI_DERIVED( MaskImageWidget )
+        class MaskTextWidget : public MyGUI::TextBox {
+            MYGUI_RTTI_DERIVED( MaskTextWidget )
         public:
-            MaskImageWidget();
-            ~MaskImageWidget();
+            MaskTextWidget();
+            ~MaskTextWidget();
             
             void setPropertyOverride(const std::string& _key, const std::string& _value);
             
-            void setImage(const ImagePtr& img) { m_image = img; update_shader(); }
-            const ImagePtr& getImage() const { return m_image; }
+            void setPassImage(const sb::string& pass, const ImagePtr& img);
+            const ImagePtr& getPassImage(const sb::string& pass) const;
             
             void setShader(const ShaderPtr& s);
             const ShaderPtr& getShader() const { return m_shader; }
@@ -44,13 +45,13 @@ namespace Sandbox {
         protected:
             void update_shader();
         private:
-            ImagePtr    m_image;
+            sb::map<sb::string,ImagePtr>    m_pass_image;
             ShaderPtr   m_shader;
         };
     }
 }
 
-#endif /* defined(__Sandbox__sb_mygui_mask_image__) */
+#endif /* defined(__Sandbox__sb_mygui_mask_text__) */
 
 
 

@@ -4,7 +4,9 @@
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_CommonStateInfo.h"
 #include "MyGUI_SubSkin.h"
+#include "MyGUI_MainSkin.h"
 
+#include <sbstd/sb_vector.h>
 
 namespace Sandbox {
     
@@ -50,6 +52,42 @@ namespace Sandbox {
             virtual void doRender(MyGUI::IRenderTarget* _target);
         private:
         };
+        
+        class MaskSubSkin : public MyGUI::SubSkin {
+            MYGUI_RTTI_DERIVED( MaskSubSkin )
+        public:
+            MaskSubSkin();
+            virtual void doRender(MyGUI::IRenderTarget* _target);
+        };
+        
+        class MaskSetSubSkinState : public MyGUI::SubSkinStateInfo {
+            MYGUI_RTTI_DERIVED( MaskSetSubSkinState )
+        public:
+            MaskSetSubSkinState();
+            MyGUI::ITexture* get_texture() { return m_texture; }
+        protected:
+            virtual void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version);
+        private:
+            MyGUI::ITexture* m_texture;
+        };
+        
+        class MaskSetSubSkin : public MyGUI::MainSkin {
+            MYGUI_RTTI_DERIVED( MaskSetSubSkin )
+        public:
+            MaskSetSubSkin();
+            
+            virtual void doRender(MyGUI::IRenderTarget* _target);
+            virtual void setStateData(MyGUI::IStateInfo* _data);
+            MyGUI::ITexture* getTexture() {
+                if (m_texture) {
+                    return m_texture;
+                }
+                return MyGUI::MainSkin::getTexture();
+            }
+        private:
+            MyGUI::ITexture* m_texture;
+        };
+
         
         void register_skin();
         void unregister_skin();
