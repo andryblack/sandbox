@@ -32,14 +32,16 @@ namespace Sandbox {
                 return 1;
             }
             lua_remove(L, -2);
-           
+            
+            lua_pushthread(L);
+        
             if (lua_isstring(L,1))
                 lua_pushvalue(L, 1);  /* pass error message */
             else {
                 lua_pushstring(L, "error");
             }
             lua_pushinteger(L, 1);  /* skip this function and traceback */
-            int res = lua_pcall(L, 2, 1, 0);
+            int res = lua_pcall(L, 3, 1, 0);
             
             if (res) {
                 LogError(LuabindModule) << " Failed debug.traceback " ;

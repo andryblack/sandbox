@@ -69,11 +69,12 @@ namespace Sandbox {
                         LogError(LuaThreadModule) << "Failed script resume  " << res;
                         if (res==LUA_ERRRUN) {
                             LogError(LuaThreadModule) << "error:" << lua_tostring(th, -1);
-                            lua_pushcclosure(L, &luabind::lua_traceback, 0);
-                            lua_pushvalue(L, -2);
-                            lua_pcall(L, 1, 1, 0);
-                            LogError(LuaThreadModule) << lua_tostring(L, -1) ;
-                            lua_pop(L, 2);
+                            lua_pushcclosure(th, &luabind::lua_traceback, 0);
+                            lua_pushvalue(th, -2);
+                            lua_pcall(th, 1, 1, 0);
+                            LogError(LuaThreadModule) << lua_tostring(th, -1) ;
+                            lua_pop(th, 1);
+                            lua_pop(L,1);
                         }
                     } else {
                         lua_pop(L,1);
