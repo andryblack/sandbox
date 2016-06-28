@@ -30,7 +30,8 @@ local sandbox = {
 	table = wrap(table),
 	print = print,
 	error = error,
-	platform = platform
+	platform = platform,
+	log = log
 }
 
 rules = {
@@ -39,7 +40,7 @@ rules = {
 	dest_files = {}
 }
 
-
+log:SetPlatformLogEnabled(true)
 
 local function extend( M , pM )
 	for k,v in pairs(M) do
