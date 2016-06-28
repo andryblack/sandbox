@@ -88,7 +88,7 @@ namespace Sandbox {
         bool version1_compatible = false;
         bool version2_compatible = false;
         if (!version || version.as_int()<3) {
-            LogError() << "deprecated version " << filename;
+            LogWarning() << "deprecated version " << filename;
             version1_compatible = version.as_int()<2;
             version2_compatible = version.as_int()<3;
             //return SkeletonDataPtr();
