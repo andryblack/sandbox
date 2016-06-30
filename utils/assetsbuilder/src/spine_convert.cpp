@@ -149,6 +149,10 @@ void SpineConvert::ExportAnimation() {
         node& n = add_node(m_skeleton->slots[i]->name);
         if (m_skeleton->slots[i]->blendMode == SP_BLEND_MODE_ADDITIVE)
             n.blend = blend_mode_additive;
+        else if (m_skeleton->slots[i]->blendMode == SP_BLEND_MODE_MULTIPLY)
+            n.blend = blend_mode_multiply;
+        else if (m_skeleton->slots[i]->blendMode == SP_BLEND_MODE_SCREEN)
+            n.blend = blend_mode_screen;
     }
     write_nodes();
     

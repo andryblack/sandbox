@@ -67,6 +67,10 @@ SkeletonConvert::frame::slot& SkeletonConvert::add_frame_slot(frame& f) {
 static const char* blend_to_string( blend_mode b) {
     if (b == blend_mode_additive) {
         return "add";
+    } else if (b == blend_mode_multiply) {
+        return "mul";
+    } else if (b == blend_mode_screen) {
+        return "screen";
     }
     return "blend";
 }

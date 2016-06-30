@@ -58,6 +58,9 @@ namespace Sandbox {
         sb_assert( (m_render!=0) && "scene not started" );
 		if (m_blend_mode!=bmode) {
 			Flush();
+            if (m_blend_mode == BLEND_MODE_SCREEN && m_mask_mode == MASK_MODE_SCREEN) {
+                SetMaskMode(MASK_MODE_NONE);
+            }
 			switch (bmode) {
 				case BLEND_MODE_COPY: 
 					m_render->SetupBlend(false, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ZERO);
@@ -68,14 +71,15 @@ namespace Sandbox {
 				case BLEND_MODE_ADDITIVE: 
 					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
 					break;
+                case BLEND_MODE_MULTIPLY:
+                    m_render->SetupBlend(true, GHL::BLEND_FACTOR_ZERO, GHL::BLEND_FACTOR_SRC_COLOR);
+                    break;
 				case BLEND_MODE_ADDITIVE_ALPHA: 
 					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
 					break;
-//				case BLEND_MODE_SCREEN:
-//					m_render->SetTexture(m_fake_tex_black,1);
-//					m_render->SetupBlend(true, GHL::BLEND_FACTOR_DST_COLOR_INV, GHL::BLEND_FACTOR_ONE);
-//					m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
-//					m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_SELECT_2,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+				case BLEND_MODE_SCREEN:
+                    SetMaskTexture(m_fake_tex_black);
+                    SetMaskMode(MASK_MODE_SCREEN);
 					break;
 				default:
 					sb_assert(false && "unknown blend mode");

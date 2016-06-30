@@ -13,6 +13,8 @@ class Application;
 enum blend_mode {
     blend_mode_normal,
     blend_mode_additive,
+    blend_mode_multiply,
+    blend_mode_screen
 };
 
 class SkeletonConvert : public Sandbox::meta::object {

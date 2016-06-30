@@ -28,6 +28,8 @@ namespace Sandbox {
         BLEND_MODE_ALPHABLEND,
         BLEND_MODE_ADDITIVE,
         BLEND_MODE_ADDITIVE_ALPHA,
+        BLEND_MODE_MULTIPLY,
+        BLEND_MODE_SCREEN
     };
     
     enum MaskMode {

@@ -108,7 +108,12 @@ namespace Sandbox {
             node.blend = BLEND_MODE_ALPHABLEND;
             if (::strcmp(nit->attribute("blend").value(),"add")==0) {
                 node.blend = BLEND_MODE_ADDITIVE;
+            } else if (::strcmp(nit->attribute("blend").value(),"mul")==0) {
+                node.blend = BLEND_MODE_MULTIPLY;
+            } else if (::strcmp(nit->attribute("blend").value(),"screen")==0) {
+                node.blend = BLEND_MODE_SCREEN;
             }
+            
             res->AddNode(node);
         }
         if (res->GetNodesCount()!=nodes_count) {
