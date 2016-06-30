@@ -91,6 +91,7 @@ SB_META_METHOD(SetResourcesVariant)
 SB_META_METHOD(SetRenderScale)
 SB_META_METHOD(Restart)
 SB_META_PROPERTY_RO(TimeUSec, GetTimeUSec)
+SB_META_PROPERTY_RO(UTCOffset, GetUTCOffset)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 SB_META_END_KLASS_BIND()
@@ -542,6 +543,11 @@ namespace Sandbox {
         return double(tv.secs) * 1000000 + tv.usecs;
     }
 	
+    int Application::GetUTCOffset() const {
+        GHL::TimeValue tv;
+        GHL_SystemGetTime(&tv);
+        return tv.tzoffset;
+    }
 	
 	void Application::DrawFrame(Graphics&) const {
 	}

@@ -151,7 +151,7 @@ project 'GHL'
 			if os.is('macosx') then	
 				files { 
 					ghl_src .. 'winlib/winlib_cocoa.*',
-					ghl_src .. 'winlib/winlib_posix_time.cpp',
+					ghl_src .. 'winlib/winlib_cocoa_time.*',
 					ghl_src .. 'sound/cocoa/*'
 				}
 				if use_network then
@@ -165,7 +165,7 @@ project 'GHL'
 					ghl_src .. 'winlib/winlib_cocoatouch.*',
 					ghl_src .. 'winlib/WinLibCocoaTouchContext.*',
 					ghl_src .. 'winlib/WinLibCocoaTouchContext2.*',
-					ghl_src .. 'winlib/winlib_posix_time.cpp',
+					ghl_src .. 'winlib/winlib_cocoa_time.cpp',
 					ghl_src .. 'sound/cocoa/*'
 				}
 				if use_network then

@@ -58,6 +58,7 @@ namespace Sandbox {
         void SetRenderScale(float scale);
         
         double GetTimeUSec() const;
+        int GetUTCOffset() const;
         void Restart() { m_need_restart = true; }
     protected:
 		Application();
