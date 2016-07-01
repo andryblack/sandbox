@@ -509,7 +509,7 @@ namespace Sandbox {
 							m_clear_color.g,
 							m_clear_color.b,
 							m_clear_color.a,0);
-		m_graphics->BeginScene(m_render,false);
+		m_graphics->BeginScene(m_render,RenderTargetPtr());
         if (m_main_scene)
             m_main_scene->Draw(*m_graphics);
 #ifdef SB_USE_MYGUI

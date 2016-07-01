@@ -24,8 +24,15 @@ namespace Sandbox {
 		if (m_enabled) {
 			ShaderPtr ss = g.GetShader();
 			g.SetShader(m_shader);
+            TexturePtr crnt_mask = g.GetMaskTexture();
+            if (m_texture) {
+                g.SetMaskTexture(m_texture);
+            }
             Container::Draw(g);
 			g.SetShader(ss);
+            if (m_texture) {
+                g.SetMaskTexture(crnt_mask);
+            }
 		} else {
 			Container::Draw(g);
 		}

@@ -45,6 +45,7 @@ namespace Sandbox {
 		~Texture();
 		GHL::Texture* Present(Resources* resources);
         BitmaskPtr GetBitmask(Resources* resources);
+        float GetScale() const { return m_scale; }
 		void SetFiltered(bool f);
         bool GetFiltered() const { return m_filtered; }
         void SetTiled(bool t) ;

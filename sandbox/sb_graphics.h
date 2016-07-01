@@ -17,6 +17,7 @@
 #include "sb_matrix4.h"
 #include "sb_rect.h"
 #include "sb_particle.h"
+#include "sb_rendertarget.h"
 
 #include <ghl_render.h>
 #include <vector>
@@ -50,7 +51,7 @@ namespace Sandbox {
 		void Load(GHL::Render* render);
 		
 		/// @brief begin draw scene
-		void BeginScene(GHL::Render* render, bool target);
+		void BeginScene(GHL::Render* render, const RenderTargetPtr& target);
         
         /// clear scene
         void Clear( const Color& clr , float depth );
@@ -92,7 +93,7 @@ namespace Sandbox {
         /// mask
         void SetMask(MaskMode mode, const TexturePtr& mask_tex,const Transform2d& tr);
         const TexturePtr& GetMaskTexture() const { return m_mask; }
-        void SetMaskTexture(const TexturePtr& tex);
+        void SetMaskTexture(const TexturePtr& tex,bool autocalc=true);
         MaskMode GetMaskMode() const { return m_mask_mode; }
         void SetMaskMode(MaskMode mode);
         const Transform2d& GetMaskTransform() const { return m_mask_transform; }
@@ -164,7 +165,7 @@ namespace Sandbox {
    private:
         Resources*  m_resources;
 		GHL::Render* m_render;
-        bool m_render_to_target;
+        RenderTargetPtr m_render_to_target;
 		TexturePtr  m_fake_tex_white;
         TexturePtr  m_fake_tex_black;
         

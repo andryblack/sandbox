@@ -132,6 +132,8 @@ SB_META_PROPERTY_RO(Width, GetOriginalWidth)
 SB_META_PROPERTY_RO(Height, GetOriginalHeight)
 SB_META_PROPERTY_RW(Filtered, GetFiltered, SetFiltered)
 SB_META_PROPERTY_RW(Tiled,GetTiled, SetTiled)
+SB_META_PROPERTY_RO(RealWidth, GetRealWidth)
+SB_META_PROPERTY_RO(RealHeight, GetRealHeight)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::RenderTarget, void)
@@ -160,12 +162,17 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderUniform)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderFloatUniform)
+SB_META_PROPERTY_WO(Value, SetValue)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderVec2Uniform)
+SB_META_PROPERTY_WO(Value, SetValue)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Shader)
+SB_META_METHOD(Fork)
+SB_META_METHOD(GetFloatUniform)
+SB_META_METHOD(GetVec2Uniform)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ImageBox, Sandbox::Image)

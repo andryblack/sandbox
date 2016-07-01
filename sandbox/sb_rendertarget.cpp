@@ -12,10 +12,15 @@
 
 namespace Sandbox {
     
-    RenderTarget::RenderTarget(GHL::RenderTarget* rt,float scale) : m_rt(rt){
+    RenderTarget::RenderTarget(GHL::RenderTarget* rt,int w, int h, float scale) : m_rt(rt){
         GHL::Texture* tex = rt->GetTexture();
         tex->AddRef();
-        m_texture.reset( new Texture(tex,1.0f/scale) );
+        m_texture.reset( new Texture(tex,1.0f/scale,w,h) );
+    }
+    
+    float RenderTarget::GetScale() const {
+        if (m_texture) return 1.0f / m_texture->GetScale();
+        return 1.0f;
     }
     
     RenderTarget::~RenderTarget() {

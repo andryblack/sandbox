@@ -12,6 +12,7 @@
 
 #include "sb_container.h"
 #include "sb_shader.h"
+#include "sb_texture.h"
 
 namespace Sandbox {
 	
@@ -25,12 +26,16 @@ namespace Sandbox {
 		
 		void SetShader(const ShaderPtr& sh) { m_shader = sh;}
 		const ShaderPtr& GetShader() const { return m_shader;}
+        
+        void SetTexture(const TexturePtr& texture) { m_texture = texture; }
+        const TexturePtr& GetTexture() const { return m_texture; }
 		
 		void SetEnabled(bool e) { m_enabled = e;}
 		bool GetEnabled() const { return m_enabled;}
 	private:
 		bool	m_enabled;
 		ShaderPtr m_shader;
+        TexturePtr m_texture;
 	};
 	
 }

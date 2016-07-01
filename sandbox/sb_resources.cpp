@@ -541,7 +541,7 @@ namespace Sandbox {
             m_render->Clear(1, 0, 0, 1, 0);
             m_render->EndScene();
         }*/
-        return RenderTargetPtr( new RenderTarget(rt,scale));
+        return RenderTargetPtr( new RenderTarget(rt,w*scale,h*scale,scale));
     }
     
     void Resources::SetResourcesVariant(float scale,const sb::string& postfix) {

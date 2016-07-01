@@ -90,7 +90,7 @@ namespace Sandbox {
                 GHL::Render* render = m_resources->GetRender();
                 render->BeginScene(rt);
                 render->Clear(0, 0, 0, 0, 0);
-                m_graphics->BeginScene(render, true);
+                m_graphics->BeginScene(render, m_target);
                 RenderTargetImpl::begin();
             }
         }

@@ -27,6 +27,12 @@ namespace Sandbox {
 			m_program->Release();
 		}
 	}
+    
+    sb::intrusive_ptr<Shader> Shader::Fork() {
+        ShaderPtr res(new Shader(m_program));
+        m_program->AddRef();
+        return res;
+    }
 	
 	void Shader::Set(GHL::Render* r) {
 		r->SetShader(m_program);

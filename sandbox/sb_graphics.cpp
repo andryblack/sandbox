@@ -798,12 +798,12 @@ namespace Sandbox {
         SetMaskMode(mode);
         m_mask_transform = tr;
     }
-    void Graphics::SetMaskTexture(const TexturePtr& tex) {
+    void Graphics::SetMaskTexture(const TexturePtr& tex,bool autocalc) {
         bool need_flush = false;
         if (m_mask != tex) {
             need_flush = true;
         }
-        bool needCalc2 = tex && tex!=m_fake_tex_black && tex!=m_fake_tex_white;
+        bool needCalc2 = autocalc && tex && tex!=m_fake_tex_black && tex!=m_fake_tex_white;
         if (needCalc2!=m_calc2_tex) {
             need_flush = true;
         }
@@ -874,13 +874,13 @@ namespace Sandbox {
 		if (m_clip_rect==m_viewport) {
 			m_render->SetupScisor( false );
 		} else {
-            float draw_scale = (m_render_to_target ? 1.0f : m_scale) * m_resources->GetScale();
+            float draw_scale = (m_render_to_target ? m_render_to_target->GetScale() : m_scale * m_resources->GetScale()) ;
 			m_render->SetupScisor( true, rect.x * draw_scale,rect.y * draw_scale, rect.w * draw_scale,rect.h*draw_scale);
 		}
 	}
 		
 		
-	void Graphics::BeginScene(GHL::Render* render, bool target) {
+	void Graphics::BeginScene(GHL::Render* render, const RenderTargetPtr& target) {
         sb_assert( (m_render==0) && "scene already started" );
 		m_render = render;
         m_render_to_target = target;
@@ -902,7 +902,7 @@ namespace Sandbox {
         m_depth_test = false;
         m_depth_write = false;
         
-        float draw_scale = (target ? 1.0f : m_scale) * m_resources->GetScale();
+        float draw_scale = (target ? target->GetScale() : m_scale * m_resources->GetScale()) ;
         
 		SetProjectionMatrix(Matrix4f::ortho(0,float(render->GetWidth())/draw_scale,
 											float(render->GetHeight())/draw_scale,0,-10,10));

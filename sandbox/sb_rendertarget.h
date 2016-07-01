@@ -20,10 +20,11 @@ namespace Sandbox {
     
     class RenderTarget : public sb::ref_countered_base_not_copyable {
     public:
-        explicit RenderTarget(GHL::RenderTarget* rt,float scale);
+        explicit RenderTarget(GHL::RenderTarget* rt,int w, int h, float scale);
         ~RenderTarget();
         const TexturePtr& GetTexture() const { return m_texture; }
         GHL::RenderTarget* GetNative() { return m_rt; }
+        float GetScale() const;
     private:
         GHL::RenderTarget*   m_rt;
         TexturePtr  m_texture;

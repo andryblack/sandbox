@@ -18,6 +18,7 @@
 #include "sb_container_blend.h"
 #include "sb_container_visible.h"
 #include "sb_container_transform3d.h"
+#include "sb_container_shader.h"
 #include "sb_scene.h"
 #include "sb_debug_geometry.h"
 #include "sb_rt_scene.h"
@@ -176,6 +177,13 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerVisible)
 SB_META_PROPERTY_RW_DEF(Invert)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerShader)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW_DEF(Shader)
+SB_META_PROPERTY_RW_DEF(Texture)
+SB_META_PROPERTY_RW_DEF(Enabled)
+SB_META_END_KLASS_BIND()
+
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::TransformModificator)
 SB_META_CONSTRUCTOR(())
@@ -250,6 +258,7 @@ namespace Sandbox {
         luabind::Class<ColorModificator>(lua);
         luabind::Class<ContainerVisible>(lua);
         luabind::Class<ContainerTransform3d>(lua);
+        luabind::Class<ContainerShader>(lua);
         luabind::Class<GeometryBuffer>(lua);
         luabind::ExternClass<Scene>(lua);
         luabind::Class<RTScene>(lua);
