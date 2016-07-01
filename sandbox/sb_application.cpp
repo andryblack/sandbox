@@ -449,8 +449,10 @@ namespace Sandbox {
         float resources_scale = m_resources->GetScale();
         LogInfo() << "[app] UpdateScreenSize g:" << graphics_scal << " r:" << resources_scale << " s:" << m_width << "x" << m_height;
         LuaContextPtr ctx = m_lua->GetGlobalContext();
-        ctx->SetValue("application.size.width", float(m_width) / (graphics_scal * resources_scale));
-        ctx->SetValue("application.size.height", float(m_height) / (graphics_scal * resources_scale));
+        m_draw_width = float(m_width) / (graphics_scal * resources_scale);
+        m_draw_height = float(m_height) / (graphics_scal * resources_scale);
+        ctx->SetValue("application.size.width", m_draw_width);
+        ctx->SetValue("application.size.height", m_draw_height);
     }
     
     Network* Application::GetNetwork() {

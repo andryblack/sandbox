@@ -7,6 +7,7 @@
 #include "utils/sb_base64.h"
 #include "sb_data.h"
 #include "sb_image.h"
+#include "sb_scene_object.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::SkeletonAnimation,Sandbox::meta::object)
 SB_META_DECLARE_OBJECT(Sandbox::SkeletonData,Sandbox::meta::object)
@@ -139,7 +140,9 @@ namespace Sandbox {
                     if (r) {
                         img->SetSize(iit->attribute("h").as_float(),iit->attribute("w").as_float());
                     }
-                    res->SetImage(iit->attribute("index").as_uint(),iit->attribute("name").value(),img);
+                    size_t idx = iit->attribute("index").as_uint();
+                    res->m_images_map[iit->attribute("name").value()] = idx;
+                    res->SetImage(idx,img);
                     img->SetHotspot(Sandbox::Vector2f(iit->attribute("hsx").as_float(),iit->attribute("hsy").as_float()));
                 }
             }
@@ -226,6 +229,15 @@ namespace Sandbox {
         return empty_node;
     }
     
+    sb::string SkeletonData::GetNodeName(size_t idx) {
+        return GetNode(idx).name;
+    }
+    void SkeletonData::SetNodeAttribute(size_t idx, const Sandbox::DrawAttributesPtr& attribute) {
+        if (idx < m_nodes.size()) {
+            m_nodes[idx].attributes = attribute;
+        }
+    }
+    
     void SkeletonData::DumpTextures() const {
         size_t idx = 0;
         for (sb::vector<ImagePtr>::const_iterator it = m_images.begin();it!=m_images.end();++it) {
@@ -262,12 +274,11 @@ namespace Sandbox {
         return m_images[index];
     }
     
-    void SkeletonData::SetImage(size_t index,const sb::string& name, const ImagePtr& img) {
+    void SkeletonData::SetImage(size_t index,const ImagePtr& img) {
         if (index >= m_images.size()) {
             m_images.resize(index+1);
         }
         m_images[index] = img;
-        m_images_map[name]=index;
     }
     
 }

@@ -92,7 +92,7 @@ namespace Sandbox {
         return true;
     }
     
-    float Font::Draw(Graphics& g,const Vector2f& _pos,const char* text,FontAlign align) const {
+    float Font::Draw(Graphics& g,const DrawAttributesPtr& attributes, const Vector2f& _pos,const char* text,FontAlign align) const {
         if (!text) return 0;
         Vector2f pos = _pos;
         float align_x = 0.0f;
@@ -110,7 +110,7 @@ namespace Sandbox {
                 const Glypth* gl = get_glypth(ch);
                 if (gl) {
                     pos.x+=getKerning(prev,ch);
-                    if (gl->img.GetTexture()) g.DrawImage(gl->img, pos);
+                    if (gl->img.GetTexture()) g.DrawImage(gl->img, attributes, pos);
                     pos.x+=gl->asc;
                 }
                 prev=gl;

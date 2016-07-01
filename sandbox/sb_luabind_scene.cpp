@@ -25,9 +25,13 @@
 #include "sb_geomerty_buffer.h"
 #include "sb_container_clip.h"
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::DrawAttributes)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::SceneObject)
 SB_META_PROPERTY_RW(Visible,GetVisible,SetVisible)
 SB_META_PROPERTY_RW(Order, GetOrder, SetOrder)
+SB_META_PROPERTY_RW_DEF(DrawAttributes)
 SB_META_METHOD(GlobalToLocal)
 SB_META_METHOD(LocalToGlobal)
 SB_META_METHOD(RemoveFromScene)
@@ -232,6 +236,7 @@ namespace Sandbox {
 
     
     void register_scene( lua_State* lua ) {
+        luabind::Class<DrawAttributes>(lua);
         luabind::Class<SceneObject>(lua);
         luabind::Class<SceneObjectWithPosition>(lua);
         luabind::Class<Sprite>(lua);

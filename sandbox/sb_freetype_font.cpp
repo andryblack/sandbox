@@ -363,9 +363,9 @@ namespace Sandbox {
         m_impl->commit();
     }
     
-    float FreeTypeFont::Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const {
+    float FreeTypeFont::Draw(Graphics& g,const DrawAttributesPtr& attributes,const Vector2f& pos,const char* text,FontAlign align) const {
         const_cast<FreeTypeFont*>(this)->preallocate_text(text);
-        return Font::Draw(g, pos, text, align);
+        return Font::Draw(g, attributes, pos, text, align);
     }
     float FreeTypeFont::GetTextWidth(const char* text) const {
         const_cast<FreeTypeFont*>(this)->preallocate_text(text);

@@ -18,7 +18,14 @@ namespace Sandbox {
 	class Graphics;
 	class Container;
     class Scene;
-
+    class DrawAttributes : public Sandbox::meta::object {
+        SB_META_OBJECT;
+    public:
+        DrawAttributes() {}
+    };
+    typedef sb::intrusive_ptr<DrawAttributes> DrawAttributesPtr;
+    
+    
 	class SceneObject : public meta::object {
 	    SB_META_OBJECT
     public:
@@ -39,6 +46,10 @@ namespace Sandbox {
         Transform2d GetTransform() const;
         Vector2f LocalToGlobal(const Vector2f& v) const;
         
+        void SetDrawAttributes(const DrawAttributesPtr& attributes) {
+            m_draw_attributes = attributes;
+        }
+        const DrawAttributesPtr& GetDrawAttributes() const { return m_draw_attributes; }
         void RemoveFromScene();
 	protected:
 		friend class Container;
@@ -51,6 +62,7 @@ namespace Sandbox {
 		Container* m_parent;
 		bool	m_visible;
         float   m_order;
+        DrawAttributesPtr m_draw_attributes;
 	};
 	typedef sb::intrusive_ptr<SceneObject> SceneObjectPtr;
     

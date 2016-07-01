@@ -27,7 +27,9 @@ namespace Sandbox {
 	};
 	
 	class Graphics;
-	
+    class DrawAttributes;
+    typedef sb::intrusive_ptr<DrawAttributes> DrawAttributesPtr;
+    
 	class Font : public meta::object {
         SB_META_OBJECT
 	public:
@@ -46,7 +48,9 @@ namespace Sandbox {
 		Font();
 		virtual ~Font();
 		
-        virtual float Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const;
+        virtual float Draw(Graphics& g,
+                           const DrawAttributesPtr& attributes,
+                           const Vector2f& pos,const char* text,FontAlign align) const;
 		virtual float GetTextWidth(const char* text) const;
         bool MovePosition(Vector2f& pos,UTF32Char prev,UTF32Char next) const;
         

@@ -47,6 +47,7 @@ namespace Sandbox {
     struct SkeletonNodeData {
         sb::string name;
         BlendMode blend;
+        DrawAttributesPtr attributes;
     };
     
     class SkeletonData;
@@ -63,13 +64,15 @@ namespace Sandbox {
     public:
         void AddNode(const SkeletonNodeData& n) { m_nodes.push_back(n); }
         size_t GetNodesCount() const { return m_nodes.size(); }
+        sb::string GetNodeName(size_t idx);
+        void SetNodeAttribute(size_t idx, const Sandbox::DrawAttributesPtr& attribute);
         const sb::vector<SkeletonNodeData>& GetNodes() const { return m_nodes; }
         void AddAnimation( const SkeletonAnimationPtr& animation);
         static SkeletonDataPtr Load(const char* file, Resources* resources);
         const SkeletonAnimationPtr& GetAnimation(const sb::string& name) const;
         const SkeletonNodeData& GetNode(size_t idx) const;
         const ImagePtr& GetImage(size_t index) const;
-        void SetImage(size_t index,const sb::string& name, const ImagePtr& img);
+        void SetImage(size_t index,const ImagePtr& img);
         bool HasAnimation( const sb::string& name ) const;
         void DumpTextures() const;
         void DumpNodes() const;

@@ -23,7 +23,7 @@ namespace Sandbox {
 
 	void Label::Draw(Graphics& g) const {
 		if (m_font && !m_text.empty()) {
-			m_font->Draw(g,GetPos(),m_text.c_str(),m_align);
+			m_font->Draw(g,GetDrawAttributes(),GetPos(),m_text.c_str(),m_align);
 		}
 	}
     
@@ -45,7 +45,7 @@ namespace Sandbox {
     void MultilineLabel::Draw(Graphics& g) const {
         if (m_font && !m_text.empty()) {
             for (sb::vector<Line>::const_iterator it = m_lines.begin();it!=m_lines.end();++it) {
-                m_font->Draw(g, GetPos()+it->pos, it->text.c_str(), m_align);
+                m_font->Draw(g, GetDrawAttributes(), GetPos()+it->pos, it->text.c_str(), m_align);
             }
 		}
     }

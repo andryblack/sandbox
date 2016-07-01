@@ -60,6 +60,10 @@ namespace Sandbox {
         double GetTimeUSec() const;
         int GetUTCOffset() const;
         void Restart() { m_need_restart = true; }
+        GHL::UInt32 GetScreenWidth() const { return m_width; }
+        GHL::UInt32 GetScreenHeight() const { return m_height; }
+        float GetDrawWidth() const { return m_draw_width; }
+        float GetDrawHeight() const { return m_draw_height; }
     protected:
 		Application();
 		virtual ~Application();
@@ -93,7 +97,7 @@ namespace Sandbox {
         bool RestoreAppProfile();
         void StoreAppProfile();
         
-        void UpdateScreenSize();
+        virtual void UpdateScreenSize();
         
         virtual void OnResize();
         
@@ -143,7 +147,9 @@ namespace Sandbox {
         sb::list<RTScenePtr>    m_rt_scenes;
         GHL::UInt32     m_width;
         GHL::UInt32     m_height;
-       
+        float   m_draw_width;
+        float   m_draw_height;
+        
 		bool		m_clear_buffer;
 		Color		m_clear_color;
         
@@ -154,6 +160,7 @@ namespace Sandbox {
         bool    m_music_enabled;
         
         sb::string  m_title;
+    
         
 #ifdef SB_USE_MYGUI
         mygui::DataManager*     m_gui_data_manager;

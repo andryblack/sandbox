@@ -24,6 +24,7 @@ namespace Sandbox {
         m_vertexes2tex.reserve(512);
 		m_indexes.reserve(512);
         m_scale = 1.0f;
+        m_filter = 0;
 	}
 	
 	Graphics::~Graphics() {
@@ -52,6 +53,10 @@ namespace Sandbox {
             tex->DiscardInternal();
 		}
 	}
+    
+    void Graphics::SetFilter(DrawFilter* filter) {
+        m_filter = filter;
+    }
 	
 	void Graphics::SetBlendMode(BlendMode bmode) {
         sb_assert( (m_render!=0) && "scene not started" );
@@ -241,8 +246,10 @@ namespace Sandbox {
 		m_primitives+=2;
 	}
 	
-	void Graphics::DrawImage(const Image& img,float x,float y) {
+	void Graphics::DrawImage(const Image& img,const DrawAttributesPtr& attributes,float x,float y) {
 		sb_assert( (m_render!=0) && "scene not started" );
+        if (m_filter && !m_filter->DrawImage(*this, attributes, img, x, y, Sandbox::Color(), 1.0))
+            return;
         BeginDrawImage(img);
 		const float w = img.GetWidth();
 		const float h = img.GetHeight();
@@ -297,8 +304,10 @@ namespace Sandbox {
                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
         }
 	}
-	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr) {
+	void Graphics::DrawImage(const Image& img,const DrawAttributesPtr& attributes,float x,float y,const Color& _clr) {
 		sb_assert( (m_render!=0) && "scene not started" );
+        if (m_filter && !m_filter->DrawImage(*this,attributes, img, x, y, _clr, 1.0))
+            return;
         BeginDrawImage(img);
         const float w = img.GetWidth();
 		const float h = img.GetHeight();
@@ -338,8 +347,10 @@ namespace Sandbox {
         }
 		
 	}
-	void Graphics::DrawImage(const Image& img,float x,float y,const Color& _clr,float scale) {
+	void Graphics::DrawImage(const Image& img,const DrawAttributesPtr& attributes,float x,float y,const Color& _clr,float scale) {
 		sb_assert( (m_render!=0) && "scene not started" );
+        if (m_filter && !m_filter->DrawImage(*this, attributes, img, x, y, _clr, scale))
+            return;
         BeginDrawImage(img);
 		const float w = img.GetWidth()*scale;
 		const float h = img.GetHeight()*scale;
@@ -382,7 +393,7 @@ namespace Sandbox {
 		
 	}
     
-    void Graphics::DrawImageBox(const ImageBox& img, const Vector2f& pos, const Vector2f& size) {
+    void Graphics::DrawImageBox(const ImageBox& img, const DrawAttributesPtr& attributes,const Vector2f& pos, const Vector2f& size) {
         sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
         float x1 = pos.x;

@@ -41,6 +41,19 @@ namespace Sandbox {
     };
 	
     struct GeometryData;
+    class Graphics;
+    
+    class DrawAttributes;
+    typedef sb::intrusive_ptr<DrawAttributes> DrawAttributesPtr;
+
+    
+    class DrawFilter {
+    public:
+        virtual bool DrawImage(Graphics& g,
+                               const DrawAttributesPtr& attributes,
+                               const Image& img,
+                               float x,float y,const Color& clr,float scale) = 0;
+    };
     
 	class Graphics {
 	public:
@@ -102,19 +115,26 @@ namespace Sandbox {
 		/// draw image
 		/// @{
 
-		void DrawImage(const Image& img,float x,float y);
-		void DrawImage(const Image& img,float x,float y,const Color& clr);
-		void DrawImage(const Image& img,float x,float y,const Color& clr,float scale);
-        void DrawImage(const Image& img,const Vector2f& pos) {
-            DrawImage(img,pos.x,pos.y);
+		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+                       float x,float y);
+		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+                       float x,float y,const Color& clr);
+		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+                       float x,float y,const Color& clr,float scale);
+        void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+                       const Vector2f& pos) {
+            DrawImage(img,attributes,pos.x,pos.y);
         }
-		void DrawImage(const Image& img,const Vector2f& pos,const Color& clr) {
-            DrawImage(img,pos.x,pos.y,clr);
+		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+                       const Vector2f& pos,const Color& clr) {
+            DrawImage(img,attributes,pos.x,pos.y,clr);
         }
-		void DrawImage(const Image& img,const Vector2f& pos,const Color& clr,float scale) {
-            DrawImage(img,pos.x,pos.y,clr,scale);
+		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+                       const Vector2f& pos,const Color& clr,float scale) {
+            DrawImage(img,attributes,pos.x,pos.y,clr,scale);
         }
-        void DrawImageBox(const ImageBox& img, const Vector2f& pos, const Vector2f& size);
+        void DrawImageBox(const ImageBox& img, const DrawAttributesPtr& attributes,
+                          const Vector2f& pos, const Vector2f& size);
         /// @}
         
         void BeginDrawTriangles(const TexturePtr& texture);
@@ -162,6 +182,8 @@ namespace Sandbox {
         
         void SetScale(float scale);
         float GetScale() const { return m_scale; }
+        
+        void SetFilter(DrawFilter* filter);
    private:
         Resources*  m_resources;
 		GHL::Render* m_render;
@@ -226,6 +248,8 @@ namespace Sandbox {
 		void appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3);
 		void appendQuad();
 		size_t m_batches;
+        
+        DrawFilter* m_filter;
 	};
 }
 

@@ -19,7 +19,7 @@ namespace Sandbox {
         g.SetTransform(tr * m_transform);
         g.SetColor(c * m_color);
         g.SetBlendMode(m_blend);
-        g.DrawImage(*m_image,0,0);
+        g.DrawImage(*m_image,GetDrawAttributes(),0,0);
         //g.DrawCircle(Vector2f(0,0), 3);
         g.SetColor(c);
         g.SetTransform(tr);
@@ -28,6 +28,7 @@ namespace Sandbox {
     
     void SkeletonNode::SetNode(const SkeletonNodeData &node) {
         m_blend = node.blend;
+        SetDrawAttributes(node.attributes);
     }
     void SkeletonNode::SetFrame(const SkeletonNodeFrame &frame) {
         m_color = frame.color;

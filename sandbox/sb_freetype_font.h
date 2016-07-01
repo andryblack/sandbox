@@ -23,7 +23,7 @@ namespace Sandbox {
     public:
         static sb::intrusive_ptr<FreeTypeFont> Load( Resources* resources, const char* file, const FreeTypeFontConfig& config );
         virtual ~FreeTypeFont();
-        virtual float Draw(Graphics& g,const Vector2f& pos,const char* text,FontAlign align) const;
+        virtual float Draw(Graphics& g,const DrawAttributesPtr& attributes,const Vector2f& pos,const char* text,FontAlign align) const;
         virtual float GetTextWidth(const char* text) const;
     private:
         struct Impl;

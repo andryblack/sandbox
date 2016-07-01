@@ -13,6 +13,7 @@
 #include "sb_container.h"
 #include "sb_scene.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::DrawAttributes,Sandbox::meta::object)
 SB_META_DECLARE_OBJECT(Sandbox::SceneObject, Sandbox::meta::object)
 SB_META_DECLARE_OBJECT(Sandbox::SceneObjectWithPosition, Sandbox::SceneObject)
 

@@ -30,7 +30,7 @@ namespace Sandbox {
                                      float(g.GetScreenHeight())/m_height));
         }
         for (size_t i=0;i<m_images.size();i++) {
-            g.DrawImage(m_images[i], 0, 0);
+            g.DrawImage(m_images[i], GetDrawAttributes(), 0, 0);
         }
         g.SetTransform(tr);
     }
