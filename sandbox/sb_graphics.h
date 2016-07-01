@@ -36,6 +36,7 @@ namespace Sandbox {
         MASK_MODE_NONE,
         MASK_MODE_ALPHA,
         MASK_MODE_SCREEN,
+        MASK_MODE_MULTIPLY
     };
 	
     struct GeometryData;
@@ -164,7 +165,7 @@ namespace Sandbox {
         Resources*  m_resources;
 		GHL::Render* m_render;
         bool m_render_to_target;
-		GHL::Texture* m_fake_tex_white;
+		TexturePtr  m_fake_tex_white;
         TexturePtr  m_fake_tex_black;
         
 		Transform2d     m_transform;
