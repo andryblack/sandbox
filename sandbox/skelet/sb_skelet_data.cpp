@@ -222,11 +222,15 @@ namespace Sandbox {
         return it->second;
     }
     
-    static const SkeletonNodeData empty_node = {"nil",BLEND_MODE_ALPHABLEND};
+    static const SkeletonNodeData empty_node = {"nil",BLEND_MODE_ALPHABLEND,DrawAttributesPtr()};
     const SkeletonNodeData& SkeletonData::GetNode(size_t idx) const {
         if (idx < m_nodes.size())
             return m_nodes[idx];
         return empty_node;
+    }
+    
+    void SkeletonData::AddNode(const SkeletonNodeData& n) {
+        m_nodes.push_back(n);
     }
     
     sb::string SkeletonData::GetNodeName(size_t idx) {
