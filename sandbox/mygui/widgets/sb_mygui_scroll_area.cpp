@@ -26,20 +26,12 @@ namespace Sandbox {
     }
 }
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ScrollArea, MyGUI::ScrollView)
-SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ScrollArea)
-SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
-SB_META_PROPERTY_WO(scrollPos, setScrollPos)
-SB_META_END_KLASS_BIND()
+
 
 namespace Sandbox {
     
     namespace mygui {
-        
-        void register_ScrollArea(lua_State* L) {
-            luabind::ExternClass<ScrollArea>(L);
-        }
-        
+                
         ScrollArea::ScrollArea() {
             
             m_move_accum.left  = 0.0f;
@@ -174,6 +166,7 @@ namespace Sandbox {
                 m_move_speed = MyGUI::FloatPoint(0,0);
                 m_move_accum = MyGUI::FloatPoint(0,0);
                 m_state = state_none;
+                scrollComplete(this,m_scroll_target);
             }
         }
         
@@ -226,7 +219,7 @@ namespace Sandbox {
 //                        if (w) {
 //                            //w->_riseMouseButtonReleased(0, 0, MyGUI::MouseButton::Left);
 //                        }
-                        LogInfo() << "set manual scroll";
+//                        LogInfo() << "set manual scroll";
                         MyGUI::InputManager::getInstance().setMouseFocusWidget(this);
                     }
                 }
@@ -373,7 +366,7 @@ namespace Sandbox {
         
         void ScrollArea::setScrollPos(const MyGUI::IntPoint& p) {
             m_scroll_target = normalizeScrollValue(p);
-            m_state=state_free_scroll;
+            setViewOffset(m_scroll_target);
         }
         
         

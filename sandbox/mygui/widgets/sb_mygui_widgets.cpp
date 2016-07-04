@@ -85,14 +85,12 @@ namespace Sandbox {
 
         
         void register_ScrollList(lua_State* L);
-        void register_ScrollArea(lua_State* L);
         
         void register_widgets(lua_State* L) {
             luabind::ExternClass<CachedWidget>(L);
             luabind::ExternClass<SceneWidget>(L);
             
             register_ScrollList(L);
-            register_ScrollArea(L);
             
             
             luabind::ExternClass<MaskImageWidget>(L);

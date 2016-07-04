@@ -108,6 +108,7 @@ namespace Sandbox {
             int     getScroll() const;
             int     getScrollAreaSize() const;
             int     getScrollContentSize() const;
+            int getScrollMargin() const;
             
             void startFreeScroll();
             

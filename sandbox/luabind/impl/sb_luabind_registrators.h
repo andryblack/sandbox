@@ -254,7 +254,7 @@ namespace Sandbox {
         public:
             explicit namespace_registrator( lua_State* L ) : registrator_base(L) {}
             template <class Func>
-            void operator()( const meta::static_method_holder<Func>& func ) {
+            namespace_registrator& operator()( const meta::static_method_holder<Func>& func ) {
                 sb_assert(lua_istable(m_L, -1));
                 lua_pushstring(m_L, func.name);
                 Func* ptr =
@@ -262,12 +262,21 @@ namespace Sandbox {
                 *ptr = func.func;
                 lua_pushcclosure(m_L, &method_helper<Func,1>::call, 1); /// name method
                 lua_rawset(this->m_L, -3);
+                return *this;
             }
-            void operator()( const meta::static_method_holder<int(*)(lua_State*)>& func ) {
+            namespace_registrator& operator()( const meta::static_method_holder<int(*)(lua_State*)>& func ) {
                 sb_assert(lua_istable(m_L, -1));
                 lua_pushstring(m_L, func.name);
                 lua_pushcclosure(m_L, func.func, 0); /// name method
                 lua_rawset(this->m_L, -3);
+                return *this;
+            }
+            template <class T>
+            namespace_registrator& operator()(const char* name,const T& value) {
+                lua_pushstring(m_L, name);
+                stack<T>::push(m_L,value);
+                lua_rawset(this->m_L, -3);
+                return *this;
             }
         };
         

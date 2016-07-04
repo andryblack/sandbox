@@ -18,6 +18,9 @@ namespace Sandbox {
     namespace mygui {
         
         class ScrollArea;
+        
+        typedef MyGUI::delegates::CDelegate2<ScrollArea*, MyGUI::IntPoint> EventHandle_ScrollAreaPtrIntPoint;
+        
                 
         class ScrollArea : public MyGUI::ScrollView {
             MYGUI_RTTI_DERIVED( ScrollArea )
@@ -32,7 +35,10 @@ namespace Sandbox {
             
             void setScrollPos(const MyGUI::IntPoint& p);
           
+            EventHandle_ScrollAreaPtrIntPoint scrollComplete;
             virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
+            
+            bool scrollActive() const { return m_state != state_none; }
         protected:
             void initialiseOverride();
             void shutdownOverride();

@@ -342,6 +342,12 @@ namespace Sandbox {
             return getContentSize().width;
         }
         
+        int ScrollList::getScrollMargin() const {
+            if (getVerticalAlignment())
+                return getContentMargins().top;
+            return getContentMargins().left;
+        }
+        
         int     ScrollList::getScrollAreaSize() const {
             if (getVerticalAlignment()) {
                 return getClientWidget()->getSize().height;
@@ -374,7 +380,7 @@ namespace Sandbox {
         }
         
         void ScrollList::moveToPage(int idx) {
-            m_scroll_target = normalizeScrollValue(getItemSize()*idx);
+            m_scroll_target = normalizeScrollValue(getScrollMargin()+getItemSize()*idx);
             if (m_state==state_none || m_state == state_free_scroll) {
                 m_move_speed += getItemSize() * 2.0f;
                 startFreeScroll();
@@ -391,15 +397,15 @@ namespace Sandbox {
         }
         
         int ScrollList::getTargetPage() const {
-            return (m_scroll_target + getItemSize() / 2) / getItemSize();
+            return ((m_scroll_target - getScrollMargin()) + getItemSize() / 2) / getItemSize();
         }
         
         void ScrollList::setPage(int page) {
-            setScroll(normalizeScrollValue(getItemSize()*page));
+            setScroll(normalizeScrollValue(getScrollMargin() + getItemSize()*page));
         }
         
         int ScrollList::getPage() const {
-            return (getScroll() + getItemSize() / 2) / getItemSize();
+            return ((getScroll()- getScrollMargin()) + getItemSize() / 2) / getItemSize();
         }
         
         void ScrollList::movePrev() {
@@ -507,7 +513,7 @@ namespace Sandbox {
 //                        if (w) {
 //                            //w->_riseMouseButtonReleased(0, 0, MyGUI::MouseButton::Left);
 //                        }
-                        LogInfo() << "set manual scroll";
+//                        LogInfo() << "set manual scroll";
                         MyGUI::InputManager::getInstance().setMouseFocusWidget(this);
                     }
                 }
@@ -562,8 +568,13 @@ namespace Sandbox {
                 MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
                 pos_in_layer -= getAbsolutePosition();
                 if (m_state == state_none || m_state == state_free_scroll) {
-                    if (pos_in_layer.left > 0 && pos_in_layer.top > 0 &&
-                        pos_in_layer.left < getWidth() && pos_in_layer.top < getHeight()) {
+                    
+                    MyGUI::IntRect client_rect = MyGUI::IntRect(0,0,getWidth(),getHeight());
+                    if (mClient) {
+                        client_rect = MyGUI::IntRect(mClient->getLeft(),mClient->getTop(),mClient->getWidth(),mClient->getHeight());
+                    }
+                    
+                    if (client_rect.inside(pos_in_layer)) {
                         m_state = state_wait_scroll;
                         //LogInfo() << "set wait scroll";
                         m_scroll_prev_pos = pos_in_layer;
@@ -589,7 +600,7 @@ namespace Sandbox {
                         m_move_speed = max_speed;
                     
                     int scroll_distance = m_move_speed * ( 0.2f ) * speed_dir;
-                    m_scroll_target = roundf(float(getScroll()+scroll_distance)/getItemSize()) * getItemSize();
+                    m_scroll_target = getScrollMargin() + roundf(float(getScroll()+scroll_distance)/getItemSize()) * getItemSize();
                     
                     m_scroll_target = normalizeScrollValue(m_scroll_target);
                     

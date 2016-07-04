@@ -76,6 +76,8 @@
 #include "font/sb_mygui_ft_font_ol.h"
 #include "font/sb_mygui_multipass_font.h"
 
+#include "widgets/sb_mygui_scroll_area.h"
+
 #include "sb_utf.h"
 
 namespace Sandbox {
@@ -947,7 +949,16 @@ SB_META_END_KLASS_BIND()
 
 
 
-
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ScrollArea, MyGUI::ScrollView)
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ScrollArea)
+SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
+SB_META_PROPERTY_WO(scrollPos, setScrollPos)
+SB_META_PROPERTY_RO(scrollActive, scrollActive)
+bind(method("scrollComplete", delegate_bind<Sandbox::mygui::ScrollArea,
+            Sandbox::mygui::ScrollArea,
+            Sandbox::mygui::EventHandle_ScrollAreaPtrIntPoint,
+            &Sandbox::mygui::ScrollArea::scrollComplete>::lua_func));
+SB_META_END_KLASS_BIND()
 
 
 namespace Sandbox {
@@ -956,6 +967,11 @@ namespace Sandbox {
         void register_widgets(lua_State* L);
         
         void register_mygui( lua_State* lua ) {
+            {
+                luabind::Namespace(lua,"MyGUI")
+                    ("ITEM_NONE",MyGUI::ITEM_NONE);
+            }
+            
             
             luabind::RawClass<MyGUI::WidgetStyle>(lua);
             //luabind::Enum<MyGUI::WidgetStyle::Enum>(lua);
@@ -1007,8 +1023,11 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ControllerEdgeHide>(lua);
             luabind::ExternClass<MyGUI::ControllerRepeatClick>(lua);
             
+            luabind::ExternClass<ScrollArea>(lua);
             
             register_widgets(lua);
+            
+            
         }
         
         void setup_singletons( LuaVM* lua ) {
