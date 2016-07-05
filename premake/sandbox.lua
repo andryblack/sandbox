@@ -179,6 +179,10 @@ solution( ProjectName )
 		dofile('spine-runtime.lua')
 	end
 
+	if pre_project then
+		pre_project()
+	end
+
 	project 'Sandbox'
 
 		kind 'StaticLib'
