@@ -64,9 +64,17 @@ namespace Sandbox {
             return m_file!=0;
         }
         bool opened() const { return m_file!=0; }
+        
+        void flush() {
+            if (opened()) {
+                m_file->Flush();
+            }
+        }
     };
     
     static GHLLogger file_logger;
+    static sb::string g_cur_log_path;
+    static sb::string g_prev_log_path;
     
     void Logger::StartSession(GHL::VFS* vfs) {
 #if !defined(GHL_PLATFORM_EMSCRIPTEN) && !defined(GHL_PLATFORM_FLASH)
@@ -77,13 +85,25 @@ namespace Sandbox {
             }
         }
         file_logger.close();
-        sb::string dst_path = path + curr_log;
-        vfs->DoRenameFile(dst_path.c_str(),(path + prev_log).c_str());
-        if (file_logger.open(vfs,dst_path.c_str())) {
-            GHL_Log(GHL::LOG_LEVEL_INFO, (sb::string("start writing ") + dst_path).c_str() );
+        g_prev_log_path =path + prev_log;
+        g_cur_log_path = path + curr_log;
+        vfs->DoRenameFile(g_cur_log_path.c_str(),g_prev_log_path.c_str());
+        if (file_logger.open(vfs,g_cur_log_path.c_str())) {
+            GHL_Log(GHL::LOG_LEVEL_INFO, (sb::string("start writing ") + g_cur_log_path).c_str() );
             GHL_SetLogger(&file_logger);
         }
 #endif
+    }
+    
+    void Logger::flush() {
+        file_logger.flush();
+    }
+    
+    sb::string Logger::GetCurrentPath() {
+        return g_cur_log_path;
+    }
+    sb::string Logger::GetPrevPath() {
+        return g_prev_log_path;
     }
     
     Logger::Logger( GHL::LogLevel level , const char* module) :  m_module(module),m_level( level ){
