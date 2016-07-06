@@ -38,7 +38,7 @@ extern "C" {
 SB_META_BEGIN_KLASS_BIND(Sandbox::BinaryData)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_NAMED_KLASS(Sandbox::Logger, "log")
+SB_META_DECLARE_NAMED_KLASS(Sandbox::Logger, "log",void)
 
 namespace Sandbox {
 	

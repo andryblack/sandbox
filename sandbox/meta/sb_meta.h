@@ -181,7 +181,7 @@ namespace Sandbox {
 #define ANONYMOUS_VARIABLE(str) CONCATENATE(str, CONCATENATE(__LINE__,__COUNTER__))
 #define SB_META_DECLARE_KLASS(Type,Parent) SB_META_DECLARE_KLASS_X(Type,Parent,ANONYMOUS_VARIABLE(private_),#Type)
 
-#define SB_META_DECLARE_NAMED_KLASS(Type,Name) SB_META_DECLARE_KLASS_X(Type,void,ANONYMOUS_VARIABLE(private_),Name)
+#define SB_META_DECLARE_NAMED_KLASS(Type,Name,Parent) SB_META_DECLARE_KLASS_X(Type,Parent,ANONYMOUS_VARIABLE(private_),Name)
 #define SB_META_DECLARE_OBJECT_IMPL(Klass)\
     const Sandbox::meta::type_info* Klass::get_static_type_info() {\
         return Sandbox::meta::type<Klass>::info(); \
