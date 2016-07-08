@@ -95,7 +95,6 @@ solution( ProjectName )
 		table.insert(hide_options,'-fvisibility=hidden')
 	end
 
-	buildoptions( hide_options )
 
 	if platform_id == 'ios' then
 		defines { 'GHL_PLATFORM_IOS' }
@@ -107,6 +106,11 @@ solution( ProjectName )
 		}
 	end
 
+	if solution_config then
+		solution_config()
+	end
+
+	buildoptions( hide_options )
 
 	defines {'GHL_STATIC_LIB'}
 

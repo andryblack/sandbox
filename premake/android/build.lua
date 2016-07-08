@@ -268,10 +268,29 @@ function build.generate_app_build_gradle( sln , prj )
 		_x(1,'}')
 	end
 
+	local libname = 'lib' .. prj.name .. '.so'
+
+	for cfg in project.eachconfig(prj) do
+		_x(1,'task copyJNI' .. cfg.name .. 'sym(type: Copy) {')
+		_x(2,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'obj','local','armeabi',libname)) .. "'")
+		_x(2,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname .. '_symbols')) .. "'")
+		_x(1,'}')
+	end
+	for cfg in project.eachconfig(prj) do
+		_x(1,'task copyJNI' .. cfg.name .. '(type: Copy) {')
+		_x(2,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'libs','armeabi',libname)) .. "'")
+		_x(2,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname)) .. "'")
+		_x(1,'}')
+	end
+	
 	
 	_p('afterEvaluate {')
 	for cfg in project.eachconfig(prj) do
-		_p(1,'generate' .. cfg.name .. 'Assets.dependsOn ' .. 'prebuild_cmd_' .. cfg.shortname .. ', buildJNI' .. cfg.name)
+		_x(1,'copyJNI' .. cfg.name .. '.dependsOn buildJNI' .. cfg.name)
+		_x(1,'copyJNI' .. cfg.name .. 'sym.dependsOn buildJNI' .. cfg.name)
+		_p(1,'generate' .. cfg.name .. 'Assets.dependsOn ' .. 'prebuild_cmd_' .. cfg.shortname .. 
+				', buildJNI' .. cfg.name .. 
+				', copyJNI' .. cfg.name .. ', copyJNI' .. cfg.name .. 'sym')
 	end
 	_p('}')
 	

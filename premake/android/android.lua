@@ -224,10 +224,10 @@ newaction {
 	onsolution = function( sln )
 		ndk.onsolution(sln)
 		build.onsolution(sln)
+		manifest.onsolution(sln)
 	end,
 	onproject = function( prj )
 		ndk.onproject(prj)
-		manifest.onproject(prj)
 	end,
 	oncleansolution = function( sln )
 		ndk.oncleansolution(sln)

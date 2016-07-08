@@ -24,7 +24,7 @@ namespace jni {
 
 	sb::string extract_jni_string( JNIEnv* env, const jstring jstr );
 	sb::string jni_object_to_string(JNIEnv *env, jobject obj);
-	bool check_exception( JNIEnv* env );
+	bool check_exception( JNIEnv* env , bool clear = true);
 
 	struct jni_string
     {

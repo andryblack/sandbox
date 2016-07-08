@@ -63,10 +63,10 @@ namespace jni {
 	    return "not found toString";
 	}
 
-	bool check_exception( JNIEnv* env ) {
+	bool check_exception( JNIEnv* env , bool clear ) {
         if (env->ExceptionCheck()) {
             jthrowable exc = env->ExceptionOccurred();
-            if (exc) {
+            if (exc && clear) {
                 env->ExceptionDescribe();
                 env->ExceptionClear();
                 jclass clazz = env->GetObjectClass(exc);

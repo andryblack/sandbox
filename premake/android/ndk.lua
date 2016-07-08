@@ -288,6 +288,7 @@ function ndk.generateMakefile(prj,cfg)
 	
 	_p('LOCAL_MODULE := '..ndk.getModuleName(prj, cfg))
 	ndk.writeStrings('LOCAL_CFLAGS', '-D', cfg.defines)
+	ndk.writeStrings('LOCAL_CFLAGS', '', cfg.buildoptions,'+=')
 	ndk.writeStrings('LOCAL_CPP_FEATURES', '', ndk.getCppFeatures(cfg))
 
 	-- Join linker options with linked libraries to get single table
@@ -296,7 +297,9 @@ function ndk.generateMakefile(prj,cfg)
 	for _,v in ipairs(links) do
 		table.insert(link_options, '-l'..v)
 	end
-	ndk.writeStrings('LOCAL_LDLIBS', '', link_options)
+	if cfg.kind ~= premake.STATICLIB then
+		ndk.writeStrings('LOCAL_LDLIBS', '', link_options)
+	end
 	ndk.writeStrings('LOCAL_SHARED_LIBRARIES', '', ndk.getDependentModules(prj, cfg, premake.SHAREDLIB))
 	local static_libs = ndk.getDependentModules(prj, cfg, premake.STATICLIB)
 	for _,v in ipairs(prj.android_ndk_static_libs or {}) do

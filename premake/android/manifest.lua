@@ -14,25 +14,18 @@ local manifest = {}
 
 
 
-function manifest.onproject( prj )
-	if prj.kind == premake.WINDOWEDAPP then
-		premake.escaper(nil)
-		local sln = prj.solution
-		local function generateManifest(prj)
-			manifest.generateManifest(sln, prj)
-		end
-		premake.generate(sln, manifest.getManifestFilename( sln,prj ), generateManifest)
-	end
-end
 function manifest.onsolution( sln )
 	premake.escaper(nil)
-	-- Generate the manifest
-	for cfg in solution.eachconfig(sln) do
-		local function generateManifest(sln)
-			manifest.generateManifest(sln, cfg)
+
+	for prj in solution.eachproject(sln) do
+		if prj.kind == premake.WINDOWEDAPP then
+			local function gen(sln)
+				manifest.generateManifest(sln,prj)
+			end
+			premake.generate(sln, manifest.getManifestFilename( sln,prj ), gen)
 		end
-		premake.generate(sln, manifest.getManifestFilename( sln, cfg ), generateManifest)
 	end
+
 end
 
 function manifest.oncleansolution( sln )
@@ -87,7 +80,7 @@ function manifest.generateManifest(sln,prj)
 			
 			_p(2, '</activity>')
 
-			for _,v in ipairs(prj.android_metadata) do
+			for _,v in ipairs(prj.android_metadata or {}) do
 				local name = nil
 				local val = nil
 				local p = v:find('=')
