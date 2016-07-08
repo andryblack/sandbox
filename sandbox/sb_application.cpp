@@ -260,33 +260,40 @@ namespace Sandbox {
     ///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
 		sb_assert( m_vfs );
-        sb_assert(!m_resources);
-        m_resources = CreateResourcesManager();
-        sb_assert(m_resources);
+         LogInfo() << "Application::FillSettings";
+        if (!m_resources) {
+            m_resources = CreateResourcesManager();
+            sb_assert(m_resources);
 
-        LogInfo() << "Application::FillSettings";
-		
-        std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);
-		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
-			base_path+="/";
-		base_path+=m_resources_base_path;
-		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
-			base_path+="/";
-		m_resources->SetBasePath(base_path.c_str());
-
-#ifdef SB_USE_NETWORK
-        sb_assert(!m_network);
-        m_network = new Network(m_resources);
-#endif
-        sb_assert(!m_lua);
-        m_lua = new LuaVM(m_resources);
+       
+            
+            std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);
+            if (!base_path.empty() && base_path[base_path.size()-1]!='/')
+                base_path+="/";
+            base_path+=m_resources_base_path;
+            if (!base_path.empty() && base_path[base_path.size()-1]!='/')
+                base_path+="/";
+            m_resources->SetBasePath(base_path.c_str());
         
-		base_path=m_lua_base_path;
-		if (!base_path.empty() && base_path[base_path.size()-1]!='/')
-			base_path+="/";
-		m_lua->SetBasePath(base_path.c_str());
-		
-        InitLua();
+        }
+#ifdef SB_USE_NETWORK
+        if (!m_network) {
+            m_network = new Network(m_resources);
+        }
+#endif
+        if (!m_lua) {
+            m_lua = new LuaVM(m_resources);
+            
+            std::string  base_path=m_lua_base_path;
+            if (!base_path.empty() && base_path[base_path.size()-1]!='/')
+                base_path+="/";
+            m_lua->SetBasePath(base_path.c_str());
+            
+            InitLua();
+        }
+        
+       
+        
 
         LuaContextPtr ctx = m_lua->GetGlobalContext();
         ctx->SetValue("settings", settings);
@@ -356,13 +363,14 @@ namespace Sandbox {
         ConfigureDevice( m_system );
         PlatformExtension::OnLoadAll(this);
         if (!m_graphics) {
-            m_graphics = new Graphics(m_resources);
             sb_assert(m_resources);
-            sb_assert(m_render);
-            sb_assert(m_image_decoder);
-            m_resources->Init(m_render, m_image_decoder);
-            m_sound_mgr->Init(m_sound,m_resources);
+            m_graphics = new Graphics(m_resources);
         }
+        
+        sb_assert(m_render);
+        sb_assert(m_image_decoder);
+        m_resources->Init(m_render, m_image_decoder);
+        m_sound_mgr->Init(m_sound,m_resources);
         
         LuaContextPtr ctx = m_lua->GetGlobalContext();
         
@@ -371,24 +379,27 @@ namespace Sandbox {
 
         InitResources();
 #ifdef SB_USE_MYGUI
-        sb_assert(!m_gui_data_manager);
-        m_gui_data_manager = new mygui::DataManager(m_resources);
-        sb_assert(!m_gui_render);
-        m_gui_render = new mygui::RenderManager(m_graphics, m_resources);
+        if (!m_gui_data_manager) {
+            m_gui_data_manager = new mygui::DataManager(m_resources);
+            sb_assert(!m_gui_render);
+            m_gui_render = new mygui::RenderManager(m_graphics, m_resources);
+        }
         
-        sb_assert(!m_gui);
-        m_gui = new MyGUI::Gui();
-        m_gui->initialise("");
-        mygui::register_font();
-        mygui::register_skin();
-        mygui::register_widgets();
-        mygui::setup_singletons(m_lua);
+        if (!m_gui) {
+            m_gui = new MyGUI::Gui();
+            m_gui->initialise("");
+            mygui::register_font();
+            mygui::register_skin();
+            mygui::register_widgets();
+            mygui::setup_singletons(m_lua);
+            sb_assert( MyGUI::InputManager::getInstancePtr());
+            MyGUI::LanguageManager::getInstance().eventRequestTag =
+                MyGUI::newDelegate(this,&Application::get_mygui_localization);
+            MyGUI::InputManager::getInstance().eventChangeKeyFocus +=
+                MyGUI::newDelegate(this,&Application::mygui_change_key_focus);
+
+        }
         
-        sb_assert( MyGUI::InputManager::getInstancePtr());
-        MyGUI::LanguageManager::getInstance().eventRequestTag =
-            MyGUI::newDelegate(this,&Application::get_mygui_localization);
-        MyGUI::InputManager::getInstance().eventChangeKeyFocus +=
-            MyGUI::newDelegate(this,&Application::mygui_change_key_focus);
 #endif
 
         UpdateScreenSize();
@@ -399,19 +410,21 @@ namespace Sandbox {
 		if (!LoadResources(*m_resources))
 			return false;
         
-        sb_assert(!m_main_scene);
-        m_main_scene = new Scene();
-        ctx->SetValue("application.scene", m_main_scene);
-        sb_assert(!m_main_thread);
-		m_main_thread = new ThreadsMgr();
-        ctx->SetValue("application.thread", m_main_thread);
+        if (!m_main_scene) {
+            m_main_scene = new Scene();
+            ctx->SetValue("application.scene", m_main_scene);
+        }
+        
+        if (!m_main_thread) {
+            m_main_thread = new ThreadsMgr();
+            ctx->SetValue("application.thread", m_main_thread);
+        }
         m_graphics->Load(m_render);
        
         
-        
-        
 		OnLoaded();
-		m_lua->DoFile("main.lua");
+		
+        m_lua->DoFile("main.lua");
         
         if (!m_url.empty()) {
             if (m_lua && m_lua->GetGlobalContext()->GetValue<bool>("application.onOpenURL")) {
@@ -425,9 +438,8 @@ namespace Sandbox {
 		return true;
 	}
     
-    void Application::DoRestart() {
+    void GHL_CALL Application::Unload() {
         StoreAppProfile();
-        
         if (m_lua) {
             m_lua->Restart();
             InitLua();
@@ -437,14 +449,24 @@ namespace Sandbox {
         m_main_scene = 0;
         m_main_thread = 0;
         ReleaseGUI();
-        
-        UpdateScreenSize();
+        if (m_resources) {
+            m_resources->ReleaseAll();
+        }
+        delete m_graphics;
+        m_graphics = 0;
+        m_sound_mgr->Deinit();
+    }
+    
+    void Application::DoRestart() {
+        Unload();
         Load();
     }
     
     void Application::UpdateScreenSize() {
         if (!m_lua)
             return;
+        sb_assert(m_graphics);
+        sb_assert(m_resources);
         float graphics_scal = m_graphics->GetScale();
         float resources_scale = m_resources->GetScale();
         LogInfo() << "[app] UpdateScreenSize g:" << graphics_scal << " r:" << resources_scale << " s:" << m_width << "x" << m_height;

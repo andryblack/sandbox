@@ -22,6 +22,28 @@ namespace Sandbox {
     
     bool json_parse_object(const char* data,sb::map<sb::string,sb::string>& res);
 
+    class JsonBuilder {
+    private:
+        struct Impl;
+        Impl* m_impl;
+    public:
+        JsonBuilder();
+        ~JsonBuilder();
+        
+        JsonBuilder& BeginObject();
+        JsonBuilder& EndObject();
+        
+        JsonBuilder& BeginArray();
+        JsonBuilder& EndArray();
+        
+        JsonBuilder& Key(const char* name);
+        JsonBuilder& PutString(const char* value);
+        JsonBuilder& PutInteger(int value);
+        JsonBuilder& PutNumber(double value);
+        
+        
+        const sb::string& End();
+    };
 }
 
 #endif

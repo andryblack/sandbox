@@ -716,4 +716,68 @@ namespace Sandbox {
         }
     };
     
+    struct JsonBuilder::Impl {
+        sb::string data;
+        yajl_gen g;
+        static void yajl_encode_print(void * ctx,const char * str,size_t len) {
+            Impl* c = static_cast<Impl*>(ctx);
+            c->data.append(str,len);
+        }
+        Impl() {
+            g = yajl_gen_alloc(0);
+            yajl_gen_config(g,yajl_gen_print_callback,&Impl::yajl_encode_print,this);
+        }
+        ~Impl() {
+            yajl_gen_free(g);
+        }
+    };
+    
+    JsonBuilder::JsonBuilder() : m_impl(new Impl()) {
+        
+    }
+    JsonBuilder::~JsonBuilder() {
+        delete m_impl;
+    }
+    
+    JsonBuilder& JsonBuilder::BeginObject() {
+        yajl_gen_map_open(m_impl->g);
+        return *this;
+    }
+    JsonBuilder& JsonBuilder::EndObject() {
+        yajl_gen_map_close(m_impl->g);
+        return *this;
+    }
+    
+    JsonBuilder& JsonBuilder::BeginArray() {
+        yajl_gen_array_open(m_impl->g);
+        return *this;
+    }
+    JsonBuilder& JsonBuilder::EndArray() {
+        yajl_gen_array_close(m_impl->g);
+        return *this;
+    }
+    
+    JsonBuilder& JsonBuilder::Key(const char* name) {
+        yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(name), ::strlen(name));
+        return *this;
+    }
+    JsonBuilder& JsonBuilder::PutString(const char* value) {
+        yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(value), ::strlen(value));
+        return *this;
+    }
+    JsonBuilder& JsonBuilder::PutInteger(int value) {
+        yajl_gen_integer(m_impl->g, value);
+        return *this;
+    }
+    JsonBuilder& JsonBuilder::PutNumber(double value) {
+        yajl_gen_double(m_impl->g, value);
+        return *this;
+    }
+    
+    
+    const sb::string& JsonBuilder::End() {
+        return m_impl->data;
+    }
+
+    
 }

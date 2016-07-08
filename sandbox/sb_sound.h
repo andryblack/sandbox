@@ -73,6 +73,7 @@ namespace Sandbox {
         explicit SoundManager( );
         ~SoundManager();
         void    Init(GHL::Sound* snd, Resources* res);
+        void    Deinit();
         void    Update(float dt);
         SoundPtr GetSound(const char* filename);
         void    SetSoundsDir(const char* dir);

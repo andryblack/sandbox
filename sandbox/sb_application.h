@@ -189,6 +189,8 @@ namespace Sandbox {
 		virtual void GHL_CALL FillSettings( GHL::Settings* settings );
         ///
 		virtual bool GHL_CALL Load() ;
+        ///
+        virtual void GHL_CALL Unload();
 		///
 		virtual bool GHL_CALL OnFrame( GHL::UInt32 usecs ) ;
         ///

@@ -136,6 +136,16 @@ namespace Sandbox {
         m_resources = res;
     }
     
+    void SoundManager::Deinit() {
+        m_sounds.clear();
+        if (m_music) {
+            m_music->Release();
+            m_music = 0;
+        }
+        m_sound = 0;
+        m_resources = 0;
+    }
+    
     void    SoundManager::SetSoundsDir(const char* dir) {
         m_sounds_dir = dir;
         if (m_sounds_dir.length() && m_sounds_dir[m_sounds_dir.length()-1]!='/') {

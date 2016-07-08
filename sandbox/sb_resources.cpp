@@ -584,6 +584,20 @@ namespace Sandbox {
         }
         return memory_used;
     }
+    
+    void Resources::ReleaseAll() {
+        for (TexturesCacheMap::iterator it = m_textures.begin();it!=m_textures.end();++it) {
+            TexturePtr& t = it->second;
+            if (t) {
+                t->Release();
+            }
+        }
+        m_textures.clear();
+        m_shaders.clear();
+        m_vshaders.clear();
+        m_fshaders.clear();
+        m_memory_used = 0;
+    }
 
 	void    Resources::ProcessMemoryMgmt() {
         ++m_live_ticks;

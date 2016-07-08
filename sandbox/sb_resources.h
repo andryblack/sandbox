@@ -41,6 +41,7 @@ namespace Sandbox {
 		~Resources();
         
         virtual void Init(GHL::Render* render,GHL::ImageDecoder* image);
+        void ReleaseAll();
 		
 		void SetBasePath(const char* path);
 		GHL::DataStream* OpenFile(const char* fn);
