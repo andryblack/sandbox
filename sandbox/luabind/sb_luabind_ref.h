@@ -19,7 +19,6 @@ struct lua_State;
 
 namespace Sandbox {
     namespace luabind {
-        
         struct LuaVMHelper {
             lua_State* lua;
         };

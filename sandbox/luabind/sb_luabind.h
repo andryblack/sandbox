@@ -25,6 +25,8 @@ namespace Sandbox {
     namespace luabind {
         
         
+        void PushErrorHandler(lua_State* L);
+        void SetErrorHandler(lua_State* L, lua_CFunction func);
         
         LuaVMHelperPtr GetHelper( lua_State* L );
         

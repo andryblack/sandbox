@@ -34,6 +34,7 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<LuaContext> LuaContextPtr;
 	
     extern lua_State* g_terminate_thread;
+    typedef int (*LuaCFunction)(lua_State*);
     
     class LuaVM : public NotCopyable {
     public:
@@ -42,6 +43,7 @@ namespace Sandbox {
         void SetBasePath(const char* path);
         bool DoFile(const char* fn);
         
+        void SetErrorHandler(LuaCFunction func);
         void Restart();
         
         sb::string GetMemoryUsed() const;

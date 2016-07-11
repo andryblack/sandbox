@@ -225,7 +225,7 @@ local function compile_files( files )
 
 			local pp_source = assert(luapp.preprocess(source_data))
 
-			local shunk = assert(load(pp_source,dst,'t'))
+			local shunk = assert(load(pp_source,'@'..dst,'t'))
 			local binary = string.dump(shunk)
 			local out = assert(io.open(path.join(dst_path,dst),'wb'))
 			out:write(binary)

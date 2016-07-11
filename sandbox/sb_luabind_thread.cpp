@@ -55,13 +55,15 @@ namespace Sandbox {
 					lua_State* L = lua->lua;
                     LUA_CHECK_STACK(0)
 					sb_assert(L);
+                    luabind::PushErrorHandler(L);
 					m_ref.GetObject(L);
 					sb_assert(lua_isfunction(L,-1));
-					int res = lua_pcall(L, 0, 0, 0);
+					int res = lua_pcall(L, 0, 0, -2);
 					if (res) {
 						LogError(LuaEventModule) << " Failed script event emmit  " ;
                         LogError(LuaEventModule) << lua_tostring(L, -1) ;
 					}
+                    lua_pop(L, 1);
 				} else {
 					LogError(LuaEventModule) <<" call emmit on released script" ;
 				}

@@ -11,10 +11,12 @@
 #include "sb_inplace_string.h"
 #include "../sb_log.h"
 #include <sbstd/sb_platform.h>
+#include "sb_luabind_ref.h"
 
 namespace Sandbox {
     namespace luabind {
         static const char* const LuabindModule = "Sanbox:luabind";
+        LuaVMHelperPtr GetHelper( lua_State* L );
         
         int lua_traceback (lua_State *L)
         {
@@ -94,10 +96,10 @@ namespace Sandbox {
             lua_error(L);
         }
         
+        void PushErrorHandler(lua_State* L);
                 
         void lua_call_method(lua_State* L, int args, int ress, const char* name) {
-            
-            lua_pushcclosure(L, &luabind::lua_traceback, 0);
+            PushErrorHandler(L);
             lua_insert(L, -2-args);
             
             int res = lua_pcall(L, args, ress, -2-args);

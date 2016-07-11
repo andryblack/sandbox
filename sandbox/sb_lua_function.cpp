@@ -9,6 +9,7 @@
 #include "sb_lua_function.h"
 #include "sb_lua_context.h"
 #include "sb_log.h"
+#include "luabind/sb_luabind.h"
 
 namespace Sandbox {
     
@@ -37,13 +38,15 @@ namespace Sandbox {
         return true;
     }
     
+    
+    
     bool LuaFunction::Execute() {
         if (!Valid()) return false;
         luabind::LuaVMHelperPtr helper = GetHelper();
         if (!helper) return false;
         lua_State* L = helper->lua;
         LUA_CHECK_STACK(0)
-        lua_pushcclosure(L, &luabind::lua_traceback, 0);  /// tb
+        luabind::PushErrorHandler(L);
         int traceback_index = lua_gettop(L);
         GetObject(L);
         int res = lua_pcall(L, 0, 0, -2);

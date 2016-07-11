@@ -230,6 +230,8 @@ namespace Sandbox {
 #endif
         luabind::Initialize(m_L);
         luabind::ExternClass<BinaryData>(m_L);
+        
+        luabind::SetErrorHandler(m_L, luabind::lua_traceback);
     }
     
     LuaVM::~LuaVM() {
@@ -252,8 +254,23 @@ namespace Sandbox {
     }
 
     void LuaVM::Restart() {
+        lua_CFunction error_handler = 0;
+        if (m_L) {
+            luabind::PushErrorHandler(m_L);
+            error_handler = lua_tocfunction(m_L, -1);
+            lua_pop(m_L, 1);
+        }
         Destroy();
         Create();
+        if (error_handler) {
+            luabind::SetErrorHandler(m_L, error_handler);
+        }
+    }
+    
+    void LuaVM::SetErrorHandler(LuaCFunction func) {
+        if (m_L) {
+            luabind::SetErrorHandler(m_L, func);
+        }
     }
     
     void LuaVM::SetBasePath(const char *path) {
@@ -275,10 +292,10 @@ namespace Sandbox {
     }
     bool LuaVM::DoFileImpl(GHL::DataStream* ds, const char* name, int results, const LuaContextPtr &env) {
 		lua_read_data data = {ds,{}};
-        lua_pushcclosure(m_L, &luabind::lua_traceback, 0);  /// tb
+        luabind::PushErrorHandler(m_L);
         int traceback_index = lua_gettop(m_L);
-        
-        int res = lua_load(m_L,&lua_read_func,&data,name,0);  /// MF tf
+        sb::string mname = sb::string("@") + name;
+        int res = lua_load(m_L,&lua_read_func,&data,mname.c_str(),0);  /// MF tf
 
         if (res!=0) {
             LogError(MODULE) << "Failed to load script: " << name;
@@ -321,29 +338,6 @@ namespace Sandbox {
             lua_gc(m_L, LUA_GCCOLLECT, 0);
     }
 
-//    
-//    bool LuaVM::DoString( const char* cont ) {
-//        //LogInfo(MODULE) << "pcall >>>> top : " << lua_gettop(m_L);
-//        lua_pushcclosure(m_L, &luabind::lua_traceback, 0);  /// tb
-//        int traceback_index = lua_gettop(m_L);
-//        int res = luaL_loadstring(m_L, cont);
-//        if (res!=0) {
-//			LogError(MODULE) << "Failed to load script: " << cont;
-//            LogError(MODULE) << lua_tostring(m_L, -1) ;
-//			return false;
-//		} else {
-//			  //
-//            res = lua_pcall(m_L, 0, 0, -2);
-//            if (res) {
-//                LogError(MODULE) << "pcall : " << res;
-//                LogError(MODULE) << lua_tostring(m_L, -1) ;
-//                return false;
-//            }
-//            lua_remove(m_L, traceback_index);
-//     	}
-//        //LogInfo(MODULE) << "pcall <<<< top : " << lua_gettop(m_L);
-//        return true;
-//    }
     
    
     int LuaVM::lua_module_searcher(lua_State *L) {
@@ -373,7 +367,8 @@ namespace Sandbox {
 			return 0;
 		}
 		lua_read_data data = {ds,{}};
-		int res = lua_load(L,&lua_read_func,&data,name,0);
+        sb::string mname = sb::string("@") + name;
+		int res = lua_load(L,&lua_read_func,&data,mname.c_str(),0);
 		ds->Release();
 		if (res!=0) {
 			LogError(MODULE) << "Failed to load module: " << name;
@@ -444,7 +439,7 @@ namespace Sandbox {
     
     LuaContextPtr  LuaVM::CreateContext() {
         lua_newtable(m_L);
-        lua_getglobal(m_L, "_G");
+        lua_pushglobaltable(m_L);
         lua_setfield(m_L, -2, "_G");
         LuaContextPtr ctx(new LuaContext());
         ctx->SetObject(m_L);
@@ -459,7 +454,7 @@ namespace Sandbox {
     }
     
     LuaContextPtr   LuaVM::GetGlobalContext() {
-        lua_getglobal(m_L, "_G");
+        lua_pushglobaltable(m_L);
         LuaContextPtr ctx(new LuaContext());
         ctx->SetObject(m_L);
         return ctx;
