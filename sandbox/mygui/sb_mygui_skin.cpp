@@ -164,7 +164,7 @@ namespace Sandbox {
                         shader = widget->getShader();
                     }
                     if (!fill_texture) {
-                        MyGUI::ISubWidgetRect* main = widget->getSubWidgetMain();
+                        MyGUI::ISubWidgetRect* main = widget_p->getSubWidgetMain();
                         if (main) {
                             MaskSetSubSkin* sub = main->castType<MaskSetSubSkin>(false);
                             if (sub) {
