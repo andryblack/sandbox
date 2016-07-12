@@ -31,6 +31,8 @@ namespace Sandbox {
         
         
         void ObjectSubSkin::doRender(MyGUI::IRenderTarget* _target) {
+            if (!mVisible)
+                return;
             if (mCroppedParent) {
                 if (_target) {
                     RenderTargetImpl* target = static_cast<RenderTargetImpl*>(_target);

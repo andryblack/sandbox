@@ -137,7 +137,8 @@ namespace Sandbox {
         
         
         void MaskSubSkin::doRender(MyGUI::IRenderTarget* _target) {
-            
+            if (!mVisible)
+                return;
             if (mRenderItem) {
                 {
                     RenderTargetImpl* target = static_cast<RenderTargetImpl*>(_target);
