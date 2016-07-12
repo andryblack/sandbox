@@ -619,6 +619,7 @@ SB_META_METHOD(detachFromWidget)
 SB_META_METHOD(attachToWidget)
 
 SB_META_METHOD(findWidget)
+SB_META_METHOD(findSkinWidget)
 
 SB_META_METHOD(getChildCount)
 SB_META_METHOD(getChildAt)
