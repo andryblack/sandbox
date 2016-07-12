@@ -92,6 +92,7 @@ SB_META_METHOD(SetRenderScale)
 SB_META_METHOD(Restart)
 SB_META_PROPERTY_RO(TimeUSec, GetTimeUSec)
 SB_META_PROPERTY_RO(UTCOffset, GetUTCOffset)
+SB_META_PROPERTY_RO(SystemLanguage, GetSystemLanguage)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 SB_META_END_KLASS_BIND()
@@ -161,6 +162,7 @@ namespace Sandbox {
         m_sound_mgr->SetSoundsDir("sound");
         
         m_need_restart = false;
+        m_utc_offset = 0;
         
         //const char* test = "{\"val\":41,\"id\":\"CgkInqr15dUFEAIQAw\"}";
         //sb::map<sb::string,sb::string> res;
@@ -232,6 +234,15 @@ namespace Sandbox {
 		m_system = sys;
         if (!m_title.empty()) {
             SetTitle(m_title);
+        }
+        GHL::Int32 offset = 0;
+        m_system->GetDeviceData(GHL::DEVICE_DATA_UTC_OFFSET, &offset);
+        m_utc_offset = offset;
+        char language[33];
+        language[0] = 0;
+        if (m_system->GetDeviceData(GHL::DEVICE_DATA_LANGUAGE, language) && language[0]) {
+            language[32] = 0;
+            m_system_language = language;
         }
         OnSystemSet();
 	}
@@ -461,7 +472,7 @@ namespace Sandbox {
         Unload();
         Load();
     }
-    
+        
     void Application::UpdateScreenSize() {
         if (!m_lua)
             return;
@@ -566,13 +577,7 @@ namespace Sandbox {
         GHL_SystemGetTime(&tv);
         return double(tv.secs) * 1000000 + tv.usecs;
     }
-	
-    int Application::GetUTCOffset() const {
-        GHL::TimeValue tv;
-        GHL_SystemGetTime(&tv);
-        return tv.tzoffset;
-    }
-	
+		
 	void Application::DrawFrame(Graphics&) const {
 	}
     

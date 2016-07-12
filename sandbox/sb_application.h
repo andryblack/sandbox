@@ -58,7 +58,9 @@ namespace Sandbox {
         void SetRenderScale(float scale);
         
         double GetTimeUSec() const;
-        int GetUTCOffset() const;
+        int GetUTCOffset() const { return m_utc_offset; }
+        const sb::string& GetSystemLanguage() const { return m_system_language; }
+        
         void Restart() { m_need_restart = true; }
         GHL::UInt32 GetScreenWidth() const { return m_width; }
         GHL::UInt32 GetScreenHeight() const { return m_height; }
@@ -160,6 +162,8 @@ namespace Sandbox {
         bool    m_music_enabled;
         
         sb::string  m_title;
+        sb::string  m_system_language;
+        int m_utc_offset;
     
         
 #ifdef SB_USE_MYGUI
