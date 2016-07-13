@@ -94,8 +94,9 @@ namespace Sandbox {
             
             
             luabind::ExternClass<MaskImageWidget>(L);
-            luabind::ExternClass<MaskTextWidget>(L);
             luabind::ExternClass<TextWidget>(L);
+            luabind::ExternClass<MaskTextWidget>(L);
+            
             luabind::ExternClass<SceneObjectWidget>(L);
             luabind::ExternClass<TextEdit>(L);
         }

@@ -11,7 +11,7 @@
 
 #include "meta/sb_meta.h"
 #include "sb_rt_scene.h"
-#include "MyGUI_TextBox.h"
+#include "sb_mygui_text_widget.h"
 #include "MyGUI_SubSkin.h"
 #include "MyGUI_MainSkin.h"
 #include "MyGUI_CommonStateInfo.h"
@@ -28,7 +28,7 @@ namespace Sandbox {
                    
         
         
-        class MaskTextWidget : public MyGUI::TextBox {
+        class MaskTextWidget : public TextWidget {
             MYGUI_RTTI_DERIVED( MaskTextWidget )
         public:
             MaskTextWidget();

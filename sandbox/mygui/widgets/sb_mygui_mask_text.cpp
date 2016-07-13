@@ -4,7 +4,7 @@
 #include "MyGUI_RenderItem.h"
 #include "sb_graphics.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskTextWidget,MyGUI::TextBox)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskTextWidget,Sandbox::mygui::TextWidget)
 
 namespace Sandbox {
     namespace mygui {
