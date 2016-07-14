@@ -165,13 +165,15 @@ namespace Sandbox {
         sb::string  m_system_language;
         int m_utc_offset;
     
-        
+        sb::string m_clipboard_text;
 #ifdef SB_USE_MYGUI
         mygui::DataManager*     m_gui_data_manager;
         mygui::RenderManager*   m_gui_render;
         MyGUI::Gui* m_gui;
         void get_mygui_localization(const MyGUI::UString & key,MyGUI::UString& value);
         void mygui_change_key_focus( MyGUI::Widget* w );
+        void mygui_clipboard_changed( const std::string& type, const std::string& text );
+        void mygui_clipboard_requested( const std::string& type, std::string& text  );
 #endif
 #ifdef SB_USE_NETWORK
         Network*    m_network;

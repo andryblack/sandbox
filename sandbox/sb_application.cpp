@@ -28,6 +28,7 @@
 #ifdef SB_USE_MYGUI
 #include "MyGUI_Gui.h"
 #include "MyGUI_InputManager.h"
+#include "MyGUI_ClipboardManager.h"
 #include "MyGUI_EditBox.h"
 
 #include "mygui/sb_mygui_keys.h"
@@ -408,6 +409,10 @@ namespace Sandbox {
                 MyGUI::newDelegate(this,&Application::get_mygui_localization);
             MyGUI::InputManager::getInstance().eventChangeKeyFocus +=
                 MyGUI::newDelegate(this,&Application::mygui_change_key_focus);
+            MyGUI::ClipboardManager::getInstance().eventClipboardChanged +=
+                MyGUI::newDelegate(this,&Application::mygui_clipboard_changed);
+            MyGUI::ClipboardManager::getInstance().eventClipboardRequested +=
+                MyGUI::newDelegate(this,&Application::mygui_clipboard_requested);
 
         }
         
@@ -716,15 +721,33 @@ namespace Sandbox {
     void Application::SetDrawDebugInfo(bool draw) {
         m_draw_debug_info = draw;
     }
+#ifdef SB_USE_MYGUI
+    static void check_key_mods(MyGUI::InputManager& mgr,GHL::UInt32 mods) {
+        if ((mods & GHL::KEYMOD_SHIFT)!=0 && !mgr.isShiftPressed()) {
+            mgr.injectKeyPress(MyGUI::KeyCode::LeftShift,0);
+        }
+        if ((mods & GHL::KEYMOD_SHIFT)==0 && mgr.isShiftPressed()) {
+            mgr.injectKeyRelease(MyGUI::KeyCode::LeftShift);
+        }
+        if ((mods & (GHL::KEYMOD_COMMAND|GHL::KEYMOD_CTRL))!=0 && !mgr.isControlPressed()) {
+            mgr.injectKeyPress(MyGUI::KeyCode::LeftControl,0);
+        }
+        if ((mods & (GHL::KEYMOD_COMMAND|GHL::KEYMOD_CTRL))==0 && mgr.isControlPressed()) {
+            mgr.injectKeyRelease(MyGUI::KeyCode::LeftControl);
+        }
+    }
+#endif
     
     void GHL_CALL Application::OnEvent( const GHL::Event* event ) {
         switch( event->type ) {
             case GHL::EVENT_TYPE_KEY_PRESS:
 #ifdef SB_USE_MYGUI
-                if (MyGUI::InputManager::getInstancePtr())
-                MyGUI::InputManager::getInstance().injectKeyPress(
+                if (MyGUI::InputManager::getInstancePtr()) {
+                    check_key_mods(MyGUI::InputManager::getInstance(),event->data.key_press.modificators);
+                    MyGUI::InputManager::getInstance().injectKeyPress(
                                                                   mygui::translate_key(event->data.key_press.key),
                                                                   event->data.key_press.charcode);
+                }
 #endif
                 if (m_keyboard_ctx) {
                     m_keyboard_ctx->call_self("onKeyDown",event->data.key_press.key,event->data.key_press.modificators);
@@ -734,20 +757,37 @@ namespace Sandbox {
                 break;
             case GHL::EVENT_TYPE_KEY_RELEASE:
 #ifdef SB_USE_MYGUI
-                if (MyGUI::InputManager::getInstancePtr())
-                MyGUI::InputManager::getInstance().injectKeyRelease(mygui::translate_key(event->data.key_release.key));
+                if (MyGUI::InputManager::getInstancePtr()) {
+                    check_key_mods(MyGUI::InputManager::getInstance(),event->data.key_release.modificators);
+                    MyGUI::InputManager::getInstance().injectKeyRelease(mygui::translate_key(event->data.key_release.key));
+                }
 #endif
                 if (m_keyboard_ctx) {
                     m_keyboard_ctx->call_self("onKeyUp",event->data.key_release.key);
                 }
                 break;
             case GHL::EVENT_TYPE_MOUSE_PRESS:
+#ifdef SB_USE_MYGUI
+                if (MyGUI::InputManager::getInstancePtr()) {
+                    check_key_mods(MyGUI::InputManager::getInstance(),event->data.mouse_press.modificators);
+                }
+#endif
                 OnMouseDown(event->data.mouse_press.button, event->data.mouse_press.x, event->data.mouse_press.y);
                 break;
             case GHL::EVENT_TYPE_MOUSE_MOVE:
+#ifdef SB_USE_MYGUI
+                if (MyGUI::InputManager::getInstancePtr()) {
+                    check_key_mods(MyGUI::InputManager::getInstance(),event->data.mouse_move.modificators);
+                }
+#endif
                 OnMouseMove(event->data.mouse_move.button, event->data.mouse_move.x, event->data.mouse_move.y);
                 break;
             case GHL::EVENT_TYPE_MOUSE_RELEASE:
+#ifdef SB_USE_MYGUI
+                if (MyGUI::InputManager::getInstancePtr()) {
+                    check_key_mods(MyGUI::InputManager::getInstance(),event->data.mouse_release.modificators);
+                }
+#endif
                 OnMouseUp(event->data.mouse_release.button, event->data.mouse_release.x, event->data.mouse_release.y);
                 break;
             case GHL::EVENT_TYPE_ACTIVATE:
@@ -796,10 +836,11 @@ namespace Sandbox {
 	void Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
         TransformMouse(x,y);
 #ifdef SB_USE_MYGUI
-       if (MyGUI::InputManager::getInstancePtr())
-        if (MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key)) ||
-            MyGUI::InputManager::getInstance().isModalAny())
-            return;
+        if (MyGUI::InputManager::getInstancePtr()) {
+            if (MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key)) ||
+                MyGUI::InputManager::getInstance().isModalAny())
+                return;
+        }
 #endif
         if (m_mouse_ctx) {
             m_mouse_ctx->call_self("onDown",key,x,y);
@@ -909,6 +950,12 @@ namespace Sandbox {
         } else {
             m_system->HideKeyboard();
         }
+    }
+    void Application::mygui_clipboard_changed( const std::string& type, const std::string& text ) {
+        m_clipboard_text = MyGUI::TextIterator::getOnlyText(MyGUI::UString(text)).asUTF8_c_str();
+    }
+    void Application::mygui_clipboard_requested( const std::string& type, std::string& text  ) {
+        text.assign(m_clipboard_text);
     }
 #endif
     

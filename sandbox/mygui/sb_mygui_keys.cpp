@@ -20,6 +20,12 @@ namespace Sandbox {
                 case GHL::KEY_TAB:          return MyGUI::KeyCode::Tab;
                 case GHL::KEY_ENTER:        return MyGUI::KeyCode::Return;
                 case GHL::KEY_SPACE:        return MyGUI::KeyCode::Space;
+               
+                case GHL::KEY_LEFT:         return MyGUI::KeyCode::ArrowLeft;
+                case GHL::KEY_RIGHT:        return MyGUI::KeyCode::ArrowRight;
+                case GHL::KEY_UP:           return MyGUI::KeyCode::ArrowUp;
+                case GHL::KEY_DOWN:         return MyGUI::KeyCode::ArrowDown;
+                    
                     
                 case GHL::KEY_0: return MyGUI::KeyCode::Zero;
                 case GHL::KEY_1: return MyGUI::KeyCode::One;
