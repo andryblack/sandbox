@@ -94,16 +94,6 @@ namespace Sandbox
 
                             FT_Done_Glyph(glyph);
                             
-//                            if (FT_Load_Glyph(_ftFace, _glyphIndex, _ftLoadFlags | FT_LOAD_RENDER) == 0) {
-//                                FT_Bitmap new_bitmap;
-//                                FT_Bitmap_New(&new_bitmap);
-//                                FT_Bitmap_Copy(_ftLibrary, &_ftFace->glyph->bitmap, &new_bitmap);
-//                                m_bitmaps_map[_glyphIndex] = new_bitmap;
-//                                
-//                                ft_bitmap_glyph->left -= _ftFace->glyph->bitmap_left;
-//                                ft_bitmap_glyph->top -= _ftFace->glyph->bitmap_top;
-//                            }
-                            
                         }
                         // Clean up afterwards.
                         FT_Stroker_Done(stroker);

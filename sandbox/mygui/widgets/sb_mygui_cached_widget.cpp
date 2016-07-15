@@ -14,6 +14,7 @@
 #include "MyGUI_LayerNode.h"
 #include "../sb_mygui_render.h"
 #include <sbstd/sb_platform.h>
+#include "sb_graphics.h"
 
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::CachedWidget, MyGUI::Widget)
@@ -101,8 +102,11 @@ namespace Sandbox {
                 MyGUI::IRenderTarget* rt = m_texture->getRenderTarget();
                 if (rt) {
                     rt->begin();
-                    rt->getInfo().setOffset(getAbsoluteLeft(), getAbsoluteTop());
+                    RenderTargetImpl* impl = static_cast<RenderTargetImpl*>(rt);
+                    Sandbox::Transform2d tr = impl->graphics()->GetTransform();
+                    impl->graphics()->SetTransform(tr.translated(-getAbsoluteLeft(),-getAbsoluteTop()));
                     doRenderToTarget(rt);
+                    impl->graphics()->SetTransform(tr);
                     rt->end();
                 }
             }

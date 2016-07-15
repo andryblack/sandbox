@@ -142,8 +142,6 @@ namespace Sandbox
                 setScale(MyGUI::utility::parseFloat(value));
             else if (key == "Resolution")
                 setResolution(MyGUI::utility::parseUInt(value));
-            else if (key == "Antialias")
-            {}
             else if (key == "TabWidth")
                 setTabWidth(MyGUI::utility::parseFloat(value));
             else if (key == "SubstituteCode")
@@ -630,16 +628,47 @@ namespace Sandbox
     {
         if (mGlyphMap.find(_glyphIndex) == mGlyphMap.end())
         {
-            {
-                if (FT_Load_Glyph(_ftFace, _glyphIndex, _ftLoadFlags | FT_LOAD_RENDER) == 0) {
+            
+            if (FT_Load_Glyph(_ftFace, _glyphIndex, (_ftLoadFlags & (~FT_LOAD_RENDER)) | FT_LOAD_NO_BITMAP) == 0) {
+                // Set up a stroker.
+                int res = 0;
+                
+                FT_Glyph glyph;
+                if (FT_Get_Glyph(_ftFace->glyph, &glyph) == 0)
+                {
+                    // Render the outline spans to the span list
+                    FT_Glyph_To_Bitmap(&glyph,FT_RENDER_MODE_NORMAL,0,1);
+                    FT_BitmapGlyph ft_bitmap_glyph = (FT_BitmapGlyph) glyph;
+                    
+                    
+                    float bearingX = ft_bitmap_glyph->left;
+                    
+                    // The following calculations aren't currently needed but are kept here for future use.
+                    // float ascent = _glyph->metrics.horiBearingY / 64.0f;
+                    // float descent = (_glyph->metrics.height / 64.0f) - ascent;
+                    
+                    MyGUI::GlyphInfo info(
+                                          _codePoint,
+                                          ft_bitmap_glyph->bitmap.width,
+                                          ft_bitmap_glyph->bitmap.rows,
+                                          (_ftFace->glyph->advance.x / 64.0f),
+                                          bearingX,
+                                          floor(_fontAscent - ft_bitmap_glyph->top ));
+                    
+                    res = createGlyph(_glyphIndex, info, _glyphHeightMap);
+                    
                     FT_Bitmap new_bitmap;
                     FT_Bitmap_New(&new_bitmap);
-                    FT_Bitmap_Copy(_ftLibrary, &_ftFace->glyph->bitmap, &new_bitmap);
+                    FT_Bitmap_Copy(_ftLibrary, &ft_bitmap_glyph->bitmap, &new_bitmap);
                     m_bitmaps_map[_glyphIndex] = new_bitmap;
-                    return createGlyph(_glyphIndex, createFaceGlyphInfo(_codePoint, _fontAscent, _ftFace->glyph), _glyphHeightMap);
+                    
+                    FT_Done_Glyph(glyph);
+                    
                 }
-                else
-                    MYGUI_LOG(Warning, "ResourceTrueTypeFont: Cannot load glyph " << _glyphIndex << " for character " << _codePoint << " in font '" << getResourceName() << "'.");
+                
+                return res;
+            } else {
+                MYGUI_LOG(Warning, "ResourceTrueTypeFontOutline: Cannot load glyph " << _glyphIndex << " for character " << _codePoint << " in font '" << getResourceName() << "'.");
             }
             
         }
@@ -722,8 +751,8 @@ namespace Sandbox
         // Calculate and store the glyph's UV coordinates within the texture.
         _info.uvRect.left = (float)_texX / _texWidth; // u1
         _info.uvRect.top = (float)_texY / _texHeight; // v1
-        _info.uvRect.right = (float)(_texX + _info.width) / _texWidth; // u2
-        _info.uvRect.bottom = (float)(_texY + _info.height) / _texHeight; // v2
+        _info.uvRect.right = (float)(_texX + width) / _texWidth; // u2
+        _info.uvRect.bottom = (float)(_texY + height) / _texHeight; // v2
         
         if (width > 0)
             _texX += mGlyphSpacing + width;
@@ -753,8 +782,8 @@ namespace Sandbox
         // Calculate and store the glyph's UV coordinates within the texture.
         _info.uvRect.left = (float)_texX / _texWidth; // u1
         _info.uvRect.top = (float)_texY / _texHeight; // v1
-        _info.uvRect.right = (float)(_texX + _info.width) / _texWidth; // u2
-        _info.uvRect.bottom = (float)(_texY + _info.height) / _texHeight; // v2
+        _info.uvRect.right = (float)(_texX + _bitmap->width) / _texWidth; // u2
+        _info.uvRect.bottom = (float)(_texY + _bitmap->rows) / _texHeight; // v2
         
         if (width > 0)
             _texX += mGlyphSpacing + width;

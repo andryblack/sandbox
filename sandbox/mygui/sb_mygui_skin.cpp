@@ -196,10 +196,6 @@ namespace Sandbox {
                         int w = mCroppedParent->getWidth();
                         int h = mCroppedParent->getHeight();
                         
-                        const MyGUI::RenderTargetInfo& info = _target->getInfo();
-                        
-                        x-=info.leftOffset;
-                        y-=info.topOffset;
                         
                         mTr.translate(fill_texture_uv.left,fill_texture_uv.top);
                         mTr.scale(fill_texture_uv.width() / w,fill_texture_uv.height() / h);

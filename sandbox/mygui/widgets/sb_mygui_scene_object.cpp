@@ -47,11 +47,6 @@ namespace Sandbox {
                     int x = mCroppedParent->getAbsoluteLeft();
                     int y = mCroppedParent->getAbsoluteTop();
                     
-                    const MyGUI::RenderTargetInfo& info = _target->getInfo();
-                    
-                    x-=info.leftOffset;
-                    y-=info.topOffset;
-                  
                     Transform2d tr = target->graphics()->GetTransform();
                     Color c = target->graphics()->GetColor();
                     target->graphics()->SetColor(c*Sandbox::Color(m_colour.red,m_colour.green,m_colour.blue,m_colour.alpha));

@@ -47,8 +47,6 @@ namespace Sandbox {
             virtual void addVertex(const MyGUI::Vertex& v) ;
             virtual void addQuad(const MyGUI::VertexQuad& q);
             
-            virtual const MyGUI::RenderTargetInfo& getInfo();
-            
             void    drawScene(const ScenePtr& scene);
             
             Resources* resources() { return m_resources; }
@@ -57,7 +55,6 @@ namespace Sandbox {
             RenderTargetImpl( Graphics* graphics, Resources* resources );
             Graphics*       m_graphics;
             Resources*      m_resources;
-            MyGUI::RenderTargetInfo m_rt_info;
             MyGUI::IntSize  m_rendertarget_size;
             void setSize(int width,int height);
         };

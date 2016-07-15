@@ -121,9 +121,6 @@ namespace Sandbox {
             MyGUI::uint32 colour = mCurrentColourNative;
             const std::string& passName = mFont->getPassName(pass);
             
-            
-            const MyGUI::RenderTargetInfo& renderTargetInfo = _target->getInfo();
-            
             // колличество отрисованных вершин
             size_t vertexCount = 0;
             
@@ -165,7 +162,7 @@ namespace Sandbox {
                         vertexRect.top = top + (info->bearingY * textViewData.scale )*m_scale;
                         vertexRect.right = vertexRect.left + info->width * textViewData.scale * m_scale;
                         vertexRect.bottom = vertexRect.top + info->height * textViewData.scale * m_scale;
-                        drawGlyph(renderTargetInfo, _target, vertexCount, vertexRect, info->uvRect, colour);
+                        drawGlyph(_target, vertexCount, vertexRect, info->uvRect, colour);
                     }
                     
                     left += fullAdvance * m_scale;
@@ -228,10 +225,6 @@ namespace Sandbox {
                     int w = mCroppedParent->getWidth();
                     int h = mCroppedParent->getHeight();
                     
-                    const MyGUI::RenderTargetInfo& info = _target->getInfo();
-                    
-                    x-=info.leftOffset;
-                    y-=info.topOffset;
                     
                     mTr.translate(fill_texture_uv.left,fill_texture_uv.top);
                     mTr.scale(fill_texture_uv.width() / w,fill_texture_uv.height() / h);

@@ -37,9 +37,6 @@ namespace Sandbox {
             m_graphics->SetTransform(tr);
         }
         
-        const MyGUI::RenderTargetInfo& RenderTargetImpl::getInfo() {
-            return m_rt_info;
-        }
         
         void RenderTargetImpl::begin() {
             m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
@@ -53,12 +50,6 @@ namespace Sandbox {
         void RenderTargetImpl::setSize(int width, int height) {
             
             m_rendertarget_size.set(width,height);
-            m_rt_info.maximumDepth = 1;
-            m_rt_info.hOffset = 0.5f;//-m_view_size.width/2;
-            m_rt_info.vOffset = 0.5f;//-m_view_size.height/2;
-            m_rt_info.aspectCoef = float(height) / float(width);
-            m_rt_info.pixScaleX = 0.5f;//0.5f;
-            m_rt_info.pixScaleY = -0.5f;//-0.5f;
 
         }
 
