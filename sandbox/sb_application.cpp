@@ -796,24 +796,16 @@ namespace Sandbox {
             case GHL::EVENT_TYPE_DEACTIVATE:
                 OnDeactivated();
                 break;
-            case GHL::EVENT_TYPE_SOFT_KEYBOARD_SHOW:
+            case GHL::EVENT_TYPE_VISIBLE_RECT_CHANGED:
                 if (m_lua) {
-                    if (m_lua->GetGlobalContext()->GetValue<bool>("application.onSoftKeyboardShow")) {
+                    if (m_lua->GetGlobalContext()->GetValue<bool>("application.onVisibleRectChanged")) {
                         float size_scale = 1.0f / (m_resources->GetScale()*m_graphics->GetScale());
                         m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
-                        ->call("onSoftKeyboardShow",
-                               Recti(event->data.soft_keyboard_show.x * size_scale,
-                                     event->data.soft_keyboard_show.y * size_scale,
-                                     event->data.soft_keyboard_show.w * size_scale,
-                                     event->data.soft_keyboard_show.h * size_scale));
-                    }
-                }
-                break;
-            case GHL::EVENT_TYPE_SOFT_KEYBOARD_HIDE:
-                if (m_lua) {
-                    if (m_lua->GetGlobalContext()->GetValue<bool>("application.onSoftKeyboardHide")) {
-                        m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
-                        ->call("onSoftKeyboardHide");
+                        ->call("onVisibleRectChanged",
+                               Recti(event->data.visible_rect_changed.x * size_scale,
+                                     event->data.visible_rect_changed.y * size_scale,
+                                     event->data.visible_rect_changed.w * size_scale,
+                                     event->data.visible_rect_changed.h * size_scale));
                     }
                 }
                 break;
@@ -947,8 +939,20 @@ namespace Sandbox {
     void Application::mygui_change_key_focus( MyGUI::Widget* w ) {
         if (w && w->isType<MyGUI::EditBox>()) {
             m_system->ShowKeyboard();
+            if (m_lua) {
+                if (m_lua->GetGlobalContext()->GetValue<bool>("application.onKeyboardFocusChanged")) {
+                    m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
+                    ->call("onKeyboardFocusChanged",w);
+                }
+            }
         } else {
             m_system->HideKeyboard();
+            if (m_lua) {
+                if (m_lua->GetGlobalContext()->GetValue<bool>("application.onKeyboardFocusChanged")) {
+                    m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
+                    ->call("onKeyboardFocusChanged",static_cast<MyGUI::Widget*>(0));
+                }
+            }
         }
     }
     void Application::mygui_clipboard_changed( const std::string& type, const std::string& text ) {
