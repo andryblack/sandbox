@@ -119,17 +119,14 @@ namespace Sandbox
     mTabWidth(0.0f),
     mSubstituteCodePoint(static_cast<MyGUI::Char>(MyGUI::FontCodeType::NotDefined)),
     mDefaultHeight(0),
-    mSubstituteGlyphInfo(nullptr),
-    mTexture(nullptr)
+    mSubstituteGlyphInfo(nullptr)
     {
     }
     
     ResourceTrueTypeFont::~ResourceTrueTypeFont()
     {
-        if (mTexture != nullptr)
-        {
-            MyGUI::RenderManager::getInstance().destroyTexture(mTexture);
-            mTexture = nullptr;
+        for (sb::vector<MyGUI::ITexture*>::iterator it = mTextures.begin();it!=mTextures.end();++it) {
+            MyGUI::RenderManager::getInstance().destroyTexture(*it);
         }
     }
         
@@ -150,6 +147,39 @@ namespace Sandbox
                 setDistance(MyGUI::utility::parseInt(value));
             else if (key == "Hinting")
                 setHinting(value);
+        }
+        
+        void ResourceTrueTypeFont::setCharImage(MyGUI::Char char_code,
+                                                     const sb::string& texture_name,
+                                                     const MyGUI::IntCoord& uv,
+                                                     const MyGUI::IntPoint& bearing,
+                                                     float advance) {
+            MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture(texture_name);
+            if (!texture) {
+                texture = MyGUI::RenderManager::getInstance().createTexture(texture_name);
+                if (texture) {
+                    texture->loadFromFile(texture_name);
+                    mTextures.push_back(texture);
+                }
+            }
+            if (texture) {
+                MyGUI::GlyphInfo gi;
+                gi.texture = texture;
+                gi.advance = advance;
+                gi.bearingX = bearing.left;
+                gi.bearingY = bearing.top;
+                gi.width = uv.width;
+                gi.height = uv.height;
+                MyGUI::IntSize tsize(texture->getWidth(),texture->getHeight());
+                gi.uvRect.left = float(uv.left) / tsize.width;
+                gi.uvRect.top = float(uv.top) / tsize.height;
+                gi.uvRect.right = float(uv.right()) / tsize.width;
+                gi.uvRect.bottom = float(uv.bottom()) / tsize.height;
+                gi.codePoint = char_code;
+                ++mMaxCharIndex;
+                mCharMap[char_code] = mMaxCharIndex;
+                mGlyphMap[mMaxCharIndex] = gi;
+            }
         }
     
     void ResourceTrueTypeFont::deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version)
@@ -366,9 +396,9 @@ namespace Sandbox
             
             // If the newly created glyph is the "Not Defined" glyph, it means that the code point is not supported by the font.
             // Remove it from the character map so that we can provide our own substitute instead of letting FreeType do it.
-            if (iter->second != 0)
+            if (iter->second != 0) {
                 ++iter;
-            else
+            } else
                 mCharMap.erase(iter++);
         }
         
@@ -478,17 +508,12 @@ namespace Sandbox
         // Create the texture and render the glyphs onto it.
         //-------------------------------------------------------------------//
         
-        if (mTexture)
-        {
-            MyGUI::RenderManager::getInstance().destroyTexture( mTexture );
-            mTexture = nullptr;
-        }
+        MyGUI::ITexture* texture =  MyGUI::RenderManager::getInstance().createTexture(MyGUI::utility::toString((size_t)this, "_TrueTypeFont"));
+        mTextures.push_back(texture);
         
-        mTexture = MyGUI::RenderManager::getInstance().createTexture(MyGUI::utility::toString((size_t)this, "_TrueTypeFont"));
+        texture->createManual(texWidth, texHeight, MyGUI::TextureUsage::Static | MyGUI::TextureUsage::Write, PixelBase::getFormat());
         
-        mTexture->createManual(texWidth, texHeight, MyGUI::TextureUsage::Static | MyGUI::TextureUsage::Write, PixelBase::getFormat());
-        
-        uint8* texBuffer = static_cast<uint8*>(mTexture->lock(MyGUI::TextureUsage::Write));
+        uint8* texBuffer = static_cast<uint8*>(texture->lock(MyGUI::TextureUsage::Write));
         
         if (texBuffer != nullptr)
         {
@@ -497,7 +522,7 @@ namespace Sandbox
             
             renderGlyphs(glyphHeightMap, ftLibrary, ftFace, ftLoadFlags, texBuffer, texWidth, texHeight);
             
-            mTexture->unlock();
+            texture->unlock();
             
             MYGUI_LOG(Info, "ResourceTrueTypeFont: Font '" << getResourceName() << "' using texture size " << texWidth << " x " << texHeight << ".");
             MYGUI_LOG(Info, "ResourceTrueTypeFont: Font '" << getResourceName() << "' using real height " << mDefaultHeight << " pixels.");
@@ -523,7 +548,7 @@ namespace Sandbox
                 iter->second.advance *= iscale;
                 iter->second.bearingX *= iscale;
                 iter->second.bearingY *= iscale;
-                iter->second.texture = mTexture;
+                iter->second.texture = texture;
             }
             mSpaceWidth *= iscale;
             mGlyphSpacing *= iscale;
@@ -531,7 +556,7 @@ namespace Sandbox
         } else {
             for (GlyphMap::iterator iter = mGlyphMap.begin(); iter != mGlyphMap.end(); ++iter)
             {
-                iter->second.texture = mTexture;
+                iter->second.texture = texture;
             }
         }
         
@@ -618,6 +643,7 @@ namespace Sandbox
         int height = (int)ceil(_glyphInfo.height);
         
         mCharMap[_glyphInfo.codePoint] = _glyphIndex;
+        mMaxCharIndex = std::max(mMaxCharIndex, _glyphIndex);
         MyGUI::GlyphInfo& info = mGlyphMap.insert(GlyphMap::value_type(_glyphIndex, _glyphInfo)).first->second;
         _glyphHeightMap[(FT_Pos)height].insert(std::make_pair(_glyphIndex, &info));
         

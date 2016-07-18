@@ -140,6 +140,62 @@ namespace Sandbox {
         };
         template <>
         struct stack<const MyGUI::IntSize&> : stack<MyGUI::IntSize> {};
+        
+        template <>
+        struct stack<MyGUI::IntRect> {
+            static void push( lua_State* L, const MyGUI::IntRect& val ) {
+                stack_help<MyGUI::IntRect, false>::push(L, val);
+            }
+            static MyGUI::IntRect get( lua_State* L, int idx ) {
+                if (lua_istable(L, idx)) {
+                    MyGUI::IntRect res;
+                    lua_rawgeti(L, idx, 1);
+                    res.left = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 2);
+                    res.top = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 3);
+                    res.right = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 4);
+                    res.bottom = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    return  res;
+                }
+                return stack_help<MyGUI::IntRect, false>::get(L, idx);
+            }
+        };
+        template <>
+        struct stack<const MyGUI::IntRect&> : stack<MyGUI::IntRect> {};
+        
+        template <>
+        struct stack<MyGUI::IntCoord> {
+            static void push( lua_State* L, const MyGUI::IntCoord& val ) {
+                stack_help<MyGUI::IntCoord, false>::push(L, val);
+            }
+            static MyGUI::IntCoord get( lua_State* L, int idx ) {
+                if (lua_istable(L, idx)) {
+                    MyGUI::IntCoord res;
+                    lua_rawgeti(L, idx, 1);
+                    res.left = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 2);
+                    res.top = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 3);
+                    res.width = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 4);
+                    res.height = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    return  res;
+                }
+                return stack_help<MyGUI::IntCoord, false>::get(L, idx);
+            }
+        };
+        template <>
+        struct stack<const MyGUI::IntCoord&> : stack<MyGUI::IntCoord> {};
                 
         template <>
         struct stack<MyGUI::Any> {
@@ -844,6 +900,7 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFont, MyGUI::IFont)
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceTrueTypeFont)
+SB_META_METHOD(setCharImage)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFontOutline, Sandbox::mygui::ResourceTrueTypeFont)

@@ -7,6 +7,7 @@
 #include "MyGUI_IFont.h"
 #include "MyGUI_Colour.h"
 
+#include "sb_image.h"
 
 #	include <ft2build.h>
 #	include FT_FREETYPE_H
@@ -50,6 +51,12 @@ namespace Sandbox
         
         void addCodePointRange(MyGUI::Char _first, MyGUI::Char _second);
         void removeCodePointRange(MyGUI::Char _first, MyGUI::Char _second);
+        
+        void setCharImage(MyGUI::Char char_code,
+                          const sb::string& texture,
+                          const MyGUI::IntCoord& uv,
+                          const MyGUI::IntPoint& bearing,
+                          float advance);
     protected:
         enum Hinting
         {
@@ -78,7 +85,7 @@ namespace Sandbox
         // The following variables are calculated automatically.
         int mDefaultHeight; // The nominal height of the font in pixels.
         MyGUI::GlyphInfo* mSubstituteGlyphInfo; // The glyph info to use as a substitute for code points that don't exist in the font.
-        MyGUI::ITexture* mTexture; // The texture that contains all of the rendered glyphs in the font.
+        sb::vector<MyGUI::ITexture*> mTextures; // The texture that contains all of the rendered glyphs in the font.
         
         // The following constants used to be mutable, but they no longer need to be. Do not modify their values!
         static const int mDefaultGlyphSpacing; // How far apart the glyphs are placed from each other in the font texture, in pixels.
@@ -137,7 +144,7 @@ namespace Sandbox
         
         CharMap mCharMap; // A map of code points to glyph indices.
         GlyphMap mGlyphMap; // A map of glyph indices to glyph info objects.
-        
+        FT_UInt mMaxCharIndex;
         
         std::map<FT_UInt,FT_Bitmap> m_bitmaps_map;
     };
