@@ -931,7 +931,7 @@ namespace Sandbox {
     
 #ifdef SB_USE_MYGUI
     void Application::get_mygui_localization(const MyGUI::UString& key, MyGUI::UString& value) {
-        LuaContextPtr localization = m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("localization");
+        LuaContextPtr localization = m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("TRSTR");
         if (localization) {
             value.assign( localization->GetValueRaw<sb::string>(key.asUTF8_c_str()) );
         }

@@ -7,9 +7,12 @@
 //
 
 #include "sb_lua_context.h"
-
+#include "sb_lua_value.h"
 
 namespace Sandbox {
+    
+    
+
     
     LuaContext::LuaContext(  )  {
         
@@ -90,5 +93,16 @@ namespace Sandbox {
         LUA_CHECK_STACK(-3)
         lua_rawset(L, -3);
         lua_pop(L, 1);
+    }
+    
+    
+    lua_State* LuaValue::get_state_with_value_on_top() const {
+        if (!Valid()) return 0;
+        luabind::LuaVMHelperPtr helper = GetHelper();
+        if (!helper) return 0;
+        lua_State* L = helper->lua;
+        LUA_CHECK_STACK(1)
+        GetObject(L);
+        return L;
     }
 }

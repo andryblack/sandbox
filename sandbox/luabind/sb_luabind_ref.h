@@ -46,6 +46,7 @@ namespace Sandbox {
             LuaVMHelperWeakPtr m_lua;
             int	m_ref;
         };
+        typedef sb::intrusive_ptr<LuaReference> LuaReferencePtr;
         
         template <>
         struct stack<LuaReference>{
@@ -77,7 +78,7 @@ namespace Sandbox {
             }
         };
         template <>
-        struct stack<sb::intrusive_ptr<LuaReference> > : stack_lua_object_ptr<LuaReference> {};
+        struct stack< LuaReferencePtr > : stack_lua_object_ptr<LuaReference> {};
     }
 }
 
