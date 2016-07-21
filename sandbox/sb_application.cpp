@@ -698,6 +698,7 @@ namespace Sandbox {
             LuaContextPtr decoded = convert_from_json( m_lua->GetVM(), d);
             d->Release();
             m_lua->GetGlobalContext()->SetValue("application.profile", decoded);
+            LogInfo() << "profile loaded";
             return true;
         }
         return false;
@@ -710,9 +711,11 @@ namespace Sandbox {
                 StringData* sd( new StringData(json));
                 sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
                 path += "/profile.json";
-                LogVerbose() << "store profile to " << path;
+                LogInfo() << "store profile to " << path;
                 if (!m_vfs->WriteFile(path.c_str(), sd)) {
                     LogError() << "failed write " << path;
+                } else {
+                    LogInfo() << "profile stored";
                 }
                 sd->Release();
             }
