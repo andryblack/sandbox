@@ -16,6 +16,7 @@ extern "C" {
 
 #include <ghl_data_stream.h>
 #include "sb_file_provider.h"
+#include "sb_lua_value.h"
 
 namespace Sandbox {
     
@@ -109,7 +110,7 @@ namespace Sandbox {
     static int yajl_parse_start_map(void * ctx) {
         parse_context* c = static_cast<parse_context*>(ctx);
         c->on_pre_value();
-        lua_newtable(c->L);
+        lua_createtable(c->L,0,4);
         ++c->stack_depth;
         parse_context::state_t s;
         s.type = parse_context::state_t::map;
@@ -120,7 +121,7 @@ namespace Sandbox {
     static int yajl_parse_map_key(void * ctx, const unsigned char * key,
                                   size_t stringLen) {
         parse_context* c = static_cast<parse_context*>(ctx);
-        lua_pushlstring(c->L, reinterpret_cast<const char*>(key),stringLen);
+        lua_pushlstring(c->L,reinterpret_cast<const char*>(key),stringLen);
         ++c->stack_depth;
         return 1;
     }
@@ -135,7 +136,7 @@ namespace Sandbox {
     static int yajl_parse_start_array(void * ctx) {
         parse_context* c = static_cast<parse_context*>(ctx);
         c->on_pre_value();
-        lua_newtable(c->L);
+        lua_createtable(c->L,4,0);
         ++c->stack_depth;
         parse_context::state_t s;
         s.type = parse_context::state_t::array;
@@ -361,9 +362,9 @@ namespace Sandbox {
             luaL_error(L, "opening file %s", file);
         }
         lua_gc(L, LUA_GCSTOP, 1);
-        GHL::Data* data = GHL_ReadAllData(ds);
-        sb_assert(data);
-        ds->Release();
+        static const size_t BUFFER_SIZE = 1024 * 8;
+        unsigned char buffer[BUFFER_SIZE];
+        
         
         yajl_callbacks cb;
         fill_parse_callbacks(cb);
@@ -373,13 +374,19 @@ namespace Sandbox {
         
         yajl_handle h = yajl_alloc(&cb, 0, &ctx);
         yajl_config(h,yajl_allow_comments,1);
-        yajl_status s = yajl_parse(h,reinterpret_cast<const unsigned char * >(data->GetData()),data->GetSize());
+        size_t shunk_size = 0;
+        yajl_status s = yajl_status_ok;
+        while (!ds->Eof() && s==yajl_status_ok) {
+            shunk_size = ds->Read(buffer, BUFFER_SIZE);
+            s = yajl_parse(h,reinterpret_cast<const unsigned char * >(buffer),shunk_size);
+        }
+        ds->Release();
         if (s == yajl_status_ok) {
             s = yajl_complete_parse(h);
         }
         lua_gc(L, LUA_GCRESTART,1);
         if (s!=yajl_status_ok) {
-            unsigned char* err_text = yajl_get_error(h, 1,reinterpret_cast<const unsigned char * >(data->GetData()),data->GetSize());
+            unsigned char* err_text = yajl_get_error(h, 1,reinterpret_cast<const unsigned char * >(buffer),shunk_size);
             lua_pop(L, ctx.stack_depth);
             lua_pushnil(L);
             lua_pushstring(L, reinterpret_cast<const char*>(err_text));
