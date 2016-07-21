@@ -537,6 +537,8 @@ SB_META_PROPERTY(left)
 SB_META_PROPERTY(top)
 SB_META_PROPERTY(right)
 SB_META_PROPERTY(bottom)
+SB_META_PROPERTY_RO(width, width)
+SB_META_PROPERTY_RO(height, height)
 SB_META_END_KLASS_BIND()
 
 static int create_colour(lua_State* L) {
