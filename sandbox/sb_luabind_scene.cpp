@@ -150,7 +150,9 @@ SB_META_ENUM_BIND(Sandbox::BlendMode,namespace Sandbox,
                         SB_META_ENUM_ITEM(BLEND_MODE_COPY)
                         SB_META_ENUM_ITEM(BLEND_MODE_ALPHABLEND)
                         SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE)
-                        SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE_ALPHA))
+                        SB_META_ENUM_ITEM(BLEND_MODE_ADDITIVE_ALPHA)
+                        SB_META_ENUM_ITEM(BLEND_MODE_MULTIPLY)
+                        SB_META_ENUM_ITEM(BLEND_MODE_SCREEN))
 
 SB_META_DECLARE_KLASS(Sandbox::MaskMode,void);
 SB_META_ENUM_BIND(Sandbox::MaskMode,namespace Sandbox,

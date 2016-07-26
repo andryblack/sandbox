@@ -12,7 +12,7 @@ namespace Sandbox {
     namespace mygui {
         
         
-        ObjectSubSkin::ObjectSubSkin() : mNode(0),mRenderItem(0){
+        ObjectSubSkin::ObjectSubSkin() : mNode(0),mRenderItem(0),m_alpha(1.0f){
             //LogInfo() << "ObjectSubSkin::ObjectSubSkin";
         }
         
@@ -49,7 +49,7 @@ namespace Sandbox {
                     
                     Transform2d tr = target->graphics()->GetTransform();
                     Color c = target->graphics()->GetColor();
-                    target->graphics()->SetColor(c*Sandbox::Color(m_colour.red,m_colour.green,m_colour.blue,m_colour.alpha));
+                    target->graphics()->SetColor(c*Sandbox::Color(m_colour.red,m_colour.green,m_colour.blue,m_colour.alpha*m_alpha));
                     target->graphics()->SetTransform(tr.translated(x, y));
                     object->Draw(*target->graphics());
                     target->graphics()->SetColor(c);
