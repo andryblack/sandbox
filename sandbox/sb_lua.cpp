@@ -253,20 +253,7 @@ namespace Sandbox {
         }
     }
 
-    void LuaVM::Restart() {
-        lua_CFunction error_handler = 0;
-        if (m_L) {
-            luabind::PushErrorHandler(m_L);
-            error_handler = lua_tocfunction(m_L, -1);
-            lua_pop(m_L, 1);
-        }
-        Destroy();
-        Create();
-        if (error_handler) {
-            luabind::SetErrorHandler(m_L, error_handler);
-        }
-    }
-    
+       
     void LuaVM::SetErrorHandler(LuaCFunction func) {
         if (m_L) {
             luabind::SetErrorHandler(m_L, func);

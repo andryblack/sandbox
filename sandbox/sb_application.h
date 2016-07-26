@@ -164,6 +164,8 @@ namespace Sandbox {
         sb::string  m_title;
         sb::string  m_system_language;
         int m_utc_offset;
+        
+        void CreateLua();
     
         sb::string m_clipboard_text;
 #ifdef SB_USE_MYGUI

@@ -44,7 +44,9 @@ namespace Sandbox {
         bool DoFile(const char* fn);
         
         void SetErrorHandler(LuaCFunction func);
-        void Restart();
+        
+        void Create();
+        void Destroy();
         
         sb::string GetMemoryUsed() const;
         
@@ -59,8 +61,7 @@ namespace Sandbox {
         void DoGC();
         FileProvider* GetResources() { return m_resources; }
     private:
-        void Create();
-        void Destroy();
+        
         
         FileProvider*  m_resources;
         lua_State*  m_L;

@@ -269,10 +269,25 @@ namespace Sandbox {
         return new Resources(m_vfs);
     }
     
+    void Application::CreateLua() {
+        if (!m_lua) {
+            sb_assert(m_resources);
+            m_lua = new LuaVM(m_resources);
+            
+            std::string  base_path=m_lua_base_path;
+            if (!base_path.empty() && base_path[base_path.size()-1]!='/')
+                base_path+="/";
+            m_lua->SetBasePath(base_path.c_str());
+            
+            InitLua();
+        }
+    }
+    
     ///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
 		sb_assert( m_vfs );
          LogInfo() << "Application::FillSettings";
+        
         if (!m_resources) {
             m_resources = CreateResourcesManager();
             sb_assert(m_resources);
@@ -288,23 +303,13 @@ namespace Sandbox {
             m_resources->SetBasePath(base_path.c_str());
         
         }
+        
 #ifdef SB_USE_NETWORK
         if (!m_network) {
             m_network = new Network(m_resources);
         }
 #endif
-        if (!m_lua) {
-            m_lua = new LuaVM(m_resources);
-            
-            std::string  base_path=m_lua_base_path;
-            if (!base_path.empty() && base_path[base_path.size()-1]!='/')
-                base_path+="/";
-            m_lua->SetBasePath(base_path.c_str());
-            
-            InitLua();
-        }
-        
-       
+        CreateLua();
         
 
         LuaContextPtr ctx = m_lua->GetGlobalContext();
@@ -384,6 +389,8 @@ namespace Sandbox {
         m_resources->Init(m_render, m_image_decoder);
         m_sound_mgr->Init(m_sound,m_resources);
         
+        CreateLua();
+        
         LuaContextPtr ctx = m_lua->GetGlobalContext();
         
         ctx->SetValue("application.resources", m_resources);
@@ -457,8 +464,9 @@ namespace Sandbox {
     void GHL_CALL Application::Unload() {
         StoreAppProfile();
         if (m_lua) {
-            m_lua->Restart();
-            InitLua();
+            m_lua->Destroy();
+            delete m_lua;
+            m_lua = 0;
         }
         delete m_main_thread;
         delete m_main_scene;
@@ -683,6 +691,7 @@ namespace Sandbox {
     }
     
     bool Application::RestoreAppProfile() {
+        LogInfo() << "RestoreAppProfile";
         if (m_lua && m_vfs) {
             sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
             path += "/profile.json";
@@ -704,6 +713,7 @@ namespace Sandbox {
         return false;
     }
     void Application::StoreAppProfile() {
+        LogInfo() << "StoreAppProfile";
         if (m_lua && m_vfs) {
             LuaContextPtr profile = m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application.profile");
             if (profile) {
@@ -793,6 +803,8 @@ namespace Sandbox {
 #endif
                 OnMouseUp(event->data.mouse_release.button, event->data.mouse_release.x, event->data.mouse_release.y);
                 break;
+            case GHL::EVENT_TYPE_APP_STARTED:
+                break;
             case GHL::EVENT_TYPE_ACTIVATE:
                 OnActivated();
                 break;
@@ -869,6 +881,8 @@ namespace Sandbox {
     }
 	///
 	void Application::OnDeactivated() {
+        
+        LogInfo() << "OnDeactivated";
         if (m_lua) {
             if (m_lua->GetGlobalContext()->GetValue<bool>("application.onDeactivated")) {
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onDeactivated");
@@ -878,6 +892,7 @@ namespace Sandbox {
 	}
 	///
 	void Application::OnActivated() {
+        LogInfo() << "OnActivated";
         if (m_lua) {
             if (m_lua->GetGlobalContext()->GetValue<bool>("application.onActivate")) {
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onActivate");
