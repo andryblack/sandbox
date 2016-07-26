@@ -170,12 +170,14 @@ function ndk.generateAppMakefile(sln, cfg)
 	
 	ndk.writeStrings('APP_CPPFLAGS', '', flags)
 	_p('NDK_TOOLCHAIN_VERSION := %s', sln.android_toolchain or '4.8')
-
+	_p('NDK_MODULE_PATH := ' .. sln.android_modules_path or '')
 	_p('')			
 end
 
 function ndk.generateAppAndroidMakefile( sln, cfg )
 	_p('DEPENDENCY_PATH := $(call my-dir)')
+	
+
 	_p('LOCAL_PATH := $(abspath $(DEPENDENCY_PATH))')
 	_p('include $(CLEAR_VARS)')
 

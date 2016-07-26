@@ -259,7 +259,6 @@ function build.generate_app_build_gradle( sln , prj )
 	for cfg in project.eachconfig(prj) do
 		build.buildCmds(cfg,'prebuild',prj)
 		local all_args = {"'-C'","'" .. path.getabsolute(path.join(sln.location,cfg.shortname)) .. "'"}
-		table.insert(all_args,"'NDK_MODULE_PATH=" .. (sln.android_modules_path or '') .. "'")
 		table.insert(all_args,"'V=1'")
 		table.insert(all_args,"'j=4'")
 		_x(1,'task buildJNI' .. cfg.name .. '(type: Exec) {')
