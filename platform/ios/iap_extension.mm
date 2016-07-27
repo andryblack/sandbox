@@ -243,7 +243,7 @@ public:
     ~iap_platform_extension() {
         [m_mgr release];
     }
-    virtual void OnLoad(Sandbox::Application* app) {
+    virtual void OnAppStarted(Sandbox::Application* app) {
         m_mgr->m_application = app;
     }
     virtual bool Process(Sandbox::Application* app,

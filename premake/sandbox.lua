@@ -48,7 +48,15 @@ solution( ProjectName )
 		if use.AndroidGooglePlayService or use.IAP then
 			android_modules_path( path.getabsolute(sandbox_dir) )
 			--local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
-			android_dependencies('com.google.android.gms:play-services-games:9.0.2')
+			android_dependencies('com.google.android.gms:play-services-base:9.2.1')
+			if use.AndroidGooglePlayService then
+				android_dependencies('com.google.android.gms:play-services-auth:9.2.1')
+				android_dependencies('com.google.android.gms:play-services-games:9.2.1')
+				android_dependencies('com.google.android.gms:play-services-nearby:9.2.1')
+				android_dependencies('com.google.android.gms:play-services-plus:9.2.1')
+				android_dependencies('com.android.support:support-v4:23.1.1')
+			end
+			
 			--android_libs(path.join(sdk_dir,'extras/google/google_play_services/libproject','google-play-services_lib'))
 			--android_libs(path.join(sdk_dir,'extras/android/support/v4/android-support-v4.jar'))
 			flags{ "C++11" }

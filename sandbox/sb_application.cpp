@@ -378,7 +378,7 @@ namespace Sandbox {
 	bool GHL_CALL Application::Load() {
         LogInfo() << "Application::Load";
         ConfigureDevice( m_system );
-        PlatformExtension::OnLoadAll(this);
+        
         if (!m_graphics) {
             sb_assert(m_resources);
             m_graphics = new Graphics(m_resources);
@@ -804,6 +804,7 @@ namespace Sandbox {
                 OnMouseUp(event->data.mouse_release.button, event->data.mouse_release.x, event->data.mouse_release.y);
                 break;
             case GHL::EVENT_TYPE_APP_STARTED:
+                PlatformExtension::OnAppStartedAll(this);
                 break;
             case GHL::EVENT_TYPE_ACTIVATE:
                 OnActivated();

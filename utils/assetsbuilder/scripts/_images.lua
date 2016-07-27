@@ -330,7 +330,7 @@ local function do_premultiply_file( src, dstconf  )
 
 	if update_only then
 		if not os.check_file_new(path.join(src_path,src),path.join(dst_path,conf.dst)) then
-			print('skip not new')
+			--print('skip not new')
 			return true
 		end
 	end
@@ -366,7 +366,7 @@ function _M.apply( rules )
 	print('premultiply images')
 	for k,v in pairs(pmi) do
 		if v then
-			print('premultiply',k)
+			--print('premultiply',k)
 			if type(v) == 'table' then
 				assert(do_premultiply_file(k,v),'failed store texture to ' .. v.dst)
 			elseif type(v) == 'string' then

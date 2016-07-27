@@ -10,6 +10,8 @@ namespace Sandbox {
     }
 
     ANativeActivity* AndroidPlatformExtension::GetNativeActivity(Application* app) {
+        if (!app)
+            return 0;
         GHL::System* sys = app->GetSystem();
         if (!sys)
             return 0;

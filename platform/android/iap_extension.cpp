@@ -45,11 +45,12 @@ public:
 	void resolve_methods(JNIEnv *env) {
 		if (m_helper_ctr)
 			return;
+        jni::check_exception(env);
 		jni::class_ref_hold IAPHelper(env);
 		IAPHelper.clazz = env->FindClass("com/sandbox/IAPHelper");
-		sb_assert(IAPHelper.clazz);
 		jni::check_exception(env);
-		m_helper_ctr = env->GetMethodID(IAPHelper.clazz,"<init>","(Lcom/sandbox/Activity;J)V");
+		sb_assert(IAPHelper.clazz);
+        m_helper_ctr = env->GetMethodID(IAPHelper.clazz,"<init>","(Lcom/sandbox/Activity;J)V");
 		jni::check_exception(env);
 		sb_assert(m_helper_ctr);
 		m_helper_dispose = env->GetMethodID(IAPHelper.clazz,"dispose","()V");
@@ -78,15 +79,10 @@ public:
 		jni::check_exception(env);
         sb_assert(m_helper_confirm_transaction);
 	}
-    virtual void OnLoad(Sandbox::Application* app) {
-        Sandbox::LogInfo() << "IAPExtension::OnLoad";
+    
+    virtual void OnAppStarted(Sandbox::Application* app) {
         m_application = app;
-        m_activity = GetNativeActivity(app);
-        if (m_activity) {
-           resolve_methods(m_activity->env);
-        } else {
-            Sandbox::LogError() << "IAPExtension : not found activity";
-        }
+        m_activity = GetNativeActivity(m_application);
     }
     virtual bool Process(Sandbox::Application* app,
                          const char* method,
@@ -167,7 +163,8 @@ public:
                                          jobject thiz,
                                          jobject activity,
                                          jobject saved_instance_state) {
-    	resolve_methods(env);
+        Sandbox::LogInfo() << "IAPExtension::nativeOnActivityCreated";
+        resolve_methods(env);
     	jni::class_ref_hold IAPHelper(env);
 		IAPHelper.clazz = env->FindClass("com/sandbox/IAPHelper");
 		jobject loc = env->NewObject(IAPHelper.clazz,m_helper_ctr,activity,(jlong)this);

@@ -40,10 +40,8 @@ end
 function manifest.generateManifest(sln,prj)
 	local packagename = prj.android_packagename or 'com.example.app'
 	local activity = prj.android_activity or 'android.app.NativeActivity'
-	local attributes = ''
-	if (not prj.android_libs) or table.isempty(prj.android_libs) then
-		attributes = attributes .. ' android:hasCode="false"'
-	end
+	local attributes = 'android:hasCode="true"'
+	
 	local mainLibName = prj.name
 	local debugVal = 'false'
 	

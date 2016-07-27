@@ -183,7 +183,7 @@ local function make_dst_tree( rules )
 			 have_childs = true
 		end
 		if not have_childs and dir ~= '' then
-			print('mkdir',dir)
+			--print('mkdir',dir)
 			assert(os.mkdir(path.join(dst_path,dir)))
 		end
 	end
@@ -195,7 +195,7 @@ end
 local function do_copy_file( src, dst  )
 	if update_only then
 		if not os.check_file_new(src,dst) then
-			print('skip not new')
+			--print('skip not new')
 			return true
 		end
 	end
@@ -205,7 +205,7 @@ end
 local function copy_files( files )
 	for v,dst in pairs(files) do
 		if dst then
-			print('copy',v)	
+			--print('copy',v)	
 			if type(dst) == 'string' then
 				assert(do_copy_file(path.join(src_path,v),path.join(dst_path,dst)))
 			else
@@ -218,7 +218,7 @@ end
 local function compile_files( files )
 	for v,dst in pairs(files) do
 		if dst then
-			print('compile',v)
+			--print('compile',v)
 			local source = assert(io.open(path.getabsolute(path.join(src_path,v)),'r'))
 			local source_data = source:read('*a')
 			source:close()

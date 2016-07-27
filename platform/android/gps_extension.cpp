@@ -108,10 +108,12 @@ void InitServices(gpg::PlatformConfiguration const &pc) {
 }
 
 class GPSExtension : public Sandbox::AndroidPlatformExtension {
+    Sandbox::Application*   m_app;
 public:
-    virtual void OnLoad(Sandbox::Application* app) {
-        Sandbox::LogInfo() << "GPSExtension::OnLoad";
-        ANativeActivity* activity = GetNativeActivity(app);
+    GPSExtension() : m_app(0) {}
+    virtual void OnAppStarted(Sandbox::Application* app) {
+        m_app = app;
+        ANativeActivity* activity = GetNativeActivity(m_app);
         if (activity) {
             // gpg-cpp: Set platform intiialization
             Sandbox::LogInfo() << "GPSExtension AndroidInitialization";
@@ -179,9 +181,10 @@ public:
     virtual void nativeOnActivityCreated(
                                          JNIEnv *env,
                                          jobject thiz,
-                                         jobject activity,
+                                         jobject aactivity,
                                          jobject saved_instance_state) {
-        gpg::AndroidSupport::OnActivityCreated(env,activity,saved_instance_state);
+        
+        gpg::AndroidSupport::OnActivityCreated(env,aactivity,saved_instance_state);
     }
     
     virtual void nativeOnActivityDestroyed(
@@ -225,3 +228,7 @@ public:
         return false;
     }
 } gps_extension;
+
+void* ensure_gps_extension_not_stripped() {
+    return &gps_extension;
+}

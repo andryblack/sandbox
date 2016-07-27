@@ -29,10 +29,10 @@ namespace Sandbox {
         return false;
     }
     
-    void PlatformExtension::OnLoadAll(Application* app) {
+    void PlatformExtension::OnAppStartedAll(Application* app) {
         PlatformExtension* ext = GetRoot();
         while (ext) {
-            ext->OnLoad(app);
+            ext->OnAppStarted(app);
             ext = ext->GetNext();
         }
 

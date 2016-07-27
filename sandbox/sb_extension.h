@@ -10,8 +10,8 @@ namespace Sandbox {
     public:
         static PlatformExtension*& GetRoot();
         PlatformExtension* GetNext() { return m_next; }
-        virtual void OnLoad(Application* app) {}
-        static void OnLoadAll(Application* app);
+        virtual void OnAppStarted(Application* app){}
+        static void OnAppStartedAll(Application* app);
         virtual bool Process(Application* app,
                              const char* method,
                              const char* args,
