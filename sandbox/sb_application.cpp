@@ -543,6 +543,8 @@ namespace Sandbox {
     	m_main_thread->Update(dt);
 	
         Update(dt);
+
+        PlatformExtension::OnTimerAll(this);
         
 #ifdef SB_USE_MYGUI
         if (m_gui_render)

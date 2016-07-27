@@ -27,15 +27,19 @@
 
 static sb::string is_auth_in_progress_;
 static std::unique_ptr<gpg::GameServices> game_services_;
-static sb::string me_player_id;
+static sb::string me_player_data;
 
-void BeginUserInitiatedSignIn() {
-    if (!game_services_)
-        return;
-    if (!game_services_->IsAuthorized()) {
-        Sandbox::LogInfo() << "StartAuthorizationUI";
-        game_services_->StartAuthorizationUI();
+sb::string BeginUserInitiatedSignIn() {
+    if (!game_services_) {
+        Sandbox::LogError() << "[PGS]" << "BeginUserInitiatedSignIn : game_services_";
+        return "uninitialized";
     }
+    if (!game_services_->IsAuthorized()) {
+        Sandbox::LogInfo() << "[PGS]" << "BeginUserInitiatedSignIn: StartAuthorizationUI";
+        game_services_->StartAuthorizationUI();
+        return "pending";
+    }
+    return "success";
 }
 
 
@@ -43,7 +47,7 @@ void SubmitHighScore(char const *leaderboard_id, uint64_t score) {
     if (!game_services_)
         return;
     if (game_services_->IsAuthorized()) {
-        Sandbox::LogInfo() << "High score submitted " << score << " " << leaderboard_id;
+        Sandbox::LogInfo() << "[PGS]" << "High score submitted " << score << " " << leaderboard_id;
         game_services_->Leaderboards().SubmitScore(leaderboard_id, score);
         game_services_->Leaderboards().Fetch(leaderboard_id,nullptr);
     } else {
@@ -53,11 +57,11 @@ void SubmitHighScore(char const *leaderboard_id, uint64_t score) {
 
 sb::string ShowScoresUI() {
     if (!game_services_) {
-        Sandbox::LogError() << "ShowScoresUI error";
+        Sandbox::LogError() << "[PGS]" << "ShowScoresUI error";
         return "error";
     }
     if (game_services_->IsAuthorized()) {
-        Sandbox::LogInfo() << "High score show";
+        Sandbox::LogInfo() << "[PGS]" << "High score show";
         //game_services_->Leaderboards().FetchAllBlocking(gpg::DataSource::CACHE_OR_NETWORK);
         game_services_->Leaderboards().ShowAllUI(nullptr);
         return "success";
@@ -67,49 +71,13 @@ sb::string ShowScoresUI() {
     return "error";
 }
 
-void InitServices(gpg::PlatformConfiguration const &pc) {
-    Sandbox::LogInfo() << "Initializing Services";
-    if (!game_services_) {
-        Sandbox::LogInfo() << "Uninitialized services, so creating";
-        game_services_ = gpg::GameServices::Builder()
-        .SetOnLog(gpg::DEFAULT_ON_LOG, gpg::LogLevel::VERBOSE)
-        .SetOnAuthActionStarted([](gpg::AuthOperation op) {
-            is_auth_in_progress_ = "progress";
-        })
-        .SetOnAuthActionFinished([](gpg::AuthOperation op,
-                                                     gpg::AuthStatus status) {
-            Sandbox::LogInfo() << "Sign in finished with a result of " << status;
-           
-            if (gpg::IsSuccess(status)) {
-                game_services_->Players().FetchSelf([op,status](const gpg::PlayerManager::FetchSelfResponse& resp) {
-                    if (gpg::IsSuccess(resp.status)) {
-                        is_auth_in_progress_ = "succcess";
-                        me_player_id = resp.data.Id();
-                    } else {
-                        is_auth_in_progress_ = "failed";
-                    }
-                    game_services_->Leaderboards().FetchAll(nullptr);
-                });
-            } else {
-                is_auth_in_progress_ = "failed";
-            }
-            
-            
-//            Sandbox::LogInfo() <<"Fetching all nonblocking";
-//            game_services_->Achievements().FetchAll(gpg::DataSource::CACHE_OR_NETWORK, [] (gpg::AchievementManager::FetchAllResponse response) {
-//                    Sandbox::LogInfo() << "Achievement response status: " << response.status);
-//                });
-//            Sandbox::LogInfo() <<"--------------------------------------------------------------";
-            
-        })
-        .Create(pc);
-    }
-    Sandbox::LogInfo() << "Created";
-}
+
 
 class GPSExtension : public Sandbox::AndroidPlatformExtension {
     Sandbox::Application*   m_app;
 public:
+    void InitServices(gpg::PlatformConfiguration const &pc);
+
     GPSExtension() : m_app(0) {}
     virtual void OnAppStarted(Sandbox::Application* app) {
         m_app = app;
@@ -144,16 +112,19 @@ public:
             return true;
         }
         if (::strcmp("GPSLogin",method)==0) {
-            BeginUserInitiatedSignIn();
-            res = "pending";
+            if (is_auth_in_progress_ == "progress") {
+                res = is_auth_in_progress_;
+                return true;
+            }
+            res = BeginUserInitiatedSignIn();
             return true;
         }
-        if (::strcmp("GPSGetPlayerId",method)==0) {
+        if (::strcmp("GPSGetPlayer",method)==0) {
             if (!game_services_)
                 return true;
             if (!game_services_->IsAuthorized())
                 return true;
-            res = me_player_id;
+            res = me_player_data;
             return true;
         }
         if (::strcmp("GPSGetLoginStatus",method)==0) {
@@ -228,6 +199,61 @@ public:
         return false;
     }
 } gps_extension;
+
+void GPSExtension::InitServices(gpg::PlatformConfiguration const &pc) {
+    Sandbox::LogInfo() << "[PGS]" << "Initializing Services";
+    if (!game_services_) {
+        Sandbox::LogInfo() << "[PGS]" << "Uninitialized services, so creating";
+        game_services_ = gpg::GameServices::Builder()
+        .SetOnLog(gpg::DEFAULT_ON_LOG, gpg::LogLevel::VERBOSE)
+        .SetOnAuthActionStarted([this](gpg::AuthOperation op) {
+            Sandbox::LogInfo() << "[PGS]" << "OnAuthActionStarted " << op;
+            is_auth_in_progress_ = "progress";
+            if (op == gpg::AuthOperation::SIGN_IN) {
+                this->AddPendingResponse("GPSLogin","progress");
+            }
+        })
+        .SetOnAuthActionFinished([this](gpg::AuthOperation op,
+                                                     gpg::AuthStatus status) {
+            Sandbox::LogInfo() << "[PGS]" << "OnAuthActionFinished" << op << " with a result of " << status;
+            if (op == gpg::AuthOperation::SIGN_IN) {
+                if (gpg::IsSuccess(status)) {
+                    game_services_->Players().FetchSelf([this](const gpg::PlayerManager::FetchSelfResponse& resp) {
+                        if (gpg::IsSuccess(resp.status)) {
+                            is_auth_in_progress_ = "success";
+                            
+                            me_player_data = Sandbox::JsonBuilder()
+                                .BeginObject()
+                                .Key("id").PutString(resp.data.Id().c_str())
+                                .Key("name").PutString(resp.data.Name().c_str())
+                                .Key("avatar").PutString(resp.data.AvatarUrl(gpg::ImageResolution::ICON).c_str())
+                                .EndObject()
+                            .End();
+                            this->AddPendingResponse("GPSLogin","success");
+                        } else {
+                            is_auth_in_progress_ = "failed";
+                            this->AddPendingResponse("GPSLogin","failed");
+                        }
+                        game_services_->Leaderboards().FetchAll(nullptr);
+                    });
+                } else {
+                    is_auth_in_progress_ = "failed";
+                    this->AddPendingResponse("GPSLogin","failed");
+                }
+            }
+            
+            
+//            Sandbox::LogInfo() <<"Fetching all nonblocking";
+//            game_services_->Achievements().FetchAll(gpg::DataSource::CACHE_OR_NETWORK, [] (gpg::AchievementManager::FetchAllResponse response) {
+//                    Sandbox::LogInfo() << "Achievement response status: " << response.status);
+//                });
+//            Sandbox::LogInfo() <<"--------------------------------------------------------------";
+            
+        })
+        .Create(pc);
+    }
+    Sandbox::LogInfo() << "Created";
+}
 
 void* ensure_gps_extension_not_stripped() {
     return &gps_extension;

@@ -61,7 +61,7 @@ solution( ProjectName )
 			--android_libs(path.join(sdk_dir,'extras/android/support/v4/android-support-v4.jar'))
 			flags{ "C++11" }
 			android_metadata {
-				'com.google.android.gms.games.APP_ID=@string/app_id',
+				'com.google.android.gms.games.APP_ID=@string/google_play_services_app_id',
 				'com.google.android.gms.version=@integer/google_play_services_version'
 			}
 		end
