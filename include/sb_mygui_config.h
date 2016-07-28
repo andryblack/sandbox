@@ -8,6 +8,10 @@
 
 #if !defined(__FLASHPLAYER__) && !defined(__ANDROID__) && (!defined(__clang__))
 #define MYGUI_DONT_REPLACE_NULLPTR
+#elif defined( __clang__ )
+#if __has_feature(cxx_nullptr) || __has_extension(cxx_nullptr)
+    #define MYGUI_DONT_REPLACE_NULLPTR
+#endif
 #endif
 
 #include <string>

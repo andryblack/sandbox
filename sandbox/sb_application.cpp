@@ -118,10 +118,7 @@ namespace Sandbox {
         void setup_singletons( LuaVM* lua );
     }
 #endif
-    
-#ifdef SB_USE_SPINE
-    void register_spine( lua_State* lua );
-#endif
+ 
     
     
 	Application::Application() {
@@ -217,9 +214,7 @@ namespace Sandbox {
 #ifdef SB_USE_MYGUI
         mygui::register_mygui(lua->GetVM());
 #endif
-#ifdef SB_USE_SPINE
-        register_spine(lua->GetVM());
-#endif
+
         register_skelet(lua->GetVM());
 #ifdef SB_USE_NETWORK
         BindNetwork(lua);

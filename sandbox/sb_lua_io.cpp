@@ -110,7 +110,7 @@ namespace Sandbox {
         luaL_buffinit(L, &b);
         for (;;) {
             char *p = luaL_prepbuffsize(&b, rlen);
-            size_t nr = f->Read(reinterpret_cast<GHL::Byte*>(p), rlen);
+            size_t nr = f->Read(reinterpret_cast<GHL::Byte*>(p), static_cast<GHL::UInt32>(rlen));
             luaL_addsize(&b, nr);
             if (nr < rlen) break;  /* eof? */
             else if (rlen <= (MAX_SIZE_T / 4))  /* avoid buffers too large */
@@ -126,7 +126,7 @@ namespace Sandbox {
         luaL_Buffer b;
         luaL_buffinit(L, &b);
         p = luaL_prepbuffsize(&b, n);  /* prepare buffer to read whole block */
-        nr = f->Read(reinterpret_cast<GHL::Byte*>(p), n);  /* try to read 'n' chars */
+        nr = f->Read(reinterpret_cast<GHL::Byte*>(p), static_cast<GHL::UInt32>(n));  /* try to read 'n' chars */
         luaL_addsize(&b, nr);
         luaL_pushresult(&b);  /* close buffer */
         return (nr > 0);  /* true iff read something */

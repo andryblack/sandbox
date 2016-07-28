@@ -187,9 +187,6 @@ solution( ProjectName )
 		dofile('mygui.lua')
 	end
 
-	if use.Spine then
-		dofile('spine-runtime.lua')
-	end
 
 	if pre_project then
 		pre_project()
@@ -252,16 +249,6 @@ solution( ProjectName )
 			defines 'SB_USE_MYGUI'
 		end
 
-		if use.Spine then
-			files {
-				sandbox_dir .. '/sandbox/spine/**.h',
-				sandbox_dir .. '/sandbox/spine/**.cpp',
-			}
-			sysincludedirs {
-				sandbox_dir .. '/external/spine-runtime-c/include',
-			}
-			defines 'SB_USE_SPINE'
-		end
 
 		if use.Chipmunk then
 			files {
@@ -284,6 +271,9 @@ solution( ProjectName )
 					sandbox_dir .. '/platform/ios/main.*',}
 			if UseModules.IAP then
 				files { sandbox_dir .. '/platform/ios/iap_extension.*',}
+			end
+			if UseModules.iOSGC then
+				files { sandbox_dir .. '/platform/ios/gc_extension.*',}
 			end
 		elseif os.is('macosx') then
 			files { sandbox_dir .. '/platform/osx/main.mm',
@@ -350,10 +340,6 @@ solution( ProjectName )
 			links { 'chipmunk' }
 			includedirs { sandbox_dir .. '/external/chipmunk/include' }
 		end
-		if use.Spine then
-			links { 'spine-runtime' }
-			defines 'SB_USE_SPINE'
-		end
 		if os.is('ios') then
 			links {
 				'Foundation.framework', 
@@ -365,12 +351,18 @@ solution( ProjectName )
 				'AudioToolbox.framework',
 				'CoreMotion.framework',
 				'StoreKit.framework' }
+			if use.iOSGC then
+				links {
+					'GameKit.framework'
+				}
+			end
 		elseif os.is('macosx') then
 			links { 
 				'OpenGL.framework', 
 				'OpenAL.framework',
 				'Cocoa.framework',
 				'AudioToolbox.framework' }
+
 		elseif os.is('flash') then
 			links {
 				'AS3++',
