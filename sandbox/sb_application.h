@@ -125,6 +125,8 @@ namespace Sandbox {
         
         void ReleaseGUI();
         virtual void DoRestart();
+        
+        virtual void ReportAppError(const char* reason) {}
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;

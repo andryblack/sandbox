@@ -75,7 +75,7 @@
 }
 
 -(void)gameCenterAuthenticationChanged:(id) object {
-    NSLog(@"[GC] gameCenterAuthenticationChanged");
+    NSLog(@"[GC] gameCenterAuthenticationChanged %@",object);
 }
 
 -(BOOL) isAuthenticated {

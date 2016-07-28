@@ -700,8 +700,14 @@ namespace Sandbox {
             }
             GHL::Data* d = GHL_ReadAllData( ds );
             ds->Release();
-            if (!d) return false;
+            if (!d) {
+                ReportAppError("read profile failed");
+                return false;
+            }
             LuaContextPtr decoded = convert_from_json( m_lua->GetVM(), d);
+            if (!decoded) {
+                ReportAppError("parse profile failed");
+            }
             d->Release();
             m_lua->GetGlobalContext()->SetValue("application.profile", decoded);
             LogInfo() << "profile loaded";
@@ -721,6 +727,7 @@ namespace Sandbox {
                 LogInfo() << "store profile to " << path;
                 if (!m_vfs->WriteFile(path.c_str(), sd)) {
                     LogError() << "failed write " << path;
+                    ReportAppError("write profile failed");
                 } else {
                     LogInfo() << "profile stored";
                 }
