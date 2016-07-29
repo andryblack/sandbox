@@ -22,10 +22,12 @@ namespace Sandbox {
         
     }
     void GHL_CALL NetworkRequestBase::AddRef() const {
+        sb_ensure_main_thread();
         add_ref();
     }
     /// release reference
     void GHL_CALL NetworkRequestBase::Release() const {
+        sb_ensure_main_thread();
         remove_ref();
     }
     /// ghl interface
@@ -63,10 +65,12 @@ namespace Sandbox {
     }
     /// received complete
     void GHL_CALL NetworkRequestBase::OnComplete() {
+        sb_ensure_main_thread();
         m_completed = true;
     }
     /// received error
     void GHL_CALL NetworkRequestBase::OnError(const char* error) {
+        sb_ensure_main_thread();
         m_completed = true;
         m_error = true;
         if (error) {

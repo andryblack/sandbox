@@ -4,9 +4,26 @@
 #include <cstdio>
 #include <stdarg.h>
 
+#if defined( _MSC_VER )
+#define SB_COMPILER_MSVC
+#endif
+
+#if defined( __GNUC__ )
+#define SB_COMPILER_GCC
+#endif
+
+#ifdef SB_COMPILER_GCC
+#define SB_ATTRIBUTE_PACKED __attribute__(( packed ))
+#endif
+
+#ifndef SB_ATTRIBUTE_PACKED
+#define SB_ATTRIBUTE_PACKED
+#endif
+
+
 namespace sb {
 
-#ifdef _MSC_VER
+#ifdef SB_COMPILER_MSVC
     
     static inline int vsnprintf(char* str, size_t size, const char* format, va_list ap)
     {

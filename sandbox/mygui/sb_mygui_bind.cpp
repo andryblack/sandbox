@@ -649,6 +649,16 @@ static bool widget_isMyChild( MyGUI::Widget* w, MyGUI::Widget* ch) {
     return false;
 }
 
+static sb::string widget_getLayerName( MyGUI::Widget* w) {
+    if (w) {
+        MyGUI::ILayer* l = w->getLayer();
+        if (l) {
+            return l->getName();
+        }
+    }
+    return "";
+}
+
 
 SB_META_DECLARE_OBJECT(MyGUI::Widget, MyGUI::ICroppedRectangle)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Widget)
@@ -702,6 +712,7 @@ bind( method( "setUserString" , &widget_setUserString ) );
 bind( method( "updateChilds" , &widget_updateChilds ) );
 bind( method( "destroyAllChilds" , &widget_destroyAllChilds ) );
 bind( method( "isMyChild" , &widget_isMyChild ) );
+bind( method( "getLayerName", &widget_getLayerName));
 
 bind(method("createWidget", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(const std::string&, const std::string&, const MyGUI::IntCoord&, MyGUI::Align, const std::string& _name)>(&MyGUI::Widget::createWidgetT)));
 bind(method("createWidgetS", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(MyGUI::WidgetStyle,

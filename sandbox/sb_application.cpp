@@ -100,6 +100,8 @@ SB_META_END_KLASS_BIND()
 
 
 bool (*sb_terminate_handler)() = 0;
+GHL::UInt32 sb_main_thread_id = 0;
+
 
 namespace Sandbox {
     
@@ -122,6 +124,9 @@ namespace Sandbox {
     
     
 	Application::Application() {
+
+        sb_main_thread_id = GHL_GetCurrentThreadId();
+
 		m_system = 0;
 		m_vfs = 0;
 		m_render = 0;
@@ -227,6 +232,7 @@ namespace Sandbox {
 	
 	///
 	void GHL_CALL Application::SetSystem( GHL::System* sys ) {
+        sb_ensure_main_thread();
 		m_system = sys;
         if (!m_title.empty()) {
             SetTitle(m_title);
@@ -280,6 +286,7 @@ namespace Sandbox {
     
     ///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
+        sb_ensure_main_thread();
 		sb_assert( m_vfs );
          LogInfo() << "Application::FillSettings";
         
@@ -369,8 +376,13 @@ namespace Sandbox {
     void Application::InitResources() {
         
     }
+    
+    void Application::ReleaseResources() {
+        
+    }
 	///
 	bool GHL_CALL Application::Load() {
+        sb_ensure_main_thread();
         LogInfo() << "Application::Load";
         ConfigureDevice( m_system );
         
@@ -457,7 +469,12 @@ namespace Sandbox {
 	}
     
     void GHL_CALL Application::Unload() {
+        sb_ensure_main_thread();
+        LogInfo() << "Application::Unload >>> ";
+        
         StoreAppProfile();
+        ReleaseResources();
+        
         if (m_lua) {
             m_lua->Destroy();
             delete m_lua;
@@ -474,6 +491,7 @@ namespace Sandbox {
         delete m_graphics;
         m_graphics = 0;
         m_sound_mgr->Deinit();
+        LogInfo() << "Application::Unload <<< ";
     }
     
     void Application::DoRestart() {
@@ -505,6 +523,8 @@ namespace Sandbox {
     }
 	///
 	bool GHL_CALL Application::OnFrame( GHL::UInt32 usecs ) {
+        sb_ensure_main_thread();
+        
         if (m_need_restart) {
             m_need_restart = false;
             DoRestart();
@@ -756,6 +776,7 @@ namespace Sandbox {
 #endif
     
     void GHL_CALL Application::OnEvent( const GHL::Event* event ) {
+        sb_ensure_main_thread();
         switch( event->type ) {
             case GHL::EVENT_TYPE_KEY_PRESS:
 #ifdef SB_USE_MYGUI

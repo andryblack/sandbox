@@ -119,6 +119,7 @@ namespace Sandbox {
         
         virtual Resources* CreateResourcesManager();
         virtual void InitResources();
+        virtual void ReleaseResources();
         Network* GetNetwork();
         
         void InitLua();

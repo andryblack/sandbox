@@ -11,6 +11,7 @@
 #define SB_ASSERT_H
 
 #include <ghl_types.h>
+#include <ghl_system.h>
 
 #ifdef SB_DEBUG
 #include "sb_log.h"
@@ -37,5 +38,8 @@ namespace sb {
 }
 
 #define sb_static_assert( COND ) typedef ::sb::static_assert_failure<COND>::failed GHL_CONCAT(assertion,__LINE__)
+
+extern GHL::UInt32 sb_main_thread_id;
+#define sb_ensure_main_thread() sb_assert(GHL_GetCurrentThreadId() == sb_main_thread_id )
 
 #endif /*SB_ASSERT_H*/
