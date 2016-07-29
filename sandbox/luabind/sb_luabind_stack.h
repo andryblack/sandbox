@@ -226,7 +226,11 @@ namespace Sandbox {
                 return res;
             }
             static T* get( lua_State* L, int idx , bool allow_nill = true ) {
-                if ( lua_gettop(L)<idx) return reinterpret_cast<T*>(0);
+                if ( lua_gettop(L)<idx ) {
+                    if (allow_nill)
+                        return reinterpret_cast<T*>(0);
+                    lua_argerror( L, idx, meta::type<T>::info()->name, 0);
+                }
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
                     return get_impl(L, holder, idx);
@@ -264,6 +268,11 @@ namespace Sandbox {
                 return res;
             }
             static const T* get( lua_State* L, int idx, bool allow_nil = true ) {
+                if ( lua_gettop(L)<idx ) {
+                    if (allow_nil)
+                        return reinterpret_cast<T*>(0);
+                    lua_argerror( L, idx, meta::type<T>::info()->name, 0);
+                }
                 if ( lua_isuserdata(L, idx) ) {
                     data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, idx));
                     return get_impl(L, holder, idx);
