@@ -220,10 +220,9 @@ local function compile_files( files )
 		if dst then
 			--print('compile',v)
 			local source = assert(io.open(path.getabsolute(path.join(src_path,v)),'r'))
-			local source_data = source:read('*a')
+			
+			local pp_source = assert(luapp.preprocess(source))
 			source:close()
-
-			local pp_source = assert(luapp.preprocess(source_data))
 
 			local shunk = assert(load(pp_source,'@'..dst,'t'))
 			local binary = string.dump(shunk)
