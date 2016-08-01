@@ -9,7 +9,7 @@
 #ifndef __sr_osx__sb_mygui_logs__
 #define __sr_osx__sb_mygui_logs__
 
-#include "sb_mygui_config.h"
+#include <MyGUI_BuildConfig.h>
 
 namespace Sandbox {
     namespace mygui {

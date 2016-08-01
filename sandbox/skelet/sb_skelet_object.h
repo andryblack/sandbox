@@ -9,8 +9,8 @@
 
 namespace Sandbox {
     
-    class SkeletonNodeFrame;
-    class SkeletonNodeData;
+    struct SkeletonNodeFrame;
+    struct SkeletonNodeData;
     
     class SkeletonNode : public SceneObject {
         SB_META_OBJECT

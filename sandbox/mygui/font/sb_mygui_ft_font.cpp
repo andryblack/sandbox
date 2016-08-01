@@ -1,6 +1,7 @@
 
 
 #include "sb_mygui_ft_font.h"
+#include <algorithm>
 
 #include "MyGUI_DataManager.h"
 #include "MyGUI_DataStreamHolder.h"

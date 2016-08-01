@@ -22,7 +22,7 @@ EXE=""
 if [[ "$PLATFORM" == "windows" ]]; then
 	EXE=".exe"
 	MAKE=echo
-	TARGET=vs2013
+	TARGET=vs2015
 fi
 
 BOOTSTRAPPREMAKE=$BIN/premake5$EXE

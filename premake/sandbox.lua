@@ -241,11 +241,6 @@ solution( ProjectName )
 			includedirs {
 				sandbox_dir .. '/external/MyGUI/MyGUIEngine/include',
 			}
-			if os.is('windows') then
-				defines 'MYGUI_CONFIG_INCLUDE="sb_mygui_config.h"'
-			else
-				defines 'MYGUI_CONFIG_INCLUDE="<sb_mygui_config.h>"'
-			end
 			defines 'SB_USE_MYGUI'
 		end
 
@@ -326,11 +321,6 @@ solution( ProjectName )
 		if use.MyGUI then
 			links { 'MyGUI' }
 			includedirs { sandbox_dir .. '/external/MyGUI/MyGUIEngine/include' }
-			if os.is('windows') then
-				defines 'MYGUI_CONFIG_INCLUDE="mygui/sb_mygui_config.h"'
-			else
-				defines 'MYGUI_CONFIG_INCLUDE="<sb_mygui_config.h>"'
-			end
 			defines 'SB_USE_MYGUI'
 		end
 		if use.Freetype then
