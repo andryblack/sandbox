@@ -13,8 +13,19 @@
 #include "sb_log.h"
 #include "sb_resources.h"
 
+SB_META_DECLARE_OBJECT(Sandbox::Network, Sandbox::meta::object)
+SB_META_DECLARE_OBJECT(Sandbox::NetworkRequestBase, Sandbox::meta::object)
+SB_META_DECLARE_OBJECT(Sandbox::NetworkRequest, Sandbox::NetworkRequestBase)
+SB_META_DECLARE_OBJECT(Sandbox::NetworkDataRequest, Sandbox::NetworkRequestBase)
+SB_META_DECLARE_OBJECT(Sandbox::NetworkFileRequest, Sandbox::NetworkRequestBase)
+#ifndef SB_NO_RESOURCES
+SB_META_DECLARE_OBJECT(Sandbox::ImageRequest, Sandbox::NetworkDataRequest)
+#endif
+SB_META_DECLARE_OBJECT(Sandbox::NetworkPostData, Sandbox::meta::object)
+SB_META_DECLARE_OBJECT(Sandbox::NetworkMultipartFormData, Sandbox::NetworkPostData)
 namespace Sandbox {
     
+
     NetworkRequestBase::NetworkRequestBase(const sb::string& url) : m_url(url),m_completed(false),m_error(false),m_received_size(0) {
         m_status_code = 0;
     }

@@ -284,6 +284,14 @@ namespace Sandbox {
         }
     }
     
+    Network* Application::CreateNetwork() {
+#ifdef SB_USE_NETWORK
+        return new Network(m_resources);
+#else
+        return 0;
+#endif
+    }
+    
     ///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
         sb_ensure_main_thread();
@@ -308,7 +316,7 @@ namespace Sandbox {
         
 #ifdef SB_USE_NETWORK
         if (!m_network) {
-            m_network = new Network(m_resources);
+            m_network = CreateNetwork();
         }
 #endif
         CreateLua();

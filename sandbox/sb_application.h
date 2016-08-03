@@ -118,6 +118,7 @@ namespace Sandbox {
         virtual void OnSystemSet();
         
         virtual Resources* CreateResourcesManager();
+        virtual Network* CreateNetwork();
         virtual void InitResources();
         virtual void ReleaseResources();
         Network* GetNetwork();

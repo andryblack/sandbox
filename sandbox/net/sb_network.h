@@ -15,6 +15,7 @@
 #include <sbstd/sb_pointer.h>
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_intrusive_ptr.h>
+#include "meta/sb_meta.h"
 #include "sb_data.h"
 #include "sb_image.h"
 
@@ -26,7 +27,8 @@ namespace Sandbox {
     
     class Resources;
     
-    class NetworkRequestBase : public sb::ref_counter_not_copyable<GHL::NetworkRequest> {
+    class NetworkRequestBase : public GHL::NetworkRequest, public meta::object {
+        SB_META_OBJECT
     public:
         explicit NetworkRequestBase(const sb::string& url);
         ~NetworkRequestBase();
@@ -77,11 +79,15 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<NetworkRequestBase> NetworkRequestBaseBtr;
     
     class NetworkRequest : public NetworkRequestBase {
+        SB_META_OBJECT
     public:
         explicit NetworkRequest(const sb::string& url) : NetworkRequestBase(url) {}
         const sb::string& GetData() const { return m_data; }
         /// received data
         virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size);
+    protected:
+        void SetData(const sb::string& d) { m_data = d; }
+        void AppendData(const char* data,size_t size) { m_data.append(data,size); }
     private:
         sb::string  m_data;
     };
@@ -89,6 +95,7 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<NetworkRequest> NetworkRequestPtr;
     
     class NetworkDataRequest : public NetworkRequestBase {
+        SB_META_OBJECT
     public:
         explicit NetworkDataRequest(const sb::string& url) :  NetworkRequestBase(url), m_data(0) {}
         ~NetworkDataRequest();
@@ -102,6 +109,7 @@ namespace Sandbox {
     };
     
     class NetworkFileRequest : public NetworkRequestBase {
+        SB_META_OBJECT
     public:
         explicit NetworkFileRequest(const sb::string& url, GHL::WriteStream* wd);
         ~NetworkFileRequest();
@@ -115,6 +123,7 @@ namespace Sandbox {
     
 #ifndef SB_NO_RESOURCES
     class ImageRequest : public NetworkDataRequest {
+        SB_META_OBJECT
     public:
         explicit ImageRequest(const sb::string& url,Resources* res) :  NetworkDataRequest(url),m_resources(res) {}
         const ImagePtr& GetImage() const { return m_img; }
@@ -127,7 +136,8 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<ImageRequest> ImageRequestPtr;
 #endif
     
-    class NetworkPostData : public sb::ref_countered_base_not_copyable {
+    class NetworkPostData : public meta::object {
+        SB_META_OBJECT
     public:
         NetworkPostData();
         virtual ~NetworkPostData();
@@ -138,6 +148,7 @@ namespace Sandbox {
     };
     
     class NetworkMultipartFormData : public NetworkPostData {
+        SB_META_OBJECT
     public:
         NetworkMultipartFormData();
         ~NetworkMultipartFormData();
@@ -156,7 +167,8 @@ namespace Sandbox {
     
     typedef sb::intrusive_ptr<NetworkPostData> NetworkPostDataPtr;
     
-    class Network {
+    class Network : public meta::object {
+        SB_META_OBJECT
     public:
         explicit Network(Resources* res);
         ~Network();
@@ -177,6 +189,8 @@ namespace Sandbox {
         GHL::Network* m_net;
         Resources*  m_resources;
         sb::map<sb::string,sb::string> m_cookie;
+    protected:
+        GHL::Network* GetNet() { return m_net; }
         void ApplyCookie(const NetworkRequestBaseBtr& req);
     };
     
