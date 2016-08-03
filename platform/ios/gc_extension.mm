@@ -5,7 +5,7 @@
 #import <Foundation/Foundation.h>
 #import <GameKit/GameKit.h>
 
-@interface gc_manager : NSObject {
+@interface gc_manager : NSObject <GKGameCenterControllerDelegate> {
 @public
     Sandbox::Application* m_application;
 }
@@ -90,6 +90,44 @@
         .EndObject()
     .End();
 }
+
+-(void) submitHighScore: (int64_t) scoreValue leaderboardId: (const char*) leaderboardId {
+    NSLog(@"[GC] submitHighScore");
+    NSString* leaderboardIdentifier = [NSString stringWithUTF8String:leaderboardId];
+    GKScore* score = [[GKScore alloc] initWithLeaderboardIdentifier:leaderboardIdentifier];
+    score.value = scoreValue;
+    
+    [GKScore reportScores:@[score] withCompletionHandler:^(NSError *error){
+        if (error != nil) {
+            NSLog(@"[GC] submitHighScore %@", [error localizedDescription]);
+            [score release];
+        }
+    }];
+}
+
+// need to dismiss score screen
+-(void)gameCenterViewControllerDidFinish:(GKGameCenterViewController *)gameCenterViewController
+{
+    [gameCenterViewController dismissViewControllerAnimated:YES completion:nil];
+    [gameCenterViewController release];
+}
+
+-(sb::string) showScoresUI {
+    UIViewController* main_controller = 0;
+    GHL::System* system = m_application->GetSystem();
+    if (system->GetDeviceData(GHL::DEVICE_DATA_VIEW_CONTROLLER, &main_controller) && main_controller) {
+        GKGameCenterViewController* gcViewController = [[GKGameCenterViewController alloc] init];
+        
+        gcViewController.gameCenterDelegate = self;
+        
+        gcViewController.viewState = GKGameCenterViewControllerStateLeaderboards;
+        
+        [main_controller presentViewController:gcViewController animated:YES completion:nil];
+
+        return "success";
+    }
+    return "error";
+}
 @end
 
 
@@ -114,6 +152,18 @@ public:
                          sb::string& res){
         if (!m_mgr)
             return false;
+        if (::strcmp("GCSendScores",method)==0) {
+            if (![m_mgr isAuthenticated]) {
+                res = "";
+                return true;
+            }
+            sb::map<sb::string,sb::string> data;
+            if (Sandbox::json_parse_object(args,data)) {
+                [m_mgr submitHighScore:atoll(data["val"].c_str()) leaderboardId:data["id"].c_str()];
+                res = "success";
+            }
+            return true;
+        }
         if (::strcmp(method,"GCLogin")==0) {
             if ([m_mgr isAuthenticated]) {
                 res = "success";
@@ -129,6 +179,14 @@ public:
                 return true;
             }
             res = [m_mgr dumpPlayer];
+            return true;
+        }
+        if (::strcmp("GCShowScores",method)==0) {
+            if (![m_mgr isAuthenticated]) {
+                res = "";
+                return true;
+            }
+            res = [m_mgr showScoresUI];
             return true;
         }
         return false;
