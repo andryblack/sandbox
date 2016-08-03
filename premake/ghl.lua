@@ -43,6 +43,7 @@ project 'GHL'
 			ghl_src .. '*.h',
 			ghl_src .. 'image/*',
 			ghl_src .. 'vfs/memory_stream.*',
+			ghl_src .. 'vfs/ghl_vfs_impl.*',
 			ghl_src .. 'vfs/ghl_vfs_factory.*',
 			ghl_src .. 'sound/ghl_sound_decoder.h',
 			ghl_src .. 'sound/ghl_sound_impl.h',
