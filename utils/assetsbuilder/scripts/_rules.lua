@@ -23,8 +23,8 @@ local img = require '_images'
 local convert_spine = require '_convert_spine'
 local luapp = require '_luapp'
 
-function _M.assets_rules.use_variant( v , scale )
-	img.use_variants[v]=scale
+function _M.assets_rules.use_variant( v , scale , override_base )
+	img.use_variants[v]={scale=scale,override_base=override_base}
 end
 
 for k,v in pairs(img.assets_rules) do

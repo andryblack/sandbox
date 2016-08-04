@@ -520,6 +520,7 @@ namespace Sandbox {
         m_draw_height = float(m_height) / (graphics_scal * resources_scale);
         ctx->SetValue("application.size.width", m_draw_width);
         ctx->SetValue("application.size.height", m_draw_height);
+        ctx->SetValue("application.size.scale", graphics_scal * resources_scale);
     }
     
     Network* Application::GetNetwork() {
