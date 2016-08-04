@@ -161,7 +161,7 @@ SB_META_METHOD(SetAlpha)
 SB_META_END_KLASS_BIND()
 
 TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(GHL_CreateImage(w, h, GHL::IMAGE_FORMAT_RGBA)) {
-    
+    m_data->Fill(0x00000000);
 }
 
 TextureData::TextureData( GHL::Image* img ) : Texture(img->GetWidth(),img->GetHeight()) , m_data(img) {

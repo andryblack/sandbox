@@ -31,8 +31,10 @@ local function load_images( dir  )
 					v.type = 'png'
 				end
 				pm[filename] = texobj 
+				print('premultiply image',filename)
 				rules.premultiply_images = pm
 				v.premultiplied = true
+				v._need_premultiply = true
 			end
 			assert(not rules.dest_files[filename],'conflict rules for file ' .. filename)
 			rules.dest_files[filename]=filename
@@ -163,7 +165,8 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	for _,v in ipairs(i) do
 		local path = path.join(v._path,v._name .. '.' .. v.type)
 		a:add_image( {width=v.texture_info.width+2, height=v.texture_info.height+2, src = v, 
-			premultiply = rules.premultiply_images[path]} )
+			premultiply = v._need_premultiply} )
+		print('put to atlas:',path,v._need_premultiply and true or false)
 		rules.dest_files[path] = nil
 		rules.premultiply_images[path] = nil
 		v._atlas = a
@@ -173,32 +176,82 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	for _,v in ipairs(a.images) do
 		v.src._placed_to = {v.place_to[1] + 1, v.place_to[2] + 1 }
 	end
-	a.path = path.join(from,name .. '.png' )
-	rules.dest_files[a.path]=true
+	a.path = path.join(from,name)
+	local override_base = false
+
 	
+	if _M.use_variants then
+		
+		for vk,vv in pairs(_M.use_variants) do
+			if vv.override_base then
+				override_base = true
+			end
+			for _,v in ipairs(i) do
+				local opath = path.join(v._path,v._name .. '.' .. v.type)
+				local vname = path.join(v._path,v._name .. vk .. '.' .. v.type)
+				local vtex = application:check_texture(vname)
+				if vtex then
+					if vtex.width ~= ( v.texture_info.width * vv.scale) then
+						error('texture width must be some ' .. atlas_name .. ' ' .. v._path .. '/' .. v._name)
+					end
+					if vtex.height ~= ( v.texture_info.height * vv.scale) then
+						error('texture height must be some ' .. atlas_name .. ' ' .. v._path .. '/' .. v._name)
+					end
+					rules.dest_files[vname] = nil
+					rules.premultiply_images[vname] = nil
+				else
+					error('for build atlas need all resolutions ' .. atlas_name .. ' ' .. v._path .. '/' .. v._name )
+				end
+			end
+			
+		end
+	end
+
 	local atex = { type='png', premultiplied = true, smooth=true, _path = path.join(from) , _name = name }
 	g._textures[name] = atex
 	function a:apply(  )
 		print('build atlas ' .. self.name .. ' with ' .. tostring(#self.images) .. ' textures')
-
-		local img = TextureData( w, h )
-		for _,v in ipairs(self.images) do
-			--print(v.src._path,v.src._name)
-			local tpath = path.join(v.src._path,v.src._name .. '.' .. v.src.type)
-			local i = assert(application:load_texture(tpath),'failed load texture ' .. tpath)
-			if v.src.aname  then
-				local apath = path.join(v.src._path,v.src.aname )
-				local ai = assert(application:load_texture(apath),'failed load alpha texture ' .. apath)
-				i:SetAlpha(ai)
+		if not override_base then
+			local img = TextureData( w, h )
+			for _,v in ipairs(self.images) do
+				--print(v.src._path,v.src._name)
+				local tpath = path.join(v.src._path,v.src._name .. '.' .. v.src.type)
+				local i = assert(application:load_texture(tpath),'failed load texture ' .. tpath)
+				if v.src.aname  then
+					local apath = path.join(v.src._path,v.src.aname )
+					local ai = assert(application:load_texture(apath),'failed load alpha texture ' .. apath)
+					i:SetAlpha(ai)
+				end
+				if v.premultiply then
+					i:PremultiplyAlpha()
+				end
+				img:Place(v.place_to[1]+1,v.place_to[2]+1,i)
 			end
-			if v.premultiply then
-				i:PremultiplyAlpha()
-			end
-			img:Place(v.place_to[1]+1,v.place_to[2]+1,i)
+			application:store_texture(self.path .. '.png' ,img)
 		end
-		application:store_texture(a.path,img)
+		if _M.use_variants then
+			for vk,vv in pairs(_M.use_variants) do
+				local img = TextureData( w * vv.scale , h * vv.scale )
+				for _,v in ipairs(self.images) do
+					--print(v.src._path,v.src._name)
+					local tpath = path.join(v.src._path,v.src._name .. vk .. '.' .. v.src.type)
+					local i = assert(application:load_texture(tpath),'failed load texture ' .. tpath)
+					if v.src.aname  then
+						local apath = path.join(v.src._path,v.src.aname .. vk )
+						local ai = assert(application:load_texture(apath),'failed load alpha texture ' .. apath)
+						i:SetAlpha(ai)
+					end
+					if v.premultiply then
+						i:PremultiplyAlpha()
+					end
+					img:Place((v.place_to[1]+1)*vv.scale,(v.place_to[2]+1)*vv.scale,i)
+				end
+				application:store_texture(self.path .. vk .. '.png',img)
+			end
+		end
 	end
 	local atlases = rules.atlases or {}
+	rules.dest_files[a.path]=true
 	table.insert(atlases,a)
 	rules.atlases = atlases
 end
