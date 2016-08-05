@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 	}
 	sb::string src_dir;
 	sb::string dst_dir;
-	sb::string scripts_dir;
+    sb::vector<sb::string> scripts_dir;
 	sb::string platform;
 	bool update_only = false;
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 			return error(std::string("invalid argument '" + arg + "'"));
 		const char* opt = arg.c_str();
 		if (strncmp(opt+2,"scripts",7)==0) {
-			scripts_dir = get_argument(arg);
+			scripts_dir.push_back( get_argument(arg) );
 		} else if (strncmp(opt+2,"src",3)==0) {
 			src_dir = get_argument(arg);
 		} else if (strncmp(opt+2,"dst",3)==0) {
@@ -102,9 +102,12 @@ int main(int argc, char** argv) {
 	if (scripts_dir.empty()) {
 		return error("scripts option required");
 	}
-	if (!is_dir(scripts_dir)) {
-		return error(std::string("invalid scripts path: ") + scripts_dir);
-	}
+    for (sb::vector<sb::string>::const_iterator it = scripts_dir.begin();it!=scripts_dir.end();++it) {
+        if (!is_dir(*it)) {
+            return error(std::string("invalid scripts path: ") + *it);
+        }
+    }
+	
 	Application* app = create_application();
 	app->set_update_only(update_only);
 	app->set_paths(scripts_dir,src_dir,dst_dir);

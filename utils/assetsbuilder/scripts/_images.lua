@@ -4,6 +4,18 @@ local _M = {}
 _M.assets_rules = {}
 _M.use_variants = {}
 
+function _M.init_rules(rules)
+	rules.images = {}
+	rules.atlases = {}
+	rules.premultiply_images = {}
+end
+
+function _M.assets_rules.set_alpha_file_format( func )
+
+	_M.alpha_file_format = func
+
+end
+
 local atlas = require '_atlas'
 
 local function load_images( dir  )
@@ -21,9 +33,9 @@ local function load_images( dir  )
 
 			local premultiplied = v.premultiplied
 			if premultiplied then
-				rules.copy_files[filename]=true
+				get_rules().copy_files[filename]=true
 			else
-				local pm = rules.premultiply_images or {}
+				local pm = assert(get_rules().premultiply_images)
 				local texobj = { dst = filename }
 				if v.aname then
 					texobj.aname = path.join(dir,v.aname)
@@ -32,12 +44,12 @@ local function load_images( dir  )
 				end
 				pm[filename] = texobj 
 				print('premultiply image',filename)
-				rules.premultiply_images = pm
+				
 				v.premultiplied = true
 				v._need_premultiply = true
 			end
-			assert(not rules.dest_files[filename],'conflict rules for file ' .. filename)
-			rules.dest_files[filename]=filename
+			assert(not get_rules().dest_files[filename],'conflict rules for file ' .. filename)
+			get_rules().dest_files[filename]=filename
 			v._name = k
 			v._path = dir
 			ctx.textures[k] = v
@@ -52,19 +64,19 @@ local function load_images( dir  )
 					local vtex = application:check_texture(vname)
 					if vtex then
 						if premultiplied then
-							rules.copy_files[vname]=true
+							get_rules().copy_files[vname]=true
 							print('copy variant',vname)
 						else
-							rules.premultiply_images[vname] = vname
+							get_rules().premultiply_images[vname] = vname
 							print('premultiply variant',vname)
 						end
-						assert(not rules.dest_files[vname],'conflict rules for file ',vname)
-						rules.dest_files[vname]=vname
+						assert(not get_rules().dest_files[vname],'conflict rules for file ',vname)
+						get_rules().dest_files[vname]=vname
 
 						if override_base then
-							rules.copy_files[filename] = nil
-							rules.premultiply_images[filename] = nil
-							rules.dest_files[filename]=nil
+							get_rules().copy_files[filename] = nil
+							get_rules().premultiply_images[filename] = nil
+							get_rules().dest_files[filename]=nil
 						end
 					else
 						print('not found varian for',filename)
@@ -139,15 +151,14 @@ local function find_textures( from, mask )
 			filter_group(v.data)
 		end
 	end
-	filter_group(assert(find_images_folder(rules.images,from),"not found images '" .. from .."'"))
+	filter_group(assert(find_images_folder(get_rules().images,from),"not found images '" .. from .."'"))
 	return res
 end
 
 function _M.assets_rules.build_images( p )
-	local i = rules.images or {}
+	local i = assert(get_rules().images)
 	i[p]=load_images(p)
-	rules.images = i
-	rules.dest_files[path.join(p,'images.lua')]=true
+	get_rules().dest_files[path.join(p,'images.lua')]=true
 end
 
 
@@ -156,7 +167,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	local i = find_textures( from, mask )
 	local a = atlas.Atlas.new(w,h)
 	
-	local g,root,atlas_prefix = assert(find_images_folder(rules.images,from))
+	local g,root,atlas_prefix = assert(find_images_folder(get_rules().images,from))
 	local atlas_name = name
 	if atlas_prefix ~='' then
 		atlas_name = string.gsub(atlas_prefix,'/','_') .. '_' .. atlas_name
@@ -167,8 +178,8 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 		a:add_image( {width=v.texture_info.width+2, height=v.texture_info.height+2, src = v, 
 			premultiply = v._need_premultiply} )
 		print('put to atlas:',path,v._need_premultiply and true or false)
-		rules.dest_files[path] = nil
-		rules.premultiply_images[path] = nil
+		get_rules().dest_files[path] = nil
+		get_rules().premultiply_images[path] = nil
 		v._atlas = a
 	end
 	a:build()
@@ -197,8 +208,8 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 					if vtex.height ~= ( v.texture_info.height * vv.scale) then
 						error('texture height must be some ' .. atlas_name .. ' ' .. v._path .. '/' .. v._name)
 					end
-					rules.dest_files[vname] = nil
-					rules.premultiply_images[vname] = nil
+					get_rules().dest_files[vname] = nil
+					get_rules().premultiply_images[vname] = nil
 				else
 					error('for build atlas need all resolutions ' .. atlas_name .. ' ' .. v._path .. '/' .. v._name )
 				end
@@ -250,10 +261,9 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 			end
 		end
 	end
-	local atlases = rules.atlases or {}
-	rules.dest_files[a.path]=true
+	local atlases = assert(get_rules().atlases)
+	get_rules().dest_files[a.path]=true
 	table.insert(atlases,a)
-	rules.atlases = atlases
 end
 
 local function apply_images( dir, data )
@@ -428,8 +438,8 @@ local function do_premultiply_file( src, dstconf  )
 	end
 	local t = assert(application:load_texture(src))
 	local aimage = conf.aname
-	if not aimage and type(dstconf) == 'string' and rules.alpha_file_format then
-		aimage = rules.alpha_file_format(src)
+	if not aimage and type(dstconf) == 'string' and _M.alpha_file_format then
+		aimage = _M.alpha_file_format(src)
 	end
 	if aimage then
 		if aimage then
@@ -452,7 +462,7 @@ function _M.filter_files( filelist )
 end
 
 function _M.apply( rules )
-
+	print('images apply:',rules)
 	local images = rules.images or {}
 	for k,v in pairs(images) do
 		apply_images(k,v)

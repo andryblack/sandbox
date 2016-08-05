@@ -115,6 +115,8 @@ static const luaL_Reg string_functions[] = {
     { NULL, NULL }
 };
 
+int luaopen_xml(lua_State* L);
+
 
 bool (*sb_terminate_handler)() = 0;
 
@@ -213,6 +215,7 @@ void Application::Bind(lua_State* L) {
     static const luaL_Reg loadedlibs[] = {
         {LUA_OSLIBNAME, luaopen_os},
         {LUA_IOLIBNAME, luaopen_io},
+        {"XML",luaopen_xml},
         {NULL, NULL}
     };
     
@@ -249,7 +252,7 @@ void Application::set_update_only(bool u){
     m_update_only = u;
 }
 
-void Application::set_paths(const sb::string& scripts, const sb::string& src, const sb::string& dst) {
+void Application::set_paths(const sb::vector<sb::string>& scripts, const sb::string& src, const sb::string& dst) {
 	m_dst_dir = dst;
     m_scripts_dir = scripts;
     m_src_dir = src;
@@ -270,7 +273,13 @@ GHL::DataStream* Application::OpenFile(const char* fn) {
     }
     sb_assert(m_vfs);
     if (fn[0]=='_') {
-        return m_vfs->OpenFile(append_path(m_scripts_dir, fn).c_str());
+        for (sb::vector<sb::string>::const_iterator it = m_scripts_dir.begin();it!=m_scripts_dir.end();++it) {
+            GHL::DataStream* r = m_vfs->OpenFile(append_path(*it, fn).c_str());
+            if (r) {
+                return r;
+            }
+        }
+        return 0;
     }
     if (fn[0]=='/') {
         return m_vfs->OpenFile(fn);
@@ -373,7 +382,7 @@ int Application::run() {
     m_lua->GetGlobalContext()->SetValue("app_arguments", m_arguments);
     
     if (!m_lua->DoFile("_init.lua")) {
-        Sandbox::LogError() << "failed exec init script, check path " << m_scripts_dir;
+        Sandbox::LogError() << "failed exec init script, check script paths";
         return 1;
     }
     

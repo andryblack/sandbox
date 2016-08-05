@@ -3,6 +3,20 @@
 
 local _M = {}
 
+
+local img = require '_images'
+local convert_spine = require '_convert_spine'
+local luapp = require '_luapp'
+
+function _M.init_rules(rules) 
+	rules.copy_files = {}
+	rules.compile_files = {}
+	rules.dest_files = {}
+	rules.call_functions = {}
+	img.init_rules(rules)
+	convert_spine.init_rules(rules)
+end
+
 _M.assets_rules = {}
 
 
@@ -14,14 +28,11 @@ function _M.assets_rules.require_version( v )
 	end
 end
 
-local call_functions = {}
+
 function _M.assets_rules.call( v )
-	table.insert(call_functions,v)
+	table.insert(get_rules().call_functions,v)
 end
 
-local img = require '_images'
-local convert_spine = require '_convert_spine'
-local luapp = require '_luapp'
 
 function _M.assets_rules.use_variant( v , scale , override_base )
 	img.use_variants[v]={scale=scale,override_base=override_base}
@@ -47,15 +58,10 @@ local function process_files_pattern( pattern , action )
 	local files = os.matchfiles(path.join(src_path,pattern))
 	for k,v in ipairs(files) do
 		local f = path.getrelative(src_path,v) or v
-		print(action,k,f,rules)
-		local r = rules[assert(action)] 
-		if not r then
-			r = {}
-			rules[action] = r
-		end
-		r[f]=f
-		assert(not rules.dest_files[f],'conflict rules for file ' .. f)
-		rules.dest_files[f]=f
+		--print(action,k,f)
+		assert(get_rules()[assert(action)])[f]=f
+		assert(not get_rules().dest_files[f],'conflict rules for file ' .. f)
+		get_rules().dest_files[f]=f
 	end
 end
 
@@ -68,15 +74,9 @@ local function process_files_pattern_to( src, pattern, dst , action)
 	for k,v in ipairs(files) do
 		local f = path.getrelative(src_path,v)
 		local fn = path.getrelative(src,f)
-		local r = rules[assert(action)] 
-		if not r then
-			r = {}
-			rules[assert(action)] = r
-		end
-		--print('process_files_pattern_to',f,fn,action)
-		r[f]=path.join(dst,fn)
-		assert(not rules.dest_files[path.join(dst,fn)],'conflict rules for file ' .. path.join(dst,fn))
-		rules.dest_files[path.join(dst,fn)]=f
+		assert(get_rules()[assert(action)])[f]=path.join(dst,fn)
+		assert(not get_rules().dest_files[path.join(dst,fn)],'conflict rules for file ' .. path.join(dst,fn))
+		get_rules().dest_files[path.join(dst,fn)]=f
 	end
 	
 end
@@ -86,17 +86,17 @@ function _M.assets_rules.copy_file( file )
 	local src = file[1]
 	local dst = file[2] or src
 
-	assert(not rules.dest_files[dst],'conflict rules for file ' .. dst)
-	rules.copy_files[src]=dst
-	rules.dest_files[dst]=src
+	assert(not get_rules().dest_files[dst],'conflict rules for file ' .. dst)
+	get_rules().copy_files[src]=dst
+	get_rules().dest_files[dst]=src
 end
 
 function _M.assets_rules.compile_file( file )
 	local src = file[1]
 	local dst = file[2] or src
-	assert(not rules.dest_files[dst],'conflict rules for file ' .. dst)
-	rules.compile_files[src]=dst
-	rules.dest_files[dst]=src
+	assert(not get_rules().dest_files[dst],'conflict rules for file ' .. dst)
+	get_rules().compile_files[src]=dst
+	get_rules().dest_files[dst]=src
 end
 
 
@@ -233,11 +233,7 @@ local function compile_files( files )
 	end
 end
 
-function _M.assets_rules.set_alpha_file_format( func )
 
-	rules.alpha_file_format = func
-
-end
 
 function _M.apply_rules( rules )
 	local dst_tree = {}
@@ -252,7 +248,7 @@ function _M.apply_rules( rules )
 	copy_files(rules.copy_files or {})
 	compile_files(rules.compile_files or {})
 
-	for _,v in ipairs(call_functions) do
+	for _,v in ipairs(rules.call_functions) do
 		v(_G)
 	end
 

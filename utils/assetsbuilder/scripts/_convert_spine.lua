@@ -5,15 +5,18 @@ _M.assets_rules = {}
 
 local img = require '_images'
 
+function _M.init_rules(rules)
+	rules.convert_spine = {}
+end
+
 function _M.assets_rules.convert_spine( n )
-	local i = rules.convert_spine or {}
+	local i = assert(get_rules().convert_spine)
 	i[n]=n
-	rules.convert_spine = i
-	rules.dest_files[n .. 'xml']=true
+	get_rules().dest_files[n .. 'xml']=true
 end
 
 function _M.assets_rules.convert_spine_to( n , t , options)
-	local i = rules.convert_spine or {}
+	local i = assert(get_rules().convert_spine)
 	i[n]=t
 	if options then
 		local o = {}
@@ -23,8 +26,7 @@ function _M.assets_rules.convert_spine_to( n , t , options)
 		o.out = t
 		i[n]=o
 	end
-	rules.convert_spine = i
-	rules.dest_files[n .. 'xml']=true
+	get_rules().dest_files[n .. 'xml']=true
 end
 
 local function apply_convert_spine( k,v )

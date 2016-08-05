@@ -51,7 +51,7 @@ public:
 	virtual ~Application();
 
     void set_update_only(bool u);
-	void set_paths(const sb::string& scripts, const sb::string& src, const sb::string& dst);
+    void set_paths(const sb::vector<sb::string>& scripts, const sb::string& src, const sb::string& dst);
 	void set_platform(const sb::string& platform);
     void set_arguments(const sb::vector<sb::string>& arguments);
 
@@ -80,7 +80,7 @@ private:
 	Sandbox::LuaVM*	m_lua;
     GHL::VFS*   m_vfs;
     GHL::ImageDecoder* m_image_decoder;
-    sb::string  m_scripts_dir;
+    sb::vector<sb::string>  m_scripts_dir;
     sb::string  m_dst_dir;
     sb::string  m_src_dir;
     sb::string  m_platform;
