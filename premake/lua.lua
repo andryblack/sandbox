@@ -16,6 +16,14 @@ project 'lua'
    		configure_lib_targetdir()
 		targetname ('lua-' .. platform_dir)
 
+		if build_cli_tools then
+			if os.is('macosx') then
+				defines{ 'LUA_USE_MACOSX' }
+			elseif os.is('linux') then
+				defines{ 'LUA_USE_LINUX' }
+			end
+		end
+
 		local lua_files = {
 			'lapi.c', 'lauxlib.c', 'lbaselib.c', 'lbitlib.c', 'lcode.c', 'lcorolib.c', 'lctype.c',
 			'ldblib.c', 'ldebug.c', 'ldo.c', 'ldump.c', 'lfunc.c', 'lgc.c', 'llex.c', 'lmathlib.c',

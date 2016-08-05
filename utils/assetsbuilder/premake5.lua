@@ -12,6 +12,7 @@
 	sandbox_dir = path.join(_SCRIPT_DIR,'../..')
 
 
+	build_cli_tools = true
 
 --
 -- Register supporting actions and options.
