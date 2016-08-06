@@ -116,7 +116,9 @@ static const luaL_Reg string_functions[] = {
 };
 
 int luaopen_xml(lua_State* L);
-
+namespace Sandbox {
+    void register_utils( lua_State* lua );
+}
 
 bool (*sb_terminate_handler)() = 0;
 
@@ -236,6 +238,7 @@ void Application::Bind(lua_State* L) {
     Sandbox::luabind::ExternClass<SkeletonConvert>(L);
     Sandbox::luabind::ExternClass<SpineConvert>(L);
     Sandbox::register_json(L);
+    Sandbox::register_utils(L);
 }
 
 Application::~Application() {

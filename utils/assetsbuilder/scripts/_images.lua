@@ -210,6 +210,8 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 					end
 					get_rules().dest_files[vname] = nil
 					get_rules().premultiply_images[vname] = nil
+
+					get_rules().dest_files[a.path .. vk .. '.png']=true
 				else
 					error('for build atlas need all resolutions ' .. atlas_name .. ' ' .. v._path .. '/' .. v._name )
 				end
@@ -262,7 +264,9 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 		end
 	end
 	local atlases = assert(get_rules().atlases)
-	get_rules().dest_files[a.path]=true
+	if not override_base then
+		get_rules().dest_files[a.path .. '.png']=true
+	end
 	table.insert(atlases,a)
 end
 

@@ -98,7 +98,7 @@ namespace Sandbox {
 
         
         template <class T> 
-        inline T* get_object_ptr( data_holder* holder , lua_State* L,int idx) {
+        inline T* get_object_ptr( data_holder* holder) {
             T* res = 0;
             const meta::type_info* info = holder->info;
             if ( holder->type == data_holder::raw_data ) {
@@ -139,7 +139,7 @@ namespace Sandbox {
                     lua_access_error( L, idx , holder->info->name );
                     return *reinterpret_cast<T*>(0);
                 }
-                T* res = get_object_ptr<T>(holder,L,idx);
+                T* res = get_object_ptr<T>(holder);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 }
@@ -180,7 +180,7 @@ namespace Sandbox {
         template <class T>
         struct stack<const T> {
             static const T& get_impl( lua_State* L, data_holder* holder,int idx ) {
-                T* res = get_object_ptr<T>(holder,L,idx);
+                T* res = get_object_ptr<T>(holder);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 }
@@ -219,7 +219,7 @@ namespace Sandbox {
                     lua_access_error( L, idx , holder->info->name );
                     return reinterpret_cast<T*>(0);
                 } 
-                T* res = get_object_ptr<T>(holder,L,idx);
+                T* res = get_object_ptr<T>(holder);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 } 
@@ -261,7 +261,7 @@ namespace Sandbox {
                 }
             }
             static const T* get_impl( lua_State* L, data_holder* holder,int idx ) {
-                T* res = get_object_ptr<T>(holder,L,idx);
+                T* res = get_object_ptr<T>(holder);
                 if (!res) {
                     lua_argerror( L, idx, meta::type<T>::info()->name, holder->info->name );
                 } 

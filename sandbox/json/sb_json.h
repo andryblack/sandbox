@@ -9,6 +9,7 @@
 
 namespace GHL {
     struct Data;
+    struct DataStream;
 }
 
 namespace Sandbox {
@@ -22,11 +23,14 @@ namespace Sandbox {
     
     bool json_parse_object(const char* data,sb::map<sb::string,sb::string>& res);
 
-    class JsonBuilder {
+    class JsonBuilder  {
     private:
         struct Impl;
         Impl* m_impl;
+        JsonBuilder(const JsonBuilder&);
+        JsonBuilder& operator = (const JsonBuilder&);
     public:
+        void reset();
         JsonBuilder();
         ~JsonBuilder();
         
@@ -37,6 +41,8 @@ namespace Sandbox {
         JsonBuilder& EndArray();
         
         JsonBuilder& Key(const char* name);
+        JsonBuilder& PutNull();
+        JsonBuilder& PutBool(bool v);
         JsonBuilder& PutString(const char* value);
         JsonBuilder& PutInteger(int value);
         JsonBuilder& PutNumber(double value);
@@ -44,6 +50,40 @@ namespace Sandbox {
         
         const sb::string& End();
     };
+    
+    class JsonTraverser {
+    private:
+        sb::vector<char> m_stack;
+        
+        void BeginObject();
+        void EndObject();
+        void BeginArray();
+        void EndArray();
+        
+        struct Ctx;
+    protected:
+        size_t GetDepth() const;
+        bool IsObject() const;
+        bool IsArray() const;
+    public:
+        JsonTraverser();
+        
+        virtual void OnBeginObject() {}
+        virtual void OnEndObject() {}
+        virtual void OnBeginArray() {}
+        virtual void OnEndArray() {}
+        virtual void OnKey(const sb::string& v) {}
+        virtual void OnNull() {}
+        virtual void OnBool(bool v) {}
+        virtual void OnString(const sb::string& v) {}
+        virtual void OnInteger(int v) {}
+        virtual void OnNumber(double v) {}
+        
+        
+        bool TraverseStream( GHL::DataStream* ds );
+    };
+    
+    
 }
 
 #endif

@@ -144,6 +144,7 @@
             'sb_bitmask.*',
 			'sb_memory_mgr.*',
 			'sb_file_provider.*',
+			'sb_luabind_utils.*',
 			'json/sb_json.*',
 			'meta/**',
 			'luabind/**',

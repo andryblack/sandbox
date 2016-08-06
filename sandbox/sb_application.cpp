@@ -281,6 +281,8 @@ namespace Sandbox {
             m_lua->SetBasePath(base_path.c_str());
             
             InitLua();
+            
+            InitResources();
         }
     }
     
@@ -411,7 +413,7 @@ namespace Sandbox {
         ctx->SetValue("application.resources", m_resources);
         ctx->SetValue("application.sound", m_sound_mgr);
 
-        InitResources();
+        
 #ifdef SB_USE_MYGUI
         if (!m_gui_data_manager) {
             m_gui_data_manager = new mygui::DataManager(m_resources);

@@ -10,6 +10,7 @@ extern "C" {
 #include <lua/lualib.h>
     
 }
+#include "luabind/sb_luabind.h"
 #include "luabind/sb_luabind_stack.h"
 #include <ghl_data.h>
 #include "sb_log.h"
@@ -420,34 +421,6 @@ namespace Sandbox {
         return results;
     }
     
-    void register_json(lua_State* L) {
-        LUA_CHECK_STACK(0);
-        lua_newtable(L);
-        lua_pushcfunction(L, &json_parse);
-        lua_setfield(L, -2, "decode");
-        lua_pushcfunction(L, &json_load);
-        lua_setfield(L, -2, "load");
-        lua_pushcfunction(L, &json_encode);
-        lua_setfield(L, -2, "encode");
-        lua_pushvalue(L, -1);
-        lua_setglobal(L, "json");
-        
-        lua_getglobal(L, "package"); // json, package
-        sb_assert(lua_istable(L, -1));
-        lua_getfield(L, -1, "loaded"); // json, package, loaded
-        sb_assert(lua_istable(L, -1));
-        lua_pushvalue(L, -3); // json, package, loaded, json
-        lua_setfield(L, -2, "cjson.safe");
-        
-        lua_newtable(L);
-        lua_pushcfunction(L, &cjson_decode);
-        lua_setfield(L, -2, "decode");
-        lua_pushcfunction(L, &cjson_encode);
-        lua_setfield(L, -2, "encode");
-        lua_setfield(L, -2, "cjson");
-        
-        lua_pop(L, 3);
-    }
     
     sb::string convert_to_json(const LuaContextPtr& tctx) {
         encode_context ctx;
@@ -743,48 +716,273 @@ namespace Sandbox {
         
     }
     JsonBuilder::~JsonBuilder() {
+        reset();
+    }
+    
+    void JsonBuilder::reset() {
         delete m_impl;
+        m_impl = 0;
     }
     
     JsonBuilder& JsonBuilder::BeginObject() {
-        yajl_gen_map_open(m_impl->g);
+        if (m_impl) yajl_gen_map_open(m_impl->g);
         return *this;
     }
     JsonBuilder& JsonBuilder::EndObject() {
-        yajl_gen_map_close(m_impl->g);
+        if (m_impl) yajl_gen_map_close(m_impl->g);
         return *this;
     }
     
     JsonBuilder& JsonBuilder::BeginArray() {
-        yajl_gen_array_open(m_impl->g);
+        if (m_impl) yajl_gen_array_open(m_impl->g);
         return *this;
     }
     JsonBuilder& JsonBuilder::EndArray() {
-        yajl_gen_array_close(m_impl->g);
+        if (m_impl) yajl_gen_array_close(m_impl->g);
         return *this;
     }
     
     JsonBuilder& JsonBuilder::Key(const char* name) {
-        yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(name), ::strlen(name));
+        if (m_impl) yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(name), ::strlen(name));
+        return *this;
+    }
+    JsonBuilder& JsonBuilder::PutNull() {
+        if (m_impl) yajl_gen_null(m_impl->g);
+        return *this;
+    }
+    JsonBuilder& JsonBuilder::PutBool(bool v) {
+        if (m_impl) yajl_gen_bool(m_impl->g, v?1:0);
         return *this;
     }
     JsonBuilder& JsonBuilder::PutString(const char* value) {
-        yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(value), ::strlen(value));
+        if (m_impl) yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(value), ::strlen(value));
         return *this;
     }
     JsonBuilder& JsonBuilder::PutInteger(int value) {
-        yajl_gen_integer(m_impl->g, value);
+        if (m_impl) yajl_gen_integer(m_impl->g, value);
         return *this;
     }
     JsonBuilder& JsonBuilder::PutNumber(double value) {
-        yajl_gen_double(m_impl->g, value);
+        if (m_impl) yajl_gen_double(m_impl->g, value);
         return *this;
     }
     
+    static const sb::string empty_string;
     
     const sb::string& JsonBuilder::End() {
-        return m_impl->data;
+        return m_impl ? m_impl->data : empty_string;
     }
 
+    namespace meta {
+        static const type_info ti = {
+            "json::gen",
+            sizeof(JsonBuilder),
+            {
+                type<void>::private_info,
+                &cast_helper<JsonBuilder,void>::raw,
+                &cast_helper<JsonBuilder,void>::shared
+            }
+        };
+        template <> const type_info* type<JsonBuilder>::private_info = &ti;
+        
+        static int JsonBuilder_new(lua_State* L) {
+            luabind::stack<JsonBuilder*>::push(L, new JsonBuilder());
+            return 1;
+        }
+        static void JsonBuilder_map_open(JsonBuilder* j) {
+            j->BeginObject();
+        }
+        static void JsonBuilder_map_close(JsonBuilder* j) {
+            j->EndObject();
+        }
+        static void JsonBuilder_array_open(JsonBuilder* j) {
+            j->BeginArray();
+        }
+        static void JsonBuilder_array_close(JsonBuilder* j) {
+            j->EndArray();
+        }
+        static void JsonBuilder_null(JsonBuilder* j) {
+            j->PutNull();
+        }
+        static void JsonBuilder_bool(JsonBuilder* j,bool v) {
+            j->PutBool(v);
+        }
+        static void JsonBuilder_string(JsonBuilder* j,const char* v) {
+            j->PutString(v);
+        }
+        static void JsonBuilder_double(JsonBuilder* j,double v) {
+            j->PutNumber(v);
+        }
+        static void JsonBuilder_integer(JsonBuilder* j,int v) {
+            j->PutInteger(v);
+        }
+        static void JsonBuilder_free(JsonBuilder* j) {
+            delete j;
+        }
+        
+        template <> template <class U> void bind_type<JsonBuilder>::bind(U& bind) {
+            bind(static_method("new", &JsonBuilder_new));
+            bind(method("free",&JsonBuilder_free));
+            bind(method("map_open",&JsonBuilder_map_open));
+            bind(method("map_close",&JsonBuilder_map_close));
+            bind(method("array_open",&JsonBuilder_array_open));
+            bind(method("array_close",&JsonBuilder_array_close));
+            bind(method("null",&JsonBuilder_null));
+            bind(method("bool",&JsonBuilder_bool));
+            bind(method("string",&JsonBuilder_string));
+            bind(method("double",&JsonBuilder_double));
+            bind(method("integer",&JsonBuilder_integer));
+            bind(method("get_buffer",&JsonBuilder::End));
+        }
+    }
+
+ 
+    void register_json(lua_State* L) {
+        LUA_CHECK_STACK(0);
+        lua_newtable(L);
+        lua_pushcfunction(L, &json_parse);
+        lua_setfield(L, -2, "decode");
+        lua_pushcfunction(L, &json_load);
+        lua_setfield(L, -2, "load");
+        lua_pushcfunction(L, &json_encode);
+        lua_setfield(L, -2, "encode");
+        lua_pushvalue(L, -1);
+        lua_setglobal(L, "json");
+        
+        lua_getglobal(L, "package"); // json, package
+        sb_assert(lua_istable(L, -1));
+        lua_getfield(L, -1, "loaded"); // json, package, loaded
+        sb_assert(lua_istable(L, -1));
+        lua_pushvalue(L, -3); // json, package, loaded, json
+        lua_setfield(L, -2, "cjson.safe");
+        
+        lua_newtable(L);
+        lua_pushcfunction(L, &cjson_decode);
+        lua_setfield(L, -2, "decode");
+        lua_pushcfunction(L, &cjson_encode);
+        lua_setfield(L, -2, "encode");
+        lua_setfield(L, -2, "cjson");
+        
+        lua_pop(L, 3);
+        
+        Sandbox::luabind::ExternClass<JsonBuilder>(L);
+    }
     
+    JsonTraverser::JsonTraverser()  {}
+    
+    size_t JsonTraverser::GetDepth() const {
+        return m_stack.size();
+    }
+    bool JsonTraverser::IsObject() const {
+        return m_stack.empty() ? false : m_stack.back() == 'o';
+    }
+    bool JsonTraverser::IsArray() const {
+        return m_stack.empty() ? false : m_stack.back() == 'a';
+    }
+    
+    void JsonTraverser::BeginObject() {
+        OnBeginObject();
+        m_stack.push_back('o');
+    }
+    void JsonTraverser::EndObject() {
+        if (!m_stack.empty()) {
+            sb_assert(m_stack.back()=='o');
+            m_stack.pop_back();
+            OnEndObject();
+        } else {
+            sb_assert(false);
+        }
+    }
+    void JsonTraverser::BeginArray() {
+        m_stack.push_back('a');
+        OnBeginArray();
+    }
+    void JsonTraverser::EndArray() {
+        if (!m_stack.empty()) {
+            sb_assert(m_stack.back() == 'a');
+            m_stack.pop_back();
+            OnEndArray();
+        } else {
+            sb_assert(false);
+        }
+    }
+    
+    
+    struct JsonTraverser::Ctx {
+        yajl_callbacks cb;
+        JsonTraverser* traverser;
+        static int yajl_parse_null(void * ctx) {
+            static_cast<Ctx*>(ctx)->traverser->OnNull();
+            return 1;
+        }
+        static int yajl_parse_boolean(void * ctx, int boolVal) {
+            static_cast<Ctx*>(ctx)->traverser->OnBool(boolVal);
+            return 1;
+        }
+        static int yajl_parse_integer(void * ctx, long long integerVal) {
+            static_cast<Ctx*>(ctx)->traverser->OnInteger(integerVal);
+            return 1;
+        }
+        static int yajl_parse_double(void * ctx, double doubleVal) {
+            static_cast<Ctx*>(ctx)->traverser->OnNumber(doubleVal);
+            return 1;
+        }
+        static int yajl_parse_string(void * ctx, const unsigned char * stringVal,
+                                     size_t stringLen) {
+            static_cast<Ctx*>(ctx)->traverser->OnString(sb::string(reinterpret_cast<const char*>(stringVal),stringLen));
+            return 1;
+        }
+        static int yajl_parse_start_map(void * ctx) {
+            static_cast<Ctx*>(ctx)->traverser->BeginObject();
+            return 1;
+        }
+        static int yajl_parse_map_key(void * ctx, const unsigned char * key,
+                                      size_t stringLen) {
+            static_cast<Ctx*>(ctx)->traverser->OnKey(sb::string(reinterpret_cast<const char*>(key),stringLen));
+            return 1;
+        }
+        static int yajl_parse_end_map(void * ctx) {
+            static_cast<Ctx*>(ctx)->traverser->EndObject();
+            return 1;
+        }
+        static int yajl_parse_start_array(void * ctx) {
+            static_cast<Ctx*>(ctx)->traverser->BeginArray();
+            return 1;
+        }
+        static int yajl_parse_end_array(void * ctx) {
+            static_cast<Ctx*>(ctx)->traverser->EndArray();
+            return 1;
+        }
+        
+        Ctx() {
+            cb.yajl_null = &yajl_parse_null;
+            cb.yajl_boolean = &yajl_parse_boolean;
+            cb.yajl_integer = &yajl_parse_integer;
+            cb.yajl_double = &yajl_parse_double;
+            cb.yajl_number = 0;
+            cb.yajl_string = &yajl_parse_string;
+            cb.yajl_start_map = &yajl_parse_start_map;
+            cb.yajl_map_key = &yajl_parse_map_key;
+            cb.yajl_end_map = &yajl_parse_end_map;
+            cb.yajl_start_array = &yajl_parse_start_array;
+            cb.yajl_end_array = &yajl_parse_end_array;
+        }
+    };
+    
+    bool JsonTraverser::TraverseStream( GHL::DataStream* ds ) {
+        Ctx ctx;
+        ctx.traverser = this;
+        yajl_handle h = yajl_alloc(&ctx.cb, 0, &ctx);
+        unsigned char buffer[1024];
+        yajl_status s = yajl_status_ok;
+        while (!ds->Eof() && s == yajl_status_ok) {
+            size_t shunk_size = ds->Read(buffer, sizeof(buffer));
+            s = yajl_parse(h,buffer,shunk_size);
+        }
+        if (s == yajl_status_ok)
+            s = yajl_complete_parse(h);
+        yajl_free(h);
+        return s == yajl_status_ok;
+    }
+
 }

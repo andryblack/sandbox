@@ -5,6 +5,8 @@ if not update_only then
 		assert(os.mkdir(dst_path))
 	elseif os.isfile(dst_path) then
 		error('destionation path is file')
+	else
+		assert(os.mkdir(dst_path))
 	end
 else
 	assert(os.mkdir(dst_path))
@@ -103,8 +105,16 @@ data = load_sandbox('assets.lua',sandbox,data)
 
 print('rules ready, apply it')
 
+if extensions.pre_apply_rules then
+	extensions.pre_apply_rules()
+end
+
 for _,rules in ipairs(__all_rules) do
 	print('apply rules',rules._name)
 	r.apply_rules(rules)
 	extensions.apply_rules(rules)
+end
+
+if extensions.post_apply_rules then
+	extensions.post_apply_rules()
 end

@@ -7,6 +7,9 @@ extern "C" {
 #include "sb_hex.h"
 #include <ghl_vfs.h>
 
+#include "sb_file_provider.h"
+#include "luabind/sb_luabind_stack.h"
+
 namespace Sandbox {
     
     sb::string MD5Sum(const char* src) {
@@ -38,6 +41,18 @@ namespace Sandbox {
         unsigned char sum[16];
         MD5_Final(sum, &ctx);
         return DataToHex(sum,16);
+    }
+    
+    int MD5SumFile( lua_State* L ) {
+        const char* fn = luaL_checkstring(L, 1);
+        FileProvider* fp = luabind::stack<FileProvider*>::get(L, 2, false);
+        GHL::DataStream* ds = fp->OpenFile(fn);
+        if (!ds) {
+            luaL_error(L, "not found file %s",fn);
+        }
+        lua_pushstring(L, MD5SumStream(ds).c_str());
+        ds->Release();
+        return 1;
     }
     
 }
