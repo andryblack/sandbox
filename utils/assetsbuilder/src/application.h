@@ -21,6 +21,8 @@ class Texture : public Sandbox::meta::object {
 private:
     GHL::UInt32         m_width;
     GHL::UInt32         m_height;
+protected:
+    void SetSize(GHL::UInt32 w,GHL::UInt32 h) { m_width = w; m_height = h;}
 public:
     explicit Texture( GHL::UInt32 w, GHL::UInt32 h) :
         m_width(w), m_height(h) {}
@@ -33,6 +35,8 @@ class TextureData : public Texture {
     SB_META_OBJECT
 private:
     GHL::Image* m_data;
+    GHL::UInt32 m_offset_x;
+    GHL::UInt32 m_offset_y;
 public:
     explicit TextureData( GHL::UInt32 w, GHL::UInt32 h );
     explicit TextureData( GHL::Image* img );
@@ -41,6 +45,11 @@ public:
     const GHL::Image* GetImage() const { return m_data; }
     void Place( GHL::UInt32 x, GHL::UInt32 y, const sb::intrusive_ptr<TextureData>& img );
     bool SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex );
+    
+    GHL::UInt32 GetOffsetX() const { return m_offset_x; }
+    GHL::UInt32 GetOffsetY() const { return m_offset_y; }
+    
+    bool Crop();
 };
 typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 

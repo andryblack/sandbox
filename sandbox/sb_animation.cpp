@@ -92,6 +92,12 @@ namespace Sandbox {
         m_sync.push_back(anim);
     }
     
+    void Animation::SetFrame(size_t frame) {
+        const size_t frames_amount = m_data->Frames();
+        m_frame = frame % frames_amount;
+        SetImages();
+    }
+    
 	bool Animation::Update(float dt) {
 		if (!m_started) return true;
 		m_time+=dt;

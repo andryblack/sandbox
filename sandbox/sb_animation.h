@@ -49,6 +49,11 @@ namespace Sandbox {
 		void Start(bool loop);
 		void Stop();
         
+        size_t GetFrame() const { return m_frame; }
+        void SetFrame(size_t frame);
+        float GetFrameTime() const { return m_time; }
+        void SetFrameTime(float f) { m_time = f; }
+        
         void Randomize();
 		
 		bool Complete() const;

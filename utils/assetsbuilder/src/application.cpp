@@ -159,17 +159,24 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_OBJECT(TextureData, Texture)
 SB_META_BEGIN_KLASS_BIND(TextureData)
 SB_META_CONSTRUCTOR((int,int))
+SB_META_PROPERTY_RO(offset_x, GetOffsetX)
+SB_META_PROPERTY_RO(offset_y, GetOffsetY)
 SB_META_METHOD(PremultiplyAlpha)
 SB_META_METHOD(Place)
 SB_META_METHOD(SetAlpha)
+SB_META_METHOD(Crop)
 SB_META_END_KLASS_BIND()
 
 TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(GHL_CreateImage(w, h, GHL::IMAGE_FORMAT_RGBA)) {
+    m_offset_x = 0;
+    m_offset_y = 0;
+    sb_assert(m_data);
     m_data->Fill(0x00000000);
 }
 
 TextureData::TextureData( GHL::Image* img ) : Texture(img->GetWidth(),img->GetHeight()) , m_data(img) {
-    
+    m_offset_x = 0;
+    m_offset_y = 0;
 }
 
 TextureData::~TextureData() {
@@ -184,12 +191,51 @@ void TextureData::PremultiplyAlpha() {
 }
 
 void TextureData::Place( GHL::UInt32 x, GHL::UInt32 y, const sb::intrusive_ptr<TextureData>& img ) {
+    sb_assert(img);
     m_data->Draw(x, y, img->GetImage());
 }
 
 bool TextureData::SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex ) {
     if (!m_data) return false;
     return m_data->SetAlpha(alpha_tex->GetImage());
+}
+
+bool TextureData::Crop() {
+    if (!m_data) return false;
+    if (m_data->GetFormat() != GHL::IMAGE_FORMAT_RGBA) return false;
+    GHL::UInt32 min_x = width() - 1;
+    GHL::UInt32 max_x = 0;
+    GHL::UInt32 min_y = height() - 1;
+    GHL::UInt32 max_y = 0;
+    for (GHL::UInt32 y = 0; y < height(); ++y) {
+        const GHL::Byte* line = m_data->GetDataPtr() + y * width() * 4;
+        bool has_pixel = false;
+        
+        for (GHL::UInt32 x = 0; x < width(); ++x) {
+            if (line[x*4+3]) {
+                has_pixel = true;
+                if (x>max_x) max_x = x;
+                if (x<min_x) min_x = x;
+            }
+        }
+        if (has_pixel) {
+            if (y < min_y) min_y = y;
+            if (y > max_y) max_y = y;
+        }
+    }
+    
+    if (max_x < min_x || max_y < min_y) {
+        /// empty image, save pixel
+        min_x = max_x = min_y = max_y = 0;
+    }
+    GHL::Image* cropped = m_data->SubImage(min_x, min_y, max_x-min_x+1, max_y-min_y+1);
+    if (!cropped) return false;
+    m_data->Release();
+    m_data = cropped;
+    m_offset_x = min_x;
+    m_offset_y = min_y;
+    SetSize(m_data->GetWidth(), m_data->GetHeight());
+    return true;
 }
 
 Application::Application() : m_lua(0),m_vfs(0),m_update_only(false) {

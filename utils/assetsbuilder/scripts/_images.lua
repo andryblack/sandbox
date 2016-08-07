@@ -225,7 +225,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	function a:apply(  )
 		print('build atlas ' .. self.name .. ' with ' .. tostring(#self.images) .. ' textures')
 		if not override_base then
-			local img = TextureData( w, h )
+			local img = TextureData( self.with, self.height )
 			for _,v in ipairs(self.images) do
 				--print(v.src._path,v.src._name)
 				local tpath = path.join(v.src._path,v.src._name .. '.' .. v.src.type)
@@ -244,7 +244,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 		end
 		if _M.use_variants then
 			for vk,vv in pairs(_M.use_variants) do
-				local img = TextureData( w * vv.scale , h * vv.scale )
+				local img = TextureData( self.width * vv.scale , self.height * vv.scale )
 				for _,v in ipairs(self.images) do
 					--print(v.src._path,v.src._name)
 					local tpath = path.join(v.src._path,v.src._name .. vk .. '.' .. v.src.type)
