@@ -296,6 +296,7 @@ override(os,'remove',function(base,f)
 			end
 		end
 	end
+	return true
 end)
 
 override(os,'rmdir',function ( base,p )

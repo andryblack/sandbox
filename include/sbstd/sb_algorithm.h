@@ -13,6 +13,8 @@
 
 namespace sb {
     using std::find;
+    using std::find_if;
+    using std::sort;
     using std::min;
     using std::max;
 }

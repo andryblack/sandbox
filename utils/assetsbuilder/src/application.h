@@ -67,7 +67,7 @@ public:
     TexturePtr check_texture( const sb::string& file );
     TextureDataPtr load_texture( const sb::string& file );
     bool store_texture( const sb::string& file , const TextureDataPtr& data );
-    bool store_file(  const sb::string& file , const GHL::Data* data );
+    virtual bool store_file(  const sb::string& file , const GHL::Data* data );
     bool write_text_file( const sb::string& file , const char* data  );
     sb::intrusive_ptr<SpineConvert> open_spine(const sb::string& atlas,
                                                 const sb::string& skelet );
@@ -78,13 +78,16 @@ public:
     bool rebuild_image( const sb::string& src, const sb::string& dst );
     
 	int run();
-protected:
-    virtual double GetVersion() const;
+    
     /// FileProvider
     virtual GHL::DataStream* OpenFile(const char* fn);
+    virtual GHL::WriteStream* OpenDestFile(const char* fn);
+    GHL::Data* LoadData(const char* fn);
+protected:
+    virtual double GetVersion() const;
     Sandbox::LuaVM* GetLua() { return m_lua; }
     virtual void Bind(lua_State* L);
-    sb::string get_output_filename( const char* name );
+    virtual sb::string get_output_filename( const char* name );
 private:
 	Sandbox::LuaVM*	m_lua;
     GHL::VFS*   m_vfs;

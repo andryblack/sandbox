@@ -106,7 +106,7 @@ data = load_sandbox('assets.lua',sandbox,data)
 print('rules ready, apply it')
 
 if extensions.pre_apply_rules then
-	extensions.pre_apply_rules()
+	__all_rules = extensions.pre_apply_rules( __all_rules ) or {}
 end
 
 for _,rules in ipairs(__all_rules) do

@@ -6,6 +6,8 @@
 
 #if defined( _MSC_VER )
 #define SB_COMPILER_MSVC
+#define SB_BEGIN_PACKED pragma pack(push,1)
+#define SB_END_PACKED pragma pack(pop)
 #endif
 
 #if defined( __GNUC__ )
@@ -18,6 +20,14 @@
 
 #ifndef SB_ATTRIBUTE_PACKED
 #define SB_ATTRIBUTE_PACKED
+#endif
+
+#ifndef SB_BEGIN_PACKED
+#define SB_BEGIN_PACKED
+#endif
+
+#ifndef SB_END_PACKED
+#define SB_END_PACKED
 #endif
 
 

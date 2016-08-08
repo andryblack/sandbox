@@ -15,6 +15,8 @@ extern "C" {
 #include <lualib.h>
 }
 
+#include <stdlib.h>
+
 static const double VERSION = 1.5;
 
 #include <luabind/sb_luabind.h>
@@ -48,6 +50,12 @@ int path_translate(lua_State* L);
 int os_chdir(lua_State* L);
 int os_chmod(lua_State* L);
 int os_copyfile(lua_State* L);
+    
+    static int os_remove (lua_State *L) {
+        const char *filename = luaL_checkstring(L, 1);
+        return luaL_fileresult(L, remove(filename) == 0, filename);
+    }
+    
 int os_getcwd(lua_State* L);
 int os_getversion(lua_State* L);
 int os_is64bit(lua_State* L);
@@ -86,6 +94,7 @@ static const luaL_Reg os_functions[] = {
     { "chdir",       os_chdir       },
     { "chmod",       os_chmod       },
     { "copyfile",    os_copyfile    },
+    { "remove",      os_remove      },
     { "_is64bit",    os_is64bit     },
     { "isdir",       os_isdir       },
     { "getcwd",      os_getcwd      },
@@ -336,6 +345,20 @@ GHL::DataStream* Application::OpenFile(const char* fn) {
     return m_vfs->OpenFile(append_path(m_src_dir, fn).c_str());
 }
 
+GHL::Data* Application::LoadData(const char* fn) {
+    GHL::DataStream* ds = OpenFile(fn);
+    if (!ds) {
+        return 0;
+    }
+    GHL::Data* data = GHL_ReadAllData(ds);
+    ds->Release();
+    return data;
+}
+
+GHL::WriteStream* Application::OpenDestFile(const char* fn) {
+    return m_vfs->OpenFileWrite(get_output_filename(fn).c_str());
+}
+
 sb::string Application::get_output_filename( const char* name ) {
     return append_path(m_dst_dir, name);
 }
@@ -380,7 +403,7 @@ bool Application::write_text_file( const sb::string& file , const char* data  ) 
 }
 bool Application::store_file(  const sb::string& file , const GHL::Data* data ) {
     if (!data) return false;
-    if (!m_vfs->WriteFile(append_path(m_dst_dir, file).c_str(), data)) {
+    if (!m_vfs->WriteFile(get_output_filename(file.c_str()).c_str(), data)) {
         Sandbox::LogError() << "failed store texture to " << file;
         return false;
     }
@@ -422,6 +445,7 @@ sb::intrusive_ptr<SpineConvert> Application::open_spine(const sb::string& atlas,
 }
 
 int Application::run() {
+    Sandbox::Logger::SetPlatformLogEnabled(true);
     Bind(m_lua->GetVM());
 
     m_lua->GetGlobalContext()->SetValue("application", this);
