@@ -381,7 +381,9 @@ namespace Sandbox {
         }
         GHL::DataStream* ds = res->OpenFile(file);
         if (!ds) {
-            luaL_error(L, "opening file %s", file);
+            lua_pushnil(L);
+            lua_pushfstring(L,"file not found %s", file);
+            return 2;
         }
         lua_gc(L, LUA_GCSTOP, 1);
         static const size_t BUFFER_SIZE = 1024 * 8;
