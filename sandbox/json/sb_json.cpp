@@ -111,6 +111,9 @@ namespace Sandbox {
     static int yajl_parse_start_map(void * ctx) {
         parse_context* c = static_cast<parse_context*>(ctx);
         c->on_pre_value();
+        if (!lua_checkstack(c->L, 4)) {
+            return 0;
+        }
         lua_createtable(c->L,0,4);
         ++c->stack_depth;
         parse_context::state_t s;
@@ -137,6 +140,9 @@ namespace Sandbox {
     static int yajl_parse_start_array(void * ctx) {
         parse_context* c = static_cast<parse_context*>(ctx);
         c->on_pre_value();
+        if (!lua_checkstack(c->L, 4)) {
+            return 0;
+        }
         lua_createtable(c->L,4,0);
         ++c->stack_depth;
         parse_context::state_t s;
@@ -215,17 +221,20 @@ namespace Sandbox {
             yajl_gen_string(g, reinterpret_cast<const unsigned char*>(str),len );
         }
     }
-    static void do_json_encode(lua_State* L,int indx,yajl_gen g,bool sort_keys);
+    static const char* do_json_encode(lua_State* L,int indx,yajl_gen g,bool sort_keys);
     
-    static void do_json_encode_table(lua_State* L,int indx,yajl_gen g,bool sort_keys) {
+    static const char* do_json_encode_table(lua_State* L,int indx,yajl_gen g,bool sort_keys) {
         LUA_CHECK_STACK(0);
         sb_assert(lua_istable(L, indx));
-        lua_pushvalue(L, indx);
+        if (!lua_checkstack(L, 5)) {
+            return "stack overflow";
+        }
+        lua_pushvalue(L, indx);     // +1
         int count = 0;
         bool only_integers = true;
         sb::vector<sb::string> keys;
-        lua_pushnil(L);
-        while (lua_next(L, -2) != 0) {
+        lua_pushnil(L);             // +2
+        while (lua_next(L, -2) != 0) {  // +3
             /* uses 'key' (at index -2) and 'value' (at index -1) */
             if (lua_isnumber(L, -2)) {
                 lua_Integer i = lua_tointeger(L, -2);
@@ -260,16 +269,17 @@ namespace Sandbox {
             }
             /* removes 'value'; keeps 'key' for next iteration */
             lua_pop(L, 1);
-        }
+        } // +1
         if (only_integers && count!=0) {
             yajl_gen_array_open(g);
-            lua_pushnil(L);
-            while (lua_next(L, -2) != 0) {
+            lua_pushnil(L); // +2
+            while (lua_next(L, -2) != 0) { // +3
                 /* uses 'key' (at index -2) and 'value' (at index -1) */
                 do_json_encode(L, -1, g, sort_keys);
                 /* removes 'value'; keeps 'key' for next iteration */
                 lua_pop(L, 1);
             }
+            // +1
             yajl_gen_array_close(g);
         } else if (sort_keys) {
             std::sort(keys.begin(), keys.end());
@@ -283,10 +293,10 @@ namespace Sandbox {
             yajl_gen_map_close(g);
         } else {
             yajl_gen_map_open(g);
-            lua_pushnil(L);
-            while (lua_next(L, -2) != 0) {
+            lua_pushnil(L); // +2
+            while (lua_next(L, -2) != 0) { // +3
                 /* uses 'key' (at index -2) and 'value' (at index -1) */
-                lua_pushvalue(L, -2); // k v k
+                lua_pushvalue(L, -2); // +4 k v k
                 do_json_string(L, -1, g);
                 do_json_encode(L, -2, g, sort_keys);
                 /* removes 'value'; keeps 'key' for next iteration */
@@ -295,9 +305,10 @@ namespace Sandbox {
             yajl_gen_map_close(g);
         }
         lua_pop(L, 1);
+        return 0;
     }
     
-    static void do_json_encode(lua_State* L,int indx,yajl_gen g,bool sort_keys) {
+    static const char* do_json_encode(lua_State* L,int indx,yajl_gen g,bool sort_keys) {
         LUA_CHECK_STACK(0);
         int type = lua_type(L, indx);
         if (type == LUA_TNIL) {
@@ -325,15 +336,20 @@ namespace Sandbox {
         }  else if (type == LUA_TUSERDATA) {
             yajl_gen_string(g, reinterpret_cast<const unsigned char*>("data"), 4);
         } else if (type == LUA_TTABLE) {
-            do_json_encode_table(L,indx,g,sort_keys);
+            const char* err = do_json_encode_table(L,indx,g,sort_keys);
+            if (err) {
+                return err;
+            }
         } else {
             /// unknown;
             sb_assert(false);
             yajl_gen_null(g);
         }
+        return 0;
     }
     
     static int json_encode(lua_State* L) {
+        LUA_CHECK_STACK(1)
         encode_context ctx;
         yajl_gen g = yajl_gen_alloc(0);
         yajl_gen_config(g,yajl_gen_print_callback,&yajl_encode_print,&ctx);
@@ -345,7 +361,12 @@ namespace Sandbox {
             sort_keys = true;
         }
         if (lua_gettop(L)>0) {
-            do_json_encode(L,1,g,sort_keys);
+            const char* err = do_json_encode(L,1,g,sort_keys);
+            if (err) {
+                lua_pushnil(L),
+                lua_pushstring(L, err);
+                return 2;
+            }
         }
         yajl_gen_free(g);
         lua_pushstring(L, ctx.data.c_str());
