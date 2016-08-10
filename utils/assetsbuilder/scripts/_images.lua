@@ -273,7 +273,7 @@ end
 local function apply_images( dir, data )
 	local fn = path.join(dir,'images.lua')
 	print('generate',fn)
-	local file = assert(io.open ( path.join(dst_path,fn) , 'w'))
+	local file = assert(io.open ( path.join(application.dst_path,fn) , 'w'))
 	
 	local function f(name,val,def)
 		val = val or def
@@ -435,7 +435,7 @@ local function do_premultiply_file( src, dstconf  )
 	end
 
 	if update_only then
-		if not os.check_file_new(path.join(src_path,src),path.join(dst_path,conf.dst)) then
+		if not os.check_file_new(path.join(src_path,src),path.join(application.dst_path,conf.dst)) then
 			--print('skip not new')
 			return true
 		end

@@ -184,7 +184,7 @@ local function make_dst_tree( rules )
 		end
 		if not have_childs and dir ~= '' then
 			--print('mkdir',dir)
-			assert(os.mkdir(path.join(dst_path,dir)))
+			assert(os.mkdir(path.join(application.dst_path,dir)))
 		end
 	end
 	doit('',rules)
@@ -207,9 +207,9 @@ local function copy_files( files )
 		if dst then
 			--print('copy',v)	
 			if type(dst) == 'string' then
-				assert(do_copy_file(path.join(src_path,v),path.join(dst_path,dst)))
+				assert(do_copy_file(path.join(src_path,v),path.join(application.dst_path,dst)))
 			else
-				assert(do_copy_file(path.join(src_path,v),path.join(dst_path,v)))
+				assert(do_copy_file(path.join(src_path,v),path.join(application.dst_path,v)))
 			end
 		end
 	end
@@ -226,7 +226,7 @@ local function compile_files( files )
 
 			local shunk = assert(load(pp_source,'@'..dst,'t'))
 			local binary = string.dump(shunk)
-			local out = assert(io.open(path.join(dst_path,dst),'wb'))
+			local out = assert(io.open(path.join(application.dst_path,dst),'wb'))
 			out:write(binary)
 			out:close()
 		end
@@ -242,8 +242,7 @@ function _M.apply_rules( rules )
 			add_dest_dir(path.getdirectory(v),dst_tree)
 		end
 	end
-	assert(dst_path and dst_path~='',"invalid dst_path '" .. tostring(dst_path) .."'")
-	print('make destination directories at ' .. tostring(dst_path))
+	print('make destination directories at ' .. tostring(application.dst_path))
 	make_dst_tree(dst_tree)
 	copy_files(rules.copy_files or {})
 	compile_files(rules.compile_files or {})

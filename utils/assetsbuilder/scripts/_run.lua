@@ -1,15 +1,15 @@
 
 if not update_only then
-	if os.isdir(dst_path) then
-		assert(os.rmdir(dst_path))
-		assert(os.mkdir(dst_path))
-	elseif os.isfile(dst_path) then
+	if os.isdir(application.dst_path) then
+		assert(os.rmdir(application.dst_path))
+		assert(os.mkdir(application.dst_path))
+	elseif os.isfile(application.dst_path) then
 		error('destionation path is file')
 	else
-		assert(os.mkdir(dst_path))
+		assert(os.mkdir(application.dst_path))
 	end
 else
-	assert(os.mkdir(dst_path))
+	assert(os.mkdir(application.dst_path))
 end
 
 local function wrap( t )

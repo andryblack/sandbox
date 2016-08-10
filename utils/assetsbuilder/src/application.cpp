@@ -149,6 +149,7 @@ SB_META_METHOD(store_texture)
 SB_META_METHOD(convert_spine)
 SB_META_METHOD(open_spine)
 SB_META_METHOD(write_text_file)
+SB_META_PROPERTY_RW(dst_path,get_dst_path,set_dst_path)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(SkeletonConvert)
@@ -310,10 +311,14 @@ void Application::set_update_only(bool u){
     m_update_only = u;
 }
 
-void Application::set_paths(const sb::vector<sb::string>& scripts, const sb::string& src, const sb::string& dst) {
-	m_dst_dir = dst;
+void Application::set_paths(const sb::vector<sb::string>& scripts, const sb::string& src, const sb::string& dst) {	
     m_scripts_dir = scripts;
     m_src_dir = src;
+    set_dst_path(dst);
+}
+
+void Application::set_dst_path(const sb::string& dst) {
+    m_dst_dir = dst;
 }
 
 void Application::set_arguments(const sb::vector<sb::string>& arguments) {
@@ -454,18 +459,14 @@ int Application::run() {
     m_lua->GetGlobalContext()->SetValue("update_only", m_update_only);
     m_lua->GetGlobalContext()->SetValue("app_arguments", m_arguments);
     
+
+    m_lua->GetGlobalContext()->SetValue("src_path",m_src_dir);
+    m_lua->GetGlobalContext()->SetValue("dst_path",m_dst_dir);
+    
     if (!m_lua->DoFile("_init.lua")) {
         Sandbox::LogError() << "failed exec init script, check script paths";
         return 1;
     }
     
-    
-    m_lua->GetGlobalContext()->SetValue("src_path",m_src_dir);
-    m_lua->GetGlobalContext()->SetValue("dst_path",m_dst_dir);
-    
-    if (!m_lua->DoFile("_run.lua")) {
-        Sandbox::LogError() << "failed exec run script";
-        return 1;
-    }
-	return 0;
+    return 0;
 }

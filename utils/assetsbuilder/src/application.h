@@ -60,6 +60,9 @@ public:
 	virtual ~Application();
 
     void set_update_only(bool u);
+    void set_dst_path(const sb::string& dst);
+    const sb::string& get_dst_path() const { return m_dst_dir; }
+
     void set_paths(const sb::vector<sb::string>& scripts, const sb::string& src, const sb::string& dst);
 	void set_platform(const sb::string& platform);
     void set_arguments(const sb::vector<sb::string>& arguments);
