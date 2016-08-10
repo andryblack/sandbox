@@ -68,7 +68,8 @@ namespace Sandbox {
         }
         
         bool DataManager::isDataExist(const std::string& _name) {
-            GHL::DataStream* ds = m_file_provider->OpenFile(_name.c_str());
+            bool variant = false;
+            GHL::DataStream* ds = m_file_provider->OpenFileVariant(_name.c_str(),variant);
             if (ds) {
                 ds->Release();
                 return true;

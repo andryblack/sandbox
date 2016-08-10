@@ -12,6 +12,8 @@ end
 function Atlas:_init( w, h )
 	self.width = w
 	self.height = h
+	self.start_w = w
+	self.start_h = h
 	self.images = {}
 	self.rects = { {0,0,w,h} }
 end
@@ -61,14 +63,18 @@ function Atlas:place_image( img )
 		error(not_found_place)
 	end
 end
+function Atlas:build_impl( ... )
+	local res,err = pcall(function()
+		for _,v in ipairs(self.images) do
+			self:place_image(v)
+		end
+	end)
+	return res,err
+end
 function Atlas:build(  )
 	table.sort(self.images, function(a,b) return (a.height + a.width) > (b.height + b.width) end)
 	while true do
-		local res,err = pcall(function()
-			for _,v in ipairs(self.images) do
-				self:place_image(v)
-			end
-		end)
+		local res,err = self:build_impl()
 		if res then
 			break
 		end
@@ -82,6 +88,28 @@ function Atlas:build(  )
 			self.width = self.width * 2
 		end
 		self.rects = { {0,0,self.width,self.height} }
+	end
+	-- shunk down
+	if self.width > self.start_w or self.height > self.start_h then
+		local last_success = nil
+		while true do
+			last_success = {self.width,self.height}
+			if self.width > self.height then
+				self.width = self.width - 16
+			else
+				self.height = self.height - 16
+			end
+			self.rects = { {0,0,self.width,self.height} }
+			local res,err = self:build_impl()
+			if not res then
+				self.width = last_success[1]
+				self.height = last_success[2]
+
+				self.rects = { {0,0,self.width,self.height} }
+				assert(self:build_impl())
+				break
+			end
+		end
 	end
 end
 
