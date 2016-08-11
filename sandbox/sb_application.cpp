@@ -485,6 +485,9 @@ namespace Sandbox {
         StoreAppProfile();
         ReleaseResources();
         
+        m_mouse_ctx.reset();
+        m_keyboard_ctx.reset();
+        
         if (m_lua) {
             m_lua->Destroy();
             delete m_lua;
