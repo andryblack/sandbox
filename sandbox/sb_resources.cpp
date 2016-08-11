@@ -477,10 +477,9 @@ namespace Sandbox {
 		}
 
 		if (!vs) {
-			std::string filename = m_base_path+vfilename;
-			GHL::DataStream* ds = m_vfs->OpenFile(filename.c_str());
+			GHL::DataStream* ds = this->OpenFile(vfilename.c_str());
 			if (!ds) {
-				LogError(MODULE) << "error opening file " << filename;
+				LogError(MODULE) << "error opening file " << vfilename;
 				return ShaderPtr();
 			}
             GHL::Data* dsd = GHL_ReadAllData( ds );
@@ -497,16 +496,15 @@ namespace Sandbox {
 			m_vshaders[vfilename]=vs;
 		}
 		if (!fs) {
-			std::string filename = m_base_path+ffilename;
-			GHL::DataStream* ds = m_vfs->OpenFile(filename.c_str());
+			GHL::DataStream* ds = this->OpenFile(ffilename.c_str());
 			if (!ds) {
-				LogError(MODULE) << "error opening file " << filename;
+				LogError(MODULE) << "error opening file " << ffilename;
 				return ShaderPtr();
 			}
             GHL::Data* dsd = GHL_ReadAllData( ds );
             ds->Release();
             if (!dsd) {
-                LogError(MODULE) << "error loading shader " << vfilename;
+                LogError(MODULE) << "error loading shader " << ffilename;
             }
 			fs = m_render->CreateFragmentShader(dsd);
 			dsd->Release();
