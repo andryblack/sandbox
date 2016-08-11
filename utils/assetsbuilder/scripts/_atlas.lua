@@ -19,6 +19,7 @@ function Atlas:_init( w, h )
 end
 function Atlas:add_image( img )
 	table.insert(self.images,img)
+	img.idx = #self.images
 end
 function Atlas:find_best( img )
 	local best = nil
@@ -71,8 +72,17 @@ function Atlas:build_impl( ... )
 	end)
 	return res,err
 end
+local function image_sorter(a,b)
+	local pa = a.height + a.width
+	local pb = b.height + b.width
+	if pa == pb then
+		return a.idx < b.idx
+	end
+	return pa > pb
+end
+
 function Atlas:build(  )
-	table.sort(self.images, function(a,b) return (a.height + a.width) > (b.height + b.width) end)
+	table.sort(self.images, image_sorter)
 	while true do
 		local res,err = self:build_impl()
 		if res then

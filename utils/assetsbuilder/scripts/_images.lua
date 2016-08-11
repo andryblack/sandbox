@@ -16,6 +16,21 @@ function _M.assets_rules.set_alpha_file_format( func )
 
 end
 
+local function sortedpairs( t )
+	local ss = {}
+	for k,v in pairs(t) do
+		table.insert(ss,{k=k,v=v})
+	end
+	table.sort(ss,function (a,b) return a.k < b.k end)
+	local i = 0
+	return function() 
+		i = i + 1
+		local v = ss[i]
+		if not v then return nil end
+		return v.k,v.v
+	end
+end
+
 local atlas = require '_atlas'
 
 local function load_images( dir  )
@@ -317,13 +332,13 @@ local function apply_images( dir, data )
 			path = path .. '/'
 		end
 		
-		for k,v in pairs(g) do
+		for k,v in sortedpairs(g) do
 			func(prefix .. k .. '_', v.data[name],path .. v.path)
 			expand_group(v,func,prefix..k..'_',name)
 		end
 	end
 	local function print_textures(  prefix, textures , path )
-		for k,v in pairs(textures) do
+		for k,v in sortedpairs(textures) do
 			if not v._atlas then
 				v._mapped_name = prefix .. k
 				local p =''
@@ -345,7 +360,7 @@ local function apply_images( dir, data )
 	expand_group({path='',data=data},print_textures,'','_textures')
 	p("}")
 	local function print_images( prefix, images )
-		for k,v in pairs(images) do
+		for k,v in sortedpairs(images) do
 			local texture = nil
 			if v.texture._atlas then
 				texture = string.format('textures.%s,',v.texture._atlas.name)
@@ -376,7 +391,7 @@ local function apply_images( dir, data )
 	expand_group({path='',data=data},print_images,'','_images')
 	p("}")
 	local function print_animations( prefix , animations )
-		for k,v in pairs(animations) do
+		for k,v in sortedpairs(animations) do
 			x(1,prefix..k,'={',
 				string.format("'%s%s',%d,%d,",prefix,v[1],v[2],v[3]),
 				f('speed',v.speed),
@@ -397,10 +412,10 @@ local function apply_images( dir, data )
 	groups._animations = nil
 	local function expand_group_names( ident, prefix, group )
 		local prefix = prefix .. '_'
-		for k,v in pairs(group._images) do
+		for k,v in sortedpairs(group._images) do
 			x(ident,k,'=images.',prefix..k,',')
 		end
-		for k,v in pairs(group._animations) do
+		for k,v in sortedpairs(group._animations) do
 			x(ident,k,'=animations.',prefix..k,',')
 		end
 		local g = {}
@@ -410,13 +425,13 @@ local function apply_images( dir, data )
 		g._textures = nil
 		g._images = nil
 		g._animations = nil
-		for k,v in pairs(g) do
+		for k,v in sortedpairs(g) do
 			x(ident,k,' = {')
 			expand_group_names(ident+1,prefix .. k,v.data)
 			x(ident,'},')
 		end
 	end
-	for k,v in pairs(groups) do
+	for k,v in sortedpairs(groups) do
 		assert(type(v)=='table','unknown field ' .. k)
 		p(k," = {" )
 		expand_group_names(1,k,v.data)
