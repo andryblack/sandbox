@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
     sb::vector<sb::string> scripts_dir;
 	sb::string platform;
 	bool update_only = false;
+	sb::vector<sb::string> other_options;
 
 	for(int i=1;i<argc;++i) {
 		if (::strcmp(argv[i],"--help")==0) {
@@ -84,7 +85,7 @@ int main(int argc, char** argv) {
 		} else if (strncmp(opt+2,"update",8)==0) {
 			update_only = true;
 		} else {
-			return error(std::string("unknown option ") + opt);
+			other_options.push_back(opt+2);
 		}
 	}
 	if (src_dir.empty()) {

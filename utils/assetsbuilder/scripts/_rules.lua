@@ -2,7 +2,7 @@
 
 
 local _M = {}
-
+_M.definitions = {}
 
 local img = require '_images'
 local convert_spine = require '_convert_spine'
@@ -31,6 +31,10 @@ end
 
 function _M.assets_rules.call( v )
 	table.insert(get_rules().call_functions,v)
+end
+
+function _M.assets_rules.define( n , v )
+	_M.definitions[n]=v
 end
 
 
@@ -221,7 +225,7 @@ local function compile_files( files )
 			--print('compile',v)
 			local source = assert(io.open(path.getabsolute(path.join(src_path,v)),'r'))
 			
-			local pp_source = assert(luapp.preprocess(source))
+			local pp_source = assert(luapp.preprocess(source,_M.definitions))
 			source:close()
 
 			local shunk = assert(load(pp_source,'@'..dst,'t'))

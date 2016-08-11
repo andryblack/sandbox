@@ -343,6 +343,13 @@ function load_sandbox( file , mt, init_data )
     return data,res
 end
 
+run_options = {}
 
-
+-- parse args
+for _,l in ipairs(application.options) do
+	local name,val = string.match(l,'^--(%w+)=(%w+)$')
+	if name and val then
+		run_options[name]=val
+	end
+end
 

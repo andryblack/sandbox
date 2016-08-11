@@ -62,6 +62,8 @@ public:
     void set_update_only(bool u);
     void set_dst_path(const sb::string& dst);
     const sb::string& get_dst_path() const { return m_dst_dir; }
+    void set_options(const sb::vector<sb::string>& o) { m_options = o;}
+    const sb::vector<sb::string>& get_options() const { return m_options; }
 
     void set_paths(const sb::vector<sb::string>& scripts, const sb::string& src, const sb::string& dst);
 	void set_platform(const sb::string& platform);
@@ -96,6 +98,7 @@ private:
     GHL::VFS*   m_vfs;
     GHL::ImageDecoder* m_image_decoder;
     sb::vector<sb::string>  m_scripts_dir;
+    sb::vector<sb::string>  m_options;
     sb::string  m_dst_dir;
     sb::string  m_src_dir;
     sb::string  m_platform;

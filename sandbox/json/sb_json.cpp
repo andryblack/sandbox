@@ -747,6 +747,13 @@ namespace Sandbox {
         m_impl = 0;
     }
     
+    JsonBuilder& JsonBuilder::SetPretty(bool p) {
+        if (m_impl) {
+            yajl_gen_config(m_impl->g, yajl_gen_beautify, (int)p);
+        }
+        return *this;
+    }
+    
     JsonBuilder& JsonBuilder::BeginObject() {
         if (m_impl) yajl_gen_map_open(m_impl->g);
         return *this;
@@ -812,6 +819,9 @@ namespace Sandbox {
             luabind::stack<JsonBuilder*>::push(L, new JsonBuilder());
             return 1;
         }
+        static void JsonBuilder_set_beautify(JsonBuilder* j,bool b) {
+            j->SetPretty(b);
+        }
         static void JsonBuilder_map_open(JsonBuilder* j) {
             j->BeginObject();
         }
@@ -846,6 +856,7 @@ namespace Sandbox {
         template <> template <class U> void bind_type<JsonBuilder>::bind(U& bind) {
             bind(static_method("new", &JsonBuilder_new));
             bind(method("free",&JsonBuilder_free));
+            bind(method("set_beautify", &JsonBuilder_set_beautify));
             bind(method("map_open",&JsonBuilder_map_open));
             bind(method("map_close",&JsonBuilder_map_close));
             bind(method("array_open",&JsonBuilder_array_open));

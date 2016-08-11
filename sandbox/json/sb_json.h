@@ -34,6 +34,8 @@ namespace Sandbox {
         JsonBuilder();
         ~JsonBuilder();
         
+        JsonBuilder& SetPretty(bool p);
+        
         JsonBuilder& BeginObject();
         JsonBuilder& EndObject();
         

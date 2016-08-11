@@ -150,6 +150,7 @@ SB_META_METHOD(convert_spine)
 SB_META_METHOD(open_spine)
 SB_META_METHOD(write_text_file)
 SB_META_PROPERTY_RW(dst_path,get_dst_path,set_dst_path)
+SB_META_PROPERTY_RW(options,get_options,set_options)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(SkeletonConvert)

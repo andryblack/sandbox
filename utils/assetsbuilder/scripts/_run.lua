@@ -33,7 +33,8 @@ local sandbox = {
 	print = print,
 	error = error,
 	platform = platform,
-	log = log
+	log = log,
+	run_options = run_options or {}
 }
 
 
