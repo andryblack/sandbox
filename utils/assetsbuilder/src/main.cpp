@@ -112,6 +112,7 @@ int main(int argc, char** argv) {
 	Application* app = create_application();
 	app->set_update_only(update_only);
 	app->set_paths(scripts_dir,src_dir,dst_dir);
+	app->set_options(other_options);
 	app->set_platform(platform);
 	int result = app->run();
     delete app;

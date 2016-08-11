@@ -34,7 +34,8 @@ local sandbox = {
 	error = error,
 	platform = platform,
 	log = log,
-	run_options = run_options or {}
+	run_options = run_options or {},
+	assert = assert
 }
 
 

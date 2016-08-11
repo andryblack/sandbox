@@ -347,8 +347,10 @@ run_options = {}
 
 -- parse args
 for _,l in ipairs(application.options) do
-	local name,val = string.match(l,'^--(%w+)=(%w+)$')
+	--print('option: ',l)
+	local name,val = string.match(l,'^([^=]+)=(.+)$')
 	if name and val then
+		print('set run_options',name,val)
 		run_options[name]=val
 	end
 end
