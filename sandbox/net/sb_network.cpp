@@ -64,10 +64,11 @@ namespace Sandbox {
     /// received response
     void GHL_CALL NetworkRequestBase::OnResponse(GHL::UInt32 status) {
         m_status_code = status;
+        LogInfo() << "Response " << status;
     }
     /// received header
     void GHL_CALL NetworkRequestBase::OnHeader(const char* name,const char* value) {
-        LogInfo() << "Header " << name << ": " << value;
+        
         m_received_headers[name]=value;
     }
     /// received data
