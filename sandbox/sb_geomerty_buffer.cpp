@@ -27,6 +27,11 @@ namespace Sandbox {
         }
     }
     
+    void GeometryBuffer::Clear() {
+        m_data.vertexes.clear();
+        m_data.indexes.clear();
+    }
+    
     void GeometryBuffer::BuildLine(const sb::vector<Vector2f>& points) {
         if (m_image) {
             GeometryBuilder builder(m_data);

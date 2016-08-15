@@ -156,13 +156,16 @@ namespace Sandbox {
         BuildLineContext ctx;
         ctx.buffer = &buffer;
         ctx.color = color.hw_premul();
-        ctx.ibase = 0;
+        ctx.ibase = buffer.vertexes.size();
         ctx.z = 0;
         
         size_t vtcs = 8 + (points.size()-2)*corner_vertexes;
 		size_t indxs = 6 * 3 + (points.size()-2)*(corner_indexes+2*3);
-		buffer.vertexes.reserve(vtcs);
-		buffer.indexes.reserve(indxs);
+        size_t start_vertexes = buffer.vertexes.size();
+        size_t start_indexes = buffer.indexes.size();
+        
+		buffer.vertexes.reserve(start_vertexes+vtcs);
+		buffer.indexes.reserve(start_indexes+indxs);
         
         float width = img.GetHeight();
         width*=0.5f;
@@ -228,8 +231,8 @@ namespace Sandbox {
         ctx.add_triangle(0,1,3);
         ctx.add_triangle(0,3,2);
         
-        sb_assert(buffer.vertexes.size()==vtcs);
-        sb_assert(buffer.indexes.size()==indxs);
+        sb_assert(buffer.vertexes.size()==vtcs+start_vertexes);
+        sb_assert(buffer.indexes.size()==indxs+start_indexes);
     }
     
     void GeometryBuilder::BuildContour(const sb::vector<Vector2f>& points,const Image& img) {
@@ -240,14 +243,18 @@ namespace Sandbox {
         BuildLineContext ctx;
         ctx.buffer = &buffer;
         ctx.color = color.hw_premul();
-        ctx.ibase = 0;
+        ctx.ibase = buffer.vertexes.size();
         ctx.z = 0;
+        
+        size_t start_vertexes = buffer.vertexes.size();
+        size_t start_indexes = buffer.indexes.size();
+        
         
         size_t vtcs = (points.size())*corner_vertexes+2;
 		size_t indxs = (points.size())*(corner_indexes+2*3);
 		
-        buffer.vertexes.reserve(vtcs);
-		buffer.indexes.reserve(indxs);
+        buffer.vertexes.reserve(start_vertexes+vtcs);
+        buffer.indexes.reserve(start_indexes+indxs);
         
         float width = img.GetHeight();
         width*=0.5f;
@@ -288,8 +295,8 @@ namespace Sandbox {
         buffer.vertexes.push_back(buffer.vertexes[0]);
         buffer.vertexes.push_back(buffer.vertexes[1]);
         
-        sb_assert(buffer.vertexes.size()==vtcs);
-        sb_assert(buffer.indexes.size()==indxs);
+        sb_assert(buffer.vertexes.size()==vtcs+start_vertexes);
+        sb_assert(buffer.indexes.size()==indxs+start_indexes);
        
     }
     
@@ -308,7 +315,7 @@ namespace Sandbox {
         BuildFillContext ctx;
         ctx.buffer = &buffer;
         ctx.color = color.hw_premul();
-        ctx.ibase = 0;
+        ctx.ibase = buffer.vertexes.size();
         ctx.z = 0;
         ctx.transform = tr;
         if (buffer.texture) {

@@ -30,6 +30,8 @@ namespace Sandbox {
         void SetImage(const ImagePtr& img) { m_image = img; }
         const ImagePtr& GetImage() const {return m_image; }
         
+        void Clear();
+        
         void BuildLine(const sb::vector<Vector2f>& points);
         void BuildContour(const sb::vector<Vector2f>& points);
         void BuildFill(const sb::vector<Vector2f>& points, const Transform2d& tr);
