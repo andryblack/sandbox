@@ -316,18 +316,19 @@ namespace Sandbox {
         }
         size_t idx_top = 0;
         size_t idx_bottom = points.size()-1;
-        ctx.add_vertex(points[idx_bottom]);
         ctx.add_vertex(points[idx_top]);
+        ctx.add_vertex(points[idx_bottom]);
         while (idx_top!=idx_bottom) {
             ++idx_top;
             ctx.add_vertex(points[idx_top]);
-            ctx.add_triangle(0, 1, 2);
+            ctx.add_triangle(1, 0, 2);
+            ctx.ibase+=1;
             if (idx_top==idx_bottom)
                 break;
             --idx_bottom;
             ctx.add_vertex(points[idx_bottom]);
-            ctx.add_triangle(0, 2, 3);
-            ctx.ibase+=2;
+            ctx.add_triangle(0, 1, 2);
+            ctx.ibase+=1;
         }
     }
     
