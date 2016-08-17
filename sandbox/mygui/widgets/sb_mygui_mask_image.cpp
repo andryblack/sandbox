@@ -4,7 +4,7 @@
 #include "MyGUI_RenderItem.h"
 #include "sb_graphics.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskImageWidget,MyGUI::Widget)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskImageWidget,Sandbox::mygui::ImageWidget)
 
 namespace Sandbox {
     namespace mygui {
@@ -26,14 +26,15 @@ namespace Sandbox {
         }
         
         void MaskImageWidget::update_shader() {
-            if (m_shader && m_image && m_image->GetTexture()) {
+            if (m_shader && getImage() && getImage()->GetTexture()) {
+                TexturePtr texture = getImage()->GetTexture();
                 ShaderVec2UniformPtr u = m_shader->GetVec2Uniform("texture_size");
                 if (u) {
-                    u->SetValue(Vector2f(m_image->GetTexture()->GetWidth(),m_image->GetTexture()->GetHeight()));
+                    u->SetValue(Vector2f(texture->GetWidth(),texture->GetHeight()));
                 }
                 u = m_shader->GetVec2Uniform("orig_texture_size");
                 if (u) {
-                    u->SetValue(Vector2f(m_image->GetTexture()->GetOriginalWidth(),m_image->GetTexture()->GetOriginalHeight()));
+                    u->SetValue(Vector2f(texture->GetOriginalWidth(),texture->GetOriginalHeight()));
                 }
             }
         }

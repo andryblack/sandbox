@@ -10,12 +10,7 @@
 #define __Sandbox__sb_mygui_mask_image__
 
 #include "meta/sb_meta.h"
-#include "sb_rt_scene.h"
-#include "MyGUI_Widget.h"
-#include "MyGUI_SubSkin.h"
-#include "MyGUI_MainSkin.h"
-#include "MyGUI_CommonStateInfo.h"
-#include "sb_image.h"
+#include "sb_mygui_image_widget.h"
 #include "sb_shader.h"
 #include "sb_rect.h"
 #include <ghl_render.h>
@@ -27,7 +22,7 @@ namespace Sandbox {
         
                 
         
-        class MaskImageWidget : public MyGUI::Widget {
+        class MaskImageWidget : public ImageWidget {
             MYGUI_RTTI_DERIVED( MaskImageWidget )
         public:
             MaskImageWidget();
@@ -35,8 +30,7 @@ namespace Sandbox {
             
             void setPropertyOverride(const std::string& _key, const std::string& _value);
             
-            void setImage(const ImagePtr& img) { m_image = img; update_shader(); }
-            const ImagePtr& getImage() const { return m_image; }
+            void setImage(const ImagePtr& img) { ImageWidget::setImage(img); update_shader(); }
             
             void setShader(const ShaderPtr& s);
             const ShaderPtr& getShader() const { return m_shader; }
@@ -44,7 +38,6 @@ namespace Sandbox {
         protected:
             void update_shader();
         private:
-            ImagePtr    m_image;
             ShaderPtr   m_shader;
         };
     }

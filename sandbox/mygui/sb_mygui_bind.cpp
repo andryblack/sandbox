@@ -31,7 +31,6 @@
 #include "MyGUI_Window.h"
 
 #include "MyGUI_IResource.h"
-#include "MyGUI_IPointer.h"
 
 #include "MyGUI_TileRect.h"
 #include "MyGUI_MainSkin.h"
@@ -49,13 +48,10 @@
 #include "MyGUI_ScrollView.h"
 #include "MyGUI_SimpleText.h"
 #include "MyGUI_ProgressBar.h"
-#include "MyGUI_ResourceImageSetPointer.h"
-#include "MyGUI_ResourceManualPointer.h"
 #include "MyGUI_ResourceManualFont.h"
 #include "MyGUI_SharedLayer.h"
 #include "MyGUI_OverlappedLayer.h"
 #include "MyGUI_ResourceLayout.h"
-#include "MyGUI_ResourceImageSet.h"
 #include "MyGUI_ResourceSkin.h"
 #include "MyGUI_RotatingSkin.h"
 #include "MyGUI_PolygonalSkin.h"
@@ -65,6 +61,7 @@
 #include "MyGUI_ControllerRepeatClick.h"
 
 #include "MyGUI_InputManager.h"
+#include "MyGUI_FactoryManager.h"
 
 #include "sb_image.h"
 
@@ -77,6 +74,8 @@
 #include "font/sb_mygui_multipass_font.h"
 
 #include "widgets/sb_mygui_scroll_area.h"
+
+#include "sb_mygui_render.h"
 
 #include "sb_utf.h"
 
@@ -878,7 +877,6 @@ static int mygui_ifont_get_string_width( MyGUI::IFont* font, const char* str) {
 }
 
 SB_META_DECLARE_OBJECT(MyGUI::IResource, MyGUI::ISerializable)
-SB_META_DECLARE_OBJECT(MyGUI::IPointer, MyGUI::IResource)
 SB_META_DECLARE_OBJECT(MyGUI::IFont, MyGUI::IResource)
 SB_META_BEGIN_KLASS_BIND(MyGUI::IFont)
 SB_META_METHOD(getDefaultHeight)
@@ -904,8 +902,6 @@ SB_META_DECLARE_OBJECT(MyGUI::TileRect, MyGUI::ISubWidgetRect)
 SB_META_DECLARE_OBJECT(MyGUI::SubSkin, MyGUI::ISubWidgetRect)
 SB_META_DECLARE_OBJECT(MyGUI::MainSkin, MyGUI::SubSkin)
 
-SB_META_DECLARE_OBJECT(MyGUI::ResourceImageSetPointer, MyGUI::IPointer)
-SB_META_DECLARE_OBJECT(MyGUI::ResourceManualPointer, MyGUI::IPointer)
 
 SB_META_DECLARE_OBJECT(MyGUI::ResourceManualFont, MyGUI::IFont)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ResourceManualFont)
@@ -926,7 +922,7 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ResourceLayout, MyGUI::IResource)
 SB_META_DECLARE_OBJECT(MyGUI::ResourceSkin, MyGUI::IResource)
-SB_META_DECLARE_OBJECT(MyGUI::ResourceImageSet, MyGUI::IResource)
+
 
 SB_META_DECLARE_OBJECT(MyGUI::RotatingSkin, MyGUI::ISubWidgetRect)
 SB_META_DECLARE_OBJECT(MyGUI::PolygonalSkin, MyGUI::ISubWidgetRect)
@@ -967,6 +963,13 @@ SB_META_DECLARE_OBJECT(MyGUI::RotatingSkinStateInfo, MyGUI::IStateInfo)
 SB_META_DECLARE_OBJECT(MyGUI::EditTextStateInfo, MyGUI::IStateInfo)
 SB_META_DECLARE_OBJECT(MyGUI::TileRectStateInfo, MyGUI::IStateInfo)
 
+SB_META_DECLARE_KLASS(Sandbox::mygui::RenderManager, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::RenderManager)
+SB_META_STATIC_METHOD(getInstancePtr)
+SB_META_PROPERTY_WO(context, setContext)
+SB_META_END_KLASS_BIND()
+
+
 
 SB_META_DECLARE_KLASS(MyGUI::LayoutManager, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::LayoutManager)
@@ -984,6 +987,17 @@ SB_META_DECLARE_KLASS(MyGUI::ResourceManager, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ResourceManager)
 SB_META_STATIC_METHOD(getInstancePtr)
 SB_META_METHOD(load)
+SB_META_METHOD(findByName)
+SB_META_METHOD(addResource)
+SB_META_METHOD(removeByName)
+SB_META_METHOD(removeResource)
+SB_META_PROPERTY_RO(categoryName, getCategoryName)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(MyGUI::FactoryManager, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::FactoryManager)
+SB_META_STATIC_METHOD(getInstancePtr)
+bind(method("createObject", static_cast<MyGUI::IObject*(MyGUI::FactoryManager::*)(const std::string& _category, const std::string& _type)>(&MyGUI::FactoryManager::createObject)));
 SB_META_END_KLASS_BIND()
 
 
@@ -1078,6 +1092,7 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::LayoutManager>(lua);
             luabind::ExternClass<MyGUI::LayerManager>(lua);
             luabind::ExternClass<MyGUI::ResourceManager>(lua);
+            luabind::ExternClass<MyGUI::FactoryManager>(lua);
             luabind::ExternClass<MyGUI::FontManager>(lua);
             luabind::ExternClass<MyGUI::Gui>(lua);
 
@@ -1099,6 +1114,7 @@ namespace Sandbox {
             luabind::ExternClass<Sandbox::mygui::ResourceMultipassFont>(lua);
             luabind::ExternClass<MyGUI::ResourceManualFont>(lua);
             
+            luabind::ExternClass<Sandbox::mygui::RenderManager>(lua);
             luabind::ExternClass<MyGUI::InputManager>(lua);
             
             luabind::ExternClass<MyGUI::ControllerManager>(lua);

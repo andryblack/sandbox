@@ -206,7 +206,17 @@ namespace Sandbox {
             
             onResizeView(m_rendertarget_size);
         }
-                
+        
+        ImagePtr RenderManager::getImage(const std::string& name) {
+            if (m_context && m_context->GetValue<bool>("get_image")) {
+                return m_context->call_self<ImagePtr>("get_image");
+            }
+            return ImagePtr();
+        }
+        void RenderManager::setContext(const LuaContextPtr& ctx ) {
+            m_context = ctx;
+        }
+        
         float RenderManager::getDisplayScale() const {
             return m_resources->GetScale();
         }

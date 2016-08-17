@@ -18,6 +18,8 @@
 #include "sb_scene.h"
 #include <ghl_render.h>
 #include "sb_data.h"
+#include "sb_lua_context.h"
+#include "sb_image.h"
 
 namespace GHL {
     struct Render;
@@ -106,8 +108,11 @@ namespace Sandbox {
         public:
             explicit RenderManager( Graphics* graphics, Resources* resources );
             
+            ImagePtr getImage(const std::string& name);
+            void setContext(const LuaContextPtr& ctx );
             
             static RenderManager& getInstance() { return static_cast<RenderManager&>(MyGUI::RenderManager::getInstance()); }
+            static RenderManager* getInstancePtr() { return static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr()); }
             
             /** Create empty texture instance */
             virtual MyGUI::ITexture* createTexture(const std::string& _name);
@@ -138,7 +143,7 @@ namespace Sandbox {
             void wrapRT( MyGUI::ITexture* texture, const RenderTargetPtr& rt );
         private:
             sb::map<sb::string,TextureImpl*>  m_textures;
-            
+            Sandbox::LuaContextPtr  m_context;
         };
         
     }

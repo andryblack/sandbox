@@ -9,7 +9,7 @@
 #ifndef __sr_osx__sb_lua_function__
 #define __sr_osx__sb_lua_function__
 
-#include "luabind/sb_luabind_ref.h"
+#include "luabind/sb_luabind_function.h"
 #include <sbstd/sb_intrusive_ptr.h>
 
 namespace Sandbox {
@@ -17,7 +17,7 @@ namespace Sandbox {
     class LuaContext;
     typedef sb::intrusive_ptr<LuaContext> LuaContextPtr;
     
-    class LuaFunction : public luabind::LuaReference {
+    class LuaFunction : public luabind::function {
     public:
         explicit LuaFunction();
         bool    Execute();
