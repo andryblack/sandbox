@@ -4,7 +4,7 @@
 #include "MyGUI_RenderItem.h"
 #include "sb_graphics.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskImageWidget,Sandbox::mygui::ImageWidget)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskImageWidget,Sandbox::mygui::ImageWidgetBase)
 
 namespace Sandbox {
     namespace mygui {
@@ -40,9 +40,7 @@ namespace Sandbox {
         }
         
         void MaskImageWidget::setPropertyOverride(const std::string& _key, const std::string& _value) {
-            if (_key == "Texture") {
-                setImage(RenderManager::getInstance().resources()->GetImage(_value.c_str(), false));
-            } else if (_key == "Shader") {
+            if (_key == "Shader") {
                 size_t delim_pos = _value.find(';');
                 if (delim_pos!=_value.npos) {
                     sb::string vert = _value.substr(0,delim_pos);

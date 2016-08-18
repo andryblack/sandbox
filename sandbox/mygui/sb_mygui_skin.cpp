@@ -19,6 +19,7 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::CopySubSkin,MyGUI::SubSkin)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSubSkin,MyGUI::SubSkin)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSetSubSkin,MyGUI::MainSkin)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSetSubSkinState,MyGUI::SubSkinStateInfo)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::KeepAspectSkin,MyGUI::MainSkin)
 
 namespace Sandbox {
 
@@ -230,6 +231,59 @@ namespace Sandbox {
         }
         
         
+        KeepAspectSkin::KeepAspectSkin() {
+            
+        }
+        
+        void KeepAspectSkin::_setUVSet(const MyGUI::FloatRect& _rect) {
+            updateRect(_rect.width(),_rect.height());
+            Base::_setUVSet(_rect);
+        }
+        void KeepAspectSkin::updateRect(float tw, float th) {
+            int rw = mCroppedParent->getWidth();
+            int rh = mCroppedParent->getHeight();
+            
+            float sw = rw / tw;
+            float sh = rh / th;
+            float s = sw;
+            if ( sh < s ) {
+                s = sh;
+            }
+            
+            int nrw = tw * s;
+            int nrh = th * s;
+            
+            mCurrentCoord.set(0, 0, nrw, nrh);
+            if (m_align.isVCenter()) {
+                mCurrentCoord.top = (rh-nrh) / 2;
+            } else if (m_align.isBottom()) {
+                mCurrentCoord.top = rh-nrh;
+            }
+            if (m_align.isHCenter()) {
+                mCurrentCoord.left = (rw-nrw)/2;
+            } else if (m_align.isRight()) {
+                mCurrentCoord.left = rw-nrw;
+            }
+            
+            mCoord = mCurrentCoord;
+            _updateView();
+            
+        }
+        void KeepAspectSkin::_setAlign(const MyGUI::IntSize& _oldsize) {
+            //mCurrentCoord.set(0, 0, mCroppedParent->getWidth(), mCroppedParent->getHeight());
+            if (mRectTexture.empty()) {
+                Base::_setAlign(_oldsize);
+                return;
+            }
+            float tw = mRectTexture.width();
+            float th = mRectTexture.height();
+            updateRect(tw,th);
+        }
+        
+        void KeepAspectSkin::setAlign(MyGUI::Align _value) {
+            m_align = _value;
+            Base::setAlign(MyGUI::Align::Stretch);
+        }
         
         void register_skin() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
@@ -243,12 +297,14 @@ namespace Sandbox {
             factory.registerFactory<ObjectSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.registerFactory<AutoSizeText>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.registerFactory<MaskText>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            factory.registerFactory<KeepAspectSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             
             factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSubSkin");
             factory.registerFactory<MaskSetSubSkinState>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSetSubSkin");
             factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ObjectSubSkin");
             factory.registerFactory<MyGUI::EditTextStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "AutoSizeText");
             factory.registerFactory<MyGUI::EditTextStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskText");
+            factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "KeepAspectSkin");
         }
         
         void unregister_skin() {
@@ -261,11 +317,14 @@ namespace Sandbox {
             factory.unregisterFactory<ObjectSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<AutoSizeText>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<MaskText>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            factory.unregisterFactory<KeepAspectSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            
             factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSubSkin");
             factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSetSubSkin");
             factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ObjectSubSkin");
             factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "AutoSizeText");
             factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskText");
+            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "KeepAspectSkin");
         }
         
     }

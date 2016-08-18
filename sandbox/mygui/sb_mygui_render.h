@@ -96,7 +96,9 @@ namespace Sandbox {
             virtual MyGUI::PixelFormat getFormat();
             virtual MyGUI::TextureUsage getUsage();
             virtual size_t getNumElemBytes();
+            
             const TexturePtr& GetTexture() { return m_texture; }
+            void SetTexture(const TexturePtr& tex) { m_texture = tex; }
         private:
             sb::string  m_name;
             TexturePtr  m_texture;
@@ -141,6 +143,7 @@ namespace Sandbox {
             
             
             void wrapRT( MyGUI::ITexture* texture, const RenderTargetPtr& rt );
+            void wrapTexture( const TexturePtr& texture );
         private:
             sb::map<sb::string,TextureImpl*>  m_textures;
             Sandbox::LuaContextPtr  m_context;

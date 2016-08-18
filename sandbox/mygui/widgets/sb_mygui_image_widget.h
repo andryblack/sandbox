@@ -24,19 +24,27 @@ namespace Sandbox {
     
     namespace mygui {
         
-        class ImageWidget : public MyGUI::Widget {
-            MYGUI_RTTI_DERIVED( ImageWidget )
+        class ImageWidgetBase : public MyGUI::Widget {
+            MYGUI_RTTI_DERIVED( ImageWidgetBase )
         public:
-            ImageWidget();
-            ~ImageWidget();
+            ImageWidgetBase();
+            ~ImageWidgetBase();
             
             void setPropertyOverride(const std::string& _key, const std::string& _value);
             
             virtual void setImage(const ImagePtr& img) { m_image = img;  }
             const ImagePtr& getImage() const { return m_image; }
             
+            void setTexture(const std::string& filename );
+            
         private:
             ImagePtr    m_image;
+        };
+        
+        class ImageWidget : public ImageWidgetBase {
+            MYGUI_RTTI_DERIVED( ImageWidget )
+        public:
+            virtual void setImage(const ImagePtr& img);
         };
     }
 }

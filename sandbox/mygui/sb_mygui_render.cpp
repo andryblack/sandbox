@@ -209,7 +209,7 @@ namespace Sandbox {
         
         ImagePtr RenderManager::getImage(const std::string& name) {
             if (m_context && m_context->GetValue<bool>("get_image")) {
-                return m_context->call_self<ImagePtr>("get_image");
+                return m_context->call_self<ImagePtr>("get_image",name);
             }
             return ImagePtr();
         }
@@ -227,6 +227,15 @@ namespace Sandbox {
             TextureImpl* tex = new TextureImpl(_name,m_graphics,m_resources);
             m_textures[_name] = tex;
             return tex;
+        }
+        
+        void RenderManager::wrapTexture( const TexturePtr& texture ) {
+            sb_assert(texture);
+            const sb::string& name(texture->GetName());
+            sb_assert(m_textures.find(name)==m_textures.end());
+            TextureImpl* tex = new TextureImpl(name,m_graphics,m_resources);
+            m_textures[name] = tex;
+            tex->SetTexture(texture);
         }
         
         void RenderManager::destroyTexture(MyGUI::ITexture* _texture) {

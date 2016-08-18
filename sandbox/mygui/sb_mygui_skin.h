@@ -87,6 +87,18 @@ namespace Sandbox {
         private:
             MyGUI::ITexture* m_texture;
         };
+        
+        class KeepAspectSkin : public MyGUI::MainSkin {
+            MYGUI_RTTI_DERIVED( KeepAspectSkin )
+        public:
+            KeepAspectSkin();
+            virtual void _setAlign(const MyGUI::IntSize& _oldsize);
+            virtual void _setUVSet(const MyGUI::FloatRect& _rect);
+            virtual void setAlign(MyGUI::Align _value);
+            void updateRect(float tw, float th);
+        private:
+            MyGUI::Align    m_align;
+        };
 
         
         void register_skin();

@@ -22,7 +22,7 @@ namespace Sandbox {
         
                 
         
-        class MaskImageWidget : public ImageWidget {
+        class MaskImageWidget : public ImageWidgetBase {
             MYGUI_RTTI_DERIVED( MaskImageWidget )
         public:
             MaskImageWidget();
@@ -30,7 +30,7 @@ namespace Sandbox {
             
             void setPropertyOverride(const std::string& _key, const std::string& _value);
             
-            void setImage(const ImagePtr& img) { ImageWidget::setImage(img); update_shader(); }
+            void setImage(const ImagePtr& img) { ImageWidgetBase::setImage(img); update_shader(); }
             
             void setShader(const ShaderPtr& s);
             const ShaderPtr& getShader() const { return m_shader; }
