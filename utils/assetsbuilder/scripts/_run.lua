@@ -99,10 +99,18 @@ extensions.base = r
 
 local data = nil
 
+local __current_path = ''
+
 function sandbox.include( file )
+	local sp = __current_path
+	__current_path = path.getdirectory(file)
 	load_sandbox(file,sandbox,data)
+	__current_path = sp
 end
 
+function get_current_path()
+	return __current_path
+end
 data = load_sandbox('assets.lua',sandbox,data)
 
 print('rules ready, apply it')
