@@ -738,8 +738,8 @@ static void set_image_proxy(MyGUI::ImageBox* ib,const Sandbox::ImagePtr& img) {
         ib->setImageTexture(img->GetTexture()->GetName());
         ib->setImageRect(MyGUI::IntRect(img->GetTextureX(),
                                         img->GetTextureY(),
-                                        img->GetTextureW(),
-                                        img->GetTextureH()));
+                                        img->GetTextureX()+img->GetTextureW(),
+                                        img->GetTextureY()+img->GetTextureH()));
     }
 }
 

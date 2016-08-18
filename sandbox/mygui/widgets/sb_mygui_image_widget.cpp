@@ -20,6 +20,12 @@ namespace Sandbox {
             
         }
         
+        void ImageWidgetBase::setImage(const ImagePtr& img) {
+            m_image = img;
+            if (img && img->GetTexture()) {
+                img->GetTexture()->SetFiltered(true);
+            }
+        }
         void ImageWidgetBase::setPropertyOverride(const std::string& _key, const std::string& _value) {
             if (_key == "Image") {
                 setImage(RenderManager::getInstance().getImage(_value.c_str()));

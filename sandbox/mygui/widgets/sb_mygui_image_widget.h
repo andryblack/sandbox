@@ -32,7 +32,7 @@ namespace Sandbox {
             
             void setPropertyOverride(const std::string& _key, const std::string& _value);
             
-            virtual void setImage(const ImagePtr& img) { m_image = img;  }
+            virtual void setImage(const ImagePtr& img);
             const ImagePtr& getImage() const { return m_image; }
             
             void setTexture(const std::string& filename );

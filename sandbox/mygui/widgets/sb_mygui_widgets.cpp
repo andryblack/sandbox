@@ -34,6 +34,8 @@ SB_META_END_KLASS_BIND()
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ImageWidgetBase)
 SB_META_PROPERTY_RW(image,getImage,setImage)
 SB_META_PROPERTY_WO(texture, setTexture)
+SB_META_METHOD(setImage)
+SB_META_METHOD(setTexture)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ImageWidget)
