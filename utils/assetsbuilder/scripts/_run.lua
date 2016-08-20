@@ -53,8 +53,9 @@ end
 
 local function setup_rules( rules )
 	assert(rules)
-	r.init_rules(rules)
-	extensions.init_rules(rules)
+	for _,v in ipairs(__modules.init_rules) do
+		v(rules)
+	end
 end
 
 setup_rules( __global_rules )
@@ -92,10 +93,7 @@ local function extend( M )
 end
 
 
-extend(r.assets_rules)
-
-extend(extensions.assets_rules)
-extensions.base = r
+extend(__modules.rules)
 
 local data = nil
 
@@ -115,16 +113,21 @@ data = load_sandbox('assets.lua',sandbox,data)
 
 print('rules ready, apply it')
 
-if extensions.pre_apply_rules then
-	__all_rules = extensions.pre_apply_rules( __all_rules ) or {}
+local function apply_rules( rules )
+	for _,v in ipairs(__modules.apply_rules) do
+		v(rules)
+	end
+end
+
+for _,v in ipairs(__modules.pre_apply_rules) do
+	v(__all_rules)
 end
 
 for _,rules in ipairs(__all_rules) do
 	print('apply rules',rules._name)
-	r.apply_rules(rules)
-	extensions.apply_rules(rules)
+	apply_rules(rules)
 end
 
-if extensions.post_apply_rules then
-	extensions.post_apply_rules()
+for _,v in ipairs(__modules.post_apply_rules) do
+	v()
 end

@@ -355,3 +355,30 @@ for _,l in ipairs(application.options) do
 	end
 end
 
+__modules = {
+	init_rules = {},
+	rules = {},
+	apply_rules = {},
+	pre_apply_rules = {},
+	post_apply_rules = {}
+}
+function register_rule( r )
+	if r.init_rules then
+		table.insert(__modules.init_rules,r.init_rules)
+	end
+	if r.assets_rules then
+		for k,v in pairs(r.assets_rules) do
+			__modules.rules[k] = v
+		end
+	end
+	if r.apply_rules then
+		table.insert(__modules.apply_rules,r.apply_rules)
+	end
+	if r.post_apply_rules then
+		table.insert(__modules.post_apply_rules,r.post_apply_rules)
+	end
+	if r.pre_apply_rules then
+		table.insert(__modules.pre_apply_rules,r.pre_apply_rules)
+	end
+end
+

@@ -16,6 +16,10 @@ function _M.assets_rules.set_alpha_file_format( func )
 
 end
 
+function _M.assets_rules.use_variant( v , scale , override_base )
+	_M.use_variants[v]={scale=scale,override_base=override_base}
+end
+
 local function sortedpairs( t )
 	local ss = {}
 	for k,v in pairs(t) do
@@ -480,7 +484,7 @@ function _M.filter_files( filelist )
 
 end
 
-function _M.apply( rules )
+function _M.apply_rules( rules )
 	print('images apply:',rules)
 	local images = rules.images or {}
 	for k,v in pairs(images) do

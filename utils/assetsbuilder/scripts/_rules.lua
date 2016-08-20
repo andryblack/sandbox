@@ -4,8 +4,6 @@
 local _M = {}
 _M.definitions = {}
 
-local img = require '_images'
-local convert_spine = require '_convert_spine'
 local luapp = require '_luapp'
 
 function _M.init_rules(rules) 
@@ -13,8 +11,6 @@ function _M.init_rules(rules)
 	rules.compile_files = {}
 	rules.dest_files = {}
 	rules.call_functions = {}
-	img.init_rules(rules)
-	convert_spine.init_rules(rules)
 end
 
 _M.assets_rules = {}
@@ -38,17 +34,7 @@ function _M.assets_rules.define( n , v )
 end
 
 
-function _M.assets_rules.use_variant( v , scale , override_base )
-	img.use_variants[v]={scale=scale,override_base=override_base}
-end
 
-for k,v in pairs(img.assets_rules) do
-	_M.assets_rules[k] = v
-end
-
-for k,v in pairs(convert_spine.assets_rules) do
-	_M.assets_rules[k] = v
-end
 
 local action_copy_files = 'copy_files'
 local action_compile_files = 'compile_files'
@@ -255,8 +241,6 @@ function _M.apply_rules( rules )
 		v(_G)
 	end
 
-	img.apply( rules )
-	convert_spine.apply( rules )
 end
 
 return _M

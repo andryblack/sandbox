@@ -45,7 +45,7 @@ local function apply_convert_spine( k,v )
 	end
 end
 
-function _M.apply( rules )
+function _M.apply_rules( rules )
 
 	local skelets = rules.convert_spine or {}
 	for k,v in pairs(skelets) do
@@ -53,5 +53,6 @@ function _M.apply( rules )
 	end
 
 end
+
 
 return _M
