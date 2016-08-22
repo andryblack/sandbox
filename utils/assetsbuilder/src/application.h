@@ -49,6 +49,8 @@ public:
     GHL::UInt32 GetOffsetX() const { return m_offset_x; }
     GHL::UInt32 GetOffsetY() const { return m_offset_y; }
     
+    sb::string GetMD5() const;
+    
     bool Crop();
 };
 typedef sb::intrusive_ptr<TextureData> TextureDataPtr;

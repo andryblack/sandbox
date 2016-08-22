@@ -6,6 +6,7 @@
 #include <ghl_image_decoder.h>
 #include <json/sb_json.h>
 #include <sb_data.h>
+#include <utils/sb_md5.h>
 
 #include "spine_convert.h"
 
@@ -176,6 +177,7 @@ SB_META_METHOD(PremultiplyAlpha)
 SB_META_METHOD(Place)
 SB_META_METHOD(SetAlpha)
 SB_META_METHOD(Crop)
+SB_META_METHOD(GetMD5)
 SB_META_END_KLASS_BIND()
 
 TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(GHL_CreateImage(w, h, GHL::IMAGE_FORMAT_RGBA)) {
@@ -247,6 +249,11 @@ bool TextureData::Crop() {
     m_offset_y = min_y;
     SetSize(m_data->GetWidth(), m_data->GetHeight());
     return true;
+}
+
+sb::string TextureData::GetMD5() const {
+    if (!m_data) return "nil";
+    return Sandbox::MD5SumData( m_data->GetData()->GetData(), m_data->GetData()->GetSize());
 }
 
 Application::Application() : m_lua(0),m_vfs(0),m_update_only(false) {
