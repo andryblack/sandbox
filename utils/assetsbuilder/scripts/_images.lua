@@ -242,9 +242,10 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	local atex = { type='png', premultiplied = true, smooth=true, _path = path.join(from) , _name = name }
 	g._textures[name] = atex
 	function a:apply(  )
-		print('build atlas ' .. self.name .. ' with ' .. tostring(#self.images) .. ' textures')
+		print('build atlas ' .. self.name .. ' with ' .. tostring(#self.images) .. ' textures ' .. self.width .. 'x' .. self.height)
 		if not override_base then
-			local img = TextureData( self.with, self.height )
+			assert(self.width ~= 0 and self.height ~= 0)
+			local img = TextureData( self.width, self.height )
 			for _,v in ipairs(self.images) do
 				--print(v.src._path,v.src._name)
 				local tpath = path.join(v.src._path,v.src._name .. '.' .. v.src.type)
@@ -263,6 +264,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 		end
 		if _M.use_variants then
 			for vk,vv in pairs(_M.use_variants) do
+				assert(vv.scale ~= 0)
 				local img = TextureData( self.width * vv.scale , self.height * vv.scale )
 				for _,v in ipairs(self.images) do
 					--print(v.src._path,v.src._name)

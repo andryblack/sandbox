@@ -41,7 +41,7 @@ local sandbox = {
 
 local r = require '_rules'
 
-local extensions = require '_extenstions'
+local extensions = require '_extensions'
 
 local __all_rules = {}
 local __current_rules = {}
