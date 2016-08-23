@@ -54,8 +54,8 @@ namespace Sandbox {
                     RenderManager::getInstance().wrapTexture(texture);
                 }
                 _setTextureName(texture->GetName());
-                float iw = 1.0f / float(texture->GetRealWidth());
-                float ih = 1.0f / float(texture->GetRealHeight());
+                float iw = 1.0f / float(texture->GetWidth());
+                float ih = 1.0f / float(texture->GetHeight());
                 if (nullptr != getSubWidgetMain())
                     getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(img->GetTextureX()*iw,
                                                                    img->GetTextureY()*ih,
