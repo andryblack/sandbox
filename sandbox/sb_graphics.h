@@ -216,6 +216,8 @@ namespace Sandbox {
 		std::vector<GHL::UInt16> m_indexes;
         bool    m_calc2_tex;
 	
+        void BeginDrawPrimitives(GHL::PrimitiveType type);
+        void BeginDrawTexture(const TexturePtr& tex);
 		void BeginDrawImage(const Image& img);
 		void BeginDrawLines();
 		void BeginDrawCircle();

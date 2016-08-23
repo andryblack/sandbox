@@ -175,35 +175,36 @@ namespace Sandbox {
 		m_indexes.clear();
 		m_primitives = 0;
 	}
+    
+    void Graphics::BeginDrawTexture(const TexturePtr& texture) {
+        if (m_texture != texture) {
+            Flush();
+            if (texture) {
+                m_itw = 1.0f / texture->GetWidth();
+                m_ith = 1.0f / texture->GetHeight();
+            } else {
+                m_itw = 1.0f;
+                m_ith = 1.0f;
+            }
+        }
+        m_texture = texture;
+    }
 	
 	void Graphics::BeginDrawImage(const Image& img) {
-        TexturePtr texture = img.GetTexture();
-        bool flush = false;
-		if (m_texture!=texture) {
-            flush = true;
-            //const GHL::Texture* tex = texture->Present(m_resources);
-            m_itw = 1.0f / texture->GetWidth();
-            m_ith = 1.0f / texture->GetHeight();
-        } else if (m_ptype!=GHL::PRIMITIVE_TYPE_TRIANGLES) {
-            flush = true;
-        }
-        if (flush) {
+        BeginDrawTexture(img.GetTexture());
+        BeginDrawPrimitives(GHL::PRIMITIVE_TYPE_TRIANGLES);
+    }
+    
+    void Graphics::BeginDrawPrimitives(GHL::PrimitiveType type) {
+        if (m_ptype != type) {
             Flush();
         }
-		
-        m_texture = texture;
-        m_ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
+        m_ptype = type;
     }
 	
     void Graphics::BeginDrawTriangles(const TexturePtr& texture) {
-        if (m_texture != texture) {
-            Flush();
-        }
-        if (m_ptype != GHL::PRIMITIVE_TYPE_TRIANGLES) {
-            Flush();
-        }
-        m_texture = texture;
-        m_ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
+        BeginDrawTexture(texture);
+        BeginDrawPrimitives(GHL::PRIMITIVE_TYPE_TRIANGLES);
     }
     
     void Graphics::AppendVertex(const Vector2f& pos, const Vector2f& tex, const Color& clr) {
@@ -740,7 +741,9 @@ namespace Sandbox {
 
 	
 	void Graphics::DrawGeometry(const GeometryData& geomentry,bool transform) {
-		Flush();
+        BeginDrawTexture(geomentry.texture);
+        BeginDrawPrimitives(geomentry.primitives);
+        size_t index_offset = m_vertexes.size();
         if (transform)
 		{
             for (size_t i=0;i<geomentry.vertexes.size();i++) {
@@ -750,33 +753,33 @@ namespace Sandbox {
 							 geomentry.vertexes[i].ty,
 							 (Color(*reinterpret_cast<const GHL::UInt32*>(geomentry.vertexes[i].color))*m_color).hw_premul());
             }
-        } 
-		if (geomentry.texture) {
-			m_render->SetTexture(geomentry.texture->Present(m_resources),0);
-		} else {
-			m_render->SetTexture(0,0);
-		}
-		
-        
-        m_texture = geomentry.texture;
-        m_ptype = geomentry.primitives;
+        } else {
+            Flush();
+        }
         
         if (m_ptype==GHL::PRIMITIVE_TYPE_TRIANGLES)
-            m_primitives = static_cast<GHL::UInt32>(geomentry.indexes.size())/3;
+            m_primitives += static_cast<GHL::UInt32>(geomentry.indexes.size())/3;
         else if (m_ptype==GHL::PRIMITIVE_TYPE_TRIANGLE_STRIP){
             sb_assert(geomentry.indexes.size()>2);
-            m_primitives = static_cast<GHL::UInt32>(geomentry.indexes.size()-2);
+            m_primitives += static_cast<GHL::UInt32>(geomentry.indexes.size()-2);
         }
         
         if (transform) {
-            m_indexes = geomentry.indexes;
+            for (sb::vector<GHL::UInt16>::const_iterator it = geomentry.indexes.begin();it!=geomentry.indexes.end();++it) {
+                m_indexes.push_back(*it+index_offset);
+            }
         } else {
-            m_render->DrawPrimitivesFromMemory(geomentry.primitives, GHL::VERTEX_TYPE_SIMPLE, &geomentry.vertexes[0], GHL::UInt32(geomentry.vertexes.size()), &geomentry.indexes[0], m_primitives);
+            
+            
+            if (m_texture) {
+                m_render->SetTexture(m_texture->Present(m_resources),0);
+            } else {
+                m_render->SetTexture(0,0);
+            }
+            m_render->DrawPrimitivesFromMemory(m_ptype, GHL::VERTEX_TYPE_SIMPLE, &geomentry.vertexes[0], GHL::UInt32(geomentry.vertexes.size()), &geomentry.indexes[0], m_primitives);
             m_primitives = 0;
         }
 		
-        
-        Flush();
 	}
 	
 	void Graphics::SetShader(const ShaderPtr& sh) {
