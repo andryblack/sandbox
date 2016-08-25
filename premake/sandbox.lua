@@ -109,7 +109,8 @@ solution( ProjectName )
 		xcodebuildsettings { 
 			SDKROOT = 'iphoneos' , 
 			CODE_SIGN_IDENTITY='iPhone Developer', 
-			ARCHS='$(ARCHS_STANDARD)',
+			--@todo fixit
+			--ARCHS=false,
 			IPHONEOS_DEPLOYMENT_TARGET='7.0'
 		}
 	elseif platform_id == 'windows' then
@@ -165,6 +166,12 @@ solution( ProjectName )
 		configuration 'Release'
 		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir .. '/' .. 'release')
 		configuration {}
+
+		if os.is('ios') then
+			xcodebuildsettings {
+				SKIP_INSTALL='YES',
+			}
+		end
 	end
 	language "C++"
 
@@ -333,6 +340,9 @@ solution( ProjectName )
 			includedirs { sandbox_dir .. '/external/chipmunk/include' }
 		end
 		if os.is('ios') then
+			xcodebuildsettings {
+				INSTALL_PATH='/Applications'
+			}
 			links {
 				'Foundation.framework', 
 				'QuartzCore.framework', 

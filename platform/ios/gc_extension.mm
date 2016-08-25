@@ -92,15 +92,17 @@
 }
 
 -(void) submitHighScore: (int64_t) scoreValue leaderboardId: (const char*) leaderboardId {
-    NSLog(@"[GC] submitHighScore");
     NSString* leaderboardIdentifier = [NSString stringWithUTF8String:leaderboardId];
-    GKScore* score = [[GKScore alloc] initWithLeaderboardIdentifier:leaderboardIdentifier];
+    NSLog(@"[GC] submitHighScore to %@",leaderboardIdentifier);
+    
+    GKScore* score = [[[GKScore alloc] initWithLeaderboardIdentifier:leaderboardIdentifier] autorelease];
     score.value = scoreValue;
     
     [GKScore reportScores:@[score] withCompletionHandler:^(NSError *error){
         if (error != nil) {
             NSLog(@"[GC] submitHighScore %@", [error localizedDescription]);
-            [score release];
+        } else {
+            NSLog(@"[GC] success");
         }
     }];
 }
@@ -121,6 +123,7 @@
         gcViewController.gameCenterDelegate = self;
         
         gcViewController.viewState = GKGameCenterViewControllerStateLeaderboards;
+        gcViewController.leaderboardTimeScope = GKLeaderboardTimeScopeAllTime;
         
         [main_controller presentViewController:gcViewController animated:YES completion:nil];
 
@@ -193,4 +196,8 @@ public:
     }
 };
 
-gc_platform_extension __gc_extension;
+
+extern "C" void *init_gc_extension() {
+    static gc_platform_extension __gc_extension;
+    return &__gc_extension;
+}
