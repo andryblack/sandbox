@@ -41,8 +41,6 @@ local sandbox = {
 
 local r = require '_rules'
 
-local extensions = require '_extensions'
-
 local __all_rules = {}
 local __current_rules = {}
 local __global_rules = { _name='global' }
@@ -120,7 +118,7 @@ local function apply_rules( rules )
 end
 
 for _,v in ipairs(__modules.pre_apply_rules) do
-	v(__all_rules)
+	__all_rules = v(__all_rules)
 end
 
 for _,rules in ipairs(__all_rules) do

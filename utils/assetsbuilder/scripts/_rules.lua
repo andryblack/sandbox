@@ -208,7 +208,7 @@ end
 local function compile_files( files )
 	for v,dst in pairs(files) do
 		if dst then
-			--print('compile',v)
+			
 			local source = assert(io.open(path.getabsolute(path.join(src_path,v)),'r'))
 			
 			local pp_source = assert(luapp.preprocess(source,_M.definitions))
@@ -216,7 +216,9 @@ local function compile_files( files )
 
 			local shunk = assert(load(pp_source,'@'..dst,'t'))
 			local binary = string.dump(shunk)
-			local out = assert(io.open(path.join(application.dst_path,dst),'wb'))
+			local full_dst = path.join(application.dst_path,dst)
+			print('compile',v,full_dst)
+			local out = assert(io.open(full_dst,'wb'))
 			out:write(binary)
 			out:close()
 		end
