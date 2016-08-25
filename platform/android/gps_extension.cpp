@@ -198,7 +198,7 @@ public:
         gpg::AndroidSupport::OnActivityResult(env,activity,request_code,result_code,data);
         return false;
     }
-} gps_extension;
+};
 
 void GPSExtension::InitServices(gpg::PlatformConfiguration const &pc) {
     Sandbox::LogInfo() << "[PGS]" << "Initializing Services";
@@ -255,6 +255,7 @@ void GPSExtension::InitServices(gpg::PlatformConfiguration const &pc) {
     Sandbox::LogInfo() << "Created";
 }
 
-void* ensure_gps_extension_not_stripped() {
-    return &gps_extension;
+extern "C" void *init_gps_extension() {
+    static GPSExtension __gps_extension;
+    return &__gps_extension;
 }

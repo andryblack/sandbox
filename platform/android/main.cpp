@@ -2,11 +2,8 @@
 
 int StartApplication(int argc,char** argv);
 
-volatile void prevent_strip_symbols();
-
 int ghl_android_app_main(int argc,char** argv) {
-	prevent_strip_symbols();
-    StartApplication(argc,argv);
+	 StartApplication(argc,argv);
 }
 
 extern "C" JNIEXPORT
@@ -44,18 +41,4 @@ void JNICALL Java_com_sandbox_Activity_nativeOnActivityResult(
                                                                  jint request_code,
                                                                  jint result_code,
                                                                  jobject data) ;
-void ensure_iap_extension_not_stripped();
-void ensure_gps_extension_not_stripped();
 
-volatile void* __prevent_strip_symbols;
-volatile void prevent_strip_symbols() {
-    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityCreated;
-    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityDestroyed;
-    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityPaused;
-    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityResumed;
-    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivitySaveInstanceState;
-    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityStopped;
-    __prevent_strip_symbols = (void*)&Java_com_sandbox_Activity_nativeOnActivityResult;
-    ensure_iap_extension_not_stripped();
-    ensure_gps_extension_not_stripped();
-}
