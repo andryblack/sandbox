@@ -262,19 +262,22 @@ namespace Sandbox {
         void ScrollList::handleCoordItem(MyGUI::ItemBox*, MyGUI::IntCoord& coords, bool drag) {
             if (m_visible_count && getClientWidget()) {
                 if (getVerticalAlignment()) {
-                    coords.width = getClientWidget()->getSize().width / m_num_subitems - getContentMargins().left - getContentMargins().right;
+                    coords.width = ( getClientWidget()->getSize().width - getContentMargins().left - getContentMargins().right) / m_num_subitems;
                     coords.height = getClientWidget()->getSize().height / m_visible_count;
                 } else {
                     coords.width = getClientWidget()->getSize().width / m_visible_count;
-                    coords.height = getClientWidget()->getSize().height / m_num_subitems - getContentMargins().top - getContentMargins().bottom;
+                    coords.height = (getClientWidget()->getSize().height - getContentMargins().top - getContentMargins().bottom)
+                                    / m_num_subitems;
                 }
             } else if (m_item_size > 0 && getClientWidget()) {
                 if (getVerticalAlignment()) {
-                    coords.width = getClientWidget()->getSize().width / m_num_subitems - getContentMargins().left - getContentMargins().right;
+                    coords.width = (getClientWidget()->getSize().width  - getContentMargins().left - getContentMargins().right)
+                                    / m_num_subitems;
                     coords.height = m_item_size;
                 } else {
                     coords.width = m_item_size;
-                    coords.height = getClientWidget()->getSize().height / m_num_subitems - getContentMargins().top - getContentMargins().bottom;
+                    coords.height = (getClientWidget()->getSize().height - getContentMargins().top - getContentMargins().bottom)
+                                    / m_num_subitems;
                 }
             }
             
