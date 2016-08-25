@@ -126,6 +126,7 @@ for _,rules in ipairs(__all_rules) do
 	apply_rules(rules)
 end
 
+print('post apply rules')
 for _,v in ipairs(__modules.post_apply_rules) do
 	v()
 end
