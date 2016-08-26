@@ -670,6 +670,9 @@ namespace Sandbox {
 	}
 	void Graphics::DrawCircle(const Vector2f& pos, float r,GHL::UInt32 clr) {
 #ifndef GHL_PLATFORM_FLASH
+        if (r < 0.0f) {
+            r = r * -1.0f;
+        }
 		size_t subdivs = int(2*M_PI*r)/5;
 		if (subdivs<8) subdivs = 8;
 		const float step = static_cast<float>(M_PI*2/subdivs);
