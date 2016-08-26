@@ -209,7 +209,9 @@ public:
     	}
     	return false;
     }
-} iap_extension;
+} ;
+
+extern "C" void *init_iap_extension();
 
 extern "C" JNIEXPORT
 void JNICALL Java_com_sandbox_IAPHelper_nativeProcessResponse(
@@ -221,9 +223,10 @@ void JNICALL Java_com_sandbox_IAPHelper_nativeProcessResponse(
     GHL_Log(GHL::LOG_LEVEL_INFO,"Java_com_sandbox_IAPHelper_nativeProcessResponse\n");
     sb::string str_method = jni::extract_jni_string(env,(jstring)method);
     sb::string str_data = jni::extract_jni_string(env,(jstring)data);
-    iap_extension.processResponse(str_method,str_data);
+    static_cast<IAPExtension*>(init_iap_extension())->processResponse(str_method,str_data);
 }
 
-void* ensure_iap_extension_not_stripped() {
-	return &iap_extension;
+extern "C" void *init_iap_extension() {
+    static IAPExtension __iap_extension;
+    return &__iap_extension;
 }

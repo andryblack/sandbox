@@ -288,4 +288,8 @@ public:
 };
 
 
-iap_platform_extension __iap_extension;
+
+extern "C" void *init_iap_extension() {
+    static iap_platform_extension __iap_extension;
+    return &__iap_extension;
+}

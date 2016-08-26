@@ -66,11 +66,20 @@ namespace Sandbox {
             delete static_cast<DataStream*>(_data);
         }
         
-        bool DataManager::isDataExist(const std::string& _name) {
-            GHL::DataStream* ds = m_file_provider->OpenFile(_name.c_str());
-            if (ds) {
-                ds->Release();
-                return true;
+        bool DataManager::isDataExist(const std::string& _name, bool _texture) {
+            if (_texture) {
+                bool variant = false;
+                GHL::DataStream* ds = m_file_provider->OpenFileVariant(_name.c_str(),variant);
+                if (ds) {
+                    ds->Release();
+                    return true;
+                }
+            } else {
+                GHL::DataStream* ds = m_file_provider->OpenFile(_name.c_str());
+                if (ds) {
+                    ds->Release();
+                    return true;
+                }
             }
             return false;
         }

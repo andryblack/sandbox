@@ -110,7 +110,7 @@ solution( ProjectName )
 			SDKROOT = 'iphoneos' , 
 			CODE_SIGN_IDENTITY='iPhone Developer', 
 			--@todo fixit
-			--ARCHS=false,
+			ARCHS="$(ARCHS_STANDARD)",
 			IPHONEOS_DEPLOYMENT_TARGET='7.0'
 		}
 	elseif platform_id == 'windows' then
