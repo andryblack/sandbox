@@ -198,6 +198,7 @@ SB_META_PROPERTY_RW(Scale,GetScale,SetScale)
 SB_META_PROPERTY_RW(ScaleX,GetScaleX,SetScaleX)
 SB_META_PROPERTY_RW(ScaleY,GetScaleY,SetScaleY)
 SB_META_PROPERTY_RW(Angle,GetAngle,SetAngle)
+SB_META_PROPERTY_RW(ScrewX,GetScrewX,SetScrewX)
 SB_META_END_KLASS_BIND()
 
 

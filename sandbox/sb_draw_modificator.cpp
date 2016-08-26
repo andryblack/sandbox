@@ -20,7 +20,7 @@ namespace Sandbox {
         g.SetColor(g.GetColor()*m_color);
     }
    
-    TransformModificator::TransformModificator() : m_scale_x(1.0f),m_scale_y(1.0f),m_angle(0.0f) {
+    TransformModificator::TransformModificator() : m_scale_x(1.0f),m_scale_y(1.0f),m_angle(0.0f),m_screw_x(0.0f) {
     }
     
     void TransformModificator::Apply(Graphics &g) const {
@@ -29,11 +29,15 @@ namespace Sandbox {
         g.SetTransform(tr);
     }
     void TransformModificator::Apply(Transform2d& tr) const {
-        tr.translate(m_translate).rotate(m_angle).scale(m_scale_x,m_scale_y);
+        tr.translate(m_translate);
+        if (m_screw_x != 0.0f)
+            tr.screw_x(m_screw_x);
+        tr.rotate(m_angle).scale(m_scale_x,m_scale_y);
     }
     void TransformModificator::Transform(Vector2f& v) const {
-        v = (v - m_translate).rotate(-m_angle);
-        v.x /= m_scale_x;
-        v.y /= m_scale_y;
+        Transform2d tr;
+        Apply(tr);
+        tr.inverse();
+        v = tr.transform(v);
     }
 }

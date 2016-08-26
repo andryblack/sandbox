@@ -56,6 +56,14 @@ namespace Sandbox {
             m*=Matrix2f(c,s,-s,c);
             return *this;
         }
+        // screw, radians
+        Transform2d& screw_x(float _a) {
+            float a = _a;
+            float c = ::cosf(a);
+            float s = ::sinf(a);
+            m*=Matrix2f(c,0,-s,1);
+            return *this;
+        }
 		Transform2d rotated(float a) const {
 			Transform2d res(*this);
 			return Transform2d(*this).rotate(a);

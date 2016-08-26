@@ -42,6 +42,7 @@ namespace Sandbox {
 		float		m_scale_x;
 		float		m_scale_y;
 		float		m_angle;
+        float       m_screw_x;
     public:
         TransformModificator();
         
@@ -55,6 +56,8 @@ namespace Sandbox {
 		float GetScaleY() const { return m_scale_y;}
 		void SetAngle(float a) { m_angle = a;}
 		float GetAngle() const { return m_angle;}
+        void SetScrewX(float a) { m_screw_x = a;}
+        float GetScrewX() const { return m_screw_x;}
 
         void Transform(Vector2f& v) const;
         void Apply(Graphics& g) const;
