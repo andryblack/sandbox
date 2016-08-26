@@ -297,7 +297,7 @@ namespace Sandbox {
                 if (!on_top_modal) return;
                 if (!layer) return;
                 MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
-                pos_in_layer -= getAbsolutePosition();
+                pos_in_layer -= mClient ? mClient->getAbsolutePosition() : getAbsolutePosition();
                 if (m_state == state_none || m_state == state_free_scroll) {
                     MyGUI::IntRect client_rect = MyGUI::IntRect(0,0,getWidth(),getHeight());
                     if (mClient) {
