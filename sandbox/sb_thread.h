@@ -23,6 +23,7 @@ namespace Sandbox {
 	public:
 		virtual ~Thread();
 		virtual bool Update(float dt) = 0;
+        virtual void Clear() {}
     protected:
         Thread();
 	};
@@ -34,6 +35,7 @@ namespace Sandbox {
 		bool Update(float dt);
 		static int constructor_func(lua_State* L);
         static sb::intrusive_ptr<LuaThread> construct(lua_State* L,int idx);
+        virtual void Clear();
     private:
         explicit LuaThread(luabind::LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
 		void SetThread(lua_State* L);

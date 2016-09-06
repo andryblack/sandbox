@@ -126,6 +126,8 @@ namespace Sandbox {
             luabind::stack<sb::intrusive_ptr<LuaThread> >::push(L, res);
         	return 1;
     }
-
+    void LuaThread::Clear() {
+        m_ref.Reset();
+    }
     
 }

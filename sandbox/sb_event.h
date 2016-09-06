@@ -19,6 +19,7 @@ namespace Sandbox {
 	public:
 		virtual ~Event() {}
 		virtual void Emmit() = 0;
+        virtual void Clear() {}
 	protected:
 	};
 	typedef sb::intrusive_ptr<Event> EventPtr;

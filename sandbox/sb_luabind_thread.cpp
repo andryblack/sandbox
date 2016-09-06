@@ -15,6 +15,7 @@
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Thread)
 SB_META_METHOD(Update)
+SB_META_METHOD(Clear)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ThreadsMgr)
@@ -34,6 +35,7 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_KLASS(Sandbox::Event, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Event)
 SB_META_METHOD(Emmit)
+SB_META_METHOD(Clear)
 SB_META_END_KLASS_BIND()
 
 
@@ -95,6 +97,9 @@ namespace Sandbox {
             luabind::stack<sb::intrusive_ptr<LuaEvent> >::push(L, e);
 			return 1;
 		}
+        virtual void Clear(){
+            m_ref.Reset();
+        }
 	private:
         luabind::LuaReference	m_ref;
 	};

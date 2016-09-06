@@ -32,7 +32,8 @@ namespace Sandbox {
         
         float GetSpeed() const { return m_speed; }
         void SetSpeed(float s) { m_speed = s; }
-	private:
+        
+   private:
 		std::vector<ThreadPtr> m_threads;
 		std::vector<ThreadPtr> m_added_threads;
 		std::vector<ThreadPtr> m_removed_threads;

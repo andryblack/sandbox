@@ -72,6 +72,7 @@ namespace Sandbox {
 			std::vector<ThreadPtr>::iterator it = std::find(m_removed_threads.begin(),m_removed_threads.end(),m_threads[i]);
 			if (it==m_removed_threads.end())
 				m_removed_threads.push_back(m_threads[i]);
+            m_threads[i]->Clear();
 		}
 	}
 

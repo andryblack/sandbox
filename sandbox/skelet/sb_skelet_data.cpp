@@ -165,7 +165,7 @@ namespace Sandbox {
             
             if (!d) continue;
             if (::strcmp(it->attribute("compression").as_string(),"zlib")==0) {
-                GHL::UInt32 size = data_size;
+                GHL::UInt32 size = GHL::UInt32(data_size);
                 VectorData<GHL::Byte>* dd = new VectorData<GHL::Byte>();
                 dd->vector().reserve(size);
                 dd->vector().resize(size);
@@ -210,6 +210,7 @@ namespace Sandbox {
                 }
             }
             res->AddAnimation(anim);
+            d->Release();
         }
         return res;
     }

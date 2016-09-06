@@ -54,4 +54,11 @@ namespace Sandbox {
         }
     }
 
+    void Processor::Clear() {
+        m_controller.reset();
+        if (m_end_event) {
+            m_end_event->Clear();
+            m_end_event.reset();
+        }
+    }
 }

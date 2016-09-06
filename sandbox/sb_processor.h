@@ -42,6 +42,8 @@ namespace Sandbox {
         
 		bool GetInverted() const { return m_inverted;}
 		void SetInverted(bool i) { m_inverted = i;}
+        
+        virtual void Clear();
 	private:
 		ControllerPtr	m_controller;
 		bool			m_loop;
