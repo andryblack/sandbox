@@ -22,6 +22,10 @@ namespace MyGUI {
     class Widget;
 }
 
+namespace GHL {
+    struct Data;
+}
+
 namespace Sandbox {
     
     class Resources;
@@ -66,6 +70,9 @@ namespace Sandbox {
         GHL::UInt32 GetScreenHeight() const { return m_height; }
         float GetDrawWidth() const { return m_draw_width; }
         float GetDrawHeight() const { return m_draw_height; }
+        
+        bool StoreProfileFile( const char* filename , const GHL::Data* data );
+        GHL::Data* LoadProfileFile( const char* filename );
     protected:
 		Application();
 		virtual ~Application();

@@ -61,7 +61,7 @@ SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
     int Application_CallExtension( lua_State* L ) {
-        Application* app = luabind::stack<Application*>::get(L, 1);
+        Application* app = luabind::stack<Application*>::get(L, 1, false);
         if (!app)
             return 0;
         const char* method = luabind::stack<const char*>::get(L, 2);
@@ -80,6 +80,38 @@ namespace Sandbox {
         luabind::stack<const char*>::push(L,res.c_str());
         return 2;
     }
+    int Application_StoreProfileFile( lua_State* L ) {
+        Application* app = luabind::stack<Application*>::get(L, 1, false);
+        if (!app)
+            return 0;
+        const char* filename = luabind::stack<const char*>::get(L, 2);
+        if (!filename)
+            return 0;
+        if (!lua_isstring(L, 3))
+            return 0;
+        size_t size = 0;
+        const char* data = lua_tolstring(L, 3, &size);
+        Sandbox::InlinedData dp(data,size);
+        bool r = app->StoreProfileFile(filename, &dp);
+        lua_pushboolean(L, r ? 1 : 0);
+        return 1;
+    }
+    
+    int Application_LoadProfileFile( lua_State* L) {
+        Application* app = luabind::stack<Application*>::get(L, 1, false);
+        if (!app)
+            return 0;
+        const char* filename = luabind::stack<const char*>::get(L, 2);
+        if (!filename)
+            return 0;
+        GHL::Data* data = app->LoadProfileFile(filename);
+        if (!data) {
+            lua_pushnil(L);
+            return 1;
+        }
+        lua_pushlstring(L, reinterpret_cast<const char*>(data->GetData()), data->GetSize());
+        return 1;
+    }
 }
 
 SB_META_DECLARE_OBJECT(Sandbox::Application, void)
@@ -96,6 +128,8 @@ SB_META_PROPERTY_RO(UTCOffset, GetUTCOffset)
 SB_META_PROPERTY_RO(SystemLanguage, GetSystemLanguage)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
+bind( method( "StoreProfileFile", &Sandbox::Application_StoreProfileFile));
+bind( method( "LoadProfileFile", &Sandbox::Application_LoadProfileFile));
 SB_META_END_KLASS_BIND()
 
 
@@ -482,7 +516,7 @@ namespace Sandbox {
         sb_ensure_main_thread();
         LogInfo() << "Application::Unload >>> ";
         
-        StoreAppProfile();
+        OnDeactivated();
         ReleaseResources();
         
         m_mouse_ctx.reset();
@@ -724,16 +758,7 @@ namespace Sandbox {
     bool Application::RestoreAppProfile() {
         LogInfo() << "RestoreAppProfile";
         if (m_lua && m_vfs) {
-            sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
-            path += "/profile.json";
-            LogInfo() << "load profile from " << path;
-            GHL::DataStream* ds = m_vfs->OpenFile(path.c_str());
-            if (!ds) {
-                LogError() << "open " << path << " failed";
-                return false;
-            }
-            GHL::Data* d = GHL_ReadAllData( ds );
-            ds->Release();
+            GHL::Data* d = LoadProfileFile("profile.json");
             if (!d) {
                 ReportAppError("read profile failed");
                 return false;
@@ -756,15 +781,7 @@ namespace Sandbox {
             if (profile) {
                 sb::string json = convert_to_json(profile);
                 StringData* sd( new StringData(json));
-                sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
-                path += "/profile.json";
-                LogInfo() << "store profile to " << path;
-                if (!m_vfs->WriteFile(path.c_str(), sd)) {
-                    LogError() << "failed write " << path;
-                    ReportAppError("write profile failed");
-                } else {
-                    LogInfo() << "profile stored";
-                }
+                StoreProfileFile("profile.json", sd);
                 sd->Release();
             }
         }
@@ -953,7 +970,7 @@ namespace Sandbox {
     }
 	///
 	void GHL_CALL Application::Release(  ) {
-        StoreAppProfile();
+        OnDeactivated();
         delete m_lua;
         m_lua = 0;
         delete m_sound_mgr;
@@ -985,6 +1002,44 @@ namespace Sandbox {
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onExtensionResponse",method,data);
             }
         }
+    }
+    
+    
+    bool Application::StoreProfileFile( const char* filename , const GHL::Data* data ) {
+        if (!m_vfs)
+            return false;
+        sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
+        if (!path.empty() && path[path.length()-1]!='/') {
+            path += "/";
+        }
+        path += filename;
+
+        LogInfo() << "store profile to " << path;
+        if (!m_vfs->WriteFile(path.c_str(), data)) {
+            LogError() << "failed write " << path;
+            ReportAppError("write profile failed");
+            return false;
+        }
+        return true;
+    }
+    GHL::Data* Application::LoadProfileFile( const char* filename ) {
+        if (!m_vfs)
+            return 0;
+        sb::string path = m_vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
+        if (!path.empty() && path[path.length()-1]!='/') {
+            path += "/";
+        }
+        path += filename;
+       
+        LogInfo() << "load profile from " << path;
+        GHL::DataStream* ds = m_vfs->OpenFile(path.c_str());
+        if (!ds) {
+            LogError() << "open " << path << " failed";
+            return 0;
+        }
+        GHL::Data* d = GHL_ReadAllData( ds );
+        ds->Release();
+        return d;
     }
     
 #ifdef SB_USE_MYGUI
