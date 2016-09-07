@@ -191,10 +191,15 @@ namespace Sandbox {
         }
         
         void RenderTargetImpl::addQuad(const MyGUI::VertexQuad& q) {
-            for (int i=0;i<MyGUI::VertexQuad::VertexCount;++i) {
-                const MyGUI::Vertex& v(q.vertex[i]);
-                m_graphics->AppendVertex(Sandbox::Vector2f(v.x,v.y), Sandbox::Vector2f(v.u,v.v), Color(v.colour));
-            }
+            const MyGUI::Vertex& lt(q.vertex[MyGUI::VertexQuad::CornerLT]);
+            const MyGUI::Vertex& rt(q.vertex[MyGUI::VertexQuad::CornerRT]);
+            const MyGUI::Vertex& lb(q.vertex[MyGUI::VertexQuad::CornerLB]);
+            const MyGUI::Vertex& rb(q.vertex[MyGUI::VertexQuad::CornerRB]);
+            m_graphics->AppendQuad(
+                                   Sandbox::Vector2f(lt.x,lt.y),Sandbox::Vector2f(lt.u,lt.v),Color(lt.colour),
+                                   Sandbox::Vector2f(rt.x,rt.y),Sandbox::Vector2f(rt.u,rt.v),Color(rt.colour),
+                                   Sandbox::Vector2f(lb.x,lb.y),Sandbox::Vector2f(lb.u,lb.v),Color(lb.colour),
+                                   Sandbox::Vector2f(rb.x,rb.y),Sandbox::Vector2f(rb.u,rb.v),Color(rb.colour));
         }
         
         

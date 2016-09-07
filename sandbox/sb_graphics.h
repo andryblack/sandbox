@@ -90,24 +90,24 @@ namespace Sandbox {
 		void SetColor(const Color& color) { m_color = color;}
 
 		/// blending
-		BlendMode GetBlendMode() const { return m_blend_mode; }
+		BlendMode GetBlendMode() const { return m_state.blend_mode; }
 		void SetBlendMode(BlendMode bm) ;
 
 		/// shader
-		ShaderPtr GetShader() const { return m_shader; }
+		ShaderPtr GetShader() const { return m_state.shader; }
 		void SetShader(const ShaderPtr& sh);
         
         /// depth
-        bool GetDepthWrite() const { return m_depth_write; }
-        bool GetDepthTest() const { return m_depth_test; }
+        bool GetDepthWrite() const { return m_state.depth_write; }
+        bool GetDepthTest() const { return m_state.depth_test; }
         void SetDepthWrite(bool write);
         void SetDepthTest(bool test);
 
         /// mask
         void SetMask(MaskMode mode, const TexturePtr& mask_tex,const Transform2d& tr);
-        const TexturePtr& GetMaskTexture() const { return m_mask; }
+        const TexturePtr& GetMaskTexture() const { return m_state.mask; }
         void SetMaskTexture(const TexturePtr& tex,bool autocalc=true);
-        MaskMode GetMaskMode() const { return m_mask_mode; }
+        MaskMode GetMaskMode() const { return m_state.mask_mode; }
         void SetMaskMode(MaskMode mode);
         const Transform2d& GetMaskTransform() const { return m_mask_transform; }
         void SetMaskTransform( const Transform2d& tr ) { m_mask_transform = tr; }
@@ -139,6 +139,10 @@ namespace Sandbox {
         
         void BeginDrawTriangles(const TexturePtr& texture);
         void AppendVertex(const Vector2f& pos, const Vector2f& tex, const Color& clr);
+        void AppendQuad(const Vector2f& poslt, const Vector2f& texlt, const Color& clrlt,
+                        const Vector2f& posrt, const Vector2f& texrt, const Color& clrrt,
+                        const Vector2f& poslb, const Vector2f& texlb, const Color& clrlb,
+                        const Vector2f& posrb, const Vector2f& texrb, const Color& clrrb);
         
         /// fill rect by pattern
         void FillRect( const TexturePtr& texture, const Rectf& rect);
@@ -193,29 +197,37 @@ namespace Sandbox {
         
 		Transform2d     m_transform;
         Transform2d     m_mask_transform;
+        Color		m_color;
+        
         float           m_scale;
         
 		Matrix4f	m_projection_matrix;
 		Matrix4f	m_view_matrix;
-		Recti		m_viewport;
-		Recti		m_clip_rect;
-		Color		m_color;
-		BlendMode	m_blend_mode;
-        MaskMode    m_mask_mode;
-		TexturePtr  m_texture;
-        TexturePtr  m_mask;
+        Recti		m_viewport;
+        Recti		m_clip_rect;
         float       m_itw;
         float       m_ith;
-		ShaderPtr	m_shader;
-        bool        m_depth_write;
-        bool        m_depth_test;
-		GHL::PrimitiveType	m_ptype;
-        GHL::UInt32      m_primitives;
+        
+        struct State {
+            BlendMode	blend_mode;
+            MaskMode    mask_mode;
+            TexturePtr  texture;
+            TexturePtr  mask;
+            ShaderPtr	shader;
+            bool        depth_write;
+            bool        depth_test;
+            GHL::PrimitiveType	ptype;
+            bool    calc2_tex;
+        };
+        State m_state;
+        State m_draw_state;
+        bool CheckFlush(bool force);
+        
+		GHL::UInt32      m_primitives;
 		std::vector<GHL::Vertex> m_vertexes;
         std::vector<GHL::Vertex2Tex> m_vertexes2tex;
 		std::vector<GHL::UInt16> m_indexes;
-        bool    m_calc2_tex;
-	
+       
         void BeginDrawPrimitives(GHL::PrimitiveType type);
         void BeginDrawTexture(const TexturePtr& tex);
 		void BeginDrawImage(const Image& img);
@@ -227,10 +239,7 @@ namespace Sandbox {
 			GHL::Vertex& v(m_vertexes.back());
 			m_transform.transform(x,y,v.x,v.y);
 			v.z = 0.0f;
-			v.color[0]=color & 0xff;
-			v.color[1]=(color >> 8)&0xff;
-			v.color[2]=(color >> 16)&0xff;
-			v.color[3]=(color >> 24)&0xff;
+            v.color=color;
 			v.tx = tx;
 			v.ty = ty;
 		}
@@ -239,19 +248,29 @@ namespace Sandbox {
 			GHL::Vertex2Tex& v(m_vertexes2tex.back());
 			m_transform.transform(x,y,v.x,v.y);
 			v.z = 0.0f;
-			v.color[0]=color & 0xff;
-			v.color[1]=(color >> 8)&0xff;
-			v.color[2]=(color >> 16)&0xff;
-			v.color[3]=(color >> 24)&0xff;
+            v.color=color;
 			v.tx = tx;
 			v.ty = ty;
             m_mask_transform.transform(x, y, v.t2x, v.t2y);
 		}
 		void appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3);
-		void appendQuad();
+        inline void appendQuad() {
+            GHL::UInt16 base = m_state.calc2_tex ? static_cast<GHL::UInt16>(m_vertexes2tex.size()) : static_cast<GHL::UInt16>(m_vertexes.size());
+            m_indexes.push_back(base+0);
+            m_indexes.push_back(base+1);
+            m_indexes.push_back(base+2);
+            m_indexes.push_back(base+2);
+            m_indexes.push_back(base+1);
+            m_indexes.push_back(base+3);
+            m_primitives+=2;
+        }
 		size_t m_batches;
         
         DrawFilter* m_filter;
+        
+        void SetBlendModeI(BlendMode bmode);
+        void SetShaderI(const ShaderPtr& sh);
+        void SetMaskModeI(MaskMode mode);
 	};
 }
 

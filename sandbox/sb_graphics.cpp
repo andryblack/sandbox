@@ -60,40 +60,38 @@ namespace Sandbox {
 	
 	void Graphics::SetBlendMode(BlendMode bmode) {
         sb_assert( (m_render!=0) && "scene not started" );
-		if (m_blend_mode!=bmode) {
-			Flush();
-            switch (bmode) {
-				case BLEND_MODE_COPY: 
-					m_render->SetupBlend(false, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ZERO);
-					break;
-				case BLEND_MODE_ALPHABLEND: 
-					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_SRC_ALPHA_INV);
-					break;
-				case BLEND_MODE_ADDITIVE: 
-					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
-					break;
-                case BLEND_MODE_MULTIPLY:
-                    m_render->SetupBlend(true, GHL::BLEND_FACTOR_DST_COLOR, GHL::BLEND_FACTOR_SRC_ALPHA_INV);
-                    break;
-				case BLEND_MODE_ADDITIVE_ALPHA: 
-					m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
-					break;
-				case BLEND_MODE_SCREEN:
-                    m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_SRC_COLOR_INV);
-					break;
-				default:
-					sb_assert(false && "unknown blend mode");
-					break;
-			}
-			m_blend_mode = bmode;
-		}
-		
+        m_state.blend_mode = bmode;
+    }
+    void Graphics::SetBlendModeI(BlendMode bmode) {
+        switch (bmode) {
+            case BLEND_MODE_COPY:
+                m_render->SetupBlend(false, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ZERO);
+                break;
+            case BLEND_MODE_ALPHABLEND:
+                m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_SRC_ALPHA_INV);
+                break;
+            case BLEND_MODE_ADDITIVE:
+                m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
+                break;
+            case BLEND_MODE_MULTIPLY:
+                m_render->SetupBlend(true, GHL::BLEND_FACTOR_DST_COLOR, GHL::BLEND_FACTOR_SRC_ALPHA_INV);
+                break;
+            case BLEND_MODE_ADDITIVE_ALPHA:
+                m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_ONE);
+                break;
+            case BLEND_MODE_SCREEN:
+                m_render->SetupBlend(true, GHL::BLEND_FACTOR_ONE, GHL::BLEND_FACTOR_SRC_COLOR_INV);
+                break;
+            default:
+                sb_assert(false && "unknown blend mode");
+                break;
+        }
 	}
     
     /// clear scene
     void Graphics::Clear( const Color& clr, float depth ) {
         sb_assert( (m_render!=0) && "scene not started" );
-        Flush();
+        CheckFlush(true);
         m_render->Clear(clr.r, clr.g, clr.b, clr.a, depth);
     }
     
@@ -101,19 +99,10 @@ namespace Sandbox {
     /// fill rect by pattern
     void Graphics::FillRect( const TexturePtr& texture, const Rectf& rect) {
         sb_assert( (m_render!=0) && "scene not started" );
-        bool flush = false;
-		if (m_texture!=texture) {
-            flush = true;
-        } else if (m_ptype!=GHL::PRIMITIVE_TYPE_TRIANGLES) {
-            flush = true;
-        }
-        if (flush) {
-            Flush();
-        }
-		
-        m_texture = texture;
-        m_ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
+        m_state.texture = texture;
+        m_state.ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
         
+        CheckFlush(false);
         
         appendQuad();
 		
@@ -145,21 +134,21 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
         if (m_primitives==0) return;
         /// do batch
-		m_render->SetTexture(m_texture ? m_texture->Present(m_resources) : 0,0);
-        if (m_mask) {
-            m_render->SetTexture(m_mask->Present(m_resources),1);
+		m_render->SetTexture(m_draw_state.texture ? m_draw_state.texture->Present(m_resources) : 0,0);
+        if (m_draw_state.mask) {
+            m_render->SetTexture(m_draw_state.mask->Present(m_resources),1);
         }
 		
         const GHL::UInt16* indexes = m_indexes.empty() ? 0 : &m_indexes.front();
-        if (!m_calc2_tex) {
-            m_render->DrawPrimitivesFromMemory(m_ptype,
+        if (!m_draw_state.calc2_tex) {
+            m_render->DrawPrimitivesFromMemory(m_draw_state.ptype,
 										   GHL::VERTEX_TYPE_SIMPLE,
 											&m_vertexes.front(),
                                            static_cast<GHL::UInt32>(m_vertexes.size()),
                                            indexes,
                                            GHL::UInt32(m_primitives));
         } else {
-            m_render->DrawPrimitivesFromMemory(m_ptype,
+            m_render->DrawPrimitivesFromMemory(m_draw_state.ptype,
                                                GHL::VERTEX_TYPE_2_TEX,
                                                &m_vertexes2tex.front(),
                                                static_cast<GHL::UInt32>(m_vertexes2tex.size()),
@@ -176,9 +165,54 @@ namespace Sandbox {
 		m_primitives = 0;
 	}
     
-    void Graphics::BeginDrawTexture(const TexturePtr& texture) {
-        if (m_texture != texture) {
+    bool Graphics::CheckFlush(bool force) {
+        bool res = force;
+        if (force) {
             Flush();
+        }
+        if (m_state.blend_mode != m_draw_state.blend_mode) {
+            res = true;
+            Flush();
+            SetBlendModeI(m_state.blend_mode);
+        }
+        if (m_state.mask != m_draw_state.mask ||
+            m_state.mask_mode != m_draw_state.mask_mode ) {
+            Flush();
+            SetMaskModeI(m_state.mask_mode);
+            if (!m_state.mask) {
+                m_render->SetTexture(0,1);
+            }
+            res = true;
+        }
+        if (m_state.calc2_tex != m_draw_state.calc2_tex) {
+            Flush();
+            res = true;
+        }
+        if (m_state.depth_test != m_draw_state.depth_test ||
+            m_state.depth_write != m_draw_state.depth_write ) {
+            Flush();
+            m_render->SetupDepthTest(m_state.depth_test,GHL::COMPARE_FUNC_LEQUAL,m_state.depth_write);
+            res = true;
+        }
+        if (m_state.texture != m_draw_state.texture ||
+            m_state.ptype != m_draw_state.ptype) {
+            Flush();
+            res = true;
+        }
+        if (m_state.shader != m_draw_state.shader) {
+            Flush();
+            SetShaderI(m_state.shader);
+            res = true;
+        }
+        if (res) {
+            m_draw_state = m_state;
+            return true;
+        }
+        return false;
+    }
+    
+    void Graphics::BeginDrawTexture(const TexturePtr& texture) {
+        if (m_state.texture != texture) {
             if (texture) {
                 m_itw = 1.0f / texture->GetWidth();
                 m_ith = 1.0f / texture->GetHeight();
@@ -187,7 +221,7 @@ namespace Sandbox {
                 m_ith = 1.0f;
             }
         }
-        m_texture = texture;
+        m_state.texture = texture;
     }
 	
 	void Graphics::BeginDrawImage(const Image& img) {
@@ -196,20 +230,18 @@ namespace Sandbox {
     }
     
     void Graphics::BeginDrawPrimitives(GHL::PrimitiveType type) {
-        if (m_ptype != type) {
-            Flush();
-        }
-        m_ptype = type;
+        m_state.ptype = type;
     }
 	
     void Graphics::BeginDrawTriangles(const TexturePtr& texture) {
         BeginDrawTexture(texture);
         BeginDrawPrimitives(GHL::PRIMITIVE_TYPE_TRIANGLES);
+        CheckFlush(false);
     }
     
     void Graphics::AppendVertex(const Vector2f& pos, const Vector2f& tex, const Color& clr) {
         GHL::UInt32 hclr = (m_color * clr).hw_premul();
-        if (m_calc2_tex) {
+        if (m_state.calc2_tex) {
             m_indexes.push_back(static_cast<GHL::UInt16>(m_vertexes2tex.size()));
             appendVertex2(pos.x,pos.y,
                           tex.x,
@@ -229,23 +261,48 @@ namespace Sandbox {
         }
     }
     
+    void Graphics::AppendQuad(const Vector2f& poslt, const Vector2f& texlt, const Color& clrlt,
+                    const Vector2f& posrt, const Vector2f& texrt, const Color& clrrt,
+                    const Vector2f& poslb, const Vector2f& texlb, const Color& clrlb,
+                    const Vector2f& posrb, const Vector2f& texrb, const Color& clrrb) {
+        appendQuad();
+        if (m_state.calc2_tex) {
+            appendVertex2(poslt.x,poslt.y,
+                          texlt.x,texlt.y,
+                          (m_color * clrlt).hw_premul());
+            appendVertex2(posrt.x,posrt.y,
+                          texrt.x,texrt.y,
+                          (m_color * clrrt).hw_premul());
+            appendVertex2(poslb.x,poslb.y,
+                          texlb.x,texlb.y,
+                          (m_color * clrlb).hw_premul());
+            appendVertex2(posrb.x,posrb.y,
+                          texrb.x,texrb.y,
+                          (m_color * clrrb).hw_premul());
+        } else {
+            appendVertex(poslt.x,poslt.y,
+                          texlt.x,texlt.y,
+                          (m_color * clrlt).hw_premul());
+            appendVertex(posrt.x,posrt.y,
+                          texrt.x,texrt.y,
+                          (m_color * clrrt).hw_premul());
+            appendVertex(poslb.x,poslb.y,
+                          texlb.x,texlb.y,
+                          (m_color * clrlb).hw_premul());
+            appendVertex(posrb.x,posrb.y,
+                          texrb.x,texrb.y,
+                          (m_color * clrrb).hw_premul());
+        }
+    }
+    
 	void Graphics::appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3) {
-		GHL::UInt16 base = m_calc2_tex ? static_cast<GHL::UInt16>(m_vertexes2tex.size()) : static_cast<GHL::UInt16>(m_vertexes.size());
+		GHL::UInt16 base = m_state.calc2_tex ? static_cast<GHL::UInt16>(m_vertexes2tex.size()) : static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+i1);
 		m_indexes.push_back(base+i2);
 		m_indexes.push_back(base+i3);
 		m_primitives++;
 	}
-	void Graphics::appendQuad() {
-		GHL::UInt16 base = m_calc2_tex ? static_cast<GHL::UInt16>(m_vertexes2tex.size()) : static_cast<GHL::UInt16>(m_vertexes.size());
-		m_indexes.push_back(base+0);
-		m_indexes.push_back(base+1);
-		m_indexes.push_back(base+2);
-		m_indexes.push_back(base+2);
-		m_indexes.push_back(base+1);
-		m_indexes.push_back(base+3);
-		m_primitives+=2;
-	}
+	
 	
 	void Graphics::DrawImage(const Image& img,const DrawAttributesPtr& attributes,float x,float y) {
 		sb_assert( (m_render!=0) && "scene not started" );
@@ -257,11 +314,13 @@ namespace Sandbox {
 		x-=img.GetHotspot().x*w/img.GetTextureDrawW();
         y-=img.GetHotspot().y*h/img.GetTextureDrawH();
 		
+        CheckFlush(false);
+        
         appendQuad();
 		
 		GHL::UInt32 clr = (m_color).hw_premul();
 		
-        if (!m_calc2_tex)
+        if (!m_state.calc2_tex)
         {
             if (img.GetRotated()) {
                 appendVertex(x+w,y,
@@ -314,11 +373,12 @@ namespace Sandbox {
 		const float h = img.GetHeight();
 		x-=img.GetHotspot().x*w/img.GetTextureW();
         y-=img.GetHotspot().y*h/img.GetTextureH();
-		
+        CheckFlush(false);
+        
         appendQuad();
 		
 		GHL::UInt32 clr = (m_color*_clr).hw_premul();
-		if (!m_calc2_tex)
+		if (!m_state.calc2_tex)
         {
             appendVertex(x,y,
 						 img.GetTextureX()*m_itw,
@@ -357,12 +417,14 @@ namespace Sandbox {
 		const float h = img.GetHeight()*scale;
 		x-=img.GetHotspot().x*w/img.GetTextureW();
         y-=img.GetHotspot().y*h/img.GetTextureH();
-		
+        
+        CheckFlush(false);
+        
         appendQuad();
 		
 		GHL::UInt32 clr = (m_color*_clr).hw_premul();
 		
-        if (!m_calc2_tex)
+        if (!m_state.calc2_tex)
         {
             appendVertex(x,y,
 						 img.GetTextureX()*m_itw,
@@ -459,6 +521,8 @@ namespace Sandbox {
         
 		GHL::UInt32 clr = m_color.hw_premul();
 		
+        CheckFlush(false);
+        
         appendQuad();
         {
             appendVertex(x1,y1,tx1,ty1,clr);
@@ -567,22 +631,14 @@ namespace Sandbox {
     }
 	
 	void Graphics::BeginDrawLines() {
-		bool flush = false;
-		if (m_texture) {
-            flush = true;
-        } else if (m_ptype!=GHL::PRIMITIVE_TYPE_LINES) {
-            flush = true;
-        }
-        if (flush) {
-            Flush();
-        }
-		m_texture = TexturePtr();
-        m_ptype = GHL::PRIMITIVE_TYPE_LINES;
+		m_state.texture = TexturePtr();
+        m_state.ptype = GHL::PRIMITIVE_TYPE_LINES;
 	}
 	void Graphics::DrawLine(const Vector2f& from, const Vector2f& to) {
 		sb_assert( (m_render!=0) && "scene not started" );
 #ifndef GHL_PLATFORM_FLASH
 		BeginDrawLines();
+        CheckFlush(false);
 		GHL::UInt32 clr = m_color.hw_premul();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+0);
@@ -596,6 +652,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
 #ifndef GHL_PLATFORM_FLASH
 		BeginDrawLines();
+        CheckFlush(false);
 		GHL::UInt32 clr = (m_color*clr_).hw_premul();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		m_indexes.push_back(base+0);
@@ -610,9 +667,9 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
 #ifndef GHL_PLATFORM_FLASH
         if (points.size()<2) return;
-		Flush();
-		m_texture = TexturePtr();
-        m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
+		m_state.texture = TexturePtr();
+        m_state.ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
+        CheckFlush(false);
 		GHL::UInt32 clr = m_color.hw_premul();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		for (GHL::UInt16 i=0;i<static_cast<GHL::UInt16>(points.size());i++) {
@@ -622,17 +679,16 @@ namespace Sandbox {
 			appendVertex(points[i].x, points[i].y, 0, 0, clr);
 		}
         m_primitives = GHL::UInt32(points.size())-1;
-		Flush();
 #endif
 	}
 	void Graphics::DrawLineStrip(const std::vector<Vector2f>& points,const Color& clr_) {
 		sb_assert( (m_render!=0) && "scene not started" );
 #ifndef GHL_PLATFORM_FLASH
         if (points.size()<2) return;
-		Flush();
-		m_texture = TexturePtr();
-        m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
-		GHL::UInt32 clr = (m_color*clr_).hw_premul();
+		m_state.texture = TexturePtr();
+        m_state.ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
+        CheckFlush(false);
+        GHL::UInt32 clr = (m_color*clr_).hw_premul();
 		GHL::UInt16 base = static_cast<GHL::UInt16>(m_vertexes.size());
 		for (GHL::UInt16 i=0;i<static_cast<GHL::UInt16>(points.size());i++) {
 			m_indexes.push_back(base+i);
@@ -641,14 +697,12 @@ namespace Sandbox {
 			appendVertex(points[i].x, points[i].y, 0, 0, clr);
 		}
 		m_primitives = GHL::UInt32(points.size())-1;
-		Flush();
 #endif
 	}
 	
 	void Graphics::BeginDrawCircle() {
-		Flush();
-		m_texture = TexturePtr();
-        m_ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
+		m_state.texture = TexturePtr();
+        m_state.ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
 	}
 	void Graphics::DrawCircle(const Vector2f& pos, float r) {
 		sb_assert( (m_render!=0) && "scene not started" );
@@ -656,7 +710,6 @@ namespace Sandbox {
 		BeginDrawCircle();
 		GHL::UInt32 clr = m_color.hw_premul();
 		DrawCircle(pos,r,clr);
-		Flush();
 #endif
 	}
 	void Graphics::DrawCircle(const Vector2f& pos, float r,const Color& clr_) {
@@ -665,11 +718,11 @@ namespace Sandbox {
 		BeginDrawCircle();
 		GHL::UInt32 clr = (m_color*clr_).hw_premul();
 		DrawCircle(pos,r,clr);
-		Flush();
 #endif
 	}
 	void Graphics::DrawCircle(const Vector2f& pos, float r,GHL::UInt32 clr) {
 #ifndef GHL_PLATFORM_FLASH
+        CheckFlush(false);
         if (r < 0.0f) {
             r = r * -1.0f;
         }
@@ -706,19 +759,22 @@ namespace Sandbox {
             if (!_img) continue;
             
             const Image& img = *_img;
-            if (prev_image!=_img)
+            if (prev_image!=_img) {
                 BeginDrawImage(img);
+                CheckFlush(false);
+            }
             
             const float x = p.pos.x - img.GetHotspot().x * p.scale;
             const float y = p.pos.y - img.GetHotspot().y * p.scale;
             const float w = img.GetWidth() * p.scale;
             const float h = img.GetHeight() * p.scale;
             
+            
             appendQuad();
             
             GHL::UInt32 clr = (m_color * p.color).hw_premul();
             
-            if (!m_calc2_tex)
+            if (!m_state.calc2_tex)
             {
                 appendVertex(x,y,
                              img.GetTextureX(),img.GetTextureY(),clr);
@@ -746,6 +802,7 @@ namespace Sandbox {
 	void Graphics::DrawGeometry(const GeometryData& geomentry,bool transform) {
         BeginDrawTexture(geomentry.texture);
         BeginDrawPrimitives(geomentry.primitives);
+        CheckFlush(!transform);
         size_t index_offset = m_vertexes.size();
         if (transform)
 		{
@@ -754,15 +811,13 @@ namespace Sandbox {
 							 geomentry.vertexes[i].y,
 							 geomentry.vertexes[i].tx,
 							 geomentry.vertexes[i].ty,
-							 (Color(*reinterpret_cast<const GHL::UInt32*>(geomentry.vertexes[i].color))*m_color).hw_premul());
+							 (Color(geomentry.vertexes[i].color)*m_color).hw_premul());
             }
-        } else {
-            Flush();
         }
         
-        if (m_ptype==GHL::PRIMITIVE_TYPE_TRIANGLES)
+        if (m_state.ptype==GHL::PRIMITIVE_TYPE_TRIANGLES)
             m_primitives += static_cast<GHL::UInt32>(geomentry.indexes.size())/3;
-        else if (m_ptype==GHL::PRIMITIVE_TYPE_TRIANGLE_STRIP){
+        else if (m_state.ptype==GHL::PRIMITIVE_TYPE_TRIANGLE_STRIP){
             sb_assert(geomentry.indexes.size()>2);
             m_primitives += static_cast<GHL::UInt32>(geomentry.indexes.size()-2);
         }
@@ -774,40 +829,32 @@ namespace Sandbox {
         } else {
             
             
-            if (m_texture) {
-                m_render->SetTexture(m_texture->Present(m_resources),0);
+            if (m_state.texture) {
+                m_render->SetTexture(m_state.texture->Present(m_resources),0);
             } else {
                 m_render->SetTexture(0,0);
             }
-            m_render->DrawPrimitivesFromMemory(m_ptype, GHL::VERTEX_TYPE_SIMPLE, &geomentry.vertexes[0], GHL::UInt32(geomentry.vertexes.size()), &geomentry.indexes[0], m_primitives);
+            m_render->DrawPrimitivesFromMemory(m_state.ptype, GHL::VERTEX_TYPE_SIMPLE, &geomentry.vertexes[0], GHL::UInt32(geomentry.vertexes.size()), &geomentry.indexes[0], m_primitives);
             m_primitives = 0;
         }
 		
 	}
 	
 	void Graphics::SetShader(const ShaderPtr& sh) {
-		Flush();
-		m_shader = sh;
-		if (sh)
-			sh->Set(m_render);
-		else
-			m_render->SetShader(0);
-
+		m_state.shader = sh;
 	}
+    void Graphics::SetShaderI(const ShaderPtr& sh) {
+        if (sh)
+            sh->Set(m_render);
+        else
+            m_render->SetShader(0);
+    }
     
     void Graphics::SetDepthWrite(bool write) {
-        if (write != m_depth_write) {
-            Flush();
-            m_depth_write = write;
-            m_render->SetupDepthTest(m_depth_test,GHL::COMPARE_FUNC_LEQUAL,m_depth_write);
-        }
+        m_state.depth_write = write;
     }
     void Graphics::SetDepthTest(bool test) {
-        if (test != m_depth_test) {
-            Flush();
-            m_depth_test = test;
-            m_render->SetupDepthTest(m_depth_test,GHL::COMPARE_FUNC_LEQUAL,m_depth_write);
-        }
+        m_state.depth_test = test;
     }
     
     void Graphics::SetMask(MaskMode mode, const TexturePtr& mask_tex,const Transform2d& tr) {
@@ -816,30 +863,17 @@ namespace Sandbox {
         m_mask_transform = tr;
     }
     void Graphics::SetMaskTexture(const TexturePtr& tex,bool autocalc) {
-        bool need_flush = false;
-        if (m_mask != tex) {
-            need_flush = true;
-        }
+        m_state.mask = tex;
         bool needCalc2 = autocalc && tex && tex!=m_fake_tex_black && tex!=m_fake_tex_white;
-        if (needCalc2!=m_calc2_tex) {
-            need_flush = true;
-        }
-        if (need_flush) {
-            Flush();
-        }
-        m_mask = tex;
-        m_calc2_tex = needCalc2;
-        if (!tex) {
-            m_render->SetTexture(0,1);
-        }
+        m_state.calc2_tex =needCalc2;
     }
     void Graphics::SetMaskMode(MaskMode mode) {
-        if (mode != m_mask_mode) {
-            Flush();
-        }
-        if (!m_mask && mode!=MASK_MODE_NONE) {
+        if (!m_state.mask && mode!=MASK_MODE_NONE) {
             SetMaskTexture(m_fake_tex_black);
         }
+        m_state.mask_mode = mode;
+    }
+    void Graphics::SetMaskModeI(MaskMode mode) {
         switch (mode) {
             case MASK_MODE_NONE:
                 m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
@@ -863,31 +897,28 @@ namespace Sandbox {
                 break;
 
         }
-    
-        m_mask_mode = mode;
-        
     }
   	
 	void Graphics::SetProjectionMatrix(const Matrix4f& m) {
-		Flush();
+		CheckFlush(true);
 		m_projection_matrix = m;
 		m_render->SetProjectionMatrix(m.matrix);
 	}
 	
 	void Graphics::SetViewMatrix(const Matrix4f& m) {
-		Flush();
+		CheckFlush(true);
 		m_view_matrix = m;
 		m_render->SetViewMatrix(m.matrix);
 	}
 	
 	void Graphics::SetViewport(const Recti& rect) {
-		Flush();
+        CheckFlush(true);
 		m_viewport = rect;
 	}
 	
 	void Graphics::SetClipRect(const Recti& rect) {
-		Flush();
-		m_clip_rect = rect;
+		CheckFlush(true);
+        m_clip_rect = rect;
 		if (m_clip_rect==m_viewport) {
 			m_render->SetupScisor( false );
 		} else {
@@ -901,23 +932,24 @@ namespace Sandbox {
         sb_assert( (m_render==0) && "scene already started" );
 		m_render = render;
         m_render_to_target = target;
-		m_blend_mode = BLEND_MODE_COPY;
+		m_state.blend_mode = BLEND_MODE_COPY;
 		m_render->SetupBlend(false);
-		m_texture = TexturePtr();
-        m_mask = TexturePtr();
-        m_mask_mode = MASK_MODE_NONE;
+		m_state.texture = TexturePtr();
+        m_state.mask = TexturePtr();
+        m_state.mask_mode = MASK_MODE_NONE;
 		m_render->SetTexture(0,0);
-		m_ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
+		m_state.ptype = GHL::PRIMITIVE_TYPE_TRIANGLES;
 		m_vertexes.clear();
 		m_indexes.clear();
 		m_primitives = 0;
 		m_batches = 0;
 		m_color = Color(1,1,1,1);
 		m_transform = Transform2d();
-		m_shader = ShaderPtr();
-        m_calc2_tex = false;
-        m_depth_test = false;
-        m_depth_write = false;
+		m_state.shader = ShaderPtr();
+        m_state.calc2_tex = false;
+        m_state.depth_test = false;
+        m_state.depth_write = false;
+        m_draw_state = m_state;
         
         float draw_scale = (target ? target->GetScale() : m_scale * m_resources->GetScale()) ;
         
@@ -932,27 +964,30 @@ namespace Sandbox {
         m_render->SetVertexBuffer(0);
         m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
         m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
-        m_render->SetupDepthTest(m_depth_test,GHL::COMPARE_FUNC_LEQUAL,m_depth_write);
+        m_render->SetupDepthTest(m_state.depth_test,GHL::COMPARE_FUNC_LEQUAL,m_state.depth_write);
+        
+        m_draw_state = m_state;
     }
 	size_t Graphics::EndScene() {
 		sb_assert( (m_render!=0) && "scene not started" );
-		Flush();
-		m_render->SetTexture(0,0);
+		CheckFlush(true);
+        m_render->SetTexture(0,0);
         m_render->SetTexture(0,1);
 		m_render->SetShader(0);
-		m_texture = TexturePtr();
-        m_mask = TexturePtr();
-		m_shader = ShaderPtr();
+		m_state.texture = TexturePtr();
+        m_state.mask = TexturePtr();
+		m_state.shader = ShaderPtr();
 		m_render = 0;
-        m_mask_mode = MASK_MODE_NONE;
+        m_state.mask_mode = MASK_MODE_NONE;
+        m_draw_state = m_state;
         return m_batches;
 	}
 	
 	
 	GHL::Render* Graphics::BeginNative() {
         sb_assert( (m_render!=0) && "scene not started" );
-        Flush();
-		GHL::Render* render = m_render;
+        CheckFlush(true);
+        GHL::Render* render = m_render;
 		if (render) {
 			EndScene();
 		}
@@ -975,4 +1010,5 @@ namespace Sandbox {
     void Graphics::SetScale( float scale ) {
         m_scale = scale;
     }
+    
 }

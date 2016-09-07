@@ -88,23 +88,19 @@ namespace Sandbox {
             // use premultiplied
             if (mAlign.isLeft()) {
                 quad.vertex[MyGUI::VertexQuad::CornerLB].colour =
-                quad.vertex[MyGUI::VertexQuad::CornerLB2].colour =
                 quad.vertex[MyGUI::VertexQuad::CornerLT].colour = 0x00000000;
             }
             if (mAlign.isRight()) {
                 quad.vertex[MyGUI::VertexQuad::CornerRB].colour =
-                quad.vertex[MyGUI::VertexQuad::CornerRT].colour =
-                quad.vertex[MyGUI::VertexQuad::CornerRT2].colour = 0x00000000;
+                quad.vertex[MyGUI::VertexQuad::CornerRT].colour = 0x00000000;
             }
             if (mAlign.isTop()) {
                 quad.vertex[MyGUI::VertexQuad::CornerLT].colour =
-                quad.vertex[MyGUI::VertexQuad::CornerRT].colour =
-                quad.vertex[MyGUI::VertexQuad::CornerRT2].colour = 0x00000000;
+                quad.vertex[MyGUI::VertexQuad::CornerRT].colour = 0x00000000;
             }
             if (mAlign.isBottom()) {
                 quad.vertex[MyGUI::VertexQuad::CornerLB].colour =
-                quad.vertex[MyGUI::VertexQuad::CornerRB].colour =
-                quad.vertex[MyGUI::VertexQuad::CornerLB2].colour = 0x00000000;
+                quad.vertex[MyGUI::VertexQuad::CornerRB].colour = 0x00000000;
             }
             
             _target->addQuad(quad);
