@@ -760,7 +760,6 @@ namespace Sandbox {
         if (m_lua && m_vfs) {
             GHL::Data* d = LoadProfileFile("profile.json");
             if (!d) {
-                ReportAppError("read profile failed");
                 return false;
             }
             LuaContextPtr decoded = convert_from_json( m_lua->GetVM(), d);
