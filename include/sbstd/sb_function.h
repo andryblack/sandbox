@@ -1,19 +1,6 @@
 #ifndef SB_FUNCTION_H
 #define SB_FUNCTION_H
 
-#ifdef SB_HAVE_TR1
-
-#include <tr1/functional>
-    namespace sb {
-        using std::tr1::function;
-        using std::tr1::bind;
-        namespace placeholders {
-            using std::tr1::placeholders::_1;
-            using std::tr1::placeholders::_2;
-        }
-    }
-
-#else
 
 #include "sb_function_traits.h"
 #include "sb_traits.h"
@@ -487,7 +474,5 @@
         
     }
 
-
-#endif /* SB_HAVE_TR1 */
 
 #endif /*SB_FUNCTION_H*/

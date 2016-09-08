@@ -11,21 +11,6 @@
 #define SB_SHARED_PTR_H
 
 
-#ifdef SB_HAVE_TR1
-#include <tr1/memory>
-namespace sb {
-    
-    using std::tr1::shared_ptr;
-    using std::tr1::weak_ptr;
-    using std::tr1::enable_shared_from_this;
-    using std::tr1::static_pointer_cast;
-    using std::tr1::dynamic_pointer_cast;
-    
-    using std::tr1::make_shared
-}
-
-#else 
-
 #include <cstring>
 #include "sb_assert.h"
 #include "sb_pointer.h"
@@ -360,7 +345,6 @@ namespace sb {
         return shared_ptr<T>(new (cntr->buf) T(a1,a2,a3,a4,a5),static_cast<implement::counter_base*>(cntr));
     }
 }
-#endif /*SB_HAVE_TR1*/
 
 
 #endif /*SB_SHARED_PTR_H*/

@@ -3,7 +3,7 @@
 int StartApplication(int argc,char** argv);
 
 int ghl_android_app_main(int argc,char** argv) {
-	 StartApplication(argc,argv);
+	 return StartApplication(argc,argv);
 }
 
 extern "C" JNIEXPORT

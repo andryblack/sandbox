@@ -33,7 +33,7 @@ solution( ProjectName )
 
 	if os.is('android') then
 		android_abis {'armeabi'}
-		android_stl('gnustl_static')
+		android_stl(AndroidConfig.stl or 'gnustl_static')
 		android_activity(AndroidConfig.activity or 'com.sandboxgames.Activity')
 		android_libs(path.getabsolute(path.join(sandbox_dir,'GHL/src/android_ghl','src')))
 		android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','sandbox_lib')))
@@ -41,7 +41,7 @@ solution( ProjectName )
 		android_target_api_level(AndroidConfig.target_api_level or 14)
 		android_build_api_level(AndroidConfig.build_api_level or AndroidConfig.target_api_level or 14)
 		android_packagename( AndroidConfig.package or 'com.sandbox.example')
-		android_toolchain( AndroidConfig.toolchain or '4.8' )
+		android_toolchain( AndroidConfig.toolchain or '4.9' )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 		android_packageversion( AndroidConfig.versioncode or 1)
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
