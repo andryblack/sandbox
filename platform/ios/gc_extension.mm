@@ -53,9 +53,13 @@
     }
 }
 
-- (void) authenticateLocalPlayer
+- (void) authenticateLocalPlayer:(BOOL)forceShowUI
 {
     GKLocalPlayer *localPlayer = [GKLocalPlayer localPlayer];
+    if (forceShowUI && localPlayer.authenticateHandler) {
+        [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"gamecenter:"]];
+        return;
+    }
     localPlayer.authenticateHandler = ^(UIViewController *viewController, NSError *error){
         if (viewController != nil)
         {
@@ -76,6 +80,7 @@
 
 -(void)gameCenterAuthenticationChanged:(id) object {
     NSLog(@"[GC] gameCenterAuthenticationChanged %@",object);
+    if (m_application) m_application->OnExtensionResponse("GCLogin","changed");
 }
 
 -(BOOL) isAuthenticated {
@@ -172,7 +177,7 @@ public:
                 res = "success";
                 return true;
             }
-            [m_mgr authenticateLocalPlayer];
+            [m_mgr authenticateLocalPlayer:(args && ::strcmp(args,"force_ui")==0)];
             res = "pending";
             return true;
         }

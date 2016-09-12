@@ -42,6 +42,16 @@ sb::string BeginUserInitiatedSignIn() {
     return "success";
 }
 
+void BeginUserInitiatedSignOut() {
+    if (!game_services_) {
+        return;
+    }
+    if (!game_services_->IsAuthorized())
+        return;
+    is_auth_in_progress_ = "logout";
+    game_services_->SignOut();
+}
+
 
 void SubmitHighScore(char const *leaderboard_id, uint64_t score) {
     if (!game_services_)
@@ -51,7 +61,7 @@ void SubmitHighScore(char const *leaderboard_id, uint64_t score) {
         game_services_->Leaderboards().SubmitScore(leaderboard_id, score);
         game_services_->Leaderboards().Fetch(leaderboard_id,nullptr);
     } else {
-        BeginUserInitiatedSignIn();
+        //BeginUserInitiatedSignIn();
     }
 }
 
@@ -112,17 +122,23 @@ public:
             return true;
         }
         if (::strcmp("GPSLogin",method)==0) {
-            if (is_auth_in_progress_ == "progress") {
+            if (is_auth_in_progress_ == "progress" && !(args && ::strcmp(args,"force_ui")==0)) {
                 res = is_auth_in_progress_;
                 return true;
             }
             res = BeginUserInitiatedSignIn();
             return true;
         }
+        if (::strcmp("GPSLogout",method)==0) {
+           BeginUserInitiatedSignOut();
+            return true;
+        }
         if (::strcmp("GPSGetPlayer",method)==0) {
             if (!game_services_)
                 return true;
             if (!game_services_->IsAuthorized())
+                return true;
+            if (is_auth_in_progress_=="logout")
                 return true;
             res = me_player_data;
             return true;
@@ -208,9 +224,11 @@ void GPSExtension::InitServices(gpg::PlatformConfiguration const &pc) {
         .SetOnLog(gpg::DEFAULT_ON_LOG, gpg::LogLevel::VERBOSE)
         .SetOnAuthActionStarted([this](gpg::AuthOperation op) {
             Sandbox::LogInfo() << "[PGS]" << "OnAuthActionStarted " << op;
-            is_auth_in_progress_ = "progress";
             if (op == gpg::AuthOperation::SIGN_IN) {
+                is_auth_in_progress_ = "progress";
                 this->AddPendingResponse("GPSLogin","progress");
+            } else if (op == gpg::AuthOperation::SIGN_OUT) {
+                this->AddPendingResponse("GPSLogin","changed");
             }
         })
         .SetOnAuthActionFinished([this](gpg::AuthOperation op,
@@ -240,6 +258,8 @@ void GPSExtension::InitServices(gpg::PlatformConfiguration const &pc) {
                     is_auth_in_progress_ = "failed";
                     this->AddPendingResponse("GPSLogin","failed");
                 }
+            } else if (op == gpg::AuthOperation::SIGN_OUT) {
+                this->AddPendingResponse("GPSLogin","changed");
             }
             
             

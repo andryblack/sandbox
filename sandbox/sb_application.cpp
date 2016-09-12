@@ -950,8 +950,8 @@ namespace Sandbox {
 	void Application::OnActivated() {
         LogInfo() << "OnActivated";
         if (m_lua) {
-            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onActivate")) {
-                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onActivate");
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onActivated")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onActivated");
             }
         }
 	}
