@@ -45,6 +45,7 @@ solution( ProjectName )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 		android_packageversion( AndroidConfig.versioncode or 1)
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
+		android_receiver( AndroidConfig.receiver )
 		if use.AndroidGooglePlayService or use.IAP then
 			android_modules_path( path.getabsolute(sandbox_dir) )
 			--local sdk_dir = assert(_OPTIONS['android-sdk-dir'])

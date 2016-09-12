@@ -189,6 +189,12 @@ api.register {
 	list = true
 }
 
+api.register {
+	name = "android_receiver",
+	scope = 'project',
+	kind = 'string'
+}
+
 
 newoption {
 	trigger = "android-ndk-dir",
