@@ -8,6 +8,7 @@ function _M.init_rules(rules)
 	rules.images = {}
 	rules.atlases = {}
 	rules.premultiply_images = {}
+	rules.convert_to_jpeg = {}
 end
 
 function _M.assets_rules.set_alpha_file_format( func )
@@ -478,6 +479,27 @@ local function do_premultiply_file( src, dstconf  )
 	return application:store_texture(conf.dst,t)
 end
 
+local function do_convert_to_jpeg_file( src, dstconf  )
+	local conf = { dst = dstconf }
+	if type(dstconf) == 'table' then
+		conf = dstconf
+	end
+
+	if update_only then
+		if not os.check_file_new(path.join(src_path,src),path.join(application.dst_path,conf.dst)) then
+			--print('skip not new')
+			return true
+		end
+	end
+	local t = assert(application:load_texture(src))
+	if t:IsJPEG() then
+		os.copyfile(path.join(src_path,src),path.join(application.dst_path,conf.dst))
+		return
+	end
+	t:SetImageFileFormatJPEG()
+	return application:store_texture(conf.dst,t)
+end
+
 function _M.filter_files( filelist )
 	local map = {}
 	for k,v in ipairs(filelist) do
@@ -508,6 +530,21 @@ function _M.apply_rules( rules )
 				assert(do_premultiply_file(k,v),'failed store texture to ' .. v)
 			else
 				assert(do_premultiply_file(k,k),'failed store texture to ' .. k)
+			end
+		end
+	end
+
+	local pmi = rules.convert_to_jpeg or {}
+	print('convert to jpeg')
+	for k,v in pairs(pmi) do
+		if v then
+			--print('premultiply',k)
+			if type(v) == 'table' then
+				assert(do_convert_to_jpeg_file(k,v),'failed store texture to ' .. v.dst)
+			elseif type(v) == 'string' then
+				assert(do_convert_to_jpeg_file(k,v),'failed store texture to ' .. v)
+			else
+				assert(do_convert_to_jpeg_file(k,k),'failed store texture to ' .. k)
 			end
 		end
 	end

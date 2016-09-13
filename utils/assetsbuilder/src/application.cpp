@@ -178,11 +178,15 @@ SB_META_METHOD(Place)
 SB_META_METHOD(SetAlpha)
 SB_META_METHOD(Crop)
 SB_META_METHOD(GetMD5)
+SB_META_METHOD(SetImageFileFormatPNG)
+SB_META_METHOD(SetImageFileFormatJPEG)
+SB_META_METHOD(IsJPEG)
 SB_META_END_KLASS_BIND()
 
 TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(GHL_CreateImage(w, h, GHL::IMAGE_FORMAT_RGBA)) {
     m_offset_x = 0;
     m_offset_y = 0;
+    m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
     sb_assert(m_data);
     m_data->Fill(0x00000000);
 }
@@ -190,6 +194,17 @@ TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(G
 TextureData::TextureData( GHL::Image* img ) : Texture(img->GetWidth(),img->GetHeight()) , m_data(img) {
     m_offset_x = 0;
     m_offset_y = 0;
+    m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
+}
+
+void TextureData::SetImageFileFormatPNG() {
+    m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
+}
+void TextureData::SetImageFileFormatJPEG() {
+    if (m_data) {
+        m_data->Convert(GHL::IMAGE_FORMAT_RGB);
+    }
+    m_image_file_format = GHL::IMAGE_FILE_FORMAT_JPEG;
 }
 
 TextureData::~TextureData() {
@@ -400,7 +415,7 @@ TextureDataPtr Application::load_texture( const sb::string& file ) {
 
 bool Application::store_texture( const sb::string& file , const TextureDataPtr& data ) {
     if (!data) return false;
-    const GHL::Data* d = m_image_decoder->Encode(data->GetImage(), GHL::IMAGE_FILE_FORMAT_PNG);
+    const GHL::Data* d = m_image_decoder->Encode(data->GetImage(), data->GetImageFileFormat());
     if (!d) {
         Sandbox::LogError() << "failed encode texture to " << file;
         return false;

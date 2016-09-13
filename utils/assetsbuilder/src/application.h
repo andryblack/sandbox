@@ -6,6 +6,7 @@
 #include <sb_lua.h>
 #include <sb_file_provider.h>
 #include <ghl_vfs.h>
+#include <ghl_image_decoder.h>
 #include <meta/sb_meta.h>
 
 namespace GHL {
@@ -37,6 +38,7 @@ private:
     GHL::Image* m_data;
     GHL::UInt32 m_offset_x;
     GHL::UInt32 m_offset_y;
+    GHL::ImageFileFormat m_image_file_format;
 public:
     explicit TextureData( GHL::UInt32 w, GHL::UInt32 h );
     explicit TextureData( GHL::Image* img );
@@ -52,6 +54,10 @@ public:
     sb::string GetMD5() const;
     
     bool Crop();
+    GHL::ImageFileFormat GetImageFileFormat() const { return m_image_file_format; }
+    void SetImageFileFormatPNG();
+    void SetImageFileFormatJPEG();
+    bool IsJPEG() const { return m_image_file_format == GHL::IMAGE_FILE_FORMAT_JPEG; }
 };
 typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 

@@ -39,6 +39,12 @@ end
 local action_copy_files = 'copy_files'
 local action_compile_files = 'compile_files'
 local action_premultiply_images = 'premultiply_images'
+local action_convert_to_jpeg = 'convert_to_jpeg'
+
+local file_remap = {}
+function file_remap.convert_to_jpeg( f )
+	return path.replaceextension(f,'jpeg')
+end
 
 local function process_files_pattern( pattern , action )
 	if type(pattern) ~= 'string' then
@@ -48,10 +54,11 @@ local function process_files_pattern( pattern , action )
 	local files = os.matchfiles(path.join(src_path,pattern))
 	for k,v in ipairs(files) do
 		local f = path.getrelative(src_path,v) or v
+		local df = file_remap[action] and file_remap[action](f) or f
 		--print(action,k,f)
-		assert(get_rules()[assert(action)])[f]=f
-		assert(not get_rules().dest_files[f],'conflict rules for file ' .. f)
-		get_rules().dest_files[f]=f
+		assert(get_rules()[assert(action)])[f]=df
+		assert(not get_rules().dest_files[df],'conflict rules for file ' .. df)
+		get_rules().dest_files[df]=f
 	end
 end
 
@@ -64,9 +71,10 @@ local function process_files_pattern_to( src, pattern, dst , action)
 	for k,v in ipairs(files) do
 		local f = path.getrelative(src_path,v)
 		local fn = path.getrelative(src,f)
-		assert(get_rules()[assert(action)])[f]=path.join(dst,fn)
-		assert(not get_rules().dest_files[path.join(dst,fn)],'conflict rules for file ' .. path.join(dst,fn))
-		get_rules().dest_files[path.join(dst,fn)]=f
+		local df = path.join(dst,file_remap[action] and file_remap[action](fn) or fn)
+		assert(get_rules()[assert(action)])[f]=df
+		assert(not get_rules().dest_files[df],'conflict rules for file ' .. df)
+		get_rules().dest_files[df]=f
 	end
 	
 end
@@ -134,10 +142,25 @@ function _M.assets_rules.premultiply_images( file_or_filelist )
 	end
 end
 
+function _M.assets_rules.convert_to_jpeg( file_or_filelist )
+	if type(file_or_filelist) == 'table' then
+		for _,v in ipairs(file_or_filelist) do
+			process_files_pattern(v,action_convert_to_jpeg)
+		end
+	elseif type(file_or_filelist) == 'string' then
+		process_files_pattern(file_or_filelist,action_convert_to_jpeg)
+	else
+		error('convert_to_jpeg table or string expected got ' .. type(file_or_filelist))
+	end
+end
+
 function _M.assets_rules.premultiply_images_to( src, pattern, dst )
 	process_files_pattern_to(src, pattern, dst, action_premultiply_images)
 end
 
+function _M.assets_rules.convert_to_jpeg_to( src, pattern, dst )
+	process_files_pattern_to(src, pattern, dst, action_convert_to_jpeg)
+end
 
 
 local function expand_dirs( p , d )
