@@ -49,6 +49,8 @@
 #include "json/sb_json.h"
 #include "sb_data.h"
 
+#include "sb_particles.h"
+
 
 SB_META_DECLARE_KLASS(GHL::Settings, void)
 SB_META_BEGIN_KLASS_BIND(GHL::Settings)
@@ -250,6 +252,7 @@ namespace Sandbox {
         register_controller(lua->GetVM());
         register_json(lua->GetVM());
         register_keys(lua->GetVM());
+        ParticlesSystem::Bind(lua);
 #ifdef SB_USE_MYGUI
         mygui::register_mygui(lua->GetVM());
 #endif

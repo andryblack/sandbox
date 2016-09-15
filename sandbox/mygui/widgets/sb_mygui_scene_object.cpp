@@ -3,6 +3,7 @@
 #include "sb_resources.h"
 #include "MyGUI_RenderItem.h"
 #include "sb_graphics.h"
+#include "MyGUI_Gui.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ObjectSubSkin,MyGUI::ISubWidgetRect)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::SceneObjectWidget,MyGUI::Widget)
@@ -65,6 +66,22 @@ namespace Sandbox {
         
         SceneObjectWidget::~SceneObjectWidget() {
             
+        }
+        
+        void SceneObjectWidget::initialiseOverride() {
+            Base::initialiseOverride();
+            MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate( this, &SceneObjectWidget::handleFrame );
+        }
+        
+        void SceneObjectWidget::shutdownOverride() {
+            Base::shutdownOverride();
+            MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &SceneObjectWidget::handleFrame );
+        }
+
+        void SceneObjectWidget::handleFrame(float dt) {
+            if (m_object) {
+                m_object->Update(dt);
+            }
         }
         
         void SceneObjectWidget::setObject(const SceneObjectPtr &object) {

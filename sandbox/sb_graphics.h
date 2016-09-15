@@ -167,7 +167,7 @@ namespace Sandbox {
 
         /// draw particles
         void DrawParticles( const std::vector<Particle>& particles,
-                           const std::vector<const Image*>& images );
+                           const std::vector<ImagePtr>& images );
 	
 		void DrawGeometry(const GeometryData& buffer,bool transform);
         

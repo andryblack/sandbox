@@ -10,7 +10,7 @@
 #include "sb_graphics.h"
 #include "sb_log.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::ParticlesSystem, Sandbox::SceneObject)
+SB_META_DECLARE_OBJECT(Sandbox::ParticlesSystem, Sandbox::SceneObjectWithPosition)
 
 namespace Sandbox {
     
@@ -90,14 +90,20 @@ namespace Sandbox {
         float startTime = 1.0f - (instance.cicle_time) / m_cicle_time;
         instance.cicle_time-=dt;
         int  emmit_amount = static_cast<int>(instance.time * m_emission_speed);
-        if (instance.cicle_time<=0.0f) {
-            if (!m_loop) {
-                instance.started = false;
-                emmit_amount = 0;
-            } else {
-                if (instance.started) Start( instance );
+        if (!instance.started) {
+            emmit_amount = 0;
+        } else {
+            if (instance.cicle_time<=0.0f) {
+                if (!m_loop) {
+                    instance.started = false;
+                    instance.time += instance.cicle_time;
+                    emmit_amount = static_cast<int>(instance.time * m_emission_speed);
+                } else {
+                    if (instance.started) Start( instance );
+                }
             }
         }
+        
         std::vector<Particle>::iterator it = instance.particles.begin();
         while (it!=instance.particles.end()) {
             const float* args = m_args;
@@ -116,26 +122,29 @@ namespace Sandbox {
             }
             it = next;
         }
+        if (emmit_amount > m_max_amount)
+            emmit_amount = m_max_amount;
         //emmit_amount = std::min(emmit_amount,int(m_max_amount)-int(instance.particles.size()));
         int free_particles = (int(m_max_amount)-int(instance.particles.size()));
+        //LogVerbose() << "emit: " << emmit_amount << " free: " << free_particles << " dt:" << dt << " circle: " << instance.cicle_time;
         if (emmit_amount>free_particles) {
             /// force dead
             int force_dead = emmit_amount-free_particles;
             instance.particles.erase(instance.particles.begin(),instance.particles.begin()+force_dead);
         }
         if (emmit_amount>0) {
+            
+            const size_t base_index = instance.particles.size();
+            instance.particles.resize( base_index+emmit_amount );
+            float emissionStep = (instance.time/emmit_amount)/m_cicle_time;
+            for (int i=0;i<emmit_amount;i++) {
+                //LogVerbose() << "emit at " << startTime;
+                Emmit( instance, base_index+i, startTime );
+                startTime+=emissionStep;
+                if (startTime>1.0f)
+                    startTime-=1.0f;
+            }
             instance.time-=emmit_amount * (1.0f/m_emission_speed);
-            if (instance.started) {
-                const size_t base_index = instance.particles.size();
-                instance.particles.resize( base_index+emmit_amount );
-                float emissionStep = (dt/emmit_amount)/m_cicle_time;
-                for (int i=0;i<emmit_amount;i++) {
-                    Emmit( instance, base_index+i, startTime );
-                    startTime+=emissionStep;
-                    if (startTime>1.0f)
-                        startTime-=1.0f;
-                }
-            } 
         }
         if (!instance.started) {
             if ( instance.particles.empty() ) {
@@ -160,14 +169,12 @@ namespace Sandbox {
     void ParticlesSystem::Draw(Sandbox::Graphics &g) const {
         if (m_instance.particles.empty()) return;
         if (!m_controller) return;
-        std::vector<const Image*> images;
-        m_controller->GetImages(images);
-        if (images.empty()) return;
-        g.DrawParticles(m_instance.particles, images);
+        g.DrawParticles(m_instance.particles, m_controller->GetImages());
     }
     
     void ParticlesSystem::Update( float dt ) {
         if (m_controller && !m_instance.finished) {
+            m_instance.pos = GetPos();
             m_controller->Update(m_instance, dt);
         }
     }

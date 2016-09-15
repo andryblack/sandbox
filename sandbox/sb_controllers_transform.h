@@ -52,7 +52,9 @@ namespace Sandbox {
 	}
 	
 	typedef LinearController<Vector2f,Impl::LinearControllerSetTranslate,TransformModificatorPtr> ControllerTranslate;
+    typedef MoveController<Impl::LinearControllerSetTranslate,TransformModificatorPtr> ControllerTranslateMove;
     typedef LinearController<Vector2f,Impl::LinearControllerSetPos,SceneObjectWithPositionPtr> ControllerPos;
+    typedef MoveController<Impl::LinearControllerSetPos,SceneObjectWithPositionPtr> ControllerPosMove;
 	typedef LinearController<float,Impl::LinearControllerSetScale,TransformModificatorPtr> ControllerScale;
 	typedef LinearController<float,Impl::LinearControllerSetScaleX,TransformModificatorPtr> ControllerScaleX;
 	typedef LinearController<float,Impl::LinearControllerSetScaleY,TransformModificatorPtr> ControllerScaleY;

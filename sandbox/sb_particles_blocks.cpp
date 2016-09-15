@@ -33,11 +33,11 @@ namespace Sandbox {
     
     static void random_dir_generator( Particle& p, float* , const float* args, float  ) {
         Vector2f dir(0,1);
-        dir.rotate(randf(-fPI, fPI));
+        dir.rotate(randf(args[3]-args[2],args[3]+args[2]));
         p.speed+=dir * randf(args[0],args[1]);
     }
     BLOCK_BEGIN(random_dir_processor)
-    {"speed_min","speed_max"}
+    {"speed_min","speed_max","spread","angle"}
     BLOCK_END(random_dir_processor,0,&random_dir_generator,0);    
    
     
@@ -46,7 +46,7 @@ namespace Sandbox {
         return false;
     }
     BLOCK_BEGIN(apply_speed_processor)
-    {0}
+    {}
     BLOCK_END(apply_speed_processor,0,0,&speed_accept_processor)
     
     static void random_pos_generator( Particle& p, float* , const float* args, float  ) {

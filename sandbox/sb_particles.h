@@ -70,6 +70,7 @@ namespace Sandbox {
                           const ArgsMap& args = ArgsMap());
         
         void GetImages( std::vector<const Image*>& images );
+        const std::vector<ImagePtr>&  GetImages() const { return m_images; }
         
         virtual void Update( ParticlesInstance& instance, float dt);
         void Start( ParticlesInstance& instance );
@@ -89,7 +90,7 @@ namespace Sandbox {
     };
     typedef sb::intrusive_ptr<ParticlesController> ParticlesControllerPtr;
     
-    class ParticlesSystem : public SceneObject {
+    class ParticlesSystem : public SceneObjectWithPosition {
         SB_META_OBJECT
     public:
         explicit ParticlesSystem(const ParticlesControllerPtr& controller);
@@ -98,9 +99,6 @@ namespace Sandbox {
         
         static void Bind( LuaVM* lua );
         static void BindProcessor( LuaVM* lua, const char* name,const ParticleProcessorBlock* block);
-        
-        void SetPosition( const Sandbox::Vector2f& pos ) { m_instance.pos = pos; }
-        const Vector2f& GetPosition() const { return m_instance.pos; }
         
         void SetCompleteEvent( const EventPtr& evnt ) { m_instance.complete_event = evnt; }
         const EventPtr& GetCompleteEvent() const { return m_instance.complete_event; }

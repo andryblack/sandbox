@@ -12,6 +12,7 @@
 
 #include <sbstd/sb_intrusive_ptr.h>
 #include "meta/sb_meta.h"
+#include "sb_vector2.h"
 
 namespace Sandbox {
 	
@@ -40,6 +41,31 @@ namespace Sandbox {
 		T	m_begin;
 		T	m_end;
 	};
+    
+    Vector2f MoveValue(const Vector2f& begin,const Vector2f& end, const Vector2f& delta, float k);
+    
+    template <class Setter ,class Obj> class MoveController : public Controller {
+    public:
+        MoveController(){}
+        const Vector2f& GetBegin() const { return m_begin;}
+        void SetBegin(const Vector2f& from) { m_begin = from;}
+        const Vector2f& GetEnd() const { return m_end;}
+        void SetEnd(const Vector2f& to) { m_end = to;}
+        const Vector2f& GetDelta() const { return m_d; }
+        void SetDelta(const Vector2f& f) { m_d = f; }
+        virtual void Set(float k) {
+            Setter::SetValue( m_obj, MoveValue(m_begin,m_end,m_d,k) );
+        }
+        explicit MoveController(const Obj& obj) : m_obj(obj),m_begin(),m_end() {}
+    protected:
+        const Obj& GetObject() const { return m_obj; }
+    private:
+        Obj	m_obj;
+        Vector2f	m_begin;
+        Vector2f	m_end;
+        Vector2f    m_d;
+    };
+
 	
 	template <class Setter ,class Obj> class LinearController<float,Setter,Obj> : public Controller {
 	public:

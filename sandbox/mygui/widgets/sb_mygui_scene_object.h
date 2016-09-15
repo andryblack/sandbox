@@ -43,7 +43,10 @@ namespace Sandbox {
             void setObject(const SceneObjectPtr& object);
             const SceneObjectPtr& getObject() const { return m_object; }
         private:
+            void initialiseOverride();
+            void shutdownOverride();
             SceneObjectPtr  m_object;
+            void handleFrame(float dt);
         };
     }
 }

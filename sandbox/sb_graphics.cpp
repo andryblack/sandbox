@@ -746,7 +746,7 @@ namespace Sandbox {
 	}
 	
     void Graphics::DrawParticles( const std::vector<Particle>& particles,
-                       const std::vector<const Image*>& images ) {
+                       const std::vector<ImagePtr>& images ) {
         if (particles.empty()) return;
         if (images.empty()) return;
         
@@ -755,7 +755,7 @@ namespace Sandbox {
         for ( size_t i=0;i<particles.size();i++) {
             const Particle& p = particles[i];
         
-            const Image* _img = images[ p.image % images.size() ];
+            const Image* _img = images[ p.image % images.size() ].get();
             if (!_img) continue;
             
             const Image& img = *_img;
@@ -777,22 +777,22 @@ namespace Sandbox {
             if (!m_state.calc2_tex)
             {
                 appendVertex(x,y,
-                             img.GetTextureX(),img.GetTextureY(),clr);
+                             img.GetTextureX()*m_itw,img.GetTextureY()*m_ith,clr);
                 appendVertex(x+w,y,
-                             img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+                             (img.GetTextureX()+img.GetTextureW())*m_itw,img.GetTextureY()*m_ith,clr);
                 appendVertex(x,y+h,
-                             img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+                             img.GetTextureX()*m_itw,(img.GetTextureY()+img.GetTextureH())*m_ith,clr);
                 appendVertex(x+w,y+h,
-                             img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+                             (img.GetTextureX()+img.GetTextureW())*m_itw,(img.GetTextureY()+img.GetTextureH())*m_ith,clr);
             } else {
                 appendVertex2(x,y,
-                             img.GetTextureX(),img.GetTextureY(),clr);
+                             img.GetTextureX()*m_itw,img.GetTextureY()*m_ith,clr);
                 appendVertex2(x+w,y,
-                             img.GetTextureX()+img.GetTextureW(),img.GetTextureY(),clr);
+                             (img.GetTextureX()+img.GetTextureW())*m_itw,img.GetTextureY()*m_ith,clr);
                 appendVertex2(x,y+h,
-                             img.GetTextureX(),img.GetTextureY()+img.GetTextureH(),clr);
+                             img.GetTextureX()*m_itw,(img.GetTextureY()+img.GetTextureH())*m_ith,clr);
                 appendVertex2(x+w,y+h,
-                             img.GetTextureX()+img.GetTextureW(),img.GetTextureY()+img.GetTextureH(),clr);
+                             (img.GetTextureX()+img.GetTextureW())*m_itw,(img.GetTextureY()+img.GetTextureH())*m_ith,clr);
             }
 
         }

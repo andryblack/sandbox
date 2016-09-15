@@ -38,6 +38,8 @@ namespace Sandbox {
     namespace mygui {
                 
         class TextureImpl;
+        class WidgetRender;
+        typedef sb::intrusive_ptr<WidgetRender> WidgetRenderPtr;
         
         class RenderTargetImpl : public MyGUI::IRenderTarget {
         public:
@@ -144,6 +146,10 @@ namespace Sandbox {
             
             void wrapRT( MyGUI::ITexture* texture, const RenderTargetPtr& rt );
             void wrapTexture( const TexturePtr& texture );
+            
+            
+            WidgetRenderPtr renderLayout( const MyGUI::IntSize& size, const sb::string& layout );
+           
         private:
             sb::map<sb::string,TextureImpl*>  m_textures;
             Sandbox::LuaContextPtr  m_context;

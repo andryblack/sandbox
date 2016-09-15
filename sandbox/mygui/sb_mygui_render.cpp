@@ -17,7 +17,10 @@
 #include <ghl_image.h>
 #include <ghl_texture.h>
 #include "sb_transform2d.h"
+#include "sb_mygui_widget_render.h"
+#include "MyGUI_LayoutManager.h"
 #include "MyGUI_VertexData.h"
+
 
 SB_META_DECLARE_OBJECT(MyGUI::ITexture, MyGUI::IObject)
 
@@ -291,6 +294,12 @@ namespace Sandbox {
             end();
         }
         
+        
+        WidgetRenderPtr RenderManager::renderLayout( const MyGUI::IntSize& size, const sb::string& layout ) {
+            WidgetRender* render = new WidgetRender(size);
+            MyGUI::LayoutManager::getInstance().loadLayout(layout,"",render);
+            return WidgetRenderPtr(render);
+        }
         
     }
     
