@@ -57,9 +57,22 @@ namespace Sandbox {
             }
             virtual void onItemClick(size_t idx) {
                 LuaContextPtr* data_ptr = m_list->getItemDataAt<LuaContextPtr>(idx,false);
-                if (data_ptr) {
+                if (data_ptr && m_obj.GetValueRaw<bool>("onItemClick")) {
                     m_obj.call_self("onItemClick",*data_ptr,idx);
                 }
+            }
+            virtual void onSelectionChanged(size_t idx) {
+                if (!m_obj.GetValueRaw<bool>("onSelectionChanged")) {
+                    return;
+                }
+                LuaContextPtr data;
+                if (idx != MyGUI::ITEM_NONE) {
+                    LuaContextPtr* data_ptr = m_list->getItemDataAt<LuaContextPtr>(idx,false);
+                    if (data_ptr) {
+                        data = *data_ptr;
+                    }
+                }
+                m_obj.call_self("onSelectionChanged",data,idx);
             }
             virtual void onBeginScroll() {
                 if (m_obj.GetValue<bool>("onBeginScroll"))
@@ -117,6 +130,7 @@ namespace Sandbox {
         
         
         ScrollList::ScrollList() {
+            m_selection_widget = 0;
             requestCreateWidgetItem = MyGUI::newDelegate(this,&ScrollList::handleCreateWidgetItem);
             requestCoordItem = MyGUI::newDelegate(this,&ScrollList::handleCoordItem);
             requestDrawItem = MyGUI::newDelegate(this,&ScrollList::handleDrawItem);
@@ -139,15 +153,22 @@ namespace Sandbox {
         
         void ScrollList::initialiseOverride() {
             Base::initialiseOverride();
+            eventChangeItemPosition += MyGUI::newDelegate(this, &ScrollList::selectionChanged );
             MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate( this, &ScrollList::frameEntered );
             MyGUI::InputManager::getInstance().eventMouseMoved += MyGUI::newDelegate(this,&ScrollList::handleGlobalMouseMove);
             MyGUI::InputManager::getInstance().eventMousePressed += MyGUI::newDelegate(this,&ScrollList::handleGlobalMousePressed);
             MyGUI::InputManager::getInstance().eventMouseReleased += MyGUI::newDelegate(this,&ScrollList::handleGlobalMouseReleased);
+            assignWidget(m_selection_widget, "Selection");
+            if (m_selection_widget) {
+                m_selection_widget->setVisible(false);
+            }
         }
         void ScrollList::shutdownOverride() {
             MyGUI::InputManager::getInstance().eventMouseMoved -= MyGUI::newDelegate(this,&ScrollList::handleGlobalMouseMove);
             MyGUI::InputManager::getInstance().eventMousePressed -= MyGUI::newDelegate(this,&ScrollList::handleGlobalMousePressed);
             MyGUI::InputManager::getInstance().eventMouseReleased -= MyGUI::newDelegate(this,&ScrollList::handleGlobalMouseReleased);
+            
+            eventChangeItemPosition -= MyGUI::newDelegate(this, &ScrollList::selectionChanged );
 
             MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &ScrollList::frameEntered );
             Base::shutdownOverride();
@@ -239,6 +260,10 @@ namespace Sandbox {
             }
             endBatchAddItems();
             setScroll(normalizeScrollValue(0));
+            _updateChilds();
+            if (getClientWidget()) {
+                getClientWidget()->_updateChilds();
+            }
         }
         
         void ScrollList::updateData() {
@@ -292,6 +317,13 @@ namespace Sandbox {
             if (m_delegate) {
                 m_delegate->onItemClick( getIndexByWidget(_sender) );
             }
+            Base::notifyMouseButtonPressed(_sender, 0, 0, MyGUI::MouseButton::Left);
+        }
+        
+        void ScrollList::notifyMouseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id) {
+        }
+        void ScrollList::notifyMouseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id) {
+            
         }
         
         void ScrollList::onMouseDrag(int _left, int _top, MyGUI::MouseButton _id) {
@@ -325,6 +357,19 @@ namespace Sandbox {
                 mVScroll->setScrollPosition(getContentPosition().top);
             if (nullptr != mHScroll)
                 mHScroll->setScrollPosition(getContentPosition().left);
+            
+            if (m_selection_widget) {
+                size_t idx = getIndexSelected();
+                if (idx != MyGUI::ITEM_NONE) {
+                    Widget* w = getWidgetByIndex(idx);
+                    if (w) {
+                        m_selection_widget->setPosition(w->getPosition());
+                        m_selection_widget->setVisible(true);
+                    } else {
+                        m_selection_widget->setVisible(false);
+                    }
+                }
+            }
         }
         
         int     ScrollList::getScroll() const {
@@ -624,7 +669,28 @@ namespace Sandbox {
         
         
                
+        void ScrollList::selectionChanged(MyGUI::ItemBox* _sender, size_t _index) {
+            if (m_delegate) {
+                m_delegate->onSelectionChanged(_index);
+            }
+            
+        }
         
+        void ScrollList::setIndexSelected(size_t _index) {
+            Base::setIndexSelected(_index);
+            if (m_selection_widget) {
+                if (_index != MyGUI::ITEM_NONE) {
+                    m_selection_widget->setVisible(true);
+                    Widget* w = getWidgetByIndex(_index);
+                    if (w) {
+                        m_selection_widget->setPosition(w->getPosition());
+                    }
+                } else {
+                    m_selection_widget->setVisible(false);
+                }
+                
+            }
+        }
         
 
     }

@@ -794,6 +794,9 @@ SB_META_DECLARE_OBJECT(MyGUI::PopupMenu, MyGUI::MenuControl)
 
 SB_META_DECLARE_OBJECT(MyGUI::EditBox, MyGUI::TextBox)
 SB_META_BEGIN_KLASS_BIND(MyGUI::EditBox)
+SB_META_PROPERTY_RO(textLength, getTextLength)
+SB_META_PROPERTY_RW(maxTextLength, getMaxTextLength, setMaxTextLength)
+SB_META_PROPERTY_RW(overflowToTheLeft, getOverflowToTheLeft, setOverflowToTheLeft)
 bind(method("eventEditSelectAccept", delegate_bind<MyGUI::EditBox,
             MyGUI::EditBox,
             MyGUI::EventPair<MyGUI::EventHandle_WidgetVoid, MyGUI::EventHandle_EditPtr>,
@@ -819,6 +822,7 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ItemBox, MyGUI::DDContainer)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ItemBox)
+SB_META_PROPERTY_RW(indexSelected, getIndexSelected, setIndexSelected)
 bind(method("requestCreateWidgetItem", delegate_bind<MyGUI::ItemBox,
             MyGUI::ItemBox,
             MyGUI::EventHandle_ItemBoxPtrWidgetPtr,
@@ -1048,9 +1052,14 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_KLASS(MyGUI::InputManager, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::InputManager)
 SB_META_STATIC_METHOD(getInstancePtr)
+SB_META_PROPERTY_RO(keyFocusWidget, getKeyFocusWidget)
+SB_META_PROPERTY_RO(mouseFocusWidget, getMouseFocusWidget)
 SB_META_METHOD(getTopModalWidget)
 SB_META_METHOD(addWidgetModal)
 SB_META_METHOD(removeWidgetModal)
+SB_META_METHOD(setKeyFocusWidget)
+bind(method("resetKeyFocusWidget",
+            static_cast<void(MyGUI::InputManager::*)()>(&MyGUI::InputManager::resetKeyFocusWidget)));
 SB_META_END_KLASS_BIND()
 
 

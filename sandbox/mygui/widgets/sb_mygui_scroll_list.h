@@ -32,6 +32,7 @@ namespace Sandbox {
             virtual void createWidget(MyGUI::Widget* w) = 0;
             virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) = 0;
             virtual void onItemClick(size_t idx) = 0;
+            virtual void onSelectionChanged(size_t idx) {};
             virtual void onBeginScroll() = 0;
             virtual void onEndScroll() = 0;
             virtual void onFreeScroll() = 0;
@@ -77,6 +78,8 @@ namespace Sandbox {
             void shutdownOverride();
             
             void frameEntered(float dt);
+            void selectionChanged(MyGUI::ItemBox* _sender, size_t _index);
+            virtual void setIndexSelected(size_t _index);
         private:
             ScrollListDelegatePtr   m_delegate;
             int     m_item_size;
@@ -86,6 +89,9 @@ namespace Sandbox {
             
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             
+            virtual void notifyMouseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            virtual void notifyMouseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+
             void handleCreateWidgetItem(MyGUI::ItemBox*, MyGUI::Widget* w);
             void handleCoordItem(MyGUI::ItemBox*, MyGUI::IntCoord& coords, bool drag);
             void handleDrawItem(MyGUI::ItemBox*, MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di);
@@ -126,6 +132,8 @@ namespace Sandbox {
             
             int m_border_dempth;
             bool    m_manual_scroll;
+            
+            MyGUI::Widget* m_selection_widget;
         };
         
         
