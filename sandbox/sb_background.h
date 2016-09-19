@@ -28,6 +28,9 @@ namespace Sandbox {
         
         GHL::UInt32 GetWidth() const { return m_width; }
         GHL::UInt32 GetHeight() const { return m_height; }
+    protected:
+        void AddImage(const Image& image);
+        void SetSize(GHL::UInt32 w, GHL::UInt32 h);
     private:
         sb::vector<Image>  m_images;
         bool    m_fullscreen;

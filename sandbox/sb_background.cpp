@@ -41,6 +41,14 @@ namespace Sandbox {
         m_images.clear();
         return res->LoadImageSubdivs( file , m_images, m_width, m_height);
     }
+    
+    void Background::AddImage(const Image& image) {
+        m_images.push_back(image);
+    }
+    void Background::SetSize(GHL::UInt32 w, GHL::UInt32 h) {
+        m_width = w;
+        m_height = h;
+    }
 
 
     void Background::SetFiltered( bool f ) {

@@ -305,7 +305,7 @@ namespace Sandbox {
             th = next_pot( h );
         }
     }
-    GHL::Texture* Resources::CreateTexture( GHL::Image* img , bool premultiply, const sb::string& filename,const sb::string& ext) {
+    GHL::Texture* Resources::CreateTexture( GHL::Image* img , bool premultiply) {
         GHL::TextureFormat tfmt;
         int bpp = 4;
 		if (img->GetFormat()==GHL::IMAGE_FORMAT_RGB) {
@@ -318,7 +318,7 @@ namespace Sandbox {
             }
             bpp = 4;
 		} else {
-			LogError(MODULE) <<"unsupported format file " << filename;
+			LogError(MODULE) <<"unsupported format";
 			return 0;
 		}
 		GHL::UInt32 tw = 0;
@@ -371,7 +371,7 @@ namespace Sandbox {
 			return 0;
 		}
         
-        GHL::Texture* texture = CreateTexture(img, premultiply, filename, ext);
+        GHL::Texture* texture = CreateTexture(img, premultiply);
 		
         img->Release();
         
@@ -380,6 +380,22 @@ namespace Sandbox {
         }
         
         return texture;
+    }
+    
+    TexturePtr Resources::LoadTexture( GHL::DataStream* ds ) {
+        GHL::Image* img = ImageFromStream(ds);
+        if (!img) {
+            return TexturePtr();
+        }
+        GHL::UInt32 w = img->GetWidth();
+        GHL::UInt32 h = img->GetHeight();
+        GHL::Texture* texture = CreateTexture(img, false);
+        img->Release();
+        if (texture) {
+            TexturePtr tex(new Texture(texture,1.0f,w,h));
+            return TexturePtr(tex);
+        }
+        return TexturePtr();
     }
     
     BitmaskPtr Resources::LoadBitmask( const sb::string& filename ) {
@@ -438,7 +454,7 @@ namespace Sandbox {
             LogError() << "failed create image from data";
             return ImagePtr();
         }
-        GHL::Texture* texture = CreateTexture(img, true, "data", "mem");
+        GHL::Texture* texture = CreateTexture(img, true);
         GHL::UInt32 img_w = img->GetWidth();
         GHL::UInt32 img_h = img->GetHeight();
         img->Release();

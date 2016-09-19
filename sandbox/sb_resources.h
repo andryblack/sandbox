@@ -50,6 +50,7 @@ namespace Sandbox {
         
         ImagePtr CreateImageFromData( const GHL::Data* data );
 		
+        TexturePtr LoadTexture( GHL::DataStream* ds );
 		TexturePtr GetTexture(const char* filename, bool need_premultiply);
 		ImagePtr GetImage(const char* filename, bool need_premultiply);
 		bool LoadImageSubdivs(const char* filename,
@@ -84,7 +85,8 @@ namespace Sandbox {
         float GetScale() const { return m_scale; }
         void    ProcessMemoryMgmt();
     protected:
-        
+        virtual GHL::Image* ImageFromData( const GHL::Data* data );
+        virtual GHL::Image* ImageFromStream( GHL::DataStream* ds );
     private:
 		GHL::VFS* m_vfs;
 		GHL::Render* m_render;
@@ -113,10 +115,8 @@ namespace Sandbox {
         
         void GetTextureSize( GHL::UInt32 w,GHL::UInt32 h, GHL::UInt32& tw, GHL::UInt32& th , bool target) const;
         
-        GHL::Image* ImageFromData( const GHL::Data* data );
-        GHL::Image* ImageFromStream( GHL::DataStream* ds );
         
-        GHL::Texture* CreateTexture( GHL::Image* img , bool premultiply, const sb::string& file, const sb::string& ext);
+        GHL::Texture* CreateTexture( GHL::Image* img , bool premultiply);
         float       m_scale;
         sb::string  m_res_variant;
 	};
