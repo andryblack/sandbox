@@ -62,6 +62,9 @@ namespace Sandbox {
         
         sb::vector<SkeletonNodeData> m_nodes;
     public:
+        SkeletonData();
+        ~SkeletonData();
+        
         void AddNode(const SkeletonNodeData& n);
         size_t GetNodesCount() const { return m_nodes.size(); }
         sb::string GetNodeName(size_t idx);

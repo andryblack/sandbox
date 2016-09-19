@@ -131,4 +131,13 @@ namespace Sandbox {
             }
         }
     }
+    
+    void SkeletController::Clear() {
+        m_data.reset();
+        m_animation = 0;
+        m_objects.clear();
+        m_end_event.reset();
+        m_started = false;
+        m_added_animations.clear();
+    }
 }

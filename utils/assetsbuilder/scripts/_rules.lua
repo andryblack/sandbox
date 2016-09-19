@@ -43,7 +43,7 @@ local action_convert_to_jpeg = 'convert_to_jpeg'
 
 local file_remap = {}
 function file_remap.convert_to_jpeg( f )
-	return path.replaceextension(f,'jpeg')
+	return path.replaceextension(f,'jpg')
 end
 
 local function process_files_pattern( pattern , action )

@@ -72,6 +72,7 @@ namespace Sandbox {
                 return FacePtr();
             }
             GHL::Data* data = GHL_ReadAllData(ds);
+            ds->Release();
             sb_assert(data);
             FacePtr face(new Face);
             face->data = data;
@@ -275,6 +276,7 @@ namespace Sandbox {
                 if (std::find(m_changed_textures.begin(),m_changed_textures.end(),ntex)==m_changed_textures.end()) {
                     m_changed_textures.push_back(ntex);
                 }
+                img.img->Release();
             }
             
             float iscale = 1.0f / resources->GetScale();

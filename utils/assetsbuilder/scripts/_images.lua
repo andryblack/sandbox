@@ -450,7 +450,7 @@ local function apply_images( dir, data )
 	end
 end
 
-local function do_premultiply_file( src, dstconf  )
+function _M.do_premultiply_file( src, dstconf  )
 	local conf = { dst = dstconf }
 	if type(dstconf) == 'table' then
 		conf = dstconf
@@ -479,7 +479,7 @@ local function do_premultiply_file( src, dstconf  )
 	return application:store_texture(conf.dst,t)
 end
 
-local function do_convert_to_jpeg_file( src, dstconf  )
+function _M.do_convert_to_jpeg_file( src, dstconf  )
 	local conf = { dst = dstconf }
 	if type(dstconf) == 'table' then
 		conf = dstconf
@@ -525,11 +525,11 @@ function _M.apply_rules( rules )
 		if v then
 			--print('premultiply',k)
 			if type(v) == 'table' then
-				assert(do_premultiply_file(k,v),'failed store texture to ' .. v.dst)
+				assert(_M.do_premultiply_file(k,v),'failed store texture to ' .. v.dst)
 			elseif type(v) == 'string' then
-				assert(do_premultiply_file(k,v),'failed store texture to ' .. v)
+				assert(_M.do_premultiply_file(k,v),'failed store texture to ' .. v)
 			else
-				assert(do_premultiply_file(k,k),'failed store texture to ' .. k)
+				assert(_M.do_premultiply_file(k,k),'failed store texture to ' .. k)
 			end
 		end
 	end
@@ -540,11 +540,11 @@ function _M.apply_rules( rules )
 		if v then
 			--print('premultiply',k)
 			if type(v) == 'table' then
-				assert(do_convert_to_jpeg_file(k,v),'failed store texture to ' .. v.dst)
+				assert(_M.do_convert_to_jpeg_file(k,v),'failed store texture to ' .. v.dst)
 			elseif type(v) == 'string' then
-				assert(do_convert_to_jpeg_file(k,v),'failed store texture to ' .. v)
+				assert(_M.do_convert_to_jpeg_file(k,v),'failed store texture to ' .. v)
 			else
-				assert(do_convert_to_jpeg_file(k,k),'failed store texture to ' .. k)
+				assert(_M.do_convert_to_jpeg_file(k,k),'failed store texture to ' .. k)
 			end
 		end
 	end

@@ -25,6 +25,7 @@ namespace Sandbox {
         void Draw( Graphics& g ) const;
         void SetFiltered( bool f );
         void SetFullScreen(bool fs);
+        void Clear();
         
         GHL::UInt32 GetWidth() const { return m_width; }
         GHL::UInt32 GetHeight() const { return m_height; }

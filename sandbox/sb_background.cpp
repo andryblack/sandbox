@@ -42,6 +42,10 @@ namespace Sandbox {
         return res->LoadImageSubdivs( file , m_images, m_width, m_height);
     }
     
+    void Background::Clear() {
+        m_images.clear();
+    }
+    
     void Background::AddImage(const Image& image) {
         m_images.push_back(image);
     }

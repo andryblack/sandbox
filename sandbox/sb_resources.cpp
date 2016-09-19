@@ -82,31 +82,14 @@ namespace Sandbox {
         }
         return ds;
     }
-	
-    GHL::Texture* Resources::InternalCreateTexture( int w,int h, bool alpha,bool fill) {
-        if (!m_render) {
-            LogError(MODULE) << "render not initialized";
-            return 0;
-        }
-		GHL::TextureFormat tfmt;
-		int bpp = 4;
-		if (alpha) {
-			tfmt = GHL::TEXTURE_FORMAT_RGBA;
-			bpp = 4;
-		} else {
-			tfmt = GHL::TEXTURE_FORMAT_RGB;
-			bpp = 3;
-        }
-        GHL::Image* img = 0;
-        if ( fill ) {
-            img = GHL_CreateImage(w, h, alpha ? GHL::IMAGE_FORMAT_RGBA : GHL::IMAGE_FORMAT_RGB);
-            img->Fill(0);
-        }
-		GHL::Texture* texture = m_render->CreateTexture(w,h,tfmt,img);
-		if (img) img->Release();
-		return texture;
-	}
     
+    static GHL::UInt32 get_subdiv_size( GHL::Render* render , GHL::UInt32 osize ) {
+        if (osize >= 1024)
+            return 1024;
+        if (render->IsFeatureSupported(GHL::RENDER_FEATURE_NPOT_TEXTURES))
+            return osize;
+        return osize <= 16 ? osize : prev_pot(osize);
+    }
     bool Resources::LoadImageSubdivs(const char* filename, std::vector<Image>& output,GHL::UInt32& width,GHL::UInt32& height) {
         bool variant = false;
         GHL::Image* img = LoadImage(filename,variant);
@@ -119,27 +102,30 @@ namespace Sandbox {
         GHL::UInt32 y = 0;
         while ( y < h ) {
             GHL::UInt32 oh = h - y;
-            GHL::UInt32 ph = oh <= 16 ? oh : prev_pot( oh );
+            GHL::UInt32 ph = get_subdiv_size(m_render,oh);
             GHL::UInt32 iph = ph > oh ? oh : ph;
             GHL::UInt32 x = 0;
             while ( x < w ) {
                 GHL::UInt32 ow = w - x;
-                GHL::UInt32 pw = ow <= 16 ? ow : prev_pot( ow );
+                GHL::UInt32 pw = get_subdiv_size(m_render, ow);
                 GHL::UInt32 ipw = pw > ow ? ow : pw;
-                GHL::Texture* texture = InternalCreateTexture(pw, ph, ImageHaveAlpha(img), false);
-                if (!texture || !ConvertImage(img,texture)) {
-                    LogError(MODULE) << "failed load subdiv image " << filename;
-                    img->Release();
-                    return false;
-                }
-                GHL::Image* subimg = img->SubImage(x, y, ipw, iph);
+                GHL::Image* subimg = img;
+                if (x!=0 || y!=0 || ipw != width || iph != height)
+                    subimg = img->SubImage(x, y, ipw, iph);
                 if (!subimg) {
                     LogError(MODULE) << "failed load subdiv image " << filename;
                     img->Release();
                     return false;
                 }
-                texture->SetData(0,0,subimg);
-                subimg->Release();
+                GHL::Texture* texture = m_render->CreateTexture(pw, ph, GHL_ImageFormatToTextureFormat(subimg->GetFormat()),
+                                                                subimg);
+                if (!texture) {
+                    LogError(MODULE) << "failed load subdiv image " << filename;
+                    img->Release();
+                    return false;
+                }
+                if (subimg != img)
+                    subimg->Release();
                 output.push_back(Image(TexturePtr(new Texture(texture,scale)),0,0,float(ipw)*scale,float(iph)*scale));
                 output.back().SetHotspot(Vector2f(-float(x)*scale,-float(y)*scale));
                 x+=ipw;
@@ -311,7 +297,10 @@ namespace Sandbox {
 		if (img->GetFormat()==GHL::IMAGE_FORMAT_RGB) {
 			tfmt = GHL::TEXTURE_FORMAT_RGB;
             bpp = 3;
-		} else if (img->GetFormat()==GHL::IMAGE_FORMAT_RGBA) {
+        } else if (img->GetFormat()==GHL::IMAGE_FORMAT_RGBX) {
+            tfmt = GHL::TEXTURE_FORMAT_RGBX;
+            bpp = 4;
+        } else if (img->GetFormat()==GHL::IMAGE_FORMAT_RGBA) {
 			tfmt = GHL::TEXTURE_FORMAT_RGBA;
             if (premultiply) {
                 img->PremultiplyAlpha();
@@ -344,7 +333,10 @@ namespace Sandbox {
 		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
 			ifmt = GHL::IMAGE_FORMAT_RGB;
 			bpp = 3;
-		}
+		} else if (tfmt==GHL::TEXTURE_FORMAT_RGBX) {
+            ifmt = GHL::IMAGE_FORMAT_RGBX;
+            bpp = 3;
+        }
 		else if (tfmt==GHL::TEXTURE_FORMAT_RGBA) {
 			ifmt = GHL::IMAGE_FORMAT_RGBA;
 			bpp = 4;
@@ -405,7 +397,9 @@ namespace Sandbox {
         if (!img) {
             return BitmaskPtr();
         }
-        return BitmaskPtr(new Bitmask(img));
+        BitmaskPtr res(new Bitmask(img));
+        img->Release();
+        return res;
     }
     
 	bool Resources::ImageHaveAlpha(const GHL::Image* img) const {
@@ -418,6 +412,9 @@ namespace Sandbox {
 		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
 			ifmt = GHL::IMAGE_FORMAT_RGB;
 		}
+        else if (tfmt==GHL::TEXTURE_FORMAT_RGBX) {
+            ifmt = GHL::IMAGE_FORMAT_RGBX;
+        }
 		else if (tfmt==GHL::TEXTURE_FORMAT_RGBA) {
 			ifmt = GHL::IMAGE_FORMAT_RGBA;
 		} else {

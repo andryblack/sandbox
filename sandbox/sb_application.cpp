@@ -112,6 +112,7 @@ namespace Sandbox {
             return 1;
         }
         lua_pushlstring(L, reinterpret_cast<const char*>(data->GetData()), data->GetSize());
+        data->Release();
         return 1;
     }
 }

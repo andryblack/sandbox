@@ -15,7 +15,7 @@
 
 	function _M.configure_solution()
 
-		defines {'GHL_STATIC_LIB','SB_SILENT' , 'GHL_SILENT'}
+		defines {'GHL_STATIC_LIB','SB_SILENT' , 'GHL_SILENT' , 'GHL_BUILD_TOOLS' }
 
 		flags       { "No64BitChecks", "ExtraWarnings", "StaticRuntime" }
 

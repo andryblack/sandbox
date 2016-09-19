@@ -47,6 +47,9 @@ namespace Sandbox {
     void SkeletonData::AddAnimation(const SkeletonAnimationPtr& animation) {
         sb_assert(animation);
         sb_assert(animation->GetNodesCount()==m_nodes.size());
+        if (m_animations.find(animation->GetName())!=m_animations.end()) {
+            LogDebug() << "dublicate animation " << animation->GetName();
+        }
         m_animations[animation->GetName()] = animation;
     }
     
@@ -150,9 +153,12 @@ namespace Sandbox {
        
         
         for (pugi::xml_node_iterator it = animations.begin();it!=animations.end();++it) {
+            size_t frames = it->attribute("frames").as_uint();
+            if (frames == 0)
+                continue;
             SkeletonAnimationPtr anim(new SkeletonAnimation(it->attribute("name").value()));
             anim->SetFPS(it->attribute("fps").as_float());
-            size_t frames = it->attribute("frames").as_uint();
+            
             SkeletonNodeFrame* pdata = anim->AllocData(nodes_count, frames);
             size_t data_size = (sizeof(float)*(4+2)+sizeof(float)+sizeof(GHL::UInt32))*frames*nodes_count;
             GHL::Data* d = 0;
@@ -163,7 +169,9 @@ namespace Sandbox {
                 continue;
             }
             
-            if (!d) continue;
+            if (!d) {
+                continue;
+            }
             if (::strcmp(it->attribute("compression").as_string(),"zlib")==0) {
                 GHL::UInt32 size = GHL::UInt32(data_size);
                 VectorData<GHL::Byte>* dd = new VectorData<GHL::Byte>();
@@ -228,6 +236,14 @@ namespace Sandbox {
         if (idx < m_nodes.size())
             return m_nodes[idx];
         return empty_node;
+    }
+    
+    SkeletonData::SkeletonData() {
+        
+    }
+    
+    SkeletonData::~SkeletonData() {
+        
     }
     
     void SkeletonData::AddNode(const SkeletonNodeData& n) {

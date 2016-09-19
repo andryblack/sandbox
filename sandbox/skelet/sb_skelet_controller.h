@@ -39,6 +39,8 @@ namespace Sandbox {
         size_t GetCurrentAnimationFrames() const;
         
         bool IsComplete() const { return !m_animation || !m_started; }
+        
+        virtual void Clear();
     private:
         size_t  m_crnt_frame;
         float   m_frame_time;

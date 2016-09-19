@@ -18,6 +18,7 @@
 #include <sbstd/sb_string.h>
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_list.h>
+#include <ghl_image.h>
 
 namespace GHL {
 	struct VFS;
@@ -96,8 +97,7 @@ namespace Sandbox {
 		
 		friend class Atlaser;
 		
-        GHL::Texture* InternalCreateTexture( int w,int h, bool alpha,bool fill);
-		GHL::Image* LoadImage(const char* file,bool& variant,const char** ext = 0);
+        GHL::Image* LoadImage(const char* file,bool& variant,const char** ext = 0);
 		bool ImageHaveAlpha(const GHL::Image* img) const;
 		bool ConvertImage(GHL::Image* img,GHL::Texture* tex) const;
         bool GetImageInfo(sb::string& file,bool& variant,GHL::UInt32& w,GHL::UInt32& h);

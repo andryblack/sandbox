@@ -29,7 +29,10 @@ project 'GHL'
 			'jdpostct.c', 'jdsample.c', 'jdtrans.c', 'jerror.c', 'jfdctflt.c', 'jfdctfst.c', 'jfdctint.c', 'jidctflt.c',
 			'jidctfst.c', 'jidctint.c', 'jmemmgr.c', 'jmemnobs.c', 'jquant1.c', 'jquant2.c', 'jutils.c',	'transupp.c' 
 		}
-		files(append_path(ghl_src .. '/image/jpeg/',jpeg_files))
+		if not os.is('ios') and not os.is('macosx') or ghl_disable_media then
+			files(append_path(ghl_src .. '/image/jpeg/',jpeg_files))
+		end
+		
 
 		local png_files = {
 			'png.c', 'pngerror.c', 'pngget.c', 'pngmem.c', 'pngpread.c', 'pngread.c', 'pngrio.c', 'pngrtran.c',
