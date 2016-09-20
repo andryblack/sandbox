@@ -182,6 +182,17 @@ namespace Sandbox
                 mGlyphMap[mMaxCharIndex] = gi;
             }
         }
+        
+        void ResourceTrueTypeFont::setCharImage(MyGUI::Char char_code,
+                          const Sandbox::ImagePtr& image,
+                          float advance) {
+            if (!image) return;
+            Sandbox::TexturePtr texture = image->GetTexture();
+            if (!texture) return;
+            MyGUI::IntCoord coord(image->GetTextureX(),image->GetTextureY(),image->GetTextureW(),image->GetTextureH());
+            MyGUI::IntPoint bearing(image->GetHotspot().x,image->GetHotspot().y);
+            setCharImage(char_code, texture->GetName(), coord, bearing, advance);
+        }
     
     void ResourceTrueTypeFont::deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version)
     {

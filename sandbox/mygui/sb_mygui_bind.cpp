@@ -912,9 +912,24 @@ SB_META_DECLARE_OBJECT(MyGUI::ResourceManualFont, MyGUI::IFont)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ResourceManualFont)
 SB_META_END_KLASS_BIND()
 
+static int ResourceTrueTypeFont_setCharImage(lua_State* L) {
+    Sandbox::mygui::ResourceTrueTypeFont* self = Sandbox::luabind::stack<Sandbox::mygui::ResourceTrueTypeFont*>::get(L, 1);
+    MyGUI::Char char_code = Sandbox::luabind::stack<MyGUI::Char>::get(L, 2);
+    if (lua_isstring(L, 3)) {
+        self->setCharImage(char_code, Sandbox::luabind::stack<sb::string>::get(L, 3),
+                           Sandbox::luabind::stack<MyGUI::IntCoord>::get(L, 4),
+                           Sandbox::luabind::stack<MyGUI::IntPoint>::get(L, 5),
+                           Sandbox::luabind::stack<float>::get(L, 6));
+    } else {
+        self->setCharImage(char_code, Sandbox::luabind::stack<Sandbox::ImagePtr>::get(L, 3),
+                           Sandbox::luabind::stack<float>::get(L, 4));
+    }
+    return 0;
+}
+
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFont, MyGUI::IFont)
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceTrueTypeFont)
-SB_META_METHOD(setCharImage)
+bind(method("setCharImage", &ResourceTrueTypeFont_setCharImage));
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFontOutline, Sandbox::mygui::ResourceTrueTypeFont)

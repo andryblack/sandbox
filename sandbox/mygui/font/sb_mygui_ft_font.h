@@ -57,6 +57,9 @@ namespace Sandbox
                           const MyGUI::IntCoord& uv,
                           const MyGUI::IntPoint& bearing,
                           float advance);
+        void setCharImage(MyGUI::Char char_code,
+                          const Sandbox::ImagePtr& image,
+                          float advance);
     protected:
         enum Hinting
         {
