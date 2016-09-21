@@ -1,5 +1,5 @@
-#ifndef SB_MYGUI_MULTIPASS_FONT_H_INCLUDED
-#define SB_MYGUI_MULTIPASS_FONT_H_INCLUDED
+#ifndef SB_MYGUI_COMBINE_FONT_H_INCLUDED
+#define SB_MYGUI_COMBINE_FONT_H_INCLUDED
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_ITexture.h"
@@ -8,11 +8,11 @@
 
 namespace Sandbox {
     namespace mygui {
-        class ResourceMultipassFont : public MyGUI::IFont {
-            MYGUI_RTTI_DERIVED( ResourceMultipassFont )
+        class ResourceCombineFont : public MyGUI::IFont {
+            MYGUI_RTTI_DERIVED( ResourceCombineFont )
         public:
             
-            ResourceMultipassFont();
+            ResourceCombineFont();
             
             virtual void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version);
             
@@ -24,15 +24,9 @@ namespace Sandbox {
             virtual std::string getPassName( size_t pass );
             virtual MyGUI::FloatSize getOffset( size_t pass );
         private:
-            struct Pass {
-                std::string mName;
-                MyGUI::IFont*   mFont;
-                MyGUI::FloatSize  mOffset;
-            };
-            std::vector<Pass> mPasses;
-            MyGUI::IFont*   mMainFont;
+            std::vector<MyGUI::IFont*> mFonts;
         };
     }
 }
 
-#endif /*SB_MYGUI_MULTIPASS_FONT_H_INCLUDED*/
+#endif /*SB_MYGUI_COMBINE_FONT_H_INCLUDED*/

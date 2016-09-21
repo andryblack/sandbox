@@ -403,9 +403,9 @@ namespace Sandbox
         {
             const MyGUI::Char& codePoint = iter->first;
             FT_UInt glyphIndex = FT_Get_Char_Index(ftFace, codePoint);
-            
-            texWidth += createFaceGlyph(ftLibrary,glyphIndex, codePoint, fontAscent, ftFace, ftLoadFlags, glyphHeightMap);
-            
+            if (glyphIndex) {
+                texWidth += createFaceGlyph(ftLibrary,glyphIndex, codePoint, fontAscent, ftFace, ftLoadFlags, glyphHeightMap);
+            }
             // If the newly created glyph is the "Not Defined" glyph, it means that the code point is not supported by the font.
             // Remove it from the character map so that we can provide our own substitute instead of letting FreeType do it.
             if (iter->second != 0) {
@@ -420,6 +420,11 @@ namespace Sandbox
         
         if (spaceGlyphInfo != nullptr && spaceGlyphInfo->codePoint == MyGUI::FontCodeType::Space)
         {
+            FT_UInt glyphIndex = FT_Get_Char_Index(ftFace, spaceGlyphInfo->codePoint);
+            if (glyphIndex && (!getGlyphInfo(-1,MyGUI::FontCodeType::NBSP) ||
+                               getGlyphInfo(-1,MyGUI::FontCodeType::NBSP) == mSubstituteGlyphInfo)) {
+                mCharMap[MyGUI::FontCodeType::NBSP] = glyphIndex;
+            }
             // Adjust the width of the "Space" glyph if it has been customized.
             if (mSpaceWidth != 0.0f)
             {
@@ -432,6 +437,7 @@ namespace Sandbox
             if (mTabWidth == 0.0f)
                 mTabWidth = mDefaultTabWidth * spaceGlyphInfo->advance;
         }
+        
         
         // Create the special glyphs. They must be created after the standard glyphs so that they take precedence in case of a
         // collision. To make sure that the indices of the special glyphs don't collide with any glyph indices in the font, we must
@@ -453,7 +459,7 @@ namespace Sandbox
         
         // Create the "Not Defined" code point (and its corresponding glyph) if it's in use as the substitute code point.
         if (mSubstituteCodePoint == MyGUI::FontCodeType::NotDefined)
-            texWidth += createFaceGlyph(ftLibrary, 0, static_cast<MyGUI::Char>(MyGUI::FontCodeType::NotDefined), fontAscent, ftFace, ftLoadFlags, glyphHeightMap);
+            texWidth += createFaceGlyph(ftLibrary, 0, mSubstituteCodePoint, fontAscent, ftFace, ftLoadFlags, glyphHeightMap);
         
         // Cache a pointer to the substitute glyph info for fast lookup.
         mSubstituteGlyphInfo = &mGlyphMap.find(mCharMap.find(mSubstituteCodePoint)->second)->second;
@@ -702,6 +708,8 @@ namespace Sandbox
                     
                     FT_Done_Glyph(glyph);
                     
+                } else {
+                     MYGUI_LOG(Warning, "ResourceTrueTypeFontOutline: Cannot get glyph " << _glyphIndex << " for character " << _codePoint << " in font '" << getResourceName() << "'.");
                 }
                 
                 return res;

@@ -838,6 +838,13 @@ namespace Sandbox {
                     m_keyboard_ctx->call_self("onKeyUp",event->data.key_release.key);
                 }
                 break;
+            case GHL::EVENT_TYPE_KEYBOARD_HIDE:
+#ifdef SB_USE_MYGUI
+                if (MyGUI::InputManager::getInstancePtr()) {
+                    MyGUI::InputManager::getInstance().resetKeyFocusWidget();
+                }
+#endif
+                break;
             case GHL::EVENT_TYPE_MOUSE_PRESS:
 #ifdef SB_USE_MYGUI
                 if (MyGUI::InputManager::getInstancePtr()) {

@@ -72,6 +72,7 @@
 #include "font/sb_mygui_ft_font.h"
 #include "font/sb_mygui_ft_font_ol.h"
 #include "font/sb_mygui_multipass_font.h"
+#include "font/sb_mygui_combine_font.h"
 
 #include "widgets/sb_mygui_scroll_area.h"
 
@@ -940,6 +941,10 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceMultipassFont, MyGUI::IFont)
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceMultipassFont)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceCombineFont, MyGUI::IFont)
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceCombineFont)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_OBJECT(MyGUI::ResourceLayout, MyGUI::IResource)
 SB_META_DECLARE_OBJECT(MyGUI::ResourceSkin, MyGUI::IResource)
 
@@ -1145,6 +1150,7 @@ namespace Sandbox {
             luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFont>(lua);
             luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFontOutline>(lua);
             luabind::ExternClass<Sandbox::mygui::ResourceMultipassFont>(lua);
+            luabind::ExternClass<Sandbox::mygui::ResourceCombineFont>(lua);
             luabind::ExternClass<MyGUI::ResourceManualFont>(lua);
             
             luabind::ExternClass<Sandbox::mygui::RenderManager>(lua);

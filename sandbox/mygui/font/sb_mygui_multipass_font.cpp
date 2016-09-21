@@ -58,6 +58,11 @@ namespace Sandbox {
             }
             return res;
         }
+        const MyGUI::GlyphInfo* ResourceMultipassFont::getSubstituteGlyphInfo() const {
+            if (mMainFont)
+                return mMainFont->getSubstituteGlyphInfo();
+            return 0;
+        }
         
         std::string ResourceMultipassFont::getPassName( size_t pass ) {
             if (pass < mPasses.size()) {
