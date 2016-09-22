@@ -434,7 +434,7 @@ namespace Sandbox {
         }
         
         void ScrollList::moveToPage(int idx) {
-            m_scroll_target = normalizeScrollValue(getScrollMargin()+getItemSize()*idx);
+            m_scroll_target = normalizeScrollValue(getItemSize()*(idx/m_num_subitems)-getScrollMargin());
             if (m_state==state_none || m_state == state_free_scroll) {
                 m_move_speed += getItemSize() * 2.0f;
                 startFreeScroll();
@@ -455,7 +455,7 @@ namespace Sandbox {
         }
         
         void ScrollList::setPage(int page) {
-            setScroll(normalizeScrollValue(getScrollMargin() + getItemSize()*page));
+            setScroll(normalizeScrollValue( getItemSize()*(page/m_num_subitems) - getScrollMargin()));
         }
         
         int ScrollList::getPage() const {
