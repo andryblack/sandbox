@@ -357,7 +357,10 @@ namespace Sandbox {
                 mVScroll->setScrollPosition(getContentPosition().top);
             if (nullptr != mHScroll)
                 mHScroll->setScrollPosition(getContentPosition().left);
-            
+        }
+        
+        void ScrollList::setContentPosition(const MyGUI::IntPoint& pos) {
+            Base::setContentPosition(pos);
             if (m_selection_widget) {
                 size_t idx = getIndexSelected();
                 if (idx != MyGUI::ITEM_NONE) {
@@ -368,8 +371,11 @@ namespace Sandbox {
                     } else {
                         m_selection_widget->setVisible(false);
                     }
+                } else {
+                    m_selection_widget->setVisible(false);
                 }
             }
+
         }
         
         int     ScrollList::getScroll() const {

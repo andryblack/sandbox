@@ -80,6 +80,7 @@ namespace Sandbox {
             void frameEntered(float dt);
             void selectionChanged(MyGUI::ItemBox* _sender, size_t _index);
             virtual void setIndexSelected(size_t _index);
+            virtual void setContentPosition(const MyGUI::IntPoint& pos);
         private:
             ScrollListDelegatePtr   m_delegate;
             int     m_item_size;
