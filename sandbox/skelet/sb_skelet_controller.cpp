@@ -3,6 +3,7 @@
 #include "sb_skelet_object.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::SkeletController, Sandbox::Thread)
+SB_META_DECLARE_OBJECT(Sandbox::InterpolatedSkeletController, Sandbox::SkeletController)
 namespace Sandbox {
     
     SkeletController::SkeletController(const SkeletonDataPtr& data ) : m_data(data),m_animation(0) {
@@ -139,5 +140,37 @@ namespace Sandbox {
         m_end_event.reset();
         m_started = false;
         m_added_animations.clear();
+    }
+    
+    InterpolatedSkeletController::InterpolatedSkeletController(const SkeletonDataPtr& data ) : SkeletController(data ) {
+        
+    }
+    static inline SkeletonNodeFrame interpolate_frame(const SkeletonNodeFrame& a, const SkeletonNodeFrame& b, float k) {
+        if (a.image!=b.image || a.node != b.node)
+            return a;
+        float ak = 1.0 - k;
+        SkeletonNodeFrame f;
+        f.transform.v = a.transform.v * ak + b.transform.v * k;
+        f.transform.m = a.transform.m * ak + b.transform.m * k;
+        f.color = a.color * ak + b.color * k;
+        return f;
+    }
+    void InterpolatedSkeletController::ApplyFrame() {
+        if (!m_animation)
+            return;
+        float k = m_frame_time * m_animation->GetFPS();
+        size_t next_frame = m_crnt_frame + 1;
+        if (next_frame >= m_animation->GetFrames()) {
+            next_frame = (m_loop!=1) ? 0 : m_crnt_frame;
+        }
+        
+        for (sb::vector<SkeletObjectPtr>::const_iterator it = m_objects.begin();it!=m_objects.end();++it ) {
+            for (size_t i = 0; i < m_data->GetNodesCount();++i ) {
+                const SkeletonNodeFrame& next = m_animation->GetNodeFrame(next_frame, i);
+                const SkeletonNodeFrame& frame = m_animation->GetNodeFrame(m_crnt_frame, i);
+                const SkeletonNodeData& node = m_data->GetNode(frame.node);
+                (*it)->SetSlot(i,node,interpolate_frame(frame,next,k),m_data->GetImage(frame.image));
+            }
+        }
     }
 }

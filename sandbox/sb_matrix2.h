@@ -86,6 +86,16 @@ namespace Sandbox {
                 matrix[0*2+1]*m.matrix[1*2+0]+matrix[1*2+1]*m.matrix[1*2+1]
             );
         }
+        
+        Matrix2f operator *(float k) const {
+            return Matrix2f(
+                            matrix[0*2+0]*k,
+                            matrix[0*2+1]*k,
+                            matrix[1*2+0]*k,
+                            matrix[1*2+1]*k
+                            );
+        }
+
 
         Matrix2f& operator *=(const Matrix2f &m)  { 
             return *this = *this * m;

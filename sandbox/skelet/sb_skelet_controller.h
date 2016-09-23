@@ -24,7 +24,7 @@ namespace Sandbox {
         void StartAnimation(const char* name,int loop);
         void SetAnimation(const char* name);
         void AddAnimation(const char* name,int loop);
-        void ApplyFrame();
+        virtual void ApplyFrame();
         void AddObject(const SkeletObjectPtr& obj);
         bool HasAnimation(const char* name) const;
         
@@ -41,7 +41,7 @@ namespace Sandbox {
         bool IsComplete() const { return !m_animation || !m_started; }
         
         virtual void Clear();
-    private:
+    protected:
         size_t  m_crnt_frame;
         float   m_frame_time;
         bool    m_started;
@@ -58,6 +58,13 @@ namespace Sandbox {
         void InitObjectNodes(const SkeletObjectPtr& obj);
     };
     typedef sb::intrusive_ptr<SkeletController> SkeletControllerPtr;
+    
+    class InterpolatedSkeletController: public SkeletController {
+        SB_META_OBJECT
+    public:
+        explicit InterpolatedSkeletController( const SkeletonDataPtr& data );
+        virtual void ApplyFrame();
+    };
 }
 
 #endif /*SB_SKELET_CONTROLLER_H_INCLUDED*/
