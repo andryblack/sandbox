@@ -79,6 +79,14 @@ namespace Sandbox {
           
         }
         
+        void CachedWidget::addChildNode(LayerItem* _item) {
+            MyGUI::ILayerNode* child_node = m_replaced_layer->createChildItemNode();
+            _item->attachItemToNode(0, child_node);
+        }
+        void CachedWidget::removeChildNode(LayerItem* _item) {
+            
+        }
+        
         void CachedWidget::frameEntered(float dt) {
             MyGUI::IntSize size = getSize();
             size.width = next_pot(size.width);

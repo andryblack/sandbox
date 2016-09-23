@@ -113,6 +113,7 @@ SB_META_METHOD(updateData)
 SB_META_PROPERTY_RW(page, getPage, setPage)
 SB_META_PROPERTY_RW(targetPage, getTargetPage, moveToPage)
 SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
+SB_META_PROPERTY_RO(selectionWidget, getSelectionWidget)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -161,6 +162,7 @@ namespace Sandbox {
             assignWidget(m_selection_widget, "Selection");
             if (m_selection_widget) {
                 m_selection_widget->setVisible(false);
+                m_selection_offset = m_selection_widget->getPosition();
             }
         }
         void ScrollList::shutdownOverride() {
@@ -261,9 +263,6 @@ namespace Sandbox {
             endBatchAddItems();
             setScroll(normalizeScrollValue(0));
             _updateChilds();
-            if (getClientWidget()) {
-                getClientWidget()->_updateChilds();
-            }
         }
         
         void ScrollList::updateData() {
@@ -276,6 +275,7 @@ namespace Sandbox {
             }
             endBatchAddItems();
             setScroll(normalizeScrollValue(0));
+            _updateChilds();
         }
         
         void ScrollList::handleCreateWidgetItem(MyGUI::ItemBox*, MyGUI::Widget* w) {
@@ -366,7 +366,7 @@ namespace Sandbox {
                 if (idx != MyGUI::ITEM_NONE) {
                     Widget* w = getWidgetByIndex(idx);
                     if (w) {
-                        m_selection_widget->setPosition(w->getPosition());
+                        m_selection_widget->setPosition(w->getPosition()+m_selection_offset);
                         m_selection_widget->setVisible(true);
                     } else {
                         m_selection_widget->setVisible(false);
@@ -689,7 +689,7 @@ namespace Sandbox {
                     m_selection_widget->setVisible(true);
                     Widget* w = getWidgetByIndex(_index);
                     if (w) {
-                        m_selection_widget->setPosition(w->getPosition());
+                        m_selection_widget->setPosition(w->getPosition()+m_selection_offset);
                     }
                 } else {
                     m_selection_widget->setVisible(false);

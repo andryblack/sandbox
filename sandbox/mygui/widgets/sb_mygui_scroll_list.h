@@ -60,6 +60,8 @@ namespace Sandbox {
             void setManualScroll(bool s);
             bool manualScroll() const { return m_manual_scroll; }
             
+            MyGUI::Widget* getSelectionWidget() const { return m_selection_widget; }
+            
             void setScrollBounds(int b);
             void setCentered(bool c);
             
@@ -135,6 +137,7 @@ namespace Sandbox {
             bool    m_manual_scroll;
             
             MyGUI::Widget* m_selection_widget;
+            MyGUI::IntPoint m_selection_offset;
         };
         
         

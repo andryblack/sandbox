@@ -27,6 +27,8 @@ namespace Sandbox {
             
             virtual void addChildItem(LayerItem* _item);
             virtual void removeChildItem(LayerItem* _item);
+            virtual void addChildNode(LayerItem* _item);
+            virtual void removeChildNode(LayerItem* _item);
 
             
         protected:
