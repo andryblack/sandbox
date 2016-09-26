@@ -106,6 +106,7 @@ namespace Sandbox {
             TexturePtr  m_texture;
             RenderTargetPtr m_target;
             GHL::Image* m_image;
+            MyGUI::PixelFormat m_format;
         };
         
         class RenderManager : public MyGUI::RenderManager, public RenderTargetImpl {

@@ -52,38 +52,17 @@ namespace Sandbox
         {
             static size_t getNumBytes()
             {
-                return 4;
+                return 1;
             }
             
             static MyGUI::PixelFormat::Enum getFormat()
             {
-                return MyGUI::PixelFormat::R8G8B8A8;
+                return MyGUI::PixelFormat::L8;
             }
             
-            static void set(uint8*& _dest, uint8 _luminance, uint8 _alpha)
+            static void set(uint8*& _dest, uint8 _luminance)
             {
-#ifdef MYGUI_USE_PREMULTIPLIED_ALPHA
-                _luminance = (MyGUI::uint16(_luminance) * _alpha) >> 8;
-#endif
                 *_dest++ = _luminance;
-                *_dest++ = _luminance;
-                *_dest++ = _luminance;
-                *_dest++ = _alpha;
-            }
-            
-            static void set(uint8*& _dest, const MyGUI::Colour& _luminance, uint8 _alpha)
-            {
-#ifdef MYGUI_USE_PREMULTIPLIED_ALPHA
-                *_dest++ = _luminance.red * _alpha ;
-                *_dest++ = _luminance.green * _alpha ;
-                *_dest++ = _luminance.blue * _alpha;
-                *_dest++ = _alpha;
-#else
-                *_dest++ = _luminance.red * 255;
-                *_dest++ = _luminance.green * 255;
-                *_dest++ = _luminance.blue * 255;
-                *_dest++ = _alpha;
-#endif
             }
             
             static void blend_c(uint8& _dest, float _src, uint8 _a) {
@@ -92,13 +71,10 @@ namespace Sandbox
 #endif
             }
             
-            static void blend(uint8*& _dest, const MyGUI::Colour& _clr, uint8 _alpha)
+            static void blend(uint8*& _dest, uint8 _luminance)
             {
-                blend_c(*_dest++ , _clr.red , _alpha);
-                blend_c(*_dest++ , _clr.green , _alpha);
-                blend_c(*_dest++ , _clr.blue , _alpha);
-                blend_c(*_dest++ , _alpha / 255.0f , _alpha);
-                
+                *_dest = (MyGUI::uint16(*_dest) * (255 - _luminance) + MyGUI::uint16(_luminance) * _luminance) / 255;
+                ++_dest;
             }
         };
         
@@ -744,7 +720,7 @@ namespace Sandbox
                     case MyGUI::FontCodeType::Selected:
                     case MyGUI::FontCodeType::SelectedBack:
                     {
-                        fillGlyph(info, charMaskWhite, charMask.find(info.codePoint)->second, j->first, _texBuffer, _texWidth, _texHeight, texX, texY);
+                        fillGlyph(info, charMask.find(info.codePoint)->second, j->first, _texBuffer, _texWidth, _texHeight, texX, texY);
                         
                         // Manually adjust the glyph's width to zero. This prevents artifacts from appearing at the seams when
                         // rendering multi-character selections.
@@ -756,7 +732,7 @@ namespace Sandbox
                         
                     case MyGUI::FontCodeType::Cursor:
                     case MyGUI::FontCodeType::Tab:
-                        fillGlyph(info, charMaskWhite, charMask.find(info.codePoint)->second, j->first, _texBuffer, _texWidth, _texHeight, texX, texY);
+                        fillGlyph(info, charMask.find(info.codePoint)->second, j->first, _texBuffer, _texWidth, _texHeight, texX, texY);
                         break;
                         
                     default:
@@ -772,7 +748,7 @@ namespace Sandbox
         FT_Bitmap_Done(_ftLibrary, &ftBitmap);
     }
     
-    void ResourceTrueTypeFont::fillGlyph(MyGUI::GlyphInfo& _info, uint8 _luminance, uint8 _alpha, int _lineHeight, uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY)
+    void ResourceTrueTypeFont::fillGlyph(MyGUI::GlyphInfo& _info, uint8 _luminance, int _lineHeight, uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY)
     {
         int width = (int)ceil(_info.width);
         int height = (int)ceil(_info.height);
@@ -789,7 +765,7 @@ namespace Sandbox
         for (int j = height; j > 0; --j)
         {
             for (int i=0;i<width;++i) {
-                PixelBase::set(dest, _luminance, _alpha);
+                PixelBase::set(dest, _luminance);
             }
             dest += destNextRow;
         }
@@ -804,7 +780,7 @@ namespace Sandbox
             _texX += mGlyphSpacing + width;
     }
     
-    void ResourceTrueTypeFont::putGlyph(MyGUI::GlyphInfo& _info,  int _lineHeight, uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY,const FT_Bitmap* _bitmap,const MyGUI::Colour& _clr) {
+    void ResourceTrueTypeFont::putGlyph(MyGUI::GlyphInfo& _info,  int _lineHeight, uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY,const FT_Bitmap* _bitmap) {
         int width = (int)ceil(_info.width);
         int height = (int)ceil(_info.height);
         
@@ -820,7 +796,7 @@ namespace Sandbox
         for (int j = _bitmap->rows; j > 0; --j)
         {
             for (int i=0;i<_bitmap->width;++i) {
-                PixelBase::set(dest, _clr, *src++);
+                PixelBase::set(dest, *src++);
             }
             dest += destNextRow;
         }
@@ -835,7 +811,7 @@ namespace Sandbox
             _texX += mGlyphSpacing + width;
     }
     
-    void ResourceTrueTypeFont::blendGlyph(MyGUI::GlyphInfo& _info, int _dx,int _dy, int _lineHeight, uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY,const FT_Bitmap* _bitmap,const MyGUI::Colour& _clr) {
+    void ResourceTrueTypeFont::blendGlyph(MyGUI::GlyphInfo& _info, int _dx,int _dy, int _lineHeight, uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY,const FT_Bitmap* _bitmap) {
         int width = (int)ceil(_info.width);
         int height = (int)ceil(_info.height);
         
@@ -851,7 +827,7 @@ namespace Sandbox
         for (int j = _bitmap->rows; j > 0; --j)
         {
             for (int i=0;i<_bitmap->width;++i) {
-                PixelBase::blend(dest, _clr, *src++);
+                PixelBase::blend(dest, *src++);
             }
             dest += destNextRow;
         }
@@ -884,7 +860,7 @@ namespace Sandbox
                         break;
                 }
                 if (bitmap_buffer) {
-                    putGlyph(_info,_lineHeight,_texBuffer,_texWidth,_texHeight,_texX,_texY,bitmap_buffer,MyGUI::Colour::White);
+                    putGlyph(_info,_lineHeight,_texBuffer,_texWidth,_texHeight,_texX,_texY,bitmap_buffer);
                 }
             }
             

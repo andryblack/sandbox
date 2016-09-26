@@ -246,6 +246,19 @@ namespace Sandbox {
 		if (data && !setData) texture->SetData(0,0,data);
         return TexturePtr( new Texture(texture,scale,w,h));
 	}
+    
+    TexturePtr Resources::CreateTexture( GHL::UInt32 w,
+                             GHL::UInt32 h,
+                             float scale,
+                             GHL::TextureFormat fmt) {
+        GHL::UInt32 tw = 0;
+        GHL::UInt32 th = 0;
+        GetTextureSize(w, h, tw, th, false);
+        GHL::Texture* texture = m_render->CreateTexture(tw,
+                                                        th,fmt,
+                                                        0);
+        return TexturePtr( new Texture(texture,scale,w,h));
+    }
 	
 	
 	TexturePtr Resources::GetTexture(const char* filename, bool need_premultiply) {
@@ -546,12 +559,10 @@ namespace Sandbox {
         GetTextureSize(w*scale, h*scale, nw, nh,true);
         sb_assert(m_render);
         GHL::RenderTarget* rt = m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth);
-        /*
-        if (rt) {
-            m_render->BeginScene(rt);
-            m_render->Clear(1, 0, 0, 1, 0);
-            m_render->EndScene();
-        }*/
+        if (!rt) {
+            LogError() << "failed create targer " << w << "x" << h;
+            return RenderTargetPtr();
+        }
         return RenderTargetPtr( new RenderTarget(rt,w*scale,h*scale,scale));
     }
     

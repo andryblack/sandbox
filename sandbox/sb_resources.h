@@ -19,6 +19,7 @@
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_list.h>
 #include <ghl_image.h>
+#include <ghl_render.h>
 
 namespace GHL {
 	struct VFS;
@@ -71,6 +72,10 @@ namespace Sandbox {
                                  float scale,
                                  bool alpha, 
                                  const GHL::Image* data);
+        TexturePtr CreateTexture( GHL::UInt32 w,
+                                 GHL::UInt32 h,
+                                 float scale,
+                                 GHL::TextureFormat fmt);
         GHL::Texture* LoadTexture( const sb::string& filename , bool& variant, bool premultiply);
         BitmaskPtr LoadBitmask( const sb::string& filename );
         

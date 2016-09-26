@@ -49,6 +49,9 @@ namespace Sandbox {
                 m_file->Write(reinterpret_cast<const GHL::Byte*>(message), ::strlen(message));
                 m_file->Write(rn, sizeof(rn));
             }
+            if (Sandbox::Logger::GetPlatformLogEnabled()) {
+                GHL_Log(level, message);
+            }
         }
         void close() {
             if (m_file) {
@@ -113,9 +116,7 @@ namespace Sandbox {
     Logger::~Logger() {
         if (file_logger.opened()) {
             file_logger.AddMessage(m_level, m_stream.str().c_str());
-        }
-
-        if (m_enable_platform_log)
+        } else if (m_enable_platform_log)
         {
             GHL_Log(m_level, m_stream.str().c_str());
         }

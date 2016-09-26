@@ -270,7 +270,8 @@ namespace Sandbox {
         
         void SetBlendModeI(BlendMode bmode);
         void SetShaderI(const ShaderPtr& sh);
-        void SetMaskModeI(MaskMode mode);
+        void SetMaskModeI(MaskMode mode,GHL::Texture* tex);
+        void SetTextureI(GHL::Texture* tex);
 	};
 }
 

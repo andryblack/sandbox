@@ -139,9 +139,9 @@ namespace Sandbox
         // Renders the glyph described by the specified glyph info according to the specified parameters.
         // Supports two types of rendering, depending on the value of UseBuffer: Texture block transfer and rectangular color fill.
         // The _luminance0 value is used for even-numbered columns (from zero), while _luminance1 is used for odd-numbered ones.
-        void fillGlyph(MyGUI::GlyphInfo& _info, MyGUI::uint8 _luminance, MyGUI::uint8 _alpha, int _lineHeight, MyGUI::uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY);
-        void putGlyph(MyGUI::GlyphInfo& _info, int _lineHeight, MyGUI::uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY,const FT_Bitmap* _bitmap,const MyGUI::Colour& _clr);
-        void blendGlyph(MyGUI::GlyphInfo& _info, int _dx,int _dy, int _lineHeight, MyGUI::uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY,const FT_Bitmap* _bitmap,const MyGUI::Colour& _clr);
+        void fillGlyph(MyGUI::GlyphInfo& _info, MyGUI::uint8 _luminance, int _lineHeight, MyGUI::uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY);
+        void putGlyph(MyGUI::GlyphInfo& _info, int _lineHeight, MyGUI::uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY,const FT_Bitmap* _bitmap);
+        void blendGlyph(MyGUI::GlyphInfo& _info, int _dx,int _dy, int _lineHeight, MyGUI::uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY,const FT_Bitmap* _bitmap);
         virtual void renderGlyph(const FT_Library& _ftLibrary,MyGUI::GlyphInfo& _info, int _lineHeight, MyGUI::uint8* _texBuffer, int _texWidth, int _texHeight, int& _texX, int& _texY, FT_UInt _glyphIndex,FT_Bitmap& _ftBitmap);
         
         

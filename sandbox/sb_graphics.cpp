@@ -134,7 +134,7 @@ namespace Sandbox {
 		sb_assert( (m_render!=0) && "scene not started" );
         if (m_primitives==0) return;
         /// do batch
-		m_render->SetTexture(m_draw_state.texture ? m_draw_state.texture->Present(m_resources) : 0,0);
+        SetTextureI(m_draw_state.texture ? m_draw_state.texture->Present(m_resources) : 0);
         if (m_draw_state.mask) {
             m_render->SetTexture(m_draw_state.mask->Present(m_resources),1);
         }
@@ -178,9 +178,11 @@ namespace Sandbox {
         if (m_state.mask != m_draw_state.mask ||
             m_state.mask_mode != m_draw_state.mask_mode ) {
             Flush();
-            SetMaskModeI(m_state.mask_mode);
             if (!m_state.mask) {
+                SetMaskModeI(m_state.mask_mode,0);
                 m_render->SetTexture(0,1);
+            } else {
+                SetMaskModeI(m_state.mask_mode, m_state.mask->Present(m_resources));
             }
             res = true;
         }
@@ -830,9 +832,9 @@ namespace Sandbox {
             
             
             if (m_state.texture) {
-                m_render->SetTexture(m_state.texture->Present(m_resources),0);
+                SetTextureI(m_state.texture->Present(m_resources));
             } else {
-                m_render->SetTexture(0,0);
+                SetTextureI(0);
             }
             m_render->DrawPrimitivesFromMemory(m_state.ptype, GHL::VERTEX_TYPE_SIMPLE, &geomentry.vertexes[0], GHL::UInt32(geomentry.vertexes.size()), &geomentry.indexes[0], m_primitives);
             m_primitives = 0;
@@ -873,26 +875,41 @@ namespace Sandbox {
         }
         m_state.mask_mode = mode;
     }
-    void Graphics::SetMaskModeI(MaskMode mode) {
+    void Graphics::SetTextureI(GHL::Texture* tex) {
+        if (tex) {
+            m_render->SetTexture(tex,0);
+            if (tex->GetFormat() == GHL::TEXTURE_FORMAT_ALPHA) {
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE_ALPHA,GHL::TEX_ARG_CURRENT,0);
+            } else {
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
+            }
+        } else {
+            m_render->SetTexture(0,0);
+        }
+    }
+    void Graphics::SetMaskModeI(MaskMode mode,GHL::Texture* tex) {
+        GHL::TextureArgument tex_arg = GHL::TEX_ARG_TEXTURE;
+        if (tex && tex->GetFormat() == GHL::TEXTURE_FORMAT_ALPHA)
+            tex_arg = GHL::TEX_ARG_TEXTURE_ALPHA;
         switch (mode) {
             case MASK_MODE_NONE:
-                m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_DISABLE,tex_arg,GHL::TEX_ARG_CURRENT,1);
                 m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_DISABLE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
                 break;
                 
             case MASK_MODE_ALPHA:
-                m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,tex_arg,GHL::TEX_ARG_CURRENT,1);
                 m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
                 break;
                 
             case MASK_MODE_SCREEN:
-                m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,tex_arg,GHL::TEX_ARG_CURRENT,1);
                 m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_SELECT_2,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
                 break;
             case MASK_MODE_MULTIPLY:
                 // alpha 0 -> 1
                 // aplha 1 -> current
-                m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
+                m_render->SetupTextureStageColorOp(GHL::TEX_OP_INT_CURRENT_ALPHA,tex_arg,GHL::TEX_ARG_CURRENT,1);
                 m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_SELECT_2,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,1);
                 break;
 

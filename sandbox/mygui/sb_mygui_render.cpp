@@ -58,7 +58,7 @@ namespace Sandbox {
 
         
         TextureImpl::TextureImpl( const sb::string& name, Graphics* graphics,Resources* res) : RenderTargetImpl(graphics,res),m_name(name),m_image(0) {
-                
+            m_format = MyGUI::PixelFormat::R8G8B8A8;
             }
             
         TextureImpl::TextureImpl( const sb::string& name, Graphics* graphics,Resources* res,
@@ -68,6 +68,7 @@ namespace Sandbox {
             int _width = m_texture->GetWidth();
             int _height = m_texture->GetHeight();
             setSize(_width, _height);
+            m_format = MyGUI::PixelFormat::R8G8B8A8;
         }
         
         void TextureImpl::WrapRT( RenderTargetPtr rt ) {
@@ -120,6 +121,10 @@ namespace Sandbox {
             } else {
                 if (_format == MyGUI::PixelFormat::R8G8B8A8) {
                     m_texture = m_resources->CreateTexture(_width, _height, m_resources->GetScale(), true, 0);
+                    m_format = MyGUI::PixelFormat::R8G8B8A8;
+                } else if (_format == MyGUI::PixelFormat::L8) {
+                    m_texture = m_resources->CreateTexture(_width, _height, m_resources->GetScale(), GHL::TEXTURE_FORMAT_ALPHA);
+                    m_format = MyGUI::PixelFormat::L8;
                 }
             }
             if (m_texture) {
@@ -142,7 +147,13 @@ namespace Sandbox {
             
         void* TextureImpl::lock(MyGUI::TextureUsage _access) {
             if (!m_texture) return 0;
-            m_image = GHL_CreateImage(m_texture->GetRealWidth(), m_texture->GetRealHeight(), GHL::IMAGE_FORMAT_RGBA);
+            if (m_format == MyGUI::PixelFormat::R8G8B8A8) {
+                m_image = GHL_CreateImage(m_texture->GetRealWidth(), m_texture->GetRealHeight(), GHL::IMAGE_FORMAT_RGBA);
+            } else if (m_format == MyGUI::PixelFormat::L8) {
+                m_image = GHL_CreateImage(m_texture->GetRealWidth(), m_texture->GetRealHeight(), GHL::IMAGE_FORMAT_GRAY);
+            } else {
+                return 0;
+            }
             return m_image->GetDataPtr();
         }
             
@@ -167,7 +178,7 @@ namespace Sandbox {
         }
             
         MyGUI::PixelFormat TextureImpl::getFormat() {
-            return MyGUI::PixelFormat::R8G8B8A8;
+            return m_format;
         }
         MyGUI::TextureUsage TextureImpl::getUsage() {
             return MyGUI::TextureUsage::Default;
