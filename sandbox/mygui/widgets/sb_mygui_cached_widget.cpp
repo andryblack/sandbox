@@ -25,7 +25,7 @@ namespace Sandbox {
         
         
         CachedWidget::CachedWidget() : m_render_content(false) {
-            m_texture = 0;
+            m_target = 0;
             m_replaced_layer = new MyGUI::SharedLayerNode(0,0);
             m_texture_name = get_type_info()->name;
             char buf[128];
@@ -41,16 +41,17 @@ namespace Sandbox {
         void CachedWidget::initialiseOverride() {
             Base::initialiseOverride();
             MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate( this, &CachedWidget::frameEntered );
-            m_texture = MyGUI::RenderManager::getInstance().createTexture(m_texture_name);
-            setRenderItemTexture(m_texture);
+            m_target = static_cast<mygui::RenderManager*>(MyGUI::RenderManager::getInstancePtr())->createTarget(getSize());
+            if (m_target)
+                setRenderItemTexture(m_target->getTexture());
         }
         
         void CachedWidget::shutdownOverride() {
             Base::shutdownOverride();
             MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &CachedWidget::frameEntered );
-            if (m_texture) {
-                MyGUI::RenderManager::getInstance().destroyTexture(m_texture);
-                m_texture = 0;
+            if (m_target) {
+                delete m_target;
+                m_target = 0;
             }
         }
         
@@ -91,32 +92,33 @@ namespace Sandbox {
             MyGUI::IntSize size = getSize();
             size.width = next_pot(size.width);
             size.height = next_pot(size.height);
-            bool need_recreate = !m_texture;
+            bool need_recreate = !m_target;
             if (!need_recreate) {
-                if (size.width > m_texture->getWidth())
+                if (size.width > m_target->getWidth())
                     need_recreate = true;
-                if (size.height > m_texture->getHeight())
+                if (size.height > m_target->getHeight())
                     need_recreate = true;
             }
             if (need_recreate) {
-                m_texture->createManual(size.width, size.height, MyGUI::TextureUsage::RenderTarget, MyGUI::PixelFormat::R8G8B8A8);
+                if (m_target) {
+                    m_target->resize(size);
+                } else {
+                    m_target = static_cast<mygui::RenderManager*>(MyGUI::RenderManager::getInstancePtr())->createTarget(size);
+                }
+                setRenderItemTexture(m_target->getTexture());
                 _updateView();
             } else {
                 if (!m_replaced_layer->isOutOfDate() && !m_render_content)
                     return;
             }
 
-            if (m_texture) {
-                MyGUI::IRenderTarget* rt = m_texture->getRenderTarget();
-                if (rt) {
-                    rt->begin();
-                    RenderTargetImpl* impl = static_cast<RenderTargetImpl*>(rt);
-                    Sandbox::Transform2d tr = impl->graphics()->GetTransform();
-                    impl->graphics()->SetTransform(tr.translated(-getAbsoluteLeft(),-getAbsoluteTop()));
-                    doRenderToTarget(rt);
-                    impl->graphics()->SetTransform(tr);
-                    rt->end();
-                }
+            if (m_target) {
+                m_target->begin();
+                Sandbox::Transform2d tr = m_target->graphics()->GetTransform();
+                m_target->graphics()->SetTransform(tr.translated(-getAbsoluteLeft(),-getAbsoluteTop()));
+                doRenderToTarget(m_target);
+                m_target->graphics()->SetTransform(tr);
+                m_target->end();
             }
         }
         

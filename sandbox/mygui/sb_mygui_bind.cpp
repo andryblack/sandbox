@@ -44,7 +44,6 @@
 #include "MyGUI_TabItem.h"
 #include "MyGUI_MenuBar.h"
 #include "MyGUI_ItemBox.h"
-#include "MyGUI_Canvas.h"
 #include "MyGUI_ScrollView.h"
 #include "MyGUI_SimpleText.h"
 #include "MyGUI_ProgressBar.h"
@@ -839,10 +838,6 @@ SB_META_METHOD(getWidgetByIndex)
 SB_META_METHOD(redrawItemAt)
 SB_META_METHOD(redrawAllItems)
 SB_META_END_KLASS_BIND()
-
-
-
-SB_META_DECLARE_OBJECT(MyGUI::Canvas, MyGUI::Widget)
 
 SB_META_DECLARE_OBJECT(MyGUI::ScrollView, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ScrollView)

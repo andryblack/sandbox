@@ -31,7 +31,29 @@ namespace Sandbox {
         
         
                 
-        RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res) : m_graphics(g),m_resources(res) {
+        RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res,RenderTargetPtr rt) : m_graphics(g),m_resources(res),m_target(rt),m_texture(0) {
+            if (m_target) {
+                m_target->GetTexture()->SetFiltered(true);
+                m_rendertarget_size.width = m_target->GetWidth();
+                m_rendertarget_size.height = m_target->GetHeight();
+                m_texture = new TextureImpl("rt",m_target->GetTexture());
+            }
+        }
+        
+        void RenderTargetImpl::resize( const MyGUI::IntSize& size) {
+            if (m_rendertarget_size == size)
+                return;
+            m_target = m_resources->CreateRenderTarget(size.width, size.height, m_resources->GetScale(), true, false);
+            m_target->GetTexture()->SetFiltered(true);
+            if (!m_texture) {
+                m_texture = new TextureImpl("rt",m_target->GetTexture());
+            } else {
+                m_texture->SetTexture(m_target->GetTexture());
+            }
+            setSize(size.width, size.height);
+        }
+        RenderTargetImpl::~RenderTargetImpl() {
+            delete m_texture;
         }
         
         void RenderTargetImpl::drawScene(const ScenePtr &scene) {
@@ -42,12 +64,24 @@ namespace Sandbox {
         
         
         void RenderTargetImpl::begin() {
-            m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
-            m_graphics->BeginDrawTriangles(TexturePtr());
+            if (m_target) {
+                GHL::RenderTarget* rt = m_target->GetNative();
+                GHL::Render* render = m_resources->GetRender();
+                render->BeginScene(rt);
+                render->Clear(0, 0, 0, 0, 0);
+                m_graphics->BeginScene(render, m_target);
+                m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
+                m_graphics->BeginDrawTriangles(TexturePtr());
+            }
         }
         
         void RenderTargetImpl::end() {
-            m_graphics->Flush();
+            if (m_target) {
+                m_graphics->Flush();
+                m_graphics->EndScene();
+                GHL::Render* render = m_resources->GetRender();
+                render->EndScene();
+            }
         }
         
         void RenderTargetImpl::setSize(int width, int height) {
@@ -55,141 +89,8 @@ namespace Sandbox {
             m_rendertarget_size.set(width,height);
 
         }
-
         
-        TextureImpl::TextureImpl( const sb::string& name, Graphics* graphics,Resources* res) : RenderTargetImpl(graphics,res),m_name(name),m_image(0) {
-            m_format = MyGUI::PixelFormat::R8G8B8A8;
-            }
-            
-        TextureImpl::TextureImpl( const sb::string& name, Graphics* graphics,Resources* res,
-                   RenderTargetPtr rt ) : RenderTargetImpl(graphics,res),m_name(name),m_image(0) {
-            m_target = rt;
-            m_texture = m_target->GetTexture();
-            int _width = m_texture->GetWidth();
-            int _height = m_texture->GetHeight();
-            setSize(_width, _height);
-            m_format = MyGUI::PixelFormat::R8G8B8A8;
-        }
         
-        void TextureImpl::WrapRT( RenderTargetPtr rt ) {
-            m_target = rt;
-            m_texture = m_target->GetTexture();
-            int _width = m_texture->GetWidth();
-            int _height = m_texture->GetHeight();
-            setSize(_width, _height);
-        }
-            
-        void TextureImpl::begin() {
-            if (m_target) {
-                GHL::RenderTarget* rt = m_target->GetNative();
-                GHL::Render* render = m_resources->GetRender();
-                render->BeginScene(rt);
-                render->Clear(0, 0, 0, 0, 0);
-                m_graphics->BeginScene(render, m_target);
-                RenderTargetImpl::begin();
-            }
-        }
-        void TextureImpl::setTexture(MyGUI::ITexture* _texture) {
-            RenderTargetImpl::setTexture(_texture);
-        }
-        
-        void TextureImpl::addVertex(const MyGUI::Vertex& v) {
-            RenderTargetImpl::addVertex(v);
-        }
-        
-        void TextureImpl::end() {
-            RenderTargetImpl::end();
-            m_graphics->EndScene();
-            GHL::Render* render = m_resources->GetRender();
-            render->EndScene();
-        }
-            
-        MyGUI::IRenderTarget* TextureImpl::getRenderTarget()
-        {
-            if (m_target)
-                return this;
-            return 0;
-        }
-            
-            
-            
-        void TextureImpl::createManual(int _width, int _height, MyGUI::TextureUsage _usage, MyGUI::PixelFormat _format) {
-            if (_usage == MyGUI::TextureUsage::RenderTarget) {
-                m_target = m_resources->CreateRenderTarget(_width,_height,m_resources->GetScale(),true,false);
-                m_texture = m_target->GetTexture();
-                setSize(_width, _height);
-            } else {
-                if (_format == MyGUI::PixelFormat::R8G8B8A8) {
-                    m_texture = m_resources->CreateTexture(_width, _height, m_resources->GetScale(), true, 0);
-                    m_format = MyGUI::PixelFormat::R8G8B8A8;
-                } else if (_format == MyGUI::PixelFormat::L8) {
-                    m_texture = m_resources->CreateTexture(_width, _height, m_resources->GetScale(), GHL::TEXTURE_FORMAT_ALPHA);
-                    m_format = MyGUI::PixelFormat::L8;
-                }
-            }
-            if (m_texture) {
-                m_texture->SetFiltered(true);
-            }
-        }
-            
-        void TextureImpl::loadFromFile(const std::string& _filename) {
-            m_texture = m_resources->GetTexture(_filename.c_str(), false);
-            if (m_texture) {
-                m_texture->SetFiltered(true);
-            }
-        }
-            
-        
-          
-        void TextureImpl::destroy() {
-            m_texture.reset();
-        }
-            
-        void* TextureImpl::lock(MyGUI::TextureUsage _access) {
-            if (!m_texture) return 0;
-            if (m_format == MyGUI::PixelFormat::R8G8B8A8) {
-                m_image = GHL_CreateImage(m_texture->GetRealWidth(), m_texture->GetRealHeight(), GHL::IMAGE_FORMAT_RGBA);
-            } else if (m_format == MyGUI::PixelFormat::L8) {
-                m_image = GHL_CreateImage(m_texture->GetRealWidth(), m_texture->GetRealHeight(), GHL::IMAGE_FORMAT_GRAY);
-            } else {
-                return 0;
-            }
-            return m_image->GetDataPtr();
-        }
-            
-        void TextureImpl::unlock() {
-            if (m_image && m_texture) {
-                GHL::Texture* tex = m_texture->Present(m_resources);
-                {
-                    //m_image->PremultiplyAlpha();
-                }
-                tex->SetData(0, 0, m_image,0);
-                m_image->Release();
-                m_image = 0;
-                tex->DiscardInternal();
-            }
-        }
-        
-        int TextureImpl::getWidth() {
-            return m_texture ? m_texture->GetWidth() : 0;
-        }
-        int TextureImpl::getHeight() {
-            return m_texture ? m_texture->GetHeight() : 0;
-        }
-            
-        MyGUI::PixelFormat TextureImpl::getFormat() {
-            return m_format;
-        }
-        MyGUI::TextureUsage TextureImpl::getUsage() {
-            return MyGUI::TextureUsage::Default;
-        }
-        size_t TextureImpl::getNumElemBytes() {
-            return 0;
-        }
-        
-        RenderTargetImpl::RenderTargetImpl()  {
-            
-        }
         
         void RenderTargetImpl::setTexture(MyGUI::ITexture *_texture) {
             if (_texture) {
@@ -218,7 +119,7 @@ namespace Sandbox {
         
         
         
-        RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res) {
+        RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res,RenderTargetPtr()) {
             m_graphics = graphics;
             setSize(m_resources->GetRender()->GetWidth(),
                     m_resources->GetRender()->GetHeight());
@@ -240,21 +141,45 @@ namespace Sandbox {
             return m_resources->GetScale();
         }
         
-        MyGUI::ITexture* RenderManager::createTexture(const std::string& _name) {
-            sb_assert(m_textures.find(_name)==m_textures.end());
-            
-            TextureImpl* tex = new TextureImpl(_name,m_graphics,m_resources);
-            m_textures[_name] = tex;
+        TextureImpl::TextureImpl( const sb::string& name,
+                                 const TexturePtr& tex) : m_name(name),m_texture(tex) {
+        }
+        
+        
+    
+        
+        void TextureImpl::destroy() {
+            m_texture.reset();
+        }
+        
+        int TextureImpl::getWidth() {
+            return m_texture ? m_texture->GetWidth() : 0;
+        }
+        int TextureImpl::getHeight() {
+            return m_texture ? m_texture->GetHeight() : 0;
+        }
+
+        
+        MyGUI::ITexture* RenderManager::loadTexture(const std::string& _file_name) {
+            sb_assert(m_textures.find(_file_name)==m_textures.end());
+            TexturePtr texture = m_resources->GetTexture(_file_name.c_str(), false);
+            if (!texture) {
+                return 0;
+            }
+            texture->SetFiltered(true);
+            TextureImpl* tex = new TextureImpl(_file_name,texture);
+            m_textures[_file_name] = tex;
             return tex;
         }
         
-        void RenderManager::wrapTexture( const TexturePtr& texture ) {
+        MyGUI::ITexture* RenderManager::wrapTexture( const TexturePtr& texture ) {
             sb_assert(texture);
             const sb::string& name(texture->GetName());
             sb_assert(m_textures.find(name)==m_textures.end());
-            TextureImpl* tex = new TextureImpl(name,m_graphics,m_resources);
+            TextureImpl* tex = new TextureImpl(name,texture);
             m_textures[name] = tex;
             tex->SetTexture(texture);
+            return tex;
         }
         
         void RenderManager::destroyTexture(MyGUI::ITexture* _texture) {
@@ -274,20 +199,25 @@ namespace Sandbox {
             return 0;
         }
         
-        void RenderManager::wrapRT(MyGUI::ITexture* texture,const RenderTargetPtr& rt ) {
-            if (!texture) return;
-            TextureImpl* tex = static_cast<TextureImpl*>(texture);
-            tex->WrapRT(rt);
+        RenderTargetImpl* RenderManager::createTarget(MyGUI::IntSize size) {
+            if (size.width <= 0 || size.height <= 0)
+                return 0;
+            RenderTargetPtr target = m_resources->CreateRenderTarget(size.width, size.height,
+                                                                    m_resources->GetScale(), true, false);
+            if (!target) return 0;
+            return new RenderTargetImpl(m_graphics,m_resources,target);
         }
         
+        RenderTargetImpl* RenderManager::wrapTarget(const RenderTargetPtr& target ) {
+            if (!target)
+                return 0;
+            return new RenderTargetImpl(m_graphics,m_resources,target);
+        }
+                
         const MyGUI::IntSize& RenderManager::getViewSize() const {
             return m_rendertarget_size;
         }
-        
-        bool RenderManager::isFormatSupported(MyGUI::PixelFormat _format, MyGUI::TextureUsage _usage) {
-            return !_usage.isValue(MyGUI::TextureUsage::Write);
-        }
-        
+                
 #if MYGUI_DEBUG_MODE == 1
         bool RenderManager::checkTexture(MyGUI::ITexture* _texture) {
             return true;
@@ -300,9 +230,12 @@ namespace Sandbox {
         }
         
         void    RenderManager::drawFrame() {
-            begin();
+            m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
+            m_graphics->BeginDrawTriangles(TexturePtr());
+
             onRenderToTarget(this, true);
-            end();
+            m_graphics->Flush();
+
         }
         
         

@@ -59,6 +59,7 @@ namespace Sandbox {
         size_t GetLiveTicks() const { return m_live_ticks; }
         size_t Release();
         size_t GetMemoryUsage() const;
+        void SetName(const sb::string& n) { m_file = n; }
         const sb::string& GetName() const { return m_file; }
         
         void SetTextureSize(GHL::UInt32 tw,GHL::UInt32 th);

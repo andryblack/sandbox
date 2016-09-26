@@ -72,8 +72,7 @@ namespace Sandbox {
                                  float scale,
                                  bool alpha, 
                                  const GHL::Image* data);
-        TexturePtr CreateTexture( GHL::UInt32 w,
-                                 GHL::UInt32 h,
+        TexturePtr CreateTexture( const GHL::Image* image,
                                  float scale,
                                  GHL::TextureFormat fmt);
         GHL::Texture* LoadTexture( const sb::string& filename , bool& variant, bool premultiply);

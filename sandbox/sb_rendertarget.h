@@ -25,6 +25,8 @@ namespace Sandbox {
         const TexturePtr& GetTexture() const { return m_texture; }
         GHL::RenderTarget* GetNative() { return m_rt; }
         float GetScale() const;
+        GHL::UInt32 GetWidth() const;
+        GHL::UInt32 GetHeight() const;
     private:
         GHL::RenderTarget*   m_rt;
         TexturePtr  m_texture;

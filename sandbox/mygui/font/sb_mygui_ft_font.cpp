@@ -8,6 +8,9 @@
 #include "MyGUI_RenderManager.h"
 #include "MyGUI_Bitwise.h"
 #include "sb_math.h"
+#include "../sb_mygui_render.h"
+#include "sb_resources.h"
+#include <ghl_image.h>
 
 
 #	include FT_GLYPH_H
@@ -55,10 +58,6 @@ namespace Sandbox
                 return 1;
             }
             
-            static MyGUI::PixelFormat::Enum getFormat()
-            {
-                return MyGUI::PixelFormat::L8;
-            }
             
             static void set(uint8*& _dest, uint8 _luminance)
             {
@@ -133,9 +132,8 @@ namespace Sandbox
                                                      float advance) {
             MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture(texture_name);
             if (!texture) {
-                texture = MyGUI::RenderManager::getInstance().createTexture(texture_name);
+                texture = MyGUI::RenderManager::getInstance().loadTexture(texture_name);
                 if (texture) {
-                    texture->loadFromFile(texture_name);
                     mTextures.push_back(texture);
                 }
             }
@@ -501,13 +499,8 @@ namespace Sandbox
         //-------------------------------------------------------------------//
         // Create the texture and render the glyphs onto it.
         //-------------------------------------------------------------------//
-        
-        MyGUI::ITexture* texture =  MyGUI::RenderManager::getInstance().createTexture(MyGUI::utility::toString((size_t)this, "_TrueTypeFont"));
-        mTextures.push_back(texture);
-        
-        texture->createManual(texWidth, texHeight, MyGUI::TextureUsage::Static | MyGUI::TextureUsage::Write, PixelBase::getFormat());
-        
-        uint8* texBuffer = static_cast<uint8*>(texture->lock(MyGUI::TextureUsage::Write));
+        GHL::Image* image = GHL_CreateImage(texWidth, texHeight, GHL::IMAGE_FORMAT_GRAY);
+        uint8* texBuffer = image->GetDataPtr();
         
         if (texBuffer != nullptr)
         {
@@ -516,7 +509,6 @@ namespace Sandbox
             
             renderGlyphs(glyphHeightMap, ftLibrary, ftFace, ftLoadFlags, texBuffer, texWidth, texHeight);
             
-            texture->unlock();
             
             MYGUI_LOG(Info, "ResourceTrueTypeFont: Font '" << getResourceName() << "' using texture size " << texWidth << " x " << texHeight << ".");
             MYGUI_LOG(Info, "ResourceTrueTypeFont: Font '" << getResourceName() << "' using real height " << mDefaultHeight << " pixels.");
@@ -525,6 +517,17 @@ namespace Sandbox
         {
             MYGUI_LOG(Error, "ResourceTrueTypeFont: Error locking texture; pointer is nullptr.");
         }
+        
+        Sandbox::mygui::RenderManager* rm = static_cast<Sandbox::mygui::RenderManager*>(MyGUI::RenderManager::getInstancePtr());
+        Sandbox::TexturePtr tex = rm->resources()->CreateTexture(image,
+                                                                 rm->resources()->GetScale(),
+                                                                 GHL::TEXTURE_FORMAT_ALPHA);
+        tex->SetFiltered(true);
+        tex->SetName(MyGUI::utility::toString((size_t)this, "_TrueTypeFont"));
+        MyGUI::ITexture* texture = rm->wrapTexture(tex);
+        mTextures.push_back(texture);
+        image->Release();
+        
         
         for (std::map<FT_UInt, FT_Bitmap>::iterator it = m_bitmaps_map.begin();it!=m_bitmaps_map.end();++it) {
             FT_Bitmap_Done(ftLibrary, &it->second);

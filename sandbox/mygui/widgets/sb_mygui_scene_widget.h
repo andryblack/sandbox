@@ -17,6 +17,7 @@ namespace Sandbox {
     
     namespace mygui {
         
+        class RenderTargetImpl;
         class SceneWidget : public MyGUI::Widget {
             MYGUI_RTTI_DERIVED( SceneWidget )
         public:
@@ -29,10 +30,9 @@ namespace Sandbox {
             const RTScenePtr& getScene() const { return m_scene; }
             void setScene( const RTScenePtr& scene );
         private:
-            MyGUI::ITexture*    m_texture;
             sb::string      m_texture_name;
             RTScenePtr    m_scene;
-            
+            RenderTargetImpl* m_target;
         };
     }
 }

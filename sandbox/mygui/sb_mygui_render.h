@@ -43,7 +43,6 @@ namespace Sandbox {
         
         class RenderTargetImpl : public MyGUI::IRenderTarget {
         public:
-            RenderTargetImpl();
             virtual void begin();
             virtual void end();
             
@@ -55,58 +54,43 @@ namespace Sandbox {
             
             Resources* resources() { return m_resources; }
             Graphics* graphics() { return m_graphics; }
+            
+            TextureImpl* getTexture() { return m_texture; }
+            
+            void SetRT( const RenderTargetPtr& rt );
+            RenderTargetImpl( Graphics* graphics, Resources* resources , RenderTargetPtr rt);
+            ~RenderTargetImpl();
+            
+            const MyGUI::IntSize& getSize() const { return m_rendertarget_size; }
+            int getWidth() const { return m_rendertarget_size.width;}
+            int getHeight() const { return m_rendertarget_size.height; }
+            
+            void resize( const MyGUI::IntSize& size);
         protected:
-            RenderTargetImpl( Graphics* graphics, Resources* resources );
             Graphics*       m_graphics;
             Resources*      m_resources;
+            TextureImpl*    m_texture;
             MyGUI::IntSize  m_rendertarget_size;
             void setSize(int width,int height);
+            RenderTargetPtr m_target;
         };
         
-        class TextureImpl : public MyGUI::ITexture, public RenderTargetImpl {
+        class TextureImpl : public MyGUI::ITexture {
         public:
-            TextureImpl( const sb::string& name, Graphics* graphics,Resources* res);
-            TextureImpl( const sb::string& name, Graphics* graphics,Resources* res,
-                        RenderTargetPtr rt );
-            
-            void WrapRT( RenderTargetPtr rt );
-            
-            virtual void begin();
-            
-            virtual void setTexture(MyGUI::ITexture* _texture) ;
-            virtual void addVertex(const MyGUI::Vertex& v) ;
-
-            void end();
-            
-            virtual MyGUI::IRenderTarget* getRenderTarget();
+            TextureImpl( const sb::string& name,const TexturePtr& tex);
+           
             virtual const std::string& getName() const { return m_name; }
-            virtual void createManual(int _width, int _height, MyGUI::TextureUsage _usage, MyGUI::PixelFormat _format);
-            virtual void loadFromFile(const std::string& _filename);
-            virtual void saveToFile(const std::string& _filename) {
-                
-            }
+           
             virtual void destroy();
 
-            virtual void* lock(MyGUI::TextureUsage _access);
-            virtual void unlock();
-            virtual bool isLocked() {
-                return m_image!=0;
-            }
             virtual int getWidth();
             virtual int getHeight();
-            
-            virtual MyGUI::PixelFormat getFormat();
-            virtual MyGUI::TextureUsage getUsage();
-            virtual size_t getNumElemBytes();
             
             const TexturePtr& GetTexture() { return m_texture; }
             void SetTexture(const TexturePtr& tex) { m_texture = tex; }
         private:
             sb::string  m_name;
             TexturePtr  m_texture;
-            RenderTargetPtr m_target;
-            GHL::Image* m_image;
-            MyGUI::PixelFormat m_format;
         };
         
         class RenderManager : public MyGUI::RenderManager, public RenderTargetImpl {
@@ -119,18 +103,15 @@ namespace Sandbox {
             static RenderManager& getInstance() { return static_cast<RenderManager&>(MyGUI::RenderManager::getInstance()); }
             static RenderManager* getInstancePtr() { return static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr()); }
             
-            /** Create empty texture instance */
-            virtual MyGUI::ITexture* createTexture(const std::string& _name);
+            /** Get texture by name */
+            virtual MyGUI::ITexture* getTexture(const std::string& _name);
             /** Destroy texture */
             virtual void destroyTexture(MyGUI::ITexture* _texture);
             /** Get texture by name */
-            virtual MyGUI::ITexture* getTexture(const std::string& _name);
+            virtual MyGUI::ITexture* loadTexture(const std::string& _filename);
             
             //FIXME возможно перенести в структуру о рендер таргете
             virtual const MyGUI::IntSize& getViewSize() const;
-            
-            /** Check if texture format supported by hardware */
-            virtual bool isFormatSupported(MyGUI::PixelFormat _format, MyGUI::TextureUsage _usage);
             
 #if MYGUI_DEBUG_MODE == 1
             /** Check if texture is valid */
@@ -144,10 +125,10 @@ namespace Sandbox {
             virtual float getDisplayScale() const;
             
             
+            RenderTargetImpl* createTarget(MyGUI::IntSize size);
             
-            void wrapRT( MyGUI::ITexture* texture, const RenderTargetPtr& rt );
-            void wrapTexture( const TexturePtr& texture );
-            
+            MyGUI::ITexture* wrapTexture( const TexturePtr& texture );
+            RenderTargetImpl* wrapTarget(const RenderTargetPtr& rt );
             
             WidgetRenderPtr renderLayout( const MyGUI::IntSize& size, const sb::string& layout );
            

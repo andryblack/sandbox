@@ -18,6 +18,13 @@ namespace Sandbox {
         m_texture.reset( new Texture(tex,1.0f/scale,w,h) );
     }
     
+    GHL::UInt32 RenderTarget::GetWidth() const {
+        return m_rt ? m_rt->GetWidth() * GetScale() : 0;
+    }
+    GHL::UInt32 RenderTarget::GetHeight() const {
+        return m_rt ? m_rt->GetHeight() * GetScale() : 0;
+    }
+    
     float RenderTarget::GetScale() const {
         if (m_texture) return 1.0f / m_texture->GetScale();
         return 1.0f;

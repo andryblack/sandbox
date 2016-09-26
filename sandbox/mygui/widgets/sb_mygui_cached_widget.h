@@ -16,6 +16,7 @@
 namespace Sandbox {
     
     namespace mygui {
+        class RenderTargetImpl;
         
         class CachedWidget : public MyGUI::Widget {
             MYGUI_RTTI_DERIVED( CachedWidget )
@@ -38,7 +39,7 @@ namespace Sandbox {
             
             virtual void doRenderToTarget(MyGUI::IRenderTarget* rt);
         private:
-            MyGUI::ITexture*        m_texture;
+            RenderTargetImpl*        m_target;
             
             MyGUI::SharedLayerNode*  m_replaced_layer;
             void frameEntered(float dt);

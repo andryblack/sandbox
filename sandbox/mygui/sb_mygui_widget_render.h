@@ -11,6 +11,8 @@ namespace MyGUI {
 namespace Sandbox {
     
     namespace mygui {
+        
+        class RenderTargetImpl;
     
         class WidgetRender : public MyGUI::Widget {
             MYGUI_RTTI_DERIVED( WidgetRender )
@@ -38,7 +40,7 @@ namespace Sandbox {
             void shutdownOverride();
             
         private:
-            MyGUI::ITexture*        m_texture;
+            RenderTargetImpl*        m_target;
             
             MyGUI::SharedLayerNode*  m_replaced_layer;
             std::string m_texture_name;

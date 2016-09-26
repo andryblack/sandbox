@@ -25,7 +25,6 @@ namespace Sandbox {
         
         
         WidgetRender::WidgetRender(MyGUI::IntSize size) : counter(0)  {
-            m_texture = 0;
             m_replaced_layer = new MyGUI::SharedLayerNode(0,0);
             m_texture_name = get_type_info()->name;
             char buf[128];
@@ -36,15 +35,11 @@ namespace Sandbox {
             m_image = ImagePtr(new Image());
             
             MyGUI::Gui::getInstance()._linkChildWidget(this);
-            m_texture = MyGUI::RenderManager::getInstance().createTexture(m_texture_name);
+            m_target = static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr())->createTarget(size);
         }
         
         WidgetRender::~WidgetRender() {
-            if (m_texture) {
-                MyGUI::RenderManager::getInstance().destroyTexture(m_texture);
-                m_texture = 0;
-            }
-            
+            delete m_target;
             delete m_replaced_layer;
         }
         
@@ -83,35 +78,35 @@ namespace Sandbox {
             MyGUI::IntSize size = getSize();
             size.width = next_pot(size.width);
             size.height = next_pot(size.height);
-            bool need_recreate = !m_texture;
+            bool need_recreate = !m_target;
             if (!need_recreate) {
-                if (size.width > m_texture->getWidth())
+                if (size.width > m_target->getWidth())
                     need_recreate = true;
-                if (size.height > m_texture->getHeight())
+                if (size.height > m_target->getHeight())
                     need_recreate = true;
             }
             if (need_recreate) {
-                m_texture->createManual(size.width, size.height, MyGUI::TextureUsage::RenderTarget, MyGUI::PixelFormat::R8G8B8A8);
+                if (!m_target) {
+                    m_target = static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr())->createTarget(size);
+                } else {
+                    m_target->resize(size);
+                }
             }
            
-            m_image->SetTexture( static_cast<TextureImpl*>(m_texture)->GetTexture() );
+            m_image->SetTexture( m_target->getTexture()->GetTexture() );
             m_image->SetTextureRect(0, 0, getWidth(), getHeight());
             m_image->SetSize(getWidth(), getHeight());
             
             
-            if (m_texture) {
-                MyGUI::IRenderTarget* rt = m_texture->getRenderTarget();
-                if (rt) {
-                    rt->begin();
-                    RenderTargetImpl* impl = static_cast<RenderTargetImpl*>(rt);
-                    Sandbox::Transform2d tr = impl->graphics()->GetTransform();
-                    impl->graphics()->SetTransform(tr.translated(-getAbsoluteLeft(),-getAbsoluteTop()));
-                    m_replaced_layer->renderToTarget(rt, true);
-                    impl->graphics()->SetTransform(tr);
-                    rt->end();
-                }
+            if (m_target) {
+                m_target->begin();
+                Sandbox::Transform2d tr = m_target->graphics()->GetTransform();
+                m_target->graphics()->SetTransform(tr.translated(-getAbsoluteLeft(),-getAbsoluteTop()));
+                m_replaced_layer->renderToTarget(m_target, true);
+                m_target->graphics()->SetTransform(tr);
+                m_target->end();
             }
-        }        
+        }
     }
     
 }

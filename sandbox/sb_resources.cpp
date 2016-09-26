@@ -247,17 +247,24 @@ namespace Sandbox {
         return TexturePtr( new Texture(texture,scale,w,h));
 	}
     
-    TexturePtr Resources::CreateTexture( GHL::UInt32 w,
-                             GHL::UInt32 h,
+    TexturePtr Resources::CreateTexture( const GHL::Image* image,
                              float scale,
                              GHL::TextureFormat fmt) {
+        if (!image)
+            return TexturePtr();
         GHL::UInt32 tw = 0;
         GHL::UInt32 th = 0;
-        GetTextureSize(w, h, tw, th, false);
+        GetTextureSize(image->GetWidth(), image->GetHeight(), tw, th, false);
+        bool setData = ( tw == image->GetWidth() ) && ( th == image->GetHeight() );
         GHL::Texture* texture = m_render->CreateTexture(tw,
                                                         th,fmt,
-                                                        0);
-        return TexturePtr( new Texture(texture,scale,w,h));
+                                                        setData ? image : 0);
+        if (!texture)
+            return TexturePtr();
+        if (!setData)
+            texture->SetData(0, 0, image);
+        texture->DiscardInternal();
+        return TexturePtr( new Texture(texture,scale,image->GetWidth(),image->GetHeight()));
     }
 	
 	
