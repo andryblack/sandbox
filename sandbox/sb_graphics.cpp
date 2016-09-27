@@ -306,7 +306,7 @@ namespace Sandbox {
 	}
 	
 	
-	void Graphics::DrawImage(const Image& img,const DrawAttributesPtr& attributes,float x,float y) {
+	void Graphics::DrawImage(const Image& img,DrawAttributes* attributes,float x,float y) {
 		sb_assert( (m_render!=0) && "scene not started" );
         if (m_filter && !m_filter->DrawImage(*this, attributes, img, x, y, Sandbox::Color(), 1.0))
             return;
@@ -366,7 +366,7 @@ namespace Sandbox {
                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
         }
 	}
-	void Graphics::DrawImage(const Image& img,const DrawAttributesPtr& attributes,float x,float y,const Color& _clr) {
+	void Graphics::DrawImage(const Image& img,DrawAttributes* attributes,float x,float y,const Color& _clr) {
 		sb_assert( (m_render!=0) && "scene not started" );
         if (m_filter && !m_filter->DrawImage(*this,attributes, img, x, y, _clr, 1.0))
             return;
@@ -410,7 +410,7 @@ namespace Sandbox {
         }
 		
 	}
-	void Graphics::DrawImage(const Image& img,const DrawAttributesPtr& attributes,float x,float y,const Color& _clr,float scale) {
+	void Graphics::DrawImage(const Image& img,DrawAttributes* attributes,float x,float y,const Color& _clr,float scale) {
 		sb_assert( (m_render!=0) && "scene not started" );
         if (m_filter && !m_filter->DrawImage(*this, attributes, img, x, y, _clr, scale))
             return;
@@ -458,7 +458,7 @@ namespace Sandbox {
 		
 	}
     
-    void Graphics::DrawImageBox(const ImageBox& img, const DrawAttributesPtr& attributes,const Vector2f& pos, const Vector2f& size) {
+    void Graphics::DrawImageBox(const ImageBox& img, DrawAttributes* attributes,const Vector2f& pos, const Vector2f& size) {
         sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
         float x1 = pos.x;

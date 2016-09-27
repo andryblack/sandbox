@@ -50,7 +50,7 @@ namespace Sandbox {
     class DrawFilter {
     public:
         virtual bool DrawImage(Graphics& g,
-                               const DrawAttributesPtr& attributes,
+                               DrawAttributes* attributes,
                                const Image& img,
                                float x,float y,const Color& clr,float scale) = 0;
     };
@@ -115,25 +115,25 @@ namespace Sandbox {
 		/// draw image
 		/// @{
 
-		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+		void DrawImage(const Image& img,DrawAttributes* attributes,
                        float x,float y);
-		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+		void DrawImage(const Image& img,DrawAttributes* attributes,
                        float x,float y,const Color& clr);
-		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+		void DrawImage(const Image& img,DrawAttributes* attributes,
                        float x,float y,const Color& clr,float scale);
-        void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+        void DrawImage(const Image& img,DrawAttributes* attributes,
                        const Vector2f& pos) {
             DrawImage(img,attributes,pos.x,pos.y);
         }
-		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+		void DrawImage(const Image& img,DrawAttributes* attributes,
                        const Vector2f& pos,const Color& clr) {
             DrawImage(img,attributes,pos.x,pos.y,clr);
         }
-		void DrawImage(const Image& img,const DrawAttributesPtr& attributes,
+		void DrawImage(const Image& img,DrawAttributes* attributes,
                        const Vector2f& pos,const Color& clr,float scale) {
             DrawImage(img,attributes,pos.x,pos.y,clr,scale);
         }
-        void DrawImageBox(const ImageBox& img, const DrawAttributesPtr& attributes,
+        void DrawImageBox(const ImageBox& img, DrawAttributes* attributes,
                           const Vector2f& pos, const Vector2f& size);
         /// @}
         

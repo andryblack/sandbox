@@ -245,6 +245,7 @@ namespace Sandbox {
             while (ti) {
                 if (ti == rt) return static_cast<T*>(vo);
                 ti = ti->parent.info;
+                if (!ti) return 0;
                 vo = ti->parent.downcast(vo);
             }
             return 0;

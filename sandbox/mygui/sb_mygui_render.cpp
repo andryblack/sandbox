@@ -37,6 +37,8 @@ namespace Sandbox {
                 m_rendertarget_size.width = m_target->GetWidth();
                 m_rendertarget_size.height = m_target->GetHeight();
                 m_texture = new TextureImpl("rt",m_target->GetTexture());
+                begin();
+                end();
             }
         }
         
@@ -45,6 +47,8 @@ namespace Sandbox {
                 return;
             m_target = m_resources->CreateRenderTarget(size.width, size.height, m_resources->GetScale(), true, false);
             m_target->GetTexture()->SetFiltered(true);
+            begin();
+            end();
             if (!m_texture) {
                 m_texture = new TextureImpl("rt",m_target->GetTexture());
             } else {
@@ -133,6 +137,14 @@ namespace Sandbox {
             }
             return ImagePtr();
         }
+        
+        FontPtr RenderManager::getFont( const sb::string& _name ) {
+            if (m_context && m_context->GetValue<bool>("get_font")) {
+                return m_context->call_self<FontPtr>("get_font",_name);
+            }
+            return FontPtr();
+        }
+        
         void RenderManager::setContext(const LuaContextPtr& ctx ) {
             m_context = ctx;
         }

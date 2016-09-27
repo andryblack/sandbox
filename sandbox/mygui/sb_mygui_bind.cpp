@@ -19,7 +19,6 @@
 #include "MyGUI_Align.h"
 #include "MyGUI_WidgetManager.h"
 #include "MyGUI_ControllerManager.h"
-#include "MyGUI_FontManager.h"
 
 #include "MyGUI_TextBox.h"
 #include "MyGUI_Window.h"
@@ -35,7 +34,7 @@
 #include "MyGUI_TileRect.h"
 #include "MyGUI_MainSkin.h"
 #include "MyGUI_ImageBox.h"
-#include "MyGUI_EditText.h"
+
 #include "MyGUI_MultiListBox.h"
 #include "MyGUI_MultiListItem.h"
 
@@ -45,9 +44,8 @@
 #include "MyGUI_MenuBar.h"
 #include "MyGUI_ItemBox.h"
 #include "MyGUI_ScrollView.h"
-#include "MyGUI_SimpleText.h"
+
 #include "MyGUI_ProgressBar.h"
-#include "MyGUI_ResourceManualFont.h"
 #include "MyGUI_SharedLayer.h"
 #include "MyGUI_OverlappedLayer.h"
 #include "MyGUI_ResourceLayout.h"
@@ -68,10 +66,10 @@
 
 #include "widgets/sb_mygui_scene_widget.h"
 #include "widgets/sb_mygui_mask_image.h"
-#include "font/sb_mygui_ft_font.h"
-#include "font/sb_mygui_ft_font_ol.h"
-#include "font/sb_mygui_multipass_font.h"
-#include "font/sb_mygui_combine_font.h"
+//#include "font/sb_mygui_ft_font.h"
+//#include "font/sb_mygui_ft_font_ol.h"
+//#include "font/sb_mygui_multipass_font.h"
+//#include "font/sb_mygui_combine_font.h"
 
 #include "widgets/sb_mygui_scroll_area.h"
 
@@ -729,8 +727,6 @@ SB_META_DECLARE_OBJECT(MyGUI::ISubWidget, MyGUI::ICroppedRectangle)
 SB_META_DECLARE_OBJECT(MyGUI::ISubWidgetRect, MyGUI::ISubWidget)
 SB_META_DECLARE_OBJECT(MyGUI::ISubWidgetText, MyGUI::ISubWidget)
 
-SB_META_DECLARE_OBJECT(MyGUI::EditText, MyGUI::ISubWidgetText)
-
 
 static void set_image_proxy(MyGUI::ImageBox* ib,const Sandbox::ImagePtr& img) {
     if (!img) {
@@ -846,7 +842,6 @@ SB_META_PROPERTY_RO(contentSize, getContentSize)
 SB_META_PROPERTY_RO(viewSize, getViewSize)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_OBJECT(MyGUI::SimpleText, MyGUI::EditText)
 
 SB_META_DECLARE_OBJECT(MyGUI::TabControl, MyGUI::Widget)
 
@@ -864,25 +859,25 @@ SB_META_DECLARE_OBJECT(MyGUI::MultiListItem, MyGUI::TextBox)
 
 SB_META_DECLARE_OBJECT(MyGUI::ISerializable, MyGUI::IObject)
 
-static int mygui_ifont_get_string_width( MyGUI::IFont* font, const char* str) {
-    if (!font || !str) return 0;
-    int w = 0;
-    while(*str) {
-        Sandbox::UTF32Char ch = 0;
-        str = Sandbox::get_char(str,ch);
-        MyGUI::GlyphInfo* glyph = font->getGlyphInfo(-1,ch);
-        if (glyph)
-            w += glyph->bearingX + glyph->advance;
-    }
-    return w;
-}
+//static int mygui_ifont_get_string_width( MyGUI::IFont* font, const char* str) {
+//    if (!font || !str) return 0;
+//    int w = 0;
+//    while(*str) {
+//        Sandbox::UTF32Char ch = 0;
+//        str = Sandbox::get_char(str,ch);
+//        MyGUI::GlyphInfo* glyph = font->getGlyphInfo(-1,ch);
+//        if (glyph)
+//            w += glyph->bearingX + glyph->advance;
+//    }
+//    return w;
+//}
 
 SB_META_DECLARE_OBJECT(MyGUI::IResource, MyGUI::ISerializable)
-SB_META_DECLARE_OBJECT(MyGUI::IFont, MyGUI::IResource)
-SB_META_BEGIN_KLASS_BIND(MyGUI::IFont)
-SB_META_METHOD(getDefaultHeight)
-bind( method( "getStringWidth" , &mygui_ifont_get_string_width ) );
-SB_META_END_KLASS_BIND()
+//SB_META_DECLARE_OBJECT(MyGUI::IFont, MyGUI::IResource)
+//SB_META_BEGIN_KLASS_BIND(MyGUI::IFont)
+//SB_META_METHOD(getDefaultHeight)
+//bind( method( "getStringWidth" , &mygui_ifont_get_string_width ) );
+//SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::IStateInfo, MyGUI::ISerializable)
 
@@ -904,41 +899,38 @@ SB_META_DECLARE_OBJECT(MyGUI::SubSkin, MyGUI::ISubWidgetRect)
 SB_META_DECLARE_OBJECT(MyGUI::MainSkin, MyGUI::SubSkin)
 
 
-SB_META_DECLARE_OBJECT(MyGUI::ResourceManualFont, MyGUI::IFont)
-SB_META_BEGIN_KLASS_BIND(MyGUI::ResourceManualFont)
-SB_META_END_KLASS_BIND()
 
-static int ResourceTrueTypeFont_setCharImage(lua_State* L) {
-    Sandbox::mygui::ResourceTrueTypeFont* self = Sandbox::luabind::stack<Sandbox::mygui::ResourceTrueTypeFont*>::get(L, 1);
-    MyGUI::Char char_code = Sandbox::luabind::stack<MyGUI::Char>::get(L, 2);
-    if (lua_isstring(L, 3)) {
-        self->setCharImage(char_code, Sandbox::luabind::stack<sb::string>::get(L, 3),
-                           Sandbox::luabind::stack<MyGUI::IntCoord>::get(L, 4),
-                           Sandbox::luabind::stack<MyGUI::IntPoint>::get(L, 5),
-                           Sandbox::luabind::stack<float>::get(L, 6));
-    } else {
-        self->setCharImage(char_code, Sandbox::luabind::stack<Sandbox::ImagePtr>::get(L, 3),
-                           Sandbox::luabind::stack<float>::get(L, 4));
-    }
-    return 0;
-}
+//static int ResourceTrueTypeFont_setCharImage(lua_State* L) {
+//    Sandbox::mygui::ResourceTrueTypeFont* self = Sandbox::luabind::stack<Sandbox::mygui::ResourceTrueTypeFont*>::get(L, 1);
+//    MyGUI::Char char_code = Sandbox::luabind::stack<MyGUI::Char>::get(L, 2);
+//    if (lua_isstring(L, 3)) {
+//        self->setCharImage(char_code, Sandbox::luabind::stack<sb::string>::get(L, 3),
+//                           Sandbox::luabind::stack<MyGUI::IntCoord>::get(L, 4),
+//                           Sandbox::luabind::stack<MyGUI::IntPoint>::get(L, 5),
+//                           Sandbox::luabind::stack<float>::get(L, 6));
+//    } else {
+//        self->setCharImage(char_code, Sandbox::luabind::stack<Sandbox::ImagePtr>::get(L, 3),
+//                           Sandbox::luabind::stack<float>::get(L, 4));
+//    }
+//    return 0;
+//}
+//
+//SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFont, MyGUI::IFont)
+//SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceTrueTypeFont)
+//bind(method("setCharImage", &ResourceTrueTypeFont_setCharImage));
+//SB_META_END_KLASS_BIND()
+//
+//SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFontOutline, Sandbox::mygui::ResourceTrueTypeFont)
+//SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceTrueTypeFontOutline)
+//SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFont, MyGUI::IFont)
-SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceTrueTypeFont)
-bind(method("setCharImage", &ResourceTrueTypeFont_setCharImage));
-SB_META_END_KLASS_BIND()
-
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceTrueTypeFontOutline, Sandbox::mygui::ResourceTrueTypeFont)
-SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceTrueTypeFontOutline)
-SB_META_END_KLASS_BIND()
-
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceMultipassFont, MyGUI::IFont)
-SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceMultipassFont)
-SB_META_END_KLASS_BIND()
-
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceCombineFont, MyGUI::IFont)
-SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceCombineFont)
-SB_META_END_KLASS_BIND()
+//SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceMultipassFont, MyGUI::IFont)
+//SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceMultipassFont)
+//SB_META_END_KLASS_BIND()
+//
+//SB_META_DECLARE_OBJECT(Sandbox::mygui::ResourceCombineFont, MyGUI::IFont)
+//SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ResourceCombineFont)
+//SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ResourceLayout, MyGUI::IResource)
 SB_META_DECLARE_OBJECT(MyGUI::ResourceSkin, MyGUI::IResource)
@@ -980,7 +972,6 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::SubSkinStateInfo, MyGUI::IStateInfo)
 SB_META_DECLARE_OBJECT(MyGUI::RotatingSkinStateInfo, MyGUI::IStateInfo)
-SB_META_DECLARE_OBJECT(MyGUI::EditTextStateInfo, MyGUI::IStateInfo)
 SB_META_DECLARE_OBJECT(MyGUI::TileRectStateInfo, MyGUI::IStateInfo)
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::WidgetRender)
@@ -1035,12 +1026,6 @@ SB_META_METHOD(addItem)
 SB_META_METHOD(removeItem)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_KLASS(MyGUI::FontManager, void)
-SB_META_BEGIN_KLASS_BIND(MyGUI::FontManager)
-SB_META_STATIC_METHOD(getInstancePtr)
-SB_META_METHOD(getByName)
-SB_META_PROPERTY_RW(defaultFont,getDefaultFont,setDefaultFont)
-SB_META_END_KLASS_BIND()
 
 static int gui_find_widget_proxy(lua_State* L) {
     MyGUI::Gui* self = Sandbox::luabind::stack<MyGUI::Gui*>::get(L, 1);
@@ -1124,7 +1109,6 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::LayerManager>(lua);
             luabind::ExternClass<MyGUI::ResourceManager>(lua);
             luabind::ExternClass<MyGUI::FactoryManager>(lua);
-            luabind::ExternClass<MyGUI::FontManager>(lua);
             luabind::ExternClass<MyGUI::Gui>(lua);
 
             luabind::ExternClass<MyGUI::TextBox>(lua);
@@ -1141,13 +1125,12 @@ namespace Sandbox {
             
             luabind::ExternClass<Sandbox::mygui::WidgetRender>(lua);
             
-            luabind::ExternClass<MyGUI::IFont>(lua);
-            luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFont>(lua);
-            luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFontOutline>(lua);
-            luabind::ExternClass<Sandbox::mygui::ResourceMultipassFont>(lua);
-            luabind::ExternClass<Sandbox::mygui::ResourceCombineFont>(lua);
-            luabind::ExternClass<MyGUI::ResourceManualFont>(lua);
-            
+//            luabind::ExternClass<MyGUI::IFont>(lua);
+//            //luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFont>(lua);
+//            //luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFontOutline>(lua);
+//            luabind::ExternClass<Sandbox::mygui::ResourceMultipassFont>(lua);
+//            luabind::ExternClass<Sandbox::mygui::ResourceCombineFont>(lua);
+//            
             luabind::ExternClass<Sandbox::mygui::RenderManager>(lua);
             luabind::ExternClass<MyGUI::InputManager>(lua);
             

@@ -43,7 +43,7 @@ namespace Sandbox {
             const ShaderPtr& getShader() const { return m_shader; }
             
         protected:
-            void update_shader();
+            void updateData();
         private:
             sb::map<sb::string,ImagePtr>    m_pass_image;
             ShaderPtr   m_shader;

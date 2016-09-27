@@ -32,7 +32,6 @@ namespace Sandbox {
         void SetSize(float s) { set_size(s); }
         void SetBaseline(float bl) {set_baseline(bl);}
         
-        void FixupChars(const char* from, const char* to);
     private:
         
 		

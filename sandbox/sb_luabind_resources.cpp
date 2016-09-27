@@ -194,24 +194,35 @@ SB_META_ENUM_BIND(Sandbox::FontAlign,namespace Sandbox,
                   SB_META_ENUM_ITEM(ALIGN_RIGHT)
                   SB_META_ENUM_ITEM(ALIGN_CENTER))
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::FontData)
+SB_META_END_KLASS_BIND()
+
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::Font)
 SB_META_PROPERTY_RO(Height, GetHeight)
 SB_META_PROPERTY_RO(Size, GetSize)
 SB_META_PROPERTY_RO(Baseline, GetBaseline)
 SB_META_PROPERTY_RO(XHeight, GetXHeight)
 SB_META_METHOD(GetTextWidth)
+SB_META_METHOD(ClearPasses)
+SB_META_METHOD(AddPass)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::FontPass)
+SB_META_CONSTRUCTOR((const Sandbox::FontDataPtr&,const sb::string&))
+SB_META_PROPERTY_RW(Offset, GetOffset, SetOffset)
+SB_META_PROPERTY_RW(UseColor, GetUseColor, SetUseColor)
+SB_META_PROPERTY_RW(Color, GetColor, SetColor)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::BitmapFont)
 SB_META_CONSTRUCTOR(())
-SB_META_METHOD(Reserve)
 SB_META_METHOD(AddGlypth)
 SB_META_METHOD(AddKerningPair)
 SB_META_METHOD(SetHeight)
 SB_META_METHOD(SetSize)
 SB_META_METHOD(SetBaseline)
 SB_META_METHOD(SetXHeight)
-SB_META_METHOD(FixupChars)
 SB_META_END_KLASS_BIND()
 
 static int Sandbox_FreeTypeFont_Load(lua_State* L) {
@@ -236,12 +247,24 @@ static int Sandbox_FreeTypeFont_Load(lua_State* L) {
     lua_getfield(L, 3, "dpi");
     config.dpi = lua_tonumber(L, -1);
     lua_pop(L, 1);
+    lua_getfield(L, 3, "substitute_code");
+    config.substitute_code = lua_tounsigned(L, -1);
+    lua_pop(L, 1);
     Sandbox::luabind::stack<sb::intrusive_ptr<Sandbox::FreeTypeFont> >::push(L, Sandbox::FreeTypeFont::Load(res, filename, config));
     return 1;
 }
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::FreeTypeFontChild)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::FreeTypeFont)
 bind( static_method( "Load" , &Sandbox_FreeTypeFont_Load ) );
+SB_META_PROPERTY_RO(MainData, GetMainData)
+SB_META_PROPERTY_RO(OutlineData,GetOutlineData)
+SB_META_METHOD(CreateMainChild)
+SB_META_METHOD(CreateOutlineChild)
+SB_META_METHOD(SetCharImage)
+SB_META_METHOD(AddCharImage)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::FileProvider)
@@ -298,18 +321,24 @@ bind( static_method( "LoadTileMapTMX" , &Sandbox::LoadTileMapTMX ) );
 SB_META_END_KLASS_BIND()
 
 struct UTF8 {
-    static  sb::string GetChar(const sb::string& src) {
+    static  sb::string GetChar(const char* src) {
         Sandbox::UTF32Char ch = 0;
-        const char* next = Sandbox::get_char(src.c_str(), ch);
+        const char* next = Sandbox::get_char(src, ch);
         sb::string res;
-        res.assign(src.c_str(),next);
+        res.assign(src,next);
         return res;
+    }
+    static GHL::UInt32 GetCode(const char* src) {
+        Sandbox::UTF32Char ch = 0;
+        Sandbox::get_char(src, ch);
+        return ch;
     }
 };
 
 SB_META_DECLARE_KLASS(UTF8, void)
 SB_META_BEGIN_KLASS_BIND(UTF8)
 SB_META_STATIC_METHOD(GetChar)
+SB_META_STATIC_METHOD(GetCode)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -318,8 +347,11 @@ namespace Sandbox {
         luabind::RawClass<Color>(lua);
         luabind::RawClass<Rectf>(lua);
         luabind::RawClass<Recti>(lua);
+        luabind::ExternClass<FontData>(lua);
+        luabind::Class<FontPass>(lua);
         luabind::Class<Font>(lua);
         luabind::Class<BitmapFont>(lua);
+        luabind::ExternClass<FreeTypeFontChild>(lua);
         luabind::ExternClass<FreeTypeFont>(lua);
         luabind::Enum<FontAlign>(lua);
         luabind::Class<Image>(lua);

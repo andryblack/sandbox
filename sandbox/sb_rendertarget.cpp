@@ -19,10 +19,10 @@ namespace Sandbox {
     }
     
     GHL::UInt32 RenderTarget::GetWidth() const {
-        return m_rt ? m_rt->GetWidth() * GetScale() : 0;
+        return m_rt ? m_rt->GetWidth() / GetScale() : 0;
     }
     GHL::UInt32 RenderTarget::GetHeight() const {
-        return m_rt ? m_rt->GetHeight() * GetScale() : 0;
+        return m_rt ? m_rt->GetHeight() / GetScale() : 0;
     }
     
     float RenderTarget::GetScale() const {

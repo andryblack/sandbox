@@ -2,7 +2,7 @@
 #define SB_MYGUI_TEXT_SKIN_H_INCLUDED
 
 #include "MyGUI_Prerequest.h"
-#include "MyGUI_SimpleText.h"
+#include "sb_mygui_edit_text.h"
 
 #include <sbstd/sb_string.h>
 
@@ -11,7 +11,7 @@ namespace Sandbox {
     namespace mygui {
 
         class AutoSizeText :
-            public MyGUI::EditText
+            public EditText
         {
             MYGUI_RTTI_DERIVED( AutoSizeText )
             
@@ -22,7 +22,6 @@ namespace Sandbox {
             virtual void setViewOffset(const MyGUI::IntPoint& _point);
             
             virtual void doRender(MyGUI::IRenderTarget* _target);
-            virtual void renderPass(MyGUI::IRenderTarget* _target,size_t pass);
             
         private:
         protected:
@@ -36,11 +35,9 @@ namespace Sandbox {
         public:
             MaskText();
             virtual ~MaskText();
-            
-            // метод для отрисовки себя
-            
-            virtual void renderPass(MyGUI::IRenderTarget* _target,size_t pass);
-            
+        protected:
+            virtual bool BeginPass(Graphics& g,const FontPass& pass);
+            virtual void EndPass(Graphics& g,const FontPass& pass);
         };
 
     }

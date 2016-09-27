@@ -27,7 +27,7 @@ namespace Sandbox {
 	
 	void Sprite::Draw(Graphics& g) const {
         if (m_image)
-            g.DrawImage(*m_image,GetDrawAttributes(),GetPos());
+            g.DrawImage(*m_image,GetDrawAttributes().get(),GetPos());
 	}
     
     bool Sprite::CheckHit(const Vector2f& pos) const {
@@ -75,27 +75,27 @@ namespace Sandbox {
                     Image img(*m_image);
                     img.SetSize(img.GetWidth()*dxs, img.GetHeight()*dys);
                     img.SetTextureRect(img.GetTextureX(), img.GetTextureY(), img.GetTextureW()*dxs, img.GetTextureH()*dys);
-                    g.DrawImage(img, GetDrawAttributes(), x, y);
+                    g.DrawImage(img, GetDrawAttributes().get(), x, y);
                 }
             }
         }
     }
     void ColorizedSprite::Draw(Graphics& g) const {
         if (m_image)
-            g.DrawImage(*m_image,GetDrawAttributes(),GetPos(),m_color);
+            g.DrawImage(*m_image,GetDrawAttributes().get(),GetPos(),m_color);
     }
     
     
     void SpriteBox::Draw(Graphics& g) const {
         if (m_image)
-            g.DrawImageBox(*m_image,GetDrawAttributes(),GetPos(),GetSize());
+            g.DrawImageBox(*m_image,GetDrawAttributes().get(),GetPos(),GetSize());
 	}
     
     void ColorizedSpriteBox::Draw(Graphics& g) const {
         if (m_image) {
             Color prev = g.GetColor();
             g.SetColor(prev*m_color);
-            g.DrawImageBox(*m_image,GetDrawAttributes(),GetPos(),GetSize());
+            g.DrawImageBox(*m_image,GetDrawAttributes().get(),GetPos(),GetSize());
             g.SetColor(prev);
         }
     }
@@ -116,11 +116,11 @@ namespace Sandbox {
                     mtr.translate(-GetPos());
                 }
                 g.SetMask(MASK_MODE_ALPHA, mt, mtr);
-                g.DrawImage(*m_image,GetDrawAttributes(),GetPos());
+                g.DrawImage(*m_image,GetDrawAttributes().get(),GetPos());
                 g.SetMask(m, t, tr);
                 
             } else {
-                g.DrawImage(*m_image,GetDrawAttributes(),GetPos());
+                g.DrawImage(*m_image,GetDrawAttributes().get(),GetPos());
             }
         }
     }

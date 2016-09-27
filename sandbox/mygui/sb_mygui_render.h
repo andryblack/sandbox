@@ -20,6 +20,7 @@
 #include "sb_data.h"
 #include "sb_lua_context.h"
 #include "sb_image.h"
+#include "sb_font.h"
 
 namespace GHL {
     struct Render;
@@ -35,8 +36,10 @@ namespace Sandbox {
     class RenderTarget;
     typedef sb::intrusive_ptr<RenderTarget> RenderTargetPtr;
     
+    
     namespace mygui {
-                
+   
+        
         class TextureImpl;
         class WidgetRender;
         typedef sb::intrusive_ptr<WidgetRender> WidgetRenderPtr;
@@ -131,7 +134,7 @@ namespace Sandbox {
             RenderTargetImpl* wrapTarget(const RenderTargetPtr& rt );
             
             WidgetRenderPtr renderLayout( const MyGUI::IntSize& size, const sb::string& layout );
-           
+            FontPtr getFont( const sb::string& _name );
         private:
             sb::map<sb::string,TextureImpl*>  m_textures;
             Sandbox::LuaContextPtr  m_context;

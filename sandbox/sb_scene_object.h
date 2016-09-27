@@ -12,18 +12,16 @@
 #include "meta/sb_meta.h"
 #include "sb_vector2.h"
 #include "sb_transform2d.h"
+#include "sb_draw_attributes.h"
 
 namespace Sandbox {
 	
 	class Graphics;
 	class Container;
     class Scene;
-    class DrawAttributes : public Sandbox::meta::object {
-        SB_META_OBJECT;
-    public:
-        DrawAttributes() {}
-    };
-    typedef sb::intrusive_ptr<DrawAttributes> DrawAttributesPtr;
+    class DrawAttributes;
+    
+    
     
     
 	class SceneObject : public meta::object {

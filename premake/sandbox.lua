@@ -229,6 +229,13 @@ solution( ProjectName )
 			sandbox_dir .. '/sandbox/utils/**.h',
 		}
 
+		if use.Freetype then
+	   		files { 
+	   			sandbox_dir .. '/sandbox/freetype/**.h',
+	   			sandbox_dir .. '/sandbox/freetype/**.cpp',
+	   		}
+		end
+
 		sysincludedirs {
 			sandbox_dir .. '/GHL/include',
 			sandbox_dir .. '/include',

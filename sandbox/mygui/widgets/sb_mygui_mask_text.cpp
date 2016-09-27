@@ -21,12 +21,13 @@ namespace Sandbox {
         
         void MaskTextWidget::setShader(const ShaderPtr &s ) {
              m_shader = s;
-             update_shader();
+             updateData();
              _updateView();
         }
         
         void MaskTextWidget::setPassImage(const sb::string& pass, const ImagePtr& img) {
             m_pass_image[pass] = img;
+            updateData();
         }
         static const ImagePtr empty_image;
         const ImagePtr& MaskTextWidget::getPassImage(const sb::string& pass) const {
@@ -37,7 +38,7 @@ namespace Sandbox {
             return empty_image;
         }
         
-        void MaskTextWidget::update_shader() {
+        void MaskTextWidget::updateData() {
             
         }
         

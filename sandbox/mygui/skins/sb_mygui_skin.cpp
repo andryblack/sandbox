@@ -4,10 +4,12 @@
 #include "meta/sb_meta.h"
 #include "MyGUI_RenderItem.h"
 #include "MyGUI_ITexture.h"
-#include "widgets/sb_mygui_mask_image.h"
-#include "widgets/sb_mygui_mask_text.h"
-#include "widgets/sb_mygui_scene_object.h"
+#include "../widgets/sb_mygui_mask_image.h"
+#include "../widgets/sb_mygui_mask_text.h"
+#include "../widgets/sb_mygui_scene_object.h"
 #include "sb_mygui_text_skin.h"
+#include "sb_mygui_edit_text.h"
+#include "sb_mygui_simple_text.h"
 #include "sb_mygui_render.h"
 #include "sb_graphics.h"
 
@@ -285,42 +287,61 @@ namespace Sandbox {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
             
             factory.registerFactory<ColorizedSubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ColorizedSubSkin");
-                        
-            factory.registerFactory<ColorizedSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<CopySubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<MaskSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<MaskSetSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<ObjectSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<AutoSizeText>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<MaskText>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<KeepAspectSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
             
-            factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSubSkin");
-            factory.registerFactory<MaskSetSubSkinState>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSetSubSkin");
-            factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ObjectSubSkin");
-            factory.registerFactory<MyGUI::EditTextStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "AutoSizeText");
-            factory.registerFactory<MyGUI::EditTextStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskText");
-            factory.registerFactory<MyGUI::SubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "KeepAspectSkin");
+            const std::string& category_name = MyGUI::SubWidgetManager::getInstance().getCategoryName();
+            
+            factory.registerFactory<ColorizedSubSkin>(category_name);
+            factory.registerFactory<CopySubSkin>(category_name);
+            factory.registerFactory<MaskSubSkin>(category_name);
+            factory.registerFactory<MaskSetSubSkin>(category_name);
+            factory.registerFactory<ObjectSubSkin>(category_name);
+            factory.registerFactory<AutoSizeText>(category_name);
+            factory.registerFactory<MaskText>(category_name);
+            factory.registerFactory<KeepAspectSkin>(category_name);
+            factory.registerFactory<EditText>(category_name);
+            factory.registerFactory<SimpleText>(category_name);
+            
+            const std::string& state_category_name = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
+            
+            factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "MaskSubSkin");
+            factory.registerFactory<MaskSetSubSkinState>(state_category_name, "MaskSetSubSkin");
+            factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "ObjectSubSkin");
+            factory.registerFactory<EditTextStateInfo>(state_category_name, "AutoSizeText");
+            factory.registerFactory<EditTextStateInfo>(state_category_name, "MaskText");
+            factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "KeepAspectSkin");
+            factory.registerFactory<EditTextStateInfo>(state_category_name, "EditText");
+            factory.registerFactory<EditTextStateInfo>(state_category_name, "SimpleText");
+
+            
         }
         
         void unregister_skin() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
-            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ColorizedSubSkin");
-            factory.unregisterFactory<ColorizedSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<CopySubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<MaskSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<MaskSetSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<ObjectSubSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<AutoSizeText>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<MaskText>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<KeepAspectSkin>(MyGUI::SubWidgetManager::getInstance().getCategoryName());
+            const std::string& category_name = MyGUI::SubWidgetManager::getInstance().getCategoryName();
             
-            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSubSkin");
-            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskSetSubSkin");
-            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ObjectSubSkin");
-            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "AutoSizeText");
-            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "MaskText");
-            factory.unregisterFactory(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "KeepAspectSkin");
+            
+            factory.unregisterFactory<ColorizedSubSkin>(category_name);
+            factory.unregisterFactory<CopySubSkin>(category_name);
+            factory.unregisterFactory<MaskSubSkin>(category_name);
+            factory.unregisterFactory<MaskSetSubSkin>(category_name);
+            factory.unregisterFactory<ObjectSubSkin>(category_name);
+            factory.unregisterFactory<AutoSizeText>(category_name);
+            factory.unregisterFactory<MaskText>(category_name);
+            factory.unregisterFactory<KeepAspectSkin>(category_name);
+            factory.unregisterFactory<EditText>(category_name);
+            factory.unregisterFactory<SimpleText>(category_name);
+            
+            const std::string& state_category_name = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
+            
+            factory.unregisterFactory(state_category_name, "MaskSubSkin");
+            factory.unregisterFactory(state_category_name, "MaskSetSubSkin");
+            factory.unregisterFactory(state_category_name, "ObjectSubSkin");
+            factory.unregisterFactory(state_category_name, "AutoSizeText");
+            factory.unregisterFactory(state_category_name, "MaskText");
+            factory.unregisterFactory(state_category_name, "KeepAspectSkin");
+            factory.unregisterFactory(state_category_name, "ColorizedSubSkin");
+            factory.unregisterFactory(state_category_name, "EditText");
+            factory.unregisterFactory(state_category_name, "SimpleText");
         }
         
     }

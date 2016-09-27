@@ -34,9 +34,9 @@
 #include "mygui/sb_mygui_keys.h"
 #include "mygui/sb_mygui_data_manager.h"
 #include "mygui/sb_mygui_render.h"
-#include "mygui/sb_mygui_skin.h"
+#include "mygui/skins/sb_mygui_skin.h"
 #include "mygui/widgets/sb_mygui_widgets.h"
-#include "mygui/font/sb_mygui_font.h"
+//#include "mygui/font/sb_mygui_font.h"
 #endif
 
 #ifdef SB_USE_NETWORK
@@ -232,7 +232,6 @@ namespace Sandbox {
             
             mygui::unregister_skin();
             mygui::unregister_widgets();
-            mygui::unregister_font();
             m_gui->shutdown();
         }
         delete m_gui;
@@ -462,7 +461,6 @@ namespace Sandbox {
         if (!m_gui) {
             m_gui = new MyGUI::Gui();
             m_gui->initialise("");
-            mygui::register_font();
             mygui::register_skin();
             mygui::register_widgets();
             mygui::setup_singletons(m_lua);
