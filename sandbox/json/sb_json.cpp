@@ -870,6 +870,88 @@ namespace Sandbox {
         }
     }
 
+    class LuaJSONTraverser : public JsonTraverser {
+    private:
+        LuaContextPtr   m_ctx;
+    public:
+        explicit LuaJSONTraverser( LuaContextPtr ctx ) : m_ctx(ctx) {}
+        
+        virtual void OnBeginObject() {
+            if (m_ctx->GetValue<bool>("OnBeginObject")) {
+                m_ctx->call_self("OnBeginObject");
+            }
+        }
+        virtual void OnEndObject() {
+            if (m_ctx->GetValue<bool>("OnEndObject")) {
+                m_ctx->call_self("OnEndObject");
+            }
+        }
+        virtual void OnBeginArray() {
+            if (m_ctx->GetValue<bool>("OnBeginArray")) {
+                m_ctx->call_self("OnBeginArray");
+            }
+        }
+        virtual void OnEndArray() {
+            if (m_ctx->GetValue<bool>("OnEndArray")) {
+                m_ctx->call_self("OnEndArray");
+            }
+        }
+        virtual void OnKey(const sb::string& v) {
+            if (m_ctx->GetValue<bool>("OnKey")) {
+                m_ctx->call_self("OnKey",v);
+            }
+        }
+        virtual void OnNull() {
+            if (m_ctx->GetValue<bool>("OnNull")) {
+                m_ctx->call_self("OnNull");
+            }
+        }
+        virtual void OnBool(bool v) {
+            if (m_ctx->GetValue<bool>("OnBool")) {
+                m_ctx->call_self("OnBool",v);
+            }
+        }
+        virtual void OnString(const sb::string& v) {
+            if (m_ctx->GetValue<bool>("OnString")) {
+                m_ctx->call_self("OnString",v);
+            }
+        }
+        virtual void OnInteger(int v) {
+            if (m_ctx->GetValue<bool>("OnInteger")) {
+                m_ctx->call_self("OnInteger",v);
+            } else if (m_ctx->GetValue<bool>("OnNumber")) {
+                m_ctx->call_self("OnNumber",v);
+            }
+        }
+        virtual void OnNumber(double v) {
+            if (m_ctx->GetValue<bool>("OnNumber")) {
+                m_ctx->call_self("OnNumber",v);
+            }
+        }
+    };
+    
+    static int lua_traverse_file(lua_State* L) {
+        const char* file = luaL_checkstring(L, 1);
+        FileProvider* res = luabind::stack<FileProvider*>::get(L, 2);
+        if (!res) {
+            luaL_argerror(L, 2, "must be 'Sandbox::FileProvider'");
+        }
+        LuaContextPtr ctx = luabind::stack<LuaContextPtr>::get(L, 3);
+        if (!ctx) {
+            luaL_argerror(L, 3, "must be table");
+        }
+        GHL::DataStream* ds = res->OpenFile(file);
+        if (!ds) {
+            lua_pushnil(L);
+            lua_pushfstring(L,"file not found %s", file);
+            return 2;
+        }
+        LuaJSONTraverser traverser(ctx);
+        bool result = traverser.TraverseStream(ds);
+        ds->Release();
+        lua_pushboolean(L, result ? 1: 0);
+        return 1;
+    }
  
     void register_json(lua_State* L) {
         LUA_CHECK_STACK(0);
@@ -880,6 +962,8 @@ namespace Sandbox {
         lua_setfield(L, -2, "load");
         lua_pushcfunction(L, &json_encode);
         lua_setfield(L, -2, "encode");
+        lua_pushcfunction(L, &lua_traverse_file);
+        lua_setfield(L, -2, "traverse_file");
         lua_pushvalue(L, -1);
         lua_setglobal(L, "json");
         

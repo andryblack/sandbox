@@ -197,6 +197,10 @@ solution( ProjectName )
 		dofile('mygui.lua')
 	end
 
+	if use.Spine then
+		dofile('spine-runtime.lua')
+	end
+
 
 	if pre_project then
 		pre_project()
@@ -268,6 +272,17 @@ solution( ProjectName )
 				sandbox_dir .. '/sandbox/chipmunk/*.h',
 			}
 		end
+
+		if use.Spine then
+			files {
+				sandbox_dir .. '/sandbox/spine/**.h',
+				sandbox_dir .. '/sandbox/spine/**.cpp',
+			}
+			sysincludedirs {
+				sandbox_dir .. '/external/spine-runtime-c/include',
+			}
+		end
+
 
 		if use_network then
 			files {
@@ -346,6 +361,12 @@ solution( ProjectName )
 		if use.Chipmunk then
 			links { 'chipmunk' }
 			includedirs { sandbox_dir .. '/external/chipmunk/include' }
+		end
+		if use.Spine then
+			links { 'spine-runtime' }
+			sysincludedirs {
+				sandbox_dir .. '/external/spine-runtime-c/include',
+			}
 		end
 		if os.is('ios') then
 			xcodebuildsettings {

@@ -2,7 +2,7 @@ local utils = require 'utils'
 
 project 'spine-runtime'
 
-		kind 'StaticLib'
+	kind 'StaticLib'
 
 	configure_lib_targetdir()
 
