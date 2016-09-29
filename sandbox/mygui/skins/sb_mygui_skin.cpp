@@ -10,7 +10,7 @@
 #include "sb_mygui_text_skin.h"
 #include "sb_mygui_edit_text.h"
 #include "sb_mygui_simple_text.h"
-#include "sb_mygui_render.h"
+#include "../sb_mygui_render.h"
 #include "sb_graphics.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ColorizedSubSkinStateInfo,MyGUI::SubSkinStateInfo)
