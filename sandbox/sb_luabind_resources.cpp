@@ -273,7 +273,8 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_KLASS(Sandbox::Resources, Sandbox::FileProvider)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Resources)
 SB_META_METHOD(GetImage)
-SB_META_METHOD(GetTexture)
+bind( method( "GetTexture" ,
+             static_cast<Sandbox::TexturePtr(Sandbox::Resources::*)(const char*,bool)>(&Sandbox::Resources::GetTexture) ) );
 SB_META_METHOD(GetShader)
 SB_META_METHOD(CreateRenderTarget)
 SB_META_PROPERTY_RO(Scale, GetScale)

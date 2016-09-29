@@ -10,9 +10,9 @@ SB_META_DECLARE_OBJECT(Sandbox::SpineData, Sandbox::meta::object)
 
 
 extern "C" void _spAtlasPage_createTexture (spAtlasPage* self, const char* path){
-    Sandbox::Resources* res = static_cast<Sandbox::Resources*>(self->atlas->rendererObject);
+    Sandbox::TextureProvider* res = static_cast<Sandbox::TextureProvider*>(self->atlas->rendererObject);
     if (!res) return;
-    Sandbox::TexturePtr tex = res->GetTexture(path, false);
+    Sandbox::TexturePtr tex = res->GetTexture(path);
     if (!tex) return;
     tex->add_ref();
     self->rendererObject = tex.get();
@@ -68,14 +68,12 @@ namespace Sandbox {
         return empty;
     }
     
-    SpineDataPtr SpineData::Load(const char* atlas_file,
-                                 const char* skeleton_file,
-                                 Resources* resources) {
-        if (!resources) {
-            return SpineDataPtr();
-        }
+    SpineDataPtr SpineData::LoadI(const char* atlas_file,
+                                  const char* skeleton_file,
+                                  FileProvider* files,
+                                  TextureProvider* textures) {
         spBone_setYDown(1);
-        GHL::DataStream* ds = resources->OpenFile(atlas_file);
+        GHL::DataStream* ds = files->OpenFile(atlas_file);
         if (!ds) return SpineDataPtr();
         GHL::Data* data = GHL_ReadAllData(ds);
         ds->Release();
@@ -89,13 +87,14 @@ namespace Sandbox {
             dir.clear();
         }
         SpineDataPtr res(new SpineData());
-        res->m_atlas = spAtlas_create(reinterpret_cast<const char*>(data->GetData()), data->GetSize(), dir.c_str(), resources);
+        
+        res->m_atlas = spAtlas_create(reinterpret_cast<const char*>(data->GetData()), data->GetSize(), dir.c_str(), textures);
         data->Release();
         if (!res->m_atlas)
             return SpineDataPtr();
         
         spSkeletonJson* json = spSkeletonJson_create(res->m_atlas);
-        ds = resources->OpenFile(skeleton_file);
+        ds = files->OpenFile(skeleton_file);
         if (!ds)
             return SpineDataPtr();
         data = GHL_ReadAllData(ds);
@@ -109,6 +108,15 @@ namespace Sandbox {
             return SpineDataPtr();
         res->m_state = spAnimationStateData_create(res->m_skeleton);
         return res;
+    }
+    
+    SpineDataPtr SpineData::Load(const char* atlas_file,
+                     const char* skeleton_file,
+                     Resources* resources) {
+        if (!resources) {
+            return SpineDataPtr();
+        }
+        return LoadI(atlas_file, skeleton_file, resources, resources);
     }
     
     void SpineData::SetDefaultMix(float duration) {

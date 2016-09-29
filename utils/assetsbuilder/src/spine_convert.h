@@ -21,7 +21,7 @@
 class Application;
 class SpineConvert : public SkeletonConvert {
     SB_META_OBJECT
-private:
+protected:
     spAtlas*   m_atlas;
     spSkeletonData* m_skeleton;
     spAnimationStateData* m_state;

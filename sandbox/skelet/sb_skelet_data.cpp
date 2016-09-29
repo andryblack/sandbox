@@ -58,10 +58,15 @@ namespace Sandbox {
         GHL::UInt32 uvalue;
         GHL::Byte   data[4];
     };
+    
+    SkeletonDataPtr SkeletonData::Load(const char *file, Resources* resources) {
+        if (!resources)
+            return SkeletonDataPtr();
+        return LoadI(file,resources,resources);
+    }
         
-    SkeletonDataPtr SkeletonData::Load(const char* filename, Resources* resources) {
-        sb_assert(resources);
-        GHL::DataStream* ds = resources->OpenFile(filename);
+    SkeletonDataPtr SkeletonData::LoadI(const char* filename, FileProvider* files,TextureProvider* textures_provider) {
+        GHL::DataStream* ds = files->OpenFile(filename);
         if (!ds) {
             LogError() << "not found skeleton file " << filename;
             return SkeletonDataPtr();
@@ -89,13 +94,10 @@ namespace Sandbox {
         }
         pugi::xml_node n = doc.document_element();
         pugi::xml_attribute version = n.attribute("version");
-        bool version1_compatible = false;
-        bool version2_compatible = false;
+      
         if (!version || version.as_int()<3) {
-            LogWarning() << "deprecated version " << filename;
-            version1_compatible = version.as_int()<2;
-            version2_compatible = version.as_int()<3;
-            //return SkeletonDataPtr();
+            LogError() << "deprecated version " << filename;
+            return SkeletonDataPtr();
         }
         pugi::xml_node textures = n.child("textures");
         pugi::xml_node nodes = n.child("nodes");
@@ -127,7 +129,7 @@ namespace Sandbox {
         if (textures) {
             for (pugi::xml_node_iterator it = textures.begin(); it!=textures.end(); ++it) {
                 const char* file = it->attribute("file").value();
-                TexturePtr texture = resources->GetTexture((dir+file).c_str(), !it->attribute("premultiplied").as_bool());
+                TexturePtr texture = textures_provider->GetTexture((dir+file).c_str());
                 if (!texture) {
                     LogError() << "not found texture " << file;
                     continue;
@@ -164,6 +166,14 @@ namespace Sandbox {
             GHL::Data* d = 0;
             if (::strcmp(it->attribute("encoding").as_string(),"base64")==0) {
                 d = Base64DecodeData(it->child_value());
+            } else if (::strcmp(it->attribute("encoding").as_string(),"file")==0) {
+                GHL::DataStream* ds = files->OpenFile(it->child_value());
+                if (!ds) {
+                    LogError() << "not found file " << it->child_value();
+                    continue;
+                }
+                d = GHL_ReadAllData(ds);
+                ds->Release();
             } else {
                 LogError() << "unsupported encoding " << it->attribute("encoding").as_string();
                 continue;
@@ -194,25 +204,16 @@ namespace Sandbox {
             const float* src = reinterpret_cast<const float*>(d->GetData());
             for (size_t i=0;i<frames;++i) {
                 for (size_t n=0;n<nodes_count;++n) {
-                    if (version2_compatible) {
-                        pdata->color = Sandbox::Color(1,1,1,*src++); 
-                    } else {
-                        pdata->color = Sandbox::Color(*reinterpret_cast<const GHL::UInt32*>(src));
-                        ++src;
-                    }
+                    pdata->color = Sandbox::Color(*reinterpret_cast<const GHL::UInt32*>(src));
+                    ++src;
                     pdata->transform.m.matrix[0] = *src++;
                     pdata->transform.m.matrix[1] = *src++;
                     pdata->transform.m.matrix[2] = *src++;
                     pdata->transform.m.matrix[3] = *src++;
                     pdata->transform.v.x = *src++;
                     pdata->transform.v.y = *src++;
-                    if (version1_compatible) {
-                        pdata->image = *reinterpret_cast<const GHL::UInt32*>(src);
-                        pdata->node = 0;
-                    } else {
-                        pdata->image = *reinterpret_cast<const GHL::UInt16*>(reinterpret_cast<const GHL::Byte*>(src)+0);
-                        pdata->node = *reinterpret_cast<const GHL::UInt16*>(reinterpret_cast<const GHL::Byte*>(src)+2);
-                    }
+                    pdata->image = *reinterpret_cast<const GHL::UInt16*>(reinterpret_cast<const GHL::Byte*>(src)+0);
+                    pdata->node = *reinterpret_cast<const GHL::UInt16*>(reinterpret_cast<const GHL::Byte*>(src)+2);
                     src++;
                     ++pdata;
                 }

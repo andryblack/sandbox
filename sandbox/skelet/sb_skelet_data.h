@@ -50,6 +50,9 @@ namespace Sandbox {
         DrawAttributesPtr attributes;
     };
     
+    class FileProvider;
+    class TextureProvider;
+    
     class SkeletonData;
     typedef sb::intrusive_ptr<SkeletonData> SkeletonDataPtr;
     class SkeletonData : public meta::object {
@@ -72,6 +75,8 @@ namespace Sandbox {
         const sb::vector<SkeletonNodeData>& GetNodes() const { return m_nodes; }
         void AddAnimation( const SkeletonAnimationPtr& animation);
         static SkeletonDataPtr Load(const char* file, Resources* resources);
+        static SkeletonDataPtr LoadI(const char* file, FileProvider* files,TextureProvider* textures);
+        
         const SkeletonAnimationPtr& GetAnimation(const sb::string& name) const;
         const SkeletonNodeData& GetNode(size_t idx) const;
         const ImagePtr& GetImage(size_t index) const;

@@ -131,10 +131,14 @@ void SpineConvert::ExportAtlas(Application* app) {
         output_name += "_";
         output_name += page->name;
         a.filename = output_name;
-        if (m_premultiply_images) {
-            app->premultiply_image(m_dir + "/" + page->name, m_out_dir + "/" + output_name);
+        if (m_export_files) {
+            a.filename = write_texture(page->name);
         } else {
-            app->rebuild_image(m_dir + "/" + page->name, m_out_dir + "/" + output_name);
+            if (m_premultiply_images) {
+                app->premultiply_image(m_dir + "/" + page->name, m_out_dir + "/" + output_name);
+            } else {
+                app->rebuild_image(m_dir + "/" + page->name, m_out_dir + "/" + output_name);
+            }
         }
         page = page->next;
     }

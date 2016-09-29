@@ -36,8 +36,14 @@ namespace Sandbox {
 	
 	
 	class Atlaser;
-   
-	class Resources : public FileProvider {
+    
+    class TextureProvider {
+    public:
+        virtual ~TextureProvider() {}
+        virtual TexturePtr GetTexture(const char* path) = 0;
+    };
+    
+	class Resources : public FileProvider , public TextureProvider {
 	public:
 		Resources(GHL::VFS* vfs);
 		~Resources();
@@ -54,6 +60,11 @@ namespace Sandbox {
 		
         TexturePtr LoadTexture( GHL::DataStream* ds );
 		TexturePtr GetTexture(const char* filename, bool need_premultiply);
+        
+        virtual TexturePtr GetTexture(const char* filename) {
+            return GetTexture(filename, false);
+        }
+        
 		ImagePtr GetImage(const char* filename, bool need_premultiply);
 		bool LoadImageSubdivs(const char* filename,
                               sb::vector<Image>& output,

@@ -8,6 +8,10 @@
 #include <sb_transform2d.h>
 #include <sb_color.h>
 
+namespace GHL {
+    struct Data;
+}
+
 class Application;
 
 enum blend_mode {
@@ -82,10 +86,14 @@ protected:
     void write_atlases();
     void write_nodes();
     void write_animations();
+    GHL::Data* get_xml_data();
     bool store_xml(const sb::string& file, Application* app);
     
     void post_scale(float s);
     sb::map<sb::string, sb::string> m_anim_rename;
+    bool m_export_files;
+    virtual sb::string write_file(const sb::string& file, GHL::Data* data ) { return file;}
+    virtual sb::string write_texture(const sb::string& name) { return name; }
 public:
     bool RenameAnimation(const char* from, const char* to);
 };

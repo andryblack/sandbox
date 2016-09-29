@@ -5,6 +5,8 @@
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_string.h>
 #include "sb_draw_attributes.h"
+#include "sb_texture.h"
+#include "sb_file_provider.h"
 
 struct spAtlas;
 struct spSkeletonData;
@@ -15,10 +17,13 @@ namespace Sandbox {
     class Resources;
     class SpineSkeleton;
     class SpineData;
+    class TextureProvider;
+    
     typedef sb::intrusive_ptr<SpineData> SpineDataPtr;
     
     class SpineAnimation;
     typedef sb::intrusive_ptr<SpineAnimation> SpineAnimationPtr;
+    
     
     class SpineData : public meta::object {
         SB_META_OBJECT
@@ -34,13 +39,20 @@ namespace Sandbox {
         sb::string GetSlotName(size_t idx) const;
         void SetSlotAttribute(size_t idx, const DrawAttributesPtr& attribute);
         const DrawAttributesPtr& GetSlotAttribute(const void* idx) const;
-    private:
+        
+        static SpineDataPtr LoadI(const char* atlas_file,
+                                 const char* skeleton_file,
+                                 FileProvider* files,
+                                 TextureProvider* textures);
+    protected:
         SpineData();
         spAtlas*   m_atlas;
         spSkeletonData* m_skeleton;
         spAnimationStateData* m_state;
         friend class SpineAnimation;
         sb::map<const void*,DrawAttributesPtr> m_attributes;
+        
+        
     };
     
 }

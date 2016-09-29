@@ -6,7 +6,7 @@
 
 SB_META_DECLARE_OBJECT(SkeletonConvert, Sandbox::meta::object)
 
-SkeletonConvert::SkeletonConvert() : m_image_index(1) {
+SkeletonConvert::SkeletonConvert() : m_image_index(1) , m_export_files(false) {
     
 }
 
@@ -149,8 +149,6 @@ void SkeletonConvert::write_animations() {
         
         if (raw) {
         
-            a.append_attribute("compression").set_value("zlib");
-            a.append_attribute("encoding").set_value("base64");
             
             Sandbox::VectorData<float>* data = new Sandbox::VectorData<float>();
             data->vector().resize((4+2+1+1)*anim->frames.size()*m_nodes.size());
@@ -175,9 +173,20 @@ void SkeletonConvert::write_animations() {
                 }
             }
             
-            GHL::Data* compressed = GHL_PackZlib(data);
-            a.append_child(pugi::node_pcdata).set_value(Sandbox::Base64EncodeData(compressed->GetData(), compressed->GetSize()).c_str());
-            compressed->Release();
+            if (m_export_files) {
+                sb::string filename = anim->name + ".data";
+                filename = write_file(filename,data);
+                a.append_child(pugi::node_pcdata).set_value(filename.c_str());
+                //a.append_attribute("compression").set_value("zlib");
+                a.append_attribute("encoding").set_value("file");
+            } else {
+                a.append_attribute("compression").set_value("zlib");
+                a.append_attribute("encoding").set_value("base64");
+                
+                GHL::Data* compressed = GHL_PackZlib(data);
+                a.append_child(pugi::node_pcdata).set_value(Sandbox::Base64EncodeData(compressed->GetData(), compressed->GetSize()).c_str());
+                compressed->Release();
+            }
             data->Release();
         } else {
             a.append_attribute("compression").set_value("none");
@@ -221,12 +230,17 @@ struct xml_writer : public pugi::xml_writer {
     }
 };
 
-bool SkeletonConvert::store_xml(const sb::string& file,Application* app) {
+GHL::Data* SkeletonConvert::get_xml_data() {
     xml_writer writer;
     writer.sdata = new Sandbox::VectorData<GHL::Byte>();;
     m_doc.save(writer);
-    app->store_file(file, writer.sdata);
-    writer.sdata->Release();
+    return writer.sdata;
+}
+
+bool SkeletonConvert::store_xml(const sb::string& file,Application* app) {
+    GHL::Data* data = get_xml_data();
+    app->store_file(file, data);
+    data->Release();
     return true;
 }
 
