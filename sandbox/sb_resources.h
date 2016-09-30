@@ -31,6 +31,7 @@ namespace GHL {
 	struct DataStream;
     struct WriteStream;
     struct Data;
+    struct ImageInfo;
 }
 namespace Sandbox {
 	
@@ -103,6 +104,7 @@ namespace Sandbox {
     protected:
         virtual GHL::Image* ImageFromData( const GHL::Data* data );
         virtual GHL::Image* ImageFromStream( GHL::DataStream* ds );
+        virtual bool GetImageInfo(GHL::ImageInfo &info,GHL::DataStream* ds);
     private:
 		GHL::VFS* m_vfs;
 		GHL::Render* m_render;

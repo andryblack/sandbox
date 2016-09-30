@@ -4,12 +4,31 @@
 local _M = {}
 _M.definitions = {}
 
+local _images = require '_images'
+
 local luapp = require '_luapp'
+
+_M.all_dest_files = {}
+
+local dest_files_mt = {}
+function dest_files_mt:__index( k )
+	return self._[k]
+end
+function dest_files_mt:__newindex( k,v )
+	self._[k]=v
+	_M.all_dest_files[k]=v
+end
+function dest_files_mt:__pairs()
+	return pairs(self._)
+end
+function dest_files_mt:__ipairs()
+	return ipairs(self._)
+end
 
 function _M.init_rules(rules) 
 	rules.copy_files = {}
 	rules.compile_files = {}
-	rules.dest_files = {}
+	rules.dest_files = setmetatable({_={}},dest_files_mt)
 	rules.call_functions = {}
 end
 
@@ -44,6 +63,9 @@ local action_convert_to_jpeg = 'convert_to_jpeg'
 local file_remap = {}
 function file_remap.convert_to_jpeg( f )
 	return path.replaceextension(f,'jpg')
+end
+function file_remap.premultiply_images( f )
+	return path.replaceextension(f,_images.image_file_format.ext)
 end
 
 local function process_files_pattern( pattern , action )
@@ -266,6 +288,30 @@ function _M.apply_rules( rules )
 		v(_G)
 	end
 
+end
+
+function _M.chek_files(  )
+	print('check files')
+	local files = os.matchfiles(path.join(application.dst_path,"**.*"))
+	for _,v in ipairs(files) do
+		local file = path.getrelative(application.dst_path,v)
+		if not _M.all_dest_files[file] then
+			if update_only then
+				print('remove unknonw file:',file)
+			else
+				error('produced unknonw file: ' .. file)
+			end
+		else
+			print('cheked file',file)
+			_M.all_dest_files[file] = nil
+		end
+	end
+	if next(_M.all_dest_files) then
+		for k,v in pairs(all_dest_files) do
+			print("not produced declared file:",k)
+		end
+		error('not all files produced')
+	end
 end
 
 return _M

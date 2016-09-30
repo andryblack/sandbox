@@ -101,6 +101,7 @@ protected:
     Sandbox::LuaVM* GetLua() { return m_lua; }
     virtual void Bind(lua_State* L);
     virtual sb::string get_output_filename( const char* name );
+    virtual const GHL::Data* encode_texture(const TextureDataPtr& texture);
 private:
 	Sandbox::LuaVM*	m_lua;
     GHL::VFS*   m_vfs;

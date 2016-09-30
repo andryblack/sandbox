@@ -157,29 +157,11 @@ namespace Sandbox {
             return 0;
         }
 		std::string fn = filename;
-		GHL::DataStream* ds = 0;
-        size_t last_dot = fn.find_last_of('.');
-        size_t last_slash = fn.find_last_of('/');
-        
-		if (last_dot!=fn.npos && ( last_slash == fn.npos || last_dot > last_slash) ) {
-            ds = OpenFileVariant(filename,variant);
-		}
-		if (!ds) {
-			std::string file = fn+".png";
-			ds = OpenFileVariant( file.c_str() , variant );
-			if ( !ds ) {
-				file = fn+".jpg";
-				ds = OpenFileVariant( file.c_str() , variant);
-				if ( !ds ) {
-					LogError(MODULE) <<"failed opening file " << fn;
-					return 0;
-				} else {
-                    if (ext) *ext = "jpg";
-                }
-			} else {
-                if (ext) *ext = "png";
-            }
-		}
+		GHL::DataStream* ds = OpenFileVariant(filename,variant);
+        if ( !ds ) {
+            LogError(MODULE) <<"failed opening file " << fn;
+            return 0;
+        }
 		GHL::Image* img = ImageFromStream(ds);
 		if (!img) {
 			ds->Release();
@@ -189,6 +171,10 @@ namespace Sandbox {
 		ds->Release();
 		return img;
 	}
+    
+    bool Resources::GetImageInfo(GHL::ImageInfo &info,GHL::DataStream* ds) {
+        return m_image->GetFileInfo(ds, &info);
+    }
     
     bool Resources::GetImageInfo(sb::string& file,bool &variant,GHL::UInt32& w,GHL::UInt32& h) {
         if (!m_image) {
@@ -201,30 +187,13 @@ namespace Sandbox {
         }
         
         std::string fn = file;
-		GHL::DataStream* ds = 0;
-        size_t dotpos = file.find_last_of('.');
-		if (dotpos!=file.npos) {
-			ds = OpenFileVariant(fn.c_str(),variant);
-            fn.resize(dotpos);
-        }
+		GHL::DataStream* ds = OpenFileVariant(fn.c_str(),variant);
 		if (!ds) {
-			std::string ifile = fn+".png";
-			ds = OpenFileVariant( ifile.c_str() , variant);
-			if ( !ds ) {
-				ifile = fn+".jpg";
-				ds = OpenFileVariant( ifile.c_str() , variant );
-				if ( !ds ) {
-					LogError(MODULE) <<"failed opening file " << fn;
-					return 0;
-				} else {
-                    file = ifile;
-                }
-			} else {
-                file = ifile;
-            }
+			LogError(MODULE) <<"failed opening file " << fn;
+            return 0;
 		}
         GHL::ImageInfo info;
-        if (!m_image->GetFileInfo(ds, &info)) {
+        if (!GetImageInfo(info,ds)) {
             ds->Release();
             LogError(MODULE) <<"error getting image info for file " << fn;
 			return false;

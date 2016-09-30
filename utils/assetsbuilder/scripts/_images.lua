@@ -9,11 +9,25 @@ function _M.init_rules(rules)
 	rules.atlases = {}
 	rules.premultiply_images = {}
 	rules.convert_to_jpeg = {}
+	rules.copy_images = {}
 end
+
+_M.image_file_format = {
+	ext = 'png',
+	store_texture = function ( self, name, img )
+		return application:store_texture( name , img)
+	end
+}
 
 function _M.assets_rules.set_alpha_file_format( func )
 
 	_M.alpha_file_format = func
+
+end
+
+function _M.assets_rules.set_image_file_format( func )
+
+	_M.image_file_format = func
 
 end
 
@@ -50,17 +64,17 @@ local function load_images( dir  )
 			local filename = path.join(dir,k .. '.' .. assert(v.type,'not found type for ' .. k .. ' at ' .. dir))
 			local tex = assert(application:check_texture(filename),'failed check texture ' .. filename)
 			v.texture_info = tex
-
+			local destfilename = path.replaceextension(filename,_M.image_file_format.ext)
 			local premultiplied = v.premultiplied
 			if premultiplied then
-				get_rules().copy_files[filename]=true
+				get_rules().copy_images[filename]=destfilename
 			else
 				local pm = assert(get_rules().premultiply_images)
-				local texobj = { dst = filename }
+				local texobj = { dst = destfilename }
 				if v.aname then
 					texobj.aname = path.join(dir,v.aname)
-					texobj.dst = path.join(dir,k .. '.png')
-					v.type = 'png'
+					texobj.dst = destfilename
+					v.type = _M.image_file_format.ext
 				end
 				pm[filename] = texobj 
 				print('premultiply image',filename)
@@ -68,8 +82,8 @@ local function load_images( dir  )
 				v.premultiplied = true
 				v._need_premultiply = true
 			end
-			assert(not get_rules().dest_files[filename],'conflict rules for file ' .. filename)
-			get_rules().dest_files[filename]=filename
+			assert(not get_rules().dest_files[destfilename],'conflict rules for file ' .. destfilename)
+			get_rules().dest_files[destfilename]=filename
 			v._name = k
 			v._path = dir
 			ctx.textures[k] = v
@@ -82,21 +96,22 @@ local function load_images( dir  )
 					end
 					local vname = path.join(dir,k .. vk.. '.' .. v.type)
 					local vtex = application:check_texture(vname)
+					local destvname = path.replaceextension(vname,_M.image_file_format.ext)
 					if vtex then
 						if premultiplied then
-							get_rules().copy_files[vname]=true
+							get_rules().copy_images[vname]= destvname
 							print('copy variant',vname)
 						else
-							get_rules().premultiply_images[vname] = vname
+							get_rules().premultiply_images[vname] = destvname
 							print('premultiply variant',vname)
 						end
-						assert(not get_rules().dest_files[vname],'conflict rules for file ',vname)
-						get_rules().dest_files[vname]=vname
+						assert(not get_rules().dest_files[destvname],'conflict rules for file ',destvname)
+						get_rules().dest_files[destvname]=vname
 
 						if override_base then
-							get_rules().copy_files[filename] = nil
+							get_rules().copy_images[filename] = nil
 							get_rules().premultiply_images[filename] = nil
-							get_rules().dest_files[filename]=nil
+							get_rules().dest_files[destfilename]=nil
 						end
 					else
 						print('not found varian for',filename)
@@ -194,12 +209,12 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	end
 	a.name = atlas_name
 	for _,v in ipairs(i) do
-		local path = path.join(v._path,v._name .. '.' .. v.type)
+		local ipath = path.join(v._path,v._name .. '.' .. v.type)
 		a:add_image( {width=v.texture_info.width+2, height=v.texture_info.height+2, src = v, 
 			premultiply = v._need_premultiply} )
-		print('put to atlas:',path,v._need_premultiply and true or false)
-		get_rules().dest_files[path] = nil
-		get_rules().premultiply_images[path] = nil
+		print('put to atlas:',ipath,v._need_premultiply and true or false)
+		get_rules().dest_files[path.replaceextension(ipath,_M.image_file_format.ext)] = nil
+		get_rules().premultiply_images[ipath] = nil
 		v._atlas = a
 	end
 	a:build()
@@ -220,6 +235,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 			for _,v in ipairs(i) do
 				local opath = path.join(v._path,v._name .. '.' .. v.type)
 				local vname = path.join(v._path,v._name .. vk .. '.' .. v.type)
+				local desvname = path.replaceextension(vname,_M.image_file_format.ext)
 				local vtex = application:check_texture(vname)
 				if vtex then
 					if vtex.width ~= ( v.texture_info.width * vv.scale) then
@@ -228,10 +244,10 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 					if vtex.height ~= ( v.texture_info.height * vv.scale) then
 						error('texture height must be some ' .. atlas_name .. ' ' .. v._path .. '/' .. v._name)
 					end
-					get_rules().dest_files[vname] = nil
+					get_rules().dest_files[desvname] = nil
 					get_rules().premultiply_images[vname] = nil
 
-					get_rules().dest_files[a.path .. vk .. '.png']=true
+					get_rules().dest_files[a.path .. vk .. '.' .. _M.image_file_format.ext]=true
 				else
 					error('for build atlas need all resolutions ' .. atlas_name .. ' ' .. v._path .. '/' .. v._name )
 				end
@@ -240,7 +256,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 		end
 	end
 
-	local atex = { type='png', premultiplied = true, smooth=true, _path = path.join(from) , _name = name }
+	local atex = { type=_M.image_file_format.ext, premultiplied = true, smooth=true, _path = path.join(from) , _name = name }
 	g._textures[name] = atex
 	function a:apply(  )
 		print('build atlas ' .. self.name .. ' with ' .. tostring(#self.images) .. ' textures ' .. self.width .. 'x' .. self.height)
@@ -261,7 +277,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 				end
 				img:Place(v.place_to[1]+1,v.place_to[2]+1,i)
 			end
-			application:store_texture(self.path .. '.png' ,img)
+			_M.image_file_format:store_texture(self.path .. '.' .. _M.image_file_format.ext,img)
 		end
 		if _M.use_variants then
 			for vk,vv in pairs(_M.use_variants) do
@@ -281,13 +297,13 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 					end
 					img:Place((v.place_to[1]+1)*vv.scale,(v.place_to[2]+1)*vv.scale,i)
 				end
-				application:store_texture(self.path .. vk .. '.png',img)
+				_M.image_file_format:store_texture(self.path .. vk .. '.' .. _M.image_file_format.ext,img)
 			end
 		end
 	end
 	local atlases = assert(get_rules().atlases)
 	if not override_base then
-		get_rules().dest_files[a.path .. '.png']=true
+		get_rules().dest_files[a.path .. '.' .. _M.image_file_format.ext]=true
 	end
 	table.insert(atlases,a)
 end
@@ -354,7 +370,7 @@ local function apply_images( dir, data )
 				end
 				x(1,prefix .. k,' = {',
 					p,
-					f('type',v.type),
+					f('type',_M.image_file_format.ext),
 					f('smooth',v.smooth,false),
 					f('tiled',v.tiled,false),
 					f('premultiplied',v.premultiplied,false),
@@ -476,7 +492,7 @@ function _M.do_premultiply_file( src, dstconf  )
 		end
 	end
 	t:PremultiplyAlpha()
-	return application:store_texture(conf.dst,t)
+	return _M.image_file_format:store_texture(conf.dst,t)
 end
 
 function _M.do_convert_to_jpeg_file( src, dstconf  )
@@ -498,6 +514,22 @@ function _M.do_convert_to_jpeg_file( src, dstconf  )
 	end
 	t:SetImageFileFormatJPEG()
 	return application:store_texture(conf.dst,t)
+end
+
+function _M.do_copy_image_file( src, dstconf  )
+	local conf = { dst = dstconf }
+	if type(dstconf) == 'table' then
+		conf = dstconf
+	end
+
+	if update_only then
+		if not os.check_file_new(path.join(src_path,src),path.join(application.dst_path,conf.dst)) then
+			--print('skip not new')
+			return true
+		end
+	end
+	local t = assert(application:load_texture(src))
+	return _M.image_file_format:store_texture(conf.dst,t)
 end
 
 function _M.filter_files( filelist )
@@ -534,7 +566,7 @@ function _M.apply_rules( rules )
 		end
 	end
 
-	local pmi = rules.convert_to_jpeg or {}
+	pmi = rules.convert_to_jpeg or {}
 	print('convert to jpeg')
 	for k,v in pairs(pmi) do
 		if v then
@@ -545,6 +577,21 @@ function _M.apply_rules( rules )
 				assert(_M.do_convert_to_jpeg_file(k,v),'failed store texture to ' .. v)
 			else
 				assert(_M.do_convert_to_jpeg_file(k,k),'failed store texture to ' .. k)
+			end
+		end
+	end
+
+	pmi = rules.copy_images or {}
+	print('copy images')
+	for k,v in pairs(pmi) do
+		if v then
+			--print('premultiply',k)
+			if type(v) == 'table' then
+				assert(_M.do_copy_image_file(k,v),'failed store texture to ' .. v.dst)
+			elseif type(v) == 'string' then
+				assert(_M.do_copy_image_file(k,v),'failed store texture to ' .. v)
+			else
+				assert(_M.do_copy_image_file(k,k),'failed store texture to ' .. k)
 			end
 		end
 	end

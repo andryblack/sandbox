@@ -414,9 +414,13 @@ TextureDataPtr Application::load_texture( const sb::string& file ) {
     return TextureDataPtr(new TextureData(img));
 }
 
+const GHL::Data* Application::encode_texture(const TextureDataPtr &texture) {
+    return m_image_decoder->Encode(texture->GetImage(), texture->GetImageFileFormat());
+}
+
 bool Application::store_texture( const sb::string& file , const TextureDataPtr& data ) {
     if (!data) return false;
-    const GHL::Data* d = m_image_decoder->Encode(data->GetImage(), data->GetImageFileFormat());
+    const GHL::Data* d = encode_texture(data);
     if (!d) {
         Sandbox::LogError() << "failed encode texture to " << file;
         return false;

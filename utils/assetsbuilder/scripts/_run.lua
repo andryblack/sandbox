@@ -95,6 +95,7 @@ extend(__modules.rules)
 
 local data = nil
 
+
 local __current_path = ''
 
 function sandbox.include( file )
@@ -127,6 +128,7 @@ for _,rules in ipairs(__all_rules) do
 end
 
 print('post apply rules')
+r.chek_files()
 for _,v in ipairs(__modules.post_apply_rules) do
 	v()
 end

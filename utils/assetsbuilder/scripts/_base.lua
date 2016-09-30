@@ -330,6 +330,11 @@ function os.check_file_new( src, dst )
 	return s1.mtime > s2.mtime
 end
 
+function os.getfilesize( src )
+	local s = assert(os.stat(src))
+	return s.size
+end
+
 function load_sandbox( file , mt, init_data )
 	local data = init_data or {}
     setmetatable(data,{__index=mt or {}})
