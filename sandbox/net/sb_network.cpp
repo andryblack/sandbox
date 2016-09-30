@@ -25,6 +25,7 @@ SB_META_DECLARE_OBJECT(Sandbox::NetworkPostData, Sandbox::meta::object)
 SB_META_DECLARE_OBJECT(Sandbox::NetworkMultipartFormData, Sandbox::NetworkPostData)
 namespace Sandbox {
     
+    static const char* MODULE = "sb_net";
 
     NetworkRequestBase::NetworkRequestBase(const sb::string& url) : m_url(url),m_completed(false),m_error(false),m_received_size(0) {
         m_status_code = 0;
@@ -64,7 +65,7 @@ namespace Sandbox {
     /// received response
     void GHL_CALL NetworkRequestBase::OnResponse(GHL::UInt32 status) {
         m_status_code = status;
-        LogInfo() << "Response " << status;
+        SB_LOGI("Response " << status);
     }
     /// received header
     void GHL_CALL NetworkRequestBase::OnHeader(const char* name,const char* value) {
@@ -204,7 +205,7 @@ namespace Sandbox {
         GHL::Data* data_p = GHL_HoldData(reinterpret_cast<const GHL::Byte*>(data.c_str()), GHL::UInt32(data.length()));
         if (!m_net->Post(request.get(),data_p)) {
             if (!request->GetErrorText().empty()) {
-                LogError() << "network POST error: " << request->GetErrorText();
+                SB_LOGE("network POST error: " << request->GetErrorText());
             }
             data_p->Release();
             return request->GetCompleted() ? request : NetworkRequestPtr();
@@ -308,7 +309,7 @@ namespace Sandbox {
         GHL::Data* data_p = data->GetData();
         if (!m_net->Post(request.get(),data_p)) {
             if (!request->GetErrorText().empty()) {
-                LogError() << "network POST error: " << request->GetErrorText();
+                SB_LOGE( "network POST error: " << request->GetErrorText() );
             }
             data_p->Release();
             return request->GetCompleted() ? request : NetworkRequestPtr();

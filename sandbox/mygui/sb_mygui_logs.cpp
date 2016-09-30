@@ -28,7 +28,7 @@ namespace Sandbox {
         }
         
         void log_message(const std::string& section,const MyGUI::LogLevel& level, const std::string& message) {
-            Logger(convert(level),"MyGUI") << section << ": " << message;
+            Logger(convert(level),"GUI") << section << ": " << message;
         }
         
         

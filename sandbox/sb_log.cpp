@@ -110,7 +110,7 @@ namespace Sandbox {
     }
     
     Logger::Logger( GHL::LogLevel level , const char* module) :  m_module(module),m_level( level ){
-        m_stream << "[" << (m_module ? m_module : "Sandbox") << "] ";
+        m_stream << "[" << (m_module ? m_module : "sbx") << "] ";
     }
     
     Logger::~Logger() {

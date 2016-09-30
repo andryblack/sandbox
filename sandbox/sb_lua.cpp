@@ -84,7 +84,7 @@ namespace Sandbox {
         int n = lua_gettop(L);  /* number of arguments */
         int i;
         lua_getglobal(L, "tostring");
-        Logger log_print(level,"script");
+        Logger log_print(level,"lua");
         for (i=1; i<=n; i++) {
             const char *s;
             lua_pushvalue(L, -1);  /* function to be called */

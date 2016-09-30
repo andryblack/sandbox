@@ -71,6 +71,10 @@ namespace Sandbox {
         }
     };
     
+#define SB_LOGE( X ) do { ::Sandbox::LogError(MODULE) << X ; } while(false)
+#define SB_LOGW( X ) do { ::Sandbox::LogWarning(MODULE) << X ; } while(false)
+#define SB_LOGI( X ) do { ::Sandbox::LogInfo(MODULE) << X ; } while(false)
+    
 #if defined(SB_DEBUG) && !defined(SB_SILENT)
     
     class LogVerbose : public Logger {
@@ -86,9 +90,16 @@ namespace Sandbox {
             
         }
     };
+#define SB_LOGV( X ) do { ::Sandbox::LogVerbose(MODULE) << X ; } while(false)
+#define SB_LOGD( X ) do { ::Sandbox::LogDebug(MODULE) << X ; } while(false)
+
 #else
     typedef EmptyLogger LogVerbose;
     typedef EmptyLogger LogDebug;
+
+#define SB_LOGV( X ) do { } while(false)
+#define SB_LOGD( X ) do { } while(false)
+
 #endif
     
     void format_memory( char* buf, size_t size, size_t mem,const char* caption );

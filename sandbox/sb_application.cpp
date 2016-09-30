@@ -62,6 +62,8 @@ SB_META_PROPERTY(screen_dpi)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
+    static const char* MODULE = "app";
+    
     int Application_CallExtension( lua_State* L ) {
         Application* app = luabind::stack<Application*>::get(L, 1, false);
         if (!app)
@@ -72,7 +74,7 @@ namespace Sandbox {
         const char* args = luabind::stack<const char*>::get(L, 3);
         if (!args)
             return 0;
-        //LogInfo() << "CallExtension: " << method << " " << args;
+        SB_LOGD( "CallExtension: " << method << " " << args);
         sb::string res;
         if (app->CallExtension(method, args, res)) {
             luabind::stack<const char*>::push(L,res.c_str());
@@ -335,7 +337,7 @@ namespace Sandbox {
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
         sb_ensure_main_thread();
 		sb_assert( m_vfs );
-         LogInfo() << "Application::FillSettings";
+        SB_LOGI("FillSettings");
         
         if (!m_resources) {
             m_resources = CreateResourcesManager();
@@ -369,7 +371,7 @@ namespace Sandbox {
         m_width = settings->width;
         m_height = settings->height;
 
-        LogInfo() << "Application::FillSettings <<<";
+        SB_LOGI("FillSettings <<<");
 	}
     
     void Application::InitLua() {
@@ -430,7 +432,7 @@ namespace Sandbox {
 	///
 	bool GHL_CALL Application::Load() {
         sb_ensure_main_thread();
-        LogInfo() << "Application::Load";
+        SB_LOGI( "Application::Load" );
         ConfigureDevice( m_system );
         
         if (!m_graphics) {
@@ -510,13 +512,13 @@ namespace Sandbox {
             m_url.clear();
         }
         
-        LogInfo() << "Application::Load <<< ";
+        SB_LOGI( "Application::Load <<< ");
 		return true;
 	}
     
     void GHL_CALL Application::Unload() {
         sb_ensure_main_thread();
-        LogInfo() << "Application::Unload >>> ";
+        SB_LOGI( "Application::Unload >>> ");
         
         OnDeactivated();
         ReleaseResources();
@@ -540,7 +542,7 @@ namespace Sandbox {
         delete m_graphics;
         m_graphics = 0;
         m_sound_mgr->Deinit();
-        LogInfo() << "Application::Unload <<< ";
+        SB_LOGI( "Application::Unload <<< " );
     }
     
     void Application::DoRestart() {
@@ -555,7 +557,7 @@ namespace Sandbox {
         sb_assert(m_resources);
         float graphics_scal = m_graphics->GetScale();
         float resources_scale = m_resources->GetScale();
-        LogInfo() << "[app] UpdateScreenSize g:" << graphics_scal << " r:" << resources_scale << " s:" << m_width << "x" << m_height;
+        SB_LOGI("UpdateScreenSize g:" << graphics_scal << " r:" << resources_scale << " s:" << m_width << "x" << m_height);
         LuaContextPtr ctx = m_lua->GetGlobalContext();
         m_draw_width = float(m_width) / (graphics_scal * resources_scale);
         m_draw_height = float(m_height) / (graphics_scal * resources_scale);
@@ -758,7 +760,7 @@ namespace Sandbox {
     }
     
     bool Application::RestoreAppProfile() {
-        LogInfo() << "RestoreAppProfile";
+        SB_LOGI("RestoreAppProfile");
         if (m_lua && m_vfs) {
             GHL::Data* d = LoadProfileFile("profile.json");
             if (!d) {
@@ -770,13 +772,13 @@ namespace Sandbox {
             }
             d->Release();
             m_lua->GetGlobalContext()->SetValue("application.profile", decoded);
-            LogInfo() << "profile loaded";
+            SB_LOGI( "profile loaded" );
             return true;
         }
         return false;
     }
     void Application::StoreAppProfile() {
-        LogInfo() << "StoreAppProfile";
+        SB_LOGI( "StoreAppProfile" );
         if (m_lua && m_vfs) {
             LuaContextPtr profile = m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application.profile");
             if (profile) {
@@ -947,7 +949,7 @@ namespace Sandbox {
 	///
 	void Application::OnDeactivated() {
         
-        LogInfo() << "OnDeactivated";
+        SB_LOGI( "OnDeactivated" );
         if (m_lua) {
             if (m_lua->GetGlobalContext()->GetValue<bool>("application.onDeactivated")) {
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onDeactivated");
@@ -957,7 +959,7 @@ namespace Sandbox {
 	}
 	///
 	void Application::OnActivated() {
-        LogInfo() << "OnActivated";
+        SB_LOGI( "OnActivated" );
         if (m_lua) {
             if (m_lua->GetGlobalContext()->GetValue<bool>("application.onActivated")) {
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onActivated");
@@ -983,7 +985,7 @@ namespace Sandbox {
         m_lua = 0;
         delete m_sound_mgr;
         m_sound_mgr = 0;
-        LogInfo() << "Release application";
+        SB_LOGI( "Release application" );
 		delete this;
 	}
 	
@@ -1039,7 +1041,7 @@ namespace Sandbox {
         }
         path += filename;
        
-        LogInfo() << "load profile from " << path;
+        SB_LOGI( "load profile from " << path );
         GHL::DataStream* ds = m_vfs->OpenFile(path.c_str());
         if (!ds) {
             LogError() << "open " << path << " failed";
