@@ -34,6 +34,9 @@ namespace Sandbox {
             LogError() << "not found animation " << name;
             return;
         }
+        if (!spAnimationState_getCurrent(m_state,0)) {
+            spSkeleton_setToSetupPose(m_skeleton);
+        }
         spAnimationState_setAnimation(m_state, 0, animation, loop == 0 ? 1 : 0);
         if (loop!=0) {
             for (int i=1;i<loop;++i) {
@@ -48,6 +51,7 @@ namespace Sandbox {
             LogError() << "not found animation " << name;
             return;
         }
+        spSkeleton_setToSetupPose(m_skeleton);
         spAnimationState_setAnimation(m_state, 0, animation, 0);
     }
     void SpineAnimation::AddAnimation(const char* name,int loop) {
@@ -56,9 +60,13 @@ namespace Sandbox {
             LogError() << "not found animation " << name;
             return;
         }
-        if (loop == 0) {
-            spAnimationState_addAnimation(m_state, 0, animation, 1, 0.0f);
+        if (!spAnimationState_getCurrent(m_state,0)) {
+            spSkeleton_setToSetupPose(m_skeleton);
+            spAnimationState_setAnimation(m_state, 0, animation, loop == 0 ? 1 : 0);
         } else {
+            spAnimationState_addAnimation(m_state, 0, animation, loop == 0 ? 1 : 0 , 0.0f);
+        }
+        if (loop!=0) {
             spAnimationState_addAnimation(m_state, 0, animation, 0, 0.0f);
             for (int i=1;i<loop;++i) {
                 spAnimationState_addAnimation(m_state, 0, animation, 0, 0.0f);
@@ -85,9 +93,9 @@ namespace Sandbox {
     bool SpineAnimation::IsComplete() const {
         spTrackEntry* entry = spAnimationState_getCurrent (m_state, 0);
         if (entry && entry->animation) {
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
     
     
