@@ -234,6 +234,7 @@ namespace Sandbox {
             
             mygui::unregister_skin();
             mygui::unregister_widgets();
+            UnregisterWidgets();
             m_gui->shutdown();
         }
         delete m_gui;
@@ -465,6 +466,7 @@ namespace Sandbox {
             m_gui->initialise("");
             mygui::register_skin();
             mygui::register_widgets();
+            RegisterWidgets();
             mygui::setup_singletons(m_lua);
             sb_assert( MyGUI::InputManager::getInstancePtr());
             MyGUI::LanguageManager::getInstance().eventRequestTag =

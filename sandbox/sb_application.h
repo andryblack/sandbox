@@ -187,6 +187,9 @@ namespace Sandbox {
         void mygui_change_key_focus( MyGUI::Widget* w );
         void mygui_clipboard_changed( const std::string& type, const std::string& text );
         void mygui_clipboard_requested( const std::string& type, std::string& text  );
+        
+        virtual void RegisterWidgets() {}
+        virtual void UnregisterWidgets() {}
 #endif
 #ifdef SB_USE_NETWORK
         Network*    m_network;
