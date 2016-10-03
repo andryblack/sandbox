@@ -92,6 +92,7 @@
         .BeginObject()
             .Key("id").PutString([[player playerID] UTF8String])
             .Key("name").PutString([[player displayName] UTF8String])
+            .Key("nickname").PutString([[player alias] UTF8String])
         .EndObject()
     .End();
 }
