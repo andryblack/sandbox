@@ -238,6 +238,10 @@ namespace Sandbox {
             Base::_setUVSet(_rect);
         }
         void KeepAspectSkin::updateRect(float tw, float th) {
+            if (mTexture) {
+                tw *= mTexture->getWidth();
+                th *= mTexture->getHeight();
+            }
             int rw = mCroppedParent->getWidth();
             int rh = mCroppedParent->getHeight();
             
