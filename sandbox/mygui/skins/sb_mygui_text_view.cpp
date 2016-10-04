@@ -94,16 +94,14 @@ namespace Sandbox
 	};
 
 	TextView::TextView() :
-		mLength(0),
-		mFontHeight(0)
+		mLength(0)
 	{
 	}
 
         
-	void TextView::update(const MyGUI::UString& _text, const Sandbox::FontPtr& _font , int _height, MyGUI::Align _align, int _maxWidth)
+	void TextView::update(const MyGUI::UString& _text, const Sandbox::FontPtr& _font , MyGUI::Align _align, int _maxWidth)
 	{
-		mFontHeight = _height;
-
+		
 		// массив для быстрой конвертации цветов
 		static const char convert_colour[64] =
 		{
@@ -122,14 +120,16 @@ namespace Sandbox
 		mLength = 0;
 		mTextData.Clear();
         
-		TextData text_data;
 		 
         TextData::Line line_info;
+        float _height = _font->GetHeight();
+        
         line_info.offset.y = _font->GetHeight() - _font->GetBaseline();
         
 		MyGUI::UString::iterator end = _text.end();
 		MyGUI::UString::iterator index = _text.begin();
 
+        m_font = _font;
 		result.height += _height;
 
 		for (; index != end; ++index)
@@ -272,9 +272,11 @@ namespace Sandbox
 		mTextData.data.push_back(line_info);
         result.width = 0.0f;
         float offset = 0.0f;
+        float move_down = 0;
         for (TextData::LinesData::iterator line = mTextData.data.begin(); line != mTextData.data.end(); ++line)
         {
             line->offset.x = 0;
+            line->offset.y += move_down;
             width = line->width;
             if (!line->data.empty()) {
                 for (TextData::SymbolsData::const_iterator simbol = line->data.begin();simbol!=line->data.end();++simbol) {
@@ -302,6 +304,26 @@ namespace Sandbox
                         break;
                     }
                 }
+                int max_asc = m_font->GetHeight()-m_font->GetBaseline();
+                int max_desc = m_font->GetBaseline();
+                for (TextData::SymbolsData::const_iterator simbol = line->data.begin();simbol!=line->data.end();++simbol) {
+                    if (simbol->type == TextData::SYMBOL_TEXT) {
+                        const FontData::Glypth* info = _font->GetGlyph(simbol->data.symbol.code);
+                        if (info) {
+                            if (-info->bearingY() > max_asc) {
+                                max_asc = -info->bearingY();
+                            }
+                            if ((info->height()+info->bearingY()) > max_desc) {
+                                max_desc = info->height()+info->bearingY();
+                            }
+                        }
+                    }
+                }
+                int add_asc = max_asc-(m_font->GetHeight()-m_font->GetBaseline());
+                //int add_desc = max_desc - m_font->GetBaseline();
+                line->offset.y += add_asc;
+                move_down += add_asc;
+                result.height += add_asc;
             }
             line->width = (int)ceil(width);
             setMax(result.width, int(line->width));
@@ -344,19 +366,21 @@ namespace Sandbox
 
 	size_t TextView::getCursorPosition(const MyGUI::IntPoint& _value)
 	{
-		const int height = mFontHeight;
 		size_t result = 0;
-		int top = 0;
+        if (!m_font)
+            return 0;
+      
+        float descent = m_font->GetBaseline();
 
         for (TextData::LinesData::const_iterator line = mTextData.data.begin(); line != mTextData.data.end(); ++line)
 		{
+            const TextData::Line& l(*line);
 			// это последняя строка
 			bool lastline = !(line + 1 != mTextData.data.end());
 
 			// наша строчка
-			if (top + height > _value.top || lastline)
+			if ( ((l.offset.y + descent) > _value.top) || lastline)
 			{
-				top += height;
 				float left = (float)line->offset.x;
 				int count = 0;
 
@@ -381,7 +405,6 @@ namespace Sandbox
 
 			if (!lastline)
 			{
-				top += height;
 				result += line->count + 1;
 			}
 		}

@@ -143,17 +143,10 @@ namespace Sandbox
         virtual void EndPass(Graphics& g,const FontPass& pass);
 	private:
 		void _setTextColour(const MyGUI::Colour& _value);
-		void checkVertexSize();
-
+		
     protected:
 		
 
-		void drawGlyph(
-			MyGUI::IRenderTarget* _target,
-			size_t& _vertexCount,
-			MyGUI::FloatRect _vertexRect,
-			MyGUI::FloatRect _textureRect,
-			MyGUI::uint32 _colour) const;
 
 	protected:
 		bool mEmptyView;
@@ -174,6 +167,7 @@ namespace Sandbox
         std::string mFontName;
 		FontPtr mFont;
 		int mFontHeight;
+        float GetFontScale() const;
 
 		size_t mCursorPosition;
 		bool mVisibleCursor;

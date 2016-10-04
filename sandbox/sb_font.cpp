@@ -58,7 +58,6 @@ namespace Sandbox {
         return pos.x - _pos.x;
     }
     void FontPass::DrawI( Graphics& g, DrawAttributes* attributes,
-                     const Sandbox::Vector2f& _pos ,
                      const TextData& text) const {
         Sandbox::Color c = g.GetColor();
         FontDrawAttributes* font_draw = 0;
@@ -72,7 +71,7 @@ namespace Sandbox {
              g.SetColor(c * m_color);
         }
         for (TextData::LinesData::const_iterator line = text.data.begin();line!=text.data.end();++line) {
-            Sandbox::Vector2f pos = _pos + line->offset;
+            Sandbox::Vector2f pos = line->offset;
             for (TextData::SymbolsData::const_iterator symbol = line->data.begin();symbol!=line->data.end();++symbol) {
                 if (symbol->type == TextData::SYMBOL_SET_COLOR) {
                     if (m_use_color) {
@@ -82,6 +81,42 @@ namespace Sandbox {
                     const FontData::Glypth* gl = m_data->get_glypth(symbol->data.symbol.code);
                     if (gl && gl->img.GetTexture()) {
                         g.DrawImage(gl->img, attributes, pos);
+                    }
+                    pos.x+=symbol->data.symbol.offset;
+                }
+            }
+        }
+        if (font_draw) {
+            font_draw->EndPass(g,*this);
+        }
+        g.SetColor(c);
+    }
+    
+    void FontPass::DrawCroppedI( Graphics& g, DrawAttributes* attributes,
+                        const Rectf& rect,
+                         const TextData& text) const {
+        Sandbox::Color c = g.GetColor();
+        FontDrawAttributes* font_draw = 0;
+        if (attributes) {
+            font_draw = meta::sb_dynamic_cast<FontDrawAttributes>(attributes);
+        }
+        if (font_draw) {
+            if (!font_draw->BeginPass(g,*this))
+                return;
+        } else if (!m_use_color) {
+            g.SetColor(c * m_color);
+        }
+        for (TextData::LinesData::const_iterator line = text.data.begin();line!=text.data.end();++line) {
+            Sandbox::Vector2f pos = line->offset;
+            for (TextData::SymbolsData::const_iterator symbol = line->data.begin();symbol!=line->data.end();++symbol) {
+                if (symbol->type == TextData::SYMBOL_SET_COLOR) {
+                    if (m_use_color) {
+                        g.SetColor(c * Color(symbol->data.color));
+                    }
+                } else {
+                    const FontData::Glypth* gl = m_data->get_glypth(symbol->data.symbol.code);
+                    if (gl && gl->img.GetTexture()) {
+                        g.DrawImage(gl->img, attributes, pos, rect);
                     }
                     pos.x+=symbol->data.symbol.offset;
                 }
@@ -146,10 +181,17 @@ namespace Sandbox {
         return res;
     }
     void Font::Draw(Graphics& g,
-                    DrawAttributes* attributes,
-                       const Vector2f& pos,const TextData& data) const {
+                    DrawAttributes* attributes,const TextData& data) const {
         for (FontPassList::const_iterator it = m_passes.begin();it!=m_passes.end();++it) {
-            (*it)->DrawI(g, attributes, pos, data);
+            (*it)->DrawI(g, attributes, data);
+        }
+    }
+    void Font::DrawCropped(Graphics& g,
+                    DrawAttributes* attributes,
+                           const Rectf& rect,
+                           const TextData& data) const {
+        for (FontPassList::const_iterator it = m_passes.begin();it!=m_passes.end();++it) {
+            (*it)->DrawCroppedI(g, attributes, rect,  data);
         }
     }
 

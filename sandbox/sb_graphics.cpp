@@ -366,6 +366,73 @@ namespace Sandbox {
                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
         }
 	}
+    
+    void Graphics::DrawImage(const Image& img,DrawAttributes* attributes,
+                   const Vector2f& pos,
+                   const Rectf& crop) {
+        sb_assert( (m_render!=0) && "scene not started" );
+        float x = pos.x;
+        float y = pos.y;
+        
+        const float w = img.GetWidth();
+        const float h = img.GetHeight();
+        x-=img.GetHotspot().x*w/img.GetTextureDrawW();
+        y-=img.GetHotspot().y*h/img.GetTextureDrawH();
+        
+        Rectf cropped = crop.GetIntersect(Rectf(x,y,w,h));
+        if (cropped.w <= 0.0f || cropped.h <= 0.0f)
+            return;
+        
+        if (m_filter && !m_filter->DrawImage(*this, attributes, img, x, y, Sandbox::Color(), 1.0))
+            return;
+        BeginDrawImage(img);
+        
+        CheckFlush(false);
+        
+        appendQuad();
+        
+        Rectf trect = Rectf(img.GetTextureX(),
+                            img.GetTextureY(),
+                            img.GetTextureW(),
+                            img.GetTextureH());
+        
+        trect.x += ((cropped.x-x) / w) * trect.w;
+        trect.y += ((cropped.y-y) / h) * trect.h;
+       
+        trect.w *= cropped.w / w;
+        trect.h *= cropped.h / h;
+        
+        GHL::UInt32 clr = (m_color).hw_premul();
+        
+        if (!m_state.calc2_tex)
+        {
+            appendVertex(cropped.GetLeft(),cropped.GetTop(),
+                         trect.GetLeft()*m_itw,
+                         trect.GetTop()*m_ith,clr);
+            appendVertex(cropped.GetRight(),cropped.GetTop(),
+                         trect.GetRight()*m_itw,
+                         trect.GetTop()*m_ith,clr);
+            appendVertex(cropped.GetLeft(),cropped.GetBottom(),
+                         trect.GetLeft()*m_itw,
+                         trect.GetBottom()*m_ith,clr);
+            appendVertex(cropped.GetRight(),cropped.GetBottom(),
+                         trect.GetRight()*m_itw,
+                         trect.GetBottom()*m_ith,clr);
+        }  else {
+            appendVertex2(cropped.GetLeft(),cropped.GetTop(),
+                         trect.GetLeft()*m_itw,
+                         trect.GetTop()*m_ith,clr);
+            appendVertex2(cropped.GetRight(),cropped.GetTop(),
+                         trect.GetRight()*m_itw,
+                         trect.GetTop()*m_ith,clr);
+            appendVertex2(cropped.GetLeft(),cropped.GetBottom(),
+                         trect.GetLeft()*m_itw,
+                         trect.GetBottom()*m_ith,clr);
+            appendVertex2(cropped.GetRight(),cropped.GetBottom(),
+                         trect.GetRight()*m_itw,
+                         trect.GetBottom()*m_ith,clr);
+        }
+    }
 	void Graphics::DrawImage(const Image& img,DrawAttributes* attributes,float x,float y,const Color& _clr) {
 		sb_assert( (m_render!=0) && "scene not started" );
         if (m_filter && !m_filter->DrawImage(*this,attributes, img, x, y, _clr, 1.0))

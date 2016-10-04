@@ -300,6 +300,7 @@ namespace Sandbox {
             factory.registerFactory<MaskSetSubSkin>(category_name);
             factory.registerFactory<ObjectSubSkin>(category_name);
             factory.registerFactory<AutoSizeText>(category_name);
+            factory.registerFactory<CroppedText>(category_name);
             factory.registerFactory<MaskText>(category_name);
             factory.registerFactory<KeepAspectSkin>(category_name);
             factory.registerFactory<EditText>(category_name);
@@ -311,6 +312,7 @@ namespace Sandbox {
             factory.registerFactory<MaskSetSubSkinState>(state_category_name, "MaskSetSubSkin");
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "ObjectSubSkin");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "AutoSizeText");
+            factory.registerFactory<EditTextStateInfo>(state_category_name, "CroppedText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "MaskText");
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "KeepAspectSkin");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "EditText");
@@ -330,6 +332,7 @@ namespace Sandbox {
             factory.unregisterFactory<MaskSetSubSkin>(category_name);
             factory.unregisterFactory<ObjectSubSkin>(category_name);
             factory.unregisterFactory<AutoSizeText>(category_name);
+            factory.unregisterFactory<CroppedText>(category_name);
             factory.unregisterFactory<MaskText>(category_name);
             factory.unregisterFactory<KeepAspectSkin>(category_name);
             factory.unregisterFactory<EditText>(category_name);
@@ -341,6 +344,7 @@ namespace Sandbox {
             factory.unregisterFactory(state_category_name, "MaskSetSubSkin");
             factory.unregisterFactory(state_category_name, "ObjectSubSkin");
             factory.unregisterFactory(state_category_name, "AutoSizeText");
+            factory.unregisterFactory(state_category_name, "CroppedText");
             factory.unregisterFactory(state_category_name, "MaskText");
             factory.unregisterFactory(state_category_name, "KeepAspectSkin");
             factory.unregisterFactory(state_category_name, "ColorizedSubSkin");

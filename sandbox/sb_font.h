@@ -20,6 +20,7 @@
 #include "sb_color.h"
 #include "sb_font_data.h"
 #include "sb_draw_attributes.h"
+#include "sb_rect.h"
 
 namespace Sandbox {
 
@@ -55,8 +56,10 @@ namespace Sandbox {
         float DrawI( Graphics& g, DrawAttributes* attributes,
                     const Sandbox::Vector2f& pos , const char* text) const;
         void DrawI( Graphics& g, DrawAttributes* attributes,
-                   const Sandbox::Vector2f& pos ,
                    const TextData& text) const;
+        void DrawCroppedI( Graphics& g, DrawAttributes* attributes,
+                          const Rectf& rect,
+                          const TextData& text) const;
     private:
         FontDataPtr    m_data;
         sb::string     m_name;
@@ -79,7 +82,11 @@ namespace Sandbox {
                            const Vector2f& pos,const char* text,FontAlign align) const;
         virtual void Draw(Graphics& g,
                            DrawAttributes* attributes,
-                           const Vector2f& pos,const TextData& data) const;
+                          const TextData& data) const;
+        virtual void DrawCropped(Graphics& g,
+                                 DrawAttributes* attributes,
+                                 const Rectf& rect,
+                                 const TextData& data ) const;
 		virtual float GetTextWidth(const char* text) const;
         bool MovePosition(Vector2f& pos,UTF32Char prev,UTF32Char next) const;
         

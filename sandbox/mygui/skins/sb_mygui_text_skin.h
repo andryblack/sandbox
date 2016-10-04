@@ -10,6 +10,18 @@ namespace Sandbox {
     
     namespace mygui {
 
+        class CroppedText :
+        public EditText
+        {
+            MYGUI_RTTI_DERIVED( CroppedText )
+            
+        public:
+            CroppedText();
+            virtual ~CroppedText();
+            
+            virtual void doRender(MyGUI::IRenderTarget* _target);
+        };
+        
         class AutoSizeText :
             public EditText
         {

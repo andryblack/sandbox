@@ -6,9 +6,11 @@
 #include "sb_resources.h"
 #include "sb_graphics.h"
 #include "sb_mygui_skin.h"
+#include "MyGUI_FontData.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::AutoSizeText,Sandbox::mygui::EditText)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskText,Sandbox::mygui::AutoSizeText)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::CroppedText,Sandbox::mygui::EditText)
 
 
 namespace Sandbox {
@@ -43,7 +45,7 @@ namespace Sandbox {
                     width -= 2;
             }
             
-            mTextView.update(mCaption, mFont, mFontHeight, mTextAlign, width);
+            mTextView.update(mCaption, mFont, mTextAlign, width);
         }
         
         void AutoSizeText::doRender(MyGUI::IRenderTarget* _target) {
@@ -59,6 +61,9 @@ namespace Sandbox {
             }
             
             MyGUI::IntSize size = mTextView.getViewSize();
+            
+            size.width *= GetFontScale();
+            size.height *= GetFontScale();
             
             float hscale = 1.0f;
             if (size.width > mCoord.width) {
@@ -81,17 +86,19 @@ namespace Sandbox {
                 }
             }
             
+            float scale = m_scale * GetFontScale();
+            
             if (mTextAlign.isRight())
-                mViewOffset.left = - (mCoord.width - float(size.width)*m_scale);
+                mViewOffset.left = - (mCoord.width - float(size.width)*scale);
             else if (mTextAlign.isHCenter())
-                mViewOffset.left = - ((mCoord.width - float(size.width)*m_scale) / 2);
+                mViewOffset.left = - ((mCoord.width - float(size.width)*scale) / 2);
             else
                 mViewOffset.left = 0;
             
             if (mTextAlign.isBottom())
-                mViewOffset.top = - (mCoord.height - float(size.height)*m_scale);
+                mViewOffset.top = - (mCoord.height - float(size.height)*scale);
             else if (mTextAlign.isVCenter())
-                mViewOffset.top = - ((mCoord.height - float(size.height)*m_scale) / 2);
+                mViewOffset.top = - ((mCoord.height - float(size.height)*scale) / 2);
             else
                 mViewOffset.top = 0;
             
@@ -106,16 +113,67 @@ namespace Sandbox {
             Color c = g.GetColor();
             g.SetColor(c * Color(colour));
             Transform2d tr = g.GetTransform();
-            g.SetTransform(tr.translated(mCroppedParent->getAbsoluteLeft(), mCroppedParent->getAbsoluteTop())
-                           .scale(m_scale));
-            MyGUI::FloatRect vertexRect;
-            
-            float top = (float)(-mViewOffset.top + mCoord.top);
-            float left = (float)( - mViewOffset.left + mCoord.left);
-            
-            mFont->Draw(g, &m_attributes, Vector2f(left,top), textViewData);
+            g.SetTransform(tr.translated(mCroppedParent->getAbsoluteLeft()-mViewOffset.left + mCoord.left,
+                                         mCroppedParent->getAbsoluteTop() -mViewOffset.top + mCoord.top )
+                           .scale(scale));
+            mFont->Draw(g, &m_attributes,  textViewData);
             g.SetColor(c);
             g.SetTransform(tr);
+        }
+        
+        
+        CroppedText::CroppedText() {
+            
+        }
+        
+        CroppedText::~CroppedText() {
+            
+        }
+        
+        
+        void CroppedText::doRender(MyGUI::IRenderTarget *_target) {
+            if (nullptr == mFont || !mVisible || mEmptyView)
+                return;
+            
+            if (mRenderItem->getCurrentUpdate() || mTextOutDate)
+                updateRawData();
+            
+            const TextData& textViewData = mTextView.getData();
+            
+            Graphics& g = *(static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr())->graphics());
+            
+            Color c = g.GetColor();
+            g.SetColor(c * Color(mCurrentColourNative));
+            
+            float scale = GetFontScale();
+            
+            float top = (-mViewOffset.top + mCoord.top) + mCroppedParent->getAbsoluteTop();
+            float left = ( - mViewOffset.left + mCoord.left) + mCroppedParent->getAbsoluteLeft();
+            
+            Transform2d tr = g.GetTransform();
+            g.SetTransform(tr.translated(left, top).scale(scale));
+            
+            mFont->DrawCropped(g, &m_attributes,
+                               Rectf(mCurrentCoord.left + mViewOffset.left,
+                                     mCurrentCoord.top  + mViewOffset.top,
+                                     mCurrentCoord.width,
+                                     mCurrentCoord.height),
+                               textViewData);
+            
+            if (mVisibleCursor)
+            {
+                MyGUI::IntPoint point = mTextView.getCursorPoint(mCursorPosition);
+                const FontData::Glypth* cursorGlyph = mFont->GetGlyph(static_cast<MyGUI::Char>(MyGUI::FontCodeType::Cursor));
+                if (cursorGlyph) {
+                    g.DrawImage(cursorGlyph->img, &m_attributes,
+                                point.left,
+                                point.top);
+                }
+            }
+            g.SetTransform(tr);
+            
+            g.SetColor(c);
+
         }
         
         

@@ -24,7 +24,6 @@ namespace Sandbox
 
         void update(const MyGUI::UString& _text,
                     const Sandbox::FontPtr& _font,
-                    int _height,
                     MyGUI::Align _align,
                     int _maxWidth = -1);
 
@@ -42,8 +41,8 @@ namespace Sandbox
 		MyGUI::IntSize mViewSize;
 		size_t mLength;
 		TextData mTextData;
-		int mFontHeight;
-	};
+        FontPtr   m_font;
+    };
 
     }
 } // namespace Sandbox

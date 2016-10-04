@@ -51,7 +51,9 @@ namespace Sandbox {
             w = f.x;
             h = f.y;
         }
+        T GetLeft() const { return x; }
         T GetRight() const { return x + w; }
+        T GetTop() const { return y; }
         T GetBottom() const { return y + h; }
         
         Rect GetIntersect(const Rect& r2) const {

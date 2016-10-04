@@ -47,8 +47,11 @@ namespace Sandbox
 		if (mTextOutDate)
 			updateRawData();
 
-		const MyGUI::IntSize& size = mTextView.getViewSize();
-
+		MyGUI::IntSize size = mTextView.getViewSize();
+        float scale = GetFontScale();
+        size.width *= scale;
+        size.height *= scale;
+        
 		if (mTextAlign.isRight())
 			mViewOffset.left = - (mCoord.width - size.width);
 		else if (mTextAlign.isHCenter())

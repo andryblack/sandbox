@@ -208,8 +208,6 @@ namespace Sandbox
 		mCaption = _value;
 		mTextOutDate = true;
 
-		checkVertexSize();
-        
         if (mFont) {
             mFont->AllocateSymbols(_value.c_str());
         }
@@ -218,15 +216,6 @@ namespace Sandbox
 			mNode->outOfDate(mRenderItem);
 	}
 
-	void EditText::checkVertexSize()
-	{
-		// если вершин не хватит, делаем реалок, с учетом выделения * 2 и курсора
-		size_t need = (mCaption.length() * 2 + 2) * VERTEX_IN_QUAD;
-		if (mCountVertex < need)
-		{
-			mCountVertex = need + SIMPLETEXT_COUNT_VERTEX;
-		}
-	}
 
 	const MyGUI::UString& EditText::getCaption() const
 	{
@@ -288,8 +277,7 @@ namespace Sandbox
         if (!mFont) {
             return;
         }
-        mFontHeight = mFont->GetHeight();
-
+        
         mFont->AllocateSymbols(mCaption.c_str());
 
 		mTextOutDate = true;
@@ -400,12 +388,25 @@ namespace Sandbox
 			const_cast<EditText*>(this)->updateRawData();
 
 		MyGUI::IntSize size = mTextView.getViewSize();
+        
+        float scale = GetFontScale();
+        size.width *= scale;
+        size.height *= scale;
+        
 		// плюс размер курсора
 		if (mIsAddCursorWidth)
 			size.width += 2;
 
 		return size;
 	}
+        
+    float EditText::GetFontScale() const {
+        if (!mFont)
+            return 1.0f;
+        if (mFontHeight==0)
+            return 1.0f;
+        return mFontHeight / mFont->GetHeight();
+    }
 
 	void EditText::setViewOffset(const MyGUI::IntPoint& _point)
 	{
@@ -432,6 +433,10 @@ namespace Sandbox
 		point -= mCroppedParent->getAbsolutePosition();
 		point += mViewOffset;
 		point -= mCoord.point();
+        
+        float scale = GetFontScale();
+        point.left = point.left / scale;
+        point.top = point.top / scale;
 
 		return mTextView.getCursorPosition(point);
 	}
@@ -445,6 +450,11 @@ namespace Sandbox
 			updateRawData();
 
 		MyGUI::IntPoint point = mTextView.getCursorPoint(_position);
+        
+        float scale = GetFontScale();
+        point.left *= scale;
+        point.top *= scale;
+        
 		point += mCroppedParent->getAbsolutePosition();
 		point -= mViewOffset;
 		point += mCoord.point();
@@ -498,7 +508,7 @@ namespace Sandbox
 				width -= 2;
 		}
 
-		mTextView.update(mCaption, mFont, mFontHeight, mTextAlign, width);
+		mTextView.update(mCaption, mFont, mTextAlign, width);
 	}
 
 	void EditText::setStateData(MyGUI::IStateInfo* _data)
@@ -517,32 +527,34 @@ namespace Sandbox
 		if (mRenderItem->getCurrentUpdate() || mTextOutDate)
 			updateRawData();
 
-        // текущие цвета
-		MyGUI::uint32 colour = mCurrentColourNative;
-		
-		const TextData& textViewData = mTextView.getData();
+        const TextData& textViewData = mTextView.getData();
 
         Graphics& g = *(static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr())->graphics());
 
         Color c = g.GetColor();
-        g.SetColor(c * Color(colour));
+        g.SetColor(c * Color(mCurrentColourNative));
         
-		MyGUI::FloatRect vertexRect;
-        float top = (float)(-mViewOffset.top + mCoord.top) + mCroppedParent->getAbsoluteTop();
-        float left = (float)( - mViewOffset.left + mCoord.left) + mCroppedParent->getAbsoluteLeft();
+        float scale = GetFontScale();
+		 
+        float top = (-mViewOffset.top + mCoord.top) + mCroppedParent->getAbsoluteTop();
+        float left = ( - mViewOffset.left + mCoord.left) + mCroppedParent->getAbsoluteLeft();
         
-        mFont->Draw(g, &m_attributes, Vector2f(left,top), textViewData);
+        Transform2d tr = g.GetTransform();
+        g.SetTransform(tr.translated(left, top).scale(scale));
+        
+        mFont->Draw(g, &m_attributes, textViewData);
         
         if (mVisibleCursor)
         {
-            MyGUI::IntPoint point = mTextView.getCursorPoint(mCursorPosition) - mViewOffset + mCoord.point();
+            MyGUI::IntPoint point = mTextView.getCursorPoint(mCursorPosition);
             const FontData::Glypth* cursorGlyph = mFont->GetGlyph(static_cast<MyGUI::Char>(MyGUI::FontCodeType::Cursor));
             if (cursorGlyph) {
                 g.DrawImage(cursorGlyph->img, &m_attributes,
-                            point.left + mCroppedParent->getAbsoluteLeft(),
-                            point.top + mCroppedParent->getAbsoluteTop());
+                            point.left,
+                            point.top);
             }
         }
+        g.SetTransform(tr);
         
         g.SetColor(c);
 	}
@@ -555,95 +567,16 @@ namespace Sandbox
 			mNode->outOfDate(mRenderItem);
 	}
         
-        bool EditText::BeginPass(Graphics& g,const FontPass& pass) {
-            sb::map<sb::string, MyGUI::Colour>::const_iterator it = mPassColors.find(pass.GetName());
-            if (it!=mPassColors.end()) {
-                g.SetColor(g.GetColor()*Color(it->second.red,it->second.green,it->second.blue,it->second.alpha));
-            }
-            return true;
+    bool EditText::BeginPass(Graphics& g,const FontPass& pass) {
+        sb::map<sb::string, MyGUI::Colour>::const_iterator it = mPassColors.find(pass.GetName());
+        if (it!=mPassColors.end()) {
+            g.SetColor(g.GetColor()*Color(it->second.red,it->second.green,it->second.blue,it->second.alpha));
         }
-        void EditText::EndPass(Graphics& g,const FontPass& pass) {
-            
-        }
-
-	void EditText::drawGlyph(
-		MyGUI::IRenderTarget* _target,
-		size_t& _vertexCount,
-		MyGUI::FloatRect _vertexRect,
-		MyGUI::FloatRect _textureRect,
-		MyGUI::uint32 _colour) const
-	{
-		// символ залазиет влево
-		float leftClip = (float)mCurrentCoord.left - _vertexRect.left;
-		if (leftClip > 0.0f)
-		{
-			if ((float)mCurrentCoord.left < _vertexRect.right)
-			{
-				_textureRect.left += _textureRect.width() * leftClip / _vertexRect.width();
-				_vertexRect.left += leftClip;
-			}
-			else
-			{
-				return;
-			}
-		}
-
-		// символ залазиет вправо
-		float rightClip = _vertexRect.right - (float)mCurrentCoord.right();
-		if (rightClip > 0.0f)
-		{
-			if (_vertexRect.left < (float)mCurrentCoord.right())
-			{
-				_textureRect.right -= _textureRect.width() * rightClip / _vertexRect.width();
-				_vertexRect.right -= rightClip;
-			}
-			else
-			{
-				return;
-			}
-		}
-
-		// символ залазиет вверх
-		float topClip = (float)mCurrentCoord.top - _vertexRect.top;
-		if (topClip > 0.0f)
-		{
-			if ((float)mCurrentCoord.top < _vertexRect.bottom)
-			{
-				_textureRect.top += _textureRect.height() * topClip / _vertexRect.height();
-				_vertexRect.top += topClip;
-			}
-			else
-			{
-				return;
-			}
-		}
-
-		// символ залазиет вниз
-		float bottomClip = _vertexRect.bottom - (float)mCurrentCoord.bottom();
-		if (bottomClip > 0.0f)
-		{
-			if (_vertexRect.top < (float)mCurrentCoord.bottom())
-			{
-				_textureRect.bottom -= _textureRect.height() * bottomClip / _vertexRect.height();
-				_vertexRect.bottom -= bottomClip;
-			}
-			else
-			{
-				return;
-			}
-		}
-
-		float pix_left = mCroppedParent->getAbsoluteLeft() + _vertexRect.left;
-		float pix_top = mCroppedParent->getAbsoluteTop() + (mShiftText ? 1.0f : 0.0f) + _vertexRect.top;
-
-        MyGUI::VertexQuad quad;
-        quad.set(pix_left, pix_top, pix_left+_vertexRect.width(), pix_top+_vertexRect.height(),
-                 mNode->getNodeDepth(),
-                 _textureRect.left, _textureRect.top, _textureRect.right, _textureRect.bottom,
-                 _colour);
-        _target->addQuad(quad);
-        _vertexCount += VERTEX_IN_QUAD;
-	}
+        return true;
+    }
+    void EditText::EndPass(Graphics& g,const FontPass& pass) {
+        
+    }
 
     }
 } // namespace Sandbox
