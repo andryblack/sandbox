@@ -692,6 +692,36 @@ bind(method("eventMouseDrag", delegate_bind<MyGUI::Widget,
             MyGUI::EventHandle_WidgetIntIntButton,
             &MyGUI::WidgetInput::eventMouseDrag>::lua_func));
 
+bind(method("eventKeySetFocus", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetWidget,
+            &MyGUI::WidgetInput::eventKeySetFocus>::lua_func));
+
+bind(method("eventKeyLostFocus", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetWidget,
+            &MyGUI::WidgetInput::eventKeyLostFocus>::lua_func));
+
+bind(method("eventRootKeyChangeFocus", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetBool,
+            &MyGUI::WidgetInput::eventRootKeyChangeFocus>::lua_func));
+
+bind(method("eventMouseSetFocus", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetWidget,
+            &MyGUI::WidgetInput::eventMouseSetFocus>::lua_func));
+
+bind(method("eventMouseLostFocus", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetWidget,
+            &MyGUI::WidgetInput::eventMouseLostFocus>::lua_func));
+
+bind(method("eventRootMouseChangeFocus", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetBool,
+            &MyGUI::WidgetInput::eventRootMouseChangeFocus>::lua_func));
+
 SB_META_METHOD(detachFromWidget)
 SB_META_METHOD(attachToWidget)
 
