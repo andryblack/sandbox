@@ -133,7 +133,7 @@ void spAnimationState_apply (spAnimationState* self, spSkeleton* skeleton) {
 
 		previous = current->previous;
 		if (!previous) {
-			if (current->mix == 1) {
+			if (current->mix == 1.0f) {
 				spAnimation_apply(current->animation, skeleton, current->lastTime, time,
 					current->loop, internal->events, &eventsCount);
 			} else {
@@ -147,8 +147,8 @@ void spAnimationState_apply (spAnimationState* self, spSkeleton* skeleton) {
 			if (!previous->loop && previousTime > previous->endTime) previousTime = previous->endTime;
 			spAnimation_apply(previous->animation, skeleton, previousTime, previousTime, previous->loop, 0, 0);
 
-			if (alpha >= 1) {
-				alpha = 1;
+			if (alpha >= 1.0f) {
+				alpha = 1.0f;
 				internal->disposeTrackEntry(current->previous);
 				current->previous = 0;
 			}

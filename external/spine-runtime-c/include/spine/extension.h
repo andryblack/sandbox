@@ -180,11 +180,17 @@ void _spAttachment_deinit (spAttachment* self);
 #endif
 
 /**/
+    
+typedef void (*_spTimeline_apply_func) (const spTimeline* self, spSkeleton* skeleton, float lastTime, float time, spEvent** firedEvents,
+int* eventsCount, float alpha);
+typedef void (*_spTimeline_dispose_func) (spTimeline* self);
+typedef struct _spTimelineVtable {
+    _spTimeline_apply_func apply;
+    _spTimeline_dispose_func dispose;
+} _spTimelineVtable;
 
-void _spTimeline_init (spTimeline* self, spTimelineType type,
-	void (*dispose) (spTimeline* self),
-	void (*apply) (const spTimeline* self, spSkeleton* skeleton, float lastTime, float time, spEvent** firedEvents,
-		int* eventsCount, float alpha));
+
+void _spTimeline_init (spTimeline* self, spTimelineType type, const _spTimelineVtable* );
 void _spTimeline_deinit (spTimeline* self);
 
 #ifdef SPINE_SHORT_NAMES
@@ -194,11 +200,11 @@ void _spTimeline_deinit (spTimeline* self);
 
 /**/
 
-void _spCurveTimeline_init (spCurveTimeline* self, spTimelineType type, int framesCount,
-	void (*dispose) (spTimeline* self),
-	void (*apply) (const spTimeline* self, spSkeleton* skeleton, float lastTime, float time, spEvent** firedEvents,
-		int* eventsCount, float alpha));
-void _spCurveTimeline_deinit (spCurveTimeline* self);
+//void _spCurveTimeline_init (spCurveTimeline* self, spTimelineType type, int framesCount,
+//	void (*dispose) (spTimeline* self),
+//	void (*apply) (const spTimeline* self, spSkeleton* skeleton, float lastTime, float time, spEvent** firedEvents,
+//		int* eventsCount, float alpha));
+//void _spCurveTimeline_deinit (spCurveTimeline* self);
 
 #ifdef SPINE_SHORT_NAMES
 #define _CurveTimeline_init(...) _spCurveTimeline_init(__VA_ARGS__)
