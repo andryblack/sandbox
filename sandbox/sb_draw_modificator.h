@@ -48,6 +48,10 @@ namespace Sandbox {
         
         void SetTranslate(const Vector2f& tr) { m_translate = tr; }
 		const Vector2f& GetTranslate() const { return m_translate;}
+        void SetTranslateX(float x) { m_translate.x = x; }
+        float GetTranslateX() const { return m_translate.x;}
+        void SetTranslateY(float y) { m_translate.y = y; }
+        float GetTranslateY() const { return m_translate.y;}
 		void SetScale(float s) { m_scale_x = m_scale_y = s;}
         float GetScale() const { return (m_scale_x + m_scale_y)*0.5f; }
 		void SetScaleX(float s) { m_scale_x = s;}

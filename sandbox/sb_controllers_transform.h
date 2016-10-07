@@ -24,6 +24,16 @@ namespace Sandbox {
 				tr->SetTranslate(pos);
 			}
 		};
+        struct LinearControllerSetTranslateX {
+            static void SetValue( const TransformModificatorPtr& tr,float x) {
+                tr->SetTranslateX(x);
+            }
+        };
+        struct LinearControllerSetTranslateY {
+            static void SetValue( const TransformModificatorPtr& tr,float y) {
+                tr->SetTranslateY(y);
+            }
+        };
         struct LinearControllerSetPos {
             static void SetValue( const SceneObjectWithPositionPtr& tr,const Vector2f& pos) {
                 tr->SetPos(pos);
@@ -52,6 +62,8 @@ namespace Sandbox {
 	}
 	
 	typedef LinearController<Vector2f,Impl::LinearControllerSetTranslate,TransformModificatorPtr> ControllerTranslate;
+    typedef LinearController<float,Impl::LinearControllerSetTranslateX,TransformModificatorPtr> ControllerTranslateX;
+    typedef LinearController<float,Impl::LinearControllerSetTranslateY,TransformModificatorPtr> ControllerTranslateY;
     typedef MoveController<Impl::LinearControllerSetTranslate,TransformModificatorPtr> ControllerTranslateMove;
     typedef LinearController<Vector2f,Impl::LinearControllerSetPos,SceneObjectWithPositionPtr> ControllerPos;
     typedef MoveController<Impl::LinearControllerSetPos,SceneObjectWithPositionPtr> ControllerPosMove;

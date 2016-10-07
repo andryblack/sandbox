@@ -106,6 +106,20 @@ SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::ControllerTranslateX, Controller)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerTranslateX)
+SB_META_CONSTRUCTOR((const Sandbox::TransformModificatorPtr&))
+SB_META_PROPERTY_RW_DEF(Begin)
+SB_META_PROPERTY_RW_DEF(End)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::ControllerTranslateY, Controller)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerTranslateY)
+SB_META_CONSTRUCTOR((const Sandbox::TransformModificatorPtr&))
+SB_META_PROPERTY_RW_DEF(Begin)
+SB_META_PROPERTY_RW_DEF(End)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_KLASS(Sandbox::ControllerTranslateMove, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerTranslateMove)
 SB_META_CONSTRUCTOR((const Sandbox::TransformModificatorPtr&))
@@ -198,6 +212,8 @@ namespace Sandbox {
         luabind::Class<ControllerPhase>(lua);
         luabind::Class<ControllerMap>(lua);
         luabind::Class<ControllerTranslate>(lua);
+        luabind::Class<ControllerTranslateX>(lua);
+        luabind::Class<ControllerTranslateY>(lua);
         luabind::Class<ControllerTranslateMove>(lua);
         luabind::Class<ControllerPos>(lua);
         luabind::Class<ControllerPosMove>(lua);
