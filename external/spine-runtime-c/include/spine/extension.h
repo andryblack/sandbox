@@ -184,9 +184,11 @@ void _spAttachment_deinit (spAttachment* self);
 typedef void (*_spTimeline_apply_func) (const spTimeline* self, spSkeleton* skeleton, float lastTime, float time, spEvent** firedEvents,
 int* eventsCount, float alpha);
 typedef void (*_spTimeline_dispose_func) (spTimeline* self);
+typedef int (*_spTimeline_compare_func) (const spTimeline* self, const spTimeline* timeline);
 typedef struct _spTimelineVtable {
     _spTimeline_apply_func apply;
     _spTimeline_dispose_func dispose;
+    _spTimeline_compare_func compare;
 } _spTimelineVtable;
 
 

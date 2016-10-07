@@ -75,6 +75,10 @@ void spAnimation_apply (const spAnimation* self, struct spSkeleton* skeleton, fl
 void spAnimation_mix (const spAnimation* self, struct spSkeleton* skeleton, float lastTime, float time, int loop,
 		spEvent** events, int* eventsCount, float alpha);
 
+int spAnimation_has_timeline(const spAnimation* self, const spTimeline* tl);
+void spAnimation_apply_prev (const spAnimation* self, struct spSkeleton* skeleton, float lastTime, float time, int loop,
+                      const spAnimation* next);
+
 #ifdef SPINE_SHORT_NAMES
 typedef spAnimation Animation;
 #define Animation_create(...) spAnimation_create(__VA_ARGS__)
@@ -112,6 +116,7 @@ struct spTimeline {
 void spTimeline_dispose (spTimeline* self);
 void spTimeline_apply (const spTimeline* self, struct spSkeleton* skeleton, float lastTime, float time, spEvent** firedEvents,
 		int* eventsCount, float alpha);
+int spTimeline_compare(const spTimeline* self, const spTimeline* other);
 
 #ifdef SPINE_SHORT_NAMES
 typedef spTimeline Timeline;

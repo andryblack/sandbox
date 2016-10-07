@@ -78,6 +78,33 @@ void spAnimation_mix (const spAnimation* self, spSkeleton* skeleton, float lastT
 		spTimeline_apply(self->timelines[i], skeleton, lastTime, time, events, eventsCount, alpha);
 }
 
+int spAnimation_has_timeline(const spAnimation* self, const spTimeline* tl) {
+    int i, n = self->timelinesCount;
+    for (i = 0; i < n; ++i) {
+        if (spTimeline_compare(self->timelines[i], tl)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void spAnimation_apply_prev (const spAnimation* self, spSkeleton* skeleton, float lastTime, float time, int loop, const spAnimation* next) {
+    int i, n = self->timelinesCount;
+    
+    if (loop && self->duration) {
+        time = FMOD(time, self->duration);
+        if (lastTime > 0) lastTime = FMOD(lastTime, self->duration);
+    }
+    
+    for (i = 0; i < n; ++i) {
+        const spTimeline* timeline = self->timelines[i];
+        if (spAnimation_has_timeline(next,timeline)) {
+            spTimeline_apply(timeline, skeleton, lastTime, time, 0, 0, 1.0);
+        }
+    }
+}
+
+
 /**/
 
 void _spTimeline_init (spTimeline* self, spTimelineType type, const _spTimelineVtable* vtable) {
@@ -86,7 +113,7 @@ void _spTimeline_init (spTimeline* self, spTimelineType type, const _spTimelineV
 }
 
 void _spTimeline_deinit (spTimeline* self) {
-	
+    UNUSED(self);
 }
 
 void spTimeline_dispose (spTimeline* self) {
@@ -96,6 +123,13 @@ void spTimeline_dispose (spTimeline* self) {
 void spTimeline_apply (const spTimeline* self, spSkeleton* skeleton, float lastTime, float time, spEvent** firedEvents,
 		int* eventsCount, float alpha) {
 	VTABLE(spTimeline, self)->apply(self, skeleton, lastTime, time, firedEvents, eventsCount, alpha);
+}
+
+
+int spTimeline_compare(const spTimeline* self, const spTimeline* other) {
+    if (self->type != other->type)
+        return 0;
+    return VTABLE(spTimeline, self)->compare(self,other);
 }
 
 /**/
@@ -224,6 +258,12 @@ void _spBaseTimeline_dispose (spTimeline* timeline) {
 	FREE(self);
 }
 
+int _spBaseTimeline_compare(const spTimeline* timeline1,const spTimeline* timeline2) {
+    const struct spBaseTimeline* self = SUB_CAST(const struct spBaseTimeline, timeline1);
+    const struct spBaseTimeline* other = SUB_CAST(const struct spBaseTimeline, timeline2);
+    return self->boneIndex == other->boneIndex;
+}
+
 /* Many timelines have structure identical to struct spBaseTimeline and extend spCurveTimeline. **/
 struct spBaseTimeline* _spBaseTimeline_create (int framesCount, spTimelineType type, int frameSize, /**/
 		const _spTimelineVtable* vtable) {
@@ -290,7 +330,8 @@ void _spRotateTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, 
 
 static const _spTimelineVtable spRotateTimeline_vtable = {
     &_spRotateTimeline_apply,
-    &_spBaseTimeline_dispose
+    &_spBaseTimeline_dispose,
+    &_spBaseTimeline_compare
 };
 
 spRotateTimeline* spRotateTimeline_create (int framesCount) {
@@ -347,7 +388,8 @@ void _spTranslateTimeline_apply (const spTimeline* timeline, spSkeleton* skeleto
 
 static const _spTimelineVtable spTranslateTimeline_vtable = {
     &_spTranslateTimeline_apply,
-    &_spBaseTimeline_dispose
+    &_spBaseTimeline_dispose,
+    &_spBaseTimeline_compare
 };
 
 spTranslateTimeline* spTranslateTimeline_create (int framesCount) {
@@ -400,7 +442,8 @@ void _spScaleTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, f
 
 static const _spTimelineVtable spScaleTimeline_vtable = {
     &_spScaleTimeline_apply,
-    &_spBaseTimeline_dispose
+    &_spBaseTimeline_dispose,
+    &_spBaseTimeline_compare
 };
 spScaleTimeline* spScaleTimeline_create (int framesCount) {
 	return _spBaseTimeline_create(framesCount, SP_TIMELINE_SCALE, 3, &spScaleTimeline_vtable);
@@ -471,7 +514,8 @@ void _spColorTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, f
 
 static const _spTimelineVtable spColorTimeline_vtable = {
     &_spColorTimeline_apply,
-    &_spBaseTimeline_dispose
+    &_spBaseTimeline_dispose,
+    &_spBaseTimeline_compare
 };
 
 spColorTimeline* spColorTimeline_create (int framesCount) {
@@ -527,9 +571,16 @@ void _spAttachmentTimeline_dispose (spTimeline* timeline) {
 	FREE(self);
 }
 
+int _spAttachmentTimeline_compare(const spTimeline* timeline1,const spTimeline* timeline2) {
+    const spAttachmentTimeline* self = SUB_CAST(const spAttachmentTimeline, timeline1);
+    const spAttachmentTimeline* other = SUB_CAST(const spAttachmentTimeline, timeline2);
+    return self->slotIndex == other->slotIndex;
+}
+
 static const _spTimelineVtable spAttachmentTimeline_vtable = {
     &_spAttachmentTimeline_apply,
-    &_spAttachmentTimeline_dispose
+    &_spAttachmentTimeline_dispose,
+    &_spAttachmentTimeline_compare
 };
 spAttachmentTimeline* spAttachmentTimeline_create (int framesCount) {
 	spAttachmentTimeline* self = NEW(spAttachmentTimeline);
@@ -598,9 +649,16 @@ void _spEventTimeline_dispose (spTimeline* timeline) {
 	FREE(self);
 }
 
+static int _spEventTimeline_compare(const spTimeline* timeline1,const spTimeline* timeline2) {
+    UNUSED(timeline1);
+    UNUSED(timeline2);
+    return 0;
+}
+
 static const _spTimelineVtable spEventTimeline_vtable = {
     &_spEventTimeline_apply,
     &_spEventTimeline_dispose,
+    &_spEventTimeline_compare
 };
 
 spEventTimeline* spEventTimeline_create (int framesCount) {
@@ -664,9 +722,16 @@ void _spDrawOrderTimeline_dispose (spTimeline* timeline) {
 	FREE(self);
 }
 
+static int _spDrawOrderTimeline_compare(const spTimeline* timeline1,const spTimeline* timeline2) {
+    UNUSED(timeline1);
+    UNUSED(timeline2);
+    return 1;
+}
+
 static const _spTimelineVtable spDrawOrderTimeline_vtable = {
     &_spDrawOrderTimeline_apply,
-    &_spDrawOrderTimeline_dispose
+    &_spDrawOrderTimeline_dispose,
+    &_spDrawOrderTimeline_compare
 };
 
 spDrawOrderTimeline* spDrawOrderTimeline_create (int framesCount, int slotsCount) {
@@ -786,9 +851,16 @@ void _spFFDTimeline_dispose (spTimeline* timeline) {
 	FREE(self);
 }
 
+int _spFFDTimeline_compare(const spTimeline* timeline1,const spTimeline* timeline2) {
+    const struct spFFDTimeline* self = SUB_CAST(const struct spFFDTimeline, timeline1);
+    const struct spFFDTimeline* other = SUB_CAST(const struct spFFDTimeline, timeline2);
+    return self->slotIndex == other->slotIndex;
+}
+
 static const _spTimelineVtable spFFDTimeline_vtable = {
     &_spFFDTimeline_apply,
-    &_spFFDTimeline_dispose
+    &_spFFDTimeline_dispose,
+    &_spFFDTimeline_compare
 };
 
 spFFDTimeline* spFFDTimeline_create (int framesCount, int frameVerticesCount) {
@@ -854,9 +926,19 @@ void _spIkConstraintTimeline_apply (const spTimeline* timeline, spSkeleton* skel
 	UNUSED(eventsCount);
 }
 
+
+
+int _spIkConstraintTimeline_compare(const spTimeline* timeline1,const spTimeline* timeline2) {
+    const struct spIkConstraintTimeline* self = SUB_CAST(const struct spIkConstraintTimeline, timeline1);
+    const struct spIkConstraintTimeline* other = SUB_CAST(const struct spIkConstraintTimeline, timeline2);
+    return self->ikConstraintIndex == other->ikConstraintIndex;
+}
+
+
 static const _spTimelineVtable spIkConstraintTimeline_vtable = {
     &_spIkConstraintTimeline_apply,
-    &_spBaseTimeline_dispose
+    &_spBaseTimeline_dispose,
+    &_spIkConstraintTimeline_compare
 };
 
 spIkConstraintTimeline* spIkConstraintTimeline_create (int framesCount) {

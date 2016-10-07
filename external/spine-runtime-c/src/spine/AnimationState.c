@@ -38,7 +38,7 @@ spTrackEntry* _spTrackEntry_create (spAnimationState* state) {
 	CONST_CAST(spAnimationState*, self->state) = state;
 	self->timeScale = 1;
 	self->lastTime = -1;
-	self->mix = 1;
+	self->mix = 1.0;
 	return self;
 }
 
@@ -145,15 +145,18 @@ void spAnimationState_apply (spAnimationState* self, spSkeleton* skeleton) {
 
 			float previousTime = previous->time;
 			if (!previous->loop && previousTime > previous->endTime) previousTime = previous->endTime;
-			spAnimation_apply(previous->animation, skeleton, previousTime, previousTime, previous->loop, 0, 0);
+            if (alpha >= 1.0f) {
+                alpha = 1.0f;
+            }
+			spAnimation_apply_prev(previous->animation, skeleton, previousTime, previousTime, previous->loop, current->animation);
 
 			if (alpha >= 1.0f) {
 				alpha = 1.0f;
 				internal->disposeTrackEntry(current->previous);
 				current->previous = 0;
-			}
+            }
 			spAnimation_mix(current->animation, skeleton, current->lastTime, time,
-				current->loop, internal->events, &eventsCount, alpha);
+                                 current->loop, internal->events, &eventsCount, alpha);
 		}
 
 		entryChanged = 0;
