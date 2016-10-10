@@ -292,7 +292,9 @@ private:
 public:
     virtual bool isType( const std::type_info& _type) { return false; }
     virtual void invoke( A1 a1, A2 a2, A3 a3, A4 a4 ) {
-        m_function.call( a1, a2, a3, a4 );
+        if (m_function.Valid()) {
+            m_function.call( a1, a2, a3, a4 );
+        }
     }
     virtual bool compare(  MyGUI::delegates::IDelegate4<A1,A2,A3,A4>* _delegate) const {
         return _delegate == this;
@@ -312,7 +314,9 @@ private:
 public:
     virtual bool isType( const std::type_info& _type) { return false; }
     virtual void invoke( A1 a1, A2 a2, A3 a3) {
-        m_function.call( a1, a2, a3 );
+        if (m_function.Valid()) {
+            m_function.call( a1, a2, a3 );
+        }
     }
     virtual bool compare(  MyGUI::delegates::IDelegate3<A1,A2,A3>* _delegate) const {
         return _delegate == this;
@@ -332,7 +336,9 @@ private:
 public:
     virtual bool isType( const std::type_info& _type) { return false; }
     virtual void invoke( A1 a1, A2& a2, A3 a3) {
-        a2 = m_function.call<A2>( a1, a3 );
+        if (m_function.Valid()) {
+            a2 = m_function.call<A2>( a1, a3 );
+        }
     }
     virtual bool compare(  MyGUI::delegates::IDelegate3<A1,A2&,A3>* _delegate) const {
         return _delegate == this;
@@ -352,7 +358,9 @@ private:
 public:
     virtual bool isType( const std::type_info& _type) { return false; }
     virtual void invoke( A1 a1, A2 a2 ) {
-        m_function.call( a1, a2 );
+        if (m_function.Valid()) {
+            m_function.call( a1, a2 );
+        }
     }
     virtual bool compare(  MyGUI::delegates::IDelegate2<A1,A2>* _delegate) const {
         return _delegate == this;
@@ -372,7 +380,9 @@ private:
 public:
     virtual bool isType( const std::type_info& _type) { return false; }
     virtual void invoke( A1 a1 ) {
-        m_function.call( a1 );
+        if (m_function.Valid()) {
+            m_function.call( a1 );
+        }
     }
     virtual bool compare(  MyGUI::delegates::IDelegate1<A1>* _delegate) const {
         return _delegate == this;

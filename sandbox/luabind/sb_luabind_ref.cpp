@@ -21,7 +21,7 @@ namespace Sandbox {
             Reset();
         }
         bool LuaReference::Valid() const {
-            return m_ref!=LUA_NOREF;
+            return m_ref!=LUA_NOREF && m_lua.lock();
         }
         LuaVMHelperPtr GetHelper( lua_State* L );
         
