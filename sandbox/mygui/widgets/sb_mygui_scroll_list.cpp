@@ -612,19 +612,14 @@ namespace Sandbox {
             if (!m_manual_scroll)
                 return;
             if (_id == MyGUI::MouseButton::Left) {
-                MyGUI::Widget* top_modal = MyGUI::InputManager::getInstance().getTopModalWidget();
-                if (!top_modal)
+                if (!MyGUI::LayerManager::getInstance().checkItemAccessibleAtPoint(this, x, y))
                     return;
-                bool on_top_modal = top_modal == this;
                 MyGUI::ILayer* layer = getLayer();
                 MyGUI::Widget* parent = getParent();
                 while (!layer && parent) {
-                    if (parent == top_modal)
-                        on_top_modal = true;
                     layer = parent->getLayer();
                     parent = parent->getParent();
                 }
-                if (!on_top_modal) return;
                 if (!layer) return;
                 MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
                 pos_in_layer -= getAbsolutePosition();
