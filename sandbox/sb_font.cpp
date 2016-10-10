@@ -37,7 +37,7 @@ namespace Sandbox {
             g.SetColor(c * m_color);
         }
         
-        Sandbox::Vector2f pos = _pos;
+        Sandbox::Vector2f pos = _pos + m_offset;
         while (*text) {
             UTF32Char ch = 0;
             text = get_char(text,ch);
@@ -71,7 +71,7 @@ namespace Sandbox {
              g.SetColor(c * m_color);
         }
         for (TextData::LinesData::const_iterator line = text.data.begin();line!=text.data.end();++line) {
-            Sandbox::Vector2f pos = line->offset;
+            Sandbox::Vector2f pos = line->offset + m_offset;
             for (TextData::SymbolsData::const_iterator symbol = line->data.begin();symbol!=line->data.end();++symbol) {
                 if (symbol->type == TextData::SYMBOL_SET_COLOR) {
                     if (m_use_color) {
@@ -107,7 +107,7 @@ namespace Sandbox {
             g.SetColor(c * m_color);
         }
         for (TextData::LinesData::const_iterator line = text.data.begin();line!=text.data.end();++line) {
-            Sandbox::Vector2f pos = line->offset;
+            Sandbox::Vector2f pos = line->offset + m_offset;
             for (TextData::SymbolsData::const_iterator symbol = line->data.begin();symbol!=line->data.end();++symbol) {
                 if (symbol->type == TextData::SYMBOL_SET_COLOR) {
                     if (m_use_color) {
