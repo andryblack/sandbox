@@ -150,9 +150,6 @@ namespace Sandbox
 
 	protected:
 		bool mEmptyView;
-		MyGUI::uint32 mCurrentColourNative;
-		MyGUI::uint32 mInverseColourNative;
-		MyGUI::uint32 mCurrentAlphaNative;
 		MyGUI::IntCoord mCurrentCoord;
 
 		MyGUI::UString mCaption;

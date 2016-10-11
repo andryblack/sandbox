@@ -104,14 +104,11 @@ namespace Sandbox {
             
             
             
-            // текущие цвета
-            MyGUI::uint32 colour = mCurrentColourNative;
-            
             const TextData& textViewData = mTextView.getData();
             
             Graphics& g = *(static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr())->graphics());
             Color c = g.GetColor();
-            g.SetColor(c * Color(colour));
+            g.SetColor(c * Color(1.0f,1.0f,1.0f,mAlpha));
             Transform2d tr = g.GetTransform();
             g.SetTransform(tr.translated(mCroppedParent->getAbsoluteLeft()-mViewOffset.left + mCoord.left,
                                          mCroppedParent->getAbsoluteTop() -mViewOffset.top + mCoord.top )
@@ -143,7 +140,7 @@ namespace Sandbox {
             Graphics& g = *(static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr())->graphics());
             
             Color c = g.GetColor();
-            g.SetColor(c * Color(mCurrentColourNative));
+            g.SetColor(c * Color(1.0f,1.0f,1.0f,mAlpha));
             
             float scale = GetFontScale();
             

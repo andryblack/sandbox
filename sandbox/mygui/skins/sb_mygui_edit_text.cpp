@@ -52,9 +52,6 @@ namespace Sandbox
 	EditText::EditText() :
 		ISubWidgetText(),
 		mEmptyView(false),
-		mCurrentColourNative(0x00FFFFFF),
-		mInverseColourNative(0x00000000),
-		mCurrentAlphaNative(0xFF000000),
 		mTextOutDate(false),
 		mTextAlign(MyGUI::Align::Default),
 		mColour(MyGUI::Colour::White),
@@ -71,12 +68,6 @@ namespace Sandbox
 		mManualColour(false),
 		mOldWidth(0)
 	{
-      
-        mCurrentColourNative = MyGUI::texture_utility::toColourARGB(mColour);
-	
-		mCurrentColourNative = (mCurrentColourNative & 0x00FFFFFF) | (mCurrentAlphaNative & 0xFF000000);
-		mInverseColourNative = mCurrentColourNative ^ 0x00FFFFFF;
-        
         m_attributes.parent = this;
 	}
 
@@ -234,11 +225,9 @@ namespace Sandbox
 			return;
 
 		mColour = _value;
-		mCurrentColourNative = MyGUI::texture_utility::toColourARGB(mColour);
-
-		mCurrentColourNative = (mCurrentColourNative & 0x00FFFFFF) | (mCurrentAlphaNative & 0xFF000000);
-		mInverseColourNative = mCurrentColourNative ^ 0x00FFFFFF;
-
+		
+        mPassColors["Base"] = mColour;
+        
 		if (nullptr != mNode)
 			mNode->outOfDate(mRenderItem);
 	}
@@ -253,10 +242,6 @@ namespace Sandbox
 		if (mAlpha == _value)
 			return;
 		mAlpha = _value;
-
-		mCurrentAlphaNative = ((MyGUI::uint8)(mAlpha * 255) << 24);
-		mCurrentColourNative = (mCurrentColourNative & 0x00FFFFFF) | (mCurrentAlphaNative & 0xFF000000);
-		mInverseColourNative = mCurrentColourNative ^ 0x00FFFFFF;
 
 		if (nullptr != mNode)
 			mNode->outOfDate(mRenderItem);
@@ -532,7 +517,7 @@ namespace Sandbox
         Graphics& g = *(static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr())->graphics());
 
         Color c = g.GetColor();
-        g.SetColor(c * Color(mCurrentColourNative));
+        g.SetColor(c * Color(1.0f,1.0f,1.0f,mAlpha));
         
         float scale = GetFontScale();
 		 
