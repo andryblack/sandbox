@@ -71,11 +71,11 @@ namespace Sandbox {
                 if (hscale < m_scale) {
                     m_scale = hscale;
                 }
-            } else if (!mWordWrap) {
+            } else if (!mWordWrap && mTextView.getData().data.size()<2) {
                 m_scale = 1.0f;
             }
             
-            if (mWordWrap) {
+            if (mWordWrap || mTextView.getData().data.size() > 1) {
                 while ((size.height*m_scale) > mCoord.height) {
                     m_scale -= 0.125f/4;
                     if (m_scale < 0.125f) {
