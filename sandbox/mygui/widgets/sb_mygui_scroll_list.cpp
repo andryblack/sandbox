@@ -114,6 +114,8 @@ SB_META_PROPERTY_RW(page, getPage, setPage)
 SB_META_PROPERTY_RW(targetPage, getTargetPage, moveToPage)
 SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
 SB_META_PROPERTY_RO(selectionWidget, getSelectionWidget)
+SB_META_PROPERTY_RW(itemSize, getItemSize, setItemSize)
+SB_META_PROPERTY_RW(visibleCount, getVisibleCount, setVisibleCount)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
