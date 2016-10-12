@@ -811,7 +811,7 @@ namespace Sandbox {
     }
 #endif
     
-    void GHL_CALL Application::OnEvent( const GHL::Event* event ) {
+    void GHL_CALL Application::OnEvent( GHL::Event* event ) {
         sb_ensure_main_thread();
         switch( event->type ) {
             case GHL::EVENT_TYPE_KEY_PRESS:
@@ -824,7 +824,7 @@ namespace Sandbox {
                 }
 #endif
                 if (m_keyboard_ctx) {
-                    m_keyboard_ctx->call_self("onKeyDown",event->data.key_press.key,event->data.key_press.modificators);
+                    event->data.key_press.handled = m_keyboard_ctx->call_self<bool>("onKeyDown",event->data.key_press.key,event->data.key_press.modificators);
                     if (event->data.key_press.charcode)
                         m_keyboard_ctx->call_self("onChar",event->data.key_press.charcode);
                 }
@@ -837,7 +837,7 @@ namespace Sandbox {
                 }
 #endif
                 if (m_keyboard_ctx) {
-                    m_keyboard_ctx->call_self("onKeyUp",event->data.key_release.key);
+                    event->data.key_release.handled = m_keyboard_ctx->call_self<bool>("onKeyUp",event->data.key_release.key);
                 }
                 break;
             case GHL::EVENT_TYPE_KEYBOARD_HIDE:

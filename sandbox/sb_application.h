@@ -216,7 +216,7 @@ namespace Sandbox {
 		///
 		virtual bool GHL_CALL OnFrame( GHL::UInt32 usecs ) ;
         ///
-        virtual void GHL_CALL OnEvent( const GHL::Event* event );
+        virtual void GHL_CALL OnEvent( GHL::Event* event );
 		///
 		virtual void GHL_CALL Release(  ) ;
 		

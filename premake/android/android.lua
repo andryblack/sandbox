@@ -122,8 +122,16 @@ api.register {
 	kind = "string",
 	allowed = {
 		'landscape',
+		'reverseLandscape',
+		'sensorLandscape',
 		'portrait',
-		'any'
+		'reversePortrait',
+		'sensorPortrait',
+		'fullSensor',
+		'sensor',
+		'user',
+		'behind',
+		'unspecified'
 	}
 
 }

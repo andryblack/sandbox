@@ -132,6 +132,8 @@ SB_META_ENUM_BIND(GHL::Key,namespace GHL,
                   SB_META_ENUM_ITEM(KEY_F10)
                   SB_META_ENUM_ITEM(KEY_F11)
                   SB_META_ENUM_ITEM(KEY_F12)
+
+                  SB_META_ENUM_ITEM(KEY_BACK)
                   
                   )
 
