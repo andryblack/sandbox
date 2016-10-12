@@ -725,7 +725,7 @@ void _spDrawOrderTimeline_dispose (spTimeline* timeline) {
 static int _spDrawOrderTimeline_compare(const spTimeline* timeline1,const spTimeline* timeline2) {
     UNUSED(timeline1);
     UNUSED(timeline2);
-    return 1;
+    return 0;
 }
 
 static const _spTimelineVtable spDrawOrderTimeline_vtable = {
