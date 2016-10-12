@@ -165,6 +165,7 @@ namespace Sandbox {
                 static const char* meta_operator[] = {
                     "__add",
                     "__mul",
+                    "__div",
                     "__sub",
                     "__index"
                 };

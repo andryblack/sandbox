@@ -26,6 +26,7 @@ SB_META_METHOD(rotated)
 SB_META_OPERATOR_ADD_(Sandbox::Vector2f(Sandbox::Vector2f::*)(const Sandbox::Vector2f&)const)
 SB_META_OPERATOR_SUB_(Sandbox::Vector2f(Sandbox::Vector2f::*)(const Sandbox::Vector2f&)const)
 SB_META_OPERATOR_MUL_(Sandbox::Vector2f(Sandbox::Vector2f::*)(float)const)
+SB_META_OPERATOR_DIV_(Sandbox::Vector2f(Sandbox::Vector2f::*)(float)const)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Vector3f, void)
