@@ -26,7 +26,8 @@ namespace Sandbox {
 	inline T interpolate(T begin,T end,float k) {
 		return end * k + begin * (1.0f-k);
 	}
-	
+    
+    size_t rand();
 	float randf();
 	float randf(float  from,float to);
 	

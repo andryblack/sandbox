@@ -17,6 +17,8 @@ namespace sb {
     using std::sort;
     using std::min;
     using std::max;
+    using std::random_shuffle;
+    using std::swap;
 }
 
 #endif

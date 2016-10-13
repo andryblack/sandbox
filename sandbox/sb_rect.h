@@ -10,7 +10,7 @@
 #ifndef SB_RECT_H
 #define SB_RECT_H
 
-#include "sb_vector2.h"
+#include "sb_point.h"
 #include <sbstd/sb_algorithm.h>
 #include "luabind/sb_luabind_stack.h"
 
@@ -33,21 +33,21 @@ namespace Sandbox {
             (pos.x<(x+w)) && (pos.y<(y+h));
         }
         
-        Vector2f GetTopLeft() const {
-            return Vector2f( x,y );
+        Point<T> GetTopLeft() const {
+            return Point<T>( x,y );
         }
-        Vector2f GetBottomRight() const {
-            return Vector2f( x + w, y + h);
+        Point<T> GetBottomRight() const {
+            return Point<T>( x + w, y + h);
         }
-        Vector2f GetSize() const {
-            return Vector2f( w, h );
+        Point<T> GetSize() const {
+            return Point<T>( w, h );
         }
         
-        void SetPos(const Vector2f& f) {
+        void SetPos(const Point<T>& f) {
             x = f.x;
             y = f.y;
         }
-        void SetSize(const Vector2f& f) {
+        void SetSize(const Point<T>& f) {
             w = f.x;
             h = f.y;
         }
@@ -66,7 +66,7 @@ namespace Sandbox {
             res.h -= res.y;
             return res;
         }
-        Rect operator - (const Sandbox::Vector2f& v) const {
+        Rect operator - (const Point<T>& v) const {
             return Rect(x-v.x,y-v.y,w,h);
         }
 	};

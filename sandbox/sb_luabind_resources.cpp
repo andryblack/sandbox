@@ -16,6 +16,7 @@
 #include "sb_shader.h"
 #include "sb_color.h"
 #include "sb_rect.h"
+#include "sb_point.h"
 #include "sb_sound.h"
 #include "sb_rendertarget.h"
 #include "sb_utf.h"
@@ -123,6 +124,20 @@ SB_META_PROPERTY(x)
 SB_META_PROPERTY(y)
 SB_META_PROPERTY(w)
 SB_META_PROPERTY(h)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Pointf, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Pointf)
+SB_META_CONSTRUCTOR((float,float))
+SB_META_PROPERTY(x)
+SB_META_PROPERTY(y)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Pointi, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Pointi)
+SB_META_CONSTRUCTOR((int,int))
+SB_META_PROPERTY(x)
+SB_META_PROPERTY(y)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Texture, void)

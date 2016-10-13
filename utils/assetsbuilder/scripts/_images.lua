@@ -64,6 +64,7 @@ local function load_images( dir  )
 			local filename = path.join(dir,k .. '.' .. assert(v.type,'not found type for ' .. k .. ' at ' .. dir))
 			local tex = assert(application:check_texture(filename),'failed check texture ' .. filename)
 			v.texture_info = tex
+
 			local destfilename = path.replaceextension(filename,_M.image_file_format.ext)
 			local premultiplied = v.premultiplied
 			if premultiplied then
@@ -170,7 +171,7 @@ local function find_textures( from, mask )
 	local function filter_group( g )
 		local t = g._textures 
 		for _,v in pairs(t) do
-			if match(v._path .. '/' .. v._name) then
+			if match(v._path .. '/' .. v._name) and not v.noatlas then
 				--print('filtered:',v._path .. '/' .. v._name)
 				table.insert(res,v)
 			end
@@ -225,13 +226,12 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	a.path = path.join(from,name)
 	local override_base = false
 
+	local use_variants = {}
 	
 	if _M.use_variants then
 		
 		for vk,vv in pairs(_M.use_variants) do
-			if vv.override_base then
-				override_base = true
-			end
+			local has_image = false
 			for _,v in ipairs(i) do
 				local opath = path.join(v._path,v._name .. '.' .. v.type)
 				local vname = path.join(v._path,v._name .. vk .. '.' .. v.type)
@@ -248,11 +248,15 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 					get_rules().premultiply_images[vname] = nil
 
 					get_rules().dest_files[a.path .. vk .. '.' .. _M.image_file_format.ext]=true
-				else
+					has_image = true
+				elseif has_image then
 					error('for build atlas need all resolutions ' .. atlas_name .. ' ' .. v._path .. '/' .. v._name )
 				end
 			end
-			
+			if vv.override_base and has_image then
+				override_base = true
+			end
+			use_variants[vk] = has_image
 		end
 	end
 
@@ -282,22 +286,24 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 		if _M.use_variants then
 			for vk,vv in pairs(_M.use_variants) do
 				assert(vv.scale ~= 0)
-				local img = TextureData( self.width * vv.scale , self.height * vv.scale )
-				for _,v in ipairs(self.images) do
-					--print(v.src._path,v.src._name)
-					local tpath = path.join(v.src._path,v.src._name .. vk .. '.' .. v.src.type)
-					local i = assert(application:load_texture(tpath),'failed load texture ' .. tpath)
-					if v.src.aname  then
-						local apath = path.join(v.src._path,v.src.aname .. vk )
-						local ai = assert(application:load_texture(apath),'failed load alpha texture ' .. apath)
-						i:SetAlpha(ai)
+				if use_variants[vk] then
+					local img = TextureData( self.width * vv.scale , self.height * vv.scale )
+					for _,v in ipairs(self.images) do
+						--print(v.src._path,v.src._name)
+						local tpath = path.join(v.src._path,v.src._name .. vk .. '.' .. v.src.type)
+						local i = assert(application:load_texture(tpath),'failed load texture ' .. tpath)
+						if v.src.aname  then
+							local apath = path.join(v.src._path,v.src.aname .. vk )
+							local ai = assert(application:load_texture(apath),'failed load alpha texture ' .. apath)
+							i:SetAlpha(ai)
+						end
+						if v.premultiply then
+							i:PremultiplyAlpha()
+						end
+						img:Place((v.place_to[1]+1)*vv.scale,(v.place_to[2]+1)*vv.scale,i)
 					end
-					if v.premultiply then
-						i:PremultiplyAlpha()
-					end
-					img:Place((v.place_to[1]+1)*vv.scale,(v.place_to[2]+1)*vv.scale,i)
+					_M.image_file_format:store_texture(self.path .. vk .. '.' .. _M.image_file_format.ext,img)
 				end
-				_M.image_file_format:store_texture(self.path .. vk .. '.' .. _M.image_file_format.ext,img)
 			end
 		end
 	end

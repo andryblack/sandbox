@@ -20,6 +20,9 @@
 
 namespace Sandbox {
 
+    size_t rand() {
+        return ::rand();
+    }
 	float randf() {
 		return float(rand())/float(RAND_MAX);
 	}
