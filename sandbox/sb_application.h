@@ -120,6 +120,9 @@ namespace Sandbox {
         ///
         virtual void OnDeactivated() ;
         ///
+        
+        virtual void OnAppStarted();
+        
         virtual void OnActivated() ;
         
         virtual void OnSystemSet();

@@ -340,28 +340,7 @@ namespace Sandbox {
 		sb_assert( m_vfs );
         SB_LOGI("FillSettings");
         
-        if (!m_resources) {
-            m_resources = CreateResourcesManager();
-            sb_assert(m_resources);
-
-       
-            
-            std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);
-            if (!base_path.empty() && base_path[base_path.size()-1]!='/')
-                base_path+="/";
-            base_path+=m_resources_base_path;
-            if (!base_path.empty() && base_path[base_path.size()-1]!='/')
-                base_path+="/";
-            m_resources->SetBasePath(base_path.c_str());
-        
-        }
-        
-#ifdef SB_USE_NETWORK
-        if (!m_network) {
-            m_network = CreateNetwork();
-        }
-#endif
-        CreateLua();
+        sb_assert(m_lua);
         
 
         LuaContextPtr ctx = m_lua->GetGlobalContext();
@@ -811,6 +790,33 @@ namespace Sandbox {
     }
 #endif
     
+    void Application::OnAppStarted() {
+        PlatformExtension::OnAppStartedAll(this);
+        sb_assert(m_vfs);
+        if (!m_resources) {
+            m_resources = CreateResourcesManager();
+            sb_assert(m_resources);
+            
+            
+            
+            std::string base_path = m_vfs->GetDir(GHL::DIR_TYPE_DATA);
+            if (!base_path.empty() && base_path[base_path.size()-1]!='/')
+                base_path+="/";
+            base_path+=m_resources_base_path;
+            if (!base_path.empty() && base_path[base_path.size()-1]!='/')
+                base_path+="/";
+            m_resources->SetBasePath(base_path.c_str());
+            
+        }
+        
+#ifdef SB_USE_NETWORK
+        if (!m_network) {
+            m_network = CreateNetwork();
+        }
+#endif
+        CreateLua();
+    }
+    
     void GHL_CALL Application::OnEvent( GHL::Event* event ) {
         sb_ensure_main_thread();
         switch( event->type ) {
@@ -872,7 +878,7 @@ namespace Sandbox {
                 OnMouseUp(event->data.mouse_release.button, event->data.mouse_release.x, event->data.mouse_release.y);
                 break;
             case GHL::EVENT_TYPE_APP_STARTED:
-                PlatformExtension::OnAppStartedAll(this);
+                OnAppStarted();
                 break;
             case GHL::EVENT_TYPE_ACTIVATE:
                 OnActivated();
@@ -901,6 +907,7 @@ namespace Sandbox {
                     m_url = event->data.handle_url.url;
                 }
                 break;
+            
         }
     }
 	
