@@ -42,6 +42,8 @@ namespace Sandbox {
         Color   m_color;
     };
     
+    typedef sb::intrusive_ptr<GeometryBuffer> GeometryBufferPtr;
+    
 }
 
 #endif /* defined(__Sandbox__sb_geomerty_buffer__) */
