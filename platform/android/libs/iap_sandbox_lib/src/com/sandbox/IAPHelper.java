@@ -78,12 +78,16 @@ public class IAPHelper  {
         String mPrice;
         String mName;
         String mDescription;
+        String mCurrencyCode;
+        int mPriceInCents;
         public Product( String jsonProduct ) throws JSONException {
             JSONObject o = new JSONObject(jsonProduct);
             mSku = o.optString("productId");
             mPrice = o.optString("price");
             mName = o.optString("title");
             mDescription = o.optString("description");
+            mCurrencyCode = o.optString("price_currency_code");
+            mPriceInCents = o.optInt("price_amount_micros") / 10000;
         }
         public String getSku() { return mSku; }
         public JSONObject toJson() throws JSONException {
@@ -92,6 +96,8 @@ public class IAPHelper  {
             obj.put("localized_price",mPrice);
             obj.put("localized_name",mName);
             obj.put("localized_descr",mDescription);
+            obj.put("currency_code",mCurrencyCode);
+            obj.put("int_price",mPriceInCents);
             return obj;
         }
     }

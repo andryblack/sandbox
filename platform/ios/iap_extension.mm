@@ -117,7 +117,10 @@
         [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
         [numberFormatter setLocale:product.priceLocale];
         NSString *formattedString = [numberFormatter stringFromNumber:product.price];
+        NSString *currencyCode = numberFormatter.currencyCode;
         [numberFormatter release];
+        
+        
         [products_info addObject:[NSDictionary dictionaryWithObjectsAndKeys:
                                   product.productIdentifier,
                                   @"product_id",
@@ -125,6 +128,8 @@
                                   @"price",
                                   formattedString,
                                   @"localized_price",
+                                  currencyCode,
+                                  @"currency_code",
                                   nil]];
         [m_products setObject:product forKey:product.productIdentifier];
     }
