@@ -515,7 +515,7 @@ function _M.do_convert_to_jpeg_file( src, dstconf  )
 	end
 	local t = assert(application:load_texture(src))
 	if t:IsJPEG() then
-		os.copyfile(path.join(src_path,src),path.join(application.dst_path,conf.dst))
+		assert(application:strip_jpeg(src,conf.dst))
 		return
 	end
 	t:SetImageFileFormatJPEG()

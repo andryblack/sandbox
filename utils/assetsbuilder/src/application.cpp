@@ -8,7 +8,10 @@
 #include <sb_data.h>
 #include <utils/sb_md5.h>
 
+#include <image/jpeg_image_decoder.h>
+
 #include "spine_convert.h"
+
 
 extern "C" {
 #include <lua.h>
@@ -428,6 +431,25 @@ bool Application::store_texture( const sb::string& file , const TextureDataPtr& 
     bool res = store_file(file, d);
     d->Release();
     return res;
+}
+
+bool Application::strip_jpeg(const sb::string& src, const sb::string& dst) {
+    GHL::DataStream* ds = OpenFile(src.c_str());
+    if (!ds) {
+        Sandbox::LogError() << "failed open file " << src;
+        return false;
+    }
+    const GHL::Data* dstdata = GHL::JpegDecoder::ReEncode(ds);
+    ds->Release();
+    if (!dstdata) {
+        Sandbox::LogError() << "failed reencode jpeg " << src;
+        return false;
+    }
+    if (!store_file(dst, dstdata)) {
+        dstdata->Release();
+        return false;
+    }
+    return true;
 }
 
 bool Application::write_text_file( const sb::string& file , const char* data  ) {

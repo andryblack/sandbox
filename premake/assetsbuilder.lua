@@ -115,6 +115,7 @@
 			path.join(sandbox_dir,'external/spine-runtime-c','include'),
 			path.join(sandbox_dir,'sandbox'),
 			path.join(sandbox_dir,'external/tlsf'),
+			path.join(sandbox_dir,'GHL','src')
 		}
 		
 		files(utils.append_path(sandbox_dir .. '/utils/assetsbuilder/',

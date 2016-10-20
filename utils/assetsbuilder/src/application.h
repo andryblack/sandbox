@@ -92,6 +92,8 @@ public:
     
 	int run();
     
+    bool strip_jpeg(const sb::string& src, const sb::string& dst);
+    
     /// FileProvider
     virtual GHL::DataStream* OpenFile(const char* fn);
     virtual GHL::WriteStream* OpenDestFile(const char* fn);
