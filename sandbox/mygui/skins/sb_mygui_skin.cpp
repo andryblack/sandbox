@@ -22,6 +22,7 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSubSkin,MyGUI::SubSkin)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSetSubSkin,MyGUI::MainSkin)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskSetSubSkinState,MyGUI::SubSkinStateInfo)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::KeepAspectSkin,MyGUI::MainSkin)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::KeepAspectMaskSubSkin,Sandbox::mygui::MaskSubSkin)
 
 namespace Sandbox {
 
@@ -186,21 +187,7 @@ namespace Sandbox {
                     
                     if (g) {
                         g->SetShader(shader);
-                        Sandbox::Transform2d mTr = Sandbox::Transform2d();
-                        
-                        
-                        
-                        int x = mCroppedParent->getAbsoluteLeft();
-                        int y = mCroppedParent->getAbsoluteTop();
-                        int w = mCroppedParent->getWidth();
-                        int h = mCroppedParent->getHeight();
-                        
-                        
-                        mTr.translate(fill_texture_uv.left,fill_texture_uv.top);
-                        mTr.scale(fill_texture_uv.width() / w,fill_texture_uv.height() / h);
-                        mTr.translate(-x,-y);
-                        
-                        g->SetMask(MASK_MODE_ALPHA, fill_texture, mTr);
+                        setMask(*g, fill_texture, fill_texture_uv);
                         Base::doRender(_target);
                         g->SetMask(MASK_MODE_NONE, TexturePtr(), Transform2d());
                         g->SetShader(ShaderPtr());
@@ -213,6 +200,24 @@ namespace Sandbox {
             }
         }
         
+        void MaskSubSkin::setMask(Sandbox::Graphics& g,const TexturePtr& texture,const MyGUI::FloatRect& uv) {
+            Sandbox::Transform2d mTr = Sandbox::Transform2d();
+            
+            
+            
+            int x = mCroppedParent->getAbsoluteLeft();
+            int y = mCroppedParent->getAbsoluteTop();
+            int w = mCroppedParent->getWidth();
+            int h = mCroppedParent->getHeight();
+            
+            
+            mTr.translate(uv.left,uv.top);
+            mTr.scale(uv.width() / w,uv.height() / h);
+            mTr.translate(-x,-y);
+            
+            g.SetMask(MASK_MODE_ALPHA, texture, mTr);
+
+        }
         MaskSetSubSkin::MaskSetSubSkin() : m_texture(0) {
             mSeparate = false;
         }
@@ -287,6 +292,40 @@ namespace Sandbox {
             Base::setAlign(MyGUI::Align::Stretch);
         }
         
+        KeepAspectMaskSubSkin::KeepAspectMaskSubSkin() {
+            mSeparate = true;
+        }
+        
+        
+        void KeepAspectMaskSubSkin::setMask(Sandbox::Graphics& g,const TexturePtr& texture,const MyGUI::FloatRect& uv) {
+            if (!texture) return;
+            Sandbox::Transform2d mTr = Sandbox::Transform2d();
+            
+            int x = mCroppedParent->getAbsoluteLeft();
+            int y = mCroppedParent->getAbsoluteTop();
+            int w = mCroppedParent->getWidth();
+            int h = mCroppedParent->getHeight();
+            
+            float tw = uv.width() * texture->GetWidth();
+            float th = uv.height() * texture->GetHeight();
+            
+            float sx = float(w) / tw;
+            float sy = float(h) / th;
+            
+            float s = (sx > sy) ? sx : sy;
+            
+            float uvdx = (tw - float(w)/s) * 0.5f / texture->GetWidth();
+            float uvdy = (th - float(h)/s) * 0.5f / texture->GetHeight();
+            
+            float uvsw = (1.0f/(s * texture->GetWidth() ) );
+            float uvsh = (1.0f/(s * texture->GetHeight() ) );
+
+            mTr.translate(uv.left+uvdx,uv.top+uvdy);
+            mTr.scale(uvsw, uvsh);
+            mTr.translate(-x,-y);
+            
+            g.SetMask(MASK_MODE_ALPHA, texture, mTr);
+        }
         void register_skin() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
             
@@ -303,6 +342,7 @@ namespace Sandbox {
             factory.registerFactory<CroppedText>(category_name);
             factory.registerFactory<MaskText>(category_name);
             factory.registerFactory<KeepAspectSkin>(category_name);
+            factory.registerFactory<KeepAspectMaskSubSkin>(category_name);
             factory.registerFactory<EditText>(category_name);
             factory.registerFactory<SimpleText>(category_name);
             
@@ -315,6 +355,7 @@ namespace Sandbox {
             factory.registerFactory<EditTextStateInfo>(state_category_name, "CroppedText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "MaskText");
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "KeepAspectSkin");
+            factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "KeepAspectMaskSubSkin");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "EditText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "SimpleText");
 
@@ -335,6 +376,7 @@ namespace Sandbox {
             factory.unregisterFactory<CroppedText>(category_name);
             factory.unregisterFactory<MaskText>(category_name);
             factory.unregisterFactory<KeepAspectSkin>(category_name);
+            factory.unregisterFactory<KeepAspectMaskSubSkin>(category_name);
             factory.unregisterFactory<EditText>(category_name);
             factory.unregisterFactory<SimpleText>(category_name);
             
@@ -347,6 +389,7 @@ namespace Sandbox {
             factory.unregisterFactory(state_category_name, "CroppedText");
             factory.unregisterFactory(state_category_name, "MaskText");
             factory.unregisterFactory(state_category_name, "KeepAspectSkin");
+            factory.unregisterFactory(state_category_name, "KeepAspectMaskSubSkin");
             factory.unregisterFactory(state_category_name, "ColorizedSubSkin");
             factory.unregisterFactory(state_category_name, "EditText");
             factory.unregisterFactory(state_category_name, "SimpleText");

@@ -7,8 +7,13 @@
 #include "MyGUI_MainSkin.h"
 
 #include <sbstd/sb_vector.h>
+#include <sbstd/sb_intrusive_ptr.h>
 
 namespace Sandbox {
+    
+    class Graphics;
+    class Texture;
+    typedef sb::intrusive_ptr<Texture> TexturePtr;
     
     namespace mygui {
         
@@ -58,6 +63,8 @@ namespace Sandbox {
         public:
             MaskSubSkin();
             virtual void doRender(MyGUI::IRenderTarget* _target);
+        protected:
+            virtual void setMask(Sandbox::Graphics& g,const TexturePtr& texture,const MyGUI::FloatRect& uv);
         };
         
         class MaskSetSubSkinState : public MyGUI::SubSkinStateInfo {
@@ -98,6 +105,13 @@ namespace Sandbox {
             void updateRect(float tw, float th);
         private:
             MyGUI::Align    m_align;
+        };
+        
+        class KeepAspectMaskSubSkin : public MaskSubSkin {
+            MYGUI_RTTI_DERIVED( KeepAspectMaskSubSkin )
+        public:
+            KeepAspectMaskSubSkin();
+            virtual void setMask(Sandbox::Graphics& g,const TexturePtr& texture,const MyGUI::FloatRect& uv);
         };
 
         
