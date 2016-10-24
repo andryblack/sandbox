@@ -30,7 +30,7 @@ SB_META_END_KLASS_BIND()
 SB_META_BEGIN_KLASS_BIND(Sandbox::ParticlesSystem)
 SB_META_CONSTRUCTOR((const Sandbox::ParticlesControllerPtr&))
 SB_META_METHOD(Stop)
-SB_META_PROPERTY_RW_DEF(CompleteEvent)
+SB_META_PROPERTY_RW_DEF(OnComplete)
 SB_META_END_KLASS_BIND()
 
 

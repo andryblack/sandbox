@@ -27,7 +27,7 @@ namespace Sandbox {
 				} else {
 					m_time = m_all_time;
 					m_started = false;
-					if (m_end_event) m_end_event->Emmit();
+					if (m_end_signal) m_end_signal->Emmit();
 				}
 			}
 			float k = m_time/m_all_time;
@@ -56,9 +56,9 @@ namespace Sandbox {
 
     void Processor::Clear() {
         m_controller.reset();
-        if (m_end_event) {
-            m_end_event->Clear();
-            m_end_event.reset();
+        if (m_end_signal) {
+            m_end_signal->Clear();
+            m_end_signal.reset();
         }
     }
 }

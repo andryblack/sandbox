@@ -112,8 +112,8 @@ namespace Sandbox {
 					SetImages();
 					m_started = false;
 				} 
-				if (m_end_event)
-					m_end_event->Emmit();
+				if (m_end_signal)
+					m_end_signal->Emmit();
 				m_played_once = true;
 			}
 			if (m_started) {

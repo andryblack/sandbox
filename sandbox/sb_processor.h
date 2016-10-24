@@ -12,7 +12,7 @@
 
 #include "sb_thread.h"
 #include "sb_controller.h"
-#include "sb_event.h"
+#include "sb_signal.h"
 
 namespace Sandbox {
 	
@@ -30,8 +30,8 @@ namespace Sandbox {
 		bool GetLoop() const { return m_loop;}
 		void SetLoop(bool l) { m_loop = l;}
 		
-		void SetEndEvent(const EventPtr& e) { m_end_event = e;}
-        const EventPtr& GetEndEvent() const { return m_end_event; }
+		void SetOnEnd(const SignalPtr& e) { m_end_signal = e;}
+        const SignalPtr& GetOnEnd() const { return m_end_signal; }
 		
 		float GetTime() const { return m_all_time;}
 		void SetTime(float t) { m_all_time = t;}
@@ -47,7 +47,7 @@ namespace Sandbox {
 	private:
 		ControllerPtr	m_controller;
 		bool			m_loop;
-		EventPtr		m_end_event;
+		SignalPtr		m_end_signal;
 		float			m_all_time;
 		bool			m_started;
 		float			m_time;

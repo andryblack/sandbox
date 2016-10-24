@@ -3,7 +3,7 @@
 
 #include "sb_thread.h"
 #include "sb_transform2d.h"
-#include "sb_event.h"
+#include "sb_signal.h"
 #include <sbstd/sb_string.h>
 #include <sbstd/sb_list.h>
 
@@ -14,7 +14,9 @@ namespace Sandbox {
     class SkeletonAnimation;
     class SkeletObject;
     typedef sb::intrusive_ptr<SkeletObject> SkeletObjectPtr;
-        
+    
+    
+    
     class SkeletController : public Thread {
         SB_META_OBJECT
     public:
@@ -28,8 +30,8 @@ namespace Sandbox {
         void AddObject(const SkeletObjectPtr& obj);
         bool HasAnimation(const char* name) const;
         
-        void SetEndEvent(const EventPtr& e) { m_end_event = e;}
-        const EventPtr& GetEndEvent() const { return m_end_event; }
+        void SetOnEnd(const SignalPtr& e) { m_end_signal = e;}
+        const SignalPtr& GetOnEnd() const { return m_end_signal; }
         
         SkeletonAnimation* GetAnimation() { return m_animation; }
         void SetFrame( size_t frame );
@@ -49,7 +51,7 @@ namespace Sandbox {
         SkeletonAnimation*  m_animation;
         int    m_loop;
         sb::vector<SkeletObjectPtr> m_objects;
-        EventPtr    m_end_event;
+        SignalPtr    m_end_signal;
         struct AnimationEntry {
             sb::string name;
             int loop;

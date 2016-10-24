@@ -176,6 +176,7 @@ namespace Sandbox {
 #define SB_META_PROPERTY_RW( name, getter, setter ) bind( property_rw( #name, &ThisType::getter, &ThisType::setter ) );
 #define SB_META_PROPERTY_RW_DEF( name ) bind( property_rw( #name, &ThisType::Get##name, &ThisType::Set##name ) );
 #define SB_META_METHOD( name ) bind( method( #name , &ThisType::name ) );
+#define SB_META_METHOD_S( name , sign ) bind( method( #name , static_cast<sign>(&ThisType::name) ) );
 #define SB_META_OPERATOR_ADD() bind( operator_( op_add , &ThisType::operator+ ) );
 #define SB_META_OPERATOR_MUL() bind( operator_( op_mul , &ThisType::operator* ) );
 #define SB_META_OPERATOR_DIV() bind( operator_( op_div , &ThisType::operator/ ) );

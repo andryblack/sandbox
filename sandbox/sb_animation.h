@@ -12,7 +12,7 @@
 
 #include "sb_sprite.h"
 #include "sb_thread.h"
-#include "sb_event.h"
+#include "sb_signal.h"
 #include <sbstd/sb_vector.h>
 
 namespace Sandbox {
@@ -62,8 +62,8 @@ namespace Sandbox {
 		void AddSprite(const SpritePtr& spr);
 		void ClearSprites();
 		
-		void SetEndEvent(const EventPtr& e) { m_end_event = e;}
-        const EventPtr& GetEndEvent() const { return m_end_event; }
+		void SetOnEnd(const SignalPtr& e) { m_end_signal = e;}
+        const SignalPtr& GetOnEnd() const { return m_end_signal; }
 		
         void AddSync( const sb::intrusive_ptr<Animation>& anim );
 		virtual bool Update(float dt);
@@ -77,7 +77,7 @@ namespace Sandbox {
 		float	m_time;
 		size_t	m_frame;
 		bool	m_played_once;
-		EventPtr	m_end_event;
+		SignalPtr	m_end_signal;
 	};
 	
 }

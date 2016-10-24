@@ -108,9 +108,17 @@ namespace Sandbox {
     }
     
     void SpineAnimation::OnAnimationComplete() {
-        if (m_end_event) {
-            m_end_event->Emmit();
+        if (m_end_signal) {
+            m_end_signal->Emmit();
         }
+    }
+    
+    void SpineAnimation::Clear() {
+        if (m_end_signal) {
+            m_end_signal->Clear();
+            m_end_signal.reset();
+        }
+        Thread::Clear();
     }
     
     void SpineAnimation::OnAnimationStarted() {

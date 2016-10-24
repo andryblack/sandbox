@@ -149,8 +149,8 @@ namespace Sandbox {
         if (!instance.started) {
             if ( instance.particles.empty() ) {
                 instance.finished = true;
-                if (instance.complete_event)
-                    instance.complete_event->Emmit();
+                if (instance.complete_signal)
+                    instance.complete_signal->Emmit();
             }
         }
     }

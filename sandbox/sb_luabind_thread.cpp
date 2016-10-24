@@ -10,7 +10,8 @@
 #include "meta/sb_meta.h"
 #include "sb_thread.h"
 #include "sb_threads_mgr.h"
-#include "sb_event.h"
+//#include "sb_event.h"
+#include "sb_signal.h"
 
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Thread)
@@ -31,10 +32,17 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::PermanentThreadsMgr)
 SB_META_CONSTRUCTOR(())
 SB_META_END_KLASS_BIND()
 
-
 SB_META_DECLARE_KLASS(Sandbox::Event, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Event)
-SB_META_METHOD(Emmit)
+SB_META_METHOD(SetInt)
+SB_META_METHOD(GetInt)
+SB_META_METHOD(SetString)
+SB_META_METHOD(GetString)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Signal, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Signal)
+SB_META_METHOD_S(Emmit,void(Sandbox::Signal::*)(const EventPtr&))
 SB_META_METHOD(Clear)
 SB_META_END_KLASS_BIND()
 
@@ -42,16 +50,16 @@ SB_META_END_KLASS_BIND()
 namespace Sandbox {
     static const char* const LuaEventModule = "Sanbox:LuaEvent";
     
-  	class LuaEvent : public Event {
+  	class LuaSignal : public Signal {
 	public:
-        typedef sb::intrusive_ptr<LuaEvent> Ptr;
-        explicit LuaEvent(luabind::LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
-		~LuaEvent() {
+        typedef sb::intrusive_ptr<LuaSignal> Ptr;
+        explicit LuaSignal(luabind::LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
+		~LuaSignal() {
 		}
 		void SetFunction(lua_State* L) {
 			m_ref.SetObject(L);
 		}
-		void Emmit() {
+		void Emmit(const EventPtr& e) {
 			if (m_ref.Valid()) {
 				if ( luabind::LuaVMHelperPtr lua = m_ref.GetHelper()) {
 					lua_State* L = lua->lua;
@@ -60,7 +68,8 @@ namespace Sandbox {
                     luabind::PushErrorHandler(L);
 					m_ref.GetObject(L);
 					sb_assert(lua_isfunction(L,-1));
-					int res = lua_pcall(L, 0, 0, -2);
+                    luabind::stack<EventPtr>::push(L, e);
+					int res = lua_pcall(L, 1, 0, -2);
 					if (res) {
 						LogError(LuaEventModule) << " Failed script event emmit  " ;
                         LogError(LuaEventModule) << lua_tostring(L, -1) ;
@@ -83,7 +92,7 @@ namespace Sandbox {
                 return Ptr();
             }
 			lua_State* main_state = helper->lua;
-			sb::intrusive_ptr<LuaEvent> e = sb::intrusive_ptr<LuaEvent>(new LuaEvent(helper));
+			sb::intrusive_ptr<LuaSignal> e = sb::intrusive_ptr<LuaSignal>(new LuaSignal(helper));
 			lua_pushvalue(L, idx);
 			if (main_state!=L) {
 				lua_xmove(L, main_state, 1);
@@ -94,7 +103,7 @@ namespace Sandbox {
 		static int constructor_func(lua_State* L) {
             LUA_CHECK_STACK(1)
 			Ptr e = construct_from_lua_function(L, 2);
-            luabind::stack<sb::intrusive_ptr<LuaEvent> >::push(L, e);
+            luabind::stack<sb::intrusive_ptr<LuaSignal> >::push(L, e);
 			return 1;
 		}
         virtual void Clear(){
@@ -106,11 +115,11 @@ namespace Sandbox {
 
     namespace luabind {
         
-        EventPtr stack<EventPtr>::get(lua_State* L, int idx) {
+        SignalPtr stack<SignalPtr>::get(lua_State* L, int idx) {
             if (lua_isfunction(L, idx)) {
-                return LuaEvent::construct_from_lua_function(L,idx);
+                return LuaSignal::construct_from_lua_function(L,idx);
             }
-            return EventPtr(stack<Event*>::get(L, idx));
+            return SignalPtr(stack<Signal*>::get(L, idx));
         }
         
     }
@@ -118,9 +127,9 @@ namespace Sandbox {
     
 }
 
-SB_META_DECLARE_KLASS(Sandbox::LuaEvent, Event)
-SB_META_BEGIN_KLASS_BIND(Sandbox::LuaEvent)
-bind(constructor(&Sandbox::LuaEvent::constructor_func));
+SB_META_DECLARE_KLASS(Sandbox::LuaSignal, Signal)
+SB_META_BEGIN_KLASS_BIND(Sandbox::LuaSignal)
+bind(constructor(&Sandbox::LuaSignal::constructor_func));
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::LuaThread, Thread)
@@ -137,7 +146,8 @@ namespace Sandbox {
         luabind::Class<ThreadsMgr>(lua);
         luabind::Class<PermanentThreadsMgr>(lua);
         luabind::Class<Event>(lua);
-        luabind::Class<LuaEvent>(lua);
+        luabind::Class<Signal>(lua);
+        luabind::Class<LuaSignal>(lua);
     }
     
 }

@@ -12,7 +12,7 @@
 #include "sb_scene_object.h"
 #include "sb_image.h"
 #include "sb_particle.h"
-#include "sb_event.h"
+#include "sb_signal.h"
 #include <sbstd/sb_vector.h>
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_string.h>
@@ -29,7 +29,7 @@ namespace Sandbox {
         bool    started;
         bool    finished;
         Vector2f    pos;
-        EventPtr    complete_event;
+        SignalPtr   complete_signal;
     };
   
     typedef void (*GeneratorFunc)( Particle& p, float* vars, const float* args, float cicle );
@@ -100,8 +100,8 @@ namespace Sandbox {
         static void Bind( LuaVM* lua );
         static void BindProcessor( LuaVM* lua, const char* name,const ParticleProcessorBlock* block);
         
-        void SetCompleteEvent( const EventPtr& evnt ) { m_instance.complete_event = evnt; }
-        const EventPtr& GetCompleteEvent() const { return m_instance.complete_event; }
+        void SetOnComplete( const SignalPtr& evnt ) { m_instance.complete_signal = evnt; }
+        const SignalPtr& GetOnComplete() const { return m_instance.complete_signal; }
         
         void Stop();
     private:

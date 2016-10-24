@@ -24,7 +24,6 @@ extern "C" {
 #include <algorithm>
 
 #include "sb_inplace_string.h"
-#include "sb_event.h"
 #include "sb_log.h"
 #include "sb_file_provider.h"
 #include "sb_memory_mgr.h"

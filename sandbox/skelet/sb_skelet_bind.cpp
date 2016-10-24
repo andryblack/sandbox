@@ -31,7 +31,7 @@ SB_META_METHOD(SetTime)
 SB_META_METHOD(SetFrame)
 SB_META_PROPERTY_RO(CurrentAnimationLength, GetCurrentAnimationLength)
 SB_META_PROPERTY_RO(CurrentAnimationFrames, GetCurrentAnimationFrames)
-SB_META_PROPERTY_RW_DEF(EndEvent)
+SB_META_PROPERTY_RW_DEF(OnEnd)
 SB_META_PROPERTY_RO(IsComplete, IsComplete)
 SB_META_END_KLASS_BIND()
 

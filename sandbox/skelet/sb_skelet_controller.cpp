@@ -31,8 +31,8 @@ namespace Sandbox {
                     m_crnt_frame = m_animation->GetFrames() - 1;
                     ApplyFrame();
                     stop = true;
-                    if (m_end_event) {
-                        m_end_event->Emmit();
+                    if (m_end_signal) {
+                        m_end_signal->Emmit();
                     }
                     m_started = false;
                     if (!m_added_animations.empty()) {
@@ -137,7 +137,10 @@ namespace Sandbox {
         m_data.reset();
         m_animation = 0;
         m_objects.clear();
-        m_end_event.reset();
+        if (m_end_signal) {
+            m_end_signal->Clear();
+        }
+        m_end_signal.reset();
         m_started = false;
         m_added_animations.clear();
     }
