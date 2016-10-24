@@ -7,6 +7,7 @@
 #include "sb_draw_attributes.h"
 #include "sb_texture.h"
 #include "sb_file_provider.h"
+#include "sb_event.h"
 
 struct spAtlas;
 struct spSkeletonData;
@@ -39,6 +40,7 @@ namespace Sandbox {
         sb::string GetSlotName(size_t idx) const;
         void SetSlotAttribute(size_t idx, const DrawAttributesPtr& attribute);
         const DrawAttributesPtr& GetSlotAttribute(const void* idx) const;
+        const EventPtr& GetEvent(const void* idx) const;
         
         static SpineDataPtr LoadI(const char* atlas_file,
                                  const char* skeleton_file,
@@ -52,7 +54,7 @@ namespace Sandbox {
         friend class SpineAnimation;
         sb::map<const void*,DrawAttributesPtr> m_attributes;
         
-        
+        sb::map<const void*,EventPtr> m_events;
     };
     
 }

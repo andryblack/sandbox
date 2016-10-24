@@ -3,11 +3,13 @@
 
 #include "sb_thread.h"
 #include "sb_scene_object.h"
+#include <spine/AnimationState.h>
 #include "sb_signal.h"
 
 struct spSkeleton;
 struct spAnimationState;
 struct spAnimation;
+struct spEvent;
 
 namespace Sandbox {
     
@@ -28,6 +30,9 @@ namespace Sandbox {
         void SetOnEnd(const SignalPtr& e) { m_end_signal = e;}
         const SignalPtr& GetOnEnd() const { return m_end_signal; }
         
+        void SetOnEvent(const SignalPtr& e) { m_event_signal = e;}
+        const SignalPtr& GetOnEvent() const { return m_event_signal; }
+        
         void SetTime( float time );
         float GetCurrentAnimationLength() const;
         
@@ -41,11 +46,13 @@ namespace Sandbox {
         spAnimationState* m_state;
         spAnimation* m_last_animation;
         friend class SpineSceneObject;
-        friend void OnAnimationComplete(SpineAnimation*);
+        friend void spine_animation_event_listener(spAnimationState* state, int trackIndex, spEventType type, spEvent* event,
+                                                        int loopCount);
         void OnAnimationComplete();
-        friend void OnAnimationStarted(SpineAnimation*);
         void OnAnimationStarted();
+        void OnAnimationEvent(spEvent* e);
         SignalPtr    m_end_signal;
+        SignalPtr    m_event_signal;
     };
     typedef sb::intrusive_ptr<SpineAnimation> SpineAnimationPtr;
     

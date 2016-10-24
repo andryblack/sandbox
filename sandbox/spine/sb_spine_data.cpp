@@ -60,12 +60,19 @@ namespace Sandbox {
             m_attributes[m_skeleton->slots[idx]] = attribute;
         }
     }
-    static DrawAttributesPtr empty;
+    static const DrawAttributesPtr empty;
     const DrawAttributesPtr& SpineData::GetSlotAttribute(const void* idx) const {
         sb::map<const void*,DrawAttributesPtr>::const_iterator it = m_attributes.find(idx);
         if (it!=m_attributes.end())
             return it->second;
         return empty;
+    }
+    static const EventPtr empty_event;
+    const EventPtr& SpineData::GetEvent(const void* idx) const {
+        sb::map<const void*,EventPtr>::const_iterator it = m_events.find(idx);
+        if (it!=m_events.end())
+            return it->second;
+        return empty_event;
     }
     
     SpineDataPtr SpineData::LoadI(const char* atlas_file,
@@ -107,6 +114,16 @@ namespace Sandbox {
         if (!res->m_skeleton)
             return SpineDataPtr();
         res->m_state = spAnimationStateData_create(res->m_skeleton);
+        
+        for (int i=0;i<res->m_skeleton->eventsCount;++i) {
+            EventPtr e(new Event());
+            const spEventData* event(res->m_skeleton->events[i]);
+            e->SetString("name", event->name);
+            e->SetString("value", event->stringValue);
+            e->SetInt("value", event->intValue);
+            res->m_events[event] = e;
+        }
+        
         return res;
     }
     

@@ -118,6 +118,10 @@ namespace Sandbox {
             m_end_signal->Clear();
             m_end_signal.reset();
         }
+        if (m_event_signal) {
+            m_event_signal->Clear();
+            m_event_signal.reset();
+        }
         Thread::Clear();
     }
     
@@ -127,25 +131,23 @@ namespace Sandbox {
         spSkeleton_updateWorldTransform(m_skeleton);
     }
     
-    void OnAnimationComplete(SpineAnimation* a) {
-        if (a) {
-            a->OnAnimationComplete();
+    void SpineAnimation::OnAnimationEvent(spEvent* e) {
+        if (m_data && m_event_signal) {
+            const EventPtr& ae = m_data->GetEvent(e->data);
+            if (ae) {
+                m_event_signal->Emmit(ae);
+            }
         }
     }
-    
-    void OnAnimationStarted(SpineAnimation* a) {
-        if (a) {
-            a->OnAnimationStarted();
-        }
-    }
- 
     void spine_animation_event_listener(spAnimationState* state, int trackIndex, spEventType type, spEvent* event,
                                         int loopCount) {
         if (state && state->rendererObject) {
             if (type == SP_ANIMATION_COMPLETE) {
-                OnAnimationComplete(static_cast<SpineAnimation*>(state->rendererObject));
+                static_cast<SpineAnimation*>(state->rendererObject)->OnAnimationComplete();
             } else if (type == SP_ANIMATION_START) {
-                OnAnimationStarted(static_cast<SpineAnimation*>(state->rendererObject));
+                static_cast<SpineAnimation*>(state->rendererObject)->OnAnimationStarted();
+            }  else if (type == SP_ANIMATION_EVENT) {
+                static_cast<SpineAnimation*>(state->rendererObject)->OnAnimationEvent(event);
             }
         }
     }
