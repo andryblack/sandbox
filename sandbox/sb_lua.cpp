@@ -244,10 +244,12 @@ namespace Sandbox {
     void LuaVM::Destroy() {
         if (m_L) {
             luabind::Deinitialize(m_L);
-            g_terminate_context = 0;
+            if (g_terminate_context == m_L) {
+                g_terminate_context = 0;
 #ifdef SB_DEBUG
-            sb_terminate_handler = 0;
+                sb_terminate_handler = 0;
 #endif
+            }
             lua_close(m_L);
             m_L = 0;
         }
