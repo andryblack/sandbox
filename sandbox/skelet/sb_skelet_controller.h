@@ -33,6 +33,9 @@ namespace Sandbox {
         void SetOnEnd(const SignalPtr& e) { m_end_signal = e;}
         const SignalPtr& GetOnEnd() const { return m_end_signal; }
         
+        void SetOnEvent(const SignalPtr& e) { m_event_signal = e;}
+        const SignalPtr& GetOnEvent() const { return m_event_signal; }
+       
         SkeletonAnimation* GetAnimation() { return m_animation; }
         void SetFrame( size_t frame );
         void SetTime( float time );
@@ -52,12 +55,14 @@ namespace Sandbox {
         int    m_loop;
         sb::vector<SkeletObjectPtr> m_objects;
         SignalPtr    m_end_signal;
+        SignalPtr    m_event_signal;
         struct AnimationEntry {
             sb::string name;
             int loop;
         };
         sb::list<AnimationEntry> m_added_animations;
         void InitObjectNodes(const SkeletObjectPtr& obj);
+        void EmmitEvents(size_t from,size_t to);
     };
     typedef sb::intrusive_ptr<SkeletController> SkeletControllerPtr;
     

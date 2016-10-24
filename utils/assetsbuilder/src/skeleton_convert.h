@@ -52,6 +52,12 @@ protected:
     int get_image_index(const sb::string& name);
     bool get_image(const sb::string& name,image& img);
     
+    struct event {
+        sb::map<sb::string,sb::string> strings;
+        sb::map<sb::string,int> ints;
+    };
+    sb::map<sb::string,event> m_events;
+    
     struct node {
         sb::string name;
         blend_mode blend;
@@ -72,19 +78,27 @@ protected:
         sb::string name;
         float fps;
         sb::vector<frame> frames;
+        struct event {
+            size_t frame;
+            sb::string event;
+        };
+        sb::vector<event> events;
     };
     sb::vector<animation> m_animations;
+    
     
     atlas& add_atlas( const sb::string& file, bool premultiplied);
     image& add_image(atlas& atlas,const sb::string& name);
     animation& add_animation( const sb::string& name, float fps );
     frame& add_frame( animation& a );
     frame::slot& add_frame_slot(frame& f);
+    event& add_event( const sb::string& name );
     
     node& add_node(const sb::string& name);
     
     void write_atlases();
     void write_nodes();
+    void write_events();
     void write_animations();
     GHL::Data* get_xml_data();
     bool store_xml(const sb::string& file, Application* app);

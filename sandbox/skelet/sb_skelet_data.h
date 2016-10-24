@@ -3,6 +3,7 @@
 
 #include "sb_transform2d.h"
 #include "sb_graphics.h"
+#include "sb_event.h"
 
 namespace GHL {
     struct Data;
@@ -30,6 +31,7 @@ namespace Sandbox {
         float               m_fps;
         size_t              m_nodes;
         size_t              m_frames;
+        sb::map<size_t,sb::vector<EventPtr> > m_frame_events;
     public:
         explicit SkeletonAnimation( const sb::string& name );
         ~SkeletonAnimation();
@@ -41,6 +43,8 @@ namespace Sandbox {
         size_t GetNodesCount() const { return m_nodes; }
         const SkeletonNodeFrame& GetNodeFrame(size_t frame,size_t node) const;
         void Dump() const;
+        void AddEvent(size_t frame,const EventPtr& e);
+        const sb::vector<EventPtr>& GetFrameEvents(size_t frame) const;
     };
     typedef sb::intrusive_ptr<SkeletonAnimation> SkeletonAnimationPtr;
 
@@ -64,6 +68,9 @@ namespace Sandbox {
         sb::map<sb::string,size_t> m_images_map;
         
         sb::vector<SkeletonNodeData> m_nodes;
+        sb::map<sb::string,EventPtr> m_events;
+        
+        const EventPtr& GetEvent(const sb::string& name) const;
     public:
         SkeletonData();
         ~SkeletonData();

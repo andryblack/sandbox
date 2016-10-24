@@ -13,22 +13,37 @@ namespace Sandbox {
         m_loop = 0;
     }
     
+    void SkeletController::EmmitEvents(size_t from,size_t to) {
+        if (m_event_signal) {
+            while (from!=to) {
+                const sb::vector<EventPtr>& events = m_animation->GetFrameEvents(from);
+                for ( sb::vector<EventPtr>::const_iterator it = events.begin();it!=events.end();++it) {
+                    m_event_signal->Emmit(*it);
+                }
+                ++from;
+            }
+        }
+    }
     
     bool SkeletController::Update(float dt) {
         if (m_animation && m_started) {
             bool stop = false;
             m_frame_time += dt;
             size_t frames_drop = m_frame_time * m_animation->GetFPS();
+            size_t from_frame = m_crnt_frame;
             m_crnt_frame += frames_drop;
             m_frame_time -= float(frames_drop) / m_animation->GetFPS();
             if (m_crnt_frame >= m_animation->GetFrames()){
                 if (m_loop != 1) {
                     m_crnt_frame = m_crnt_frame % m_animation->GetFrames();
+                    EmmitEvents(from_frame,m_animation->GetFrames());
+                    EmmitEvents(0,m_crnt_frame);
                     if (m_loop > 0) {
                         m_loop--;
                     }
                 } else {
                     m_crnt_frame = m_animation->GetFrames() - 1;
+                    EmmitEvents(from_frame,m_animation->GetFrames());
                     ApplyFrame();
                     stop = true;
                     if (m_end_signal) {
@@ -41,6 +56,8 @@ namespace Sandbox {
                         stop = false;
                     }
                 }
+            } else {
+                EmmitEvents(from_frame,m_crnt_frame);
             }
             ApplyFrame();
         }
@@ -139,8 +156,12 @@ namespace Sandbox {
         m_objects.clear();
         if (m_end_signal) {
             m_end_signal->Clear();
+            m_end_signal.reset();
         }
-        m_end_signal.reset();
+        if (m_event_signal) {
+            m_event_signal->Clear();
+            m_event_signal.reset();
+        }
         m_started = false;
         m_added_animations.clear();
     }

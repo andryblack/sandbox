@@ -105,6 +105,12 @@ bool SpineConvert::Load(const char *atlas_file,
     if (!m_skeleton) {
         return false;
     }
+    for (int i=0;i<m_skeleton->eventsCount;++i) {
+        event& e = add_event(m_skeleton->events[i]->name);
+        e.strings["name"] = m_skeleton->events[i]->name;
+        e.strings["value"] = m_skeleton->events[i]->stringValue;
+        e.ints["value"] = m_skeleton->events[i]->intValue;
+    }
     m_state = spAnimationStateData_create(m_skeleton);
     return true;
 }
@@ -147,6 +153,15 @@ void SpineConvert::ExportAtlas(Application* app) {
 
 static const float export_fps = 24.0f;
 
+void SpineConvert::sp_event_listener(spAnimationState* state, int /*trackIndex*/, spEventType type, spEvent* event,
+    int /*loopCount*/) {
+    sp_event_data* event_data = static_cast<sp_event_data*>(state->rendererObject);
+    if (type == SP_ANIMATION_EVENT && event && event_data->a) {
+        animation::event e = { event_data->frame, event->data->name };
+        event_data->a->events.push_back(e);
+    }
+}
+
 void SpineConvert::ExportAnimation() {
     
     for (int i=0;i<m_skeleton->slotsCount;++i) {
@@ -159,9 +174,14 @@ void SpineConvert::ExportAnimation() {
             n.blend = blend_mode_screen;
     }
     write_nodes();
+    write_events();
     
     spAnimationState* state = spAnimationState_create(m_state);
     spSkeleton* skeleton = spSkeleton_create(m_skeleton);
+    state->listener = &sp_event_listener;
+    
+    sp_event_data event_data = { this,0,0 };
+    state->rendererObject = &event_data;
     
     for (int i=0;i<m_skeleton->animationsCount;++i) {
         spAnimation* anim = m_skeleton->animations[i];
@@ -170,7 +190,7 @@ void SpineConvert::ExportAnimation() {
             frames = 1;
         }
         animation& a = add_animation(anim->name, export_fps);
-                
+        event_data.a = &a;
         float delta = 1.0f / export_fps;
         
         spSkeleton_setToSetupPose(skeleton);
@@ -178,6 +198,8 @@ void SpineConvert::ExportAnimation() {
         spAnimationState_setAnimation(state, 0, anim, false);
        
         for (size_t f = 0;f<frames;++f ) {
+            event_data.frame = f;
+            
             frame& fr = add_frame(a);
             spAnimationState_update(state, delta);
             spAnimationState_apply(state, skeleton);

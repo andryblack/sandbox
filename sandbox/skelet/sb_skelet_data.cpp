@@ -28,6 +28,24 @@ namespace Sandbox {
         return m_data;
     }
     
+    void SkeletonAnimation::AddEvent(size_t frame, const EventPtr &e) {
+        sb::map<size_t,sb::vector<EventPtr> >::iterator it = m_frame_events.find(frame);
+        if (it!=m_frame_events.end()) {
+            it->second.push_back(e);
+        } else {
+            sb::vector<EventPtr> v;
+            v.push_back(e);
+            m_frame_events[frame] = v;
+        }
+    }
+    static const sb::vector<EventPtr> empty_frame_events;
+    const sb::vector<EventPtr>& SkeletonAnimation::GetFrameEvents(size_t frame) const {
+        sb::map<size_t,sb::vector<EventPtr> >::const_iterator it = m_frame_events.find(frame);
+        if (it!=m_frame_events.end())
+            return it->second;
+        return empty_frame_events;
+    }
+    
     const SkeletonNodeFrame& SkeletonAnimation::GetNodeFrame(size_t frame,size_t node) const {
         sb_assert(frame<m_frames);
         sb_assert(node<m_nodes);
@@ -42,6 +60,15 @@ namespace Sandbox {
                 LogDebug() << "n " << n.image << " " << n.node << " " << n.color.ToStringRGB() << " " << n.color.a;
             }
         }
+    }
+    
+    static const EventPtr empty_event;
+    
+    const EventPtr& SkeletonData::GetEvent(const sb::string &name) const {
+        sb::map<sb::string, EventPtr>::const_iterator it = m_events.find(name);
+        if (it!=m_events.end())
+            return it->second;
+        return empty_event;
     }
     
     void SkeletonData::AddAnimation(const SkeletonAnimationPtr& animation) {
@@ -152,6 +179,21 @@ namespace Sandbox {
                 }
             }
         }
+        
+        pugi::xml_node events_n = n.child("events");
+        if (events_n) {
+            for (pugi::xml_node_iterator it = events_n.begin(); it!=events_n.end(); ++it) {
+                EventPtr e(new Event());
+                for (pugi::xml_node_iterator jt = it->begin(); jt!=it->end(); ++jt) {
+                    if (::strcmp(jt->name(),"string")==0) {
+                        e->SetString(jt->attribute("name").value(), jt->attribute("value").value());
+                    } else if (::strcmp(jt->name(), "int")==0) {
+                        e->SetInt(jt->attribute("name").value(), jt->attribute("value").as_int());
+                    }
+                }
+                res->m_events[it->attribute("name").value()] = e;
+            }
+        }
        
         
         for (pugi::xml_node_iterator it = animations.begin();it!=animations.end();++it) {
@@ -217,6 +259,15 @@ namespace Sandbox {
                     src++;
                     ++pdata;
                 }
+            }
+            pugi::xml_node events = it->child("events");
+            if (events) {
+                 for (pugi::xml_node_iterator jt = events.begin(); jt!=events.end(); ++jt) {
+                     const EventPtr& e = res->GetEvent(jt->attribute("event").value());
+                     if (e) {
+                         anim->AddEvent(jt->attribute("frame").as_uint(), e);
+                     }
+                 }
             }
             res->AddAnimation(anim);
             d->Release();

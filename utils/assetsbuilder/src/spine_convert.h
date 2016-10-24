@@ -35,7 +35,13 @@ public:
     bool Load(const char* atlas, const char* skelet,
               Sandbox::FileProvider* file_provider);
     void Export(const char* file, Application* app);
-    
+    struct sp_event_data {
+        SpineConvert* this_;
+        animation* a;
+        size_t frame;
+    };
+    static void sp_event_listener(spAnimationState* state, int trackIndex, spEventType type, spEvent* event,
+                                         int loopCount);
     
 };
 

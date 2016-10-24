@@ -54,6 +54,11 @@ SkeletonConvert::animation& SkeletonConvert::add_animation( const sb::string& na
     return m_animations.back();
 }
 
+SkeletonConvert::event& SkeletonConvert::add_event( const sb::string& name ) {
+    m_events[name] = event();
+    return m_events[name];
+}
+
 SkeletonConvert::frame& SkeletonConvert::add_frame( SkeletonConvert::animation& a ) {
     a.frames.push_back(frame());
     return a.frames.back();
@@ -113,6 +118,22 @@ void SkeletonConvert::write_nodes() {
         pugi::xml_node n = nodes.append_child("node");
         n.append_attribute("name").set_value(it->name.c_str());
         n.append_attribute("blend").set_value(blend_to_string(it->blend));
+    }
+}
+
+void SkeletonConvert::write_events() {
+    pugi::xml_node nodes = m_doc.document_element().append_child("events");
+    for (sb::map<sb::string,event>::const_iterator it = m_events.begin();it!=m_events.end();++it) {
+        pugi::xml_node n = nodes.append_child("event");
+        n.append_attribute("name").set_value(it->first.c_str());
+        for (sb::map<sb::string,sb::string>::const_iterator jt = it->second.strings.begin();jt!=it->second.strings.end();++jt) {
+            pugi::xml_node s = n.append_child("string");
+            s.append_attribute(jt->first.c_str()).set_value(jt->second.c_str());
+        }
+        for (sb::map<sb::string,int>::const_iterator jt = it->second.ints.begin();jt!=it->second.ints.end();++jt) {
+            pugi::xml_node s = n.append_child("int");
+            s.append_attribute(jt->first.c_str()).set_value(jt->second);
+        }
     }
 }
 
@@ -216,6 +237,13 @@ void SkeletonConvert::write_animations() {
                 }
             }
 
+        }
+        
+        pugi::xml_node events = a.append_child("events");
+        for (std::vector<animation::event>::const_iterator eit = anim->events.begin();eit!=anim->events.end();++eit) {
+            pugi::xml_node e = events.append_child("event");
+            e.append_attribute("frame").set_value(int(eit->frame));
+            e.append_attribute("event").set_value(eit->event.c_str());
         }
         
     }
