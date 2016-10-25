@@ -49,6 +49,7 @@ namespace Sandbox {
         void    RemoveScene( const RTScenePtr& scene );
         void    SetMouseContext(const LuaContextPtr& ctx );
         void    SetKeyboardContext(const LuaContextPtr& ctx );
+        void    SetFrameInterval(int interval);
         
         GHL::System* GetSystem() const { return m_system;}
         

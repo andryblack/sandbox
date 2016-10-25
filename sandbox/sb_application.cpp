@@ -132,6 +132,7 @@ SB_META_PROPERTY_RO(TimeUSec, GetTimeUSec)
 SB_META_PROPERTY_RO(UTCOffset, GetUTCOffset)
 SB_META_PROPERTY_RO(SystemLanguage, GetSystemLanguage)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
+SB_META_PROPERTY_WO(FrameInterval, SetFrameInterval)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 bind( method( "StoreProfileFile", &Sandbox::Application_StoreProfileFile));
 bind( method( "LoadProfileFile", &Sandbox::Application_LoadProfileFile));
@@ -701,6 +702,13 @@ namespace Sandbox {
         m_keyboard_ctx = ctx;
     }
 	
+    void    Application::SetFrameInterval(int interval) {
+        if (m_system) {
+            GHL::Int32 frame_interval = interval;
+            m_system->SetDeviceState(GHL::DEVICE_STATE_FRAME_INTERVAL, &frame_interval);
+        }
+    }
+    
 	void Application::SetClearColor(const Color& c) {
 		m_clear_buffer = true;
 		m_clear_color = c;
