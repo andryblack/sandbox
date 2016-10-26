@@ -106,6 +106,8 @@ namespace Sandbox {
             static RenderManager& getInstance() { return static_cast<RenderManager&>(MyGUI::RenderManager::getInstance()); }
             static RenderManager* getInstancePtr() { return static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr()); }
             
+            void reshape(float w,float h);
+            
             /** Get texture by name */
             virtual MyGUI::ITexture* getTexture(const std::string& _name);
             /** Destroy texture */

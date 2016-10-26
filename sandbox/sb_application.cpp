@@ -546,6 +546,11 @@ namespace Sandbox {
         ctx->SetValue("application.size.width", m_draw_width);
         ctx->SetValue("application.size.height", m_draw_height);
         ctx->SetValue("application.size.scale", graphics_scal * resources_scale);
+#ifdef SB_USE_MYGUI
+        if (m_gui_render) {
+            m_gui_render->reshape(GetDrawWidth(), GetDrawHeight());
+        }
+#endif
     }
     
     Network* Application::GetNetwork() {

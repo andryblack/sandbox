@@ -125,9 +125,10 @@ namespace Sandbox {
         
         RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res,RenderTargetPtr()) {
             m_graphics = graphics;
-            setSize(m_resources->GetRender()->GetWidth(),
-                    m_resources->GetRender()->GetHeight());
-            
+        }
+        
+        void RenderManager::reshape(float w,float h) {
+            setSize(w,h);
             onResizeView(m_rendertarget_size);
         }
         
