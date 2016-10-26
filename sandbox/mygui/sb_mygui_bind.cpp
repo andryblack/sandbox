@@ -687,8 +687,8 @@ SB_META_PROPERTY_RO(clientWidget, getClientWidget)
 SB_META_PROPERTY_WO(colour, setColour)
 SB_META_PROPERTY_RW(alpha, getAlpha,setAlpha)
 SB_META_PROPERTY_RW(depth, getDepth,setDepth)
-bind( property_rw( "inheristPick", &widget_getInheritsPick, &widget_setInheritsPick ) );
-SB_META_PROPERTY_RW(inheristState, getInheritsState, setInheritsState)
+bind( property_rw( "inheritsPick", &widget_getInheritsPick, &widget_setInheritsPick ) );
+SB_META_PROPERTY_RW(inheritsState, getInheritsState, setInheritsState)
 
 bind(method("eventMouseButtonClick", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
