@@ -75,7 +75,7 @@ namespace Sandbox {
 	
 	inline Image::Image()
 	: m_texture(),m_src_x(0),m_src_y(0),m_src_w(1.0f),m_src_h(1.0f),
-	m_hotspot(),m_width(1.0f),m_height(1.0f)
+	m_hotspot(),m_width(1.0f),m_height(1.0f),m_rotated(false)
     {
 		
     }
