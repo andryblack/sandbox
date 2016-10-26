@@ -99,6 +99,12 @@ namespace Sandbox {
                                                                                 void (T::*setter)(U)) {
             return property_holder_rw<T,U (T::*)() const,void(T::*)(U)>(name,getter,setter);
         }
+        template <class T,class U>
+        static inline property_holder_rw<T,U (*)(const T*),void(*)(T*,U)> property_rw( const char* name,
+                                                                                       U (*getter)(const T*),
+                                                                                       void (*setter)(T*, U)) {
+            return property_holder_rw<T,U (*)(const T*),void(*)(T*,U)>(name,getter,setter);
+        }
         template <class T,class U> 
         static inline property_holder_rw<T,const U& (T::*)() const,void(T::*)(const U&)> property_rw( const char* name,
                                                                                               const U& (T::*getter)() const,

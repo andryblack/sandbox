@@ -27,6 +27,7 @@ namespace Sandbox {
             virtual void doRender(MyGUI::IRenderTarget*);
             virtual void _setColour(const MyGUI::Colour& _value) { m_colour = _value; }
             virtual void setAlpha(float _alpha) { m_alpha = _alpha; }
+            virtual void _correctView();
         private:
             MyGUI::Colour   m_colour;
             float m_alpha;

@@ -30,6 +30,10 @@ namespace Sandbox {
             mRenderItem = nullptr;
         }
         
+        void ObjectSubSkin::_correctView() {
+            if (nullptr != mNode)
+                mNode->outOfDate(mRenderItem);
+        }
         
         void ObjectSubSkin::doRender(MyGUI::IRenderTarget* _target) {
             if (!mVisible)

@@ -30,7 +30,7 @@ namespace Sandbox {
     
     sb::intrusive_ptr<Shader> Shader::Fork() {
         ShaderPtr res(new Shader(m_program));
-        m_program->AddRef();
+        if (m_program) m_program->AddRef();
         return res;
     }
 	

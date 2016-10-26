@@ -667,6 +667,12 @@ static sb::string widget_getLayerName( MyGUI::Widget* w) {
     return "";
 }
 
+static bool widget_getInheritsPick( const MyGUI::Widget* w ) {
+    return w->getInheritsPick();
+}
+static void widget_setInheritsPick( MyGUI::Widget* w, bool i) {
+    w->setInheritsPick(i);
+}
 
 SB_META_DECLARE_OBJECT(MyGUI::Widget, MyGUI::ICroppedRectangle)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Widget)
@@ -674,13 +680,15 @@ SB_META_PROPERTY_RO(name, getName)
 SB_META_PROPERTY_RW(align, getAlign,setAlign)
 SB_META_PROPERTY_RW(visible,getVisible,setVisible)
 SB_META_PROPERTY_RW(alpha, getAlpha, setAlpha)
-SB_META_PROPERTY_RW(InheritsAlpha, getInheritsAlpha, setInheritsAlpha)
+SB_META_PROPERTY_RW(inheritsAlpha, getInheritsAlpha, setInheritsAlpha)
 SB_META_PROPERTY_RW(enabled, getEnabled, setEnabled)
 SB_META_PROPERTY_RO(parent, getParent)
 SB_META_PROPERTY_RO(clientWidget, getClientWidget)
 SB_META_PROPERTY_WO(colour, setColour)
 SB_META_PROPERTY_RW(alpha, getAlpha,setAlpha)
 SB_META_PROPERTY_RW(depth, getDepth,setDepth)
+bind( property_rw( "inheristPick", &widget_getInheritsPick, &widget_setInheritsPick ) );
+SB_META_PROPERTY_RW(inheristState, getInheritsState, setInheritsState)
 
 bind(method("eventMouseButtonClick", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
