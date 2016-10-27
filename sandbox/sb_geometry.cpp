@@ -292,8 +292,8 @@ namespace Sandbox {
         }
         dir_l = get_dir_next(points,points.size()-1);
         
-        buffer.vertexes.push_back(buffer.vertexes[0]);
-        buffer.vertexes.push_back(buffer.vertexes[1]);
+        buffer.vertexes.push_back(buffer.vertexes[start_vertexes]);
+        buffer.vertexes.push_back(buffer.vertexes[start_vertexes+1]);
         
         sb_assert(buffer.vertexes.size()==vtcs+start_vertexes);
         sb_assert(buffer.indexes.size()==indxs+start_indexes);
