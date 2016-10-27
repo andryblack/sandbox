@@ -35,6 +35,7 @@ project 'lua'
 			table.insert(lua_files,'liolib.c')
 		end
 
+
 		os.mkdir(path.getabsolute(sandbox_dir..'/include/lua'))
 		os.copyfile(path.getabsolute(sandbox_dir..'/external/lua/src/lua.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
 		os.copyfile(path.getabsolute(sandbox_dir..'/external/lua/src/lualib.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
@@ -42,6 +43,6 @@ project 'lua'
 		os.copyfile(path.getabsolute(sandbox_dir..'/external/lua/src/luaconf.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
 		
 		files(utils.append_path(sandbox_dir .. '/external/lua/src/',lua_files))
-
+		files{ sandbox_dir .. '/external/lua/src/*.h' }
 
 		

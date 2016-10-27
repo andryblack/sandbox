@@ -226,7 +226,6 @@ namespace Sandbox {
         FileHandle* handle = ((FileHandle *)luaL_checkudata(L, 1, LUA_FILEHANDLE));
         if (!handle->ds)
             luaL_error(L, "attempt to use a closed file");
-        lua_assert(p->f);
         return handle->ds;
     }
     

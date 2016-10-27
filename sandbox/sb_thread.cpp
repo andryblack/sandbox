@@ -45,13 +45,14 @@ namespace Sandbox {
                         return true;
 					}
 					lua_State* th = lua_tothread(L, -1);
-                    
+
                     g_terminate_thread = th;
                     
                     int status = lua_status(th);
                     if (status!=LUA_YIELD) {
                         //LogDebug(LuaThreadModule) << "thread " << th << " status: " << status;
                     }
+                    lua_checkstack(th, 1);
 					lua_pushnumber(th, dt);
 					int res = lua_resume(th,0, 1);
                     
@@ -68,13 +69,11 @@ namespace Sandbox {
 					if (res!=LUA_OK) {
                         LogError(LuaThreadModule) << "Failed script resume  " << res;
                         if (res==LUA_ERRRUN) {
-                            LogError(LuaThreadModule) << "error:" << lua_tostring(th, -1);
-                            luabind::PushErrorHandler(th);
-                            lua_pushvalue(th, -2);
-                            lua_pcall(th, 1, 1, 0);
-                            LogError(LuaThreadModule) << lua_tostring(th, -1) ;
-                            lua_pop(th, 1);
-                            lua_pop(L,1);
+                            luabind::PushErrorHandler(L);
+                            lua_pushvalue(L, -2);
+                            lua_pcall(L, 1, 1, 0);
+                            LogError(LuaThreadModule) << lua_tostring(L, -1) ;
+                            lua_pop(L,2);
                         }
                     } else {
                         lua_pop(L,1);

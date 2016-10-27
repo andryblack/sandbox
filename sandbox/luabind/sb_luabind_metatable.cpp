@@ -258,6 +258,7 @@ namespace Sandbox {
 				if (!lua_isnil(L, -1)) {
                     lua_remove(L, -2);          /// mt res
                     lua_remove(L, -2);          /// res
+                    lua_checkstack(L, 2);
                     lua_rawgeti(L, -1, mt_indexes::__set); /// res set
                     if (!lua_isfunction(L, -1)) {
                         char buf[128];

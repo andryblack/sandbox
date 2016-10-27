@@ -17,6 +17,7 @@ namespace Sandbox {
         static const char* error_handler_idx = "__lua_vm_error_handler";
 
         void PushErrorHandler(lua_State* L) {
+            lua_checkstack(L, 1);
             lua_rawgetp(L, LUA_REGISTRYINDEX, error_handler_idx);
         }
         void SetErrorHandler(lua_State* L, lua_CFunction func) {

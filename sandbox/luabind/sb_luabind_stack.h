@@ -479,6 +479,9 @@ namespace Sandbox {
             }
             ~lua_stack_check() {
                 int top = lua_gettop(m_L);
+                if (top != m_top) {
+                    LogError() << "top is: " << top << " expected: " << m_top;
+                }
                 sb_assert( top == m_top );
             }
         private:

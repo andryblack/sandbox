@@ -20,36 +20,16 @@ namespace Sandbox {
         
         int lua_traceback (lua_State *L)
         {
-            // look up Lua's 'debug.traceback' function
-            lua_getglobal(L, "debug");
-            if (!lua_istable(L, -1))
-            {
-                lua_pop(L, 1);
-                return 1;
+            lua_State* th = L;
+            const char* err = 0;
+            if (lua_isthread(L, 1)) {
+                th = lua_tothread(L, 1);
+                err = lua_tostring(th, -1);
+            } else {
+                err = lua_tostring(L, -1);
             }
-            lua_getfield(L, -1, "traceback");
-            if (!lua_isfunction(L, -1))
-            {
-                lua_pop(L, 2);
-                return 1;
-            }
-            lua_remove(L, -2);
-            
-            lua_pushthread(L);
-        
-            if (lua_isstring(L,1))
-                lua_pushvalue(L, 1);  /* pass error message */
-            else {
-                lua_pushstring(L, "error");
-            }
-            lua_pushinteger(L, 1);  /* skip this function and traceback */
-            int res = lua_pcall(L, 3, 1, 0);
-            
-            if (res) {
-                LogError(LuabindModule) << " Failed debug.traceback " ;
-                LogError(LuabindModule) << lua_tostring(L, -1) ;
-            }
-
+            luaL_traceback(L,th,err,1);
+           
             return 1;
         }
         
@@ -99,6 +79,7 @@ namespace Sandbox {
         void PushErrorHandler(lua_State* L);
                 
         void lua_call_method(lua_State* L, int args, int ress, const char* name) {
+            LUA_CHECK_STACK(ress-args-1);  // 1 - func
             PushErrorHandler(L);
             lua_insert(L, -2-args);
             
