@@ -109,6 +109,9 @@ namespace Sandbox {
         if (!data)
             return SpineDataPtr();
         res->m_skeleton = spSkeletonJson_readSkeletonData(json, reinterpret_cast<const char*>(data->GetData()));
+        if (!res->m_skeleton && json->error) {
+            LogError() << "[spine] " << json->error;
+        }
         spSkeletonJson_dispose(json);
         data->Release();
         if (!res->m_skeleton)
