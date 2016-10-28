@@ -30,7 +30,7 @@ namespace Sandbox {
             virtual size_t getItemsCount() = 0;
             virtual MyGUI::Any getItemData(size_t idx) = 0;
             virtual void createWidget(MyGUI::Widget* w) = 0;
-            virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) = 0;
+            virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di,bool changed) = 0;
             virtual void onItemClick(size_t idx) = 0;
             virtual void onSelectionChanged(size_t idx) {};
             virtual void onBeginScroll() = 0;
@@ -73,6 +73,8 @@ namespace Sandbox {
             int getPage() const;
             
             int getTargetPage() const;
+            
+            void itemAdded();
             
             virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
         protected:

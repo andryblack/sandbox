@@ -49,10 +49,10 @@ namespace Sandbox {
             virtual void createWidget(MyGUI::Widget* w) {
                 m_obj.call_self("createWidget",w);
             }
-            virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) {
+            virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di,bool changed) {
                 LuaContextPtr* data_ptr = m_list->getItemDataAt<LuaContextPtr>(di.index,false);
                 if (data_ptr) {
-                    m_obj.call_self("updateWidget",w,*data_ptr,di);
+                    m_obj.call_self("updateWidget",w,*data_ptr,di,changed);
                 }
             }
             virtual void onItemClick(size_t idx) {
@@ -110,6 +110,7 @@ SB_META_METHOD(moveNext)
 SB_META_METHOD(movePrev)
 SB_META_METHOD(moveToPage)
 SB_META_METHOD(updateData)
+SB_META_METHOD(itemAdded)
 SB_META_PROPERTY_RW(page, getPage, setPage)
 SB_META_PROPERTY_RW(targetPage, getTargetPage, moveToPage)
 SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
@@ -267,6 +268,18 @@ namespace Sandbox {
             _updateChilds();
         }
         
+        void ScrollList::itemAdded() {
+            if (!m_delegate) return;
+            size_t current_count = getItemCount();
+            size_t count = m_delegate->getItemsCount();
+            beginBatchAddItems();
+            for (size_t i=current_count;i<count;++i) {
+                batchAddItem(m_delegate->getItemData(i));
+            }
+            endBatchAddItems();
+            setScroll(normalizeScrollValue(getScroll()));
+        }
+        
         void ScrollList::updateData() {
             removeAllItems();
             if (!m_delegate) return;
@@ -311,7 +324,13 @@ namespace Sandbox {
         }
         void ScrollList::handleDrawItem(MyGUI::ItemBox*, MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) {
             if (m_delegate && di.update) {
-                m_delegate->updateWidget(w, di);
+                size_t* old_idx = w->getUserData<size_t>(false);
+                m_delegate->updateWidget(w, di,!old_idx || *old_idx!=di.index);
+                if (!old_idx) {
+                    w->setUserData(MyGUI::Any(di.index));
+                } else {
+                    *old_idx = di.index;
+                }
             }
         }
         
