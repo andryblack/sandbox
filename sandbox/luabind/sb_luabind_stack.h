@@ -484,6 +484,9 @@ namespace Sandbox {
                 }
                 sb_assert( top == m_top );
             }
+            bool check_state() const {
+                return lua_gettop(m_L) == m_top;
+            }
         private:
             lua_State* m_L;
             int m_top;

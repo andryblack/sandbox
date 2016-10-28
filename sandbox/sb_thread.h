@@ -37,9 +37,11 @@ namespace Sandbox {
         static sb::intrusive_ptr<LuaThread> construct(lua_State* L,int idx);
         virtual void Clear();
     private:
-        explicit LuaThread(luabind::LuaVMHelperWeakPtr ptr) : m_ref(ptr) {}
+        explicit LuaThread(luabind::LuaVMHelperWeakPtr ptr) : m_ref(ptr),m_pause(0.0f),m_time(0.0f) {}
 		void SetThread(lua_State* L);
 		luabind::LuaReference m_ref;
+        float   m_pause;
+        float   m_time;
 	};
 
     namespace luabind {
