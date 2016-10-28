@@ -4,6 +4,7 @@
 #include <ghl_data_stream.h>
 #include <ghl_data.h>
 #include "sb_texture.h"
+#include "sb_log.h"
 #include <sbstd/sb_assert.h>
 
 SB_META_DECLARE_OBJECT(Sandbox::SpineData, Sandbox::meta::object)
