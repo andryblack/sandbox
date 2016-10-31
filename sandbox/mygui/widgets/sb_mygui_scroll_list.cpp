@@ -251,6 +251,12 @@ namespace Sandbox {
         void ScrollList::setManualScroll(bool s) {
             m_manual_scroll = s;
             m_state = state_none;
+            if (mVScroll) {
+                mVScroll->setEnabled(s);
+            }
+            if (mHScroll) {
+               mHScroll->setEnabled(s);
+            }
         }
         
         void ScrollList::setDelegate(const ScrollListDelegatePtr &delegate) {
