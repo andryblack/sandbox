@@ -39,6 +39,7 @@ namespace Sandbox {
             if ( luabind::LuaVMHelperPtr lua = m_ref.GetHelper()) {
                 lua_State* L = lua->lua;
                 LUA_CHECK_STACK(0)
+                int main_top = lua_gettop(L);
                 //LogVerbose(LuaThreadModule) << "update thread >>> " << lua_gettop(L);
                 
                 sb_assert(L);
@@ -77,8 +78,7 @@ namespace Sandbox {
                         if (lua_isnumber(th, -1))
                             m_pause = lua_tonumber(th, -1);
                     }
-                    if (new_top != top)
-                        lua_pop(th, new_top-top);
+                    lua_settop(th, top);
                     
                     lua_pop(L,1);
                     
@@ -91,7 +91,7 @@ namespace Sandbox {
                     return false;
                 }
                 if (res!=LUA_OK) {
-                    LogError(LuaThreadModule) << "Failed script resume  " << res;
+                    LogError(LuaThreadModule) << "Failed script resume  " << res << " " << lua_gettop(L);
                     if (res==LUA_ERRRUN) {
                         luabind::PushErrorHandler(L);
                         lua_pushvalue(L, -2);
@@ -103,6 +103,9 @@ namespace Sandbox {
                     lua_pop(L,1);
                     //LogDebug(LuaThreadModule) << "thread " << th << " ended";
                 }
+                
+                lua_settop(th, top);
+                
                 //LogVerbose(LuaThreadModule) << "update thread <<< " << lua_gettop(L);
             } else {
                 LogError(LuaThreadModule) << "update on released script";

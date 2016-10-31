@@ -90,7 +90,7 @@ namespace Sandbox {
                 LogError(LuabindModule) << lua_tostring(L, -1) ;
                 lua_pop(L, 2);
                 // emulate results
-                for (int i=0;i<args;++i) {
+                for (int i=0;i<ress;++i) {
                     lua_pushnil(L);
                 }
             } else {
