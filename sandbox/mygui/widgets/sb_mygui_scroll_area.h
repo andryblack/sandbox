@@ -12,6 +12,7 @@
 #include "meta/sb_meta.h"
 #include "sb_vector2.h"
 #include "MyGUI_Timer.h"
+#include "sb_scroll.h"
 
 namespace Sandbox {
     
@@ -22,7 +23,7 @@ namespace Sandbox {
         typedef MyGUI::delegates::CDelegate2<ScrollArea*, MyGUI::IntPoint> EventHandle_ScrollAreaPtrIntPoint;
         
                 
-        class ScrollArea : public MyGUI::ScrollView {
+        class ScrollArea : public MyGUI::ScrollView , protected Scroll {
             MYGUI_RTTI_DERIVED( ScrollArea )
         public:
             ScrollArea();
@@ -38,13 +39,19 @@ namespace Sandbox {
             EventHandle_ScrollAreaPtrIntPoint scrollComplete;
             virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
             
-            bool scrollActive() const { return m_state != state_none; }
+            bool scrollActive() const { return Scroll::IsActive(); }
         protected:
             void initialiseOverride();
             void shutdownOverride();
             
+            virtual void updateView();
+            
             void frameEntered(float dt);
             virtual void notifyScrollChangePosition(MyGUI::ScrollBar* _sender, size_t _position);
+            
+            virtual void OnScrollBegin();
+            virtual void OnScrollEnd();
+            virtual void OnScrollMove();
         private:
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             
@@ -52,24 +59,6 @@ namespace Sandbox {
             void handleGlobalMousePressed(int x,int y, MyGUI::MouseButton _id);
             void handleGlobalMouseReleased(int x,int y, MyGUI::MouseButton _id);
             
-            MyGUI::FloatPoint       m_move_speed;
-            MyGUI::FloatPoint       m_move_accum;
-            
-            MyGUI::IntPoint         m_scroll_target;
-                        
-            enum State {
-                state_none,
-                state_wait_scroll,
-                state_manual_scroll,
-                state_free_scroll
-            } m_state;
-            MyGUI::IntPoint m_scroll_prev_pos;
-            MyGUI::IntPoint m_scroll_begin;
-            
-            MyGUI::Timer    m_scroll_timer;
-            MyGUI::IntPoint normalizeScrollValue(const MyGUI::IntPoint& val) const;
-            
-            int m_border_dempth;
             bool    m_manual_scroll;
         };
         

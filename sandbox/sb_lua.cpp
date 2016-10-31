@@ -20,7 +20,7 @@ extern "C" {
 #include <ghl_types.h>
 #include <ghl_data_stream.h>
 #include <ghl_vfs.h>
-#include <ghl_system.h>
+#include <ghl_time.h>
 #include <algorithm>
 
 #include "sb_inplace_string.h"
@@ -139,12 +139,12 @@ namespace Sandbox {
     }
 	
     static int lua_os_time_func(lua_State* L) {
-        lua_pushnumber(L, GHL_SystemGetTime(0));
+        lua_pushnumber(L, GHL_GetTime(0));
         return 1;
     }
     static int lua_os_timems_func(lua_State* L) {
         GHL::TimeValue tv;
-        GHL_SystemGetTime(&tv);
+        GHL_GetTime(&tv);
         lua_pushnumber(L,tv.secs*1000+lua_Number(tv.usecs)/1000 );
         return 1;
     }

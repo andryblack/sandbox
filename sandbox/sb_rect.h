@@ -11,6 +11,7 @@
 #define SB_RECT_H
 
 #include "sb_point.h"
+#include "sb_size.h"
 #include <sbstd/sb_algorithm.h>
 #include "luabind/sb_luabind_stack.h"
 
@@ -39,17 +40,17 @@ namespace Sandbox {
         Point<T> GetBottomRight() const {
             return Point<T>( x + w, y + h);
         }
-        Point<T> GetSize() const {
-            return Point<T>( w, h );
+        Size<T> GetSize() const {
+            return Size<T>( w, h );
         }
         
         void SetPos(const Point<T>& f) {
             x = f.x;
             y = f.y;
         }
-        void SetSize(const Point<T>& f) {
-            w = f.x;
-            h = f.y;
+        void SetSize(const Size<T>& f) {
+            w = f.w;
+            h = f.h;
         }
         T GetLeft() const { return x; }
         T GetRight() const { return x + w; }
@@ -65,6 +66,9 @@ namespace Sandbox {
             res.w -= res.x;
             res.h -= res.y;
             return res;
+        }
+        Rect operator + (const Point<T>& v) const {
+            return Rect(x+v.x,y+v.y,w,h);
         }
         Rect operator - (const Point<T>& v) const {
             return Rect(x-v.x,y-v.y,w,h);

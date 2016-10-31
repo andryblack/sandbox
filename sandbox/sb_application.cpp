@@ -24,6 +24,7 @@
 #include <ghl_system.h>
 #include <ghl_keys.h>
 #include <ghl_event.h>
+#include <ghl_time.h>
 
 #ifdef SB_USE_MYGUI
 #include "MyGUI_Gui.h"
@@ -643,7 +644,7 @@ namespace Sandbox {
     
     double Application::GetTimeUSec() const {
         GHL::TimeValue tv;
-        GHL_SystemGetTime(&tv);
+        GHL_GetTime(&tv);
         return double(tv.secs) * 1000000 + tv.usecs;
     }
 		
