@@ -24,9 +24,6 @@ namespace Sandbox {
     
     namespace mygui {
         
-        const float min_speed = 5.0f;
-        const int min_scroll_distance = 10;
-        const float max_speed = 2048.0f*5;
         
         class LuaScrollListDelegate : public ScrollListDelegate {
         private:
@@ -40,25 +37,25 @@ namespace Sandbox {
                 ScrollListDelegate::setScrollList(sl);
             }
             virtual size_t getItemsCount() {
+                if (!m_obj.Valid())
+                    return 0;
                 return m_obj.call_self<size_t>("getItemsCount");
             }
-            virtual MyGUI::Any getItemData(size_t idx) {
+            LuaContextPtr getItemData(size_t idx) {
                 LuaContextPtr data = m_obj.call_self<LuaContextPtr>("getItemData",idx);
-                return MyGUI::Any(data);
+                return data;
             }
             virtual void createWidget(MyGUI::Widget* w) {
                 m_obj.call_self("createWidget",w);
             }
             virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di,bool changed) {
-                LuaContextPtr* data_ptr = m_list->getItemDataAt<LuaContextPtr>(di.index,false);
-                if (data_ptr) {
-                    m_obj.call_self("updateWidget",w,*data_ptr,di,changed);
-                }
+                LuaContextPtr data_ptr = getItemData(di.index);
+                m_obj.call_self("updateWidget",w,data_ptr,di,changed);
             }
             virtual void onItemClick(size_t idx) {
-                LuaContextPtr* data_ptr = m_list->getItemDataAt<LuaContextPtr>(idx,false);
+                LuaContextPtr data_ptr = getItemData(idx);
                 if (data_ptr && m_obj.GetValueRaw<bool>("onItemClick")) {
-                    m_obj.call_self("onItemClick",*data_ptr,idx);
+                    m_obj.call_self("onItemClick",data_ptr,idx);
                 }
             }
             virtual void onSelectionChanged(size_t idx) {
@@ -67,10 +64,7 @@ namespace Sandbox {
                 }
                 LuaContextPtr data;
                 if (idx != MyGUI::ITEM_NONE) {
-                    LuaContextPtr* data_ptr = m_list->getItemDataAt<LuaContextPtr>(idx,false);
-                    if (data_ptr) {
-                        data = *data_ptr;
-                    }
+                    data = getItemData(idx);
                 }
                 m_obj.call_self("onSelectionChanged",data,idx);
             }
@@ -103,7 +97,7 @@ static int setDelegateImpl(lua_State* L) {
     return 0;
 }
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ScrollList, MyGUI::ItemBox)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ScrollList, Sandbox::mygui::ScrollArea)
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ScrollList)
 bind( property_wo( "delegate", &setDelegateImpl ) );
 SB_META_METHOD(moveNext)
@@ -111,12 +105,16 @@ SB_META_METHOD(movePrev)
 SB_META_METHOD(moveToPage)
 SB_META_METHOD(updateData)
 SB_META_METHOD(itemAdded)
+SB_META_METHOD(clearIndexSelected)
+SB_META_METHOD(redrawAllItems)
+SB_META_METHOD(redrawItemAt)
+SB_META_METHOD(getWidgetByIndex)
+SB_META_METHOD(getIndexByWidget)
 SB_META_PROPERTY_RW(page, getPage, setPage)
-SB_META_PROPERTY_RW(targetPage, getTargetPage, moveToPage)
 SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
 SB_META_PROPERTY_RO(selectionWidget, getSelectionWidget)
 SB_META_PROPERTY_RW(itemSize, getItemSize, setItemSize)
-SB_META_PROPERTY_RW(visibleCount, getVisibleCount, setVisibleCount)
+SB_META_PROPERTY_RW(indexSelected, getIndexSelected, setIndexSelected)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -135,21 +133,14 @@ namespace Sandbox {
         
         ScrollList::ScrollList() {
             m_selection_widget = 0;
-            requestCreateWidgetItem = MyGUI::newDelegate(this,&ScrollList::handleCreateWidgetItem);
-            requestCoordItem = MyGUI::newDelegate(this,&ScrollList::handleCoordItem);
-            requestDrawItem = MyGUI::newDelegate(this,&ScrollList::handleDrawItem);
-            //eventMouseItemActivate += MyGUI::newDelegate(this,&ScrollList::handleItemActivate);
-            setNeedDragDrop(false);
-            m_item_size = 0;
-            m_visible_count = 1;
-            m_num_subitems = 1;
-            m_move_accum  = 0.0f;
-            m_move_speed = 0.0f;
-            m_scroll_target = 0;
-            m_state = state_none;
-            m_border_dempth = 100;
             m_centered = false;
-            m_manual_scroll = true;
+            m_item_size = 0;
+            m_visible_count = 0;
+            m_num_subitems = 1;
+            m_vertical = false;
+            m_selected_index = MyGUI::ITEM_NONE;
+            Scroll::SetVEnabled(m_vertical);
+            Scroll::SetHEnabled(!m_vertical);
         }
         
         ScrollList::~ScrollList() {
@@ -157,11 +148,6 @@ namespace Sandbox {
         
         void ScrollList::initialiseOverride() {
             Base::initialiseOverride();
-            eventChangeItemPosition += MyGUI::newDelegate(this, &ScrollList::selectionChanged );
-            MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate( this, &ScrollList::frameEntered );
-            MyGUI::InputManager::getInstance().eventMouseMoved += MyGUI::newDelegate(this,&ScrollList::handleGlobalMouseMove);
-            MyGUI::InputManager::getInstance().eventMousePressed += MyGUI::newDelegate(this,&ScrollList::handleGlobalMousePressed);
-            MyGUI::InputManager::getInstance().eventMouseReleased += MyGUI::newDelegate(this,&ScrollList::handleGlobalMouseReleased);
             assignWidget(m_selection_widget, "Selection");
             if (m_selection_widget) {
                 m_selection_widget->setVisible(false);
@@ -169,13 +155,6 @@ namespace Sandbox {
             }
         }
         void ScrollList::shutdownOverride() {
-            MyGUI::InputManager::getInstance().eventMouseMoved -= MyGUI::newDelegate(this,&ScrollList::handleGlobalMouseMove);
-            MyGUI::InputManager::getInstance().eventMousePressed -= MyGUI::newDelegate(this,&ScrollList::handleGlobalMousePressed);
-            MyGUI::InputManager::getInstance().eventMouseReleased -= MyGUI::newDelegate(this,&ScrollList::handleGlobalMouseReleased);
-            
-            eventChangeItemPosition -= MyGUI::newDelegate(this, &ScrollList::selectionChanged );
-
-            MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &ScrollList::frameEntered );
             Base::shutdownOverride();
             if (m_delegate) {
                 m_delegate->setScrollList(0);
@@ -184,8 +163,12 @@ namespace Sandbox {
         }
         
         void ScrollList::setPropertyOverride(const std::string& _key, const std::string& _value) {
+            if (_key == "VerticalAlignment")
+                setVerticalAlignment(MyGUI::utility::parseValue<bool>(_value));
+            else if (_key == "ContentMargins")
+                setContentMargins(MyGUI::utility::parseValue<MyGUI::IntRect>(_value));
             /// @wproperty{ItemBox, VisibleCount, size_t} visible cells count.
-            if (_key == "VisibleCount")
+            else if (_key == "VisibleCount")
                 setVisibleCount(MyGUI::utility::parseValue<size_t>(_value));
             else if (_key == "ItemSize")
                 setItemSize(MyGUI::utility::parseValue<int>(_value));
@@ -208,15 +191,10 @@ namespace Sandbox {
         }
         
         void ScrollList::setVisibleCount(size_t count) {
-            if (count<1)
-                count = 1;
             if (m_visible_count == count)
                 return;
             m_visible_count = count;
-            if (m_visible_count!=0)
-                m_item_size = 0;
-            //mCountItemInLine = -1;
-            updateFromResize();
+            updateView();
         }
         
         void ScrollList::setItemSize(int size) {
@@ -224,7 +202,7 @@ namespace Sandbox {
             if (size > 0) {
                 m_visible_count = 0;
             }
-            updateFromResize();
+            updateView();
         }
         
         void ScrollList::setSubItems(size_t count) {
@@ -233,102 +211,46 @@ namespace Sandbox {
             if (m_num_subitems == count)
                 return;
             m_num_subitems = count;
-            //mCountItemInLine = -1;
-            updateFromResize();
+            updateView();
         }
         
         void ScrollList::setScrollBounds(int b) {
-            m_border_dempth = b;
-        }
-        
-        void ScrollList::setCentered(bool c) {
-            if (m_centered != c) {
-                m_centered = c;
-                updateFromResize();
+            if (getVerticalAlignment()) {
+                Scroll::SetBounds(Sizef(0,b));
+            } else {
+                Scroll::SetBounds(Sizef(b,0));
             }
         }
-        
-        void ScrollList::setManualScroll(bool s) {
-            m_manual_scroll = s;
-            m_state = state_none;
-            if (mVScroll) {
-                mVScroll->setEnabled(s);
-            }
-            if (mHScroll) {
-               mHScroll->setEnabled(s);
-            }
-        }
-        
+                        
         void ScrollList::setDelegate(const ScrollListDelegatePtr &delegate) {
-            removeAllItems();
             m_delegate = delegate;
             if (!m_delegate) return;
             m_delegate->setScrollList(this);
-            size_t count = m_delegate->getItemsCount();
-            beginBatchAddItems();
-            for (size_t i=0;i<count;++i) {
-                batchAddItem(m_delegate->getItemData(i));
-            }
-            endBatchAddItems();
-            setScroll(normalizeScrollValue(0));
+            updateView();
             _updateChilds();
         }
         
         void ScrollList::itemAdded() {
             if (!m_delegate) return;
-            size_t current_count = getItemCount();
-            size_t count = m_delegate->getItemsCount();
-            beginBatchAddItems();
-            for (size_t i=current_count;i<count;++i) {
-                batchAddItem(m_delegate->getItemData(i));
-            }
-            endBatchAddItems();
-            setScroll(normalizeScrollValue(getScroll()));
+            
         }
         
         void ScrollList::updateData() {
-            removeAllItems();
             if (!m_delegate) return;
-            size_t count = m_delegate->getItemsCount();
-            beginBatchAddItems();
-            for (size_t i=0;i<count;++i) {
-                batchAddItem(m_delegate->getItemData(i));
-            }
-            endBatchAddItems();
-            setScroll(normalizeScrollValue(0));
-            _updateChilds();
+            updateView();
         }
         
-        void ScrollList::handleCreateWidgetItem(MyGUI::ItemBox*, MyGUI::Widget* w) {
+        MyGUI::Widget* ScrollList::createWidgetItem() {
+            MyGUI::Widget* w = mRealClient->createWidget<MyGUI::Widget>("Default",
+                                                                        MyGUI::IntCoord(0, 0, m_item_widget_size.width, m_item_widget_size.height), MyGUI::Align::Default);
             if (m_delegate) {
                 m_delegate->createWidget(w);
-                w->eventMouseButtonClick += MyGUI::newDelegate(this,&ScrollList::handleItemClick);
             }
+            w->eventMouseButtonClick += MyGUI::newDelegate(this,&ScrollList::handleItemClick);
+            return w;
         }
-        void ScrollList::handleCoordItem(MyGUI::ItemBox*, MyGUI::IntCoord& coords, bool drag) {
-            if (m_visible_count && getClientWidget()) {
-                if (getVerticalAlignment()) {
-                    coords.width = ( getClientWidget()->getSize().width - getContentMargins().left - getContentMargins().right) / m_num_subitems;
-                    coords.height = getClientWidget()->getSize().height / m_visible_count;
-                } else {
-                    coords.width = getClientWidget()->getSize().width / m_visible_count;
-                    coords.height = (getClientWidget()->getSize().height - getContentMargins().top - getContentMargins().bottom)
-                                    / m_num_subitems;
-                }
-            } else if (m_item_size > 0 && getClientWidget()) {
-                if (getVerticalAlignment()) {
-                    coords.width = (getClientWidget()->getSize().width  - getContentMargins().left - getContentMargins().right)
-                                    / m_num_subitems;
-                    coords.height = m_item_size;
-                } else {
-                    coords.width = m_item_size;
-                    coords.height = (getClientWidget()->getSize().height - getContentMargins().top - getContentMargins().bottom)
-                                    / m_num_subitems;
-                }
-            }
-            
-        }
-        void ScrollList::handleDrawItem(MyGUI::ItemBox*, MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) {
+        
+        void ScrollList::drawItem(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di) {
             if (m_delegate && di.update) {
                 size_t* old_idx = w->getUserData<size_t>(false);
                 m_delegate->updateWidget(w, di,!old_idx || *old_idx!=di.index);
@@ -341,16 +263,13 @@ namespace Sandbox {
         }
         
         void ScrollList::handleItemClick(MyGUI::Widget* _sender) {
+            size_t index = getIndexByWidget(_sender);
+            if (index == MyGUI::ITEM_NONE)
+                return;
             if (m_delegate) {
-                m_delegate->onItemClick( getIndexByWidget(_sender) );
+                m_delegate->onItemClick( index );
             }
-            Base::notifyMouseButtonPressed(_sender, 0, 0, MyGUI::MouseButton::Left);
-        }
-        
-        void ScrollList::notifyMouseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id) {
-        }
-        void ScrollList::notifyMouseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id) {
-            
+            setIndexSelected( index);
         }
         
         void ScrollList::onMouseDrag(int _left, int _top, MyGUI::MouseButton _id) {
@@ -364,45 +283,18 @@ namespace Sandbox {
         }
         
         void ScrollList::setScroll(int pos) {
-            MyGUI::IntPoint idiff(0,0);
-//            int norm = normalizeScrollValue(pos);
-//            int err = norm - pos;
-//            
-//            err = err * (1.0f -fabs(err)/m_border_dempth);
-//            
-//            pos = norm - err;
-//            
+            Vector2f idiff(0,0);
             if (getVerticalAlignment()) {
-                idiff.top = pos;
+                idiff.y = pos;
              } else {
-                idiff.left = pos;
+                idiff.x = pos;
             }
-            resetCurrentActiveItem();
-            setContentPosition(idiff);
-            
-            if (nullptr != mVScroll)
-                mVScroll->setScrollPosition(getContentPosition().top);
-            if (nullptr != mHScroll)
-                mHScroll->setScrollPosition(getContentPosition().left);
+            ScrollArea::SetOffset(ScrollArea::Normalize(idiff,false));
+            updateWidgets();
         }
         
         void ScrollList::setContentPosition(const MyGUI::IntPoint& pos) {
             Base::setContentPosition(pos);
-            if (m_selection_widget) {
-                size_t idx = getIndexSelected();
-                if (idx != MyGUI::ITEM_NONE) {
-                    Widget* w = getWidgetByIndex(idx);
-                    if (w) {
-                        m_selection_widget->setPosition(w->getPosition()+m_selection_offset);
-                        m_selection_widget->setVisible(true);
-                    } else {
-                        m_selection_widget->setVisible(false);
-                    }
-                } else {
-                    m_selection_widget->setVisible(false);
-                }
-            }
-
         }
         
         int     ScrollList::getScroll() const {
@@ -412,9 +304,7 @@ namespace Sandbox {
         }
         
         int     ScrollList::getItemSize() const {
-            if (m_item_size >0 || m_visible_count == 0)
-                return m_item_size;
-            return getScrollAreaSize() / m_visible_count;
+            return m_item_size;
         }
         
         int     ScrollList::getScrollContentSize() const {
@@ -431,58 +321,21 @@ namespace Sandbox {
         
         int     ScrollList::getScrollAreaSize() const {
             if (getVerticalAlignment()) {
-                return getClientWidget()->getSize().height;
+                return Scroll::GetViewSize().h;
             }
-            return getClientWidget()->getSize().width;
-        }
-        
-        int ScrollList::normalizeScrollValue(int val) const {
-            int max_scroll = getScrollContentSize() - getScrollAreaSize();
-            if (val>max_scroll)
-                val = max_scroll;
-            if (val<0) {
-                val = 0;
-            }
-            if (m_centered) {
-                int conent_size = getItemSize() * getItemCount();
-                if (conent_size < getScrollAreaSize()) {
-                    val = - (getScrollAreaSize() - conent_size)/2;
-                }
-            }
-            return val;
+            return Scroll::GetViewSize().w;
         }
         
         void ScrollList::moveNext() {
-            m_scroll_target = normalizeScrollValue(m_scroll_target+getItemSize());
-            if (m_state==state_none || m_state == state_free_scroll) {
-                m_move_speed += getItemSize() * 2.0f;
-                startFreeScroll();
-            }
+            setPage(getPage()+1);
         }
         
         void ScrollList::moveToPage(int idx) {
-            m_scroll_target = normalizeScrollValue(getItemSize()*(idx/m_num_subitems)-getScrollMargin());
-            if (m_state==state_none || m_state == state_free_scroll) {
-                m_move_speed += getItemSize() * 2.0f;
-                startFreeScroll();
-            }
+            setPage(idx);
         }
-        
-        void ScrollList::startFreeScroll() {
-            if (m_state!=state_free_scroll) {
-                m_state = state_free_scroll;
-                if (m_delegate) {
-                    m_delegate->onFreeScroll();
-                }
-            }
-        }
-        
-        int ScrollList::getTargetPage() const {
-            return ((m_scroll_target - getScrollMargin()) + getItemSize() / 2) / getItemSize();
-        }
-        
+                
         void ScrollList::setPage(int page) {
-            setScroll(normalizeScrollValue( getItemSize()*(page/m_num_subitems) - getScrollMargin()));
+            setScroll(getItemSize()*(page/m_num_subitems) - getScrollMargin());
         }
         
         int ScrollList::getPage() const {
@@ -490,236 +343,270 @@ namespace Sandbox {
         }
         
         void ScrollList::movePrev() {
-            m_scroll_target = normalizeScrollValue(m_scroll_target-getItemSize());
-            if (m_state==state_none || m_state == state_free_scroll) {
-                m_move_speed += getItemSize() * 2.0f;
-                startFreeScroll();
-            }
-        }
-        
-        void ScrollList::frameEntered(float dt) {
-            if (!getVisible())
-                return;
-            if (m_state!=state_free_scroll) {
-                return;
-            }
-            int crnt_pos = getScroll();
-            if (crnt_pos!=m_scroll_target) {
-                
-                
-                
-                float speed = m_move_speed;
-                
-                float dist = std::abs(m_scroll_target-crnt_pos);
-                speed = dist * 5;
-                if (speed<min_speed)
-                    speed=min_speed;
-                if (speed>max_speed)
-                    speed=max_speed;
-                
-                m_move_accum += dt * speed;
-                int delta = int(m_move_accum);
-                if (!delta)
-                    return;
-                m_move_accum-=delta;
-                
-                if (crnt_pos<m_scroll_target) {
-                    crnt_pos += delta;
-                    if (crnt_pos > m_scroll_target) {
-                        crnt_pos = m_scroll_target;
-                        //m_move_speed = 0;
-                    }
-                } else {
-                    crnt_pos -= delta;
-                    if (crnt_pos < m_scroll_target) {
-                        crnt_pos = m_scroll_target;
-                        //m_move_speed = 0;
-                    }
-                }
-                setScroll(crnt_pos);
-            } else {
-                m_move_speed = 0;
-                m_move_accum = 0;
-                if (m_state != state_none) {
-                    m_state = state_none;
-                    if (m_delegate) {
-                        m_delegate->onEndScroll();
-                    }
-                }
-               
-            }
-        }
-        
-        MyGUI::ILayerItem* ScrollList::getLayerItemByPoint(int _left, int _top) const {
-            if (!getInheritedVisible())
-                return 0;
-            if (m_state == state_manual_scroll && _checkPoint(_left, _top)) return const_cast<ScrollList*>(this);
-            return Base::getLayerItemByPoint(_left, _top);
-        }
-        
-        void ScrollList::handleGlobalMouseMove(int x,int y) {
-            if (!getInheritedVisible())
-                return;
-            if (!m_manual_scroll)
-                return;
-            if (m_state == state_wait_scroll || m_state == state_manual_scroll) {
-                MyGUI::ILayer* layer = getLayer();
-                MyGUI::Widget* parent = getParent();
-                while (!layer && parent) {
-                    layer = parent->getLayer();
-                    parent = parent->getParent();
-                }
-                if (!layer) return;
-                MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
-                pos_in_layer -= getAbsolutePosition();
-                MyGUI::IntPoint move = pos_in_layer - m_scroll_prev_pos;
-                
-                int delta_scroll = 0;
-                if (getVerticalAlignment()) {
-                    delta_scroll = -move.top;
-                } else {
-                    delta_scroll = -move.left;
-                }
-                int crnt_scroll = getScroll();
-                int new_scroll = crnt_scroll + delta_scroll;
-                if (m_state == state_wait_scroll) {
-                    if (std::abs((new_scroll-m_scroll_begin))>min_scroll_distance) {
-                        m_state = state_manual_scroll;
-                        if (m_delegate) {
-                            m_delegate->onBeginScroll();
-                        }
-//                        MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
-//                        //getClientWidget()->setEnabled(false);
-//                        MyGUI::Widget* w = MyGUI::InputManager::getInstance().getMouseFocusWidget();
-//                        if (w) {
-//                            //w->_riseMouseButtonReleased(0, 0, MyGUI::MouseButton::Left);
-//                        }
-//                        LogInfo() << "set manual scroll";
-                        MyGUI::InputManager::getInstance().setMouseFocusWidget(this);
-                    }
-                }
-                
-                
-                
-                int norm = normalizeScrollValue(new_scroll);
-                if (m_border_dempth > 0) {
-                    int err = norm - new_scroll;
-                    
-                    float derr = std::abs(err)/m_border_dempth;
-                    if (derr>1.0f) {
-                        derr = 1.0f;
-                    } else if (derr<0.0f) {
-                        derr = 0.0f;
-                    }
-
-                    new_scroll = crnt_scroll + delta_scroll * (1.0f - derr);
-                } else {
-                    new_scroll = norm;
-                }
-                
-                setScroll(new_scroll);
-                
-                new_scroll = getScroll();
-                m_scroll_prev_pos = pos_in_layer;
-                
-                delta_scroll = new_scroll - crnt_scroll;
-                if (true) {
-                    unsigned long dt = m_scroll_timer.getMilliseconds();
-                    if (dt) {
-                        m_move_speed = (m_move_speed*0.9f)+(float(delta_scroll) / (dt*0.001f))*0.1f;
-                        m_scroll_timer.reset();
-                    }
-                }
-            }
-        }
-        
-        void ScrollList::handleGlobalMousePressed(int x,int y, MyGUI::MouseButton _id) {
-            if (!getVisible())
-                return;
-            if (!m_manual_scroll)
-                return;
-            if (_id == MyGUI::MouseButton::Left) {
-                if (!MyGUI::LayerManager::getInstance().checkItemAccessibleAtPoint(this, x, y))
-                    return;
-                MyGUI::ILayer* layer = getLayer();
-                MyGUI::Widget* parent = getParent();
-                while (!layer && parent) {
-                    layer = parent->getLayer();
-                    parent = parent->getParent();
-                }
-                if (!layer) return;
-                MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
-                pos_in_layer -= getAbsolutePosition();
-                if (m_state == state_none || m_state == state_free_scroll) {
-                    
-                    MyGUI::IntRect client_rect = MyGUI::IntRect(0,0,getWidth(),getHeight());
-                    if (mClient) {
-                        client_rect = MyGUI::IntRect(mClient->getLeft(),mClient->getTop(),mClient->getWidth(),mClient->getHeight());
-                    }
-                    
-                    if (client_rect.inside(pos_in_layer)) {
-                        m_state = state_wait_scroll;
-                        //LogInfo() << "set wait scroll";
-                        m_scroll_prev_pos = pos_in_layer;
-                        m_scroll_begin = getScroll();
-                        m_scroll_timer.reset();
-                        m_move_speed = 0.0f;
-                    }
-                }
-            }
-        }
-        
-        void ScrollList::handleGlobalMouseReleased(int x,int y, MyGUI::MouseButton _id) {
-            if (!m_manual_scroll)
-                return;
-            if (_id == MyGUI::MouseButton::Left) {
-                if (m_state == state_manual_scroll || m_state == state_wait_scroll) {
-                    if (m_state == state_manual_scroll) {
-                        //getClientWidget()->setEnabled(true);
-                    }
-                    float speed_dir = m_move_speed < 0 ? -1.0f : 1.0f;
-                    m_move_speed = fabs(m_move_speed);
-                    if (m_move_speed>max_speed)
-                        m_move_speed = max_speed;
-                    
-                    int scroll_distance = m_move_speed * ( 0.2f ) * speed_dir;
-                    m_scroll_target = getScrollMargin() + roundf(float(getScroll()+scroll_distance)/getItemSize()) * getItemSize();
-                    
-                    m_scroll_target = normalizeScrollValue(m_scroll_target);
-                    
-                    startFreeScroll();
-                    //LogInfo() << "set animate scroll";
-                } else {
-                    //m_state = state_none;
-                }
-            }
+            setPage(getPage()-1);
         }
         
         
-               
-        void ScrollList::selectionChanged(MyGUI::ItemBox* _sender, size_t _index) {
+        
+        void ScrollList::setIndexSelected(size_t _index) {
+            size_t prev = m_selected_index;
+            m_selected_index = _index;
+            if (prev != _index && prev != MyGUI::ITEM_NONE) {
+                Widget* w = getWidgetByIndex(prev);
+                if (w) {
+                    MyGUI::IBDrawItemInfo di(prev,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
+                    drawItem(w, di);
+                }
+            }
+            if (_index != MyGUI::ITEM_NONE) {
+                Widget* w = getWidgetByIndex(_index);
+                if (w) {
+                    MyGUI::IBDrawItemInfo di(_index,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
+                    drawItem(w, di);
+                    updateSelectionWidget(w);
+                }
+            } else if (m_selection_widget) {
+                m_selection_widget->setVisible(false);
+            }
             if (m_delegate) {
                 m_delegate->onSelectionChanged(_index);
             }
-            
+        }
+       
+        void  ScrollList::clearIndexSelected() {
+            setIndexSelected(MyGUI::ITEM_NONE);
         }
         
-        void ScrollList::setIndexSelected(size_t _index) {
-            Base::setIndexSelected(_index);
-            if (m_selection_widget) {
-                if (_index != MyGUI::ITEM_NONE) {
-                    m_selection_widget->setVisible(true);
-                    Widget* w = getWidgetByIndex(_index);
-                    if (w) {
-                        m_selection_widget->setPosition(w->getPosition()+m_selection_offset);
-                    }
+        void ScrollList::updateView() {
+            ScrollView::updateView();
+            updateContent();
+            Base::updateView();
+            ScrollArea::SetOffset(Normalize(GetOffset(), true));
+            updateWidgets();
+        }
+        
+        void ScrollList::updateContent() {
+            if (m_visible_count) {
+                if (getVerticalAlignment()) {
+                    m_item_size =
+                    (getViewSize().height - m_content_margins.top - m_content_margins.bottom) / m_visible_count;
                 } else {
-                    m_selection_widget->setVisible(false);
+                    m_item_size = (getViewSize().width - m_content_margins.left - m_content_margins.right) / m_visible_count;
                 }
-                
+            }
+            
+            if (m_delegate) {
+                size_t count = m_delegate->getItemsCount();
+                size_t full_lines = (count + m_num_subitems -1)/m_num_subitems;
+                if (m_vertical) {
+                    m_item_widget_size.width = (getViewSize().width-m_content_margins.left-m_content_margins.right) / m_num_subitems;
+                    m_item_widget_size.height = m_item_size;
+                    mRealClient->setSize(getViewSize().width,
+                                  full_lines*m_item_size +
+                                  m_content_margins.top +
+                                  m_content_margins.bottom);
+                } else {
+                    m_item_widget_size.width = m_item_size;
+                    m_item_widget_size.height = (getViewSize().height-m_content_margins.top-m_content_margins.bottom) / m_num_subitems;
+                    mRealClient->setSize(full_lines*m_item_size +
+                                  m_content_margins.left +
+                                  m_content_margins.top,getViewSize().height);
+                }
+            }
+        }
+
+        void ScrollList::setVerticalAlignment(bool _value) {
+            m_vertical = _value;
+            Scroll::SetVEnabled(m_vertical);
+            Scroll::SetHEnabled(!m_vertical);
+            updateView();
+        }
+        
+        void ScrollList::setContentMargins(const MyGUI::IntRect& _value) {
+            m_content_margins = _value;
+            updateView();
+        }
+        
+        void ScrollList::setCentered(bool c) {
+            m_centered = c;
+            updateView();
+        }
+        
+        MyGUI::Widget* ScrollList::getWidgetByIndex(size_t _index) {
+            for (MyGUI::VectorWidgetPtr::iterator it = m_items.begin();
+                 it!=m_items.end();++it) {
+                size_t* idx_ptr = (*it)->getUserData<size_t>(false);
+                if (idx_ptr && *idx_ptr == _index)
+                    return *it;
+            }
+            return 0;
+        }
+        
+        size_t ScrollList::getIndexByWidget(MyGUI::Widget* w) {
+            for (MyGUI::VectorWidgetPtr::iterator it = m_items.begin();
+                 it!=m_items.end();++it) {
+                if (w == *it) {
+                    size_t* idx_ptr = (*it)->getUserData<size_t>(false);
+                    if (idx_ptr)
+                        return *idx_ptr;
+                    return MyGUI::ITEM_NONE;
+                }
+            }
+            return MyGUI::ITEM_NONE;
+        }
+        
+        void ScrollList::redrawAllItems() {
+            for (MyGUI::VectorWidgetPtr::iterator it = m_items.begin();
+                 it!=m_items.end();++it) {
+                size_t* idx_ptr = (*it)->getUserData<size_t>(false);
+                if (idx_ptr) {
+                    MyGUI::IBDrawItemInfo di(*idx_ptr,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
+                    drawItem(*it, di);
+                }
             }
         }
         
-
+        void ScrollList::redrawItemAt(size_t idx) {
+            MyGUI::Widget* w = getWidgetByIndex(idx);
+            if (w) {
+                MyGUI::IBDrawItemInfo di(idx,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
+                drawItem(w, di);
+            }
+        }
+        
+        void ScrollList::OnScrollMove() {
+            updateWidgets();
+        }
+        
+        void ScrollList::OnScrollBegin() {
+            Base::OnScrollBegin();
+            if (m_delegate) {
+                m_delegate->onBeginScroll();
+            }
+        }
+        
+        void ScrollList::OnScrollEnd() {
+            Base::OnScrollEnd();
+            if (m_delegate) {
+                m_delegate->onEndScroll();
+            }
+        }
+        
+        Vector2f ScrollList::Normalize(const Vector2f& v,bool soft) const {
+            Vector2f res = Scroll::Normalize(v, soft);
+            if (!soft) {
+                if (getVerticalAlignment()) {
+                    res.y = m_content_margins.top + m_item_size * int((res.y - m_content_margins.top + m_item_size/2) / m_item_size);
+                } else {
+                    res.x = m_content_margins.left + m_item_size * int((res.x - m_content_margins.left + m_item_size/2) / m_item_size);
+                }
+            }
+            return res;
+        }
+        
+        void ScrollList::updateSelectionWidget(MyGUI::Widget *w) {
+            if (!m_selection_widget)
+                return;
+            m_selection_widget->setVisible(true);
+            m_selection_widget->setPosition(w->getPosition()
+                                            +m_selection_offset
+                                            +getViewOffset());
+        }
+        
+        void ScrollList::updateWidgets() {
+            if (!m_delegate)
+                return;
+            int count = m_delegate->getItemsCount();
+            if (count == 0) {
+                for (MyGUI::VectorWidgetPtr::iterator it = m_items.begin();
+                          it!=m_items.end();++it) {
+                    (*it)->setUserData(MyGUI::Any::Null);
+                    (*it)->setVisible(false);
+                }
+                return;
+            }
+            int lines = (count + m_num_subitems - 1) / m_num_subitems;
+            int item_size = getItemSize();
+            int first = (-getScroll() - item_size) / item_size;
+            int last = (-getScroll() + getScrollAreaSize() + item_size) / item_size;
+            if (first >= lines) {
+                first = lines - 1;
+            }
+            if (first < 0) {
+                first = 0;
+            }
+            if (last >= lines) {
+                last = lines-1;
+            }
+            if (last < 0) {
+                last = 0;
+            }
+            first*=m_num_subitems;
+            last*=m_num_subitems;
+            last+=m_num_subitems-1;
+            if (last>=count) {
+                last = count-1;
+            }
+            if (last < first) {
+                last = first;
+            }
+            bool hide_selection = true;
+            MyGUI::VectorWidgetPtr pool;
+            //sb::vector<size_t> create;
+            for (MyGUI::VectorWidgetPtr::iterator it = m_items.begin();
+                 it!=m_items.end();++it) {
+                size_t* idx_ptr = (*it)->getUserData<size_t>(false);
+                if (idx_ptr) {
+                    if (*idx_ptr >= first && *idx_ptr <= last) {
+                        // ok, reuse
+                        continue;
+                    }
+                }
+                (*it)->setUserData(MyGUI::Any::Null);
+                (*it)->setVisible(false);
+                pool.push_back(*it);
+            }
+            for (int i = first; i<=last; ++i) {
+                MyGUI::Widget* w = getWidgetByIndex(i);
+                if (w) {
+                    if (i == m_selected_index && m_selection_widget) {
+                        updateSelectionWidget(w);
+                        hide_selection = false;
+                    }
+                    continue;
+                }
+                int l = (i/m_num_subitems);
+                int x = (i%m_num_subitems);
+                
+                if (pool.empty()) {
+                    w = createWidgetItem();
+                    m_items.push_back(w);
+                } else {
+                    w = pool.back();
+                    pool.pop_back();
+                    w->setVisible(true);
+                }
+                if (getVerticalAlignment()) {
+                    w->setPosition(m_content_margins.left
+                                               +x*m_item_widget_size.width,
+                                                   m_content_margins.top+l*m_item_size);
+                } else {
+                    w->setPosition(m_content_margins.left
+                                   +l*m_item_size,
+                                   m_content_margins.top+x*m_item_widget_size.height);
+                }
+                w->setSize(m_item_widget_size);
+                MyGUI::IBDrawItemInfo di(i,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
+                drawItem(w, di);
+                if (di.select && m_selection_widget) {
+                    hide_selection = false;
+                    updateSelectionWidget(w);
+                }
+            }
+            
+            if (hide_selection && m_selection_widget) {
+                m_selection_widget->setVisible(false);
+            }
+        }
     }
 }

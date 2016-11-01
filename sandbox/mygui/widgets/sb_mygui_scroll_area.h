@@ -41,6 +41,8 @@ namespace Sandbox {
             
             bool scrollActive() const { return Scroll::IsActive(); }
         protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+            
             void initialiseOverride();
             void shutdownOverride();
             
@@ -49,17 +51,20 @@ namespace Sandbox {
             void frameEntered(float dt);
             virtual void notifyScrollChangePosition(MyGUI::ScrollBar* _sender, size_t _position);
             
+            virtual Vector2f GetOffset() const;
+            virtual void SetOffset(const Vector2f& offset);
+            
             virtual void OnScrollBegin();
             virtual void OnScrollEnd();
-            virtual void OnScrollMove();
         private:
-            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             
             void handleGlobalMouseMove(int x,int y);
             void handleGlobalMousePressed(int x,int y, MyGUI::MouseButton _id);
             void handleGlobalMouseReleased(int x,int y, MyGUI::MouseButton _id);
             
+            Sandbox::Vector2f   m_real_offset;
             bool    m_manual_scroll;
+            
         };
         
         

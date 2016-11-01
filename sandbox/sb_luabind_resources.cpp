@@ -17,6 +17,7 @@
 #include "sb_color.h"
 #include "sb_rect.h"
 #include "sb_point.h"
+#include "sb_size.h"
 #include "sb_sound.h"
 #include "sb_rendertarget.h"
 #include "sb_utf.h"
@@ -138,6 +139,20 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::Pointi)
 SB_META_CONSTRUCTOR((int,int))
 SB_META_PROPERTY(x)
 SB_META_PROPERTY(y)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Sizef, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Sizef)
+SB_META_CONSTRUCTOR((float,float))
+SB_META_PROPERTY(w)
+SB_META_PROPERTY(h)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::Sizei, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Sizei)
+SB_META_CONSTRUCTOR((int,int))
+SB_META_PROPERTY(w)
+SB_META_PROPERTY(h)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Texture, void)
@@ -322,6 +337,8 @@ namespace Sandbox {
         luabind::RawClass<Color>(lua);
         luabind::RawClass<Rectf>(lua);
         luabind::RawClass<Recti>(lua);
+        luabind::RawClass<Sizef>(lua);
+        luabind::RawClass<Sizei>(lua);
         luabind::ExternClass<FontData>(lua);
         luabind::Class<FontPass>(lua);
         luabind::Class<Font>(lua);

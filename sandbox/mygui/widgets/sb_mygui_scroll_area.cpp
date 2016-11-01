@@ -145,11 +145,14 @@ namespace Sandbox {
             Base::updateView();
             Scroll::SetContentSize(Sizef(getCanvasSize()));
             Scroll::SetViewSize(Sizef(getViewSize()));
+            Scroll::SetBounds(Scroll::GetViewSize()*0.25);
+            Scroll::SetHEnabled(Scroll::GetContentSize().w>Scroll::GetViewSize().w);
+            Scroll::SetVEnabled(Scroll::GetContentSize().h>Scroll::GetViewSize().h);
             Scroll::SetViewPos(Vector2f(-getViewOffset().left,-getViewOffset().top));
         }
         
         void ScrollArea::setScrollPos(const MyGUI::IntPoint& p) {
-            Scroll::SetViewPos(Vector2f(-getViewOffset().left,-getViewOffset().top));
+            Scroll::SetViewPos(Sizef(-p.left,-p.top));
             OnScrollMove();
         }
         
@@ -161,18 +164,20 @@ namespace Sandbox {
             scrollComplete(this,getViewOffset());
         }
         
-        void ScrollArea::OnScrollMove() {
-            int x = Scroll::GetViewPos().x;
-            int y = Scroll::GetViewPos().y;
-            
+        
+        Vector2f ScrollArea::GetOffset() const {
+            return m_real_offset;
+        }
+        void ScrollArea::SetOffset(const Vector2f& offset) {
+            m_real_offset = offset;
             
             if (mHScroll != nullptr)
-                mHScroll->setScrollPosition(x < 0 ? 0 : x);
+                mHScroll->setScrollPosition(offset.x < 0 ? 0 : offset.x);
             
             if (mVScroll != nullptr)
-                mVScroll->setScrollPosition(y < 0 ? 0 : y);
+                mVScroll->setScrollPosition(offset.y < 0 ? 0 : offset.y);
             
-            mRealClient->setPosition(MyGUI::IntPoint(-x,-y));
+            mRealClient->setPosition(MyGUI::IntPoint(-offset.x,-offset.y));
         }
         
     }

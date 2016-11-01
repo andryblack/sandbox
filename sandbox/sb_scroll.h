@@ -14,7 +14,6 @@ namespace Sandbox {
         bool m_h_enabled;
         Sizef   m_content_size;
         Sizef   m_view_size;
-        Vector2f    m_offset;
         Vector2f   m_prev_pos;
         Time    m_last_time;
         Vector2f    m_last_speed;
@@ -26,25 +25,34 @@ namespace Sandbox {
         } m_state;
         Sizef   m_bounds;
     protected:
-        virtual Vector2f Normalize(const Vector2f& offset,bool soft);
+        virtual Vector2f Normalize(const Vector2f& offset,bool soft) const;
         Vector2f Limit(const Vector2f& v) const;
         void Move(const Vector2f& offset);
         
         virtual void OnScrollBegin() {}
         virtual void OnScrollEnd() {}
         virtual void OnScrollMove() {}
+        
+        virtual Vector2f GetOffset() const = 0;
+        virtual void SetOffset(const Vector2f& offset) = 0;
     public:
         Scroll();
         
         bool IsMove() const { return m_state == scroll_move || m_state == scroll_wait;  }
         bool IsActive() const { return m_state != scroll_none; }
         
+        bool GetVEnabled() const { return m_v_enabled; }
+        void SetVEnabled( bool e ) { m_v_enabled = e; }
+        bool GetHEnabled() const { return m_h_enabled; }
+        void SetHEnabled( bool e ) { m_h_enabled = e; }
         const Sizef& GetContentSize() const { return m_content_size; }
         void SetContentSize(const Sizef& r) { m_content_size = r; }
         const Sizef& GetViewSize() const { return m_view_size; }
         void SetViewSize(const Sizef& r);
-        void SetViewPos(const Vector2f& v) { m_offset = Normalize(v,false); }
-        const Vector2f& GetViewPos() const { return m_offset; }
+        const Sizef& GetBounds() const { return m_bounds; }
+        void SetBounds(const Sizef& s) { m_bounds = s; }
+        void SetViewPos(const Vector2f& v) { SetOffset(Normalize(v,false)); }
+        Vector2f GetViewPos() const { return GetOffset(); }
         
         void ScrollBegin( const Vector2f& pos );
         void ScrollMove( const Vector2f& pos );

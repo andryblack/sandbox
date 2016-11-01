@@ -24,6 +24,7 @@
 #include "sb_rt_scene.h"
 #include "sb_geomerty_buffer.h"
 #include "sb_container_clip.h"
+#include "sb_container_scroll.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::DrawAttributes)
 SB_META_END_KLASS_BIND()
@@ -191,6 +192,19 @@ SB_META_PROPERTY_RW_DEF(Texture)
 SB_META_PROPERTY_RW_DEF(Enabled)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerScroll)
+SB_META_CONSTRUCTOR(())
+SB_META_METHOD(ScrollBegin)
+SB_META_METHOD(ScrollMove)
+SB_META_METHOD(ScrollEnd)
+SB_META_METHOD(Reset)
+SB_META_PROPERTY_RW_DEF(ContentSize)
+SB_META_PROPERTY_RW_DEF(ViewSize)
+SB_META_PROPERTY_RW_DEF(ViewPos)
+SB_META_PROPERTY_RW_DEF(Bounds)
+SB_META_PROPERTY_RW_DEF(VEnabled)
+SB_META_PROPERTY_RW_DEF(HEnabled)
+SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::TransformModificator)
 SB_META_CONSTRUCTOR(())
@@ -271,6 +285,7 @@ namespace Sandbox {
         luabind::Class<ContainerVisible>(lua);
         luabind::Class<ContainerTransform3d>(lua);
         luabind::Class<ContainerShader>(lua);
+        luabind::Class<ContainerScroll>(lua);
         luabind::Class<GeometryBuffer>(lua);
         luabind::ExternClass<Scene>(lua);
         luabind::Class<RTScene>(lua);

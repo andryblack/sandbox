@@ -52,6 +52,7 @@ namespace Sandbox {
         virtual void GlobalToLocalImpl(Vector2f& v) const;
         virtual void GetTransformImpl(Transform2d& tr) const;
         virtual void DrawChilds( Graphics& g ) const;
+        const TransformModificatorPtr& GetTransform() const { return m_transform; }
     private:
         friend class SceneObject;
         TransformModificatorPtr     m_transform;

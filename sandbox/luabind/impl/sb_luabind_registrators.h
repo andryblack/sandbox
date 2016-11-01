@@ -46,13 +46,13 @@ namespace Sandbox {
             }
         };
         
-        template <class T,int base> struct method_helper<int(T::*)(lua_State*),base> {
-            static int call( lua_State* L ) {
-                typedef int (T::*Func)(lua_State*);
-				Func func = *reinterpret_cast<Func*>(lua_touserdata(L, lua_upvalueindex(1)));
-				return (&stack<T>::get(L,base+0)->*func)(L);
-			}
-        };
+//        template <class T,int base> struct method_helper<int(T::*)(lua_State*),base> {
+//            static int call( lua_State* L ) {
+//                typedef int (T::*Func)(lua_State*);
+//				Func func = *reinterpret_cast<Func*>(lua_touserdata(L, lua_upvalueindex(1)));
+//				return (&stack<T>::get(L,base+0)->*func)(L);
+//			}
+//        };
         
         template <class T>
         class klass_registrator : public registrator_base {
@@ -85,7 +85,7 @@ namespace Sandbox {
                 Getter* ptr = 
                 reinterpret_cast<Getter*>(lua_newuserdata(m_L, sizeof(Getter)));    /// props tbl ud
                 *ptr = prop.getter;
-                lua_pushcclosure(m_L, &method_helper<Getter>::call, 1);    /// props tbl func
+                lua_pushcclosure(m_L, &method_helper<T,Getter>::call, 1);    /// props tbl func
                 lua_rawseti(m_L, -2, __get);                   /// props tbl
                 lua_setfield(m_L, -2, prop.name);               /// props 
                 lua_pop(m_L, 1);
@@ -99,7 +99,7 @@ namespace Sandbox {
                 Setter* set_ptr =
                 reinterpret_cast<Setter*>(lua_newuserdata(m_L, sizeof(Setter)));    /// props tbl ud
                 *set_ptr = prop.setter;
-                lua_pushcclosure(m_L, &method_helper<Setter>::call, 1);    /// props tbl func
+                lua_pushcclosure(m_L, &method_helper<T,Setter>::call, 1);    /// props tbl func
                 lua_rawseti(m_L, -2, __set);                  /// props tbl
                 lua_setfield(m_L, -2, prop.name);               /// props
                 lua_pop(m_L, 1);
@@ -114,8 +114,8 @@ namespace Sandbox {
                 lua_setfield(m_L, -2, prop.name);               /// props
                 lua_pop(m_L, 1);
             }
-            template <class Getter,class Setter>
-            void operator()( const meta::property_holder_rw<T, Getter, Setter>& prop ) {
+            template <class U,class Getter,class Setter>
+            void operator()( const meta::property_holder_rw<U, Getter, Setter>& prop ) {
                 sb_assert(lua_istable(m_L, -1)); 
                 lua_rawgeti(m_L, -1 , __props);                   /// props
                 sb_assert(lua_istable(m_L, -1)); 
@@ -123,12 +123,12 @@ namespace Sandbox {
                 Getter* get_ptr = 
                 reinterpret_cast<Getter*>(lua_newuserdata(m_L, sizeof(Getter)));    /// props tbl ud
                 *get_ptr = prop.getter;
-                lua_pushcclosure(m_L, &method_helper<Getter>::call, 1);    /// props tbl func
+                lua_pushcclosure(m_L, &method_helper<T,Getter>::call, 1);    /// props tbl func
                 lua_rawseti(m_L, -2, __get);                   /// props tbl
                 Setter* set_ptr = 
                 reinterpret_cast<Setter*>(lua_newuserdata(m_L, sizeof(Setter)));    /// props tbl ud
                 *set_ptr = prop.setter;
-                lua_pushcclosure(m_L, &method_helper<Setter>::call, 1);    /// props tbl func
+                lua_pushcclosure(m_L, &method_helper<T,Setter>::call, 1);    /// props tbl func
                 lua_rawseti(m_L, -2, __set);                   /// props tbl
                 lua_setfield(m_L, -2, prop.name);               /// props 
                 lua_pop(m_L, 1);
@@ -141,7 +141,7 @@ namespace Sandbox {
                 Func* ptr = 
                 reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// methods ud
                 *ptr = func.func;
-                lua_pushcclosure(m_L, &method_helper<Func>::call, 1);
+                lua_pushcclosure(m_L, &method_helper<T,Func>::call, 1);
                 lua_setfield(m_L, -2, func.name);               /// methods 
                 lua_pop(m_L, 1);
             }
@@ -161,7 +161,7 @@ namespace Sandbox {
                 Func* ptr = 
                 reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// methods ud
                 *ptr = func.func;
-                lua_pushcclosure(m_L, &method_helper<Func>::call, 1);
+                lua_pushcclosure(m_L, &method_helper<T,Func>::call, 1);
                 static const char* meta_operator[] = {
                     "__add",
                     "__mul",
@@ -179,7 +179,7 @@ namespace Sandbox {
                 Func* ptr = 
                 reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// name ud
                 *ptr = func.func;
-                lua_pushcclosure(m_L, &method_helper<Func,1>::call, 1); /// name method
+                lua_pushcclosure(m_L, &method_helper<void,Func,1>::call, 1); /// name method
                 lua_rawset(this->m_L, -3); 
             }
             void operator()( const meta::static_method_holder<int(*)(lua_State*)>& func ) {
@@ -261,7 +261,7 @@ namespace Sandbox {
                 Func* ptr =
                 reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// name ud
                 *ptr = func.func;
-                lua_pushcclosure(m_L, &method_helper<Func,1>::call, 1); /// name method
+                lua_pushcclosure(m_L, &method_helper<void,Func,1>::call, 1); /// name method
                 lua_rawset(this->m_L, -3);
                 return *this;
             }
