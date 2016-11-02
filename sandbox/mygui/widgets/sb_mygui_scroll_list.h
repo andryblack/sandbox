@@ -136,6 +136,8 @@ namespace Sandbox {
             
             MyGUI::VectorWidgetPtr m_items;
             MyGUI::IntSize   m_item_widget_size;
+            
+            void resetWidgets();
         };
         
         

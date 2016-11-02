@@ -226,18 +226,30 @@ namespace Sandbox {
             m_delegate = delegate;
             if (!m_delegate) return;
             m_delegate->setScrollList(this);
+            resetWidgets();
             updateView();
+            updateWidgets();
             _updateChilds();
+        }
+        
+        void ScrollList::resetWidgets() {
+            for (MyGUI::VectorWidgetPtr::iterator it = m_items.begin();
+                 it!=m_items.end();++it) {
+                (*it)->setUserData(MyGUI::Any::Null);
+            }
         }
         
         void ScrollList::itemAdded() {
             if (!m_delegate) return;
-            
+            updateView();
+            resetWidgets();
         }
         
         void ScrollList::updateData() {
             if (!m_delegate) return;
+            resetWidgets();
             updateView();
+            updateWidgets();
         }
         
         MyGUI::Widget* ScrollList::createWidgetItem() {
@@ -299,8 +311,8 @@ namespace Sandbox {
         
         int     ScrollList::getScroll() const {
             if (getVerticalAlignment())
-                return getViewOffset().top;
-            return getViewOffset().left;
+                return -getViewOffset().top;
+            return -getViewOffset().left;
         }
         
         int     ScrollList::getItemSize() const {
@@ -537,8 +549,8 @@ namespace Sandbox {
             }
             int lines = (count + m_num_subitems - 1) / m_num_subitems;
             int item_size = getItemSize();
-            int first = (-getScroll() - item_size) / item_size;
-            int last = (-getScroll() + getScrollAreaSize() + item_size) / item_size;
+            int first = (getScroll() - item_size) / item_size;
+            int last = (getScroll() + getScrollAreaSize() + item_size) / item_size;
             if (first >= lines) {
                 first = lines - 1;
             }
