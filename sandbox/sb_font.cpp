@@ -23,11 +23,11 @@ namespace Sandbox {
         m_use_color = false;
     }
 	
-    float FontPass::DrawI( Graphics& g, DrawAttributes* attributes,const Sandbox::Vector2f& _pos , const char* text) const {
+    float FontPass::DrawI( Graphics& g, const DrawAttributes* attributes,const Sandbox::Vector2f& _pos , const char* text) const {
         const FontData::Glypth* prev = 0;
-        FontDrawAttributes* font_draw = 0;
+        const FontDrawAttributes* font_draw = 0;
         if (attributes) {
-            font_draw = meta::sb_dynamic_cast<FontDrawAttributes>(attributes);
+            font_draw = meta::sb_dynamic_cast<const FontDrawAttributes>(attributes);
         }
         Sandbox::Color c = g.GetColor();
         if (font_draw) {
@@ -57,12 +57,12 @@ namespace Sandbox {
         g.SetColor(c);
         return pos.x - _pos.x;
     }
-    void FontPass::DrawI( Graphics& g, DrawAttributes* attributes,
+    void FontPass::DrawI( Graphics& g, const DrawAttributes* attributes,
                      const TextData& text) const {
         Sandbox::Color c = g.GetColor();
-        FontDrawAttributes* font_draw = 0;
+        const FontDrawAttributes* font_draw = 0;
         if (attributes) {
-            font_draw = meta::sb_dynamic_cast<FontDrawAttributes>(attributes);
+            font_draw = meta::sb_dynamic_cast<const FontDrawAttributes>(attributes);
         }
         if (font_draw) {
             if (!font_draw->BeginPass(g,*this))
@@ -92,13 +92,13 @@ namespace Sandbox {
         g.SetColor(c);
     }
     
-    void FontPass::DrawCroppedI( Graphics& g, DrawAttributes* attributes,
+    void FontPass::DrawCroppedI( Graphics& g, const DrawAttributes* attributes,
                         const Rectf& rect,
                          const TextData& text) const {
         Sandbox::Color c = g.GetColor();
-        FontDrawAttributes* font_draw = 0;
+        const FontDrawAttributes* font_draw = 0;
         if (attributes) {
-            font_draw = meta::sb_dynamic_cast<FontDrawAttributes>(attributes);
+            font_draw = meta::sb_dynamic_cast<const FontDrawAttributes>(attributes);
         }
         if (font_draw) {
             if (!font_draw->BeginPass(g,*this))
@@ -170,7 +170,7 @@ namespace Sandbox {
     }
     
     
-    float Font::Draw(Graphics& g, DrawAttributes* attributes, const Vector2f& _pos,const char* text,FontAlign align) const {
+    float Font::Draw(Graphics& g, const DrawAttributes* attributes, const Vector2f& _pos,const char* text,FontAlign align) const {
         if (!text) return 0;
         const_cast<Font*>(this)->AllocateSymbols(text);
         Sandbox::Vector2f pos = m_data->AlignI(_pos,align,text);
@@ -181,13 +181,13 @@ namespace Sandbox {
         return res;
     }
     void Font::Draw(Graphics& g,
-                    DrawAttributes* attributes,const TextData& data) const {
+                    const DrawAttributes* attributes,const TextData& data) const {
         for (FontPassList::const_iterator it = m_passes.begin();it!=m_passes.end();++it) {
             (*it)->DrawI(g, attributes, data);
         }
     }
     void Font::DrawCropped(Graphics& g,
-                    DrawAttributes* attributes,
+                    const DrawAttributes* attributes,
                            const Rectf& rect,
                            const TextData& data) const {
         for (FontPassList::const_iterator it = m_passes.begin();it!=m_passes.end();++it) {

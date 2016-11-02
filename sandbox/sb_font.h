@@ -37,8 +37,8 @@ namespace Sandbox {
     class FontDrawAttributes : public DrawAttributes {
         SB_META_OBJECT;
     public:
-        virtual bool BeginPass(Graphics& g, const FontPass& pass) = 0;
-        virtual void EndPass(Graphics& g, const FontPass& pass) = 0;
+        virtual bool BeginPass(Graphics& g, const FontPass& pass) const = 0;
+        virtual void EndPass(Graphics& g, const FontPass& pass) const = 0;
     };
     
     class FontPass : public meta::object {
@@ -53,11 +53,11 @@ namespace Sandbox {
         const Color& GetColor() const { return m_color; }
         const sb::string& GetName() const { return m_name; }
         
-        float DrawI( Graphics& g, DrawAttributes* attributes,
+        float DrawI( Graphics& g, const DrawAttributes* attributes,
                     const Sandbox::Vector2f& pos , const char* text) const;
-        void DrawI( Graphics& g, DrawAttributes* attributes,
+        void DrawI( Graphics& g, const DrawAttributes* attributes,
                    const TextData& text) const;
-        void DrawCroppedI( Graphics& g, DrawAttributes* attributes,
+        void DrawCroppedI( Graphics& g, const DrawAttributes* attributes,
                           const Rectf& rect,
                           const TextData& text) const;
     private:
@@ -78,13 +78,13 @@ namespace Sandbox {
 		virtual ~Font();
 		
         virtual float Draw(Graphics& g,
-                           DrawAttributes* attributes,
+                           const DrawAttributes* attributes,
                            const Vector2f& pos,const char* text,FontAlign align) const;
         virtual void Draw(Graphics& g,
-                           DrawAttributes* attributes,
+                           const DrawAttributes* attributes,
                           const TextData& data) const;
         virtual void DrawCropped(Graphics& g,
-                                 DrawAttributes* attributes,
+                                 const DrawAttributes* attributes,
                                  const Rectf& rect,
                                  const TextData& data ) const;
 		virtual float GetTextWidth(const char* text) const;

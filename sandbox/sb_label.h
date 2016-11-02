@@ -24,11 +24,11 @@ namespace Sandbox {
 		Label();
 		~Label();
 		void Draw(Graphics& g) const;
-		void SetFont(const FontPtr& font) { m_font = font; }
+        void SetFont(const FontPtr& font);
 		const FontPtr& GetFont() const { return m_font;}
-		void SetAlign( FontAlign align) { m_align = align; }
+        void SetAlign( FontAlign align);
 		FontAlign GetAlign() const { return m_align;}
-		void SetText(const char* text) { m_text = text; UpdateText();}
+        void SetText(const char* text);
 		const char* GetText() const { return m_text.c_str(); }
     protected:
         virtual void UpdateText() {}
@@ -48,27 +48,6 @@ namespace Sandbox {
         Color   m_color;
     };
     
-    class MultilineLabel : public Label {
-        SB_META_OBJECT
-    public:
-        MultilineLabel();
-        ~MultilineLabel();
-        void Draw(Graphics& g) const;
-        void SetWidth(float w) { m_width = w; UpdateText(); }
-        float GetWidth() const { return m_width; }
-        size_t GetLines() const { return m_lines.size(); }
-        float GetHeight() const;
-    protected:
-        virtual void UpdateText();
-        struct Line {
-            Vector2f pos;
-            sb::string text;
-        };
-        struct MultilineContext;
-		friend struct MultilineContext;
-        sb::vector<Line> m_lines;
-        float   m_width;
-    };
 }
 
 #endif /*SB_LABEL_H*/

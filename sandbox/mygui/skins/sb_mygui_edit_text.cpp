@@ -39,10 +39,10 @@ namespace Sandbox
             mColour = MyGUI::Colour::parse(colour);
         }
         
-        bool TextDrawAttributes::BeginPass(Sandbox::Graphics &g, const Sandbox::FontPass &pass) {
+        bool TextDrawAttributes::BeginPass(Sandbox::Graphics &g, const Sandbox::FontPass &pass) const {
             return parent->BeginPass(g, pass);
         }
-        void TextDrawAttributes::EndPass(Sandbox::Graphics &g, const Sandbox::FontPass &pass) {
+        void TextDrawAttributes::EndPass(Sandbox::Graphics &g, const Sandbox::FontPass &pass) const {
             parent->EndPass(g, pass);
         }
 
@@ -552,14 +552,14 @@ namespace Sandbox
 			mNode->outOfDate(mRenderItem);
 	}
         
-    bool EditText::BeginPass(Graphics& g,const FontPass& pass) {
+    bool EditText::BeginPass(Graphics& g,const FontPass& pass) const {
         sb::map<sb::string, MyGUI::Colour>::const_iterator it = mPassColors.find(pass.GetName());
         if (it!=mPassColors.end()) {
             g.SetColor(g.GetColor()*Color(it->second.red,it->second.green,it->second.blue,it->second.alpha));
         }
         return true;
     }
-    void EditText::EndPass(Graphics& g,const FontPass& pass) {
+    void EditText::EndPass(Graphics& g,const FontPass& pass) const {
         
     }
 

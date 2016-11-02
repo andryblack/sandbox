@@ -61,8 +61,8 @@ namespace Sandbox
         SB_META_OBJECT
         public:
             EditText* parent;
-            virtual bool BeginPass(Graphics& g, const FontPass& pass);
-            virtual void EndPass(Graphics& g, const FontPass& pass);
+            virtual bool BeginPass(Graphics& g, const FontPass& pass) const;
+            virtual void EndPass(Graphics& g, const FontPass& pass) const;
         };
 
 	class EditText :
@@ -139,8 +139,8 @@ namespace Sandbox
 
         virtual bool fontHasSymbol(MyGUI::Char s) const;
         
-        virtual bool BeginPass(Graphics& g,const FontPass& pass);
-        virtual void EndPass(Graphics& g,const FontPass& pass);
+        virtual bool BeginPass(Graphics& g,const FontPass& pass) const;
+        virtual void EndPass(Graphics& g,const FontPass& pass) const;
 	private:
 		void _setTextColour(const MyGUI::Colour& _value);
 		

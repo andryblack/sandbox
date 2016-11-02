@@ -141,7 +141,7 @@ namespace Sandbox {
         
         template <class Klass, class Parent> struct cast_helper {
             static void* raw( void* ptr ) {
-                return static_cast<Parent*>(reinterpret_cast<Klass*>(ptr));
+                return static_cast<Parent*>(static_cast<Klass*>(ptr));
             }
             static type_info_parent::shared_destruct shared( void* storage_ptr1, void* storage_ptr2 ) {
                 typedef sb::shared_ptr<Klass> klass_ptr;
@@ -153,7 +153,7 @@ namespace Sandbox {
         };
         template <class Klass> struct cast_helper<Klass,void> {
             static void* raw( void* ptr ) {
-                return static_cast<void*>(reinterpret_cast<Klass*>(ptr));
+                return static_cast<void*>(static_cast<Klass*>(ptr));
             }
             static type_info_parent::shared_destruct shared( void* , void*  ) {
                 return 0;
@@ -250,6 +250,21 @@ namespace Sandbox {
             }
             return 0;
         }
+        
+        template <class T,class U>
+        inline const T* sb_dynamic_cast(const U* o) {
+            const type_info* rt = T::get_static_type_info();
+            const type_info* ti = o->get_type_info();
+            void* vo = const_cast<U*>(o);
+            while (ti) {
+                if (ti == rt) return static_cast<const T*>(vo);
+                ti = ti->parent.info;
+                if (!ti) return 0;
+                vo = ti->parent.downcast(vo);
+            }
+            return 0;
+        }
+
 
         template <class T>
         inline const type_info* get_type_info(const T* v) {

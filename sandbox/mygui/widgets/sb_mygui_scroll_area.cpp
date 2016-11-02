@@ -92,7 +92,8 @@ namespace Sandbox {
                 return;
             Scroll::Reset();
             MyGUI::ScrollView::notifyScrollChangePosition(_sender, _position);
-            Scroll::SetViewPos(Vector2f(-getViewOffset().left,-getViewOffset().top));
+            SetOffset(Vector2f(-getViewOffset().left,-getViewOffset().top));
+            OnScrollMove();
         }
         
         void ScrollArea::handleGlobalMouseMove(int x,int y) {

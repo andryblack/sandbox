@@ -134,7 +134,9 @@ namespace Sandbox {
             Vector2f delta = Limit(m_last_speed * dt * 0.95);
             Move(delta);
             m_last_speed = (GetOffset() - prev_pos) / dt;
-            Move(nmove * dt * 8);
+            Vector2f delta_n = nmove * dt * 8;
+            if (delta_n.length() > delta.length())
+                Move(delta_n);
         }
         
     }

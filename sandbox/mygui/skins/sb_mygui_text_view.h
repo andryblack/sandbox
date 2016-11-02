@@ -39,7 +39,6 @@ namespace Sandbox
 
 	private:
 		MyGUI::IntSize mViewSize;
-		size_t mLength;
 		TextData mTextData;
         FontPtr   m_font;
     };

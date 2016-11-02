@@ -48,8 +48,8 @@ namespace Sandbox {
             MaskText();
             virtual ~MaskText();
         protected:
-            virtual bool BeginPass(Graphics& g,const FontPass& pass);
-            virtual void EndPass(Graphics& g,const FontPass& pass);
+            virtual bool BeginPass(Graphics& g,const FontPass& pass) const;
+            virtual void EndPass(Graphics& g,const FontPass& pass) const;
         };
 
     }

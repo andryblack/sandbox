@@ -496,9 +496,19 @@ namespace Sandbox {
             Vector2f res = Scroll::Normalize(v, soft);
             if (!soft) {
                 if (getVerticalAlignment()) {
-                    res.y = m_content_margins.top + m_item_size * int((res.y - m_content_margins.top + m_item_size/2) / m_item_size);
+                    float max = Scroll::GetContentSize().h - Scroll::GetViewSize().h;
+                    if (res.y >= ( max - m_item_size/4)) {
+                        res.y = max;
+                    } else {
+                        res.y = m_content_margins.top + m_item_size * int((res.y - m_content_margins.top + m_item_size/2) / m_item_size);
+                    }
                 } else {
-                    res.x = m_content_margins.left + m_item_size * int((res.x - m_content_margins.left + m_item_size/2) / m_item_size);
+                    float max = Scroll::GetContentSize().w - Scroll::GetViewSize().w;
+                    if (res.x >= ( max - m_item_size/4)) {
+                        res.x = max;
+                    } else {
+                        res.x = m_content_margins.left + m_item_size * int((res.x - m_content_margins.left + m_item_size/2) / m_item_size);
+                    }
                 }
             }
             return res;

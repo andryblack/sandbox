@@ -25,6 +25,7 @@
 #include "sb_geomerty_buffer.h"
 #include "sb_container_clip.h"
 #include "sb_container_scroll.h"
+#include "sb_text_box.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::DrawAttributes)
 SB_META_END_KLASS_BIND()
@@ -109,16 +110,23 @@ SB_META_PROPERTY_RW(Text,GetText,SetText)
 SB_META_PROPERTY_RW(Align,GetAlign,SetAlign)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::FontDrawAttributes)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::ColorizedLabel)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Color,GetColor,SetColor)
 SB_META_END_KLASS_BIND()
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::MultilineLabel)
+SB_META_BEGIN_KLASS_BIND(Sandbox::TextBox)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Width,GetWidth,SetWidth)
-SB_META_PROPERTY_RO(Lines, GetLines)
-SB_META_PROPERTY_RO(Height, GetHeight)
+SB_META_PROPERTY_RO(Size,GetSize)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::TextDrawAttributes)
+SB_META_CONSTRUCTOR(())
+SB_META_METHOD(SetPassColor)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::CircleObject)
@@ -258,6 +266,8 @@ namespace Sandbox {
     
     void register_scene( lua_State* lua ) {
         luabind::Class<DrawAttributes>(lua);
+        luabind::Class<FontDrawAttributes>(lua);
+        luabind::Class<TextDrawAttributes>(lua);
         luabind::Class<SceneObject>(lua);
         luabind::Class<SceneObjectWithPosition>(lua);
         luabind::Class<Sprite>(lua);
@@ -271,7 +281,7 @@ namespace Sandbox {
         luabind::Class<Background>(lua);
         luabind::Class<Label>(lua);
         luabind::Class<ColorizedLabel>(lua);
-        luabind::Class<MultilineLabel>(lua);
+        luabind::Class<TextBox>(lua);
         luabind::Class<CircleObject>(lua);
         luabind::Class<LineObject>(lua);
         luabind::Class<Container>(lua);

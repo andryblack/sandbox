@@ -12,354 +12,44 @@ namespace Sandbox
 {
     namespace mygui {
 
-	namespace
+
+        template<typename T>
+        static inline void setMin(T& _var, const T& _newValue)
+        {
+            if (_newValue < _var)
+                _var = _newValue;
+        }
+
+        template<typename T>
+        static inline void setMax(T& _var, const T& _newValue)
+        {
+            if (_var < _newValue)
+                _var = _newValue;
+        }
+
+	
+	TextView::TextView()
 	{
-
-		template<typename T>
-		void setMin(T& _var, const T& _newValue)
-		{
-			if (_newValue < _var)
-				_var = _newValue;
-		}
-
-		template<typename T>
-		void setMax(T& _var, const T& _newValue)
-		{
-			if (_var < _newValue)
-				_var = _newValue;
-		}
-
-	}
-
-	class RollBackPoint
-	{
-	public:
-		RollBackPoint() :
-			position(0),
-			count(0),
-			width(0),
-			rollback(false)
-		{
-		}
-
-		void set(size_t _position, MyGUI::UString::iterator& _space_point, size_t _count, float _width)
-		{
-			position = _position;
-			space_point = _space_point;
-			count = _count;
-			width = _width;
-			rollback = true;
-		}
-
-		void clear()
-		{
-			rollback = false;
-		}
-
-		bool empty() const
-		{
-			return !rollback;
-		}
-
-		float getWidth() const
-		{
-			MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid");
-			return width;
-		}
-
-		size_t getCount() const
-		{
-			MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid");
-			return count;
-		}
-
-		size_t getPosition() const
-		{
-			MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid");
-			return position;
-		}
-
-		MyGUI::UString::iterator getTextIter() const
-		{
-			MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid");
-			return space_point;
-		}
-
-	private:
-		size_t position;
-		MyGUI::UString::iterator space_point;
-		size_t count;
-		float width;
-		bool rollback;
-	};
-
-	TextView::TextView() :
-		mLength(0)
-	{
+        mTextData.Clear();
 	}
 
         
 	void TextView::update(const MyGUI::UString& _text, const Sandbox::FontPtr& _font , MyGUI::Align _align, int _maxWidth)
 	{
 		
-		// массив для быстрой конвертации цветов
-		static const char convert_colour[64] =
-		{
-			0,  1,  2,  3,  4,  5,  6, 7, 8, 9, 0, 0, 0, 0, 0, 0,
-			0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0,  0,  0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0
-		};
-
-		mViewSize.clear();
-
-		RollBackPoint roll_back;
-		MyGUI::IntSize result;
-		float width = 0.0f;
-		size_t count = 0;
-		mLength = 0;
-		mTextData.Clear();
-        
-		 
-        TextData::Line line_info;
-        float _height = _font->GetHeight();
-        
-        line_info.offset.y = _font->GetHeight() - _font->GetBaseline();
-        
-		MyGUI::UString::iterator end = _text.end();
-		MyGUI::UString::iterator index = _text.begin();
-
         m_font = _font;
-		result.height += _height;
-
-		for (; index != end; ++index)
-		{
-            MyGUI::Char character = *index;
-
-			// новая строка
-			if (character == MyGUI::FontCodeType::CR
-				|| character == MyGUI::FontCodeType::NEL
-				|| character == MyGUI::FontCodeType::LF)
-			{
-				if (character == MyGUI::FontCodeType::CR)
-				{
-					MyGUI::UString::iterator peeki = index;
-					++peeki;
-					if ((peeki != end) && (*peeki == MyGUI::FontCodeType::LF))
-						index = peeki; // skip both as one newline
-				}
-
-				line_info.width = (int)ceil(width);
-				line_info.count = count;
-				mLength += line_info.count + 1;
-
-				result.height += _height;
-				
-				width = 0;
-				count = 0;
-
-				mTextData.data.push_back(line_info);
-				line_info.Clear();
-                line_info.offset.y += _height;
-
-				// отменяем откат
-				roll_back.clear();
-
-              	continue;
-			}
-			// тег
-			else if (character == L'#')
-			{
-				// берем следующий символ
-				++ index;
-				if (index == end)
-				{
-                    break;
-				}
-
-				character = *index;
-				// если два подряд, то рисуем один шарп, если нет то меняем цвет
-				if (character != L'#')
-				{
-					// парсим первый символ
-					MyGUI::uint32 colour = convert_colour[(character - 48) & 0x3F];
-
-					// и еще пять символов после шарпа
-					for (char i = 0; i < 5; i++)
-					{
-						++ index;
-						if (index == end)
-						{
-                            break;
-						}
-						colour <<= 4;
-						colour += convert_colour[ ((*index) - 48) & 0x3F ];
-					}
-                    colour = ((colour & 0x00ff0000) >> 16) |
-                             ((colour & 0x000000ff) << 16) |
-                             ((colour & 0xff00ff00)) | 0xff000000;
-                    TextData::SymbolData symbol;
-                    symbol.type = TextData::SYMBOL_SET_COLOR;
-                    symbol.data.color = colour;
-                    line_info.data.push_back(symbol);
-                    if (index==end)
-                        break;
-					continue;
-				}
-			}
-
-            const FontData::Glypth* info = _font->GetGlyph(character);
-
-			if (info == nullptr)
-				continue;
-
-			if (MyGUI::FontCodeType::Space == character)
-			{
-				roll_back.set(line_info.data.size(), index, count, width);
-			}
-			else if (MyGUI::FontCodeType::Tab == character)
-			{
-				roll_back.set(line_info.data.size(), index, count, width);
-			}
-
-            float char_advance = info->asc;
-			
-			float char_fullAdvance = char_advance;
-
-			// перенос слов
-			if (_maxWidth != -1
-				&& (width + char_fullAdvance) > _maxWidth
-				&& !roll_back.empty())
-			{
-				// откатываем до последнего пробела
-				width = roll_back.getWidth();
-				count = roll_back.getCount();
-				index = roll_back.getTextIter();
-				line_info.data.erase(line_info.data.begin() + roll_back.getPosition(), line_info.data.end());
-
-				// запоминаем место отката, как полную строку
-				line_info.width = (int)ceil(width);
-				line_info.count = count;
-				mLength += line_info.count + 1;
-
-				result.height += _height;
-				
-				width = 0;
-				count = 0;
-
-				mTextData.data.push_back(line_info);
-				line_info.Clear();
-                line_info.offset.y += _height;
-
-				// отменяем откат
-				roll_back.clear();
-
-				continue;
-			}
-            TextData::SymbolData symbol;
-            symbol.type = TextData::SYMBOL_TEXT;
-            symbol.data.symbol.code = character;
-            symbol.data.symbol.offset = char_fullAdvance;
-            line_info.data.push_back(symbol);
-			width += char_fullAdvance;
-			count ++;
-		}
-
-		line_info.width = (int)ceil(width);
-		line_info.count = count;
-		mLength += line_info.count;
-
-		mTextData.data.push_back(line_info);
-        result.width = 0.0f;
-        float offset = 0.0f;
-        float move_down = 0;
-        for (TextData::LinesData::iterator line = mTextData.data.begin(); line != mTextData.data.end(); ++line)
-        {
-            line->offset.x = 0;
-            line->offset.y += move_down;
-            width = line->width;
-            if (!line->data.empty()) {
-                for (TextData::SymbolsData::const_iterator simbol = line->data.begin();simbol!=line->data.end();++simbol) {
-                    if (simbol->type == TextData::SYMBOL_TEXT) {
-                        const FontData::Glypth* info = _font->GetGlyph(simbol->data.symbol.code);
-                        if (info) {
-                            if (info->bearingX() < 0) {
-                                float firstOffset = - info->bearingX();
-                                setMax(offset, firstOffset);
-                                width += firstOffset;
-                            }
-                        }
-                        break;
-                    }
-                }
-                for (TextData::SymbolsData::const_reverse_iterator simbol = line->data.rbegin();simbol!=line->data.rend();++simbol) {
-                    if (simbol->type == TextData::SYMBOL_TEXT) {
-                        const FontData::Glypth* info = _font->GetGlyph(simbol->data.symbol.code);
-                        if (info) {
-                            float rightOffset = ((info->bearingX() + info->width()) - info->asc);
-                            if (rightOffset > 0) {
-                                width += rightOffset;
-                            }
-                        }
-                        break;
-                    }
-                }
-                int max_asc = m_font->GetHeight()-m_font->GetBaseline();
-                int max_desc = m_font->GetBaseline();
-                for (TextData::SymbolsData::const_iterator simbol = line->data.begin();simbol!=line->data.end();++simbol) {
-                    if (simbol->type == TextData::SYMBOL_TEXT) {
-                        const FontData::Glypth* info = _font->GetGlyph(simbol->data.symbol.code);
-                        if (info) {
-                            if (-info->bearingY() > max_asc) {
-                                max_asc = -info->bearingY();
-                            }
-                            if ((info->height()+info->bearingY()) > max_desc) {
-                                max_desc = info->height()+info->bearingY();
-                            }
-                        }
-                    }
-                }
-                int add_asc = max_asc-(m_font->GetHeight()-m_font->GetBaseline());
-                //int add_desc = max_desc - m_font->GetBaseline();
-                line->offset.y += add_asc;
-                move_down += add_asc;
-                result.height += add_asc;
-            }
-            line->width = (int)ceil(width);
-            setMax(result.width, int(line->width));
-        }
+		mViewSize.clear();
+        mTextData.Clear();
         
-        if (!mTextData.data.empty()) {
-            int addHeight = 0;
-            for (TextData::SymbolsData::const_reverse_iterator simbol = mTextData.data.back().data.rbegin();simbol!=mTextData.data.back().data.rend();++simbol) {
-                if (simbol->type == TextData::SYMBOL_TEXT) {
-                    const FontData::Glypth* info = _font->GetGlyph(simbol->data.symbol.code);
-                    if (info) {
-                        int bottomOffset = int(ceil(((info->bearingY() + info->height()) - _height)));
-                        if (bottomOffset > 0) {
-                            setMax(addHeight, bottomOffset);
-                        }
-                    }
-                    break;
-                }
-            }
-            
-            result.height += addHeight;
-        }
+        FontAlign align = ALIGN_LEFT;
+        if (_align.isHCenter())
+            align = ALIGN_CENTER;
+        if (_align.isRight())
+            align = ALIGN_RIGHT;
         
-		
-		// теперь выравниванием строки
-		for (TextData::LinesData::iterator line = mTextData.data.begin(); line != mTextData.data.end(); ++line)
-		{
-            line->offset.x = offset;
-			if (_align.isRight())
-				line->offset.x += result.width - line->width;
-			else if (_align.isHCenter())
-				line->offset.x += (result.width - line->width) / 2;
-		}
-        
+        mTextData.Fill(_text.c_str(), _font, _maxWidth, align);
 
-		mViewSize = result;
+		mViewSize = MyGUI::IntSize(mTextData.size.w,mTextData.size.h);
 	}
     
    
@@ -414,7 +104,7 @@ namespace Sandbox
 
 	MyGUI::IntPoint TextView::getCursorPoint(size_t _position)
 	{
-		setMin(_position, mLength);
+		setMin(_position, mTextData.length);
 
 		size_t position = 0;
 		int top = 0;
@@ -451,7 +141,7 @@ namespace Sandbox
 
 	size_t TextView::getTextLength() const
 	{
-		return mLength;
+		return mTextData.length;
 	}
 
 	const TextData& TextView::getData() const

@@ -182,7 +182,7 @@ namespace Sandbox {
             
         }
         
-        bool MaskText::BeginPass(Graphics& g,const FontPass& pass) {
+        bool MaskText::BeginPass(Graphics& g,const FontPass& pass) const {
             Base::BeginPass(g, pass);
              if (mRenderItem) {
                  MyGUI::Widget* widget_p = static_cast<MyGUI::Widget*>(mCroppedParent);
@@ -227,7 +227,7 @@ namespace Sandbox {
              }
             return true;
         }
-        void MaskText::EndPass(Graphics& g,const FontPass& pass) {
+        void MaskText::EndPass(Graphics& g,const FontPass& pass) const {
             g.SetMask(MASK_MODE_NONE, TexturePtr(), Transform2d());
             g.SetShader(ShaderPtr());
             Base::EndPass(g, pass);
