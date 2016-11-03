@@ -1,7 +1,7 @@
 #ifndef SB_SCROLL_H_INCLUDED
 #define SB_SCROLL_H_INCLUDED
 
-#include "sb_vector.h"
+#include "sb_vector2.h"
 #include "sb_rect.h"
 #include "sb_point.h"
 #include "sb_time.h"
