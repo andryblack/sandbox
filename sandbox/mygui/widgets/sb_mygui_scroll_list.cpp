@@ -507,17 +507,25 @@ namespace Sandbox {
         
         Vector2f ScrollList::Normalize(const Vector2f& v,bool soft) const {
             Vector2f res = Scroll::Normalize(v, soft);
-            if (!soft) {
+            if (!soft && m_item_size > 0) {
                 if (getVerticalAlignment()) {
                     float max = Scroll::GetContentSize().h - Scroll::GetViewSize().h;
-                    if (res.y >= ( max - m_item_size/4)) {
+                    int last_delta = 0;
+                    if (max > m_item_size) {
+                        last_delta = m_item_size / 4;
+                    }
+                    if (res.y >= ( max - last_delta)) {
                         res.y = max;
                     } else {
                         res.y = m_content_margins.top + m_item_size * int((res.y - m_content_margins.top + m_item_size/2) / m_item_size);
                     }
                 } else {
                     float max = Scroll::GetContentSize().w - Scroll::GetViewSize().w;
-                    if (res.x >= ( max - m_item_size/4)) {
+                    int last_delta = 0;
+                    if (max > m_item_size) {
+                        last_delta = m_item_size / 4;
+                    }
+                    if (res.x >= ( max - last_delta)) {
                         res.x = max;
                     } else {
                         res.x = m_content_margins.left + m_item_size * int((res.x - m_content_margins.left + m_item_size/2) / m_item_size);
