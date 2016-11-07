@@ -137,7 +137,7 @@ namespace Sandbox {
             DrawImage(img,attributes,pos.x,pos.y,clr,scale);
         }
         void DrawImageBox(const ImageBox& img,const  DrawAttributes* attributes,
-                          const Vector2f& pos, const Vector2f& size);
+                          const Vector2f& pos, const Sizef& size);
         /// @}
         
         void BeginDrawTriangles(const TexturePtr& texture);

@@ -15,6 +15,7 @@ SB_META_DECLARE_OBJECT(Sandbox::ContainerShader, Sandbox::Container)
 namespace Sandbox {
 
 	ContainerShader::ContainerShader() : m_enabled(true){
+        m_mask_tr.reset(new TransformModificator() );
 	}
 	
 	ContainerShader::~ContainerShader() {
@@ -27,6 +28,11 @@ namespace Sandbox {
             TexturePtr crnt_mask = g.GetMaskTexture();
             if (m_texture) {
                 g.SetMaskTexture(m_texture);
+                if (m_mask_tr) {
+                    Transform2d tr;
+                    m_mask_tr->Apply(tr);
+                    g.SetMaskTransform(tr);
+                }
             }
             Container::Draw(g);
 			g.SetShader(ss);

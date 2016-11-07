@@ -32,10 +32,13 @@ namespace Sandbox {
 		
 		void SetEnabled(bool e) { m_enabled = e;}
 		bool GetEnabled() const { return m_enabled;}
+        
+        const TransformModificatorPtr& GetMaskTransform() const { return m_mask_tr; }
 	private:
 		bool	m_enabled;
 		ShaderPtr m_shader;
         TexturePtr m_texture;
+        TransformModificatorPtr    m_mask_tr;
 	};
 	
 }

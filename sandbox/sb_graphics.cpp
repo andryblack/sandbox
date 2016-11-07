@@ -525,7 +525,7 @@ namespace Sandbox {
 		
 	}
     
-    void Graphics::DrawImageBox(const ImageBox& img, const DrawAttributes* attributes,const Vector2f& pos, const Vector2f& size) {
+    void Graphics::DrawImageBox(const ImageBox& img, const DrawAttributes* attributes,const Vector2f& pos, const Sizef& size) {
         sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
         float x1 = pos.x;
@@ -538,21 +538,21 @@ namespace Sandbox {
 		x1-=hsx;
         y1-=hsy;
         
-		float x4 = pos.x + size.x + hsx;
-        float y4 = pos.y + size.y + hsy;
+		float x4 = pos.x + size.w + hsx;
+        float y4 = pos.y + size.h + hsy;
         
         float osl = img.GetOffsetL()*w/img.GetTextureW();
         float osr = img.GetOffsetR()*w/img.GetTextureW();
         float ost = img.GetOffsetT()*h/img.GetTextureH();
         float osb = img.GetOffsetB()*h/img.GetTextureH();
         
-        if ( size.x < (osl + osr) ) {
-            float sx = size.x / (osl + osr);
+        if ( size.w < (osl + osr) ) {
+            float sx = size.w / (osl + osr);
             osl *= sx;
             osr *= sx;
         }
-        if (size.y < (ost + osb)) {
-            float sy = size.y / (ost + osb);
+        if (size.h < (ost + osb)) {
+            float sy = size.h / (ost + osb);
             ost *= sy;
             osb *= sy;
         }
@@ -593,33 +593,51 @@ namespace Sandbox {
         CheckFlush(false);
         
         appendQuad();
+        if (!m_state.calc2_tex)
         {
             appendVertex(x1,y1,tx1,ty1,clr);
             appendVertex(x2,y1,tx2,ty1,clr);
             appendVertex(x1,y2,tx1,ty2,clr);
             appendVertex(x2,y2,tx2,ty2,clr);
+        } else {
+            appendVertex2(x1,y1,tx1,ty1,clr);
+            appendVertex2(x2,y1,tx2,ty1,clr);
+            appendVertex2(x1,y2,tx1,ty2,clr);
+            appendVertex2(x2,y2,tx2,ty2,clr);
         }
         
         float lx2 = x2;
         float lx3 = x2+stepx;
         for (int i=0;i<count_x;++i) {
             appendQuad();
+            if (!m_state.calc2_tex)
             {
                 appendVertex(lx2,y1,tx2,ty1,clr);
                 appendVertex(lx3,y1,tx3,ty1,clr);
                 appendVertex(lx2,y2,tx2,ty2,clr);
                 appendVertex(lx3,y2,tx3,ty2,clr);
+            } else {
+                appendVertex2(lx2,y1,tx2,ty1,clr);
+                appendVertex2(lx3,y1,tx3,ty1,clr);
+                appendVertex2(lx2,y2,tx2,ty2,clr);
+                appendVertex2(lx3,y2,tx3,ty2,clr);
             }
             lx2 += stepx;
             lx3 += stepx;
         }
         
         appendQuad();
+        if (!m_state.calc2_tex)
         {
             appendVertex(x3,y1,tx3,ty1,clr);
             appendVertex(x4,y1,tx4,ty1,clr);
             appendVertex(x3,y2,tx3,ty2,clr);
             appendVertex(x4,y2,tx4,ty2,clr);
+        } else {
+            appendVertex2(x3,y1,tx3,ty1,clr);
+            appendVertex2(x4,y1,tx4,ty1,clr);
+            appendVertex2(x3,y2,tx3,ty2,clr);
+            appendVertex2(x4,y2,tx4,ty2,clr);
         }
         
         
@@ -629,22 +647,34 @@ namespace Sandbox {
         for (int j=0;j<count_y;++j) {
             
             appendQuad();
+            if (!m_state.calc2_tex)
             {
                 appendVertex(x1,ly2,tx1,ty2,clr);
                 appendVertex(x2,ly2,tx2,ty2,clr);
                 appendVertex(x1,ly3,tx1,ty3,clr);
                 appendVertex(x2,ly3,tx2,ty3,clr);
+            } else {
+                appendVertex2(x1,ly2,tx1,ty2,clr);
+                appendVertex2(x2,ly2,tx2,ty2,clr);
+                appendVertex2(x1,ly3,tx1,ty3,clr);
+                appendVertex2(x2,ly3,tx2,ty3,clr);
             }
             
             lx2 = x2;
             lx3 = x2+stepx;
             for (int i=0;i<count_x;++i) {
                 appendQuad();
+                if (!m_state.calc2_tex)
                 {
                     appendVertex(lx2,ly2,tx2,ty2,clr);
                     appendVertex(lx3,ly2,tx3,ty2,clr);
                     appendVertex(lx2,ly3,tx2,ty3,clr);
                     appendVertex(lx3,ly3,tx3,ty3,clr);
+                } else {
+                    appendVertex2(lx2,ly2,tx2,ty2,clr);
+                    appendVertex2(lx3,ly2,tx3,ty2,clr);
+                    appendVertex2(lx2,ly3,tx2,ty3,clr);
+                    appendVertex2(lx3,ly3,tx3,ty3,clr);
                 }
                 lx2 += stepx;
                 lx3 += stepx;
@@ -652,11 +682,17 @@ namespace Sandbox {
             
             
             appendQuad();
+            if (!m_state.calc2_tex)
             {
                 appendVertex(x3,ly2,tx3,ty2,clr);
                 appendVertex(x4,ly2,tx4,ty2,clr);
                 appendVertex(x3,ly3,tx3,ty3,clr);
                 appendVertex(x4,ly3,tx4,ty3,clr);
+            } else {
+                appendVertex2(x3,ly2,tx3,ty2,clr);
+                appendVertex2(x4,ly2,tx4,ty2,clr);
+                appendVertex2(x3,ly3,tx3,ty3,clr);
+                appendVertex2(x4,ly3,tx4,ty3,clr);
             }
             
             ly2 += stepy;
@@ -666,22 +702,34 @@ namespace Sandbox {
         
         
         appendQuad();
+        if (!m_state.calc2_tex)
         {
             appendVertex(x1,y3,tx1,ty3,clr);
             appendVertex(x2,y3,tx2,ty3,clr);
             appendVertex(x1,y4,tx1,ty4,clr);
             appendVertex(x2,y4,tx2,ty4,clr);
+        } else {
+            appendVertex2(x1,y3,tx1,ty3,clr);
+            appendVertex2(x2,y3,tx2,ty3,clr);
+            appendVertex2(x1,y4,tx1,ty4,clr);
+            appendVertex2(x2,y4,tx2,ty4,clr);
         }
         
         lx2 = x2;
         lx3 = x2+stepx;
         for (int i=0;i<count_x;++i) {
             appendQuad();
+            if (!m_state.calc2_tex)
             {
                 appendVertex(lx2,y3,tx2,ty3,clr);
                 appendVertex(lx3,y3,tx3,ty3,clr);
                 appendVertex(lx2,y4,tx2,ty4,clr);
                 appendVertex(lx3,y4,tx3,ty4,clr);
+            } else {
+                appendVertex2(lx2,y3,tx2,ty3,clr);
+                appendVertex2(lx3,y3,tx3,ty3,clr);
+                appendVertex2(lx2,y4,tx2,ty4,clr);
+                appendVertex2(lx3,y4,tx3,ty4,clr);
             }
             lx2 += stepx;
             lx3 += stepx;
@@ -689,11 +737,17 @@ namespace Sandbox {
         
         
         appendQuad();
+        if (!m_state.calc2_tex)
         {
             appendVertex(x3,y3,tx3,ty3,clr);
             appendVertex(x4,y3,tx4,ty3,clr);
             appendVertex(x3,y4,tx3,ty4,clr);
             appendVertex(x4,y4,tx4,ty4,clr);
+        } else {
+            appendVertex2(x3,y3,tx3,ty3,clr);
+            appendVertex2(x4,y3,tx4,ty3,clr);
+            appendVertex2(x3,y4,tx3,ty4,clr);
+            appendVertex2(x4,y4,tx4,ty4,clr);
         }
 
         

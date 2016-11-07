@@ -15,6 +15,7 @@
 #include "sb_scene_object.h"
 #include "sb_color.h"
 #include "sb_rect.h"
+#include "sb_size.h"
 
 namespace Sandbox {
     
@@ -67,11 +68,11 @@ namespace Sandbox {
         void SetImage(const ImageBoxPtr& img) { m_image = img; }
         const ImageBoxPtr& GetImage() const { return m_image; }
         virtual void Draw( Graphics& g ) const;
-        void SetSize(const Vector2f& size) { m_size = size; }
-        const Vector2f& GetSize() const { return m_size; }
+        void SetSize(const Sizef& size) { m_size = size; }
+        const Sizef& GetSize() const { return m_size; }
     protected:
         ImageBoxPtr m_image;
-        Vector2f    m_size;
+        Sizef    m_size;
     };
     
     class ColorizedSpriteBox : public SpriteBox {
