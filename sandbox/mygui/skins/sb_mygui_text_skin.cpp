@@ -83,22 +83,24 @@ namespace Sandbox {
                     }
                     updateRawData();
                     size = mTextView.getViewSize();
+                    size.width *= GetFontScale();
+                    size.height *= GetFontScale();
                 }
             }
             
             float scale = m_scale * GetFontScale();
             
             if (mTextAlign.isRight())
-                mViewOffset.left = - (mCoord.width - float(size.width)*scale);
+                mViewOffset.left = - (mCoord.width - float(size.width)*m_scale);
             else if (mTextAlign.isHCenter())
-                mViewOffset.left = - ((mCoord.width - float(size.width)*scale) / 2);
+                mViewOffset.left = - ((mCoord.width - float(size.width)*m_scale) / 2);
             else
                 mViewOffset.left = 0;
             
             if (mTextAlign.isBottom())
-                mViewOffset.top = - (mCoord.height - float(size.height)*scale);
+                mViewOffset.top = - (mCoord.height - float(size.height)*m_scale);
             else if (mTextAlign.isVCenter())
-                mViewOffset.top = - ((mCoord.height - float(size.height)*scale) / 2);
+                mViewOffset.top = - ((mCoord.height - float(size.height)*m_scale) / 2);
             else
                 mViewOffset.top = 0;
             

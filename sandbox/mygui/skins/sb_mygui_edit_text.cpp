@@ -375,8 +375,8 @@ namespace Sandbox
 		MyGUI::IntSize size = mTextView.getViewSize();
         
         float scale = GetFontScale();
-        size.width *= scale;
-        size.height *= scale;
+        size.width = size.width * scale;
+        size.height = size.height * scale;
         
 		// плюс размер курсора
 		if (mIsAddCursorWidth)
