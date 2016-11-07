@@ -116,6 +116,7 @@ SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
 SB_META_PROPERTY_RO(selectionWidget, getSelectionWidget)
 SB_META_PROPERTY_RW(itemSize, getItemSize, setItemSize)
 SB_META_PROPERTY_RW(indexSelected, getIndexSelected, setIndexSelected)
+SB_META_PROPERTY_RW(alignOnCell, getAlignOnCell, setAlignOnCell)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
@@ -139,6 +140,7 @@ namespace Sandbox {
             m_visible_count = 0;
             m_num_subitems = 1;
             m_vertical = false;
+            m_align_on_cell = true;
             m_selected_index = MyGUI::ITEM_NONE;
             Scroll::SetVEnabled(m_vertical);
             Scroll::SetHEnabled(!m_vertical);
@@ -182,6 +184,8 @@ namespace Sandbox {
                 setCentered(MyGUI::utility::parseValue<bool>(_value));
             else if (_key == "ManualScroll")
                 setManualScroll(MyGUI::utility::parseValue<bool>(_value));
+            else if (_key == "AlignOnCell")
+                setAlignOnCell(MyGUI::utility::parseValue<bool>(_value));
             else
             {
                 Base::setPropertyOverride(_key, _value);
@@ -435,6 +439,11 @@ namespace Sandbox {
             updateView();
         }
         
+        void ScrollList::setAlignOnCell(bool _value) {
+            m_align_on_cell = _value;
+            updateView();
+        }
+        
         void ScrollList::setContentMargins(const MyGUI::IntRect& _value) {
             m_content_margins = _value;
             updateView();
@@ -507,7 +516,7 @@ namespace Sandbox {
         
         Vector2f ScrollList::Normalize(const Vector2f& v,bool soft) const {
             Vector2f res = Scroll::Normalize(v, soft);
-            if (!soft && m_item_size > 0) {
+            if (!soft && m_item_size > 0 && m_align_on_cell) {
                 if (getVerticalAlignment()) {
                     float max = Scroll::GetContentSize().h - Scroll::GetViewSize().h;
                     int last_delta = 0;

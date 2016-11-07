@@ -82,6 +82,9 @@ namespace Sandbox {
             
             void redrawAllItems();
             void redrawItemAt(size_t idx);
+            
+            void setAlignOnCell(bool _value);
+            bool getAlignOnCell() const { return m_align_on_cell; }
         protected:
             void initialiseOverride();
             void shutdownOverride();
@@ -138,6 +141,8 @@ namespace Sandbox {
             MyGUI::IntSize   m_item_widget_size;
             
             void resetWidgets();
+            
+            bool m_align_on_cell;
         };
         
         
