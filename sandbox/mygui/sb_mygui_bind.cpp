@@ -639,6 +639,16 @@ static void widget_updateChilds( MyGUI::Widget* w) {
         w->_updateChilds();
     }
 }
+static void widget_updateSkinChilds( MyGUI::Widget* w) {
+    if (w) {
+        w->_updateSkinChilds();
+    }
+}
+static void widget_upLayerItem( MyGUI::Widget* w) {
+    if (w) {
+        w->upLayerItem();
+    }
+}
 static void widget_destroyAllChilds( MyGUI::Widget* w) {
     if (w) {
         while (w->getChildCount() != 0)
@@ -687,6 +697,8 @@ SB_META_PROPERTY_RO(clientWidget, getClientWidget)
 SB_META_PROPERTY_WO(colour, setColour)
 SB_META_PROPERTY_RW(alpha, getAlpha,setAlpha)
 SB_META_PROPERTY_RW(depth, getDepth,setDepth)
+SB_META_PROPERTY_RW(needMouse, getNeedMouseFocus, setNeedMouseFocus)
+SB_META_PROPERTY_RW(needKey, getNeedKeyFocus, setNeedKeyFocus)
 bind( property_rw( "inheritsPick", &widget_getInheritsPick, &widget_setInheritsPick ) );
 SB_META_PROPERTY_RW(inheritsState, getInheritsState, setInheritsState)
 
@@ -756,10 +768,11 @@ bind( method( "isUserString" , &widget_isUserString ) );
 bind( method( "getUserString" , &widget_getUserString ) );
 bind( method( "setUserString" , &widget_setUserString ) );
 bind( method( "updateChilds" , &widget_updateChilds ) );
+bind( method( "updateSkinChilds" , &widget_updateSkinChilds ) );
 bind( method( "destroyAllChilds" , &widget_destroyAllChilds ) );
 bind( method( "isMyChild" , &widget_isMyChild ) );
 bind( method( "getLayerName", &widget_getLayerName));
-
+bind( method( "upLayerItem", &widget_upLayerItem));
 bind(method("createWidget", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(const std::string&, const std::string&, const MyGUI::IntCoord&, MyGUI::Align, const std::string& _name)>(&MyGUI::Widget::createWidgetT)));
 bind(method("createWidgetS", static_cast<MyGUI::Widget*(MyGUI::Widget::*)(MyGUI::WidgetStyle,
                                                                           const std::string&,

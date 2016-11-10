@@ -20,6 +20,7 @@
 #include "sb_mygui_text_edit.h"
 #include "sb_mygui_selectable_widget.h"
 #include "sb_mygui_state_visible_widget.h"
+#include "sb_mygui_client_widget.h"
 
 #include "MyGUI_WidgetManager.h"
 #include "MyGUI_FactoryManager.h"
@@ -27,6 +28,9 @@
 #include "luabind/sb_luabind.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::CachedWidget)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ClientWidget)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::SceneWidget)
@@ -89,6 +93,7 @@ namespace Sandbox {
             factory.registerFactory<TextEdit>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.registerFactory<SelectableWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.registerFactory<StateVisibleWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            factory.registerFactory<ClientWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
         }
         void unregister_widgets() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
@@ -105,6 +110,7 @@ namespace Sandbox {
             factory.unregisterFactory<SceneObjectWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<SelectableWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
             factory.unregisterFactory<StateVisibleWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            factory.unregisterFactory<ClientWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
         }
 
         
@@ -126,6 +132,7 @@ namespace Sandbox {
             luabind::ExternClass<TextEdit>(L);
             luabind::ExternClass<SelectableWidget>(L);
             luabind::ExternClass<StateVisibleWidget>(L);
+            luabind::ExternClass<ClientWidget>(L);
         }
     }
     
