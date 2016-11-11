@@ -53,9 +53,13 @@ namespace Sandbox {
             h = f.h;
         }
         T GetLeft() const { return x; }
+        void SetLeft(T v) { w+=(x-v); x = v; }
         T GetRight() const { return x + w; }
+        void SetRight(T v) { w = ( v - x); }
         T GetTop() const { return y; }
+        void SetTop(T v) { h+=(y-v); y = v; }
         T GetBottom() const { return y + h; }
+        void SetBottom(T v) { h = (v - y); }
         
         Rect GetIntersect(const Rect& r2) const {
             Rect res;
