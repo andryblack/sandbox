@@ -150,6 +150,14 @@ namespace Sandbox {
         if (m_transform) return m_transform->GetAngle();
         return 0.0f;
     }
+    
+    void Container::SetAlpha(float a) {
+        GetColorModificator()->SetAlpha(a);
+    }
+    float Container::GetAlpha() const {
+        if (m_color) return m_color->GetAlpha();
+        return 1.0f;
+    }
 
     
     void Container::GlobalToLocalImpl(Vector2f& v) const {

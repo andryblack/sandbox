@@ -85,6 +85,8 @@ namespace Sandbox {
             
             void setAlignOnCell(bool _value);
             bool getAlignOnCell() const { return m_align_on_cell; }
+            
+            void upWidget(MyGUI::Widget* w);
         protected:
             void initialiseOverride();
             void shutdownOverride();

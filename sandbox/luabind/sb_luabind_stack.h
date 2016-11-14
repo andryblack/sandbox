@@ -312,7 +312,7 @@ namespace Sandbox {
                                                                                  sizeof(T*)));
             holder->type = data_holder::intrusive_ptr;
             holder->is_const = false;
-            holder->info = meta::type<T>::info();
+            holder->info = meta::get_type_info(val.get());
             holder->destructor = &destructor_helper<T>::intrusive;
             *reinterpret_cast<T**>(holder+1) = val.get();
             val->add_ref();

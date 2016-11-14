@@ -44,6 +44,9 @@ namespace Sandbox {
         
         void SetAngle(float a);
         float GetAngle() const;
+        
+        void SetAlpha(float a);
+        float GetAlpha() const;
     
         void SortByOrder();
     protected:

@@ -110,6 +110,7 @@ SB_META_METHOD(redrawAllItems)
 SB_META_METHOD(redrawItemAt)
 SB_META_METHOD(getWidgetByIndex)
 SB_META_METHOD(getIndexByWidget)
+SB_META_METHOD(upWidget)
 SB_META_PROPERTY_RW(verticalAlignment,getVerticalAlignment,setVerticalAlignment)
 SB_META_PROPERTY_RW(page, getPage, setPage)
 SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
@@ -551,6 +552,17 @@ namespace Sandbox {
             m_selection_widget->setPosition(w->getPosition()
                                             +m_selection_offset
                                             +getViewOffset());
+        }
+        
+        void ScrollList::upWidget(MyGUI::Widget* w) {
+            MyGUI::VectorWidgetPtr::iterator it = std::find(m_items.begin(),m_items.end(),w);
+            if (it!=m_items.end()) {
+                m_items.erase(it);
+                w->detachFromWidget();
+                w->attachToWidget(mRealClient);
+                m_items.push_back(w);
+            }
+            updateWidgets();
         }
         
         void ScrollList::updateWidgets() {
