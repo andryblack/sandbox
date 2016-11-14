@@ -271,6 +271,18 @@ namespace Sandbox {
             return implementation::get_type_info<T,implementation::has_get_type_info<T>::result>::get(v);
         }
         
+        template <class T>
+        inline const type_info* get_top_type_info(const T* v) {
+            const type_info* dyn = implementation::get_type_info<T,implementation::has_get_type_info<T>::result>::get(v);
+            const type_info* stat = type<T>::info();
+            while (stat) {
+                if (stat == dyn) {
+                    return type<T>::info();
+                }
+                stat = stat->parent.info;
+            }
+            return dyn;
+        }
     }
     
 }
