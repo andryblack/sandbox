@@ -26,6 +26,7 @@
 #include "sb_container_clip.h"
 #include "sb_container_scroll.h"
 #include "sb_text_box.h"
+#include "sb_container_mask.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::DrawAttributes)
 SB_META_END_KLASS_BIND()
@@ -186,6 +187,7 @@ SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Mode,GetMode,SetMode)
 SB_META_PROPERTY_RW(Texture,GetTexture,SetTexture)
 SB_META_PROPERTY_RW(Transform,GetTransform,SetTransform)
+SB_META_PROPERTY_WO(Image, SetImage)
 SB_META_END_KLASS_BIND()
 
 
@@ -259,6 +261,7 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::RTScene)
 SB_META_CONSTRUCTOR((const Sandbox::RenderTargetPtr&))
 SB_META_PROPERTY_RO(Target, GetTarget)
 SB_META_END_KLASS_BIND()
+
 
 
 namespace Sandbox {
