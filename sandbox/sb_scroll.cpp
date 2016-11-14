@@ -40,6 +40,8 @@ namespace Sandbox {
         if (delta.length() > 1.0 && (time > (1.0f / 120.0f)) ) {
             m_last_speed = (GetOffset() - prev_pos) / time;
             //LogDebug() << "set speed: " << m_last_speed.x << "," << m_last_speed.y << " with time: " << time;
+        } else if (time > 1.0f/10.0f) {
+            m_last_speed = Sandbox::Vector2f();
         }
         m_last_time = now;
         m_prev_pos = pos;
