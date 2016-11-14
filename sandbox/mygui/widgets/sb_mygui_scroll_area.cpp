@@ -14,7 +14,7 @@
 #include "MyGUI_ScrollBar.h"
 
 #include "sb_log.h"
-
+#include "sb_mygui_cached_widget.h"
 
 namespace Sandbox {
     
@@ -96,7 +96,7 @@ namespace Sandbox {
             OnScrollMove();
         }
         
-        void ScrollArea::handleGlobalMouseMove(int x,int y) {
+        void ScrollArea::handleGlobalMouseMove(float x,float y) {
             if (!getInheritedVisible())
                 return;
             if (!m_manual_scroll)
@@ -106,7 +106,7 @@ namespace Sandbox {
             }
         }
         
-        void ScrollArea::handleGlobalMousePressed(int x,int y, MyGUI::MouseButton _id) {
+        void ScrollArea::handleGlobalMousePressed(float x,float y, MyGUI::MouseButton _id) {
             if (!getVisible())
                 return;
             if (!m_manual_scroll)
@@ -122,8 +122,8 @@ namespace Sandbox {
                 }
                 if (!layer) return;
                 
-                MyGUI::IntPoint pos_in_layer = layer->getPosition(x, y);
-                pos_in_layer -= mClient ? mClient->getAbsolutePosition() : getAbsolutePosition();
+                MyGUI::FloatPoint pos_in_layer = layer->getPosition(x, y);
+                pos_in_layer -= MyGUI::FloatPoint(mClient ? mClient->getAbsolutePosition() : getAbsolutePosition());
                 MyGUI::IntRect client_rect = MyGUI::IntRect(0,0,getWidth(),getHeight());
                 if (mClient) {
                     client_rect = MyGUI::IntRect(mClient->getLeft(),mClient->getTop(),mClient->getWidth(),mClient->getHeight());
@@ -134,7 +134,7 @@ namespace Sandbox {
             }
         }
         
-        void ScrollArea::handleGlobalMouseReleased(int x,int y, MyGUI::MouseButton _id) {
+        void ScrollArea::handleGlobalMouseReleased(float x,float y, MyGUI::MouseButton _id) {
             if (!m_manual_scroll)
                 return;
             if (_id == MyGUI::MouseButton::Left) {
@@ -178,7 +178,18 @@ namespace Sandbox {
             if (mVScroll != nullptr)
                 mVScroll->setScrollPosition(offset.y < 0 ? 0 : offset.y);
             
-            mRealClient->setPosition(MyGUI::IntPoint(-offset.x,-offset.y));
+            MyGUI::IntPoint int_pos(-offset.x,-offset.y);
+            mRealClient->setPosition(int_pos);
+            if (mClient && mClient->isType<CachedWidget>()) {
+                static_cast<CachedWidget*>(mClient)->setSubOffset(Sandbox::Vector2f(-m_real_offset.x-int_pos.left,
+                                                                                    -m_real_offset.y-int_pos.top));
+            } else if (mClient) {
+                MyGUI::Widget* parent = mClient->getParent();
+                if (parent && parent->isType<CachedWidget>()) {
+                    static_cast<CachedWidget*>(parent)->setSubOffset(Sandbox::Vector2f(-m_real_offset.x-int_pos.left,
+                                                                                        -m_real_offset.y-int_pos.top));
+                }
+            }
         }
         
     }

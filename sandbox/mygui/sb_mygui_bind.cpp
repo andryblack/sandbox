@@ -95,27 +95,27 @@ namespace Sandbox {
         struct stack<const MyGUI::UString&> : stack<MyGUI::UString> {};
         
         
-        template <>
-        struct stack<MyGUI::IntPoint> {
-            static void push( lua_State* L, const MyGUI::IntPoint& val ) {
-                stack_help<MyGUI::IntPoint, false>::push(L, val);
+        template <class T>
+        struct stack<MyGUI::types::TPoint<T> > {
+            static void push( lua_State* L, const MyGUI::types::TPoint<T>& val ) {
+                stack_help<MyGUI::types::TPoint<T>, false>::push(L, val);
             }
-            static MyGUI::IntPoint get( lua_State* L, int idx ) {
+            static MyGUI::types::TPoint<T> get( lua_State* L, int idx ) {
                 if (lua_istable(L, idx)) {
-                    MyGUI::IntPoint res;
+                    MyGUI::types::TPoint<T> res;
                     lua_rawgeti(L, idx, 1);
-                    res.left = float(lua_tonumber(L, -1));
+                    res.left = lua_tonumber(L, -1);
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 2);
-                    res.top = float(lua_tonumber(L, -1));
+                    res.top = lua_tonumber(L, -1);
                     lua_pop(L, 1);
                     return  res;
                 }
-                return stack_help<MyGUI::IntPoint, false>::get(L, idx);
+                return stack_help<MyGUI::types::TPoint<T>, false>::get(L, idx);
             }
         };
-        template <>
-        struct stack<const MyGUI::IntPoint&> : stack<MyGUI::IntPoint> {};
+        template <class T>
+        struct stack<const MyGUI::types::TPoint<T>&> : stack<MyGUI::types::TPoint<T> > {};
         
         template <>
         struct stack<MyGUI::IntSize> {
@@ -519,6 +519,13 @@ SB_META_PROPERTY(left)
 SB_META_PROPERTY(top)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(MyGUI::FloatPoint, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::FloatPoint)
+SB_META_CONSTRUCTOR((float,float))
+SB_META_PROPERTY(left)
+SB_META_PROPERTY(top)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_KLASS(MyGUI::IntSize, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::IntSize)
 SB_META_CONSTRUCTOR((int,int))
@@ -709,17 +716,17 @@ bind(method("eventMouseButtonClick", delegate_bind<MyGUI::Widget,
 
 bind(method("eventMouseButtonPressed", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
-            MyGUI::EventHandle_WidgetIntIntButton,
+            MyGUI::EventHandle_WidgetFloatFloatButton,
             &MyGUI::WidgetInput::eventMouseButtonPressed>::lua_func));
 
 bind(method("eventMouseButtonReleased", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
-            MyGUI::EventHandle_WidgetIntIntButton,
+            MyGUI::EventHandle_WidgetFloatFloatButton,
             &MyGUI::WidgetInput::eventMouseButtonReleased>::lua_func));
 
 bind(method("eventMouseDrag", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
-            MyGUI::EventHandle_WidgetIntIntButton,
+            MyGUI::EventHandle_WidgetFloatFloatButton,
             &MyGUI::WidgetInput::eventMouseDrag>::lua_func));
 
 bind(method("eventKeySetFocus", delegate_bind<MyGUI::Widget,
@@ -1159,6 +1166,7 @@ namespace Sandbox {
             luabind::RawClass<MyGUI::Align>(lua);
             //luabind::RawClass<MyGUI::WidgetStyle>(lua);
             luabind::RawClass<MyGUI::IntPoint>(lua);
+            luabind::RawClass<MyGUI::FloatPoint>(lua);
             luabind::RawClass<MyGUI::IntSize>(lua);
             luabind::RawClass<MyGUI::IntCoord>(lua);
             luabind::RawClass<MyGUI::IntRect>(lua);

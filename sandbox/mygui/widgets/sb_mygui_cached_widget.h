@@ -11,6 +11,7 @@
 
 #include "MyGUI_Widget.h"
 #include "meta/sb_meta.h"
+#include "sb_vector2.h"
 #include "MyGUI_SharedLayerNode.h"
 
 namespace Sandbox {
@@ -31,6 +32,9 @@ namespace Sandbox {
             virtual void addChildNode(LayerItem* _item);
             virtual void removeChildNode(LayerItem* _item);
 
+            void setSubOffset(const Sandbox::Vector2f& sub) {
+                m_suboffset = sub;
+            }
             
         protected:
             void initialiseOverride();
@@ -46,6 +50,7 @@ namespace Sandbox {
             std::string m_texture_name;
             
             bool    m_render_content;
+            Sandbox::Vector2f m_suboffset;
         };
         
     }

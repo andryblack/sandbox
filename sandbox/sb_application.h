@@ -114,7 +114,7 @@ namespace Sandbox {
         
         virtual void OnResize();
         
-        void TransformMouse(GHL::Int32& x,GHL::Int32& y);
+        void TransformMouse(GHL::Int32 x,GHL::Int32 y, float& fx, float& fy);
         ///
         virtual void OnMouseDown( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) ;
         ///

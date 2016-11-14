@@ -58,9 +58,9 @@ namespace Sandbox {
             virtual void OnScrollEnd();
         private:
             
-            void handleGlobalMouseMove(int x,int y);
-            void handleGlobalMousePressed(int x,int y, MyGUI::MouseButton _id);
-            void handleGlobalMouseReleased(int x,int y, MyGUI::MouseButton _id);
+            void handleGlobalMouseMove(float x,float y);
+            void handleGlobalMousePressed(float x,float y, MyGUI::MouseButton _id);
+            void handleGlobalMouseReleased(float x,float y, MyGUI::MouseButton _id);
             
             Sandbox::Vector2f   m_real_offset;
             bool    m_manual_scroll;

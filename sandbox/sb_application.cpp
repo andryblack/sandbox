@@ -949,48 +949,51 @@ namespace Sandbox {
         }
     }
 	
-    void Application::TransformMouse(GHL::Int32& x,GHL::Int32& y) {
-        x *= 1.0f / (m_resources->GetScale()*m_graphics->GetScale());
-        y *= 1.0f / (m_resources->GetScale()*m_graphics->GetScale());
+    void Application::TransformMouse(GHL::Int32 x,GHL::Int32 y,float& fx, float& fy) {
+        fx = x / (m_resources->GetScale()*m_graphics->GetScale());
+        fy = y / (m_resources->GetScale()*m_graphics->GetScale());
     }
 	///
 	void Application::OnMouseDown( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
-        TransformMouse(x,y);
+        float fx,fy;
+        TransformMouse(x,y,fx,fy);
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstancePtr()) {
-            if (MyGUI::InputManager::getInstance().injectMousePress(x, y, mygui::translate_key(key)) ||
+            if (MyGUI::InputManager::getInstance().injectMousePress(fx, fy, mygui::translate_key(key)) ||
                 MyGUI::InputManager::getInstance().isModalAny())
                 return;
         }
 #endif
         if (m_mouse_ctx) {
-            m_mouse_ctx->call_self("onDown",key,x,y);
+            m_mouse_ctx->call_self("onDown",key,fx,fy);
         }
     }
 	///
 	void Application::OnMouseMove( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
-        TransformMouse(x,y);
+        float fx,fy;
+        TransformMouse(x,y,fx,fy);
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstancePtr())
-        if (MyGUI::InputManager::getInstance().injectMouseMove(x, y, 0)||
+        if (MyGUI::InputManager::getInstance().injectMouseMove(fx, fy, 0)||
             MyGUI::InputManager::getInstance().isModalAny())
             return;
 #endif
         if (m_mouse_ctx) {
-            m_mouse_ctx->call_self("onMove",key,x,y);
+            m_mouse_ctx->call_self("onMove",key,fx,fy);
         }
     }
 	///
 	void Application::OnMouseUp( GHL::MouseButton key, GHL::Int32 x, GHL::Int32 y) {
-        TransformMouse(x,y);
+        float fx,fy;
+        TransformMouse(x,y,fx,fy);
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstancePtr())
-        if (MyGUI::InputManager::getInstance().injectMouseRelease(x, y, mygui::translate_key(key))||
+        if (MyGUI::InputManager::getInstance().injectMouseRelease(fx, fy, mygui::translate_key(key))||
             MyGUI::InputManager::getInstance().isModalAny())
             return;
 #endif
         if (m_mouse_ctx) {
-            m_mouse_ctx->call_self("onUp",key,x,y);
+            m_mouse_ctx->call_self("onUp",key,fx,fy);
         }
     }
 	///

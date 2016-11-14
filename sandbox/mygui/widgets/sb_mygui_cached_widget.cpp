@@ -31,7 +31,7 @@ namespace Sandbox {
             char buf[128];
 			sb::snprintf(buf, 128, "_%p", this);
             m_texture_name += buf;
-           
+            m_suboffset = Sandbox::Vector2f(0,0);
         }
         
         CachedWidget::~CachedWidget() {
@@ -115,7 +115,7 @@ namespace Sandbox {
             if (m_target) {
                 m_target->begin();
                 Sandbox::Transform2d tr = m_target->graphics()->GetTransform();
-                m_target->graphics()->SetTransform(tr.translated(-getAbsoluteLeft(),-getAbsoluteTop()));
+                m_target->graphics()->SetTransform(tr.translated(-getAbsoluteLeft(),-getAbsoluteTop()).translated(m_suboffset));
                 doRenderToTarget(m_target);
                 m_target->graphics()->SetTransform(tr);
                 m_target->end();
