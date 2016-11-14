@@ -80,7 +80,11 @@ namespace Sandbox {
     }
     
     void SpineAnimation::SetTime( float time ) {
-        
+        spTrackEntry* entry = spAnimationState_getCurrent (m_state, 0);
+        if (entry && entry->animation) {
+            float current = entry->time;
+            Update(time-current);
+        }
     }
     float SpineAnimation::GetCurrentAnimationLength() const {
         spTrackEntry* entry = spAnimationState_getCurrent (m_state, 0);
