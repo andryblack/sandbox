@@ -15,6 +15,7 @@
 #include "sb_rt_scene.h"
 #include "sb_lua.h"
 #include <sbstd/sb_list.h>
+#include "sb_image.h"
 
 namespace MyGUI {
     class Gui;
@@ -74,6 +75,8 @@ namespace Sandbox {
         
         bool StoreProfileFile( const char* filename , const GHL::Data* data );
         GHL::Data* LoadProfileFile( const char* filename );
+        
+        ImagePtr RenderScreen();
     protected:
 		Application();
 		virtual ~Application();
@@ -140,6 +143,8 @@ namespace Sandbox {
         virtual void DoRestart();
         
         virtual void ReportAppError(const char* reason) {}
+        
+        void DoDrawScreen();
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;

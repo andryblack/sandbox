@@ -129,6 +129,7 @@ SB_META_METHOD(SetKeyboardContext)
 SB_META_METHOD(SetResourcesVariant)
 SB_META_METHOD(SetRenderScale)
 SB_META_METHOD(Restart)
+SB_META_METHOD(RenderScreen)
 SB_META_PROPERTY_RO(TimeUSec, GetTimeUSec)
 SB_META_PROPERTY_RO(UTCOffset, GetUTCOffset)
 SB_META_PROPERTY_RO(SystemLanguage, GetSystemLanguage)
@@ -561,6 +562,34 @@ namespace Sandbox {
         return 0;
 #endif
     }
+    
+    ImagePtr Application::RenderScreen() {
+        sb_ensure_main_thread();
+        GHL::UInt32 twidth = m_render->GetWidth();
+        GHL::UInt32 theight = m_render->GetHeight();
+        float scale = m_resources->GetScale() * m_graphics->GetScale();
+        float width = twidth / scale;
+        float height = theight / scale;
+        RenderTargetPtr target = m_resources->CreateRenderTarget(width, height, scale, false, false);
+        m_render->BeginScene(target->GetNative());
+        m_graphics->BeginScene(m_render,target);
+        DoDrawScreen();
+        m_graphics->EndScene();
+        m_render->EndScene();
+        ImagePtr img(new Image(target->GetTexture(),0,0,width,height,width,height));
+        return img;
+    }
+    
+    void Application::DoDrawScreen() {
+        if (m_main_scene)
+            m_main_scene->Draw(*m_graphics);
+#ifdef SB_USE_MYGUI
+        if (m_gui_render)
+            m_gui_render->drawFrame();
+#endif
+        DrawFrame(*m_graphics);
+    }
+    
 	///
 	bool GHL_CALL Application::OnFrame( GHL::UInt32 usecs ) {
         sb_ensure_main_thread();
@@ -615,13 +644,8 @@ namespace Sandbox {
 							m_clear_color.b,
 							m_clear_color.a,0);
 		m_graphics->BeginScene(m_render,RenderTargetPtr());
-        if (m_main_scene)
-            m_main_scene->Draw(*m_graphics);
-#ifdef SB_USE_MYGUI
-		if (m_gui_render)
-            m_gui_render->drawFrame();
-#endif
-        DrawFrame(*m_graphics);
+        
+        DoDrawScreen();
         
         m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
        
