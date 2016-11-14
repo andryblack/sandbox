@@ -24,6 +24,7 @@ namespace Sandbox {
             scroll_free
         } m_state;
         Sizef   m_bounds;
+        float m_fade;
     protected:
         virtual Vector2f Normalize(const Vector2f& offset,bool soft) const;
         Vector2f Limit(const Vector2f& v) const;
@@ -45,6 +46,9 @@ namespace Sandbox {
         void SetVEnabled( bool e ) { m_v_enabled = e; }
         bool GetHEnabled() const { return m_h_enabled; }
         void SetHEnabled( bool e ) { m_h_enabled = e; }
+        void SetFade(float f) { m_fade = f; }
+        float GetFade() const { return m_fade; }
+
         const Sizef& GetContentSize() const { return m_content_size; }
         void SetContentSize(const Sizef& r) { m_content_size = r; }
         const Sizef& GetViewSize() const { return m_view_size; }
