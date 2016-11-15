@@ -47,6 +47,8 @@ namespace Sandbox {
             void setIndexSelected(size_t _index);
             void clearIndexSelected();
 
+            size_t getIndexTop() const { return m_top_index; }
+            void setIndexTop(size_t idx);
             
             void setItemSize(int size);
             int getItemSize() const;
@@ -86,6 +88,7 @@ namespace Sandbox {
             void setAlignOnCell(bool _value);
             bool getAlignOnCell() const { return m_align_on_cell; }
             
+            MyGUI::Widget* updateWidget(size_t idx, MyGUI::VectorWidgetPtr& pool);
             void upWidget(MyGUI::Widget* w);
         protected:
             void initialiseOverride();
@@ -134,6 +137,7 @@ namespace Sandbox {
             size_t  m_selected_index;
             MyGUI::Widget* m_selection_widget;
             MyGUI::IntPoint m_selection_offset;
+            size_t  m_top_index;
             
             bool   m_centered;
             bool   m_vertical;

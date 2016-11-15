@@ -115,6 +115,7 @@ SB_META_PROPERTY_RW(verticalAlignment,getVerticalAlignment,setVerticalAlignment)
 SB_META_PROPERTY_RW(page, getPage, setPage)
 SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
 SB_META_PROPERTY_RO(selectionWidget, getSelectionWidget)
+SB_META_PROPERTY_RW(indexTop, getIndexTop,setIndexTop)
 SB_META_PROPERTY_RW(itemSize, getItemSize, setItemSize)
 SB_META_PROPERTY_RW(indexSelected, getIndexSelected, setIndexSelected)
 SB_META_PROPERTY_RW(alignOnCell, getAlignOnCell, setAlignOnCell)
@@ -143,6 +144,7 @@ namespace Sandbox {
             m_vertical = false;
             m_align_on_cell = true;
             m_selected_index = MyGUI::ITEM_NONE;
+            m_top_index = MyGUI::ITEM_NONE;
             Scroll::SetVEnabled(m_vertical);
             Scroll::SetHEnabled(!m_vertical);
         }
@@ -555,6 +557,8 @@ namespace Sandbox {
         }
         
         void ScrollList::upWidget(MyGUI::Widget* w) {
+            if (w == m_items.back())
+                return;
             MyGUI::VectorWidgetPtr::iterator it = std::find(m_items.begin(),m_items.end(),w);
             if (it!=m_items.end()) {
                 m_items.erase(it);
@@ -562,7 +566,42 @@ namespace Sandbox {
                 w->attachToWidget(mRealClient);
                 m_items.push_back(w);
             }
-            updateWidgets();
+        }
+        
+        void ScrollList::setIndexTop(size_t idx) {
+            m_top_index = idx;
+            MyGUI::Widget* w = getWidgetByIndex(idx);
+            if (w) {
+                upWidget(w);
+            }
+        }
+        
+        MyGUI::Widget* ScrollList::updateWidget(size_t i, MyGUI::VectorWidgetPtr& pool) {
+            MyGUI::Widget* w = 0;
+            int l = (i/m_num_subitems);
+            int x = (i%m_num_subitems);
+            
+            if (pool.empty()) {
+                w = createWidgetItem();
+                m_items.push_back(w);
+            } else {
+                w = pool.back();
+                pool.pop_back();
+                w->setVisible(true);
+            }
+            if (getVerticalAlignment()) {
+                w->setPosition(m_content_margins.left
+                               +x*m_item_widget_size.width,
+                               m_content_margins.top+l*m_item_size);
+            } else {
+                w->setPosition(m_content_margins.left
+                               +l*m_item_size,
+                               m_content_margins.top+x*m_item_widget_size.height);
+            }
+            w->setSize(m_item_widget_size);
+            MyGUI::IBDrawItemInfo di(i,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
+            drawItem(w, di);
+            return w;
         }
         
         void ScrollList::updateWidgets() {
@@ -602,7 +641,8 @@ namespace Sandbox {
             if (last < first) {
                 last = first;
             }
-            bool hide_selection = true;
+            MyGUI::Widget* selected_widget = 0;
+            MyGUI::Widget* top_widget = 0;
             MyGUI::VectorWidgetPtr pool;
             //sb::vector<size_t> create;
             for (MyGUI::VectorWidgetPtr::iterator it = m_items.begin();
@@ -611,6 +651,12 @@ namespace Sandbox {
                 if (idx_ptr) {
                     if (*idx_ptr >= first && *idx_ptr <= last) {
                         // ok, reuse
+                        if (*idx_ptr == m_selected_index) {
+                            selected_widget = *it;
+                        }
+                        if (*idx_ptr == m_top_index) {
+                            top_widget = *it;
+                        }
                         continue;
                     }
                 }
@@ -621,43 +667,28 @@ namespace Sandbox {
             for (int i = first; i<=last; ++i) {
                 MyGUI::Widget* w = getWidgetByIndex(i);
                 if (w) {
-                    if (i == m_selected_index && m_selection_widget) {
-                        updateSelectionWidget(w);
-                        hide_selection = false;
-                    }
                     continue;
                 }
-                int l = (i/m_num_subitems);
-                int x = (i%m_num_subitems);
-                
-                if (pool.empty()) {
-                    w = createWidgetItem();
-                    m_items.push_back(w);
-                } else {
-                    w = pool.back();
-                    pool.pop_back();
-                    w->setVisible(true);
+                w = updateWidget(i, pool);
+                if ( i == m_selected_index ) {
+                    selected_widget = w;
                 }
-                if (getVerticalAlignment()) {
-                    w->setPosition(m_content_margins.left
-                                               +x*m_item_widget_size.width,
-                                                   m_content_margins.top+l*m_item_size);
-                } else {
-                    w->setPosition(m_content_margins.left
-                                   +l*m_item_size,
-                                   m_content_margins.top+x*m_item_widget_size.height);
-                }
-                w->setSize(m_item_widget_size);
-                MyGUI::IBDrawItemInfo di(i,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
-                drawItem(w, di);
-                if (di.select && m_selection_widget) {
-                    hide_selection = false;
-                    updateSelectionWidget(w);
+                if ( i == m_top_index ) {
+                    top_widget = w;
                 }
             }
             
-            if (hide_selection && m_selection_widget) {
-                m_selection_widget->setVisible(false);
+            if (!selected_widget) {
+                if (m_selection_widget)
+                    m_selection_widget->setVisible(false);
+            } else {
+                if (m_selection_widget) {
+                    updateSelectionWidget(selected_widget);
+                    m_selection_widget->setVisible(true);
+                }
+            }
+            if (top_widget) {
+                upWidget(top_widget);
             }
         }
     }
