@@ -38,10 +38,13 @@ namespace Sandbox {
         Time  now = Time::Now();
         float time = (now-m_last_time).ToFloat();
         
-        if (delta.length() > 0.001f && (time > (1.0f / 120.0f)) ) {
+        if (delta.length() > 2.0f && (time > (1.0f / 120.0f)) ) {
             m_last_speed = (GetOffset() - prev_pos) / time;
             //LogDebug() << "set speed: " << m_last_speed.x << "," << m_last_speed.y << " with time: " << time;
         } else if (time > 1.0f/10.0f) {
+            m_last_speed = Sandbox::Vector2f();
+        }
+        if (m_last_speed.length() < 10.0f) {
             m_last_speed = Sandbox::Vector2f();
         }
         m_last_time = now;
