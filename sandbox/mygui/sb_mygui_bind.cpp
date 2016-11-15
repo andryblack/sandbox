@@ -840,6 +840,10 @@ SB_META_PROPERTY_RW(movable, getMovable, setMovable)
 SB_META_PROPERTY_RW(autoAlpha, getAutoAlpha, setAutoAlpha)
 SB_META_METHOD(setVisibleSmooth)
 SB_META_METHOD(destroySmooth)
+bind(method("eventWindowButtonPressed", delegate_bind<MyGUI::Window,
+            MyGUI::Window,
+            MyGUI::EventHandle_WindowPtrCStringRef,
+            &MyGUI::Window::eventWindowButtonPressed>::lua_func));
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ScrollBar, MyGUI::Widget)
