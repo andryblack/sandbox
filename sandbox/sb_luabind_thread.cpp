@@ -69,10 +69,12 @@ namespace Sandbox {
 					m_ref.GetObject(L);
 					sb_assert(lua_isfunction(L,-1));
                     luabind::stack<EventPtr>::push(L, e);
-					int res = lua_pcall(L, 1, 0, -2);
+					int res = lua_pcall(L, 1, 0, -3);
 					if (res) {
-						LogError(LuaEventModule) << " Failed script event emmit  " ;
-                        LogError(LuaEventModule) << lua_tostring(L, -1) ;
+						LogError(LuaEventModule) << " Failed script event emmit  " << res;
+                        LogError(LuaEventModule) << lua_tostring(L, -1);
+                        lua_pop(L, 2);
+                        return;
 					}
                     lua_pop(L, 1);
 				} else {
