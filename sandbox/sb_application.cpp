@@ -30,14 +30,12 @@
 #include "MyGUI_Gui.h"
 #include "MyGUI_InputManager.h"
 #include "MyGUI_ClipboardManager.h"
+#include "MyGUI_LanguageManager.h"
 #include "MyGUI_EditBox.h"
 
 #include "mygui/sb_mygui_keys.h"
 #include "mygui/sb_mygui_data_manager.h"
 #include "mygui/sb_mygui_render.h"
-#include "mygui/skins/sb_mygui_skin.h"
-#include "mygui/widgets/sb_mygui_widgets.h"
-//#include "mygui/font/sb_mygui_font.h"
 #endif
 
 #ifdef SB_USE_NETWORK
@@ -160,6 +158,9 @@ namespace Sandbox {
     namespace mygui {
         void register_mygui( lua_State* lua );
         void setup_singletons( LuaVM* lua );
+        
+        void register_factory();
+        void unregister_factory();
     }
 #endif
  
@@ -235,8 +236,7 @@ namespace Sandbox {
         if (m_gui) {
             MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
             
-            mygui::unregister_skin();
-            mygui::unregister_widgets();
+            mygui::unregister_factory();
             UnregisterWidgets();
             m_gui->shutdown();
         }
@@ -446,8 +446,7 @@ namespace Sandbox {
         if (!m_gui) {
             m_gui = new MyGUI::Gui();
             m_gui->initialise("");
-            mygui::register_skin();
-            mygui::register_widgets();
+            mygui::register_factory();
             RegisterWidgets();
             mygui::setup_singletons(m_lua);
             sb_assert( MyGUI::InputManager::getInstancePtr());

@@ -14,7 +14,7 @@ namespace Sandbox {
 
 	
 	ControllerElastic::ControllerElastic(const ControllerPtr& child) : m_child(child),
-		m_hard(8.0f),m_end(1.0f),m_amplitude(1.0f) , m_phases(5){
+		m_hard(8.0f),m_end(1.0f) , m_phases(5){
 	}
 	
 	ControllerElastic::~ControllerElastic() {
@@ -27,7 +27,6 @@ namespace Sandbox {
 		} else if (k>=1.0f) {
 			m_child->Set(m_end);
 		} else {
-			//float a = m_amplitude;
 			float d = asin(m_end);
 			float modulator = pow(2,-m_hard*k);
 			m_child->Set(m_end+modulator*sin(k*(float(M_PI*m_phases)+d)-d));

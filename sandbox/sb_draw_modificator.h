@@ -43,11 +43,15 @@ namespace Sandbox {
 		float		m_scale_y;
 		float		m_angle;
         float       m_screw_x;
+        Vector2f    m_origin;
     public:
         TransformModificator();
         
         void SetTranslate(const Vector2f& tr) { m_translate = tr; }
 		const Vector2f& GetTranslate() const { return m_translate;}
+        void SetOrigin(const Vector2f& tr) { m_origin = tr; }
+        const Vector2f& GetOrigin() const { return m_origin;}
+        
         void SetTranslateX(float x) { m_translate.x = x; }
         float GetTranslateX() const { return m_translate.x;}
         void SetTranslateY(float y) { m_translate.y = y; }

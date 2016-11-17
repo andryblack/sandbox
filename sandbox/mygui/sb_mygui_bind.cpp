@@ -75,6 +75,7 @@
 
 #include "sb_mygui_render.h"
 #include "sb_mygui_widget_render.h"
+#include "sb_mygui_animated_layer.h"
 
 #include "sb_utf.h"
 
@@ -1161,6 +1162,12 @@ SB_META_END_KLASS_BIND()
 namespace Sandbox {
     namespace mygui {
         
+        void register_skin();
+        void register_widgets();
+        void unregister_skin();
+        void unregister_widgets();
+        
+        
         void register_widgets(lua_State* L);
         
         void register_mygui( lua_State* lua ) {
@@ -1238,6 +1245,22 @@ namespace Sandbox {
             //ctx->SetValue("settings", settings);
 
         }
+        
+        
+        void register_factory() {
+            MyGUI::FactoryManager::getInstance().registerFactory<AnimatedLayer>(MyGUI::LayerManager::getInstance().getCategoryName());
+            register_skin();
+            register_widgets();
+        }
+        
+        void unregister_factory() {
+            
+            unregister_skin();
+            unregister_widgets();
+            
+            MyGUI::FactoryManager::getInstance().unregisterFactory<AnimatedLayer>(MyGUI::LayerManager::getInstance().getCategoryName());
+        }
+
     }
 }
 

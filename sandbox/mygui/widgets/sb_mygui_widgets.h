@@ -14,8 +14,7 @@
 namespace Sandbox {
     
     namespace mygui {
-        void register_widgets();
-        void unregister_widgets();
+        
     }
 }
 

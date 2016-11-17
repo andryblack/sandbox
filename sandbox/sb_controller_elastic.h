@@ -25,8 +25,6 @@ namespace Sandbox {
 		void SetEnd(float e) { m_end = e;}
 		void SetPhases(size_t p) { m_phases = p;}
 		size_t GetPhases() const { return m_phases;}
-		void SetAmplitude(float a) { m_amplitude = a;}
-		float GetAmplitude() const { return m_amplitude;}
 	private:
 		ControllerPtr m_child;
 		float m_hard;

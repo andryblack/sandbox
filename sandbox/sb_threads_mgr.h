@@ -41,6 +41,8 @@ namespace Sandbox {
         float   m_speed;
 	};
     
+    typedef sb::intrusive_ptr<ThreadsMgr> ThreadsMgrPtr;
+    
     class PermanentThreadsMgr : public ThreadsMgr {
         SB_META_OBJECT
     public:

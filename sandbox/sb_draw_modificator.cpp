@@ -29,10 +29,12 @@ namespace Sandbox {
         g.SetTransform(tr);
     }
     void TransformModificator::Apply(Transform2d& tr) const {
+        tr.translate(m_origin);
         tr.translate(m_translate);
         if (m_screw_x != 0.0f)
             tr.screw_x(m_screw_x);
         tr.rotate(m_angle).scale(m_scale_x,m_scale_y);
+        tr.translate(-m_origin);
     }
     void TransformModificator::Transform(Vector2f& v) const {
         Transform2d tr;
