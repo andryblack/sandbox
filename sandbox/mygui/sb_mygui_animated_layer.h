@@ -21,6 +21,8 @@ namespace Sandbox {
         void SetColorModificator(const ColorModificatorPtr& ptr);
         ColorModificatorPtr GetColorModificator();
         
+        virtual MyGUI::ILayerNode* createChildItemNode();
+        
     protected:
         TransformModificatorPtr     m_transform;
         ColorModificatorPtr         m_color;

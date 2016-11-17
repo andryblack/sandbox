@@ -38,6 +38,16 @@ namespace Sandbox {
 
         
     }
+        
+        MyGUI::ILayerNode* AnimatedLayerNode::createChildItemNode()
+        {
+            LayerNode* layer = new AnimatedLayerNode(mLayer, this);
+            mChildItems.push_back(layer);
+            
+            mOutOfDate = true;
+            
+            return layer;
+        }
     
     
         void AnimatedLayerNode::SetTransformModificator(const TransformModificatorPtr& ptr) {
