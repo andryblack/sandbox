@@ -816,10 +816,18 @@ SB_META_METHOD(setImageTexture)
 bind(method("setImage", &set_image_proxy));
 SB_META_END_KLASS_BIND()
 
+
+static void TextBox_setCaptionWithReplacing( MyGUI::TextBox* tb, const MyGUI::UString& s) {
+    tb->setCaptionWithReplacing(s);
+}
+static const MyGUI::UString& TextBox_getCaption( const MyGUI::TextBox* tb) {
+    return tb->getCaption();
+}
+
 SB_META_DECLARE_OBJECT(MyGUI::TextBox, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::TextBox)
 SB_META_PROPERTY_RO(textSize, getTextSize)
-SB_META_PROPERTY_RW(caption, getCaption, setCaption)
+bind(property_rw("caption", &TextBox_getCaption, &TextBox_setCaptionWithReplacing));
 SB_META_PROPERTY_RW(fontName, getFontName, setFontName)
 SB_META_PROPERTY_RW(fontHeight, getFontHeight, setFontHeight)
 SB_META_PROPERTY_RW(textAlign, getTextAlign, setTextAlign)
