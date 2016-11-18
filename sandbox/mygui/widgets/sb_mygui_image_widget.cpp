@@ -4,7 +4,7 @@
 #include "MyGUI_RenderItem.h"
 #include "sb_graphics.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ImageWidgetBase,MyGUI::Widget)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ImageWidgetBase,Sandbox::mygui::AnimatedWidget)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ImageWidget,Sandbox::mygui::ImageWidgetBase)
 
 namespace Sandbox {

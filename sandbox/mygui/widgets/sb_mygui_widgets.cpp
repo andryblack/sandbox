@@ -131,6 +131,8 @@ namespace Sandbox {
             
             register_ScrollList(L);
             
+            luabind::ExternClass<AnimatedWidget>(L);
+            
             luabind::ExternClass<ImageWidgetBase>(L);
             luabind::ExternClass<ImageWidget>(L);
             luabind::ExternClass<MaskImageWidget>(L);
@@ -142,7 +144,7 @@ namespace Sandbox {
             luabind::ExternClass<SelectableWidget>(L);
             luabind::ExternClass<StateVisibleWidget>(L);
             luabind::ExternClass<ClientWidget>(L);
-            luabind::ExternClass<AnimatedWidget>(L);
+            
         }
     }
     

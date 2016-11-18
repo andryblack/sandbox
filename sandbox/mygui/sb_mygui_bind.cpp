@@ -620,6 +620,8 @@ SB_META_ENUM_BIND(MyGUI::MouseButton,namespace MyGUI,
 
 
 SB_META_DECLARE_OBJECT(MyGUI::IObject, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::IObject)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::WidgetStyle,void);
 SB_META_ENUM_BIND(MyGUI::WidgetStyle,namespace MyGUI,
@@ -939,7 +941,8 @@ SB_META_DECLARE_OBJECT(MyGUI::MultiListItem, MyGUI::TextBox)
 
 
 SB_META_DECLARE_OBJECT(MyGUI::ISerializable, MyGUI::IObject)
-
+SB_META_BEGIN_KLASS_BIND(MyGUI::ISerializable)
+SB_META_END_KLASS_BIND()
 //static int mygui_ifont_get_string_width( MyGUI::IFont* font, const char* str) {
 //    if (!font || !str) return 0;
 //    int w = 0;
@@ -963,6 +966,8 @@ SB_META_DECLARE_OBJECT(MyGUI::IResource, MyGUI::ISerializable)
 SB_META_DECLARE_OBJECT(MyGUI::IStateInfo, MyGUI::ISerializable)
 
 SB_META_DECLARE_OBJECT(MyGUI::ILayer, MyGUI::ISerializable)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ILayer)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ILayerNode, MyGUI::IObject)
 
@@ -970,6 +975,8 @@ SB_META_DECLARE_OBJECT(MyGUI::LayerNode, MyGUI::ILayerNode)
 
 SB_META_DECLARE_OBJECT(MyGUI::SharedLayer, MyGUI::ILayer)
 SB_META_DECLARE_OBJECT(MyGUI::OverlappedLayer, MyGUI::ILayer)
+SB_META_BEGIN_KLASS_BIND(MyGUI::OverlappedLayer)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::SharedLayerNode, MyGUI::ILayerNode)
 
@@ -1107,6 +1114,8 @@ SB_META_METHOD(addItem)
 SB_META_METHOD(removeItem)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::AnimatedLayer)
+SB_META_END_KLASS_BIND()
 
 static int gui_find_widget_proxy(lua_State* L) {
     MyGUI::Gui* self = Sandbox::luabind::stack<MyGUI::Gui*>::get(L, 1);
@@ -1176,6 +1185,8 @@ namespace Sandbox {
                     ("ITEM_NONE",MyGUI::ITEM_NONE);
             }
             
+            luabind::ExternClass<MyGUI::IObject>(lua);
+            luabind::ExternClass<MyGUI::ISerializable>(lua);
             
             luabind::RawClass<MyGUI::WidgetStyle>(lua);
             //luabind::Enum<MyGUI::WidgetStyle::Enum>(lua);
@@ -1232,6 +1243,10 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ControllerRepeatClick>(lua);
             
             luabind::ExternClass<ScrollArea>(lua);
+            
+            luabind::ExternClass<MyGUI::ILayer>(lua);
+            luabind::ExternClass<MyGUI::OverlappedLayer>(lua);
+            luabind::ExternClass<AnimatedLayer>(lua);
             
             register_widgets(lua);
             

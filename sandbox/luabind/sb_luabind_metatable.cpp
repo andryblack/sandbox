@@ -75,16 +75,17 @@ namespace Sandbox {
             get_create_table_impl<':',2>(L, InplaceString(name),prealloc);
         }
 
-        static void get_table(lua_State* L,const InplaceString& name) {
+        static bool get_table(lua_State* L,const InplaceString& name, bool do_error = false) {
             const char* other = name.find(':');
             sb::string first = InplaceString(name.begin(),other).str();
             lua_getglobal(L,first.c_str());
             if (!lua_istable(L, -1)) {
                 lua_pop(L, 1);
-                lua_unregistered_error( L ,name.begin() );
-                return;
+                if (do_error)
+                    lua_unregistered_error( L ,name.begin() );
+                return false;
             }
-            if (*other==0) return;
+            if (*other==0) return true;
             other+=2;
             InplaceString tail(other,name.end());
             while (!tail.empty()) {
@@ -93,13 +94,15 @@ namespace Sandbox {
                 lua_getfield(L, -1, head.str().c_str() );
                 if (!lua_istable(L, -1)) {
                     lua_pop(L, 2);
-                    lua_unregistered_error( L ,name.begin() );
-                    return;
+                    if (do_error)
+                        lua_unregistered_error( L ,name.begin() );
+                    return false;
                 }
                 lua_remove(L, -2);
                 if (*other==0) break;
                 tail = InplaceString(other+2,name.end());
             }
+            return true;
         }
         
         void lua_set_metatable( lua_State* L, const data_holder& holder ) {
@@ -147,6 +150,11 @@ namespace Sandbox {
                 lua_setfield(L, -2, name+2);        /// val tbl
                 lua_pop(L, 2);
             }
+        }
+        
+        static bool lua_get_metatable( lua_State* L, const char* path) {
+            InplaceString full_path(path);
+            return get_table(L,full_path,false);
         }
         
         static int destructor_func( lua_State* L ) {
@@ -379,7 +387,13 @@ namespace Sandbox {
         /// -1 - class-metatable
         void lua_register_metatable(lua_State* L,const meta::type_info* info) {
             if (info->parent.info!=meta::type<void>::info() ) {
-                lua_get_create_table(L,info->parent.info->name,2);  /// [metatatable] ptbl
+                if (!lua_get_metatable(L,info->parent.info->name)) {
+                    LogError() << "unregistered parent " << info->parent.info->name;
+                    sb_assert(false);
+                    lua_pop(L, 1);
+                    lua_get_create_table(L, info->parent.info->name, 2);
+                }
+                //lua_get_create_table(L,info->parent.info->name,2);  /// [metatatable] ptbl
                 lua_rawseti(L, -2, mt_indexes::__parent);
                 lua_rawgeti(L, -1, mt_indexes::__metatable);
                 lua_rawgeti(L, -2, mt_indexes::__parent);                 /// mntbl raw_ptr parent

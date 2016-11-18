@@ -6,7 +6,7 @@
 #include "MyGUI_Gui.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ObjectSubSkin,MyGUI::ISubWidgetRect)
-SB_META_DECLARE_OBJECT(Sandbox::mygui::SceneObjectWidget,MyGUI::Widget)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::SceneObjectWidget,Sandbox::mygui::AnimatedWidget)
 
 
 namespace Sandbox {

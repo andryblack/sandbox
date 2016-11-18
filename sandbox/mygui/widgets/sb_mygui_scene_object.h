@@ -11,7 +11,7 @@
 
 #include "meta/sb_meta.h"
 #include "sb_scene_object.h"
-#include "MyGUI_Widget.h"
+#include "sb_mygui_animated_widget.h"
 #include "MyGUI_SubSkin.h"
 
 namespace Sandbox {
@@ -35,7 +35,7 @@ namespace Sandbox {
             MyGUI::RenderItem* mRenderItem;
         };
         
-        class SceneObjectWidget : public MyGUI::Widget {
+        class SceneObjectWidget : public AnimatedWidget {
             MYGUI_RTTI_DERIVED( SceneObjectWidget )
         public:
             SceneObjectWidget();

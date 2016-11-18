@@ -11,7 +11,7 @@
 
 #include "meta/sb_meta.h"
 #include "sb_rt_scene.h"
-#include "MyGUI_Widget.h"
+#include "sb_mygui_animated_widget.h"
 #include "MyGUI_SubSkin.h"
 #include "MyGUI_MainSkin.h"
 #include "MyGUI_CommonStateInfo.h"
@@ -24,7 +24,7 @@ namespace Sandbox {
     
     namespace mygui {
         
-        class ImageWidgetBase : public MyGUI::Widget {
+        class ImageWidgetBase : public AnimatedWidget {
             MYGUI_RTTI_DERIVED( ImageWidgetBase )
         public:
             ImageWidgetBase();
