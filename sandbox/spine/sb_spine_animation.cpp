@@ -206,6 +206,7 @@ namespace Sandbox {
                 Sandbox::Color c(skeleton->r*slot->r,skeleton->g*slot->g,skeleton->b*slot->b,skeleton->a*slot->a);
                 if (c.a <= 0.0f)
                     continue;
+                c.clamp();
                 gr.SetColor(clr*c);
                 
                 Image img(tex,region->x,region->y,
