@@ -9,7 +9,7 @@
 #include "../sb_mygui_render.h"
 #include <sbstd/sb_platform.h>
 #include "sb_graphics.h"
-#include "sb_mygui_animated_layer.h"
+#include "../sb_mygui_animated_layer.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::AnimatedWidget, MyGUI::Widget)
 
