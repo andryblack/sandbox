@@ -39,6 +39,7 @@ namespace Sandbox {
             LUA_CHECK_STACK(0)
             impl::raw_klass_registrator<T> kr(L);
             lua_create_metatable(L);
+            kr.register_is_a();
             meta::bind_type<T>::bind( kr );
             lua_register_metatable(L,meta::type<T>::info());
         }
@@ -47,6 +48,7 @@ namespace Sandbox {
             LUA_CHECK_STACK(0)
             impl::klass_registrator<T> kr(L);
             lua_create_metatable(L);
+            kr.register_is_a();
             meta::bind_type<T>::bind( kr );
             lua_register_metatable(L,meta::type<T>::info());
         }
@@ -55,6 +57,7 @@ namespace Sandbox {
             LUA_CHECK_STACK(0)
             impl::shared_klass_registrator<T> kr(L);
             lua_create_metatable(L);
+            kr.register_is_a();
             meta::bind_type<T>::bind( kr );
             lua_register_metatable(L,meta::type<T>::info());
         }

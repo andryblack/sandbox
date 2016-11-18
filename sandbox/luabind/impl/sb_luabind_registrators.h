@@ -57,7 +57,24 @@ namespace Sandbox {
         template <class T>
         class klass_registrator : public registrator_base {
         public:
-            explicit klass_registrator( lua_State* L ) : registrator_base(L) {}
+            static int is_a(lua_State* L) {
+                if (!lua_isuserdata(L, 1))
+                    lua_pushboolean(L, 0);
+                else {
+                    data_holder* holder = reinterpret_cast<data_holder*>(lua_touserdata(L, 1));
+                    T* res = get_object_ptr<T>(holder);
+                    lua_pushboolean(L, res ? 1 : 0);
+                }
+                return 1;
+            }
+            explicit klass_registrator( lua_State* L ) : registrator_base(L) {
+                
+            }
+            void register_is_a() {
+                lua_pushstring(m_L, "is_a");
+                lua_pushcclosure(m_L, &is_a, 0); /// name method
+                lua_rawset(m_L, -3);
+            }
             template <class U>
             void operator()( const meta::property_holder<T, U>& prop ) {
                 typedef typename meta::property_holder<T, U>::prop_ptr prop_ptr;

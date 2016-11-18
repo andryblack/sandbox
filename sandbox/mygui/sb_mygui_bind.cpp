@@ -513,11 +513,16 @@ SB_META_PROPERTY_RO(isDefault, isDefault)
 SB_META_STATIC_METHOD(parse)
 SB_META_END_KLASS_BIND()
 
+static MyGUI::IntPoint IntPoint_fromString(const char* value) {
+    return MyGUI::utility::parseValue<MyGUI::IntPoint>(value);
+}
+
 SB_META_DECLARE_KLASS(MyGUI::IntPoint, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::IntPoint)
 SB_META_CONSTRUCTOR((int,int))
 SB_META_PROPERTY(left)
 SB_META_PROPERTY(top)
+bind( static_method( "fromString" , IntPoint_fromString ) );
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::FloatPoint, void)
