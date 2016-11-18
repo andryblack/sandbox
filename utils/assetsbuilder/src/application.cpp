@@ -145,6 +145,9 @@ static sb::string append_path(const sb::string& dir, const sb::string& name) {
     return res;
 }
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::FileProvider)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_OBJECT(Application, Sandbox::FileProvider);
 SB_META_BEGIN_KLASS_BIND(Application)
 SB_META_METHOD(check_texture)
@@ -317,6 +320,7 @@ void Application::Bind(lua_State* L) {
     
     Sandbox::luabind::Class<Texture>(L);
     Sandbox::luabind::Class<TextureData>(L);
+    Sandbox::luabind::ExternClass<FileProvider>(L);
     Sandbox::luabind::ExternClass<Application>(L);
     Sandbox::luabind::ExternClass<SkeletonConvert>(L);
     Sandbox::luabind::ExternClass<SpineConvert>(L);
