@@ -229,6 +229,7 @@ spTrackEntry* _spAnimationState_expandToIndex (spAnimationState* self, int index
 	return 0;
 }
 
+
 void _spAnimationState_setCurrent (spAnimationState* self, int index, spTrackEntry* entry) {
 	_spAnimationState* internal = SUB_CAST(_spAnimationState, self);
 
@@ -239,8 +240,11 @@ void _spAnimationState_setCurrent (spAnimationState* self, int index, spTrackEnt
 
 		if (current->listener) current->listener(self, index, SP_ANIMATION_END, 0, 0);
 		if (self->listener) self->listener(self, index, SP_ANIMATION_END, 0, 0);
-
-		entry->mixDuration = spAnimationStateData_getMix(self->data, current->animation, entry->animation);
+        if (current->animation == entry->animation && current->time >= (current->endTime-0.5f)) {
+            entry->mixDuration = 0;
+        } else {
+            entry->mixDuration = spAnimationStateData_getMix(self->data, current->animation, entry->animation);
+        }
 		if (entry->mixDuration > 0) {
 			entry->mixTime = 0;
 			/* If a mix is in progress, mix from the closest animation. */
@@ -310,9 +314,12 @@ spTrackEntry* spAnimationState_addAnimation (spAnimationState* self, int trackIn
 		self->tracks[trackIndex] = entry;
 
 	if (delay <= 0) {
-		if (last)
-			delay += last->endTime - spAnimationStateData_getMix(self->data, last->animation, animation);
-		else
+        if (last) {
+            if (last->animation != animation)
+                delay += last->endTime - spAnimationStateData_getMix(self->data, last->animation, animation);
+            else
+                delay += last->endTime;
+        } else
 			delay = 0;
 	}
 	entry->delay = delay;

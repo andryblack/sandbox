@@ -542,7 +542,8 @@ void _spAttachmentTimeline_apply (const spTimeline* timeline, spSkeleton* skelet
 	if (time < self->frames[0]) {
 		if (lastTime > time) _spAttachmentTimeline_apply(timeline, skeleton, lastTime, (float)INT_MAX, 0, 0, 0);
 		return;
-	} else if (lastTime > time) /**/
+	}
+    else if (lastTime > time) /**/
 		lastTime = -1;
 
 	frameIndex = time >= self->frames[self->framesCount - 1] ?
@@ -572,9 +573,9 @@ void _spAttachmentTimeline_dispose (spTimeline* timeline) {
 }
 
 int _spAttachmentTimeline_compare(const spTimeline* timeline1,const spTimeline* timeline2) {
-    const spAttachmentTimeline* self = SUB_CAST(const spAttachmentTimeline, timeline1);
-    const spAttachmentTimeline* other = SUB_CAST(const spAttachmentTimeline, timeline2);
-    return self->slotIndex == other->slotIndex;
+    //const spAttachmentTimeline* self = SUB_CAST(const spAttachmentTimeline, timeline1);
+    //const spAttachmentTimeline* other = SUB_CAST(const spAttachmentTimeline, timeline2);
+    return 0;//self->slotIndex == other->slotIndex;
 }
 
 static const _spTimelineVtable spAttachmentTimeline_vtable = {
