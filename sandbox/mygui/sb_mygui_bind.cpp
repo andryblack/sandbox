@@ -513,16 +513,12 @@ SB_META_PROPERTY_RO(isDefault, isDefault)
 SB_META_STATIC_METHOD(parse)
 SB_META_END_KLASS_BIND()
 
-static MyGUI::IntPoint IntPoint_fromString(const char* value) {
-    return MyGUI::utility::parseValue<MyGUI::IntPoint>(value);
-}
-
 SB_META_DECLARE_KLASS(MyGUI::IntPoint, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::IntPoint)
 SB_META_CONSTRUCTOR((int,int))
 SB_META_PROPERTY(left)
 SB_META_PROPERTY(top)
-bind( static_method( "fromString" , IntPoint_fromString ) );
+SB_META_STATIC_METHOD(parse)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::FloatPoint, void)
@@ -530,6 +526,7 @@ SB_META_BEGIN_KLASS_BIND(MyGUI::FloatPoint)
 SB_META_CONSTRUCTOR((float,float))
 SB_META_PROPERTY(left)
 SB_META_PROPERTY(top)
+SB_META_STATIC_METHOD(parse)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::IntSize, void)
@@ -537,6 +534,7 @@ SB_META_BEGIN_KLASS_BIND(MyGUI::IntSize)
 SB_META_CONSTRUCTOR((int,int))
 SB_META_PROPERTY(width)
 SB_META_PROPERTY(height)
+SB_META_STATIC_METHOD(parse)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::IntCoord, void)
@@ -550,16 +548,19 @@ SB_META_PROPERTY_RO(right, right)
 SB_META_PROPERTY_RO(bottom, bottom)
 SB_META_PROPERTY_RO(point, point)
 SB_META_PROPERTY_RO(size, size)
+SB_META_STATIC_METHOD(parse)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::IntRect, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::IntRect)
+SB_META_CONSTRUCTOR((int,int,int,int))
 SB_META_PROPERTY(left)
 SB_META_PROPERTY(top)
 SB_META_PROPERTY(right)
 SB_META_PROPERTY(bottom)
 SB_META_PROPERTY_RO(width, width)
 SB_META_PROPERTY_RO(height, height)
+SB_META_STATIC_METHOD(parse)
 SB_META_END_KLASS_BIND()
 
 static int create_colour(lua_State* L) {
