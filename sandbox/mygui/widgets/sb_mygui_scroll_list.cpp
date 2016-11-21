@@ -142,7 +142,7 @@ namespace Sandbox {
             m_visible_count = 0;
             m_num_subitems = 1;
             m_vertical = false;
-            m_align_on_cell = true;
+            m_align_on_cell = false;
             m_selected_index = MyGUI::ITEM_NONE;
             m_top_index = MyGUI::ITEM_NONE;
             Scroll::SetVEnabled(m_vertical);
