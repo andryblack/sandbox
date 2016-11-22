@@ -93,6 +93,69 @@ namespace Sandbox {
         return m_current_volume == m_ref_volume;
     }
     
+    
+    MusicInstance::MusicInstance( GHL::MusicInstance* mus) : m_music(mus),
+    m_volume(1.0f),
+    m_fade_volume(1.0f),
+    m_fade_speed(0.0f) {
+        
+    }
+    MusicInstance::~MusicInstance() {
+        if (m_music) {
+            m_music->Release();
+            m_music = 0;
+        }
+    }
+    
+    void MusicInstance::Play(bool loop) {
+        if (m_music) {
+            m_music->SetVolume(m_volume * m_fade_volume);
+            m_music->Play(loop);
+        }
+    }
+    void MusicInstance::Pause() {
+        if (m_music) {
+            m_music->Pause();
+        }
+    }
+    
+    void MusicInstance::Stop() {
+        if (m_music) {
+            m_music->Stop();
+        }
+    }
+    void MusicInstance::FadeOut(float time) {
+        m_fade_speed = -1.0f / time;
+    }
+    void MusicInstance::FadeIn(float time) {
+        m_fade_volume = 0.0f;
+        m_fade_speed = 1.0f;
+        if (m_music) m_music->SetVolume(m_volume * m_fade_volume);
+    }
+    
+    bool MusicInstance::Update( float dt ) {
+        if (!m_music) return true;
+        if (m_fade_speed!=0.0f) {
+            m_fade_volume += m_fade_speed * dt;
+            if (m_fade_volume < 0.0f) {
+                m_fade_volume = 0.0f;
+                if (m_music) m_music->Stop();
+                return true;
+            }
+            if (m_fade_volume > 1.0f) {
+                m_fade_volume = 1.0f;
+                m_fade_speed = 0.0f;
+            }
+            if (m_music) m_music->SetVolume(m_volume * m_fade_volume);
+        }
+        return false;
+    }
+    void MusicInstance::SetVolume( float vol ) {
+        m_volume = vol;
+        if (m_music) m_music->SetVolume(m_volume * m_fade_volume);
+    }
+    
+    
     void    Sound::Play() {
         if (!m_effect) return;
         m_mgr->m_sound->PlayEffect(m_effect,m_mgr->m_sounds_volume,0.0f,0);
@@ -120,16 +183,13 @@ namespace Sandbox {
         return res;
     }
     
-    SoundManager::SoundManager( ) : m_sound(0),m_resources(0),m_music(0) {
+    SoundManager::SoundManager( ) : m_sound(0),m_resources(0) {
         m_sounds_volume = 70.0f;
         m_music_volume = 70.0f;
     }
     
     SoundManager::~SoundManager() {
-        if (m_music) {
-            m_music->Release();
-            m_music = 0;
-        }
+        
     }
     void    SoundManager::Init(GHL::Sound* snd, Resources* res) {
         m_sound = snd;
@@ -138,10 +198,8 @@ namespace Sandbox {
     
     void SoundManager::Deinit() {
         m_sounds.clear();
-        if (m_music) {
-            m_music->Release();
-            m_music = 0;
-        }
+        m_music.reset();
+        m_fade_outs_musics.clear();
         m_sound = 0;
         m_resources = 0;
     }
@@ -212,27 +270,48 @@ namespace Sandbox {
             else
                 ++it;
         }
+        for (MusicsList::iterator it = m_fade_outs_musics.begin();it!=m_fade_outs_musics.end();) {
+            if ((*it)->Update(dt))
+                it = m_fade_outs_musics.erase(it);
+            else
+                ++it;
+        }
+        if (m_music && m_music->Update(dt)) {
+            m_music.reset();
+        }
     }
     
     void SoundManager::PlayMusic(const char* filename,bool loop) {
+        PlayMusicEx(filename, loop, 3.0f, 3.0f);
+    }
+    
+    void SoundManager::PlayMusicEx(const char *filename, bool loop, float fade_in, float fade_out_current) {
         if (!m_resources)
             return;
         if (!m_sound)
             return;
         if (m_music) {
-            m_music->Stop();
-            m_music->Release();
-            m_music = 0;
+            if (fade_out_current > 0.0f) {
+                m_music->FadeOut(fade_out_current);
+                m_fade_outs_musics.push_back(m_music);
+            } else {
+                m_music->Stop();
+            }
+            m_music.reset();
         }
         sb::string fullname = m_sounds_dir + filename;
         GHL::DataStream* ds = m_resources->OpenFile(fullname.c_str());
         if (!ds) {
             return;
         }
-        m_music = m_sound->OpenMusic(ds);
+        GHL::MusicInstance* music = m_sound->OpenMusic(ds);
         ds->Release();
-        if (m_music) {
+        if (music) {
+            m_music.reset( new MusicInstance(music) );
             m_music->SetVolume(m_music_volume);
+            if (fade_in > 0.0f) {
+                m_music->FadeIn(fade_in);
+            }
             m_music->Play(loop);
         }
     }

@@ -627,6 +627,10 @@ namespace Sandbox {
 	
         Update(dt);
 
+        if (m_sound_mgr) {
+            m_sound_mgr->Update(dt);
+        }
+        
         PlatformExtension::OnTimerAll(this);
         
 #ifdef SB_USE_MYGUI
