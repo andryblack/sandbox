@@ -129,8 +129,12 @@ namespace Sandbox {
         if (m_state == scroll_free) {
             Sandbox::Vector2f offset = GetOffset();
             Vector2f nmove = (Normalize(offset,false)-offset);
-            float len = m_last_speed.length() + nmove.length();
-            if (len < 5.0f) {
+            float nlen = nmove.length();
+            float len = m_last_speed.length() + nlen;
+            if (len < 5.0f && nlen < 0.5f) {
+                if (nlen != 0.0f) {
+                    Move(nmove);
+                }
                 m_last_speed = Vector2f(0,0);
                 m_state = scroll_none;
                 OnScrollEnd();
