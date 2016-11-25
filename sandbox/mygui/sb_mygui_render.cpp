@@ -246,7 +246,7 @@ namespace Sandbox {
             m_graphics->SetBlendMode(BLEND_MODE_ALPHABLEND);
             m_graphics->BeginDrawTriangles(TexturePtr());
 
-            onRenderToTarget(this, true);
+            onRenderToTarget(this, false);
             m_graphics->Flush();
 
         }

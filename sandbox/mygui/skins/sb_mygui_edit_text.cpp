@@ -196,9 +196,11 @@ namespace Sandbox
 
 	void EditText::setCaption(const MyGUI::UString& _value)
 	{
-		mCaption = _value;
-		mTextOutDate = true;
-
+        if (mCaption != _value) {
+            mCaption = _value;
+            mTextOutDate = true;
+        }
+		
         if (mFont) {
             mFont->AllocateSymbols(_value.c_str());
         }
