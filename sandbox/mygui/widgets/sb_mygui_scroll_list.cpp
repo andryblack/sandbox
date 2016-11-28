@@ -401,6 +401,8 @@ namespace Sandbox {
             ScrollView::updateView();
             updateContent();
             Base::updateView();
+            Scroll::SetVEnabled(m_vertical);
+            Scroll::SetHEnabled(!m_vertical);
             ScrollArea::SetOffset(Normalize(GetOffset(), true));
             updateWidgets();
         }
