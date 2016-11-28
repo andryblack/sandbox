@@ -156,6 +156,18 @@ namespace Sandbox {
         }
     }
     
+    Rectf SpineAnimation::CalcBoundingBox() const {
+        spSkeletonBounds* bounds = spSkeletonBounds_create();
+        spSkeletonBounds_update(bounds, m_skeleton, true);
+        Rectf r;
+        r.x = bounds->minX;
+        r.y = bounds->minY;
+        r.w = bounds->maxX - bounds->minX;
+        r.h = bounds->maxY - bounds->minY;
+        spSkeletonBounds_dispose(bounds);
+        return r;
+    }
+    
     SpineSceneObject::SpineSceneObject(const SpineAnimationPtr& animation) : m_animation(animation) {
         
     }

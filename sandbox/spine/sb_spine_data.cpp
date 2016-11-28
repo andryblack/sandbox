@@ -45,6 +45,13 @@ namespace Sandbox {
         if (m_skeleton) spSkeletonData_dispose(m_skeleton);
     }
     
+    Sizef SpineData::GetSize() const {
+        if (m_skeleton) {
+            return Sizef(m_skeleton->width,m_skeleton->height);
+        }
+        return Sizef();
+    }
+    
     size_t SpineData::GetSlotsCount() const {
         return m_skeleton->slotsCount;
     }

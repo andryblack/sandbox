@@ -5,6 +5,8 @@
 #include "sb_scene_object.h"
 #include <spine/AnimationState.h>
 #include "sb_signal.h"
+#include "sb_rect.h"
+
 
 struct spSkeleton;
 struct spAnimationState;
@@ -40,6 +42,7 @@ namespace Sandbox {
         
         virtual void Clear();
         
+        Rectf CalcBoundingBox() const;
     private:
         SpineDataPtr    m_data;
         spSkeleton*     m_skeleton;

@@ -8,6 +8,7 @@
 #include "sb_texture.h"
 #include "sb_file_provider.h"
 #include "sb_event.h"
+#include "sb_size.h"
 
 struct spAtlas;
 struct spSkeletonData;
@@ -46,6 +47,7 @@ namespace Sandbox {
                                  const char* skeleton_file,
                                  FileProvider* files,
                                  TextureProvider* textures);
+        Sizef GetSize() const;
     protected:
         SpineData();
         spAtlas*   m_atlas;
