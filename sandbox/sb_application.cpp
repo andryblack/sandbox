@@ -133,6 +133,7 @@ SB_META_PROPERTY_RO(UTCOffset, GetUTCOffset)
 SB_META_PROPERTY_RO(SystemLanguage, GetSystemLanguage)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 SB_META_PROPERTY_WO(FrameInterval, SetFrameInterval)
+SB_META_PROPERTY_WO(ResizeableWindow, SetResizeableWindow)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 bind( method( "StoreProfileFile", &Sandbox::Application_StoreProfileFile));
 bind( method( "LoadProfileFile", &Sandbox::Application_LoadProfileFile));
@@ -739,6 +740,12 @@ namespace Sandbox {
         if (m_system) {
             GHL::Int32 frame_interval = interval;
             m_system->SetDeviceState(GHL::DEVICE_STATE_FRAME_INTERVAL, &frame_interval);
+        }
+    }
+    
+    void    Application::SetResizeableWindow(bool v) {
+        if (m_system) {
+            m_system->SetDeviceState(GHL::DEVICE_STATE_RESIZEABLE_WINDOW, &v);
         }
     }
     

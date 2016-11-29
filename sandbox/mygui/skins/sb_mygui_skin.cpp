@@ -10,6 +10,8 @@
 #include "sb_mygui_text_skin.h"
 #include "sb_mygui_edit_text.h"
 #include "sb_mygui_simple_text.h"
+#include "sb_mygui_half_stretch.h"
+
 #include "../sb_mygui_render.h"
 #include "sb_graphics.h"
 
@@ -345,10 +347,12 @@ namespace Sandbox {
             factory.registerFactory<KeepAspectMaskSubSkin>(category_name);
             factory.registerFactory<EditText>(category_name);
             factory.registerFactory<SimpleText>(category_name);
+            factory.registerFactory<SubSkinHalfHStretch>(category_name);
             
             const std::string& state_category_name = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
             
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "MaskSubSkin");
+            factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "SubSkinHalfHStretch");
             factory.registerFactory<MaskSetSubSkinState>(state_category_name, "MaskSetSubSkin");
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "ObjectSubSkin");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "AutoSizeText");
@@ -379,6 +383,7 @@ namespace Sandbox {
             factory.unregisterFactory<KeepAspectMaskSubSkin>(category_name);
             factory.unregisterFactory<EditText>(category_name);
             factory.unregisterFactory<SimpleText>(category_name);
+            factory.unregisterFactory<SubSkinHalfHStretch>(category_name);
             
             const std::string& state_category_name = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
             
@@ -393,6 +398,7 @@ namespace Sandbox {
             factory.unregisterFactory(state_category_name, "ColorizedSubSkin");
             factory.unregisterFactory(state_category_name, "EditText");
             factory.unregisterFactory(state_category_name, "SimpleText");
+            factory.unregisterFactory(state_category_name, "SubSkinHalfHStretch");
         }
         
     }

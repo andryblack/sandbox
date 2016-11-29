@@ -51,6 +51,7 @@ namespace Sandbox {
         void    SetMouseContext(const LuaContextPtr& ctx );
         void    SetKeyboardContext(const LuaContextPtr& ctx );
         void    SetFrameInterval(int interval);
+        void    SetResizeableWindow(bool v);
         
         GHL::System* GetSystem() const { return m_system;}
         
