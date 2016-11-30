@@ -348,13 +348,15 @@ namespace Sandbox {
             factory.registerFactory<EditText>(category_name);
             factory.registerFactory<SimpleText>(category_name);
             factory.registerFactory<SubSkinHalfHStretch>(category_name);
+            factory.registerFactory<SubSkinHalfVStretch>(category_name);
             
             const std::string& state_category_name = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
             
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "MaskSubSkin");
-            factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "SubSkinHalfHStretch");
             factory.registerFactory<MaskSetSubSkinState>(state_category_name, "MaskSetSubSkin");
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "ObjectSubSkin");
+            factory.registerFactory<SubSkinHalfStateInfo>(state_category_name, "SubSkinHalfHStretch");
+            factory.registerFactory<SubSkinHalfStateInfo>(state_category_name, "SubSkinHalfVStretch");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "AutoSizeText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "CroppedText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "MaskText");
@@ -384,6 +386,7 @@ namespace Sandbox {
             factory.unregisterFactory<EditText>(category_name);
             factory.unregisterFactory<SimpleText>(category_name);
             factory.unregisterFactory<SubSkinHalfHStretch>(category_name);
+            factory.unregisterFactory<SubSkinHalfVStretch>(category_name);
             
             const std::string& state_category_name = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
             
@@ -399,6 +402,7 @@ namespace Sandbox {
             factory.unregisterFactory(state_category_name, "EditText");
             factory.unregisterFactory(state_category_name, "SimpleText");
             factory.unregisterFactory(state_category_name, "SubSkinHalfHStretch");
+            factory.unregisterFactory(state_category_name, "SubSkinHalfVStretch");
         }
         
     }
