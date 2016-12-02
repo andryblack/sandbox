@@ -137,6 +137,19 @@ namespace Sandbox {
             mSeparate = true;
         }
         
+        static void get_sub_image(Image& img,MaskSetSubSkin* sub) {
+            MyGUI::ITexture* tex = sub->getTexture();
+            if (tex) {
+                MyGUI::FloatRect fill_texture_uv = sub->getUVSet();
+                TexturePtr fill_texture = static_cast<TextureImpl*>(tex)->GetTexture();
+                img.SetTexture(fill_texture);
+                img.SetTextureRect(fill_texture_uv.left*fill_texture->GetWidth(),
+                                   fill_texture_uv.top*fill_texture->GetHeight(),
+                                   fill_texture_uv.width()*fill_texture->GetWidth(),
+                                   fill_texture_uv.height()*fill_texture->GetHeight());
+                img.SetSize(img.GetTextureW(), img.GetTextureH());
+            }
+        }
         
         void MaskSubSkin::doRender(MyGUI::IRenderTarget* _target) {
             if (!mVisible)
@@ -148,39 +161,38 @@ namespace Sandbox {
                     MaskImageWidget* widget = widget_p->castType<MaskImageWidget>(false);
                     
                     ShaderPtr shader;
-                    TexturePtr fill_texture;
-                    MyGUI::FloatRect fill_texture_uv;
+                    Image fill_image;
+                    
+                    //TexturePtr fill_texture;
+                    //MyGUI::FloatRect fill_texture_uv;
                     
                     if (widget) {
                         ImagePtr    img = widget->getImage();
                         if (img && img->GetTexture()) {
-                            fill_texture = img->GetTexture();
-                            float itw = 1.0f / img->GetTexture()->GetWidth();
-                            float ith = 1.0f / img->GetTexture()->GetHeight();
-                            
-                            fill_texture_uv.set( img->GetTextureX() * itw,
-                                                img->GetTextureY() * ith,
-                                                (img->GetTextureX() + img->GetTextureW()) * itw,
-                                                (img->GetTextureY() + img->GetTextureH()) * ith);
+//                            fill_texture = img->GetTexture();
+//                            float itw = 1.0f / img->GetTexture()->GetWidth();
+//                            float ith = 1.0f / img->GetTexture()->GetHeight();
+//                            
+//                            fill_texture_uv.set( img->GetTextureX() * itw,
+//                                                img->GetTextureY() * ith,
+//                                                (img->GetTextureX() + img->GetTextureW()) * itw,
+//                                                (img->GetTextureY() + img->GetTextureH()) * ith);
+                            fill_image = *img;
                         }
                         shader = widget->getShader();
                     }
-                    if (!fill_texture) {
+                    if (!fill_image.GetTexture()) {
                         MyGUI::ISubWidgetRect* main = widget_p->getSubWidgetMain();
                         if (main) {
                             MaskSetSubSkin* sub = main->castType<MaskSetSubSkin>(false);
                             if (sub) {
-                                MyGUI::ITexture* tex = sub->getTexture();
-                                fill_texture_uv = sub->getUVSet();
-                                if (tex) {
-                                    fill_texture = static_cast<TextureImpl*>(tex)->GetTexture();
-                                }
+                                get_sub_image(fill_image,sub);
                             }
                         }
                     }
                     
                     
-                    if (!fill_texture) {
+                    if (!fill_image.GetTexture())  {
                         Base::doRender(_target);
                         return;
                     }
@@ -189,7 +201,7 @@ namespace Sandbox {
                     
                     if (g) {
                         g->SetShader(shader);
-                        setMask(*g, fill_texture, fill_texture_uv);
+                        setMask(*g, fill_image);
                         Base::doRender(_target);
                         g->SetMask(MASK_MODE_NONE, TexturePtr(), Transform2d());
                         g->SetShader(ShaderPtr());
@@ -202,22 +214,21 @@ namespace Sandbox {
             }
         }
         
-        void MaskSubSkin::setMask(Sandbox::Graphics& g,const TexturePtr& texture,const MyGUI::FloatRect& uv) {
-            Sandbox::Transform2d mTr = Sandbox::Transform2d();
-            
-            
+        void MaskSubSkin::setMask(Sandbox::Graphics& g,const Sandbox::Image& image) {
+  //          Sandbox::Transform2d mTr = g.GetTransform();
             
             int x = mCroppedParent->getAbsoluteLeft();
             int y = mCroppedParent->getAbsoluteTop();
             int w = mCroppedParent->getWidth();
             int h = mCroppedParent->getHeight();
+//            
+//            mTr.translate(-x,-y);
+//            
+//            mTr.translate(uv.left,uv.top);
+//            mTr.scale(uv.width() / w,uv.height() / h);
+//            mTr.translate(-x,-y);
             
-            
-            mTr.translate(uv.left,uv.top);
-            mTr.scale(uv.width() / w,uv.height() / h);
-            mTr.translate(-x,-y);
-            
-            g.SetMask(MASK_MODE_ALPHA, texture, mTr);
+            g.SetMask(MASK_MODE_ALPHA, image, Sandbox::Rectf(x,y,w,h));
 
         }
         MaskSetSubSkin::MaskSetSubSkin() : m_texture(0) {

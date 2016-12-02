@@ -105,12 +105,15 @@ namespace Sandbox {
 
         /// mask
         void SetMask(MaskMode mode, const TexturePtr& mask_tex,const Transform2d& tr);
+        void SetMask(MaskMode mode, const Image& mask_img,const Rectf& rect);
+        
         const TexturePtr& GetMaskTexture() const { return m_state.mask; }
         void SetMaskTexture(const TexturePtr& tex,bool autocalc=true);
         MaskMode GetMaskMode() const { return m_state.mask_mode; }
         void SetMaskMode(MaskMode mode);
         const Transform2d& GetMaskTransform() const { return m_mask_transform; }
         void SetMaskTransform( const Transform2d& tr ) { m_mask_transform = tr; }
+        void SetMaskImageTransform(const Image& img,const Rectf& r);
         
 		/// draw image
 		/// @{
@@ -210,6 +213,8 @@ namespace Sandbox {
         Recti		m_clip_rect;
         float       m_itw;
         float       m_ith;
+        float       m_mask_itw;
+        float       m_mask_ith;
         
         struct State {
             BlendMode	blend_mode;
@@ -254,7 +259,9 @@ namespace Sandbox {
             v.color=color;
 			v.tx = tx;
 			v.ty = ty;
-            m_mask_transform.transform(x, y, v.t2x, v.t2y);
+            m_mask_transform.transform(v.x, v.y, v.t2x, v.t2y);
+            v.t2x *= m_mask_itw;
+            v.t2y *= m_mask_ith;
 		}
 		void appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3);
         inline void appendQuad() {

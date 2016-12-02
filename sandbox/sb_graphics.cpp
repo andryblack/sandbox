@@ -52,6 +52,85 @@ namespace Sandbox {
 			img->Release();
             tex->DiscardInternal();
 		}
+        
+#if 0
+        /// mask self test
+        {
+            Image img;
+            m_mask_itw = 1.0f / 256;
+            m_mask_ith = 1.0f / 512;
+            img.SetTextureRect(16, 32, 64, 128);
+            m_transform = Transform2d();
+            SetMaskImageTransform(img, Rectf(10,20,100,200));
+            
+            
+            {
+                appendVertex2(10,20,0,0);
+                sb_assert(m_vertexes2tex.back().x == 10.0f);
+                sb_assert(m_vertexes2tex.back().y == 20.0f);
+                sb_assert(m_vertexes2tex.back().t2x == 16.0f / 256);
+                sb_assert(m_vertexes2tex.back().t2y == 32.0f / 512);
+                
+            }
+            
+            {
+                appendVertex2(110,220,0,0);
+                sb_assert(m_vertexes2tex.back().x == 110.0f);
+                sb_assert(m_vertexes2tex.back().y == 220.0f);
+                sb_assert(m_vertexes2tex.back().t2x == (16.0f+64.0f) / 256);
+                sb_assert(m_vertexes2tex.back().t2y == (32.0f+128.0f) / 512);
+                
+            }
+            
+            {
+                m_transform.translate(10,20);
+                appendVertex2(100,200,0,0);
+                sb_assert(m_vertexes2tex.back().x == 110.0f);
+                sb_assert(m_vertexes2tex.back().y == 220.0f);
+                sb_assert(m_vertexes2tex.back().t2x == (16.0f+64.0f) / 256);
+                sb_assert(m_vertexes2tex.back().t2y == (32.0f+128.0f) / 512);
+                
+            }
+            
+            {
+                m_transform.scale(2.0f,2.0f);
+                appendVertex2(50,100,0,0);
+                sb_assert(m_vertexes2tex.back().x == 110.0f);
+                sb_assert(m_vertexes2tex.back().y == 220.0f);
+                sb_assert(m_vertexes2tex.back().t2x == (16.0f+64.0f) / 256);
+                sb_assert(m_vertexes2tex.back().t2y == (32.0f+128.0f) / 512);
+                
+            }
+            
+            {
+                m_transform.scale(2.0f,2.0f);
+                appendVertex2(0,0,0,0);
+                sb_assert(m_vertexes2tex.back().x == 10.0f);
+                sb_assert(m_vertexes2tex.back().y == 20.0f);
+                sb_assert(m_vertexes2tex.back().t2x == (16.0f) / 256);
+                sb_assert(m_vertexes2tex.back().t2y == (32.0f) / 512);
+                
+            }
+
+            m_transform = Transform2d();
+            m_transform.translate(10,20);
+            m_transform.scale(2,2);
+            SetMaskImageTransform(img, Rectf(0,0,50,100));
+            
+            m_transform = Transform2d();
+            {
+                appendVertex2(10,20,0,0);
+                sb_assert(m_vertexes2tex.back().x == 10.0f);
+                sb_assert(m_vertexes2tex.back().y == 20.0f);
+                sb_assert(m_vertexes2tex.back().t2x == 16.0f / 256);
+                sb_assert(m_vertexes2tex.back().t2y == 32.0f / 512);
+                
+            }
+            
+            m_transform = Transform2d();
+            m_vertexes2tex.clear();
+        }
+#endif
 	}
     
     void Graphics::SetFilter(DrawFilter* filter) {
@@ -985,10 +1064,30 @@ namespace Sandbox {
         SetMaskMode(mode);
         m_mask_transform = tr;
     }
+    
+    void Graphics::SetMask(MaskMode mode, const Image& mask_img,const Rectf& rect) {
+        SetMaskTexture(mask_img.GetTexture());
+        SetMaskMode(mode);
+        SetMaskImageTransform(mask_img,rect);
+    }
+    
+    void Graphics::SetMaskImageTransform(const Image& img,const Rectf& r) {
+        Transform2d tr;
+        tr.translate(img.GetTextureX(), img.GetTextureY());
+        tr.scale(img.GetTextureW()/r.w, img.GetTextureH()/r.h);
+        tr.translate(-Vector2f(r.GetTopLeft()));
+        tr*=m_transform.inverted();
+        m_mask_transform = tr;
+    }
+    
     void Graphics::SetMaskTexture(const TexturePtr& tex,bool autocalc) {
         m_state.mask = tex;
         bool needCalc2 = autocalc && tex && tex!=m_fake_tex_black && tex!=m_fake_tex_white;
         m_state.calc2_tex =needCalc2;
+        if (tex) {
+            m_mask_itw = 1.0f / tex->GetWidth();
+            m_mask_ith = 1.0f / tex->GetHeight();
+        }
     }
     void Graphics::SetMaskMode(MaskMode mode) {
         if (!m_state.mask && mode!=MASK_MODE_NONE) {

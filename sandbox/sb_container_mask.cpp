@@ -8,23 +8,33 @@ namespace Sandbox {
     }
     
     void ContainerMask::Draw(Graphics& g) const {
-        MaskMode m = g.GetMaskMode();
-        TexturePtr t = g.GetMaskTexture();
-        Transform2d tr = g.GetMaskTransform();
-        g.SetMask(m_mode, m_texture, m_transform);
-        Container::Draw(g);
-        g.SetMask(m, t, tr);
+        if (m_image) {
+            MaskMode m = g.GetMaskMode();
+            TexturePtr t = g.GetMaskTexture();
+            Transform2d tr = g.GetMaskTransform();
+            g.SetMask(m_mode, *m_image, m_rect);
+            Container::Draw(g);
+            g.SetMask(m, t, tr);
+        } else {
+            Container::Draw(g);
+        }
+    }
+    
+    void ContainerMask::CalcRect() {
+        if (m_image) {
+            m_rect = Rectf(-m_image->GetHotspot().x*m_image->GetWidth()/m_image->GetTextureW(),
+                       -m_image->GetHotspot().y*m_image->GetHeight()/m_image->GetTextureH(),
+                       m_image->GetWidth(),
+                       m_image->GetHeight());
+        }
     }
     
     void ContainerMask::SetImage(const ImagePtr &img) {
-        if (img) {
-            m_texture = img->GetTexture();
-            m_transform = Transform2d();
-            if (m_texture) {
-                m_transform.scale(1.0f/m_texture->GetWidth(), 1.0f/m_texture->GetHeight());
-            }
-            m_transform.translate(-img->GetHotspot());
-        }
+        m_image = img;
+    }
+    
+    void ContainerMask::SetRect(const Rectf &r) {
+        m_rect = r;
     }
     
 }

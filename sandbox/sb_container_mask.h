@@ -11,6 +11,7 @@
 #include "sb_container.h"
 #include "sb_graphics.h"
 #include "sb_image.h"
+#include "sb_rect.h"
 
 namespace Sandbox {
     
@@ -21,15 +22,15 @@ namespace Sandbox {
         void Draw(Graphics& g) const;
         void SetMode(MaskMode mode) { m_mode = mode;}
         MaskMode GetMode() const { return m_mode;}
-        const Transform2d& GetTransform() const { return m_transform; }
-        void SetTransform( const Transform2d& tr ) { m_transform = tr; }
-        const TexturePtr& GetTexture() const { return m_texture; }
-        void SetTexture(const TexturePtr& t) { m_texture = t; }
+        const ImagePtr& GetImage() const { return m_image; }
         void SetImage(const ImagePtr& img);
+        const Rectf& GetRect() const { return m_rect; }
+        void SetRect(const Rectf& r);
+        void CalcRect();
     private:
         MaskMode	m_mode;
-        TexturePtr  m_texture;
-        Transform2d m_transform;
+        ImagePtr    m_image;
+        Rectf       m_rect;
     };
 
 }

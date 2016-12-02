@@ -33,6 +33,11 @@ namespace Sandbox {
             m.inverse();
             v = - (m * v);
         }
+        Transform2d inverted() const {
+            Transform2d tr(*this);
+            tr.inverse();
+            return tr;
+        }
         Transform2d& translate(const Vector2f& pos) {
             v+=m*pos;
             return *this;

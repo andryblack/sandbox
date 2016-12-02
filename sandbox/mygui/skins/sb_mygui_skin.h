@@ -13,6 +13,7 @@ namespace Sandbox {
     
     class Graphics;
     class Texture;
+    class Image;
     typedef sb::intrusive_ptr<Texture> TexturePtr;
     
     namespace mygui {
@@ -64,7 +65,7 @@ namespace Sandbox {
             MaskSubSkin();
             virtual void doRender(MyGUI::IRenderTarget* _target);
         protected:
-            virtual void setMask(Sandbox::Graphics& g,const TexturePtr& texture,const MyGUI::FloatRect& uv);
+            virtual void setMask(Sandbox::Graphics& g,const Sandbox::Image& img);
         };
         
         class MaskSetSubSkinState : public MyGUI::SubSkinStateInfo {
