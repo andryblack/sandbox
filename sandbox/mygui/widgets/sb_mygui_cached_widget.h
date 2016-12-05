@@ -12,7 +12,7 @@
 #include "MyGUI_Widget.h"
 #include "meta/sb_meta.h"
 #include "sb_vector2.h"
-#include "MyGUI_SharedLayerNode.h"
+#include "../sb_mygui_animated_layer.h"
 
 namespace Sandbox {
     
@@ -45,7 +45,7 @@ namespace Sandbox {
         private:
             RenderTargetImpl*        m_target;
             
-            MyGUI::SharedLayerNode*  m_replaced_layer;
+            AnimatedLayerNode*  m_replaced_layer;
             void frameEntered(float dt);
             std::string m_texture_name;
             

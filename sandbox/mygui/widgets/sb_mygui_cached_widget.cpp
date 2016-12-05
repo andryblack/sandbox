@@ -26,7 +26,7 @@ namespace Sandbox {
         
         CachedWidget::CachedWidget() : m_render_content(false) {
             m_target = 0;
-            m_replaced_layer = new MyGUI::SharedLayerNode(0,0);
+            m_replaced_layer = new AnimatedLayerNode(0,0);
             m_texture_name = get_type_info()->name;
             char buf[128];
 			sb::snprintf(buf, 128, "_%p", this);
