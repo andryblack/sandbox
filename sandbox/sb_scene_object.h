@@ -49,9 +49,9 @@ namespace Sandbox {
         }
         const DrawAttributesPtr& GetDrawAttributes() const { return m_draw_attributes; }
         void RemoveFromScene();
-	protected:
+        Container* GetParent() const { return m_parent;}
+    protected:
 		friend class Container;
-		Container* GetParent() const { return m_parent;}
         Scene*  GetScene() const;
         virtual void GlobalToLocalImpl(Vector2f& v) const;
         virtual void GetTransformImpl(Transform2d& tr) const;

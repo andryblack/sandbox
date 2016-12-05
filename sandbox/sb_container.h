@@ -48,6 +48,9 @@ namespace Sandbox {
         void SetAlpha(float a);
         float GetAlpha() const;
     
+        void SetColor(const Color& c);
+        const Color& GetColor() const;
+        
         void SortByOrder();
     protected:
     	void UpdateChilds( float dt );

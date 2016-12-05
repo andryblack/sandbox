@@ -65,7 +65,7 @@ namespace Sandbox {
 		void Set(GHL::Render* r);
 		ShaderFloatUniformPtr GetFloatUniform(const char* name);
         ShaderVec2UniformPtr GetVec2Uniform(const char* name);
-        sb::intrusive_ptr<Shader> Fork();
+        sb::intrusive_ptr<Shader> Clone();
   	private:
         template <class T>
         ShaderUniformPtr GetUniform(const char* name);

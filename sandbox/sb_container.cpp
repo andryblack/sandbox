@@ -158,6 +158,14 @@ namespace Sandbox {
         if (m_color) return m_color->GetAlpha();
         return 1.0f;
     }
+    
+    void Container::SetColor(const Color& c) {
+        GetColorModificator()->SetColor(c);
+    }
+    const Color& Container::GetColor() const {
+        if (m_color) return m_color->GetColor();
+        return Color::white();
+    }
 
     
     void Container::GlobalToLocalImpl(Vector2f& v) const {

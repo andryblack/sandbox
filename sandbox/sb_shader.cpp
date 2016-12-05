@@ -28,7 +28,7 @@ namespace Sandbox {
 		}
 	}
     
-    sb::intrusive_ptr<Shader> Shader::Fork() {
+    sb::intrusive_ptr<Shader> Shader::Clone() {
         ShaderPtr res(new Shader(m_program));
         if (m_program) m_program->AddRef();
         return res;

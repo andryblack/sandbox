@@ -57,4 +57,9 @@ namespace Sandbox {
         return buf;
     }
 
+    
+    const Color& Color::white() {
+        static Color _c;
+        return _c;
+    }
 }

@@ -48,11 +48,9 @@ namespace Sandbox {
     }
     
     void GeometryBuffer::BuildFill(const sb::vector<Vector2f>& points, const Transform2d& tr) {
-        if (m_image) {
-            GeometryBuilder builder(m_data);
-            builder.SetColor(m_color);
-            builder.BuildFill(points, *m_image, tr);
-        }
+        GeometryBuilder builder(m_data);
+        builder.SetColor(m_color);
+        builder.BuildFill(points, m_image ? *m_image : Image(), tr);
     }
     
 }

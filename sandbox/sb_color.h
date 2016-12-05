@@ -88,6 +88,8 @@ namespace Sandbox {
         
         static Color FromString( const char* str );
         sb::string ToStringRGB() const;
+        
+        static const Color& white();
     };
     
     namespace luabind {
