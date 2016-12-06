@@ -31,14 +31,19 @@ namespace Sandbox {
             const TransformModificatorPtr& GetTransform() const { return m_transform; }
             const ColorModificatorPtr& GetColor() const { return m_color; }
             const ThreadsMgrPtr& GetThread() const { return m_thread; }
+            
+            void SetOrigin(const Vector2f& o) { m_origin = o; }
+            const Vector2f& GetOrigin() const { return m_origin; }
         protected:
             void initialiseOverride();
             void shutdownOverride();
             
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+            
             TransformModificatorPtr     m_transform;
             ColorModificatorPtr         m_color;
             ThreadsMgrPtr               m_thread;
-            
+            Vector2f            m_origin;
          private:
             void frameEntered(float dt);
         };

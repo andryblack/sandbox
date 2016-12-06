@@ -36,6 +36,13 @@ namespace Sandbox {
         }
         
         void AnimatedWidget::frameEntered(float dt) {
+            if (m_transform &&
+                /// is owner
+                (getWidgetStyle()==MyGUI::WidgetStyle::Overlapped ||
+                 getWidgetStyle()==MyGUI::WidgetStyle::Popup) ) {
+                Vector2f origin = Vector2f(getAbsoluteLeft(),getAbsoluteTop())+m_origin;
+                m_transform->SetOrigin(origin);
+            }
             m_thread->Update(dt);
         }
         
@@ -46,6 +53,19 @@ namespace Sandbox {
                 m_transform = n->GetTransformModificator();
                 m_color = n->GetColorModificator();
             }
+        }
+        
+        void AnimatedWidget::setPropertyOverride(const std::string& _key, const std::string& _value) {
+            if (_key == "Origin") {
+                MyGUI::IntPoint p = MyGUI::utility::parseValue<MyGUI::IntPoint>(_value);
+                m_origin = Vector2f(p.left,p.top);
+            } else
+            {
+                Base::setPropertyOverride(_key, _value);
+                return;
+            }
+            
+            eventChangeProperty(this, _key, _value);
         }
                 
     }

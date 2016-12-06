@@ -79,6 +79,7 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::AnimatedWidget)
 SB_META_PROPERTY_RO(Thread, GetThread)
 SB_META_PROPERTY_RO(Transform, GetTransform)
 SB_META_PROPERTY_RO(Color, GetColor)
+SB_META_PROPERTY_RW(Origin,GetOrigin,SetOrigin)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
