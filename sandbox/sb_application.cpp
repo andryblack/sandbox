@@ -344,6 +344,8 @@ namespace Sandbox {
 		sb_assert( m_vfs );
         SB_LOGI("FillSettings");
         
+        CreateLua();
+        
         sb_assert(m_lua);
         
 
