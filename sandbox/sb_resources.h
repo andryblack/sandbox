@@ -44,6 +44,14 @@ namespace Sandbox {
         virtual TexturePtr GetTexture(const char* path) = 0;
     };
     
+    struct BackgroundData {
+        sb::vector<Image>  images;
+        GHL::UInt32 width;
+        GHL::UInt32 height;
+    };
+    typedef sb::shared_ptr<BackgroundData> BackgroundDataPtr;
+    
+    
 	class Resources : public FileProvider , public TextureProvider {
 	public:
 		Resources(GHL::VFS* vfs);
@@ -67,10 +75,7 @@ namespace Sandbox {
         }
         
 		ImagePtr GetImage(const char* filename, bool need_premultiply);
-		bool LoadImageSubdivs(const char* filename,
-                              sb::vector<Image>& output,
-                              GHL::UInt32& width,
-                              GHL::UInt32& height);
+		BackgroundDataPtr LoadBackground(const char* filename);
 		
 		ShaderPtr GetShader(const char* vfn,const char* ffn);
 		
@@ -125,6 +130,10 @@ namespace Sandbox {
 		sb::map<sb::string,GHL::FragmentShader*>    m_fshaders;
 		sb::map<sb::string,ShaderPtr >   m_shaders;
 
+        typedef sb::weak_ptr<BackgroundData> BackgroundDataCachePtr;
+        typedef sb::map<sb::string, BackgroundDataCachePtr> BackgroundsDataCache;
+        BackgroundsDataCache m_backgrounds_cache;
+        
         size_t    m_live_ticks;
         size_t    m_memory_limit;
         size_t    m_memory_used;

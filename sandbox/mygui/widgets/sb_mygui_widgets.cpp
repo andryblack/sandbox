@@ -22,6 +22,7 @@
 #include "sb_mygui_state_visible_widget.h"
 #include "sb_mygui_client_widget.h"
 #include "sb_mygui_animated_widget.h"
+#include "sb_mygui_background_widget.h"
 
 #include "MyGUI_WidgetManager.h"
 #include "MyGUI_FactoryManager.h"
@@ -82,45 +83,52 @@ SB_META_PROPERTY_RO(Color, GetColor)
 SB_META_PROPERTY_RW(Origin,GetOrigin,SetOrigin)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::BackgroundWidget)
+SB_META_END_KLASS_BIND()
+
+
 namespace Sandbox {
     
     namespace mygui {
         
         void register_widgets() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
-            
-            factory.registerFactory<ScrollList>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<ScrollArea>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<CachedWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<SceneWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<ImageWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<MaskImageWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<MaskTextWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<TextWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<SceneObjectWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<TextEdit>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<SelectableWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<StateVisibleWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<ClientWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.registerFactory<AnimatedWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            const std::string& category = MyGUI::WidgetManager::getInstance().getCategoryName();
+            factory.registerFactory<ScrollList>(category);
+            factory.registerFactory<ScrollArea>(category);
+            factory.registerFactory<CachedWidget>(category);
+            factory.registerFactory<SceneWidget>(category);
+            factory.registerFactory<ImageWidget>(category);
+            factory.registerFactory<MaskImageWidget>(category);
+            factory.registerFactory<MaskTextWidget>(category);
+            factory.registerFactory<TextWidget>(category);
+            factory.registerFactory<SceneObjectWidget>(category);
+            factory.registerFactory<TextEdit>(category);
+            factory.registerFactory<SelectableWidget>(category);
+            factory.registerFactory<StateVisibleWidget>(category);
+            factory.registerFactory<ClientWidget>(category);
+            factory.registerFactory<AnimatedWidget>(category);
+            factory.registerFactory<BackgroundWidget>(category);
         }
         void unregister_widgets() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
+            const std::string& category = MyGUI::WidgetManager::getInstance().getCategoryName();
             
-            factory.unregisterFactory<TextEdit>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<SceneWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<ScrollList>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<ScrollArea>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<CachedWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<MaskImageWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<ImageWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<MaskTextWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<TextWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<SceneObjectWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<SelectableWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<StateVisibleWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<ClientWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
-            factory.unregisterFactory<AnimatedWidget>(MyGUI::WidgetManager::getInstance().getCategoryName());
+            factory.unregisterFactory<TextEdit>(category);
+            factory.unregisterFactory<SceneWidget>(category);
+            factory.unregisterFactory<ScrollList>(category);
+            factory.unregisterFactory<ScrollArea>(category);
+            factory.unregisterFactory<CachedWidget>(category);
+            factory.unregisterFactory<MaskImageWidget>(category);
+            factory.unregisterFactory<ImageWidget>(category);
+            factory.unregisterFactory<MaskTextWidget>(category);
+            factory.unregisterFactory<TextWidget>(category);
+            factory.unregisterFactory<SceneObjectWidget>(category);
+            factory.unregisterFactory<SelectableWidget>(category);
+            factory.unregisterFactory<StateVisibleWidget>(category);
+            factory.unregisterFactory<ClientWidget>(category);
+            factory.unregisterFactory<AnimatedWidget>(category);
+            factory.unregisterFactory<BackgroundWidget>(category);
         }
 
         
@@ -145,7 +153,7 @@ namespace Sandbox {
             luabind::ExternClass<SelectableWidget>(L);
             luabind::ExternClass<StateVisibleWidget>(L);
             luabind::ExternClass<ClientWidget>(L);
-            
+            luabind::ExternClass<BackgroundWidget>(L);
         }
     }
     

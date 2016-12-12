@@ -190,6 +190,9 @@ namespace Sandbox {
         GHL::UInt32 GetScreenWidth() const { if (m_render) return m_render->GetWidth(); return 0;}
 		GHL::UInt32 GetScreenHeight() const { if (m_render) return m_render->GetHeight(); return 0;}
         
+        GHL::UInt32 GetDrawWidth() const;
+        GHL::UInt32 GetDrawHeight() const;
+        
         void SetScale(float scale);
         float GetScale() const { return m_scale; }
         

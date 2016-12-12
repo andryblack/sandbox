@@ -12,10 +12,13 @@
 #include "sb_scene_object.h"
 #include "sb_image.h"
 #include <sbstd/sb_vector.h>
+#include <sbstd/sb_shared_ptr.h>
+#include "sb_resources.h"
 
 namespace Sandbox {
     
     class Resources;
+    
     
     class Background : public SceneObject {
         SB_META_OBJECT
@@ -25,18 +28,17 @@ namespace Sandbox {
         void Draw( Graphics& g ) const;
         void SetFiltered( bool f );
         void SetFullScreen(bool fs);
+        void SetKeepAspect(bool k);
         void Clear();
         
-        GHL::UInt32 GetWidth() const { return m_width; }
-        GHL::UInt32 GetHeight() const { return m_height; }
+        GHL::UInt32 GetWidth() const { return m_data ? m_data->width : 0; }
+        GHL::UInt32 GetHeight() const { return m_data ? m_data->height : 0; }
     protected:
-        void AddImage(const Image& image);
-        void SetSize(GHL::UInt32 w, GHL::UInt32 h);
+        void SetData(const BackgroundDataPtr& bg) { m_data = bg; }
     private:
-        sb::vector<Image>  m_images;
+        BackgroundDataPtr   m_data;
         bool    m_fullscreen;
-        GHL::UInt32 m_width;
-        GHL::UInt32 m_height;
+        bool    m_keep_aspect;
     };
     
 }

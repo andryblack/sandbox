@@ -1164,6 +1164,21 @@ namespace Sandbox {
 		}
 	}
 		
+    GHL::UInt32 Graphics::GetDrawWidth() const {
+        float draw_scale = m_scale * (m_resources ? m_resources->GetScale() : 1.0f);
+        if (m_render_to_target) {
+            draw_scale = m_render_to_target->GetScale();
+        }
+        return (m_render ? m_render->GetWidth() : 0) / draw_scale;
+    }
+    
+    GHL::UInt32 Graphics::GetDrawHeight() const {
+        float draw_scale = m_scale * (m_resources ? m_resources->GetScale() : 1.0f);
+        if (m_render_to_target) {
+            draw_scale = m_render_to_target->GetScale();
+        }
+        return (m_render ? m_render->GetHeight() : 0) / draw_scale;
+    }
 		
 	void Graphics::BeginScene(GHL::Render* render, const RenderTargetPtr& target) {
         sb_assert( (m_render==0) && "scene already started" );

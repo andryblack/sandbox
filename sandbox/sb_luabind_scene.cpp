@@ -103,6 +103,7 @@ SB_META_PROPERTY_RO(Width, GetWidth)
 SB_META_PROPERTY_RO(Height, GetHeight)
 SB_META_PROPERTY_WO(Fullscreen, SetFullScreen)
 SB_META_PROPERTY_WO(Filtered,SetFiltered)
+SB_META_PROPERTY_WO(KeepAspect, SetKeepAspect)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Label)

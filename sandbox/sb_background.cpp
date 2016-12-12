@@ -15,7 +15,7 @@ SB_META_DECLARE_OBJECT(Sandbox::Background, Sandbox::SceneObject)
 
 namespace Sandbox {
     
-    Background::Background() : m_fullscreen(true),m_width(0),m_height(0){
+    Background::Background() : m_fullscreen(true),m_keep_aspect(false){
         
     }
     
@@ -23,14 +23,37 @@ namespace Sandbox {
         m_fullscreen = fs;
     }
     
+    void Background::SetKeepAspect(bool k) {
+        m_keep_aspect = k;
+    }
+    
     void Background::Draw(Sandbox::Graphics &g) const {
+        if (!m_data)
+            return;
         Transform2d tr = g.GetTransform();
-        if (m_fullscreen && (m_width!=g.GetScreenWidth()||m_height!=g.GetScreenHeight()) && (m_width) && (m_height)) {
-            g.SetTransform(tr.scaled(float(g.GetScreenWidth())/m_width,
-                                     float(g.GetScreenHeight())/m_height));
+        if (m_fullscreen) {
+            GHL::UInt32 sw = g.GetDrawWidth();
+            GHL::UInt32 sh = g.GetDrawHeight();
+            if (sw != m_data->width || sh != m_data->height) {
+                float sx = float(sw)/m_data->width;
+                float sy = float(sh)/m_data->height;
+                float ox = 0.0f;
+                float oy = 0.0f;
+                if (m_keep_aspect) {
+                    if (sx > sy) {
+                        sy = sx;
+                        oy = -int((int)m_data->height*sx-(int)sh) / 2;
+                    } else if (sy > sx) {
+                        sx = sy;
+                        ox = -int((int)m_data->width*sy-(int)sw) / 2;
+                        
+                    }
+                }
+                g.SetTransform(tr.translated(ox,oy).scaled( sx,sy));
+            }
         }
-        for (size_t i=0;i<m_images.size();i++) {
-            g.DrawImage(m_images[i], GetDrawAttributes().get(), 0, 0);
+        for (size_t i=0;i<m_data->images.size();i++) {
+            g.DrawImage(m_data->images[i], GetDrawAttributes().get(), 0, 0);
         }
         g.SetTransform(tr);
     }
@@ -38,26 +61,21 @@ namespace Sandbox {
     bool Background::Load( const char* file, Resources* res ) {
         if (!res) return false;
         if (!file ) return false;
-        m_images.clear();
-        return res->LoadImageSubdivs( file , m_images, m_width, m_height);
+        m_data = res->LoadBackground(file);
+        return m_data;
     }
     
     void Background::Clear() {
-        m_images.clear();
+        m_data.reset();
     }
     
-    void Background::AddImage(const Image& image) {
-        m_images.push_back(image);
-    }
-    void Background::SetSize(GHL::UInt32 w, GHL::UInt32 h) {
-        m_width = w;
-        m_height = h;
-    }
-
 
     void Background::SetFiltered( bool f ) {
-        for (size_t i=0;i<m_images.size();++i) {
-            m_images[i].GetTexture()->SetFiltered(f);
+        if (m_data) {
+            for (size_t i=0;i<m_data->images.size();++i) {
+                m_data->images[i].GetTexture()->SetFiltered(f);
+            }
         }
+        
     }
 }

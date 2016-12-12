@@ -90,14 +90,26 @@ namespace Sandbox {
             return osize;
         return osize <= 16 ? osize : prev_pot(osize);
     }
-    bool Resources::LoadImageSubdivs(const char* filename, std::vector<Image>& output,GHL::UInt32& width,GHL::UInt32& height) {
+    BackgroundDataPtr Resources::LoadBackground(const char* filename) {
+        BackgroundDataPtr res;
+        BackgroundsDataCache::iterator it = m_backgrounds_cache.find(filename);
+        if (it!=m_backgrounds_cache.end()) {
+            res = it->second.lock();
+            if (res)
+                return res;
+            m_backgrounds_cache.erase(it);
+        }
+        
         bool variant = false;
         GHL::Image* img = LoadImage(filename,variant);
-        if (!img) return false;
+        if (!img) return BackgroundDataPtr();
+        
+        res = BackgroundDataPtr(new BackgroundData());
+        
         GHL::UInt32 w = img->GetWidth();
         GHL::UInt32 h = img->GetHeight();
-        width = w;
-        height = h;
+        res->width = w;
+        res->height = h;
         float scale = variant?1.0f/m_scale:1.0f;
         GHL::UInt32 y = 0;
         while ( y < h ) {
@@ -110,24 +122,24 @@ namespace Sandbox {
                 GHL::UInt32 pw = get_subdiv_size(m_render, ow);
                 GHL::UInt32 ipw = pw > ow ? ow : pw;
                 GHL::Image* subimg = img;
-                if (x!=0 || y!=0 || ipw != width || iph != height)
+                if (x!=0 || y!=0 || ipw != res->width || iph != res->height)
                     subimg = img->SubImage(x, y, ipw, iph);
                 if (!subimg) {
                     LogError(MODULE) << "failed load subdiv image " << filename;
                     img->Release();
-                    return false;
+                    return BackgroundDataPtr();
                 }
                 GHL::Texture* texture = m_render->CreateTexture(pw, ph, GHL_ImageFormatToTextureFormat(subimg->GetFormat()),
                                                                 subimg);
                 if (!texture) {
                     LogError(MODULE) << "failed load subdiv image " << filename;
                     img->Release();
-                    return false;
+                    return BackgroundDataPtr();
                 }
                 if (subimg != img)
                     subimg->Release();
-                output.push_back(Image(TexturePtr(new Texture(texture,scale)),0,0,float(ipw)*scale,float(iph)*scale));
-                output.back().SetHotspot(Vector2f(-float(x)*scale,-float(y)*scale));
+                res->images.push_back(Image(TexturePtr(new Texture(texture,scale)),0,0,float(ipw)*scale,float(iph)*scale));
+                res->images.back().SetHotspot(Vector2f(-float(x)*scale,-float(y)*scale));
                 x+=ipw;
                 texture->DiscardInternal();
             }
@@ -135,10 +147,10 @@ namespace Sandbox {
         }
         img->Release();
         if (variant) {
-            width = float(width)/m_scale;
-            height = float(height)/m_scale;
+            res->width = float(res->width)/m_scale;
+            res->height = float(res->height)/m_scale;
         }
-        return true;
+        return res;
     }
     
     GHL::Image* Resources::ImageFromStream( GHL::DataStream* ds ) {
