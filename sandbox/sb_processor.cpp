@@ -27,11 +27,13 @@ namespace Sandbox {
 				} else {
 					m_time = m_all_time;
 					m_started = false;
-					if (m_end_signal) m_end_signal->Emmit();
 				}
 			}
 			float k = m_time/m_all_time;
 			if (m_controller) m_controller->Set(m_inverted ? 1.0f - k : k);
+            if (!m_started) {
+                if (m_end_signal) m_end_signal->Emmit();
+            }
 		}
 		return !m_started;
 	}
