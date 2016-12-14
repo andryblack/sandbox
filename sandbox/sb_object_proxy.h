@@ -28,6 +28,14 @@ namespace Sandbox {
 	};
 	typedef sb::intrusive_ptr<ObjectDrawProxy> ObjectDrawProxyPtr;
     
+    class SceneObjectProxy : public SceneObject {
+        SB_META_OBJECT
+    public:
+        explicit SceneObjectProxy(const SceneObjectPtr& ref);
+        void Draw(Graphics& g) const;
+    private:
+        SceneObjectPtr  m_ref;
+    };
 }
 
 #endif /*SB_OBJECT_PROXY_H*/

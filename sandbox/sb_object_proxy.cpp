@@ -10,6 +10,7 @@
 #include "sb_object_proxy.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::ObjectDrawProxy, Sandbox::SceneObject)
+SB_META_DECLARE_OBJECT(Sandbox::SceneObjectProxy, Sandbox::SceneObject)
 
 namespace Sandbox {
 
@@ -20,4 +21,14 @@ namespace Sandbox {
 		if (m_func) m_func(g);
 	}
 	
+    
+    SceneObjectProxy::SceneObjectProxy(const SceneObjectPtr& ref) : m_ref(ref) {
+        
+    }
+    
+    void SceneObjectProxy::Draw(Graphics &g) const {
+        if (m_ref) {
+            m_ref->Draw(g);
+        }
+    }
 }

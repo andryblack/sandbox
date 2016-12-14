@@ -27,6 +27,7 @@
 #include "sb_container_scroll.h"
 #include "sb_text_box.h"
 #include "sb_container_mask.h"
+#include "sb_object_proxy.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::DrawAttributes)
 SB_META_END_KLASS_BIND()
@@ -47,6 +48,11 @@ SB_META_METHOD(Move)
 SB_META_METHOD(MoveX)
 SB_META_METHOD(MoveY)
 SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::SceneObjectProxy)
+SB_META_CONSTRUCTOR((Sandbox::SceneObjectPtr))
+SB_META_END_KLASS_BIND()
+
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Sprite)
 SB_META_CONSTRUCTOR(())
@@ -280,6 +286,7 @@ namespace Sandbox {
         luabind::Class<TextDrawAttributes>(lua);
         luabind::Class<SceneObject>(lua);
         luabind::Class<SceneObjectWithPosition>(lua);
+        luabind::Class<SceneObjectProxy>(lua);
         luabind::Class<Sprite>(lua);
         luabind::Class<SpriteBox>(lua);
         luabind::Class<SpriteFill>(lua);
