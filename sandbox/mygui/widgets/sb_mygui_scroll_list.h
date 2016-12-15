@@ -69,6 +69,9 @@ namespace Sandbox {
             void setPage(int page);
             int getPage() const;
             
+            void    setScroll(int pos);
+            int     getScroll() const;
+            
             void itemAdded();
             
             
@@ -127,8 +130,7 @@ namespace Sandbox {
             virtual void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id);
             
             
-            void    setScroll(int pos);
-            int     getScroll() const;
+            
             int     getScrollAreaSize() const;
             int     getScrollContentSize() const;
             int getScrollMargin() const;

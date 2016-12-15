@@ -119,6 +119,7 @@ SB_META_PROPERTY_RW(indexTop, getIndexTop,setIndexTop)
 SB_META_PROPERTY_RW(itemSize, getItemSize, setItemSize)
 SB_META_PROPERTY_RW(indexSelected, getIndexSelected, setIndexSelected)
 SB_META_PROPERTY_RW(alignOnCell, getAlignOnCell, setAlignOnCell)
+SB_META_PROPERTY_RW(scroll, getScroll, setScroll)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {

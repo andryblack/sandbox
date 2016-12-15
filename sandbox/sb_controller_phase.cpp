@@ -26,4 +26,21 @@ namespace Sandbox {
 		}
 		m_child->Set(k);
 	}
+    
+    ControllerOffsets::ControllerOffsets(const ControllerPtr& child) : m_child(child),m_begin(0.0f),m_end(0.0f) {
+    }
+    
+    ControllerOffsets::~ControllerOffsets() {
+    }
+
+    void ControllerOffsets::Set(float k) {
+        if (k<=m_begin) {
+            k = 0.0f;
+        } else if (k>=(1.0f-m_end)) {
+            k = 1.0f;
+        } else {
+            k = (k-m_begin) / (1.0f - m_begin - m_end);
+        }
+        m_child->Set(k);
+    }
 }

@@ -1069,6 +1069,7 @@ SB_META_DECLARE_OBJECT(MyGUI::RotatingSkinStateInfo, MyGUI::IStateInfo)
 SB_META_DECLARE_OBJECT(MyGUI::TileRectStateInfo, MyGUI::IStateInfo)
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::WidgetRender)
+SB_META_CONSTRUCTOR((MyGUI::IntSize))
 SB_META_PROPERTY_RO(image, getImage)
 SB_META_METHOD(render)
 SB_META_END_KLASS_BIND()
@@ -1229,7 +1230,7 @@ namespace Sandbox {
             
             luabind::ExternClass<MyGUI::EditBox>(lua);
             
-            luabind::ExternClass<Sandbox::mygui::WidgetRender>(lua);
+            luabind::Class<Sandbox::mygui::WidgetRender>(lua);
             
 //            luabind::ExternClass<MyGUI::IFont>(lua);
 //            //luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFont>(lua);

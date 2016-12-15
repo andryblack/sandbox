@@ -25,6 +25,21 @@ namespace Sandbox {
 		ControllerPtr m_child;
 		float m_phase;
 	};
+    
+    class ControllerOffsets : public Controller {
+    public:
+        explicit ControllerOffsets(const ControllerPtr& child);
+        ~ControllerOffsets();
+        void Set(float k);
+        void SetBegin(float phase) { m_begin = phase;}
+        float GetBegin() const { return m_begin;}
+        void SetEnd(float phase) { m_end = phase;}
+        float GetEnd() const { return m_end;}
+    private:
+        ControllerPtr m_child;
+        float m_begin;
+        float m_end;
+    };
 }
 
 #endif /*SB_CONTROLLER_PHASE_H*/
