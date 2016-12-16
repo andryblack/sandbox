@@ -12,6 +12,7 @@ namespace Sandbox {
                                         int loopCount);
     
     SpineAnimation::SpineAnimation(const SpineDataPtr& data) : m_data(data) {
+        m_block_events = false;
         m_skeleton = spSkeleton_create(m_data->m_skeleton);
         m_state = spAnimationState_create(m_data->m_state);
         spSkeleton_setToSetupPose(m_skeleton);
@@ -82,8 +83,10 @@ namespace Sandbox {
     void SpineAnimation::SetTime( float time ) {
         spTrackEntry* entry = spAnimationState_getCurrent (m_state, 0);
         if (entry && entry->animation) {
+            m_block_events = true;
             float current = entry->time;
             Update(time-current);
+            m_block_events = false;
         }
     }
     float SpineAnimation::GetCurrentAnimationLength() const {
@@ -136,7 +139,7 @@ namespace Sandbox {
     }
     
     void SpineAnimation::OnAnimationEvent(spEvent* e) {
-        if (m_data && m_event_signal) {
+        if (m_data && m_event_signal && !m_block_events) {
             const EventPtr& ae = m_data->GetEvent(e->data);
             if (ae) {
                 m_event_signal->Emmit(ae);

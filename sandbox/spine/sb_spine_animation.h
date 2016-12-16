@@ -54,6 +54,7 @@ namespace Sandbox {
         void OnAnimationComplete();
         void OnAnimationStarted();
         void OnAnimationEvent(spEvent* e);
+        bool    m_block_events;
         SignalPtr    m_end_signal;
         SignalPtr    m_event_signal;
     };
