@@ -929,6 +929,8 @@ SB_META_BEGIN_KLASS_BIND(MyGUI::ScrollView)
 SB_META_PROPERTY_RW(canvasSize,getCanvasSize,setCanvasSize)
 SB_META_PROPERTY_RO(contentSize, getContentSize)
 SB_META_PROPERTY_RO(viewSize, getViewSize)
+SB_META_PROPERTY_RW(visibleVScroll, isVisibleVScroll, setVisibleVScroll)
+SB_META_PROPERTY_RW(visibleHScroll, isVisibleHScroll, setVisibleHScroll)
 SB_META_END_KLASS_BIND()
 
 
