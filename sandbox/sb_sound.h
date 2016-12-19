@@ -37,6 +37,7 @@ namespace Sandbox {
         void Stop();
         void SetVolume(float vol);
         void SetPan(float pan);
+        void SetPitch(float pitch);
         void FadeOut(float time);
         
         bool Update( float dt );

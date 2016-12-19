@@ -58,6 +58,11 @@ namespace Sandbox {
             m_instance->SetPan(pan*100.0f);
         }
     }
+    void SoundInstance::SetPitch(float pitch) {
+        if (m_instance) {
+            m_instance->SetPitch(pitch*100.0f);
+        }
+    }
     void SoundInstance::FadeOut(float time) {
         if (time==0.0f) {
             Stop();
