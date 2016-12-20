@@ -80,6 +80,14 @@ namespace Sandbox {
         return animation != 0;
     }
     
+    Color SpineAnimation::GetSlotColor(const char* slot_name) const {
+        spSlot* slot = spSkeleton_findSlot(m_skeleton, slot_name);
+        if (slot) {
+            return Color(slot->r,slot->g,slot->b,slot->a);
+        }
+        return Color();
+    }
+    
     void SpineAnimation::SetTime( float time ) {
         spTrackEntry* entry = spAnimationState_getCurrent (m_state, 0);
         if (entry && entry->animation) {
@@ -175,6 +183,16 @@ namespace Sandbox {
         
     }
     
+    void SpineSceneObject::SetAttachement(const sb::string& slot_name,const SceneObjectPtr& object) {
+        m_attachements[slot_name] = object;
+    }
+    void SpineSceneObject::RemoveAttachement(const sb::string& slot_name) {
+        AttachementMap::iterator it = m_attachements.find(slot_name);
+        if (it!=m_attachements.end()) {
+            m_attachements.erase(it);
+        }
+    }
+    
     void SpineSceneObject::Draw(Graphics &gr) const {
         if (!m_animation)
             return;
@@ -187,7 +205,17 @@ namespace Sandbox {
             spSlot* slot = skeleton->drawOrder[i];
             spBone* bone = slot->bone;
             spAttachment* attachment = slot->attachment;
-            if (!attachment) continue;
+            SceneObjectPtr object_attachement;
+            {
+                AttachementMap::const_iterator it = m_attachements.find(slot->data->name);
+                if (it!=m_attachements.end()) {
+                    object_attachement = it->second;
+                }
+            }
+            if (attachment && attachment->type != SP_ATTACHMENT_REGION) {
+                attachment = 0;
+            }
+            if (!attachment && !object_attachement) continue;
             
             switch (slot->data->blendMode) {
                 case SP_BLEND_MODE_ADDITIVE:
@@ -204,6 +232,12 @@ namespace Sandbox {
                     break;
             }
             
+            Sandbox::Color c(skeleton->r*slot->r,skeleton->g*slot->g,skeleton->b*slot->b,skeleton->a*slot->a);
+            if (c.a <= 0.0f)
+                continue;
+            c.clamp();
+            gr.SetColor(clr*c);
+            
             Sandbox::Transform2d tr;
             tr.m.matrix[0*2+0] = bone->a;
             tr.m.matrix[0*2+1] = bone->c;
@@ -212,17 +246,13 @@ namespace Sandbox {
             tr.v.x = skeleton->x + bone->worldX;
             tr.v.y = skeleton->y + bone->worldY;
             
-            if (attachment->type == SP_ATTACHMENT_REGION) {
+            if (attachment)
+            {
+                
                 spRegionAttachment* ra = (spRegionAttachment*)attachment;
                 spAtlasRegion* region = (spAtlasRegion*)ra->rendererObject;
                 TexturePtr tex(static_cast<Texture*>(region->page->rendererObject));
                 if (!tex) continue;
-                
-                Sandbox::Color c(skeleton->r*slot->r,skeleton->g*slot->g,skeleton->b*slot->b,skeleton->a*slot->a);
-                if (c.a <= 0.0f)
-                    continue;
-                c.clamp();
-                gr.SetColor(clr*c);
                 
                 Image img(tex,region->x,region->y,
                           (region->rotate ? region->height : region->width),
@@ -248,6 +278,10 @@ namespace Sandbox {
                 const DrawAttributesPtr& attr = m_animation->m_data->GetSlotAttribute(slot->data);
                 gr.DrawImage(img,attr.get(),0,0);
                 
+            }
+            if (object_attachement) {
+                gr.SetTransform(str * tr);
+                object_attachement->Draw(gr);
             }
         }
         gr.SetColor(clr);

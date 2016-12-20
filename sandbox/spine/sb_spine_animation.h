@@ -6,6 +6,7 @@
 #include <spine/AnimationState.h>
 #include "sb_signal.h"
 #include "sb_rect.h"
+#include "sb_color.h"
 
 
 struct spSkeleton;
@@ -34,6 +35,8 @@ namespace Sandbox {
         
         void SetOnEvent(const SignalPtr& e) { m_event_signal = e;}
         const SignalPtr& GetOnEvent() const { return m_event_signal; }
+        
+        Color GetSlotColor(const char* slot_name) const;
         
         void SetTime( float time );
         float GetCurrentAnimationLength() const;
@@ -66,8 +69,12 @@ namespace Sandbox {
         explicit SpineSceneObject( const SpineAnimationPtr& animation );
         /// self drawing implementation
         virtual void Draw(Graphics& g) const;
+        void SetAttachement(const sb::string& slot_name,const SceneObjectPtr& object);
+        void RemoveAttachement(const sb::string& slot_name);
     private:
         SpineAnimationPtr   m_animation;
+        typedef sb::map<sb::string,SceneObjectPtr> AttachementMap;
+        AttachementMap m_attachements;
     };
     
 }

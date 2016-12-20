@@ -89,6 +89,10 @@ namespace Sandbox {
         static Color FromString( const char* str );
         sb::string ToStringRGB() const;
         
+        Color Premultiply() const {
+            return Color(r*a,g*a,b*a,a);
+        }
+        
         static const Color& white();
     };
     

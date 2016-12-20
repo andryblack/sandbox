@@ -16,6 +16,7 @@
 #include <sbstd/sb_map.h>
 #include "meta/sb_meta.h"
 #include "sb_vector2.h"
+#include "sb_color.h"
 
 namespace GHL {
 	struct ShaderProgram;
@@ -57,6 +58,17 @@ namespace Sandbox {
 	};
     typedef sb::intrusive_ptr<ShaderVec2Uniform> ShaderVec2UniformPtr;
     
+    class ShaderColorUniform : public ShaderUniform {
+        SB_META_OBJECT
+    public:
+        explicit ShaderColorUniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
+        virtual void DoSet();
+        void SetValue(const Color& v) { m_value = v;}
+    private:
+        Color m_value;
+    };
+    typedef sb::intrusive_ptr<ShaderColorUniform> ShaderColorUniformPtr;
+    
 	class Shader : public sb::ref_countered_base_not_copyable {
         SB_META_OBJECT
 	public:
@@ -65,6 +77,7 @@ namespace Sandbox {
 		void Set(GHL::Render* r);
 		ShaderFloatUniformPtr GetFloatUniform(const char* name);
         ShaderVec2UniformPtr GetVec2Uniform(const char* name);
+        ShaderColorUniformPtr GetColorUniform(const char* name);
         sb::intrusive_ptr<Shader> Clone();
   	private:
         template <class T>

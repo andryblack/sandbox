@@ -107,6 +107,7 @@ SB_META_OPERATOR_MUL_(Sandbox::Color(Sandbox::Color::*)(float)const)
 bind(method("mul", static_cast<Sandbox::Color(Sandbox::Color::*)(const Sandbox::Color&)const>(&Sandbox::Color::operator*)));
 SB_META_METHOD(ToStringRGB)
 SB_META_STATIC_METHOD(FromString)
+SB_META_METHOD(Premultiply)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Rectf, void)
@@ -203,10 +204,15 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderVec2Uniform)
 SB_META_PROPERTY_WO(Value, SetValue)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderColorUniform)
+SB_META_PROPERTY_WO(Value, SetValue)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::Shader)
 SB_META_METHOD(Clone)
 SB_META_METHOD(GetFloatUniform)
 SB_META_METHOD(GetVec2Uniform)
+SB_META_METHOD(GetColorUniform)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::ImageBox, Sandbox::Image)
@@ -367,6 +373,7 @@ namespace Sandbox {
         luabind::ExternClass<ShaderUniform>(lua);
         luabind::ExternClass<ShaderFloatUniform>(lua);
         luabind::ExternClass<ShaderVec2Uniform>(lua);
+        luabind::ExternClass<ShaderColorUniform>(lua);
         luabind::ExternClass<Shader>(lua);
         
     }

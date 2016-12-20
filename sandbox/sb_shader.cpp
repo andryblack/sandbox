@@ -15,6 +15,7 @@
 SB_META_DECLARE_OBJECT(Sandbox::ShaderUniform, void)
 SB_META_DECLARE_OBJECT(Sandbox::ShaderFloatUniform, Sandbox::ShaderUniform)
 SB_META_DECLARE_OBJECT(Sandbox::ShaderVec2Uniform, Sandbox::ShaderUniform)
+SB_META_DECLARE_OBJECT(Sandbox::ShaderColorUniform, Sandbox::ShaderUniform)
 SB_META_DECLARE_OBJECT(Sandbox::Shader, void)
 
 namespace Sandbox {
@@ -50,6 +51,9 @@ namespace Sandbox {
     void ShaderVec2Uniform::DoSet() {
 		if (m_uniform) m_uniform->SetValueFloat2(m_value.x,m_value.y);
 	}
+    void ShaderColorUniform::DoSet() {
+        if (m_uniform) m_uniform->SetValueFloat4(m_value.r,m_value.g,m_value.b,m_value.a);
+    }
 	
     template <class T>
     sb::intrusive_ptr<ShaderUniform> Shader::GetUniform(const char* name) {
@@ -70,6 +74,9 @@ namespace Sandbox {
     }
     ShaderVec2UniformPtr Shader::GetVec2Uniform(const char* name) {
         return ShaderVec2UniformPtr(meta::sb_dynamic_cast<ShaderVec2Uniform>(GetUniform<ShaderVec2Uniform>(name).get()));
+    }
+    ShaderColorUniformPtr Shader::GetColorUniform(const char* name) {
+        return ShaderColorUniformPtr(meta::sb_dynamic_cast<ShaderColorUniform>(GetUniform<ShaderColorUniform>(name).get()));
     }
     
 }

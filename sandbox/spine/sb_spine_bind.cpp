@@ -23,6 +23,7 @@ SB_META_METHOD(SetAnimation)
 SB_META_METHOD(AddAnimation)
 SB_META_METHOD(SetTime)
 SB_META_METHOD(HasAnimation)
+SB_META_METHOD(GetSlotColor)
 SB_META_PROPERTY_RW_DEF(OnEnd)
 SB_META_PROPERTY_RW_DEF(OnEvent)
 SB_META_PROPERTY_RO(CurrentAnimationLength, GetCurrentAnimationLength)
@@ -32,6 +33,8 @@ SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::SpineSceneObject)
 SB_META_CONSTRUCTOR((Sandbox::SpineAnimationPtr))
+SB_META_METHOD(SetAttachement)
+SB_META_METHOD(RemoveAttachement)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
