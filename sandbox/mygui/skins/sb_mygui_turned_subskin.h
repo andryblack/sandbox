@@ -11,8 +11,10 @@ namespace Sandbox {
         class TurnedSubSkinStateInfo : public MyGUI::SubSkinStateInfo {
             MYGUI_RTTI_DERIVED( TurnedSubSkinStateInfo )
         public:
-            int getTurn() const { return _turn; }
-            
+            int getTurn() const { return m_turn; }
+            bool getFlipH() const { return m_flip_h; }
+            bool getFlipV() const { return m_flip_v; }
+            TurnedSubSkinStateInfo() : m_turn(0),m_flip_v(false),m_flip_h(false) {}
         protected:
             virtual void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) {
                 Base::deserialization(_node, _version);
@@ -23,12 +25,25 @@ namespace Sandbox {
                     turn = std::atoi(str.c_str());
                 }
                 setTurn(turn);
+                str = _node->findAttribute("flip");
+                if (str.find("v")!=str.npos) {
+                    m_flip_v = true;
+                } else {
+                    m_flip_v = false;
+                }
+                if (str.find("h")!=str.npos) {
+                    m_flip_h = true;
+                } else {
+                    m_flip_h = false;
+                }
             }
             
-            void setTurn(int turn) { _turn = turn; }
+            void setTurn(int turn) { m_turn = turn; }
             
         private:
-            int _turn; // count pi/2 rotation (clockwise)
+            int m_turn; // count pi/2 rotation (clockwise)
+            bool m_flip_v;
+            bool m_flip_h;
         };
 
         class TurnedSubSkin : public MyGUI::SubSkin {
@@ -48,7 +63,9 @@ namespace Sandbox {
             void setupUV();
             void fillQuad(MyGUI::VertexQuad& _quad, MyGUI::IRenderTarget* _target);
             
-            int mTurn;
+            int m_turn;
+            bool m_flip_h;
+            bool m_flip_v;
         };
 
 
