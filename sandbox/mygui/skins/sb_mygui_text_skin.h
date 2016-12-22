@@ -32,6 +32,7 @@ namespace Sandbox {
             virtual ~AutoSizeText();
             
             virtual void setViewOffset(const MyGUI::IntPoint& _point);
+            virtual void _setAlign(const MyGUI::IntSize& _oldsize);
             
             virtual void doRender(MyGUI::IRenderTarget* _target);
             

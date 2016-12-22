@@ -30,11 +30,19 @@ namespace Sandbox {
             
         }
         
+        void AutoSizeText::_setAlign(const MyGUI::IntSize& _oldsize) {
+            Base::_setAlign(_oldsize);
+            if (mCoord.size()!=_oldsize) {
+                mTextOutDate = true;
+            }
+        }
+        
         void AutoSizeText::updateRawData() {
             if (nullptr == mFont)
                 return;
             // сбрасывам флаги
             mTextOutDate = false;
+            m_scale = 1.0f;
             
             int width = -1;
             if (mWordWrap)
@@ -46,19 +54,6 @@ namespace Sandbox {
             }
             
             mTextView.update(mCaption, mFont, mTextAlign, width);
-        }
-        
-        void AutoSizeText::doRender(MyGUI::IRenderTarget* _target) {
-                        
-            if (nullptr == mFont)
-                return;
-            if (!mVisible || mEmptyView)
-                return;
-            
-            if (mTextOutDate) {
-                m_scale = 1.0f;
-                updateRawData();
-            }
             
             MyGUI::IntSize size = mTextView.getViewSize();
             
@@ -87,6 +82,24 @@ namespace Sandbox {
                     size.height *= GetFontScale();
                 }
             }
+
+        }
+        
+        void AutoSizeText::doRender(MyGUI::IRenderTarget* _target) {
+                        
+            if (nullptr == mFont)
+                return;
+            if (!mVisible || mEmptyView)
+                return;
+            
+            if (mTextOutDate) {
+                updateRawData();
+            }
+            
+            MyGUI::IntSize size = mTextView.getViewSize();
+            
+            size.width *= GetFontScale();
+            size.height *= GetFontScale();
             
             float scale = m_scale * GetFontScale();
             
