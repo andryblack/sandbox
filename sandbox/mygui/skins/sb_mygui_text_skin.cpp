@@ -76,10 +76,16 @@ namespace Sandbox {
                     if (m_scale < 0.125f) {
                         m_scale = 0.125f;
                     }
-                    updateRawData();
-                    size = mTextView.getViewSize();
-                    size.width *= GetFontScale();
-                    size.height *= GetFontScale();
+                    if (mWordWrap) {
+                        width = mCoord.width / m_scale;
+                        // обрезать слова нужно по шарине, которую мы реально используем
+                        if (mIsAddCursorWidth)
+                            width -= 2;
+                        mTextView.update(mCaption, mFont, mTextAlign, width);
+                        size = mTextView.getViewSize();
+                        size.width *= GetFontScale();
+                        size.height *= GetFontScale();
+                    }
                 }
             }
 
