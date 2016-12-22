@@ -91,9 +91,10 @@ namespace Sandbox {
     void SpineAnimation::SetTime( float time ) {
         spTrackEntry* entry = spAnimationState_getCurrent (m_state, 0);
         if (entry && entry->animation) {
-            m_block_events = true;
             float current = entry->time;
-            Update(time-current);
+            float dt = time - current;
+            m_block_events = dt <= 0.0f;
+            Update(dt);
             m_block_events = false;
         }
     }
