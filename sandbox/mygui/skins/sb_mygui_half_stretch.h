@@ -3,8 +3,7 @@
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_CommonStateInfo.h"
-#include "MyGUI_SubSkin.h"
-#include "MyGUI_MainSkin.h"
+#include "sb_mygui_turned_subskin.h"
 
 #include <sbstd/sb_vector.h>
 #include <sbstd/sb_intrusive_ptr.h>
@@ -13,7 +12,7 @@ namespace Sandbox {
     
      namespace mygui {
          
-         class SubSkinHalfStateInfo : public MyGUI::SubSkinStateInfo {
+         class SubSkinHalfStateInfo : public TurnedSubSkinStateInfo {
              MYGUI_RTTI_DERIVED( SubSkinHalfStateInfo )
          private:
              int    m_center;
@@ -27,7 +26,7 @@ namespace Sandbox {
              int getCenter() const { return m_center; }
          };
          
-         class SubSkinHalfHStretch : public MyGUI::SubSkin {
+         class SubSkinHalfHStretch : public TurnedSubSkin {
              MYGUI_RTTI_DERIVED( SubSkinHalfHStretch )
          public:
              SubSkinHalfHStretch();
@@ -37,7 +36,7 @@ namespace Sandbox {
              virtual void setStateData(MyGUI::IStateInfo* _data);
          };
          
-         class SubSkinHalfVStretch : public MyGUI::SubSkin {
+         class SubSkinHalfVStretch : public TurnedSubSkin {
              MYGUI_RTTI_DERIVED( SubSkinHalfVStretch )
          public:
              SubSkinHalfVStretch();

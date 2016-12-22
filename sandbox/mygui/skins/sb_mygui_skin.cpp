@@ -11,6 +11,7 @@
 #include "sb_mygui_edit_text.h"
 #include "sb_mygui_simple_text.h"
 #include "sb_mygui_half_stretch.h"
+#include "sb_mygui_turned_subskin.h"
 
 #include "../sb_mygui_render.h"
 #include "sb_graphics.h"
@@ -360,6 +361,7 @@ namespace Sandbox {
             factory.registerFactory<SimpleText>(category_name);
             factory.registerFactory<SubSkinHalfHStretch>(category_name);
             factory.registerFactory<SubSkinHalfVStretch>(category_name);
+            factory.registerFactory<TurnedSubSkin>(category_name);
             
             const std::string& state_category_name = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
             
@@ -375,6 +377,7 @@ namespace Sandbox {
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "KeepAspectMaskSubSkin");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "EditText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "SimpleText");
+            factory.registerFactory<TurnedSubSkinStateInfo>(state_category_name, "TurnedSubSkin");
 
             
         }
@@ -398,6 +401,7 @@ namespace Sandbox {
             factory.unregisterFactory<SimpleText>(category_name);
             factory.unregisterFactory<SubSkinHalfHStretch>(category_name);
             factory.unregisterFactory<SubSkinHalfVStretch>(category_name);
+            factory.unregisterFactory<TurnedSubSkin>(category_name);
             
             const std::string& state_category_name = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
             
@@ -414,6 +418,7 @@ namespace Sandbox {
             factory.unregisterFactory(state_category_name, "SimpleText");
             factory.unregisterFactory(state_category_name, "SubSkinHalfHStretch");
             factory.unregisterFactory(state_category_name, "SubSkinHalfVStretch");
+            factory.unregisterFactory(state_category_name, "TurnedSubSkin");
         }
         
     }
