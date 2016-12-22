@@ -3,29 +3,25 @@
 
 #include "MyGUI_OverlappedLayer.h"
 #include "MyGUI_LayerNode.h"
+#include "MyGUI_ILayer.h"
 #include "sb_container.h"
 
 namespace Sandbox {
     
     namespace mygui {
     
+        class AnimatedWidget;
     class AnimatedLayerNode : public MyGUI::LayerNode {
         MYGUI_RTTI_DERIVED( AnimatedLayerNode )
     public:
-        explicit AnimatedLayerNode(MyGUI::ILayer* _layer, MyGUI::ILayerNode* _parent = nullptr);
+        explicit AnimatedLayerNode(MyGUI::ILayerNode* _parent , AnimatedWidget* widget);
+        explicit AnimatedLayerNode(MyGUI::ILayer* layer , MyGUI::Widget* widget);
+        ~AnimatedLayerNode();
+        
         virtual void renderToTarget(MyGUI::IRenderTarget* _target, bool _update);
         
-        void SetTransformModificator(const TransformModificatorPtr& ptr);
-        TransformModificatorPtr GetTransformModificator();
-        
-        void SetColorModificator(const ColorModificatorPtr& ptr);
-        ColorModificatorPtr GetColorModificator();
-        
-        virtual MyGUI::ILayerNode* createChildItemNode();
-        
     protected:
-        TransformModificatorPtr     m_transform;
-        ColorModificatorPtr         m_color;
+        AnimatedWidget* m_widget;
     };
     
     class AnimatedLayer : public MyGUI::OverlappedLayer {
@@ -35,8 +31,8 @@ namespace Sandbox {
         AnimatedLayer();
         virtual ~AnimatedLayer();
     
-        virtual MyGUI::ILayerNode* createChildItemNode();
-        virtual void destroyChildItemNode(MyGUI::ILayerNode* _node);
+        virtual MyGUI::ILayerNode* createRootItemNode(MyGUI::Widget* widget);
+        virtual void destroyRootItemNode(MyGUI::ILayerNode* _node);
         
     };
     }

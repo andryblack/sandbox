@@ -26,7 +26,7 @@ namespace Sandbox {
         
         CachedWidget::CachedWidget() : m_render_content(false) {
             m_target = 0;
-            m_replaced_layer = new AnimatedLayerNode(0,0);
+            m_replaced_layer = new MyGUI::LayerNode(0,0);
             m_texture_name = get_type_info()->name;
             char buf[128];
 			sb::snprintf(buf, 128, "_%p", this);
@@ -81,9 +81,10 @@ namespace Sandbox {
         }
         
         void CachedWidget::addChildNode(LayerItem* _item) {
-            MyGUI::ILayerNode* child_node = m_replaced_layer->createChildItemNode();
+            MyGUI::ILayerNode* child_node = _item->createChildItemNode(m_replaced_layer);
             _item->attachItemToNode(0, child_node);
         }
+        
         void CachedWidget::removeChildNode(LayerItem* _item) {
             
         }

@@ -19,6 +19,7 @@ namespace Sandbox {
     
     namespace mygui {
         class RenderTargetImpl;
+        class AnimatedLayerNode;
         
         class AnimatedWidget : public MyGUI::Widget {
             MYGUI_RTTI_DERIVED( AnimatedWidget )
@@ -26,22 +27,26 @@ namespace Sandbox {
             AnimatedWidget();
             ~AnimatedWidget();
             
-            virtual void attachToLayerItemNode(MyGUI::ILayerNode* _node, bool _deep);
+            virtual MyGUI::ILayerNode* createChildItemNode(MyGUI::ILayerNode* _node);
             
-            const TransformModificatorPtr& GetTransform() const { return m_transform; }
-            const ColorModificatorPtr& GetColor() const { return m_color; }
+            const TransformModificatorPtr& GetTransform() const;
+            const ColorModificatorPtr& GetColor() const;
             const ThreadsMgrPtr& GetThread() const { return m_thread; }
             
-            void SetOrigin(const Vector2f& o) { m_origin = o; }
+            void SetOrigin(const Vector2f& o);
             const Vector2f& GetOrigin() const { return m_origin; }
+            
+            void renderToTarget(MyGUI::IRenderTarget* rt,AnimatedLayerNode* node,bool update);
+            virtual void DrawContent(MyGUI::IRenderTarget* rt,AnimatedLayerNode* node,bool update);
+            
         protected:
             void initialiseOverride();
             void shutdownOverride();
             
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             
-            TransformModificatorPtr     m_transform;
-            ColorModificatorPtr         m_color;
+            mutable TransformModificatorPtr     m_transform;
+            mutable ColorModificatorPtr         m_color;
             ThreadsMgrPtr               m_thread;
             Vector2f            m_origin;
          private:

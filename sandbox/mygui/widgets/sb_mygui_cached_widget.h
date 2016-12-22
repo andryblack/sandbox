@@ -45,7 +45,7 @@ namespace Sandbox {
         private:
             RenderTargetImpl*        m_target;
             
-            AnimatedLayerNode*  m_replaced_layer;
+            MyGUI::LayerNode*  m_replaced_layer;
             void frameEntered(float dt);
             std::string m_texture_name;
             
