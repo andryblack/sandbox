@@ -44,13 +44,13 @@ namespace Sandbox {
             void shutdownOverride();
             
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+            virtual void Update(float dt);
             
             mutable TransformModificatorPtr     m_transform;
             mutable ColorModificatorPtr         m_color;
             ThreadsMgrPtr               m_thread;
             Vector2f            m_origin;
          private:
-            void frameEntered(float dt);
         };
         
     }

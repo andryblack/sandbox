@@ -47,12 +47,12 @@ namespace Sandbox {
         }
         void AnimatedWidget::initialiseOverride() {
             Base::initialiseOverride();
-            MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate( this, &AnimatedWidget::frameEntered );
+            MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate( this, &AnimatedWidget::Update );
         }
         
         void AnimatedWidget::shutdownOverride() {
             Base::shutdownOverride();
-            MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &AnimatedWidget::frameEntered );
+            MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &AnimatedWidget::Update );
         }
         
         void AnimatedWidget::renderToTarget(MyGUI::IRenderTarget* rt,AnimatedLayerNode* node,bool update) {
@@ -77,7 +77,7 @@ namespace Sandbox {
             node->LayerNode::renderToTarget(rt, update);
         }
         
-        void AnimatedWidget::frameEntered(float dt) {
+        void AnimatedWidget::Update(float dt) {
             m_thread->Update(dt);
         }
         
