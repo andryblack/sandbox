@@ -39,4 +39,21 @@ namespace Sandbox {
 			return (a*pow(2,-10*t) * sin( (t*d-s)*(2*PI)/p ) + c + b);
         }*/
 	}
+    
+    ControllerSinus::ControllerSinus(const ControllerPtr& child) : m_child(child){
+    
+    }
+    
+    void ControllerSinus::Set(float k) {
+        if (k<=0.0f) {
+            m_child->Set(0.0f);
+        } else if (k>=1.0f) {
+            m_child->Set(1.0);
+        } else {
+            float v = 0.5f + 0.5f*sin(k*M_PI-M_PI/2);
+            m_child->Set(v);
+        }
+    }
+    
+
 }

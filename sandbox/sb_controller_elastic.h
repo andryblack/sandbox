@@ -32,6 +32,14 @@ namespace Sandbox {
 		float m_amplitude;
 		size_t	m_phases;
 	};
-	
+    
+    class ControllerSinus : public Controller {
+    public:
+        explicit ControllerSinus(const ControllerPtr& child);
+        void Set(float k);
+    private:
+        ControllerPtr m_child;
+    };
+    	
 }
 #endif /*SB_CONTROLLER_ELASTIC_H*/

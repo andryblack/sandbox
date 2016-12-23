@@ -160,6 +160,22 @@ namespace Sandbox {
         return 1;
     }
     
+    
+    static int lua_typename_func(lua_State* L) {
+        int t = lua_type(L, -1);
+        if (t != LUA_TUSERDATA) {
+            lua_pushstring(L, lua_typename(L, t));
+        } else {
+            luabind::data_holder* holder = reinterpret_cast<luabind::data_holder*>(lua_touserdata(L, -1));
+            if (holder && holder->info) {
+                lua_pushstring(L, holder->info->name);
+            } else {
+                lua_pushstring(L, lua_typename(L, LUA_TUSERDATA));
+            }
+        }
+        return 1;
+    }
+
     ////////////////////////////////////////////////////////////
     void lua_io_register( lua_State* L, FileProvider* provider );
     
@@ -204,6 +220,7 @@ namespace Sandbox {
             {"print",   lua_log_func<GHL::LOG_LEVEL_INFO>},
             //{"require",lua_require_func},
             {"loadfile",lua_loadfile_func},
+            {"typename",lua_typename_func},
             {NULL, NULL}
         };
         lua_rawgeti(m_L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
