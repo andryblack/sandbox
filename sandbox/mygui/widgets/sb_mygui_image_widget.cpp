@@ -3,6 +3,7 @@
 #include "sb_resources.h"
 #include "MyGUI_RenderItem.h"
 #include "sb_graphics.h"
+#include "sb_log.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ImageWidgetBase,Sandbox::mygui::AnimatedWidget)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ImageWidget,Sandbox::mygui::ImageWidgetBase)
@@ -56,11 +57,14 @@ namespace Sandbox {
                 _setTextureName(texture->GetName());
                 float iw = 1.0f / float(texture->GetWidth());
                 float ih = 1.0f / float(texture->GetHeight());
-                if (nullptr != getSubWidgetMain())
+                if (nullptr != getSubWidgetMain()) {
                     getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(img->GetTextureX()*iw,
                                                                    img->GetTextureY()*ih,
                                                                    (img->GetTextureX()+img->GetTextureW())*iw,
                                                                    (img->GetTextureY()+img->GetTextureH())*ih));
+                } else {
+                    LogDebug() << "not found main widget";
+                }
             } else {
                 _setTextureName("");
             }
