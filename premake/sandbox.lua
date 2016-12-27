@@ -52,12 +52,12 @@ solution( ProjectName )
 		if use.AndroidGooglePlayService or use.IAP then
 			android_modules_path( path.getabsolute(sandbox_dir) )
 			--local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
-			android_dependencies('com.google.android.gms:play-services-base:10.0.1')
+			android_dependencies('com.google.android.gms:play-services-base:9.2.1')
 			if use.AndroidGooglePlayService then
-				android_dependencies('com.google.android.gms:play-services-auth:10.0.1')
-				android_dependencies('com.google.android.gms:play-services-games:10.0.1')
-				android_dependencies('com.google.android.gms:play-services-nearby:10.0.1')
-				android_dependencies('com.google.android.gms:play-services-plus:10.0.1')
+				android_dependencies('com.google.android.gms:play-services-auth:9.2.1')
+				android_dependencies('com.google.android.gms:play-services-games:9.2.1')
+				android_dependencies('com.google.android.gms:play-services-nearby:9.2.1')
+				android_dependencies('com.google.android.gms:play-services-plus:9.2.1')
 				android_dependencies('com.android.support:support-v4:23.1.1')
 			end
 			
@@ -72,9 +72,9 @@ solution( ProjectName )
 
 		if use.AndroidPN then
 			android_module{fcm=true}
-			android_permissions('com.nordx.battle.android.permission.C2D_MESSAGE')
-			android_dependencies('com.google.firebase:firebase-core:10.0.1')
-			android_dependencies('com.google.firebase:firebase-messaging:10.0.1')
+			--android_permissions('com.nordx.battle.android.permission.C2D_MESSAGE')
+			android_dependencies('com.google.firebase:firebase-core:9.2.1')
+			android_dependencies('com.google.firebase:firebase-messaging:9.2.1')
 
 			android_service {
 				{

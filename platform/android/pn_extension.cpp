@@ -16,9 +16,9 @@ class PNExtension : public Sandbox::AndroidPlatformExtension {
 private:
 	Sandbox::Application*	m_application;
 	ANativeActivity* 		m_activity;
-	
+	jclass  m_SBFirebaseInstanceIDService;
 public:
-	PNExtension() : m_application(0),m_activity(0) {
+	PNExtension() : m_application(0),m_activity(0),m_SBFirebaseInstanceIDService(0) {
 		GHL_Log(GHL::LOG_LEVEL_INFO,"PNExtension::PNExtension\n");
 	}
 	~PNExtension() {
@@ -29,33 +29,63 @@ public:
         m_application = app;
         m_activity = GetNativeActivity(m_application);
     }
-    sb::string get_pn_token() {
-        JNIEnv* env = m_activity->env;
-        jni::class_ref_hold FirebaseInstanceId(env);
-        FirebaseInstanceId.clazz = env->FindClass("com/google/firebase/iid/FirebaseInstanceId");
-        if (!FirebaseInstanceId.clazz || jni::check_exception(env)) {
-            Sandbox::LogError() << "PNExtension not found class";
-            return failed_get;
-        }
 
-        jmethodID getInstance = env->GetStaticMethodID(FirebaseInstanceId.clazz,"getInstance","()Lcom/google/firebase/iid/FirebaseInstanceId;");
-        if (!getInstance || jni::check_exception(env)) {
-            Sandbox::LogError() << "PNExtension not found getInstance method";
+    virtual void nativeOnActivityCreated(
+                                         JNIEnv *env,
+                                         jobject thiz,
+                                         jobject activity,
+                                         jobject saved_instance_state) {
+        Sandbox::LogInfo() << "PNExtension::nativeOnActivityCreated";
+        check_available(env,activity);
+    }
+    
+    virtual void nativeOnActivityDestroyed(JNIEnv *env, jobject thiz, jobject activity) {
+        if (m_SBFirebaseInstanceIDService) {
+            env->DeleteGlobalRef(m_SBFirebaseInstanceIDService);
+            m_SBFirebaseInstanceIDService = 0;
+        }
+    }   
+
+    void check_available(JNIEnv* env,jobject activity) {
+        m_SBFirebaseInstanceIDService = 0;
+        jni::class_ref_hold SBFirebaseInstanceIDService(env);
+        //com.google.android.gms.common.GoogleApiAvailability.getInstance();
+        jni::check_exception(env);
+        SBFirebaseInstanceIDService.clazz = env->FindClass("com/sandbox/SBFirebaseInstanceIDService");
+        if (jni::check_exception(env) || !SBFirebaseInstanceIDService.clazz) {
+            Sandbox::LogError() << "SBFirebaseInstanceIDService not found class";
+            return;
+        }
+        jmethodID isGooglePlayServicesAvailable = env->GetStaticMethodID(SBFirebaseInstanceIDService.clazz,"isGooglePlayServicesAvailable","(Landroid/content/Context;)I");
+        if (jni::check_exception(env) || !isGooglePlayServicesAvailable) {
+            Sandbox::LogError() << "SBFirebaseInstanceIDService not found isGooglePlayServicesAvailable method";
+            return;
+        }
+        int res = env->CallStaticIntMethod(SBFirebaseInstanceIDService.clazz,isGooglePlayServicesAvailable,activity);
+        if (jni::check_exception(env)) {
+            Sandbox::LogError() << "isGooglePlayServicesAvailable exception";
+            return;
+        }
+        Sandbox::LogInfo() << "isGooglePlayServicesAvailable: " << res;
+        if (res == 0) {
+            m_SBFirebaseInstanceIDService =  (jclass)env->NewGlobalRef(SBFirebaseInstanceIDService.clazz);
+        }
+    }
+
+    sb::string get_pn_token() {
+        if (!m_SBFirebaseInstanceIDService) {
             return failed_get;
         }
-        jobject obj = env->CallStaticObjectMethod(FirebaseInstanceId.clazz,getInstance);
-        if (!obj || jni::check_exception(env)) {
-            Sandbox::LogError() << "PNExtension not found instance obj";
+        JNIEnv* env = m_activity->env;
+        jni::check_exception(env);
+        jmethodID getToken = env->GetStaticMethodID(m_SBFirebaseInstanceIDService,"getToken","()Ljava/lang/String;");
+        if (jni::check_exception(env) || !getToken) {
+            Sandbox::LogError() << "SBFirebaseInstanceIDService not found getToken method";
             return failed_get;
         }
-        jmethodID getToken = env->GetMethodID(FirebaseInstanceId.clazz,"getToken","()Ljava/lang/String;");
-        if (!getToken || jni::check_exception(env)) {
-            env->DeleteLocalRef(obj);
-            Sandbox::LogError() << "PNExtension not found getToken method";
-            return failed_get;
-        }
-        jstring token_jni = (jstring)env->CallObjectMethod(obj,getToken);
-        if (token_jni == 0 || jni::check_exception(env)) {
+      
+        jstring token_jni = (jstring)env->CallStaticObjectMethod(m_SBFirebaseInstanceIDService,getToken);
+        if (jni::check_exception(env) || token_jni == 0) {
             return pending_get;
         }
         sb::string res = Sandbox::JsonBuilder()

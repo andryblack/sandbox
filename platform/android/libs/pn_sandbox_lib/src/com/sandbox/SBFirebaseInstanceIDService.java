@@ -20,12 +20,20 @@ import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
-
+import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.google.android.gms.common.GoogleApiAvailability;
+import android.content.Context;
 
 public class SBFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
     private static final String TAG = "SBFirebaseIIDService";
 
+    public static int isGooglePlayServicesAvailable(Context ctx) {
+        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(ctx);
+    }
+    public static String getToken() {
+        return FirebaseInstanceId.getInstance().getToken();
+    }
     /**
      * Called if InstanceID token is updated. This may occur if the security of
      * the previous token had been compromised. Note that this is called when the InstanceID token
