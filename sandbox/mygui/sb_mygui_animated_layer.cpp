@@ -1,7 +1,6 @@
 #include "sb_mygui_animated_layer.h"
 #include "sb_mygui_render.h"
 #include "sb_graphics.h"
-#include "sb_mygui_animated_widget.h"
 #include "widgets/sb_mygui_animated_widget.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::mygui::AnimatedLayer, MyGUI::OverlappedLayer)

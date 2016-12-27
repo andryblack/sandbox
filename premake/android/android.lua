@@ -200,7 +200,22 @@ api.register {
 api.register {
 	name = "android_receiver",
 	scope = 'project',
-	kind = 'string'
+	kind = 'table',
+	list = true
+}
+
+api.register {
+	name = "android_service",
+	scope = 'project',
+	kind = 'table',
+	list = true
+}
+
+api.register {
+	name = "android_module",
+	scope = 'solution',
+	kind = 'string',
+	keyed = true
 }
 
 

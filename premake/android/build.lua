@@ -101,6 +101,10 @@ function build.generate_build_gradle(sln)
     _x(1,'}')
     _x(1,'dependencies {')
     _x(2,"classpath 'com.android.tools.build:gradle:2.1.2'")
+    if sln.android_module and
+    	(sln.android_module.gcm or sln.android_module.fcm) then
+    	_x(2,"classpath 'com.google.gms:google-services:3.0.0'")
+	end
     _x(1,'}')
 	_x('}')
 	
@@ -254,6 +258,19 @@ function build.generate_app_build_gradle( sln , prj )
 	_x('}')
 
 
+	if sln.android_module and
+    	(sln.android_module.gcm or sln.android_module.fcm) then
+
+    	_x("task copyGoogleServicesJSON(type: Copy) {")
+    	_x(1,"description = 'Copy google-services.json'")
+    	_x(1,'from ".."')
+    	_x(1,'include "google-services.json"')
+    	_x(1,'into "."')
+		_x('}')
+	
+    	_x("apply plugin: 'com.google.gms.google-services'")
+	end
+	
 	local ndk_dir = _OPTIONS['android-ndk-dir']
 
 	for cfg in project.eachconfig(prj) do
@@ -290,12 +307,19 @@ function build.generate_app_build_gradle( sln , prj )
 		_p(1,'generate' .. cfg.name .. 'Assets.dependsOn ' .. 'prebuild_cmd_' .. cfg.shortname .. 
 				', buildJNI' .. cfg.name .. 
 				', copyJNI' .. cfg.name .. ', copyJNI' .. cfg.name .. 'sym')
+		if sln.android_module and
+    		(sln.android_module.gcm or sln.android_module.fcm) then
+    		_x(1,'process' .. cfg.name .. 'GoogleServices.dependsOn copyGoogleServicesJSON')
+    	end
 	end
+
 	_p('}')
 	
 	--_p('task build << {' )
 	--_p("\tdependsOn " .. crnt_name)
 	--_p('}')
+
+	
 end
 
 return build

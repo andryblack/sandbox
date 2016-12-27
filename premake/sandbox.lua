@@ -45,16 +45,19 @@ solution( ProjectName )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 		android_packageversion( AndroidConfig.versioncode or 1)
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
-		android_receiver( AndroidConfig.receiver )
+		for _,v in ipairs(AndroidConfig.receivers or {} ) do
+			android_receiver( v )
+		end
+		
 		if use.AndroidGooglePlayService or use.IAP then
 			android_modules_path( path.getabsolute(sandbox_dir) )
 			--local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
-			android_dependencies('com.google.android.gms:play-services-base:9.2.1')
+			android_dependencies('com.google.android.gms:play-services-base:10.0.1')
 			if use.AndroidGooglePlayService then
-				android_dependencies('com.google.android.gms:play-services-auth:9.2.1')
-				android_dependencies('com.google.android.gms:play-services-games:9.2.1')
-				android_dependencies('com.google.android.gms:play-services-nearby:9.2.1')
-				android_dependencies('com.google.android.gms:play-services-plus:9.2.1')
+				android_dependencies('com.google.android.gms:play-services-auth:10.0.1')
+				android_dependencies('com.google.android.gms:play-services-games:10.0.1')
+				android_dependencies('com.google.android.gms:play-services-nearby:10.0.1')
+				android_dependencies('com.google.android.gms:play-services-plus:10.0.1')
 				android_dependencies('com.android.support:support-v4:23.1.1')
 			end
 			
@@ -65,6 +68,27 @@ solution( ProjectName )
 				'com.google.android.gms.games.APP_ID=@string/google_play_services_app_id',
 				'com.google.android.gms.version=@integer/google_play_services_version'
 			}
+		end
+
+		if use.AndroidPN then
+			android_module{fcm=true}
+			android_permissions('com.nordx.battle.android.permission.C2D_MESSAGE')
+			android_dependencies('com.google.firebase:firebase-core:10.0.1')
+			android_dependencies('com.google.firebase:firebase-messaging:10.0.1')
+
+			android_service {
+				{
+					name = 'com.sandbox.SBFirebaseInstanceIDService',
+					intent_filter = {
+						{
+							type = 'action',
+							name = 'com.google.firebase.INSTANCE_ID_EVENT'
+						}
+					}
+				},
+			}
+
+			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','pn_sandbox_lib','src')))
 		end
 		if use.IAP then
 			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib','src')))
@@ -302,6 +326,9 @@ solution( ProjectName )
 			if UseModules.iOSGC then
 				files { sandbox_dir .. '/platform/ios/gc_extension.*',}
 			end
+			if UseModules.iOSPN then
+				files { sandbox_dir .. '/platform/ios/pn_extension.*',}
+			end
 		elseif os.is('macosx') then
 			files { sandbox_dir .. '/platform/osx/main.mm',
 					sandbox_dir .. '/platform/osx/*.cpp',
@@ -320,6 +347,9 @@ solution( ProjectName )
 			end
 			if use.IAP then
 				files { sandbox_dir .. '/platform/android/iap_extension.cpp' }
+			end
+			if use.AndroidPN then
+				files { sandbox_dir .. '/platform/android/pn_extension.*',}
 			end
 		elseif os.is( 'emscripten' ) then
 			files { sandbox_dir .. '/platform/emscripten/*.cpp' }

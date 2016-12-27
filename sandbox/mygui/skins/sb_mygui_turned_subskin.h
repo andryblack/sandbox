@@ -4,6 +4,8 @@
 #include "MyGUI_CommonStateInfo.h"
 #include "MyGUI_SubSkin.h"
 
+#include <cstdlib>
+
 namespace Sandbox {
 
     namespace mygui {
