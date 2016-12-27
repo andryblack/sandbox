@@ -24,6 +24,8 @@ import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.google.android.gms.common.GoogleApiAvailability;
 import android.content.Context;
 
+import org.json.*;
+
 public class SBFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
     private static final String TAG = "SBFirebaseIIDService";
@@ -32,7 +34,7 @@ public class SBFirebaseInstanceIDService extends FirebaseInstanceIdService {
         return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(ctx);
     }
     public static String getToken() {
-        return FirebaseInstanceId.getInstance().getToken();
+        return parse_token(FirebaseInstanceId.getInstance().getToken());
     }
     /**
      * Called if InstanceID token is updated. This may occur if the security of
@@ -49,9 +51,24 @@ public class SBFirebaseInstanceIDService extends FirebaseInstanceIdService {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
-        sendRegistrationToServer(refreshedToken);
+        sendRegistrationToServer(parse_token(refreshedToken));
     }
     // [END refresh_token]
+
+    private static String parse_token(String src) {
+        if (src == null) {
+            return null;
+        }
+        try {
+            JSONObject jObject = new JSONObject(src);
+            if (jObject.has("token")) {
+                return jObject.getString("token");
+            }
+        } catch (JSONException e) {
+            
+        }
+        return src;
+    }
 
     /**
      * Persist token to third-party servers.
