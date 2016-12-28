@@ -157,6 +157,11 @@ namespace Sandbox {
             OnScrollMove();
         }
         
+        void ScrollArea::setScrollPosF(const Sandbox::Vector2f &p) {
+            Scroll::SetViewPos(-p);
+            OnScrollMove();
+        }
+        
         void ScrollArea::OnScrollBegin() {
             MyGUI::InputManager::getInstance().setMouseFocusWidget(this);
         }

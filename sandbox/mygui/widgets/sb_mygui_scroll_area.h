@@ -35,6 +35,7 @@ namespace Sandbox {
             bool manualScroll() const { return m_manual_scroll; }
             
             void setScrollPos(const MyGUI::IntPoint& p);
+            void setScrollPosF(const Sandbox::Vector2f& p);
           
             EventHandle_ScrollAreaPtrIntPoint scrollComplete;
             virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
