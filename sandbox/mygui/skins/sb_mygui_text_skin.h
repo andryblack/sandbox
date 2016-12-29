@@ -22,8 +22,21 @@ namespace Sandbox {
             virtual void doRender(MyGUI::IRenderTarget* _target);
         };
         
+        class AutoWidthText : public EditText{
+            MYGUI_RTTI_DERIVED( AutoWidthText )
+        public:
+            AutoWidthText();
+            virtual void setViewOffset(const MyGUI::IntPoint& _point);
+            virtual void _setAlign(const MyGUI::IntSize& _oldsize);
+            
+            virtual void doRender(MyGUI::IRenderTarget* _target);
+        protected:
+            virtual void updateRawData();
+             float   m_scale;
+        };
+        
         class AutoSizeText :
-            public EditText
+            public AutoWidthText
         {
             MYGUI_RTTI_DERIVED( AutoSizeText )
             
@@ -31,17 +44,17 @@ namespace Sandbox {
             AutoSizeText();
             virtual ~AutoSizeText();
             
-            virtual void setViewOffset(const MyGUI::IntPoint& _point);
-            virtual void _setAlign(const MyGUI::IntSize& _oldsize);
             
-            virtual void doRender(MyGUI::IRenderTarget* _target);
+            
             
         private:
         protected:
             virtual void updateRawData();
-            float   m_scale;
+           
            
         };
+        
+        
         
         class MaskText : public AutoSizeText {
              MYGUI_RTTI_DERIVED( MaskText )

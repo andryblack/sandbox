@@ -334,6 +334,7 @@ namespace Sandbox {
             factory.registerFactory<MaskSubSkin>(category_name);
             factory.registerFactory<MaskSetSubSkin>(category_name);
             factory.registerFactory<ObjectSubSkin>(category_name);
+            factory.registerFactory<AutoWidthText>(category_name);
             factory.registerFactory<AutoSizeText>(category_name);
             factory.registerFactory<CroppedText>(category_name);
             factory.registerFactory<MaskText>(category_name);
@@ -352,6 +353,7 @@ namespace Sandbox {
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "ObjectSubSkin");
             factory.registerFactory<SubSkinHalfStateInfo>(state_category_name, "SubSkinHalfHStretch");
             factory.registerFactory<SubSkinHalfStateInfo>(state_category_name, "SubSkinHalfVStretch");
+            factory.registerFactory<EditTextStateInfo>(state_category_name, "AutoWidthText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "AutoSizeText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "CroppedText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "MaskText");
@@ -374,6 +376,7 @@ namespace Sandbox {
             factory.unregisterFactory<MaskSubSkin>(category_name);
             factory.unregisterFactory<MaskSetSubSkin>(category_name);
             factory.unregisterFactory<ObjectSubSkin>(category_name);
+            factory.unregisterFactory<AutoWidthText>(category_name);
             factory.unregisterFactory<AutoSizeText>(category_name);
             factory.unregisterFactory<CroppedText>(category_name);
             factory.unregisterFactory<MaskText>(category_name);
@@ -390,6 +393,7 @@ namespace Sandbox {
             factory.unregisterFactory(state_category_name, "MaskSubSkin");
             factory.unregisterFactory(state_category_name, "MaskSetSubSkin");
             factory.unregisterFactory(state_category_name, "ObjectSubSkin");
+            factory.unregisterFactory(state_category_name, "AutoWidthText");
             factory.unregisterFactory(state_category_name, "AutoSizeText");
             factory.unregisterFactory(state_category_name, "CroppedText");
             factory.unregisterFactory(state_category_name, "MaskText");

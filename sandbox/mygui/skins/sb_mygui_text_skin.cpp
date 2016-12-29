@@ -8,7 +8,8 @@
 #include "sb_mygui_skin.h"
 #include "MyGUI_FontData.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::AutoSizeText,Sandbox::mygui::EditText)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::AutoWidthText,Sandbox::mygui::EditText)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::AutoSizeText,Sandbox::mygui::AutoWidthText)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskText,Sandbox::mygui::AutoSizeText)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::CroppedText,Sandbox::mygui::EditText)
 
@@ -17,20 +18,23 @@ namespace Sandbox {
     
     namespace mygui {
         
-        AutoSizeText::AutoSizeText() {
+        AutoWidthText::AutoWidthText() {
             mIsAddCursorWidth = false;
             m_scale = 1.0f;
         }
         
+        AutoSizeText::AutoSizeText() {
+            
+        }
         AutoSizeText::~AutoSizeText() {
             
         }
         
-        void AutoSizeText::setViewOffset(const MyGUI::IntPoint& _point) {
+        void AutoWidthText::setViewOffset(const MyGUI::IntPoint& _point) {
             
         }
         
-        void AutoSizeText::_setAlign(const MyGUI::IntSize& _oldsize) {
+        void AutoWidthText::_setAlign(const MyGUI::IntSize& _oldsize) {
             Base::_setAlign(_oldsize);
             if (mCoord.size()!=_oldsize) {
                 mTextOutDate = true;
@@ -38,6 +42,32 @@ namespace Sandbox {
         }
         
         void AutoSizeText::updateRawData() {
+            AutoWidthText::updateRawData();
+            if (nullptr == mFont)
+                return;
+            MyGUI::IntSize size = mTextView.getViewSize();
+            if (mWordWrap || mTextView.getData().data.size() > 1) {
+                while ((size.height*m_scale) > mCoord.height) {
+                    m_scale -= 0.125f/4;
+                    if (m_scale < 0.125f) {
+                        m_scale = 0.125f;
+                    }
+                    if (mWordWrap) {
+                        int width = mCoord.width / m_scale;
+                        // обрезать слова нужно по шарине, которую мы реально используем
+                        if (mIsAddCursorWidth)
+                            width -= 2;
+                        mTextView.update(mCaption, mFont, mTextAlign, width);
+                        size = mTextView.getViewSize();
+                        size.width *= GetFontScale();
+                        size.height *= GetFontScale();
+                    }
+                }
+            }
+
+        }
+        
+        void AutoWidthText::updateRawData() {
             if (nullptr == mFont)
                 return;
             // сбрасывам флаги
@@ -66,32 +96,10 @@ namespace Sandbox {
                 if (hscale < m_scale) {
                     m_scale = hscale;
                 }
-            } else if (!mWordWrap && mTextView.getData().data.size()<2) {
-                m_scale = 1.0f;
             }
-            
-            if (mWordWrap || mTextView.getData().data.size() > 1) {
-                while ((size.height*m_scale) > mCoord.height) {
-                    m_scale -= 0.125f/4;
-                    if (m_scale < 0.125f) {
-                        m_scale = 0.125f;
-                    }
-                    if (mWordWrap) {
-                        width = mCoord.width / m_scale;
-                        // обрезать слова нужно по шарине, которую мы реально используем
-                        if (mIsAddCursorWidth)
-                            width -= 2;
-                        mTextView.update(mCaption, mFont, mTextAlign, width);
-                        size = mTextView.getViewSize();
-                        size.width *= GetFontScale();
-                        size.height *= GetFontScale();
-                    }
-                }
-            }
-
         }
         
-        void AutoSizeText::doRender(MyGUI::IRenderTarget* _target) {
+        void AutoWidthText::doRender(MyGUI::IRenderTarget* _target) {
                         
             if (nullptr == mFont)
                 return;
