@@ -66,7 +66,7 @@ void spAnimation_apply (const spAnimation* self, spSkeleton* skeleton, float las
 }
 
 void spAnimation_mix (const spAnimation* self, spSkeleton* skeleton, float lastTime, float time, int loop, spEvent** events,
-		int* eventsCount, float alpha) {
+		int* eventsCount, float alpha,const spAnimation* prev) {
 	int i, n = self->timelinesCount;
 
 	if (loop && self->duration) {
@@ -74,8 +74,14 @@ void spAnimation_mix (const spAnimation* self, spSkeleton* skeleton, float lastT
 		if (lastTime > 0) lastTime = FMOD(lastTime, self->duration);
 	}
 
-	for (i = 0; i < n; ++i)
-		spTimeline_apply(self->timelines[i], skeleton, lastTime, time, events, eventsCount, alpha);
+    for (i = 0; i < n; ++i) {
+        const spTimeline* timeline = self->timelines[i];
+        if (!prev || spAnimation_has_timeline(prev,timeline)) {
+            spTimeline_apply(timeline, skeleton, lastTime, time, events, eventsCount, alpha);
+        } else {
+            spTimeline_apply(timeline, skeleton, lastTime, time, events, eventsCount, 1.0);
+        }
+    }
 }
 
 int spAnimation_has_timeline(const spAnimation* self, const spTimeline* tl) {

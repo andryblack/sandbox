@@ -138,7 +138,7 @@ void spAnimationState_apply (spAnimationState* self, spSkeleton* skeleton) {
 					current->loop, internal->events, &eventsCount);
 			} else {
 				spAnimation_mix(current->animation, skeleton, current->lastTime, time,
-					current->loop, internal->events, &eventsCount, current->mix);
+					current->loop, internal->events, &eventsCount, current->mix,0);
 			}
 		} else {
 			float alpha = current->mixTime / current->mixDuration * current->mix;
@@ -148,15 +148,17 @@ void spAnimationState_apply (spAnimationState* self, spSkeleton* skeleton) {
             if (alpha >= 1.0f) {
                 alpha = 1.0f;
             }
-			spAnimation_apply_prev(previous->animation, skeleton, previousTime, previousTime, previous->loop, current->animation);
+            const spAnimation* prev_anim = previous->animation;
+			spAnimation_apply_prev(prev_anim, skeleton, previousTime, previousTime, previous->loop, current->animation);
 
 			if (alpha >= 1.0f) {
 				alpha = 1.0f;
 				internal->disposeTrackEntry(current->previous);
 				current->previous = 0;
+                prev_anim = 0;
             }
 			spAnimation_mix(current->animation, skeleton, current->lastTime, time,
-                                 current->loop, internal->events, &eventsCount, alpha);
+                                 current->loop, internal->events, &eventsCount, alpha,prev_anim);
 		}
 
 		entryChanged = 0;

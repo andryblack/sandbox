@@ -73,7 +73,7 @@ void spAnimation_apply (const spAnimation* self, struct spSkeleton* skeleton, fl
  * @param events Any triggered events are added.
  * @param alpha The amount of this animation that affects the current pose. */
 void spAnimation_mix (const spAnimation* self, struct spSkeleton* skeleton, float lastTime, float time, int loop,
-		spEvent** events, int* eventsCount, float alpha);
+		spEvent** events, int* eventsCount, float alpha,const spAnimation* prev);
 
 int spAnimation_has_timeline(const spAnimation* self, const spTimeline* tl);
 void spAnimation_apply_prev (const spAnimation* self, struct spSkeleton* skeleton, float lastTime, float time, int loop,
