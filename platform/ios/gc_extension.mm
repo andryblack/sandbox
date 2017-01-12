@@ -137,6 +137,38 @@
     }
     return "error";
 }
+
+-(sb::string) dumpFriends:(NSArray<NSString *>*) friends {
+    Sandbox::JsonBuilder res;
+    res.BeginArray();
+    for (NSString* _id in friends) {
+        res.PutString(_id.UTF8String);
+    }
+    res.EndArray();
+    return res.End();
+};
+
+-(sb::string) requestFriends {
+    GKLocalPlayer* player = [GKLocalPlayer localPlayer];
+    NSArray<NSString *>* friends = [player friends];
+    if (friends) {
+        return [self dumpFriends:friends];
+    }
+    if ([player respondsToSelector:@selector(loadFriendsWithCompletionHandler:)]) {
+        [player loadFriendsWithCompletionHandler:^(NSArray<NSString *> * _Nullable friendIDs, NSError * _Nullable error) {
+            if (friendIDs && !error) {
+            
+                if (m_application) m_application->OnExtensionResponse("GCGetFriends",[self dumpFriends:friendIDs].c_str());
+            } else {
+                NSLog(@"loadFriends failed: %@",error);
+                if (m_application) m_application->OnExtensionResponse("GCGetFriends","failed");
+            }
+        }];
+    } else {
+        return "failed";
+    }
+    return "pending";
+}
 @end
 
 
@@ -188,6 +220,14 @@ public:
                 return true;
             }
             res = [m_mgr dumpPlayer];
+            return true;
+        }
+        if (::strcmp(method,"GCGetFriends")==0) {
+            if (![m_mgr isAuthenticated]) {
+                res = "failed";
+                return true;
+            }
+            res = [m_mgr requestFriends];
             return true;
         }
         if (::strcmp("GCShowScores",method)==0) {

@@ -81,6 +81,34 @@ sb::string ShowScoresUI() {
     return "error";
 }
 
+sb::string BeginGetFriends(Sandbox::Application* app) {
+    if (!game_services_) {
+        Sandbox::LogError() << "[PGS]" << "BeginGetFriends error";
+        return "failed";
+    }
+    if (!game_services_->IsAuthorized()) {
+        return "failed";
+    } 
+    game_services_->Players().FetchConnected([app](const gpg::PlayerManager::FetchListResponse& resp){
+        if (!gpg::IsSuccess(resp.status)) {
+            if (app) {
+                app->OnExtensionResponse("GPSGetFriends","failed");
+            }
+        } else {
+            Sandbox::JsonBuilder res;
+            res.BeginArray();
+            for (std::vector< gpg::Player >::const_iterator it = resp.data.begin(); it!=resp.data.end(); ++it) {
+                res.PutString(it->Id().c_str());
+            }
+            res.EndArray();
+            if (app) {
+                app->OnExtensionResponse("GPSGetFriends",res.End().c_str());
+            }
+        }
+    });
+    return "pending";
+}
+
 
 
 class GPSExtension : public Sandbox::AndroidPlatformExtension {
@@ -158,6 +186,10 @@ public:
         }
         if (::strcmp("GPSShowScores",method)==0) {
             res = ShowScoresUI();
+            return true;
+        }
+        if (::strcmp("GPSGetFriends",method)==0) {
+            res = BeginGetFriends(app);
             return true;
         }
 
