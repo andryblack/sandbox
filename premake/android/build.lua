@@ -98,6 +98,11 @@ function build.generate_build_gradle(sln)
 	_x('buildscript {')
     _x(1,'repositories {')
     _x(2,'jcenter()')
+    if sln.android_repository then
+    	for _,v in ipairs(sln.android_repository) do
+    		_x(2,'%s()',v)
+    	end
+    end
     _x(1,'}')
     _x(1,'dependencies {')
     _x(2,"classpath 'com.android.tools.build:gradle:2.1.2'")

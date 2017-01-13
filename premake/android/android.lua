@@ -93,6 +93,13 @@ api.register {
 	kind = "string"
 }
 
+api.register {
+	name = "android_repository",
+	scope = "solution",
+	kind = "string",
+	list = true
+}
+
 -- Specify android activity name
 api.register {
 	name = "android_activity",
