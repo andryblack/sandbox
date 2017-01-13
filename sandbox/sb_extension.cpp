@@ -1,5 +1,6 @@
 #include "sb_extension.h"
 #include "sb_application.h"
+#include <ghl_system.h>
 
 namespace Sandbox {
     
@@ -40,13 +41,17 @@ namespace Sandbox {
     }
 
     void PlatformExtension::AddPendingResponse(const char* method, const char* data) {
+         GHL_GlobalLock();
         extension_response r = { method , data };
         m_pending_responses.push_back(r);
+        GHL_GlobalUnlock();
     }
 
     void PlatformExtension::OnTimer(Application* app) {
         sb::vector<extension_response> responses;
+        GHL_GlobalLock();
         responses.swap(m_pending_responses);
+         GHL_GlobalUnlock();
         for (sb::vector<extension_response>::const_iterator i = responses.begin();i!=responses.end();++i) {
             app->OnExtensionResponse(i->method.c_str(),i->args.c_str());
         }
@@ -58,7 +63,6 @@ namespace Sandbox {
             ext->OnTimer(app);
             ext = ext->GetNext();
         }
-
     }
     
 }

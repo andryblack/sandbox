@@ -81,33 +81,8 @@ sb::string ShowScoresUI() {
     return "error";
 }
 
-sb::string BeginGetFriends(Sandbox::Application* app) {
-    if (!game_services_) {
-        Sandbox::LogError() << "[PGS]" << "BeginGetFriends error";
-        return "failed";
-    }
-    if (!game_services_->IsAuthorized()) {
-        return "failed";
-    } 
-    game_services_->Players().FetchConnected([app](const gpg::PlayerManager::FetchListResponse& resp){
-        if (!gpg::IsSuccess(resp.status)) {
-            if (app) {
-                app->OnExtensionResponse("GPSGetFriends","failed");
-            }
-        } else {
-            Sandbox::JsonBuilder res;
-            res.BeginArray();
-            for (std::vector< gpg::Player >::const_iterator it = resp.data.begin(); it!=resp.data.end(); ++it) {
-                res.PutString(it->Id().c_str());
-            }
-            res.EndArray();
-            if (app) {
-                app->OnExtensionResponse("GPSGetFriends",res.End().c_str());
-            }
-        }
-    });
-    return "pending";
-}
+
+
 
 
 
@@ -154,6 +129,7 @@ public:
                 res = is_auth_in_progress_;
                 return true;
             }
+
             res = BeginUserInitiatedSignIn();
             return true;
         }
@@ -189,7 +165,7 @@ public:
             return true;
         }
         if (::strcmp("GPSGetFriends",method)==0) {
-            res = BeginGetFriends(app);
+            res = BeginGetFriends();
             return true;
         }
 
@@ -246,6 +222,8 @@ public:
         gpg::AndroidSupport::OnActivityResult(env,activity,request_code,result_code,data);
         return false;
     }
+
+    static sb::string BeginGetFriends();
 };
 
 void GPSExtension::InitServices(gpg::PlatformConfiguration const &pc) {
@@ -311,3 +289,28 @@ extern "C" void *init_gps_extension() {
     static GPSExtension __gps_extension;
     return &__gps_extension;
 }
+
+sb::string GPSExtension::BeginGetFriends() {
+    if (!game_services_) {
+        Sandbox::LogError() << "[PGS]" << "BeginGetFriends error";
+        return "failed";
+    }
+    if (!game_services_->IsAuthorized()) {
+        return "failed";
+    } 
+    game_services_->Players().FetchConnected([](const gpg::PlayerManager::FetchListResponse& resp){
+        if (!gpg::IsSuccess(resp.status)) {
+            static_cast<GPSExtension*>(init_gps_extension())->AddPendingResponse("GPSGetFriends","failed");
+        } else {
+            Sandbox::JsonBuilder res;
+            res.BeginArray();
+            for (std::vector< gpg::Player >::const_iterator it = resp.data.begin(); it!=resp.data.end(); ++it) {
+                res.PutString(it->Id().c_str());
+            }
+            res.EndArray();
+            static_cast<GPSExtension*>(init_gps_extension())->AddPendingResponse("GPSGetFriends",res.End().c_str());
+        }
+    });
+    return "pending";
+}
+

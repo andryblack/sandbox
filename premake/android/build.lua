@@ -204,8 +204,16 @@ function build.generate_app_build_gradle( sln , prj )
 				 if cfg.android_key_alias then
             		_x(3,'keyAlias "%s"',cfg.android_key_alias)
            		 end
-            	_x(3,'storePassword System.getenv("'..cfg.shortname:upper()..'KSTOREPWD")')
-				_x(3,'keyPassword System.getenv("'..cfg.shortname:upper()..'KEYPWD")')
+           		 if cfg.android_keystore_pwd then
+           		 	_x(3,'storePassword "%s"',cfg.android_keystore_pwd)
+           		 else
+            		_x(3,'storePassword System.getenv("'..cfg.shortname:upper()..'KSTOREPWD")')
+            	 end
+            	 if cfg.android_key_pwd then
+           		 	_x(3,'keyPassword "%s"',cfg.android_key_pwd)
+           		 else
+            		_x(3,'keyPassword System.getenv("'..cfg.shortname:upper()..'KEYPWD")')
+            	 end
 				_x(2,'}')
 			end
 		end

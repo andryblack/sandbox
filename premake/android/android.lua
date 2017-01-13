@@ -153,6 +153,17 @@ api.register {
 	scope = "config",
 	kind = "string"
 }
+api.register {
+	name = "android_keystore_pwd",
+	scope = "config",
+	kind = "string"
+}
+api.register {
+	name = "android_key_pwd",
+	scope = "config",
+	kind = "string"
+}
+
 
 -- Specify applicaton permissions
 
