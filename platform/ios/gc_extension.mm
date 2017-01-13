@@ -57,7 +57,20 @@
 {
     GKLocalPlayer *localPlayer = [GKLocalPlayer localPlayer];
     if (forceShowUI && localPlayer.authenticateHandler) {
-        [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"gamecenter:"]];
+        if (![UIApplication.sharedApplication openURL:[NSURL URLWithString:@"gamecenter:/me/account"]]) {
+            UIViewController* main_controller = 0;
+            GHL::System* system = m_application->GetSystem();
+            if (system->GetDeviceData(GHL::DEVICE_DATA_VIEW_CONTROLLER, &main_controller) && main_controller) {
+                GKGameCenterViewController* gcViewController = [[GKGameCenterViewController alloc] init];
+                
+                gcViewController.gameCenterDelegate = self;
+                
+                gcViewController.viewState = GKGameCenterViewControllerStateDefault;
+                
+                [main_controller presentViewController:gcViewController animated:YES completion:nil];
+                
+            }
+        }
         return;
     }
     localPlayer.authenticateHandler = ^(UIViewController *viewController, NSError *error){

@@ -1,22 +1,51 @@
 #include "sb_ios_extension.h"
 #import <UIKit/UIKit.h>
-#import <objc/runtime.h>
+#import "../../GHL/src/winlib/winlib_cocoatouch.h"
 
-static IMP super_imp(id rcv, SEL a_sel, IMP origin_imp)
-{
-    IMP ret = NULL;
-    Class klass = [rcv class];
-    
-    while ((klass = [klass superclass])) {
-        ret = [klass instanceMethodForSelector: a_sel];
-        if (ret && ret != origin_imp)
-            return ret;
+@interface SandboxAppDelegate : WinLibAppDelegate
+
+@end
+
+@implementation SandboxAppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(nullable NSDictionary *)launchOptions {
+    [super application:application didFinishLaunchingWithOptions:launchOptions];
+    Sandbox::iOSPlatformExtension* ext = Sandbox::iOSPlatformExtension::GetRoot();
+    while (ext) {
+        NSObject* obj = ext->GetObject();
+        if (obj && [obj respondsToSelector:@selector(application:didFinishLaunchingWithOptions:)]) {
+            [obj performSelector:@selector(application:didFinishLaunchingWithOptions:) withObject:application withObject:launchOptions];
+        }
+        ext = ext->GetNext();
     }
-    return NULL;
+    return YES;
 }
 
-static void imp_forwardInvocation(id rcv, SEL method,NSInvocation *anInvocation)
-{
+- (void)applicationWillResignActive:(UIApplication *)application {
+    [super applicationWillResignActive:application];
+    Sandbox::iOSPlatformExtension* ext = Sandbox::iOSPlatformExtension::GetRoot();
+    while (ext) {
+        NSObject* obj = ext->GetObject();
+        if (obj && [obj respondsToSelector:@selector(applicationWillResignActive:)]) {
+            [obj performSelector:@selector(applicationWillResignActive:) withObject:application];
+        }
+        ext = ext->GetNext();
+    }
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    [super applicationDidBecomeActive:application];
+    Sandbox::iOSPlatformExtension* ext = Sandbox::iOSPlatformExtension::GetRoot();
+    while (ext) {
+        NSObject* obj = ext->GetObject();
+        if (obj && [obj respondsToSelector:@selector(applicationDidBecomeActive:)]) {
+            [obj performSelector:@selector(applicationDidBecomeActive:) withObject:application];
+        }
+        ext = ext->GetNext();
+    }
+}
+
+-(void)forwardInvocation:(NSInvocation *)anInvocation {
     Sandbox::iOSPlatformExtension* ext = Sandbox::iOSPlatformExtension::GetRoot();
     bool handled = false;
     while (ext) {
@@ -27,23 +56,18 @@ static void imp_forwardInvocation(id rcv, SEL method,NSInvocation *anInvocation)
         }
         ext = ext->GetNext();
     }
-    if (!handled) {
-        IMP simp = super_imp(rcv, method, (IMP)imp_forwardInvocation);
-        (*simp)(rcv, method, anInvocation);
+    if ([super respondsToSelector:[anInvocation selector]]) {
+        [super forwardInvocation: anInvocation];
     }
 }
 
-static BOOL imp_respondsToSelector (id rcv, SEL method, SEL arg0)
-{
-    BOOL ret;
-    IMP simp = super_imp(rcv, method, (IMP)imp_respondsToSelector);
-    
-    ret = ((BOOL (*)(id, SEL, SEL))simp)(rcv, method, arg0);
+-(BOOL)respondsToSelector:(SEL)aSelector {
+    BOOL ret = [super respondsToSelector:aSelector];
     if (!ret) {
         Sandbox::iOSPlatformExtension* ext = Sandbox::iOSPlatformExtension::GetRoot();
         while (ext) {
             NSObject* obj = ext->GetObject();
-            if (obj && [obj respondsToSelector:arg0]) {
+            if (obj && [obj respondsToSelector:aSelector]) {
                 ret = TRUE;
                 break;
             }
@@ -53,28 +77,11 @@ static BOOL imp_respondsToSelector (id rcv, SEL method, SEL arg0)
     return ret;
 }
 
-static void extend_app_delegate() {
-    Class c = objc_getClass("WinLibAppDelegate");
-    if (c) {
-        if (class_addMethod(c,@selector(forwardInvocation:),(IMP)imp_forwardInvocation,"v@:@")) {
-            NSLog(@"add forward invocation");
-        } else {
-            NSLog(@"add forward invocation failed");
-        }
-        if (class_addMethod(c,@selector(respondsToSelector:),(IMP)imp_respondsToSelector,"c@::")) {
-            NSLog(@"add respond to selector");
-        } else {
-            NSLog(@"add respond to selector failed");
-        }
-    }
-}
+@end
 
 namespace Sandbox {
     iOSPlatformExtension::iOSPlatformExtension() {
-        static dispatch_once_t once;
-        dispatch_once(&once, ^ {
-            extend_app_delegate();
-        });
+       
     }
     
     iOSPlatformExtension::~iOSPlatformExtension() {
