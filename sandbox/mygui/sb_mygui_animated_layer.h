@@ -10,31 +10,30 @@ namespace Sandbox {
     
     namespace mygui {
     
-        class AnimatedWidget;
-    class AnimatedLayerNode : public MyGUI::LayerNode {
-        MYGUI_RTTI_DERIVED( AnimatedLayerNode )
-    public:
-        explicit AnimatedLayerNode(MyGUI::ILayerNode* _parent , AnimatedWidget* widget);
-        explicit AnimatedLayerNode(MyGUI::ILayer* layer , MyGUI::Widget* widget);
-        ~AnimatedLayerNode();
+        class AnimatedLayerNode : public MyGUI::LayerNode {
+            MYGUI_RTTI_DERIVED( AnimatedLayerNode )
+        public:
+            explicit AnimatedLayerNode(MyGUI::ILayerNode* _parent , MyGUI::Widget* widget);
+            explicit AnimatedLayerNode(MyGUI::ILayer* layer , MyGUI::Widget* widget);
+            ~AnimatedLayerNode();
+            
+            virtual void renderToTarget(MyGUI::IRenderTarget* _target, bool _update);
+            
+        protected:
+            MyGUI::Widget* m_widget;
+        };
         
-        virtual void renderToTarget(MyGUI::IRenderTarget* _target, bool _update);
+        class AnimatedLayer : public MyGUI::OverlappedLayer {
+            MYGUI_RTTI_DERIVED( AnimatedLayer )
         
-    protected:
-        AnimatedWidget* m_widget;
-    };
-    
-    class AnimatedLayer : public MyGUI::OverlappedLayer {
-        MYGUI_RTTI_DERIVED( AnimatedLayer )
-    
-    public:
-        AnimatedLayer();
-        virtual ~AnimatedLayer();
-    
-        virtual MyGUI::ILayerNode* createRootItemNode(MyGUI::Widget* widget);
-        virtual void destroyRootItemNode(MyGUI::ILayerNode* _node);
+        public:
+            AnimatedLayer();
+            virtual ~AnimatedLayer();
         
-    };
+            virtual MyGUI::ILayerNode* createRootItemNode(MyGUI::Widget* widget);
+            virtual void destroyRootItemNode(MyGUI::ILayerNode* _node);
+            
+        };
     }
 }
 

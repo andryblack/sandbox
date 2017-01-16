@@ -34,14 +34,13 @@ namespace Sandbox {
 #define MYGUI_LOGGING(section, level, text) \
     Sandbox::mygui::log_message(section,MyGUI::LogLevel::level,MyGUI::LogStream()<<text<<MyGUI::LogStream::End())
 
-#define MYGUI_RTTI_TYPE const std::string&
+#define MYGUI_RTTI_TYPE const Sandbox::meta::type_info*
 
-#define MYGUI_RTTI_GET_TYPE(type) type::getClassTypeName()
+#define MYGUI_RTTI_GET_TYPE(type) type::get_static_type_info()
 
 #define MYGUI_DECLARE_TYPE_NAME(Type) \
     public: \
         static const std::string& getClassTypeName() { static std::string type = #Type; return type; } \
-        /** Get type name as string */ \
         virtual const std::string& getTypeName() const { return getClassTypeName(); } \
         virtual const Sandbox::meta::type_info* get_type_info() const;\
         static const Sandbox::meta::type_info* get_static_type_info();\
@@ -62,7 +61,7 @@ namespace Sandbox {
         template<typename Type> Type* castType(bool _throw = true) \
         { \
             if (this->isType<Type>()) return static_cast<Type*>(this); \
-            MYGUI_ASSERT(!_throw, "Error cast type '" << this->getTypeName() << "' to type '" << Type::getClassTypeName() << "' .") \
+            MYGUI_ASSERT(!_throw, "Error cast type") \
             return nullptr; \
         } \
         /** Try to cast pointer to selected type. \
@@ -71,7 +70,7 @@ namespace Sandbox {
         template<typename Type> const Type* castType(bool _throw = true) const \
         { \
             if (this->isType<Type>()) return static_cast<Type*>(this); \
-            MYGUI_ASSERT(!_throw, "Error cast type '" << this->getTypeName() << "' to type '" << Type::getClassTypeName() << "' .") \
+            MYGUI_ASSERT(!_throw, "Error cast type") \
             return nullptr; \
         }
 

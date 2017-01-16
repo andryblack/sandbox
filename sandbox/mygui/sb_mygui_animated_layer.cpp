@@ -11,11 +11,13 @@ namespace Sandbox {
     
     namespace mygui {
     
-        AnimatedLayerNode::AnimatedLayerNode( ILayerNode* _parent , AnimatedWidget* widget ) : MyGUI::LayerNode(_parent->getLayer(),_parent), m_widget(widget) {
+        AnimatedLayerNode::AnimatedLayerNode( ILayerNode* _parent , MyGUI::Widget* widget ) : MyGUI::LayerNode(_parent->getLayer(),_parent), m_widget(widget) {
         }
         
         AnimatedLayerNode::AnimatedLayerNode(MyGUI::ILayer* layer , MyGUI::Widget* widget) : MyGUI::LayerNode(layer,0),m_widget(0){
-            m_widget = widget->castType<AnimatedWidget>(false);
+            if (widget && MyGUI::utility::parseBool(widget->getUserString("animated"))) {
+                m_widget = widget;
+            }
         }
         
         AnimatedLayerNode::~AnimatedLayerNode() {
@@ -24,7 +26,7 @@ namespace Sandbox {
         
         void AnimatedLayerNode::renderToTarget(MyGUI::IRenderTarget* _target, bool _update) {
             if (m_widget) {
-                m_widget->renderToTarget(_target, this, _update);
+                m_widget->renderNodeToTarget(_target, this, _update);
             } else {
                 Base::renderToTarget(_target, _update);
             }
