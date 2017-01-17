@@ -8,6 +8,7 @@
 
 #include "sb_mygui_widgets.h"
 
+
 #include "sb_mygui_scroll_list.h"
 #include "sb_mygui_cached_widget.h"
 #include "sb_mygui_scene_widget.h"
@@ -23,11 +24,13 @@
 #include "sb_mygui_client_widget.h"
 #include "sb_mygui_animated_widget.h"
 #include "sb_mygui_background_widget.h"
+#include "sb_mygui_text_input.h"
 
 #include "MyGUI_WidgetManager.h"
 #include "MyGUI_FactoryManager.h"
 
 #include "luabind/sb_luabind.h"
+#include "../sb_mygui_bind_helpers.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::CachedWidget)
 SB_META_END_KLASS_BIND()
@@ -86,6 +89,19 @@ SB_META_END_KLASS_BIND()
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::BackgroundWidget)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::TextInput)
+SB_META_PROPERTY_RW(Placeholder, getPlaceholder, setPlaceholder)
+bind(method("eventEditAccept", delegate_bind<Sandbox::mygui::TextInput,
+            Sandbox::mygui::TextInput,
+            Sandbox::mygui::EventHandle_TextInputPtr,
+            &Sandbox::mygui::TextInput::eventEditAccept>::lua_func));
+bind(method("eventEditTextChange", delegate_bind<Sandbox::mygui::TextInput,
+            Sandbox::mygui::TextInput,
+            Sandbox::mygui::EventHandle_TextInputPtr,
+            &Sandbox::mygui::TextInput::eventEditTextChange>::lua_func));
+
+SB_META_END_KLASS_BIND()
+
 
 namespace Sandbox {
     
@@ -109,6 +125,7 @@ namespace Sandbox {
             factory.registerFactory<ClientWidget>(category);
             factory.registerFactory<AnimatedWidget>(category);
             factory.registerFactory<BackgroundWidget>(category);
+            factory.registerFactory<TextInput>(category);
         }
         void unregister_widgets() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
@@ -129,6 +146,7 @@ namespace Sandbox {
             factory.unregisterFactory<ClientWidget>(category);
             factory.unregisterFactory<AnimatedWidget>(category);
             factory.unregisterFactory<BackgroundWidget>(category);
+            factory.unregisterFactory<TextInput>(category);
         }
 
         
@@ -154,6 +172,7 @@ namespace Sandbox {
             luabind::ExternClass<StateVisibleWidget>(L);
             luabind::ExternClass<ClientWidget>(L);
             luabind::ExternClass<BackgroundWidget>(L);
+            luabind::ExternClass<TextInput>(L);
         }
     }
     

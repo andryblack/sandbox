@@ -105,7 +105,7 @@ function build.generate_build_gradle(sln)
     end
     _x(1,'}')
     _x(1,'dependencies {')
-    _x(2,"classpath 'com.android.tools.build:gradle:2.1.2'")
+    _x(2,"classpath 'com.android.tools.build:gradle:2.2.3'")
     if sln.android_module and
     	(sln.android_module.gcm or sln.android_module.fcm) then
     	_x(2,"classpath 'com.google.gms:google-services:3.0.0'")
@@ -312,20 +312,30 @@ function build.generate_app_build_gradle( sln , prj )
 		_x(1,'}')
 	end
 	
+
 	
 	_p('afterEvaluate {')
 	for cfg in project.eachconfig(prj) do
 		_x(1,'copyJNI' .. cfg.name .. '.dependsOn buildJNI' .. cfg.name)
 		_x(1,'copyJNI' .. cfg.name .. 'sym.dependsOn buildJNI' .. cfg.name)
-		_p(1,'generate' .. cfg.name .. 'Assets.dependsOn ' .. 'prebuild_cmd_' .. cfg.shortname .. 
-				', buildJNI' .. cfg.name .. 
-				', copyJNI' .. cfg.name .. ', copyJNI' .. cfg.name .. 'sym')
-		if sln.android_module and
-    		(sln.android_module.gcm or sln.android_module.fcm) then
-    		_x(1,'process' .. cfg.name .. 'GoogleServices.dependsOn copyGoogleServicesJSON')
-    	end
 	end
 
+	_p('}')
+
+	_p('tasks.whenTaskAdded { task ->')
+	for cfg in project.eachconfig(prj) do
+		_x(1,"if (task.name == 'generate%sAssets') {",cfg.name)
+		_x(2,'task.dependsOn ' .. 'prebuild_cmd_' .. cfg.shortname .. 
+				', buildJNI' .. cfg.name .. 
+				', copyJNI' .. cfg.name .. ', copyJNI' .. cfg.name .. 'sym')
+		_x(1,'}')
+		if sln.android_module and
+    		(sln.android_module.gcm or sln.android_module.fcm) then
+    		_x(1,"if (task.name == 'process%sGoogleServices') {",cfg.name)
+			_x(2,'task.dependsOn copyGoogleServicesJSON')
+			_x(1,'}')
+    	end
+	end
 	_p('}')
 	
 	--_p('task build << {' )

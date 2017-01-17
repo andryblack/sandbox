@@ -27,7 +27,7 @@
 #include <ghl_time.h>
 
 #ifdef SB_USE_MYGUI
-#include "MyGUI_Gui.h"
+#include "mygui/sb_mygui_gui.h"
 #include "MyGUI_InputManager.h"
 #include "MyGUI_ClipboardManager.h"
 #include "MyGUI_LanguageManager.h"
@@ -158,7 +158,6 @@ namespace Sandbox {
 #ifdef SB_USE_MYGUI
     namespace mygui {
         void register_mygui( lua_State* lua );
-        void setup_singletons( LuaVM* lua );
         
         void register_factory();
         void unregister_factory();
@@ -447,21 +446,10 @@ namespace Sandbox {
         }
         
         if (!m_gui) {
-            m_gui = new MyGUI::Gui();
-            m_gui->initialise("");
+            m_gui = new mygui::GUI(m_system);
+            m_gui->initialize(m_lua->GetGlobalContext());
             mygui::register_factory();
             RegisterWidgets();
-            mygui::setup_singletons(m_lua);
-            sb_assert( MyGUI::InputManager::getInstancePtr());
-            MyGUI::LanguageManager::getInstance().eventRequestTag =
-                MyGUI::newDelegate(this,&Application::get_mygui_localization);
-            MyGUI::InputManager::getInstance().eventChangeKeyFocus +=
-                MyGUI::newDelegate(this,&Application::mygui_change_key_focus);
-            MyGUI::ClipboardManager::getInstance().eventClipboardChanged +=
-                MyGUI::newDelegate(this,&Application::mygui_clipboard_changed);
-            MyGUI::ClipboardManager::getInstance().eventClipboardRequested +=
-                MyGUI::newDelegate(this,&Application::mygui_clipboard_requested);
-
         }
         
 #endif
@@ -869,6 +857,11 @@ namespace Sandbox {
     
     void GHL_CALL Application::OnEvent( GHL::Event* event ) {
         sb_ensure_main_thread();
+#ifdef SB_USE_MYGUI
+        if (m_gui) {
+            m_gui->eventGHLEvent(event);
+        }
+#endif
         switch( event->type ) {
             case GHL::EVENT_TYPE_KEY_PRESS:
 #ifdef SB_USE_MYGUI
@@ -1114,38 +1107,5 @@ namespace Sandbox {
         return d;
     }
     
-#ifdef SB_USE_MYGUI
-    void Application::get_mygui_localization(const MyGUI::UString& key, MyGUI::UString& value) {
-        LuaContextPtr localization = m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("TRSTR");
-        if (localization) {
-            value.assign( localization->GetValueRaw<sb::string>(key.asUTF8_c_str()) );
-        }
-    }
-    void Application::mygui_change_key_focus( MyGUI::Widget* w ) {
-        if (w && w->isType<MyGUI::EditBox>()) {
-            m_system->ShowKeyboard();
-            if (m_lua) {
-                if (m_lua->GetGlobalContext()->GetValue<bool>("application.onKeyboardFocusChanged")) {
-                    m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
-                    ->call("onKeyboardFocusChanged",w);
-                }
-            }
-        } else {
-            m_system->HideKeyboard();
-            if (m_lua) {
-                if (m_lua->GetGlobalContext()->GetValue<bool>("application.onKeyboardFocusChanged")) {
-                    m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
-                    ->call("onKeyboardFocusChanged",static_cast<MyGUI::Widget*>(0));
-                }
-            }
-        }
-    }
-    void Application::mygui_clipboard_changed( const std::string& type, const std::string& text ) {
-        m_clipboard_text = MyGUI::TextIterator::getOnlyText(MyGUI::UString(text)).asUTF8_c_str();
-    }
-    void Application::mygui_clipboard_requested( const std::string& type, std::string& text  ) {
-        text.assign(m_clipboard_text);
-    }
-#endif
     
 }

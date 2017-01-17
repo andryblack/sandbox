@@ -17,12 +17,6 @@
 #include <sbstd/sb_list.h>
 #include "sb_image.h"
 
-namespace MyGUI {
-    class Gui;
-    class UString;
-    class Widget;
-}
-
 namespace GHL {
     struct Data;
 }
@@ -32,6 +26,7 @@ namespace Sandbox {
     class Resources;
     class SoundManager;
     namespace mygui {
+        class GUI;
         class DataManager;
         class RenderManager;
     }
@@ -188,15 +183,11 @@ namespace Sandbox {
         
         void CreateLua();
     
-        sb::string m_clipboard_text;
+        
 #ifdef SB_USE_MYGUI
         mygui::DataManager*     m_gui_data_manager;
         mygui::RenderManager*   m_gui_render;
-        MyGUI::Gui* m_gui;
-        void get_mygui_localization(const MyGUI::UString & key,MyGUI::UString& value);
-        void mygui_change_key_focus( MyGUI::Widget* w );
-        void mygui_clipboard_changed( const std::string& type, const std::string& text );
-        void mygui_clipboard_requested( const std::string& type, std::string& text  );
+        mygui::GUI* m_gui;
         
         virtual void RegisterWidgets() {}
         virtual void UnregisterWidgets() {}
