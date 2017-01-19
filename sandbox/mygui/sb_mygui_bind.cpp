@@ -493,6 +493,10 @@ static bool widget_getInheritsPick( const MyGUI::Widget* w ) {
 static void widget_setInheritsPick( MyGUI::Widget* w, bool i) {
     w->setInheritsPick(i);
 }
+static bool widget_isTypeOf( const MyGUI::Widget* w , const char* name ) {
+    if (!w) return false;
+    return w->isTypeNameOf(name);
+}
 
 SB_META_DECLARE_OBJECT(MyGUI::Widget, MyGUI::ICroppedRectangle)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Widget)
@@ -574,6 +578,7 @@ SB_META_METHOD(getChildAt)
 SB_META_METHOD(setProperty)
 SB_META_METHOD(changeWidgetSkin)
 
+bind( method( "isTypeOf" , &widget_isTypeOf ) );
 bind( method( "isUserString" , &widget_isUserString ) );
 bind( method( "getUserString" , &widget_getUserString ) );
 bind( method( "setUserString" , &widget_setUserString ) );

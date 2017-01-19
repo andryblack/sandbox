@@ -42,7 +42,7 @@ namespace Sandbox {
     public: \
         static const std::string& getClassTypeName() { static std::string type = #Type; return type; } \
         virtual const std::string& getTypeName() const { return getClassTypeName(); } \
-        virtual const Sandbox::meta::type_info* get_type_info() const;\
+        virtual const Sandbox::meta::type_info* get_type_info() const; \
         static const Sandbox::meta::type_info* get_static_type_info();\
 
 
@@ -53,6 +53,7 @@ namespace Sandbox {
         MYGUI_DECLARE_TYPE_NAME(BaseType) \
         /** Compare with selected type */ \
         virtual bool isType(MYGUI_RTTI_TYPE _type) const { return MYGUI_RTTI_GET_TYPE(BaseType) == _type; } \
+        virtual bool isTypeNameOf(const std::string& name) const { return name == getClassTypeName(); } \
         /** Compare with selected type */ \
         template<typename Type> bool isType() const { return isType(MYGUI_RTTI_GET_TYPE(Type)); } \
         /** Try to cast pointer to selected type. \
@@ -81,6 +82,7 @@ namespace Sandbox {
         typedef DerivedType RTTIBase; \
         /** Compare with selected type */ \
         virtual bool isType(MYGUI_RTTI_TYPE _type) const { return MYGUI_RTTI_GET_TYPE(DerivedType) == _type || Base::isType(_type); } \
+        virtual bool isTypeNameOf(const std::string& name) const { return name == getClassTypeName() || Base::isTypeNameOf(name); } \
         /** Compare with selected type */ \
         template<typename Type> bool isType() const { return isType(MYGUI_RTTI_GET_TYPE(Type)); }
 
