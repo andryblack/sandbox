@@ -5,6 +5,7 @@
 
 #include <ghl_system.h>
 #include <sbstd/sb_intrusive_ptr.h>
+#include <sbstd/sb_string.h>
 
 namespace GHL {
     struct Event;

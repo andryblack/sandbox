@@ -3,6 +3,7 @@
 
 #include "sb_mygui_text_widget.h"
 #include "MyGUI_EditBox.h"
+#include <sbstd/sb_string.h>
 
 namespace GHL {
     struct Event;
