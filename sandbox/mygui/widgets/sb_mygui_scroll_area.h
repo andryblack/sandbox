@@ -50,6 +50,7 @@ namespace Sandbox {
             virtual void updateView();
             
             void frameEntered(float dt);
+            virtual void updateScrollBars();
             virtual void notifyScrollChangePosition(MyGUI::ScrollBar* _sender, size_t _position);
             
             virtual Vector2f GetOffset() const;

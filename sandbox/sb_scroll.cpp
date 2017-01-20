@@ -33,7 +33,7 @@ namespace Sandbox {
             }
         }
         Sandbox::Vector2f prev_pos = GetOffset();
-        Move(Limit(delta));
+        Move(Limit(delta),false);
         
         Time  now = Time::Now();
         float time = (now-m_last_time).ToFloat();
@@ -49,6 +49,7 @@ namespace Sandbox {
         }
         m_last_time = now;
         m_prev_pos = pos;
+        OnScrollMove();
     }
     void Scroll::ScrollEnd( const Vector2f& pos ) {
         if (m_state == scroll_move) {
@@ -59,9 +60,10 @@ namespace Sandbox {
         m_state = scroll_free;
     }
     
-    void Scroll::Move(const Vector2f& delta) {
+    void Scroll::Move(const Vector2f& delta,bool fire) {
         SetOffset(Normalize(GetOffset() + delta,true));
-        OnScrollMove();
+        if (fire)
+            OnScrollMove();
     }
     
     static inline float limit(float v,float l,float r) {
@@ -133,7 +135,7 @@ namespace Sandbox {
             float len = m_last_speed.length() + nlen;
             if (len < 5.0f && nlen < 0.5f) {
                 if (nlen != 0.0f) {
-                    Move(nmove);
+                    Move(nmove,true);
                 }
                 m_last_speed = Vector2f(0,0);
                 m_state = scroll_none;
@@ -142,11 +144,12 @@ namespace Sandbox {
             }
             Vector2f prev_pos = offset;
             Vector2f delta = Limit(m_last_speed * dt * m_fade);
-            Move(delta);
+            Move(delta,false);
             m_last_speed = (GetOffset() - prev_pos) / dt;
             Vector2f delta_n = nmove * dt * 8;
             if (delta_n.length() > delta.length())
-                Move(delta_n);
+                Move(delta_n,false);
+            OnScrollMove();
         }
         
     }

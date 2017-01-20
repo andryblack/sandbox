@@ -63,6 +63,19 @@ namespace Sandbox {
         return ctx;
     }
     
+    bool LuaContext::IsSame(const sb::intrusive_ptr<LuaContext>& o) {
+        if (!o || !o->Valid()) return !Valid();
+        luabind::LuaVMHelperPtr helper = GetHelper();
+        if (!helper) return LuaContextPtr();
+        lua_State* L = helper->lua;
+        LUA_CHECK_STACK(0)
+        GetObject(L);
+        o->GetObject(L);
+        int r = lua_rawequal(L, -1, -2);
+        lua_pop(L, 2);
+        return r!=0;
+    }
+    
     lua_State* LuaContext::get_state_with_table_on_top(const char* path) {
         if (!Valid()) return 0;
         luabind::LuaVMHelperPtr helper = GetHelper();

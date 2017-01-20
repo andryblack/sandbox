@@ -62,6 +62,10 @@ namespace Sandbox {
                         size.width *= GetFontScale();
                         size.height *= GetFontScale();
                     }
+                    if (m_scale <= 0.125f) {
+                        m_scale = 0.125f;
+                        break;
+                    }
                 }
             }
 

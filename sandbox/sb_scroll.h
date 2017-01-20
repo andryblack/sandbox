@@ -28,7 +28,7 @@ namespace Sandbox {
     protected:
         virtual Vector2f Normalize(const Vector2f& offset,bool soft) const;
         Vector2f Limit(const Vector2f& v) const;
-        void Move(const Vector2f& offset);
+        void Move(const Vector2f& offset,bool fire=true);
         
         virtual void OnScrollBegin() {}
         virtual void OnScrollEnd() {}

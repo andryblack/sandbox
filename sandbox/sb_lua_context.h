@@ -33,6 +33,8 @@ namespace Sandbox {
         sb::intrusive_ptr<LuaContext> CreateInherited();
         sb::intrusive_ptr<LuaContext> CreateChild(const char* name);
         
+        bool IsSame(const sb::intrusive_ptr<LuaContext>& o);
+        
         template <class T>
         inline T GetValue(const char* path) {
             lua_State* L = get_state_with_table_on_top(path);
