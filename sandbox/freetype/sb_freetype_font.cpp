@@ -410,7 +410,7 @@ namespace Sandbox {
         if (int error = FT_Set_Char_Size(face->face,
                                      size_x,
                                      size_y,
-                                     config.dpi,
+                                     config.dpi * config.x_scale,
                                      config.dpi)) {
             LogError() << "FT_Set_Char_Size " << error;
         }
