@@ -166,6 +166,7 @@ namespace Sandbox {
         
         void ScrollArea::OnScrollBegin() {
             MyGUI::InputManager::getInstance().setMouseFocusWidget(this);
+            scrollBegin(this, getViewOffset());
         }
         
         void ScrollArea::OnScrollEnd() {

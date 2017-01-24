@@ -975,6 +975,10 @@ SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
 SB_META_PROPERTY_WO(scrollPos, setScrollPos)
 SB_META_PROPERTY_WO(scrollPosF, setScrollPosF)
 SB_META_PROPERTY_RO(scrollActive, scrollActive)
+bind(method("scrollBegin", delegate_bind<Sandbox::mygui::ScrollArea,
+            Sandbox::mygui::ScrollArea,
+            Sandbox::mygui::EventHandle_ScrollAreaPtrIntPoint,
+            &Sandbox::mygui::ScrollArea::scrollBegin>::lua_func));
 bind(method("scrollComplete", delegate_bind<Sandbox::mygui::ScrollArea,
             Sandbox::mygui::ScrollArea,
             Sandbox::mygui::EventHandle_ScrollAreaPtrIntPoint,
