@@ -190,6 +190,13 @@ namespace Sandbox {
                     Graphics* g = target->graphics();
                     
                     if (g) {
+                        if (shader && widget_p) {
+                            ShaderVec2UniformPtr u = shader->GetVec2Uniform("draw_offset");
+                            if (u) {
+                                
+                                u->SetValue(g->GetTransform().transform(Vector2f(widget_p->getAbsoluteLeft(),widget_p->getAbsoluteTop())));
+                            }
+                        }
                         g->SetShader(shader);
                         setMask(*g, fill_image);
                         Base::doRender(_target);
