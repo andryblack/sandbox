@@ -19,6 +19,43 @@ namespace Sandbox {
     namespace mygui {
         class RenderTargetImpl;
         
+        class ReplacedLayer : public MyGUI::ILayer {
+        private:
+            MyGUI::LayerNode    m_root;
+            MyGUI::IntSize      m_view_size;
+        public:
+            ReplacedLayer();
+            
+            MyGUI::LayerNode* getRoot() { return &m_root; }
+            
+            virtual MyGUI::ILayerNode* createRootItemNode(MyGUI::Widget* _item);
+            virtual void destroyRootItemNode(MyGUI::ILayerNode* _node);
+            
+            // up child item (make it draw and pick above other)
+            virtual void upRootItemNode(MyGUI::ILayerNode* _node);
+            
+            // child items list
+            virtual size_t getLayerNodeCount() const;
+            
+            virtual MyGUI::ILayerNode* getLayerNodeAt(size_t _index) const;
+            
+            // return widget at position
+            virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
+            virtual MyGUI::ILayerItem* checkLayerItemByPoint(const MyGUI::ILayerItem* _target, int _left, int _top) const;
+            
+            
+            // return position in layer coordinates
+            virtual MyGUI::FloatPoint getPosition(float _left, float _top) const;
+            
+            // return layer size
+            virtual const MyGUI::IntSize& getSize() const;
+            
+            // render layer
+            virtual void renderToTarget(MyGUI::IRenderTarget* _target, bool _update);
+            
+            virtual void resizeView(const MyGUI::IntSize& _viewSize);
+        };
+        
         class CachedWidget : public MyGUI::Widget {
             MYGUI_RTTI_DERIVED( CachedWidget )
         public:
@@ -45,7 +82,7 @@ namespace Sandbox {
         private:
             RenderTargetImpl*        m_target;
             
-            MyGUI::LayerNode*  m_replaced_layer;
+            ReplacedLayer*      m_replaced_layer;
             void frameEntered(float dt);
             std::string m_texture_name;
             

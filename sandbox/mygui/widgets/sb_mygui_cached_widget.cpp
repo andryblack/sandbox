@@ -23,10 +23,71 @@ namespace Sandbox {
     
     namespace mygui {
         
+        ReplacedLayer::ReplacedLayer() : m_root(this,0) {
+            
+        }
+        
+        MyGUI::ILayerNode* ReplacedLayer::createRootItemNode(MyGUI::Widget* _item) {
+            return &m_root;
+        }
+        void ReplacedLayer::destroyRootItemNode(MyGUI::ILayerNode* _item) {
+            MyGUI::ILayerNode* parent = _item->getParent();
+            if (parent)
+            {
+                parent->destroyChildItemNode(_item);
+                return;
+            }
+        }
+        
+        // up child item (make it draw and pick above other)
+        void ReplacedLayer::upRootItemNode(MyGUI::ILayerNode* _node) {
+            // none
+        }
+        
+        // child items list
+        
+        size_t ReplacedLayer::getLayerNodeCount() const {
+            return 1;
+        }
+        
+        MyGUI::ILayerNode* ReplacedLayer::getLayerNodeAt(size_t _index) const {
+            return const_cast<MyGUI::LayerNode*>(&m_root);
+        }
+        
+        // return widget at position
+        MyGUI::ILayerItem* ReplacedLayer::getLayerItemByPoint(int _left, int _top) const {
+            return m_root.getLayerItemByPoint(_left, _top);
+        }
+        MyGUI::ILayerItem* ReplacedLayer::checkLayerItemByPoint(const MyGUI::ILayerItem* _target, int _left, int _top) const {
+            return m_root.checkLayerItemByPoint(_target, _left, _top);
+        }
+        
+        
+        // return position in layer coordinates
+        MyGUI::FloatPoint ReplacedLayer::getPosition(float _left, float _top) const {
+            return MyGUI::FloatPoint(_left,_top);
+        }
+        
+        // return layer size
+        const MyGUI::IntSize& ReplacedLayer::getSize() const {
+            return m_view_size;
+        }
+        
+        // render layer
+        void ReplacedLayer::renderToTarget(MyGUI::IRenderTarget* _target, bool _update) {
+            m_root.renderToTarget(_target, _update);
+        }
+        
+        void ReplacedLayer::resizeView(const MyGUI::IntSize& _viewSize) {
+            m_view_size = _viewSize;
+            m_root.resizeView(_viewSize);
+        }
+
+        
         
         CachedWidget::CachedWidget() : m_render_content(false) {
             m_target = 0;
-            m_replaced_layer = new MyGUI::LayerNode(0,0);
+            m_replaced_layer = new ReplacedLayer();
             m_texture_name = get_type_info()->name;
             char buf[128];
 			sb::snprintf(buf, 128, "_%p", this);
@@ -73,20 +134,23 @@ namespace Sandbox {
         }
         
         void CachedWidget::addChildItem(LayerItem* _item) {
-            _item->attachItemToNode(0, m_replaced_layer);
+            m_replaced_layer->getRoot()->attachLayerItem(_item);
         }
         
         void CachedWidget::removeChildItem(LayerItem* _item) {
-          
+            _item->detachFromLayer();
         }
         
         void CachedWidget::addChildNode(LayerItem* _item) {
-            MyGUI::ILayerNode* child_node = _item->createChildItemNode(m_replaced_layer);
-            _item->attachItemToNode(0, child_node);
+            MyGUI::ILayerNode* child_node = _item->createChildItemNode(m_replaced_layer->getRoot());
+            child_node->attachLayerItem(_item);
         }
         
         void CachedWidget::removeChildNode(LayerItem* _item) {
-            
+            MyGUI::ILayerNode* node = _item->getLayerNode();
+            if (node)
+                m_replaced_layer->getRoot()->destroyChildItemNode(node);
+            _item->detachFromLayer();
         }
         
         void CachedWidget::frameEntered(float dt) {
@@ -107,9 +171,10 @@ namespace Sandbox {
                     m_target = static_cast<mygui::RenderManager*>(MyGUI::RenderManager::getInstancePtr())->createTarget(size);
                 }
                 setRenderItemTexture(m_target->getTexture());
+                m_replaced_layer->resizeView(size);
                 _updateView();
             } else {
-                if (!m_replaced_layer->isOutOfDate() && !m_render_content)
+                if (!m_replaced_layer->getRoot()->isOutOfDate() && !m_render_content)
                     return;
             }
 

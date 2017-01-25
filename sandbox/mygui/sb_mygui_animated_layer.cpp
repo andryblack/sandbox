@@ -12,6 +12,7 @@ namespace Sandbox {
     namespace mygui {
     
         AnimatedLayerNode::AnimatedLayerNode( ILayerNode* _parent , MyGUI::Widget* widget ) : MyGUI::LayerNode(_parent->getLayer(),_parent), m_widget(widget) {
+            sb_assert(getLayer());
         }
         
         AnimatedLayerNode::AnimatedLayerNode(MyGUI::ILayer* layer , MyGUI::Widget* widget) : MyGUI::LayerNode(layer,0),m_widget(0){
