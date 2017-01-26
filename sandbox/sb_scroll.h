@@ -25,6 +25,7 @@ namespace Sandbox {
         } m_state;
         Sizef   m_bounds;
         float m_fade;
+        float   m_normalization_time;
     protected:
         virtual Vector2f Normalize(const Vector2f& offset,bool soft) const;
         Vector2f Limit(const Vector2f& v) const;
@@ -36,6 +37,7 @@ namespace Sandbox {
         
         virtual Vector2f GetOffset() const = 0;
         virtual void SetOffset(const Vector2f& offset) = 0;
+        bool IsFreeMove() const { return m_state == scroll_free; }
     public:
         Scroll();
         
@@ -57,6 +59,8 @@ namespace Sandbox {
         void SetBounds(const Sizef& s) { m_bounds = s; }
         void SetViewPos(const Vector2f& v) { SetOffset(Normalize(v,false)); }
         Vector2f GetViewPos() const { return GetOffset(); }
+        float GetNormalizationTime() const { return m_normalization_time; }
+        void SetNormalizationTime(float t) { m_normalization_time = t; }
         
         void ScrollBegin( const Vector2f& pos );
         void ScrollMove( const Vector2f& pos );

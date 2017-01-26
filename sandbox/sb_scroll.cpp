@@ -7,6 +7,7 @@ namespace Sandbox {
     Scroll::Scroll() : m_v_enabled(true) , m_h_enabled(true),m_state(scroll_none) {
         m_bounds = Sizef(0,0);
         m_fade = 0.9f;
+        m_normalization_time = 1.0f / 8.0f;
     }
     
     void Scroll::SetViewSize(const Sizef& r) {
@@ -146,7 +147,7 @@ namespace Sandbox {
             Vector2f delta = Limit(m_last_speed * dt * m_fade);
             Move(delta,false);
             m_last_speed = (GetOffset() - prev_pos) / dt;
-            Vector2f delta_n = nmove * dt * 8;
+            Vector2f delta_n = nmove * dt / m_normalization_time;
             if (delta_n.length() > delta.length())
                 Move(delta_n,false);
             OnScrollMove();

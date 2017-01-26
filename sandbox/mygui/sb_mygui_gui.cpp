@@ -20,7 +20,7 @@ namespace Sandbox {
         void GUI::initialize(const LuaContextPtr& ctx) {
             m_ctx = ctx;
             
-            MyGUI::Gui::initialise();
+            MyGUI::Gui::initialise("");
             
             mLanguageManager->eventRequestTag =
                 MyGUI::newDelegate(this,&GUI::get_mygui_localization);

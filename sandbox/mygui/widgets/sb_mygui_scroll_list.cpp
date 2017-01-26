@@ -190,6 +190,8 @@ namespace Sandbox {
                 setManualScroll(MyGUI::utility::parseValue<bool>(_value));
             else if (_key == "AlignOnCell")
                 setAlignOnCell(MyGUI::utility::parseValue<bool>(_value));
+            else if (_key == "AlignTime")
+                SetNormalizationTime(MyGUI::utility::parseValue<float>(_value));
             else
             {
                 Base::setPropertyOverride(_key, _value);
