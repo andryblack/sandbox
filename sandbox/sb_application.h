@@ -73,6 +73,7 @@ namespace Sandbox {
         GHL::Data* LoadProfileFile( const char* filename );
         
         ImagePtr RenderScreen();
+        bool OpenURL(const sb::string& url);
     protected:
 		Application();
 		virtual ~Application();

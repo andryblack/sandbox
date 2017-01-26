@@ -128,6 +128,7 @@ SB_META_METHOD(SetResourcesVariant)
 SB_META_METHOD(SetRenderScale)
 SB_META_METHOD(Restart)
 SB_META_METHOD(RenderScreen)
+SB_META_METHOD(OpenURL)
 SB_META_PROPERTY_RO(TimeUSec, GetTimeUSec)
 SB_META_PROPERTY_RO(UTCOffset, GetUTCOffset)
 SB_META_PROPERTY_RO(SystemLanguage, GetSystemLanguage)
@@ -272,6 +273,12 @@ namespace Sandbox {
     void Application::OnSystemSet() {
         
     }
+    
+    bool Application::OpenURL(const sb::string& url) {
+        if (!m_system)
+            return false;
+        return m_system->OpenURL(url.c_str());
+    }
 	
 	///
 	void GHL_CALL Application::SetSystem( GHL::System* sys ) {
@@ -391,7 +398,10 @@ namespace Sandbox {
         luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
         luabind::RawClass<GHL::Settings>(m_lua->GetVM());
         
+        
         BindModules( m_lua );
+        
+        ctx->SetValue("application.resources", m_resources);
         
         ctx->SetValue("application.app", this);
         

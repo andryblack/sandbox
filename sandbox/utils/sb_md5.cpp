@@ -29,18 +29,23 @@ namespace Sandbox {
         MD5_Final(sum, &ctx);
         return DataToHex(sum,16);
     }
-    sb::string MD5SumStream( GHL::DataStream* ds ) {
+    sb::string MD5SumStream( GHL::DataStream* ds , size_t& total_size) {
         MD5_CTX ctx;
         MD5_Init(&ctx);
         static const size_t BUFFER_SIZE = 1024 * 4;
         GHL::Byte buffer[BUFFER_SIZE];
         while (!ds->Eof()) {
             size_t size = ds->Read(buffer, BUFFER_SIZE);
+            total_size+=size;
             MD5_Update(&ctx, buffer, size);
         }
         unsigned char sum[16];
         MD5_Final(sum, &ctx);
         return DataToHex(sum,16);
+    }
+    sb::string MD5SumStream( GHL::DataStream* ds) {
+        size_t s = 0;
+        return MD5SumStream(ds,s);
     }
     
     int MD5SumFile( lua_State* L ) {
@@ -50,9 +55,11 @@ namespace Sandbox {
         if (!ds) {
             luaL_error(L, "not found file %s",fn);
         }
-        lua_pushstring(L, MD5SumStream(ds).c_str());
+        size_t size = 0;
+        lua_pushstring(L, MD5SumStream(ds,size).c_str());
         ds->Release();
-        return 1;
+        lua_pushinteger(L, size);
+        return 2;
     }
     
 }

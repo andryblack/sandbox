@@ -155,6 +155,7 @@ namespace Sandbox {
     }
     
     void NetworkFileRequest::OnData(const GHL::Byte *data, GHL::UInt32 size) {
+        NetworkRequestBase::OnData(data, size);
         if (m_ds) {
             m_ds->Write(data, size);
         }

@@ -13,7 +13,7 @@
 
 
 namespace Sandbox {
-    
+        
     void register_utils( lua_State* lua ) {
         luabind::Namespace ns(lua,"Sandbox.utils");
         ns( Sandbox::meta::static_method( "MD5" , &Sandbox::MD5Sum) );
