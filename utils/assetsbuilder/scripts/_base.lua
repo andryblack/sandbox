@@ -1,6 +1,11 @@
 
 -- ported premake functions
 
+if not lua then 
+	lua = {}
+end
+lua.compile = string.dump
+
 function iif(condition, trueValue, falseValue)
 	if condition then
 		return trueValue
@@ -367,6 +372,8 @@ __modules = {
 	pre_apply_rules = {},
 	post_apply_rules = {}
 }
+
+
 function register_rule( r )
 	if r.init_rules then
 		table.insert(__modules.init_rules,r.init_rules)

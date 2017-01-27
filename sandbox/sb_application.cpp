@@ -965,6 +965,11 @@ namespace Sandbox {
     }
 	
     void Application::TransformMouse(GHL::Int32 x,GHL::Int32 y,float& fx, float& fy) {
+        if (!m_resources || !m_graphics) {
+            fx = x;
+            fy = y;
+            return;
+        }
         fx = x / (m_resources->GetScale()*m_graphics->GetScale());
         fy = y / (m_resources->GetScale()*m_graphics->GetScale());
     }

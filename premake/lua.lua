@@ -11,6 +11,8 @@ if not configure_lib_targetdir then
 	end
 end
 
+local lua_root = external_module_lua or (sandbox_dir .. '/external/lua/')
+
 project 'lua'
    		kind 'StaticLib'
    		configure_lib_targetdir()
@@ -37,12 +39,12 @@ project 'lua'
 
 
 		os.mkdir(path.getabsolute(sandbox_dir..'/include/lua'))
-		os.copyfile(path.getabsolute(sandbox_dir..'/external/lua/src/lua.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
-		os.copyfile(path.getabsolute(sandbox_dir..'/external/lua/src/lualib.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
-		os.copyfile(path.getabsolute(sandbox_dir..'/external/lua/src/lauxlib.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
-		os.copyfile(path.getabsolute(sandbox_dir..'/external/lua/src/luaconf.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
+		os.copyfile(path.getabsolute(lua_root .. 'src/lua.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
+		os.copyfile(path.getabsolute(lua_root .. 'src/lualib.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
+		os.copyfile(path.getabsolute(lua_root .. 'src/lauxlib.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
+		os.copyfile(path.getabsolute(lua_root .. 'src/luaconf.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
 		
-		files(utils.append_path(sandbox_dir .. '/external/lua/src/',lua_files))
-		files{ sandbox_dir .. '/external/lua/src/*.h' }
+		files(utils.append_path(lua_root .. 'src/',lua_files))
+		files{ lua_root .. 'src/*.h' }
 
 		

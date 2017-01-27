@@ -260,7 +260,7 @@ local function compile_files( files )
 			source:close()
 
 			local shunk = assert(load(pp_source,'@'..dst,'t'))
-			local binary = string.dump(shunk)
+			local binary = lua.compile(shunk)
 			local full_dst = path.join(application.dst_path,dst)
 			print('compile',v,full_dst)
 			local out = assert(io.open(full_dst,'wb'))
