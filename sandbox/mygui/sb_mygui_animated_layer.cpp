@@ -27,10 +27,11 @@ namespace Sandbox {
         
         void AnimatedLayerNode::renderToTarget(MyGUI::IRenderTarget* _target, bool _update) {
             if (m_widget) {
-                m_widget->renderNodeToTarget(_target, this, _update);
-            } else {
-                Base::renderToTarget(_target, _update);
+                if (m_widget->renderNodeToTarget(_target, this, _update)) {
+                    return;
+                }
             }
+            Base::renderToTarget(_target, _update);
         }
         
         

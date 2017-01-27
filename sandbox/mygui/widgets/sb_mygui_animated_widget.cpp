@@ -56,7 +56,7 @@ namespace Sandbox {
             MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &AnimatedWidget::Update );
         }
         
-        void AnimatedWidget::renderNodeToTarget(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update) {
+        bool AnimatedWidget::renderNodeToTarget(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update) {
             Graphics& g = *static_cast<RenderTargetImpl*>(rt)->graphics();
             Transform2d tr = g.GetTransform();
             Color clr = g.GetColor();
@@ -72,6 +72,7 @@ namespace Sandbox {
 
             g.SetColor(clr);
             g.SetTransform(tr);
+            return true;
         }
    
         void AnimatedWidget::DrawContent(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update) {

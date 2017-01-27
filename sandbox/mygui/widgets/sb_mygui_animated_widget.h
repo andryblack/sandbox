@@ -36,7 +36,7 @@ namespace Sandbox {
             void SetOrigin(const Vector2f& o);
             const Vector2f& GetOrigin() const { return m_origin; }
             
-            virtual void renderNodeToTarget(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update);
+            virtual bool renderNodeToTarget(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update);
             virtual void DrawContent(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update);
             
         protected:
