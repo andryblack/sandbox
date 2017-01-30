@@ -14,6 +14,7 @@
 #include "sb_container.h"
 #include "MyGUI_SharedLayerNode.h"
 #include "sb_threads_mgr.h"
+#include "../sb_mygui_animated_layer.h"
 
 namespace Sandbox {
     
@@ -21,7 +22,7 @@ namespace Sandbox {
         class RenderTargetImpl;
         class AnimatedLayerNode;
         
-        class AnimatedWidget : public MyGUI::Widget {
+        class AnimatedWidget : public MyGUI::Widget, public AnimatedLayerProxy {
             MYGUI_RTTI_DERIVED( AnimatedWidget )
         public:
             AnimatedWidget();
@@ -42,6 +43,7 @@ namespace Sandbox {
         protected:
             void initialiseOverride();
             void shutdownOverride();
+            void detachFromLayer();
             
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             virtual void Update(float dt);
@@ -50,7 +52,6 @@ namespace Sandbox {
             mutable ColorModificatorPtr         m_color;
             ThreadsMgrPtr               m_thread;
             Vector2f            m_origin;
-         private:
         };
         
     }

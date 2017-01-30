@@ -56,6 +56,11 @@ namespace Sandbox {
             MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &AnimatedWidget::Update );
         }
         
+        void AnimatedWidget::detachFromLayer() {
+            Base::detachFromLayer();
+        }
+
+        
         bool AnimatedWidget::renderNodeToTarget(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update) {
             Graphics& g = *static_cast<RenderTargetImpl*>(rt)->graphics();
             Transform2d tr = g.GetTransform();
@@ -84,9 +89,9 @@ namespace Sandbox {
         }
         
         MyGUI::ILayerNode* AnimatedWidget::createChildItemNode(MyGUI::ILayerNode* _node) {
-            AnimatedLayerNode* child = new AnimatedLayerNode(_node,this);
-            _node->addChildItemNode(child);
-            return child;
+            AnimatedLayerNode* node = new AnimatedLayerNode(_node,this);
+            _node->addChildItemNode(node);
+            return node;
         }
         
         void AnimatedWidget::setPropertyOverride(const std::string& _key, const std::string& _value) {

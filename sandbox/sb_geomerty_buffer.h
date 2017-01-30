@@ -36,6 +36,7 @@ namespace Sandbox {
         void BuildContour(const sb::vector<Vector2f>& points);
         void BuildFill(const sb::vector<Vector2f>& points, const Transform2d& tr);
         
+        GeometryData& GetData() { return m_data; }
     private:
         GeometryData  m_data;
         ImagePtr    m_image;
