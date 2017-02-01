@@ -59,7 +59,7 @@ namespace Sandbox {
         return m_texture;
     }
     BitmaskPtr Texture::GetBitmask(Resources* resources) {
-        if (!m_bitmask) {
+        if (!m_bitmask && !m_file.empty()) {
             m_bitmask = resources->LoadBitmask(m_file);
         }
         return m_bitmask;

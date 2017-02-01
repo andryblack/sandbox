@@ -13,6 +13,7 @@ SB_META_METHOD(SetDefaultMix)
 SB_META_METHOD(GetSlotsCount)
 SB_META_METHOD(GetSlotName)
 SB_META_METHOD(SetSlotAttribute)
+SB_META_METHOD(GetSlotImage)
 SB_META_PROPERTY_RO(Size, GetSize)
 SB_META_END_KLASS_BIND()
 

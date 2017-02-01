@@ -6,6 +6,7 @@
 #include <sbstd/sb_string.h>
 #include "sb_draw_attributes.h"
 #include "sb_texture.h"
+#include "sb_image.h"
 #include "sb_file_provider.h"
 #include "sb_event.h"
 #include "sb_size.h"
@@ -42,6 +43,7 @@ namespace Sandbox {
         void SetSlotAttribute(size_t idx, const DrawAttributesPtr& attribute);
         const DrawAttributesPtr& GetSlotAttribute(const void* idx) const;
         const EventPtr& GetEvent(const void* idx) const;
+        ImagePtr GetSlotImage(const char* slot_name) const;
         
         static SpineDataPtr LoadI(const char* atlas_file,
                                  const char* skeleton_file,
