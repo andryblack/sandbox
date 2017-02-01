@@ -188,6 +188,7 @@ local function find_textures( from, mask )
 		end
 	end
 	filter_group(assert(find_images_folder(get_rules().images,from),"not found images '" .. from .."'"))
+	table.sort(res,function(a,b) return (a._path .. a._name) < (b._path .. b._name) end)
 	return res
 end
 
