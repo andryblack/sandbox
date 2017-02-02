@@ -69,8 +69,10 @@ namespace Sandbox {
             void setPage(int page);
             int getPage() const;
             
-            void    setScroll(int pos);
-            int     getScroll() const;
+            void    setScroll(float pos);
+            float     getScroll() const;
+            
+            int getPageScroll(int page);
             
             void itemAdded();
             

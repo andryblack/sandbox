@@ -111,6 +111,7 @@ SB_META_METHOD(redrawItemAt)
 SB_META_METHOD(getWidgetByIndex)
 SB_META_METHOD(getIndexByWidget)
 SB_META_METHOD(upWidget)
+SB_META_METHOD(getPageScroll)
 SB_META_PROPERTY_RW(verticalAlignment,getVerticalAlignment,setVerticalAlignment)
 SB_META_PROPERTY_RW(page, getPage, setPage)
 SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
@@ -305,7 +306,7 @@ namespace Sandbox {
             Base::onMouseButtonReleased(_left, _top, _id);
         }
         
-        void ScrollList::setScroll(int pos) {
+        void ScrollList::setScroll(float pos) {
             Vector2f idiff(0,0);
             if (getVerticalAlignment()) {
                 idiff.y = pos;
@@ -320,10 +321,10 @@ namespace Sandbox {
             Base::setContentPosition(pos);
         }
         
-        int     ScrollList::getScroll() const {
+        float     ScrollList::getScroll() const {
             if (getVerticalAlignment())
-                return -getViewOffset().top;
-            return -getViewOffset().left;
+                return ScrollArea::GetOffset().y;
+            return ScrollArea::GetOffset().x;
         }
         
         int     ScrollList::getItemSize() const {
@@ -358,7 +359,19 @@ namespace Sandbox {
         }
                 
         void ScrollList::setPage(int page) {
-            setScroll(getItemSize()*(page/m_num_subitems) - getScrollMargin());
+            setScroll(getItemSize()*(page/int(m_num_subitems)) - getScrollMargin());
+        }
+        
+        int ScrollList::getPageScroll(int page) {
+            int scroll = getItemSize()*(page/int(m_num_subitems)) - getScrollMargin();
+            Vector2f idiff(0,0);
+            if (getVerticalAlignment()) {
+                idiff.y = scroll;
+            } else {
+                idiff.x = scroll;
+            }
+            Vector2f pos = ScrollArea::Normalize(idiff,false);
+            return getVerticalAlignment() ? pos.y : pos.x;
         }
         
         int ScrollList::getPage() const {
