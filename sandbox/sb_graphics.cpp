@@ -1065,6 +1065,15 @@ namespace Sandbox {
         m_mask_transform = tr;
     }
     
+    void Graphics::StoreMask(MaskContext& ctx) const {
+        ctx.mode = GetMaskMode();
+        ctx.texture = GetMaskTexture();
+        ctx.tr = GetMaskTransform();
+    }
+    void Graphics::RestoreMask(const MaskContext& ctx) {
+        SetMask(ctx.mode, ctx.texture, ctx.tr);
+    }
+    
     void Graphics::SetMask(MaskMode mode, const Image& mask_img,const Rectf& rect) {
         SetMaskTexture(mask_img.GetTexture());
         SetMaskMode(mode);

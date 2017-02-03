@@ -107,6 +107,15 @@ namespace Sandbox {
         void SetMask(MaskMode mode, const TexturePtr& mask_tex,const Transform2d& tr);
         void SetMask(MaskMode mode, const Image& mask_img,const Rectf& rect);
         
+        struct MaskContext {
+            MaskMode mode;
+            TexturePtr texture;
+            Transform2d tr;
+        };
+        
+        void StoreMask(MaskContext& ctx) const;
+        void RestoreMask(const MaskContext& ctx);
+        
         const TexturePtr& GetMaskTexture() const { return m_state.mask; }
         void SetMaskTexture(const TexturePtr& tex,bool autocalc=true);
         MaskMode GetMaskMode() const { return m_state.mask_mode; }

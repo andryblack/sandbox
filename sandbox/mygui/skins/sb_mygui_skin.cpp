@@ -193,15 +193,25 @@ namespace Sandbox {
                         if (shader && widget_p) {
                             ShaderVec2UniformPtr u = shader->GetVec2Uniform("draw_offset");
                             if (u) {
-                                
-                                u->SetValue(g->GetTransform().transform(Vector2f(widget_p->getAbsoluteLeft(),widget_p->getAbsoluteTop())));
+                                Sandbox::Vector2f left_top = g->GetTransform().transform(Vector2f(widget_p->getAbsoluteLeft(),widget_p->getAbsoluteTop()));
+                                u->SetValue(left_top);
+                                u = shader->GetVec2Uniform("draw_scale");
+                                if (u) {
+                                    Sandbox::Vector2f right_bottom = g->GetTransform().transform(Vector2f(widget_p->getAbsoluteLeft()+widget_p->getWidth(),widget_p->getAbsoluteTop()+widget_p->getHeight()));
+                                    Sandbox::Vector2f size = right_bottom-left_top;
+                                    if (size.x != 0.0f && size.y != 0.0f)
+                                        u->SetValue(Vector2f(float(widget_p->getWidth())/size.x ,float(widget_p->getHeight())/size.y ));
+                                }
                             }
                         }
+                        Sandbox::ShaderPtr storeShader = g->GetShader();
+                        Sandbox::Graphics::MaskContext mask;
+                        g->StoreMask(mask);
                         g->SetShader(shader);
                         setMask(*g, fill_image);
                         Base::doRender(_target);
-                        g->SetMask(MASK_MODE_NONE, TexturePtr(), Transform2d());
-                        g->SetShader(ShaderPtr());
+                        g->RestoreMask(mask);
+                        g->SetShader(storeShader);
                         
                         //
                     } else {
