@@ -683,11 +683,11 @@ SB_META_PROPERTY_RW(maxTextLength, getMaxTextLength, setMaxTextLength)
 SB_META_PROPERTY_RW(overflowToTheLeft, getOverflowToTheLeft, setOverflowToTheLeft)
 bind(method("eventEditSelectAccept", delegate_bind<MyGUI::EditBox,
             MyGUI::EditBox,
-            MyGUI::EventPair<MyGUI::EventHandle_WidgetVoid, MyGUI::EventHandle_EditPtr>,
+            MyGUI::EventHandle_EditPtr,
             &MyGUI::EditBox::eventEditSelectAccept>::lua_func));
 bind(method("eventEditTextChange", delegate_bind<MyGUI::EditBox,
             MyGUI::EditBox,
-            MyGUI::EventPair<MyGUI::EventHandle_WidgetVoid, MyGUI::EventHandle_EditPtr>,
+            MyGUI::EventHandle_EditPtr,
             &MyGUI::EditBox::eventEditTextChange>::lua_func));
 SB_META_END_KLASS_BIND()
 

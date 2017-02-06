@@ -28,6 +28,12 @@ namespace Sandbox {
             }
         }
         
+        void AnimatedLayerProxy::setNodeOutOfDate() {
+            if (m_node) {
+                m_node->setOutOfDate();
+            }
+        }
+        
         void AnimatedLayerProxy::attachLayerNode(AnimatedLayerNode *node) {
             if (m_node == node)
                 return;

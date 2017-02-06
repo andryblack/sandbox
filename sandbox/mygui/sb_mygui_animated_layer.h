@@ -21,6 +21,7 @@ namespace Sandbox {
             virtual bool renderNodeToTarget(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update) = 0;
             void attachLayerNode(AnimatedLayerNode* node);
             void resetLayerNode(AnimatedLayerNode* node);
+            void setNodeOutOfDate();
         };
         
         class AnimatedLayer;
@@ -37,6 +38,7 @@ namespace Sandbox {
             virtual void detachLayerItem(MyGUI::ILayerItem* _root);
             
             void resetProxy();
+            void setOutOfDate() { mOutOfDate = true; }
         protected:
             AnimatedLayerProxy* m_proxy;
         };
