@@ -9,7 +9,11 @@
 #include <sbstd/sb_intrusive_ptr.h>
 
 namespace Sandbox {
-    
+    class LuaValue;
+    struct LuaTableTraverser {
+        virtual ~LuaTableTraverser() {}
+        virtual void OnKeyValue(const LuaValue& key,const LuaValue& value) = 0;
+    };
     class LuaValue : public luabind::LuaReference {
     private:
         lua_State* get_state_with_value_on_top() const;
@@ -26,15 +30,18 @@ namespace Sandbox {
             return val;
         }
         
-        inline int GetLuaType() const {
-            lua_State* L = get_state_with_value_on_top();
-            if (!L) return LUA_TNONE;
-            LUA_CHECK_STACK(-1)
-            int res = lua_type(L,-1);
-            lua_pop(L,1);
-            return res;
+        int GetLuaType() const;
+        bool IsTable() const {
+            return GetLuaType() == LUA_TTABLE;
+        }
+        bool IsString() const {
+            return GetLuaType() == LUA_TSTRING;
+        }
+        bool IsNumber() const {
+            return GetLuaType() == LUA_TNUMBER;
         }
         
+        void Traverse(LuaTableTraverser& tr) const;
     };
     typedef sb::intrusive_ptr<LuaValue> LuaValuePtr;
     
