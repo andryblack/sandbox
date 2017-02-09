@@ -342,7 +342,6 @@ namespace Sandbox {
         void register_skin() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
             
-            factory.registerFactory<ColorizedSubSkinStateInfo>(MyGUI::SubWidgetManager::getInstance().getStateCategoryName(), "ColorizedSubSkin");
             
             const std::string& category_name = MyGUI::SubWidgetManager::getInstance().getCategoryName();
             
@@ -364,8 +363,8 @@ namespace Sandbox {
             factory.registerFactory<TurnedSubSkin>(category_name);
             
             const std::string& state_category_name = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
-            
-            factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "MaskSubSkin");
+            factory.registerFactory<ColorizedSubSkinStateInfo>(state_category_name, "ColorizedSubSkin");
+            factory.registerFactory<ColorizedSubSkinStateInfo>(state_category_name, "MaskSubSkin");
             factory.registerFactory<MaskSetSubSkinState>(state_category_name, "MaskSetSubSkin");
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "ObjectSubSkin");
             factory.registerFactory<SubSkinHalfStateInfo>(state_category_name, "SubSkinHalfHStretch");
@@ -375,7 +374,7 @@ namespace Sandbox {
             factory.registerFactory<EditTextStateInfo>(state_category_name, "CroppedText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "MaskText");
             factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "KeepAspectSkin");
-            factory.registerFactory<MyGUI::SubSkinStateInfo>(state_category_name, "KeepAspectMaskSubSkin");
+            factory.registerFactory<ColorizedSubSkinStateInfo>(state_category_name, "KeepAspectMaskSubSkin");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "EditText");
             factory.registerFactory<EditTextStateInfo>(state_category_name, "SimpleText");
             factory.registerFactory<TurnedSubSkinStateInfo>(state_category_name, "TurnedSubSkin");

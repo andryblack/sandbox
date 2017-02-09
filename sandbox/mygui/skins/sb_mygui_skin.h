@@ -59,7 +59,7 @@ namespace Sandbox {
         private:
         };
         
-        class MaskSubSkin : public MyGUI::SubSkin {
+        class MaskSubSkin : public ColorizedSubSkin {
             MYGUI_RTTI_DERIVED( MaskSubSkin )
         public:
             MaskSubSkin();

@@ -35,8 +35,8 @@ namespace Sandbox
             {
                 colour = MyGUI::LanguageManager::getInstance().replaceTags(colour);
             }
-            
-            mColour = MyGUI::Colour::parse(colour);
+            if (!colour.empty())
+                mColour = MyGUI::Colour::parse(colour);
         }
         
         bool TextDrawAttributes::BeginPass(Sandbox::Graphics &g, const Sandbox::FontPass &pass) const {
@@ -65,7 +65,6 @@ namespace Sandbox
 		mIsAddCursorWidth(true),
 		mShiftText(false),
 		mWordWrap(false),
-		mManualColour(false),
 		mOldWidth(0)
 	{
         m_attributes.parent = this;
@@ -217,8 +216,9 @@ namespace Sandbox
 
 	void EditText::setTextColour(const MyGUI::Colour& _value)
 	{
-		mManualColour = true;
-		_setTextColour(_value);
+		mPassColors["Base"] = _value;
+        if (nullptr != mNode)
+            mNode->outOfDate(mRenderItem);
 	}
 
 	void EditText::_setTextColour(const MyGUI::Colour& _value)
@@ -227,8 +227,6 @@ namespace Sandbox
 			return;
 
 		mColour = _value;
-		
-        mPassColors["Base"] = mColour;
         
 		if (nullptr != mNode)
 			mNode->outOfDate(mRenderItem);
@@ -236,7 +234,10 @@ namespace Sandbox
 
 	const MyGUI::Colour& EditText::getTextColour() const
 	{
-		return mColour;
+        PassColourMap::const_iterator it = mPassColors.find("Base");
+        if (it!=mPassColors.end())
+            return it->second;
+        return MyGUI::Colour::White;
 	}
 
 	void EditText::setAlpha(float _value)
@@ -501,8 +502,7 @@ namespace Sandbox
 	void EditText::setStateData(MyGUI::IStateInfo* _data)
 	{
 		EditTextStateInfo* data = _data->castType<EditTextStateInfo>();
-		if (!mManualColour && data->getColour() != MyGUI::Colour::Zero)
-			_setTextColour(data->getColour());
+		_setTextColour(data->getColour());
 		setShiftText(data->getShift());
 	}
 
@@ -557,7 +557,15 @@ namespace Sandbox
     bool EditText::BeginPass(Graphics& g,const FontPass& pass) const {
         sb::map<sb::string, MyGUI::Colour>::const_iterator it = mPassColors.find(pass.GetName());
         if (it!=mPassColors.end()) {
-            g.SetColor(g.GetColor()*Color(it->second.red,it->second.green,it->second.blue,it->second.alpha));
+            g.SetColor(g.GetColor()*Color(it->second.red*mColour.red,
+                                          it->second.green*mColour.green,
+                                          it->second.blue*mColour.blue,
+                                          it->second.alpha*mColour.alpha));
+        } else {
+            g.SetColor(g.GetColor()*Color(mColour.red,
+                                          mColour.green,
+                                          mColour.blue,
+                                          mColour.alpha));
         }
         return true;
     }

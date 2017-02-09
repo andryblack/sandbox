@@ -157,7 +157,8 @@ namespace Sandbox
 		MyGUI::Align mTextAlign;
 
 		MyGUI::Colour mColour;
-        sb::map<sb::string, MyGUI::Colour> mPassColors;
+        typedef sb::map<sb::string, MyGUI::Colour> PassColourMap;
+        PassColourMap mPassColors;
         
 		float mAlpha;
 	
@@ -178,7 +179,6 @@ namespace Sandbox
 
 		bool mShiftText;
 		bool mWordWrap;
-		bool mManualColour;
 		int mOldWidth;
 
 		TextView mTextView;
