@@ -38,22 +38,25 @@ namespace Sandbox {
 
 #define MYGUI_RTTI_GET_TYPE(type) type::get_static_type_info()
 
-#define MYGUI_DECLARE_TYPE_NAME(Type) \
-    public: \
-        static const std::string& getClassTypeName() { static std::string type = #Type; return type; } \
-        virtual const std::string& getTypeName() const { return getClassTypeName(); } \
-        virtual const Sandbox::meta::type_info* get_type_info() const; \
-        static const Sandbox::meta::type_info* get_static_type_info();\
 
+#define MYGUI_IMPL_TYPE_NAME(Type) \
+        const std::string& Type::getClassTypeName() { \
+            static std::string _type(#Type); \
+            return _type; \
+        } \
+        const std::string& Type::getTypeName() const { \
+            return getClassTypeName(); \
+        }
 
 
 #define MYGUI_RTTI_BASE(BaseType) \
     public: \
         typedef BaseType RTTIBase; \
-        MYGUI_DECLARE_TYPE_NAME(BaseType) \
+        virtual const std::string& getTypeName() const = 0; \
+        virtual const Sandbox::meta::type_info* get_type_info() const = 0; \
         /** Compare with selected type */ \
-        virtual bool isType(MYGUI_RTTI_TYPE _type) const { return MYGUI_RTTI_GET_TYPE(BaseType) == _type; } \
-        virtual bool isTypeNameOf(const std::string& name) const { return name == getClassTypeName(); } \
+        virtual bool isType(MYGUI_RTTI_TYPE _type) const { return false; } \
+        virtual bool isTypeNameOf(const std::string& name) const { return false; } \
         /** Compare with selected type */ \
         template<typename Type> bool isType() const { return isType(MYGUI_RTTI_GET_TYPE(Type)); } \
         /** Try to cast pointer to selected type. \
@@ -77,7 +80,10 @@ namespace Sandbox {
 
 #define MYGUI_RTTI_DERIVED(DerivedType) \
     public: \
-        MYGUI_DECLARE_TYPE_NAME(DerivedType) \
+        static const std::string& getClassTypeName(); \
+        virtual const std::string& getTypeName() const; \
+        virtual const Sandbox::meta::type_info* get_type_info() const; \
+        static const Sandbox::meta::type_info* get_static_type_info();\
         typedef RTTIBase Base; \
         typedef DerivedType RTTIBase; \
         /** Compare with selected type */ \

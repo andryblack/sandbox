@@ -6,6 +6,8 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::SelectableWidget, MyGUI::Widget)
 namespace Sandbox {
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(SelectableWidget)
+        
         SelectableWidget::SelectableWidget() : m_selected(false) {
             
         }

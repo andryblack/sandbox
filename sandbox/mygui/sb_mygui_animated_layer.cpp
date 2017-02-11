@@ -11,6 +11,9 @@ namespace Sandbox {
     
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(AnimatedLayer)
+        MYGUI_IMPL_TYPE_NAME(AnimatedLayerNode)
+        
         AnimatedLayerProxy::AnimatedLayerProxy() : m_node(0) {
             
         }

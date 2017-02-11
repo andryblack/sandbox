@@ -15,6 +15,8 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::SceneWidget, MyGUI::Widget)
 namespace Sandbox {
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(SceneWidget)
+        
         SceneWidget::SceneWidget() : m_target(0) {
             m_texture_name = get_type_info()->name;
             char buf[128];

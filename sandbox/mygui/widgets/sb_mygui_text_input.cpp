@@ -10,7 +10,8 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::TextInput, Sandbox::mygui::TextWidget)
 
 namespace Sandbox {
     namespace mygui {
-
+        
+        MYGUI_IMPL_TYPE_NAME(TextInput)
                 
         TextInput::TextInput() :  m_client(0) ,m_placeholder_widget(0){
         }

@@ -31,7 +31,15 @@ namespace Sandbox {
 
     namespace mygui {
         
-     
+        MYGUI_IMPL_TYPE_NAME(ColorizedSubSkinStateInfo)
+        MYGUI_IMPL_TYPE_NAME(ColorizedSubSkin)
+        MYGUI_IMPL_TYPE_NAME(CopySubSkin)
+        MYGUI_IMPL_TYPE_NAME(MaskSubSkin)
+        MYGUI_IMPL_TYPE_NAME(MaskSetSubSkin)
+        MYGUI_IMPL_TYPE_NAME(MaskSetSubSkinState)
+        MYGUI_IMPL_TYPE_NAME(KeepAspectSkin)
+        MYGUI_IMPL_TYPE_NAME(KeepAspectMaskSubSkin)
+        
         void ColorizedSubSkin::applyColor() {
             MyGUI::Colour val(m_color.red*m_state_color.red,
                               m_color.green*m_state_color.green,

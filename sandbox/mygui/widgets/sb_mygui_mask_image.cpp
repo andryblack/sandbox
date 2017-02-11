@@ -9,7 +9,7 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskImageWidget,Sandbox::mygui::ImageWidg
 namespace Sandbox {
     namespace mygui {
         
-        
+        MYGUI_IMPL_TYPE_NAME(MaskImageWidget)
        
         MaskImageWidget::MaskImageWidget() {
             

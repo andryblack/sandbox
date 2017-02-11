@@ -392,7 +392,14 @@ GHL::Data* Application::LoadData(const char* fn) {
 }
 
 GHL::WriteStream* Application::OpenDestFile(const char* fn) {
-    return m_vfs->OpenFileWrite(get_output_filename(fn).c_str());
+    sb::string full_output = get_output_filename(fn);
+    GHL::WriteStream* ws = m_vfs->OpenFileWrite(full_output.c_str());
+    if (!ws) {
+        Sandbox::LogError() << "failed opening " << full_output;
+    } else {
+        Sandbox::LogDebug() << "opened dest file " << full_output;
+    }
+    return ws;
 }
 
 sb::string Application::get_output_filename( const char* name ) {

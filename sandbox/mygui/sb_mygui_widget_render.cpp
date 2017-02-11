@@ -23,6 +23,7 @@ namespace Sandbox {
     
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(WidgetRender)
         
         WidgetRender::WidgetRender(MyGUI::IntSize size) : counter(0)  {
             m_replaced_layer = new MyGUI::SharedLayerNode(0,0);

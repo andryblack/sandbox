@@ -11,7 +11,7 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::ImageWidget,Sandbox::mygui::ImageWidgetBa
 namespace Sandbox {
     namespace mygui {
         
-        
+        MYGUI_IMPL_TYPE_NAME(ImageWidgetBase)
         
         ImageWidgetBase::ImageWidgetBase() {
             
@@ -45,6 +45,8 @@ namespace Sandbox {
         void ImageWidgetBase::setTexture(const std::string& filename ) {
             setImage(RenderManager::getInstance().resources()->GetImage(filename.c_str(), false));
         }
+        
+        MYGUI_IMPL_TYPE_NAME(ImageWidget)
         
         void ImageWidget::setImage(const ImagePtr &img) {
             ImageWidgetBase::setImage(img);

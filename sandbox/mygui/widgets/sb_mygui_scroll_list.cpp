@@ -127,6 +127,8 @@ namespace Sandbox {
     
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(ScrollList)
+        
         void register_ScrollList(lua_State* L) {
             luabind::Class<ScrollListDelegate>(L);
             luabind::ExternClass<ScrollList>(L);

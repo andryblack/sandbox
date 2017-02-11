@@ -124,7 +124,7 @@ project 'GHL'
 
 
 		if use_vorbis then
-			includedirs {
+			sysincludedirs {
 				sandbox_dir .. '/sound/libogg/include',
 				sandbox_dir .. '/sound/libvorbis/include'
 			}

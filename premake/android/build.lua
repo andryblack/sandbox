@@ -300,24 +300,30 @@ function build.generate_app_build_gradle( sln , prj )
 	local libname = 'lib' .. prj.name .. '.so'
 
 	for cfg in project.eachconfig(prj) do
-		_x(1,'task copyJNI' .. cfg.name .. 'sym(type: Copy) {')
-		_x(2,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'obj','local','armeabi',libname)) .. "'")
-		_x(2,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname .. '_symbols')) .. "'")
-		_x(1,'}')
+		for abi in ipairs(sln.android_abis) do
+			_x(1,'task copyJNI' .. cfg.name .. abi .. 'sym(type: Copy) {')
+			_x(2,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'obj','local',abi,libname)) .. "'")
+			_x(2,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname .. '_symbols',abi)) .. "'")
+			_x(1,'}')
+		end
 	end
 	for cfg in project.eachconfig(prj) do
-		_x(1,'task copyJNI' .. cfg.name .. '(type: Copy) {')
-		_x(2,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'libs','armeabi',libname)) .. "'")
-		_x(2,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname)) .. "'")
-		_x(1,'}')
+		for abi in ipairs(sln.android_abis) do
+			_x(1,'task copyJNI' .. cfg.name .. abi.. '(type: Copy) {')
+			_x(2,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'libs',abi,libname)) .. "'")
+			_x(2,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname,abi)) .. "'")
+			_x(1,'}')
+		end
 	end
 	
 
 	
 	_p('afterEvaluate {')
 	for cfg in project.eachconfig(prj) do
-		_x(1,'copyJNI' .. cfg.name .. '.dependsOn buildJNI' .. cfg.name)
-		_x(1,'copyJNI' .. cfg.name .. 'sym.dependsOn buildJNI' .. cfg.name)
+		for abi in ipairs(sln.android_abis) do
+			_x(1,'copyJNI' .. cfg.name .. abi .. '.dependsOn buildJNI' .. cfg.name)
+			_x(1,'copyJNI' .. cfg.name .. abi .. 'sym.dependsOn buildJNI' .. cfg.name)
+		end
 	end
 
 	_p('}')
@@ -325,9 +331,14 @@ function build.generate_app_build_gradle( sln , prj )
 	_p('tasks.whenTaskAdded { task ->')
 	for cfg in project.eachconfig(prj) do
 		_x(1,"if (task.name == 'generate%sAssets') {",cfg.name)
+		local abis = {}
+		for abi in ipairs(sln.android_abis) do
+			table.insert(abis,'copyJNI' .. cfg.name .. abi)
+			table.insert(abis,'copyJNI' .. cfg.name .. abi .. 'sym')
+		end
 		_x(2,'task.dependsOn ' .. 'prebuild_cmd_' .. cfg.shortname .. 
 				', buildJNI' .. cfg.name .. 
-				', copyJNI' .. cfg.name .. ', copyJNI' .. cfg.name .. 'sym')
+				', ' ..table.concat(abis,', '))
 		_x(1,'}')
 		if sln.android_module and
     		(sln.android_module.gcm or sln.android_module.fcm) then

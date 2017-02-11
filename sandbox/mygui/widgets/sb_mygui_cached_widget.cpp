@@ -23,6 +23,7 @@ namespace Sandbox {
     
     namespace mygui {
         
+        
         ReplacedLayer::ReplacedLayer() : m_root(this,0) {
             
         }
@@ -83,6 +84,7 @@ namespace Sandbox {
             m_root.resizeView(_viewSize);
         }
 
+        MYGUI_IMPL_TYPE_NAME(CachedWidget)
         
         
         CachedWidget::CachedWidget() : m_render_content(false) {

@@ -9,6 +9,10 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::TurnedSubSkin,MyGUI::SubSkin)
 namespace Sandbox {
     
     namespace mygui {
+        
+        MYGUI_IMPL_TYPE_NAME(TurnedSubSkin)
+        MYGUI_IMPL_TYPE_NAME(TurnedSubSkinStateInfo)
+        
         TurnedSubSkin::TurnedSubSkin() : m_turn(0),m_flip_h(false),m_flip_v(false) {
         }
 

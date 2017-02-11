@@ -6,6 +6,8 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::TextWidget, MyGUI::TextBox)
 namespace Sandbox {
     
     namespace mygui {
+        
+        MYGUI_IMPL_TYPE_NAME(TextWidget)
 
         TextWidget::TextWidget() {
             

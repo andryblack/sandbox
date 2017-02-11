@@ -419,7 +419,7 @@ SB_META_ENUM_BIND(MyGUI::MouseButton,namespace MyGUI,
                   SB_META_ENUM_MEMBER_ITEM(Middle,MouseButton::Middle))
 
 
-SB_META_DECLARE_OBJECT(MyGUI::IObject, void)
+SB_META_DECLARE_KLASS(MyGUI::IObject, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::IObject)
 SB_META_END_KLASS_BIND()
 

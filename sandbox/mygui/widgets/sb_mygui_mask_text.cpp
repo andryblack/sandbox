@@ -9,8 +9,8 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::MaskTextWidget,Sandbox::mygui::TextWidget
 namespace Sandbox {
     namespace mygui {
         
-        
-        
+        MYGUI_IMPL_TYPE_NAME(MaskTextWidget)
+
         MaskTextWidget::MaskTextWidget() {
             
         }

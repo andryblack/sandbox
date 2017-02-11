@@ -26,6 +26,8 @@ namespace Sandbox
 {
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(EditText)
+        MYGUI_IMPL_TYPE_NAME(EditTextStateInfo)
         
         void EditTextStateInfo::deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) {
             mShift = MyGUI::utility::parseBool(_node->findAttribute("shift"));

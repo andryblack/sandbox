@@ -6,6 +6,8 @@ namespace Sandbox {
     
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(ClientWidget)
+        
         ClientWidget::ClientWidget() {
         }
         

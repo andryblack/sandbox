@@ -18,6 +18,9 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::SimpleText, Sandbox::mygui::EditText)
 namespace Sandbox
 {
     namespace mygui {
+        
+        MYGUI_IMPL_TYPE_NAME(SimpleText)
+        
 
 	SimpleText::SimpleText() :
 		EditText()

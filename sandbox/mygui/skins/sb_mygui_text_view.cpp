@@ -12,7 +12,6 @@ namespace Sandbox
 {
     namespace mygui {
 
-
         template<typename T>
         static inline void setMin(T& _var, const T& _newValue)
         {

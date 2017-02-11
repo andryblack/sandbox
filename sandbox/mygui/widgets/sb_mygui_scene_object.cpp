@@ -12,6 +12,7 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::SceneObjectWidget,Sandbox::mygui::Animate
 namespace Sandbox {
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(ObjectSubSkin)
         
         ObjectSubSkin::ObjectSubSkin() : mNode(0),mRenderItem(0),m_alpha(1.0f){
             //LogInfo() << "ObjectSubSkin::ObjectSubSkin";
@@ -63,6 +64,7 @@ namespace Sandbox {
             }
         }
         
+        MYGUI_IMPL_TYPE_NAME(SceneObjectWidget)
         
         SceneObjectWidget::SceneObjectWidget() {
             

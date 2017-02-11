@@ -19,6 +19,8 @@
 namespace Sandbox {
     
     namespace mygui {
+        
+        MYGUI_IMPL_TYPE_NAME(ScrollArea)
                 
         ScrollArea::ScrollArea() {
             m_manual_scroll = true;

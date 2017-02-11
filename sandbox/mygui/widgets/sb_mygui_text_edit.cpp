@@ -8,6 +8,8 @@ namespace Sandbox {
     
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(TextEdit)
+        
         TextEdit::TextEdit() : m_placeholder_widget(0) {
             
         }

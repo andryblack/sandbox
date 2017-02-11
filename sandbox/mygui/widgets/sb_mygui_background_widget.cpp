@@ -7,6 +7,8 @@ namespace Sandbox {
     
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(BackgroundWidget)
+        
         BackgroundWidget::BackgroundWidget() : m_background(new Background()) {
             
         }

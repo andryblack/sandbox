@@ -32,7 +32,7 @@ solution( ProjectName )
 	configurations { 'Debug', 'Release' }
 
 	if os.is('android') then
-		android_abis {'armeabi'}
+		android_abis(AndroidConfig.abi or {'armeabi'})
 		android_stl(AndroidConfig.stl or 'gnustl_static')
 		android_activity(AndroidConfig.activity or 'com.sandboxgames.Activity')
 		android_libs(path.getabsolute(path.join(sandbox_dir,'GHL/src/android_ghl','src')))

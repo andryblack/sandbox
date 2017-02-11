@@ -8,6 +8,11 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::SubSkinHalfStateInfo,MyGUI::SubSkinStateI
 
 namespace Sandbox {
     namespace mygui {
+        
+        MYGUI_IMPL_TYPE_NAME(SubSkinHalfHStretch)
+        MYGUI_IMPL_TYPE_NAME(SubSkinHalfVStretch)
+        MYGUI_IMPL_TYPE_NAME(SubSkinHalfStateInfo)
+        
         SubSkinHalfHStretch::SubSkinHalfHStretch() : m_center(0) {
             
         }

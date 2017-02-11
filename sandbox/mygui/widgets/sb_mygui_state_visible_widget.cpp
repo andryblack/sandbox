@@ -4,6 +4,9 @@ SB_META_DECLARE_OBJECT(Sandbox::mygui::StateVisibleWidget, MyGUI::Widget)
 
 namespace Sandbox {
     namespace mygui {
+        
+        MYGUI_IMPL_TYPE_NAME(StateVisibleWidget)
+        
         StateVisibleWidget::StateVisibleWidget() {
             
         }

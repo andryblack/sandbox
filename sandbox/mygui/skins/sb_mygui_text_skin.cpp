@@ -18,6 +18,11 @@ namespace Sandbox {
     
     namespace mygui {
         
+        MYGUI_IMPL_TYPE_NAME(AutoWidthText)
+        MYGUI_IMPL_TYPE_NAME(AutoSizeText)
+        MYGUI_IMPL_TYPE_NAME(MaskText)
+        MYGUI_IMPL_TYPE_NAME(CroppedText)
+        
         AutoWidthText::AutoWidthText() {
             mIsAddCursorWidth = false;
             m_scale = 1.0f;
