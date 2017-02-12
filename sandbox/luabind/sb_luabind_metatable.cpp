@@ -38,6 +38,7 @@ namespace Sandbox {
                 InplaceString head( tail.begin(), other );
                 
                 lua_pushlstring(L, head.begin(),head.length());
+                sb_assert(lua_istable(L, -2));
                 lua_rawget(L, -2);
                 
                 if (!lua_istable(L, -1)) {

@@ -459,8 +459,10 @@ namespace Sandbox {
     }
     
     LuaContextPtr   LuaVM::GetGlobalContext() {
+        lua_checkstack(m_L, 4);
         lua_pushglobaltable(m_L);
         LuaContextPtr ctx(new LuaContext());
+        sb_assert(lua_istable(m_L, -1));
         ctx->SetObject(m_L);
         return ctx;
     }

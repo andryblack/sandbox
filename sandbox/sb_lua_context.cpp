@@ -83,6 +83,7 @@ namespace Sandbox {
         lua_State* L = helper->lua;
         LUA_CHECK_STACK(2)
         GetObject(L);
+        sb_assert(lua_istable(L, -1));
         luabind::lua_get_create_child_table(L,path);
         lua_pushstring(L, path);
         return L;
