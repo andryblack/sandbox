@@ -155,7 +155,9 @@
     Sandbox::JsonBuilder res;
     res.BeginArray();
     for (NSString* _id in friends) {
-        res.PutString(_id.UTF8String);
+        res.BeginObject();
+        res.Key("id").PutString(_id.UTF8String);
+        res.EndObject();
     }
     res.EndArray();
     return res.End();

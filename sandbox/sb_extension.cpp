@@ -37,8 +37,15 @@ namespace Sandbox {
             ext->OnAppStarted(app);
             ext = ext->GetNext();
         }
-
     }
+    void PlatformExtension::OnAppStoppedAll(Application* app) {
+        PlatformExtension* ext = GetRoot();
+        while (ext) {
+            ext->OnAppStopped(app);
+            ext = ext->GetNext();
+        }
+    }
+
 
     void PlatformExtension::AddPendingResponse(const char* method, const char* data) {
          GHL_GlobalLock();

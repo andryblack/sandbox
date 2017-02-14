@@ -785,7 +785,11 @@ namespace Sandbox {
         return *this;
     }
     JsonBuilder& JsonBuilder::PutString(const char* value) {
-        if (m_impl) yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(value), ::strlen(value));
+        if (value) {
+            if (m_impl) yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(value), ::strlen(value));
+        } else {
+            if (m_impl) yajl_gen_null(m_impl->g);
+        }
         return *this;
     }
     JsonBuilder& JsonBuilder::PutInteger(int value) {

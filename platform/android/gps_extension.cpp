@@ -305,7 +305,11 @@ sb::string GPSExtension::BeginGetFriends() {
             Sandbox::JsonBuilder res;
             res.BeginArray();
             for (std::vector< gpg::Player >::const_iterator it = resp.data.begin(); it!=resp.data.end(); ++it) {
-                res.PutString(it->Id().c_str());
+                res.BeginObject();
+                res.Key("id").PutString(it->Id().c_str());
+                res.Key("name").PutString(it->Name().c_str());
+                res.Key("avatar").PutString(it->AvatarUrl(gpg::ImageResolution::ICON).c_str());
+                res.EndObject();
             }
             res.EndArray();
             static_cast<GPSExtension*>(init_gps_extension())->AddPendingResponse("GPSGetFriends",res.End().c_str());

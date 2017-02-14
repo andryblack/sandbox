@@ -1051,6 +1051,9 @@ namespace Sandbox {
 	///
 	void GHL_CALL Application::Release(  ) {
         OnDeactivated();
+        
+        PlatformExtension::OnAppStoppedAll(this);
+        
         delete m_lua;
         m_lua = 0;
         delete m_sound_mgr;

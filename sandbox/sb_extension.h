@@ -13,6 +13,8 @@ namespace Sandbox {
         PlatformExtension* GetNext() { return m_next; }
         virtual void OnAppStarted(Application* app){}
         static void OnAppStartedAll(Application* app);
+        virtual void OnAppStopped(Application* app){}
+        static void OnAppStoppedAll(Application* app);
         virtual void OnTimer(Application* app);
         virtual bool Process(Application* app,
                              const char* method,
