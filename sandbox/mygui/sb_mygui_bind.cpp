@@ -59,6 +59,7 @@
 
 #include "MyGUI_InputManager.h"
 #include "MyGUI_FactoryManager.h"
+#include "MyGUI_LanguageManager.h"
 
 #include "sb_image.h"
 
@@ -624,18 +625,19 @@ SB_META_METHOD(setImageTexture)
 bind(method("setImage", &set_image_proxy));
 SB_META_END_KLASS_BIND()
 
-
-static void TextBox_setCaptionWithReplacing( MyGUI::TextBox* tb, const MyGUI::UString& s) {
-    tb->setCaptionWithReplacing(s);
-}
-static const MyGUI::UString& TextBox_getCaption( const MyGUI::TextBox* tb) {
-    return tb->getCaption();
-}
+//
+//static void TextBox_setCaptionWithReplacing( MyGUI::TextBox* tb, const MyGUI::UString& s) {
+//    tb->setCaptionWithReplacing(s);
+//}
+//static const MyGUI::UString& TextBox_getCaption( const MyGUI::TextBox* tb) {
+//    return tb->getCaption();
+//}
 
 SB_META_DECLARE_OBJECT(MyGUI::TextBox, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::TextBox)
 SB_META_PROPERTY_RO(textSize, getTextSize)
-bind(property_rw("caption", &TextBox_getCaption, &TextBox_setCaptionWithReplacing));
+bind(property_rw("caption", &MyGUI::TextBox::getCaption, &MyGUI::TextBox::setCaption));
+bind(property_wo("captionWithTags",&MyGUI::TextBox::setCaptionWithReplacing));
 SB_META_PROPERTY_RW(fontName, getFontName, setFontName)
 SB_META_PROPERTY_RW(fontHeight, getFontHeight, setFontHeight)
 SB_META_PROPERTY_RW(textAlign, getTextAlign, setTextAlign)
@@ -907,6 +909,13 @@ SB_META_METHOD(removeResource)
 SB_META_PROPERTY_RO(categoryName, getCategoryName)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(MyGUI::LanguageManager, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::LanguageManager)
+SB_META_STATIC_METHOD(getInstancePtr)
+bind( static_method( "getOnlyText" , &MyGUI::TextIterator::getOnlyText ) );
+SB_META_METHOD(replaceTags)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_KLASS(MyGUI::FactoryManager, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::FactoryManager)
 SB_META_STATIC_METHOD(getInstancePtr)
@@ -1051,6 +1060,7 @@ namespace Sandbox {
 //            
             luabind::ExternClass<Sandbox::mygui::RenderManager>(lua);
             luabind::ExternClass<MyGUI::InputManager>(lua);
+            luabind::ExternClass<MyGUI::LanguageManager>(lua);
             
             luabind::ExternClass<MyGUI::ControllerManager>(lua);
             
