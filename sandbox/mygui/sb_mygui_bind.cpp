@@ -952,6 +952,7 @@ SB_META_DECLARE_KLASS(MyGUI::Gui, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Gui)
 SB_META_STATIC_METHOD(getInstancePtr)
 SB_META_METHOD(destroyWidget)
+SB_META_METHOD(destroyAllChildWidget)
 bind(method("createWidget", static_cast<MyGUI::Widget*(MyGUI::Gui::*)(const std::string&, const std::string&, const MyGUI::IntCoord&, MyGUI::Align, const std::string& _layer, const std::string& _name)>(&MyGUI::Gui::createWidgetT)));
 bind( method( "findWidget" , &gui_find_widget_proxy ) );
 SB_META_END_KLASS_BIND()
