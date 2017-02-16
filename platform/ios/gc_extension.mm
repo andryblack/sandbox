@@ -110,21 +110,42 @@
     .End();
 }
 
--(void) submitHighScore: (int64_t) scoreValue leaderboardId: (const char*) leaderboardId {
-    NSString* leaderboardIdentifier = [NSString stringWithUTF8String:leaderboardId];
-    NSLog(@"[GC] submitHighScore to %@",leaderboardIdentifier);
+-(void) submitHighScores: (NSDictionary*) scores {
+    NSMutableArray* scoresData = [NSMutableArray arrayWithCapacity:scores.count];
+    for (NSString* key in scores.allKeys) {
+        GKScore* score = [[[GKScore alloc] initWithLeaderboardIdentifier:key] autorelease];
+        score.value = [(NSNumber*)[scores objectForKey:key] longLongValue];
+        NSLog(@"[GC] submitHighScore to %@ : %lld",score.leaderboardIdentifier,score.value);
+    }
     
-    GKScore* score = [[[GKScore alloc] initWithLeaderboardIdentifier:leaderboardIdentifier] autorelease];
-    score.value = scoreValue;
-    
-    [GKScore reportScores:@[score] withCompletionHandler:^(NSError *error){
+    [GKScore reportScores:scoresData withCompletionHandler:^(NSError *error){
         if (error != nil) {
-            NSLog(@"[GC] submitHighScore %@", [error localizedDescription]);
+            NSLog(@"[GC] submitHighScore %@", [error description]);
         } else {
             NSLog(@"[GC] success");
         }
     }];
 }
+
+-(void) submitAchievements:(NSDictionary*) scores {
+    NSMutableArray* achievementsData = [NSMutableArray arrayWithCapacity:scores.count];
+    for (NSString* key in scores.allKeys) {
+        GKAchievement* a = [[[GKAchievement alloc] initWithIdentifier:key] autorelease];
+        a.percentComplete = [(NSNumber*)[scores objectForKey:key] intValue] * 1.0;
+        a.showsCompletionBanner = YES;
+        [achievementsData addObject:a];
+        NSLog(@"[GC] submitAchievement to %@ : %f",a.identifier,a.percentComplete);
+    }
+    
+    [GKAchievement reportAchievements:achievementsData withCompletionHandler:^(NSError* error) {
+        if (error != nil) {
+            NSLog(@"[GC] submitAchievements %@", [error description]);
+        } else {
+            NSLog(@"[GC] success");
+        }
+    }];
+}
+
 
 // need to dismiss score screen
 -(void)gameCenterViewControllerDidFinish:(GKGameCenterViewController *)gameCenterViewController
@@ -150,6 +171,25 @@
     }
     return "error";
 }
+
+-(sb::string) showAchievementsUI {
+    UIViewController* main_controller = 0;
+    GHL::System* system = m_application->GetSystem();
+    if (system->GetDeviceData(GHL::DEVICE_DATA_VIEW_CONTROLLER, &main_controller) && main_controller) {
+        GKGameCenterViewController* gcViewController = [[GKGameCenterViewController alloc] init];
+        
+        gcViewController.gameCenterDelegate = self;
+        
+        gcViewController.viewState = GKGameCenterViewControllerStateAchievements;
+        gcViewController.leaderboardTimeScope = GKLeaderboardTimeScopeAllTime;
+        
+        [main_controller presentViewController:gcViewController animated:YES completion:nil];
+        
+        return "success";
+    }
+    return "error";
+}
+
 
 -(sb::string) dumpFriends:(NSArray<NSString *>*) friends {
     Sandbox::JsonBuilder res;
@@ -210,16 +250,35 @@ public:
             return false;
         if (::strcmp("GCSendScores",method)==0) {
             if (![m_mgr isAuthenticated]) {
-                res = "";
+                res = "failed";
                 return true;
             }
-            sb::map<sb::string,sb::string> data;
-            if (Sandbox::json_parse_object(args,data)) {
-                [m_mgr submitHighScore:atoll(data["val"].c_str()) leaderboardId:data["id"].c_str()];
+            NSData* argsData = [NSData dataWithBytes:args length:strlen(args)];
+            NSDictionary* data = [NSJSONSerialization JSONObjectWithData:argsData options:0 error:nil];
+            if (data) {
+                [m_mgr submitHighScores:data];
                 res = "success";
+            } else {
+                res = "failed";
             }
             return true;
         }
+        if (::strcmp("GCSendAchievements",method)==0) {
+            if (![m_mgr isAuthenticated]) {
+                res = "failed";
+                return true;
+            }
+            NSData* argsData = [NSData dataWithBytes:args length:strlen(args)];
+            NSDictionary* data = [NSJSONSerialization JSONObjectWithData:argsData options:0 error:nil];
+            if (data) {
+                [m_mgr submitAchievements:data];
+                res = "success";
+            } else {
+                res = "failed";
+            }
+            return true;
+        }
+
         if (::strcmp(method,"GCLogin")==0) {
             if ([m_mgr isAuthenticated]) {
                 res = "success";
@@ -245,12 +304,17 @@ public:
             res = [m_mgr requestFriends];
             return true;
         }
-        if (::strcmp("GCShowScores",method)==0) {
+        if (::strcmp("GCShowUI",method)==0) {
             if (![m_mgr isAuthenticated]) {
                 res = "";
                 return true;
             }
-            res = [m_mgr showScoresUI];
+            if (::strcmp("leaderboards",args)==0) {
+                res = [m_mgr showScoresUI];
+            } else if (::strcmp("achievements",args)==0) {
+                res = [m_mgr showAchievementsUI];
+            }
+            
             return true;
         }
         return false;

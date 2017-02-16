@@ -83,6 +83,7 @@ namespace Sandbox {
         
         
         bool TraverseStream( GHL::DataStream* ds );
+        bool TraverseString( const char* ds );
     };
     
     

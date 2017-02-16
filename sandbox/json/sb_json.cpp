@@ -1107,4 +1107,15 @@ namespace Sandbox {
         return s == yajl_status_ok;
     }
 
+    bool JsonTraverser::TraverseString( const char* ds ) {
+        Ctx ctx;
+        ctx.traverser = this;
+        yajl_handle h = yajl_alloc(&ctx.cb, 0, &ctx);
+        yajl_status s = yajl_status_ok;
+        s = yajl_parse(h,reinterpret_cast<const unsigned char*>(ds),::strlen(ds));
+        if (s == yajl_status_ok)
+            s = yajl_complete_parse(h);
+        yajl_free(h);
+        return s == yajl_status_ok;
+    }
 }

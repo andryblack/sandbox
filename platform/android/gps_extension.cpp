@@ -22,6 +22,7 @@
 #include "gpg/android_initialization.h"
 #include "gpg/android_support.h"
 #include "gpg/score_summary.h"
+#include "gpg/achievement_manager.h"
 
 #include <android/native_activity.h>
 
@@ -53,13 +54,23 @@ void BeginUserInitiatedSignOut() {
 }
 
 
-void SubmitHighScore(char const *leaderboard_id, uint64_t score) {
+void SubmitHighScore(const sb::string& leaderboard_id, uint64_t score) {
     if (!game_services_)
         return;
     if (game_services_->IsAuthorized()) {
         Sandbox::LogInfo() << "[PGS]" << "High score submitted " << score << " " << leaderboard_id;
         game_services_->Leaderboards().SubmitScore(leaderboard_id, score);
-        game_services_->Leaderboards().Fetch(leaderboard_id,nullptr);
+    } else {
+        //BeginUserInitiatedSignIn();
+    }
+}
+
+void UnlockAchievement(const sb::string& achivement_id) {
+    if (!game_services_)
+        return;
+    if (game_services_->IsAuthorized()) {
+        Sandbox::LogInfo() << "[PGS]" << "Achievement unlocked " << achivement_id;
+        game_services_->Achievements().Unlock(achivement_id);
     } else {
         //BeginUserInitiatedSignIn();
     }
@@ -74,6 +85,22 @@ sb::string ShowScoresUI() {
         Sandbox::LogInfo() << "[PGS]" << "High score show";
         //game_services_->Leaderboards().FetchAllBlocking(gpg::DataSource::CACHE_OR_NETWORK);
         game_services_->Leaderboards().ShowAllUI(nullptr);
+        return "success";
+    } else {
+        BeginUserInitiatedSignIn();
+    }
+    return "error";
+}
+
+sb::string ShowAchievementsUI() {
+    if (!game_services_) {
+        Sandbox::LogError() << "[PGS]" << "ShowAchievementsUI error";
+        return "error";
+    }
+    if (game_services_->IsAuthorized()) {
+        Sandbox::LogInfo() << "[PGS]" << "Achievements show";
+        //game_services_->Leaderboards().FetchAllBlocking(gpg::DataSource::CACHE_OR_NETWORK);
+        game_services_->Achievements().ShowAllUI(nullptr);
         return "success";
     } else {
         BeginUserInitiatedSignIn();
@@ -112,16 +139,67 @@ public:
             Sandbox::LogError() << "GPSExtension : not found activity";
         }
     }
+
+    struct ScoresSubmitter : public Sandbox::JsonTraverser {
+        sb::string leaderboard_id;
+        virtual void OnKey(const sb::string& v) {
+            leaderboard_id = v;
+        }
+        virtual void OnInteger(int v) {
+            if (!leaderboard_id.empty()) {
+                SubmitHighScore(leaderboard_id,v);
+            }
+        }
+        virtual void OnNumber(double v) {
+            if (!leaderboard_id.empty()) {
+                SubmitHighScore(leaderboard_id,v);
+            }
+        }
+
+    };
+
+    struct AchievementsSubmitter : public Sandbox::JsonTraverser {
+        sb::string achivement_id;
+        virtual void OnKey(const sb::string& v) {
+            achivement_id = v;
+        }
+        virtual void OnInteger(int v) {
+            if (!achivement_id.empty()) {
+                if (v >= 100)
+                    UnlockAchievement(achivement_id);
+            }
+        }
+        virtual void OnNumber(double v) {
+            if (!achivement_id.empty()) {
+                if (v >= 100.0)
+                    UnlockAchievement(achivement_id);
+            }
+        }
+
+    };
+
     virtual bool Process(Sandbox::Application* app,
                          const char* method,
                          const char* args,
                          sb::string& res) {
         if (::strcmp("GPSSendScores",method)==0) {
-            sb::map<sb::string,sb::string> data;
-            if (Sandbox::json_parse_object(args,data)) {
-                SubmitHighScore(data["id"].c_str(),::atoll(data["val"].c_str()));
-                res = "success";
+            if (!game_services_->IsAuthorized()) {
+                res = "failed";
+                return true;
             }
+            ScoresSubmitter submit;
+            submit.TraverseString(args);
+            res = "success";
+            return true;
+        }
+        if (::strcmp("GPSSendAchievements",method)==0) {
+            if (!game_services_->IsAuthorized()) {
+                res = "failed";
+                return true;
+            }
+            AchievementsSubmitter submit;
+            submit.TraverseString(args);
+            res = "success";
             return true;
         }
         if (::strcmp("GPSLogin",method)==0) {
@@ -160,8 +238,12 @@ public:
             res = "[]";
             return true;
         }
-        if (::strcmp("GPSShowScores",method)==0) {
-            res = ShowScoresUI();
+        if (::strcmp("GPSShowUI",method)==0) {
+            if (::strcmp("leaderboards",args)==0) {
+                res = ShowScoresUI();
+            } else if (::strcmp("achievements",args)==0) {
+                res = ShowAchievementsUI();
+            }
             return true;
         }
         if (::strcmp("GPSGetFriends",method)==0) {
