@@ -153,6 +153,7 @@ namespace Sandbox {
             void resetWidgets();
             
             bool m_align_on_cell;
+            int  m_centered_offset;
         };
         
         

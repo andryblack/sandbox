@@ -142,6 +142,7 @@ namespace Sandbox {
         ScrollList::ScrollList() {
             m_selection_widget = 0;
             m_centered = false;
+            m_centered_offset = false;
             m_item_size = 0;
             m_visible_count = 0;
             m_num_subitems = 1;
@@ -438,17 +439,40 @@ namespace Sandbox {
             if (m_delegate) {
                 size_t count = m_delegate->getItemsCount();
                 size_t full_lines = (count + m_num_subitems -1)/m_num_subitems;
+                
+                
+                int client_width = getViewSize().width;
+                int client_height = getViewSize().height;
+                m_centered_offset = 0;
+                
                 if (m_vertical) {
-                    m_item_widget_size.width = (getViewSize().width-m_content_margins.left-m_content_margins.right) / m_num_subitems;
+                    m_item_widget_size.width = (client_width-m_content_margins.left-m_content_margins.right) / m_num_subitems;
                     m_item_widget_size.height = m_item_size;
+                    
+                    if( m_centered ) {
+                        int required_height = m_content_margins.top+m_content_margins.bottom + count * m_item_size;
+                        int client_height = getViewSize().height;
+                        if( required_height < client_height ) {
+                            m_centered_offset = (client_height - required_height)/2;
+                        }
+                    }
+
                     mRealClient->setSize(getViewSize().width,
-                                  full_lines*m_item_size +
+                                  m_centered_offset+ full_lines*m_item_size +
                                   m_content_margins.top +
                                   m_content_margins.bottom);
                 } else {
                     m_item_widget_size.width = m_item_size;
-                    m_item_widget_size.height = (getViewSize().height-m_content_margins.top-m_content_margins.bottom) / m_num_subitems;
-                    mRealClient->setSize(full_lines*m_item_size +
+                    m_item_widget_size.height = (client_height-m_content_margins.top-m_content_margins.bottom) / m_num_subitems;
+                    
+                    if( m_centered ) {
+                        int required_width = m_content_margins.left+m_content_margins.right + count * m_item_size;
+                        int client_width = getViewSize().width;
+                        if( required_width < client_width ) {
+                            m_centered_offset = (client_width - required_width)/2;
+                        }
+                    }
+                    mRealClient->setSize(m_centered_offset + full_lines*m_item_size +
                                   m_content_margins.left +
                                   m_content_margins.top,getViewSize().height);
                 }
@@ -609,15 +633,16 @@ namespace Sandbox {
                 pool.pop_back();
                 w->setVisible(true);
             }
+            
+            int left, top;
             if (getVerticalAlignment()) {
-                w->setPosition(m_content_margins.left
-                               +x*m_item_widget_size.width,
-                               m_content_margins.top+l*m_item_size);
+                left = m_content_margins.left+x*m_item_widget_size.width;
+                top = m_content_margins.top+l*m_item_size+m_centered_offset;
             } else {
-                w->setPosition(m_content_margins.left
-                               +l*m_item_size,
-                               m_content_margins.top+x*m_item_widget_size.height);
+                left = m_content_margins.left+l*m_item_size+m_centered_offset;
+                top = m_content_margins.top+x*m_item_widget_size.height;
             }
+            w->setPosition( left, top );
             w->setSize(m_item_widget_size);
             MyGUI::IBDrawItemInfo di(i,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
             drawItem(w, di);
