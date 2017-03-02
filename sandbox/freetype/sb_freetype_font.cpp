@@ -40,12 +40,10 @@ namespace Sandbox {
         };
         typedef sb::vector<TextureData> TextureDataVector;
         TextureDataVector m_textures;
-        float   m_scale;
     public:
-        TexturePool( Resources* resources ) : m_resources(resources) {
-            m_scale = resources->GetScale();
-            m_initial_texture_width = 512 * m_scale;
-            m_initial_texture_height = 512 * m_scale;
+        TexturePool( Resources* resources  ) : m_resources(resources) {
+            m_initial_texture_width = 512 * resources->GetScale();
+            m_initial_texture_height = 512 * resources->GetScale();
         }
         
         TexturePtr alloc(int w, int h, int& x, int& y,GHL::Texture* &ntex) {
@@ -70,7 +68,7 @@ namespace Sandbox {
                                                    m_initial_texture_height,
                                                    GHL::IMAGE_FORMAT_GRAY);
                 fill->Fill(0x00000000);
-                TexturePtr tex = m_resources->CreateTexture(fill, 1.0f / m_scale, GHL::TEXTURE_FORMAT_ALPHA);
+                TexturePtr tex = m_resources->CreateTexture(fill, 1.0f / m_resources->GetScale(), GHL::TEXTURE_FORMAT_ALPHA);
                 fill->Release();
                 tex->SetFiltered(true);
                 TextureData d;
@@ -193,10 +191,11 @@ namespace Sandbox {
         FT_Size     size;
         FreeTypeFontConfig  config;
         float scale;
-        
+        float outline_width;
         
         Impl(const LibraryPtr& library, const FacePtr& face) : library(library),face(face) {
             scale = 1.0f;
+            outline_width = 1.0f;
         }
         
         
@@ -226,11 +225,10 @@ namespace Sandbox {
         
         void render_outline(FontData::Glypth* gl, ImageData& data) {
             // Set up a stroker.
-            float outlineWidth = 1.0 * scale;
             FT_Stroker stroker;
             FT_Stroker_New(library->library, &stroker);
             FT_Stroker_Set(stroker,
-                           (int)(outlineWidth * 64),
+                           (int)(outline_width * 64),
                            FT_STROKER_LINECAP_ROUND,
                            FT_STROKER_LINEJOIN_ROUND,
                            0);
@@ -257,18 +255,22 @@ namespace Sandbox {
         void put_image( FontData::Glypth* gl, ImageData& img ) {
             TexturePtr tex;
             
+            float iscale = 1.0f / scale;
+            
             if (img.img) {
                 GHL::Texture* ntex = 0;
                 tex = library->textures.alloc(img.w+1,img.h+1,img.x,img.y,ntex);
                 ntex->SetData(img.x, img.y, img.img);
                 img.img->Release();
                 img.img = 0;
+                iscale = tex->GetScale();
             }
             
-            float iscale = 1.0f / scale;
+            
             
             gl->img = Image(tex,iscale*img.x ,iscale*img.y,iscale*img.w,iscale*img.h);
             gl->img.SetHotspot(Sandbox::Vector2f(-img.left * iscale,img.top * iscale));
+            gl->img.SetSize(img.w / scale , img.h / scale );
         }
         
         void render_glyph(FontData::Glypth* gl,bool ol) {
@@ -345,7 +347,7 @@ namespace Sandbox {
         gl->asc = 2;
         Impl::ImageData img;
         img.h = GetHeight() * m_impl->scale;
-        img.w = 2 * m_impl->scale;
+        img.w = 2.0f * m_impl->scale;
         img.left = 0;
         img.top = fontAscent;
         img.img = GHL_CreateImage(img.w, img.h, GHL::IMAGE_FORMAT_GRAY);
@@ -400,7 +402,7 @@ namespace Sandbox {
         FT_New_Size(face->face,&size);
         FT_Activate_Size(size);
         
-        float scale = resources->GetScale();
+        float scale = resources->GetScale() * config.scale;
         
         // The font is scalable, so set the font size by first converting the requested size to FreeType's 26.6 fixed-point
         // format.
@@ -418,6 +420,7 @@ namespace Sandbox {
         Impl* impl = new Impl(library,face);
         impl->size = size;
         impl->scale = scale;
+        impl->outline_width = 1.0f * scale;
         impl->config = config;
         
         res.reset(new FreeTypeFont(impl));
