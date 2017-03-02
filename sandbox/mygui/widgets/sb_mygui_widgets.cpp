@@ -103,6 +103,24 @@ bind(method("eventEditTextChange", delegate_bind<Sandbox::mygui::TextInput,
 SB_META_END_KLASS_BIND()
 
 
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ScrollArea, MyGUI::ScrollView)
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ScrollArea)
+SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
+SB_META_PROPERTY_WO(scrollPos, setScrollPos)
+SB_META_PROPERTY_WO(scrollPosF, setScrollPosF)
+SB_META_PROPERTY_RO(scrollActive, scrollActive)
+SB_META_METHOD(scrollToWidget)
+SB_META_METHOD(isWidgetFullVisible)
+bind(method("scrollBegin", delegate_bind<Sandbox::mygui::ScrollArea,
+            Sandbox::mygui::ScrollArea,
+            Sandbox::mygui::EventHandle_ScrollAreaPtrIntPoint,
+            &Sandbox::mygui::ScrollArea::scrollBegin>::lua_func));
+bind(method("scrollComplete", delegate_bind<Sandbox::mygui::ScrollArea,
+            Sandbox::mygui::ScrollArea,
+            Sandbox::mygui::EventHandle_ScrollAreaPtrIntPoint,
+            &Sandbox::mygui::ScrollArea::scrollComplete>::lua_func));
+SB_META_END_KLASS_BIND()
+
 namespace Sandbox {
     
     namespace mygui {
@@ -156,7 +174,7 @@ namespace Sandbox {
             luabind::ExternClass<CachedWidget>(L);
             luabind::ExternClass<SceneWidget>(L);
             
-            register_ScrollList(L);
+            
             
             luabind::ExternClass<AnimatedWidget>(L);
             
@@ -173,6 +191,10 @@ namespace Sandbox {
             luabind::ExternClass<ClientWidget>(L);
             luabind::ExternClass<BackgroundWidget>(L);
             luabind::ExternClass<TextInput>(L);
+            
+            luabind::ExternClass<ScrollArea>(L);
+            register_ScrollList(L);
+            
         }
     }
     

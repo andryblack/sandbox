@@ -128,10 +128,22 @@ namespace Sandbox {
                         soft_limit(offset.y, m_content_size.h-m_view_size.h, m_bounds.h, v.y));
     }
     
+    void Scroll::ScrollTo( const Vector2f& targer ) {
+        m_state = scroll_none;
+        m_scroll_target = Normalize(targer,false);
+        m_state = scroll_target;
+    }
+    
+    Sandbox::Vector2f Scroll::GetTarget() const {
+        if (m_state == scroll_target)
+            return m_scroll_target;
+        return Normalize(GetOffset(), false);
+    }
+    
     void Scroll::Update(float dt) {
-        if (m_state == scroll_free) {
+        if (m_state == scroll_free || m_state == scroll_target) {
             Sandbox::Vector2f offset = GetOffset();
-            Vector2f nmove = (Normalize(offset,false)-offset);
+            Vector2f nmove = (GetTarget()-offset);
             float nlen = nmove.length();
             float len = m_last_speed.length() + nlen;
             if (len < 5.0f && nlen < 0.5f) {
@@ -152,8 +164,9 @@ namespace Sandbox {
                 Move(delta_n,false);
             OnScrollMove();
         }
-        
     }
+    
+    
 
     void Scroll::Reset() {
         m_state = scroll_none;

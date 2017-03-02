@@ -42,6 +42,8 @@ namespace Sandbox {
             virtual MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const;
             
             bool scrollActive() const { return Scroll::IsActive(); }
+            void scrollToWidget(MyGUI::Widget* w);
+            bool isWidgetFullVisible(MyGUI::Widget* w);
         protected:
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             

@@ -979,21 +979,6 @@ SB_META_END_KLASS_BIND()
 
 
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ScrollArea, MyGUI::ScrollView)
-SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ScrollArea)
-SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
-SB_META_PROPERTY_WO(scrollPos, setScrollPos)
-SB_META_PROPERTY_WO(scrollPosF, setScrollPosF)
-SB_META_PROPERTY_RO(scrollActive, scrollActive)
-bind(method("scrollBegin", delegate_bind<Sandbox::mygui::ScrollArea,
-            Sandbox::mygui::ScrollArea,
-            Sandbox::mygui::EventHandle_ScrollAreaPtrIntPoint,
-            &Sandbox::mygui::ScrollArea::scrollBegin>::lua_func));
-bind(method("scrollComplete", delegate_bind<Sandbox::mygui::ScrollArea,
-            Sandbox::mygui::ScrollArea,
-            Sandbox::mygui::EventHandle_ScrollAreaPtrIntPoint,
-            &Sandbox::mygui::ScrollArea::scrollComplete>::lua_func));
-SB_META_END_KLASS_BIND()
 
 
 namespace Sandbox {
@@ -1071,7 +1056,6 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ControllerEdgeHide>(lua);
             luabind::ExternClass<MyGUI::ControllerRepeatClick>(lua);
             
-            luabind::ExternClass<ScrollArea>(lua);
             
             luabind::ExternClass<MyGUI::ILayer>(lua);
             luabind::ExternClass<MyGUI::OverlappedLayer>(lua);

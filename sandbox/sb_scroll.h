@@ -17,11 +17,13 @@ namespace Sandbox {
         Vector2f   m_prev_pos;
         Time    m_last_time;
         Vector2f    m_last_speed;
+        Vector2f    m_scroll_target;
         enum ScrollState {
             scroll_none,
             scroll_wait,
             scroll_move,
-            scroll_free
+            scroll_free,
+            scroll_target
         } m_state;
         Sizef   m_bounds;
         float m_fade;
@@ -30,6 +32,7 @@ namespace Sandbox {
         virtual Vector2f Normalize(const Vector2f& offset,bool soft) const;
         Vector2f Limit(const Vector2f& v) const;
         void Move(const Vector2f& offset,bool fire=true);
+        Vector2f GetTarget() const;
         
         virtual void OnScrollBegin() {}
         virtual void OnScrollEnd() {}
@@ -38,6 +41,7 @@ namespace Sandbox {
         virtual Vector2f GetOffset() const = 0;
         virtual void SetOffset(const Vector2f& offset) = 0;
         bool IsFreeMove() const { return m_state == scroll_free; }
+        bool IsTargetMove() const { return m_state == scroll_target; }
     public:
         Scroll();
         
@@ -65,6 +69,8 @@ namespace Sandbox {
         void ScrollBegin( const Vector2f& pos );
         void ScrollMove( const Vector2f& pos );
         void ScrollEnd( const Vector2f& pos );
+        
+        void ScrollTo( const Vector2f& targer );
         
         void Reset();
         

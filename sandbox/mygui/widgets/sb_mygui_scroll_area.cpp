@@ -144,6 +144,64 @@ namespace Sandbox {
             }
         }
         
+        void ScrollArea::scrollToWidget(MyGUI::Widget* w) {
+            if (!w)
+                return;
+            if (w->getParent()!=mRealClient)
+                return;
+            MyGUI::IntCoord srect = w->getCoord();
+            MyGUI::IntSize psize = getViewSize();
+            MyGUI::IntPoint offset = getViewOffset();
+            srect.left += offset.left;
+            srect.top += offset.top;
+            MyGUI::IntPoint move;
+            if (GetVEnabled()) {
+                if (srect.top < 0) {
+                    move.top = -srect.top;
+                } else if (srect.bottom() > psize.height) {
+                    move.top = psize.height - srect.bottom();
+                }
+            }
+            if (GetHEnabled()) {
+                if (srect.left < 0) {
+                    move.left = -srect.left;
+                } else if (srect.right() > psize.width) {
+                    move.left = psize.width - srect.right();
+                }
+            }
+            if (!move.empty()) {
+                ScrollTo(GetOffset()-Sandbox::Vector2f(move.left,move.top));
+            }
+        }
+        
+        bool ScrollArea::isWidgetFullVisible(MyGUI::Widget* w) {
+            if (!w)
+                return true;
+            if (w->getParent()!=mRealClient)
+                return true;
+            MyGUI::IntCoord srect = w->getCoord();
+            MyGUI::IntSize psize = getViewSize();
+            MyGUI::IntPoint offset = getViewOffset();
+            srect.left += offset.left;
+            srect.top += offset.top;
+            MyGUI::IntPoint move;
+            if (GetVEnabled()) {
+                if (srect.top < 0) {
+                    return  false;
+                } else if (srect.bottom() > psize.height) {
+                    return  false;
+                }
+            }
+            if (GetHEnabled()) {
+                if (srect.left < 0) {
+                    return false;
+                } else if (srect.right() > psize.width) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
         void ScrollArea::updateView() {
             Base::updateView();
             Scroll::SetContentSize(Sizef(getCanvasSize()));

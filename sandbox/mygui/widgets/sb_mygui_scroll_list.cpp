@@ -58,6 +58,12 @@ namespace Sandbox {
                     m_obj.call_self("onItemClick",data_ptr,idx);
                 }
             }
+            virtual void onItemPressed(size_t idx) {
+                LuaContextPtr data_ptr = getItemData(idx);
+                if (data_ptr && m_obj.GetValueRaw<bool>("onItemPressed")) {
+                    m_obj.call_self("onItemPressed",data_ptr,idx);
+                }
+            }
             virtual void onSelectionChanged(size_t idx) {
                 if (!m_obj.GetValueRaw<bool>("onSelectionChanged")) {
                     return;
@@ -274,6 +280,7 @@ namespace Sandbox {
                 m_delegate->createWidget(w);
             }
             w->eventMouseButtonClick += MyGUI::newDelegate(this,&ScrollList::handleItemClick);
+            w->eventMouseButtonPressed += MyGUI::newDelegate(this,&ScrollList::handleItemPressed);
             return w;
         }
         
@@ -297,6 +304,15 @@ namespace Sandbox {
                 m_delegate->onItemClick( index );
             }
             setIndexSelected( index);
+        }
+        
+        void ScrollList::handleItemPressed(MyGUI::Widget* _sender,float x,float y,MyGUI::MouseButton btn) {
+            size_t index = getIndexByWidget(_sender);
+            if (index == MyGUI::ITEM_NONE)
+                return;
+            if (m_delegate) {
+                m_delegate->onItemPressed( index  );
+            }
         }
         
         void ScrollList::onMouseDrag(int _left, int _top, MyGUI::MouseButton _id) {

@@ -23,6 +23,7 @@ namespace Sandbox {
             virtual void createWidget(MyGUI::Widget* w) = 0;
             virtual void updateWidget(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di,bool changed) = 0;
             virtual void onItemClick(size_t idx) = 0;
+            virtual void onItemPressed(size_t idx) = 0;
             virtual void onSelectionChanged(size_t idx) {};
             virtual void onBeginScroll() = 0;
             virtual void onEndScroll() = 0;
@@ -113,6 +114,13 @@ namespace Sandbox {
             virtual Vector2f Normalize(const Vector2f& v,bool soft) const;
             void updateSelectionWidget(MyGUI::Widget* w);
             
+            virtual void onMouseDrag(int _left, int _top, MyGUI::MouseButton _id);
+            virtual void onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id);
+            virtual void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id);
+            
+            virtual void handleItemClick(MyGUI::Widget* _sender);
+            virtual void handleItemPressed(MyGUI::Widget* _sender,float,float,MyGUI::MouseButton _id);
+            
         private:
             ScrollListDelegatePtr   m_delegate;
             int     m_item_size;
@@ -124,12 +132,6 @@ namespace Sandbox {
            
             MyGUI::Widget* createWidgetItem();
             void drawItem(MyGUI::Widget* w, const MyGUI::IBDrawItemInfo& di);
-            void handleItemClick(MyGUI::Widget* _sender);
-            
-            
-            virtual void onMouseDrag(int _left, int _top, MyGUI::MouseButton _id);
-            virtual void onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id);
-            virtual void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id);
             
             
             
