@@ -269,8 +269,8 @@ namespace Sandbox {
             
             
             gl->img = Image(tex,iscale*img.x ,iscale*img.y,iscale*img.w,iscale*img.h);
-            gl->img.SetHotspot(Sandbox::Vector2f(-img.left * iscale,img.top * iscale));
-            gl->img.SetSize(img.w / scale , img.h / scale );
+            gl->img.SetHotspot(Sandbox::Vector2f(-float(img.left) * iscale,float(img.top) * iscale));
+            gl->img.SetSize(float(img.w) / scale , float(img.h) / scale );
         }
         
         void render_glyph(FontData::Glypth* gl,bool ol) {
@@ -329,15 +329,19 @@ namespace Sandbox {
         
         if (os2)
         {
-            setMax(fontAscent, os2->usWinAscent * ftFace->size->metrics.y_ppem / ftFace->units_per_EM);
-            setMax(fontDescent, os2->usWinDescent * ftFace->size->metrics.y_ppem / ftFace->units_per_EM);
+            int fixFontAscent = os2->usWinAscent * ftFace->size->metrics.y_ppem / ftFace->units_per_EM;
+            setMax(fontAscent, fixFontAscent );
+            int fixFontDescent = os2->usWinDescent * ftFace->size->metrics.y_ppem / ftFace->units_per_EM;
+            setMax(fontDescent, fixFontDescent );
             
-            setMax(fontAscent, os2->sTypoAscender * ftFace->size->metrics.y_ppem / ftFace->units_per_EM);
-            setMax(fontDescent, -os2->sTypoDescender * ftFace->size->metrics.y_ppem / ftFace->units_per_EM);
+            fixFontAscent = os2->sTypoAscender * ftFace->size->metrics.y_ppem / ftFace->units_per_EM;
+            setMax(fontAscent, fixFontAscent);
+            fixFontDescent = -os2->sTypoDescender * ftFace->size->metrics.y_ppem / ftFace->units_per_EM;
+            setMax(fontDescent, fixFontDescent );
         }
         set_size(m_impl->config.size);
-        set_height((fontAscent+fontDescent)/m_impl->scale);
-        set_baseline(fontDescent/m_impl->scale);
+        set_height(float(fontAscent+fontDescent)/m_impl->scale);
+        set_baseline(float(fontDescent)/m_impl->scale);
         if (m_impl->config.substitute_code) {
             preallocate_symb(m_impl->config.substitute_code);
             m_data->SetSubsituteCode(m_impl->config.substitute_code);

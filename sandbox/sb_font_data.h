@@ -28,10 +28,10 @@ namespace Sandbox {
             float	asc;
             sb::vector<Kerning> kerning;
             inline float bearingX() const {
-                return -img.GetHotspot().x;
+                return -img.GetHotspotReal().x;
             }
             inline float bearingY() const {
-                return -img.GetHotspot().y;
+                return -img.GetHotspotReal().y;
             }
             inline float width() const {
                 return img.GetWidth();
