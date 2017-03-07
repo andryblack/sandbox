@@ -68,7 +68,6 @@ namespace Sandbox {
             spAnimationState_addAnimation(m_state, 0, animation, loop == 0 ? 1 : 0 , 0.0f);
         }
         if (loop!=0) {
-            spAnimationState_addAnimation(m_state, 0, animation, 0, 0.0f);
             for (int i=1;i<loop;++i) {
                 spAnimationState_addAnimation(m_state, 0, animation, 0, 0.0f);
             }
