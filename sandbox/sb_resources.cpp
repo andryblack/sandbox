@@ -357,7 +357,7 @@ namespace Sandbox {
         return texture;
     }
     GHL::Texture* Resources::LoadTexture( const sb::string& filename , bool& variant, bool premultiply ) {
-        LogDebug() << "load texture " << filename;
+        //LogDebug() << "load texture " << filename;
         const char* ext = "";
 		GHL::Image* img = LoadImage(filename.c_str(),variant,&ext);
 		if (!img) {
