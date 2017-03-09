@@ -78,7 +78,7 @@ local function load_images( dir  )
 					v.type = _M.image_file_format.ext
 				end
 				pm[filename] = texobj 
-				print('premultiply image',filename)
+				--log.debug('premultiply image',filename)
 				
 				v.premultiplied = true
 				v._need_premultiply = true
@@ -101,10 +101,10 @@ local function load_images( dir  )
 					if vtex then
 						if premultiplied then
 							get_rules().copy_images[vname]= destvname
-							print('copy variant',vname)
+							--log.debug('copy variant',vname)
 						else
 							get_rules().premultiply_images[vname] = destvname
-							print('premultiply variant',vname)
+							--log.debug('premultiply variant',vname)
 						end
 						assert(not get_rules().dest_files[destvname],'conflict rules for file ',destvname)
 						get_rules().dest_files[destvname]=vname
@@ -115,7 +115,7 @@ local function load_images( dir  )
 							get_rules().dest_files[destfilename]=nil
 						end
 					else
-						print('not found varian for',filename)
+						log.warning('not found varian for',filename)
 					end
 				end
 			end
@@ -214,7 +214,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 		local ipath = path.join(v._path,v._name .. '.' .. v.type)
 		a:add_image( {width=v.texture_info.width+2, height=v.texture_info.height+2, src = v, 
 			premultiply = v._need_premultiply} )
-		print('put to atlas:',ipath,v._need_premultiply and true or false)
+		--log.debug('put to atlas:',ipath,v._need_premultiply and true or false)
 		get_rules().dest_files[path.replaceextension(ipath,_M.image_file_format.ext)] = nil
 		get_rules().premultiply_images[ipath] = nil
 		v._atlas = a
@@ -264,7 +264,7 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	local atex = { type=_M.image_file_format.ext, premultiplied = true, smooth=true, _path = path.join(from) , _name = name }
 	g._textures[name] = atex
 	function a:apply(  )
-		print('build atlas ' .. self.name .. ' with ' .. tostring(#self.images) .. ' textures ' .. self.width .. 'x' .. self.height)
+		log.debug('build atlas ' .. self.name .. ' with ' .. tostring(#self.images) .. ' textures ' .. self.width .. 'x' .. self.height)
 		if not override_base then
 			assert(self.width ~= 0 and self.height ~= 0)
 			local img = TextureData( self.width, self.height )
@@ -317,7 +317,7 @@ end
 
 local function apply_images( dir, data )
 	local fn = path.join(dir,'images.lua')
-	print('generate',fn)
+	log.debug('generate',fn)
 	local file = assert(io.open ( path.join(application.dst_path,fn) , 'w'))
 	
 	local function f(name,val,def)
@@ -548,7 +548,7 @@ function _M.filter_files( filelist )
 end
 
 function _M.apply_rules( rules )
-	print('images apply:',rules)
+	--log.debug('images apply:',rules)
 	local images = rules.images or {}
 	for k,v in pairs(images) do
 		apply_images(k,v)
@@ -559,7 +559,7 @@ function _M.apply_rules( rules )
 	end
 
 	local pmi = rules.premultiply_images or {}
-	print('premultiply images')
+	--log.debug('premultiply images')
 	for k,v in pairs(pmi) do
 		if v then
 			--print('premultiply',k)
@@ -574,7 +574,7 @@ function _M.apply_rules( rules )
 	end
 
 	pmi = rules.convert_to_jpeg or {}
-	print('convert to jpeg')
+	--log.debug('convert to jpeg')
 	for k,v in pairs(pmi) do
 		if v then
 			--print('premultiply',k)
@@ -589,7 +589,7 @@ function _M.apply_rules( rules )
 	end
 
 	pmi = rules.copy_images or {}
-	print('copy images')
+	--log.debug('copy images')
 	for k,v in pairs(pmi) do
 		if v then
 			--print('premultiply',k)

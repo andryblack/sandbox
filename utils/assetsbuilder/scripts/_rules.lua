@@ -37,8 +37,8 @@ _M.assets_rules = {}
 
 function _M.assets_rules.require_version( v )
 	if not host_version or host_version < v then
-		print('required host version ',v,'but run on',host_version)
-		print('please update utils')
+		log.error('required host version ',v,'but run on',host_version)
+		log.error('please update utils')
 		os.exit(1)
 	end
 end
@@ -262,7 +262,7 @@ local function compile_files( files )
 			local shunk = assert(load(pp_source,'@'..dst,'t'))
 			local binary = lua.compile(shunk)
 			local full_dst = path.join(application.dst_path,dst)
-			print('compile',v,full_dst)
+			--print('compile',v,full_dst)
 			local out = assert(io.open(full_dst,'wb'))
 			out:write(binary)
 			out:close()
@@ -279,7 +279,7 @@ function _M.apply_rules( rules )
 			add_dest_dir(path.getdirectory(v),dst_tree)
 		end
 	end
-	print('make destination directories at ' .. tostring(application.dst_path))
+	log.info('make destination directories at ' .. tostring(application.dst_path))
 	make_dst_tree(dst_tree)
 	copy_files(rules.copy_files or {})
 	compile_files(rules.compile_files or {})
@@ -291,24 +291,24 @@ function _M.apply_rules( rules )
 end
 
 function _M.chek_files(  )
-	print('check files')
+	log.info('check files')
 	local files = os.matchfiles(path.join(application.dst_path,"**.*"))
 	for _,v in ipairs(files) do
 		local file = path.getrelative(application.dst_path,v)
 		if not _M.all_dest_files[file] then
 			if update_only then
-				print('remove unknonw file:',file)
+				log.warning('remove unknonw file:',file)
 			else
 				error('produced unknonw file: ' .. file)
 			end
 		else
-			print('cheked file',file)
+			--print('cheked file',file)
 			_M.all_dest_files[file] = nil
 		end
 	end
 	if next(_M.all_dest_files) then
 		for k,v in pairs(all_dest_files) do
-			print("not produced declared file:",k)
+			log.error("not produced declared file:",k)
 		end
 		error('not all files produced')
 	end
