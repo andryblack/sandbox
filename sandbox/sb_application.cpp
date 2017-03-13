@@ -135,6 +135,7 @@ SB_META_PROPERTY_RO(SystemLanguage, GetSystemLanguage)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 SB_META_PROPERTY_WO(FrameInterval, SetFrameInterval)
 SB_META_PROPERTY_WO(ResizeableWindow, SetResizeableWindow)
+SB_META_PROPERTY_RO(FPS, GetFPS)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 bind( method( "StoreProfileFile", &Sandbox::Application_StoreProfileFile));
 bind( method( "LoadProfileFile", &Sandbox::Application_LoadProfileFile));

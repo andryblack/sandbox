@@ -279,6 +279,7 @@ SB_META_METHOD(CreateRenderTarget)
 SB_META_PROPERTY_RO(Scale, GetScale)
 SB_META_PROPERTY_WO(BasePath, SetBasePath)
 SB_META_PROPERTY_RO(ResourcesPostfix, GetResourcesPostfix)
+SB_META_PROPERTY_RO(MemoryUsed, GetMemoryUsed)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::SoundInstance, void)

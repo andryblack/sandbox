@@ -68,6 +68,7 @@ namespace Sandbox {
         GHL::UInt32 GetScreenHeight() const { return m_height; }
         float GetDrawWidth() const { return m_draw_width; }
         float GetDrawHeight() const { return m_draw_height; }
+        float GetFPS() const { return m_fps; }
         
         bool StoreProfileFile( const char* filename , const GHL::Data* data );
         GHL::Data* LoadProfileFile( const char* filename );
@@ -142,6 +143,8 @@ namespace Sandbox {
         virtual void ReportAppError(const char* reason) {}
         
         void DoDrawScreen();
+        
+        
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
