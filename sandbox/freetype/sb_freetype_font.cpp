@@ -372,6 +372,17 @@ namespace Sandbox {
                 gl->asc = asc;
             }
         }
+        /// empty symbols
+        img.h = 0;
+        img.w = 0;
+        img.left = 0;
+        img.top = fontAscent;
+        gl = m_data->add_glypth_int('\r');
+        gl->asc = 0.0f;
+        m_impl->put_image(gl, img);
+        gl = m_data->add_glypth_int('\n');
+        gl->asc = 0.0f;
+        m_impl->put_image(gl, img);
     }
     
     void FreeTypeFont::SetCharImage(GHL::UInt32 code,const Sandbox::ImagePtr& image,float advance) {
