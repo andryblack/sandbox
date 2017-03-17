@@ -28,15 +28,15 @@ namespace Sandbox {
     void ContainerScroll::GlobalToLocalImpl(Vector2f& v) const {
         SceneObject::GlobalToLocalImpl(v);
         v += m_offset;
-        if (GetTransform()) {
-            GetTransform()->Transform(v);
+        if (GetTransformM()) {
+            GetTransformM()->Transform(v);
         }
     }
     void ContainerScroll::GetTransformImpl(Transform2d& tr) const {
         SceneObject::GetTransformImpl(tr);
         tr.translate(-m_offset);
-        if (GetTransform()) {
-            GetTransform()->Apply(tr);
+        if (GetTransformM()) {
+            GetTransformM()->Apply(tr);
         }
     }
 }
