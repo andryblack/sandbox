@@ -171,11 +171,41 @@ namespace Sandbox {
         spSkeletonBounds* bounds = spSkeletonBounds_create();
         spSkeletonBounds_update(bounds, m_skeleton, true);
         Rectf r;
-        r.x = bounds->minX;
-        r.y = bounds->minY;
-        r.w = bounds->maxX - bounds->minX;
-        r.h = bounds->maxY - bounds->minY;
-        spSkeletonBounds_dispose(bounds);
+        if (bounds->count) {
+            r.x = bounds->minX;
+            r.y = bounds->minY;
+            r.w = bounds->maxX - bounds->minX;
+            r.h = bounds->maxY - bounds->minY;
+            spSkeletonBounds_dispose(bounds);
+        } else {
+            float vert[8];
+            bool first = true;
+            for (int i = 0; i < m_skeleton->slotsCount; ++i) {
+                spSlot* slot = m_skeleton->drawOrder[i];
+                if (!slot)
+                    continue;
+                if (!slot->bone)
+                    continue;
+                if (slot->a <= 0.01f)
+                    continue;
+                spAttachment* attachment = slot->attachment;
+                if (!attachment || attachment->type != SP_ATTACHMENT_REGION) continue;
+                spRegionAttachment* ra = (spRegionAttachment*)attachment;
+                spRegionAttachment_computeWorldVertices(ra,slot->bone,vert);
+                if (first) {
+                    r.x = vert[SP_VERTEX_X1];
+                    r.y = vert[SP_VERTEX_Y1];
+                    r.w = 0;
+                    r.h = 0;
+                    first = false;
+                } else {
+                    r.Extend(Vector2f(vert[SP_VERTEX_X1],vert[SP_VERTEX_Y1]));
+                }
+                r.Extend(Vector2f(vert[SP_VERTEX_X2],vert[SP_VERTEX_Y2]));
+                r.Extend(Vector2f(vert[SP_VERTEX_X3],vert[SP_VERTEX_Y3]));
+                r.Extend(Vector2f(vert[SP_VERTEX_X4],vert[SP_VERTEX_Y4]));
+            }
+        }
         return r;
     }
     
@@ -222,6 +252,8 @@ namespace Sandbox {
         spSkeleton* skeleton = m_animation->m_skeleton;
         for (int i = 0; i < skeleton->slotsCount; ++i) {
             spSlot* slot = skeleton->drawOrder[i];
+            if (!slot)
+                continue;
             spBone* bone = slot->bone;
             if (slot_name == slot->data->name) {
                 Sandbox::Transform2d tr;
@@ -255,6 +287,8 @@ namespace Sandbox {
         spSkeleton* skeleton = m_animation->m_skeleton;
         for (int i = 0; i < skeleton->slotsCount; ++i) {
             spSlot* slot = skeleton->drawOrder[i];
+            if (!slot)
+                continue;
             spBone* bone = slot->bone;
             spAttachment* attachment = slot->attachment;
             SpineSceneAttachementPtr object_attachement;
