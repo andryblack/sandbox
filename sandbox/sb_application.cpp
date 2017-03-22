@@ -129,6 +129,7 @@ SB_META_METHOD(SetRenderScale)
 SB_META_METHOD(Restart)
 SB_META_METHOD(RenderScreen)
 SB_META_METHOD(OpenURL)
+SB_META_METHOD(Exit)
 SB_META_PROPERTY_RO(TimeUSec, GetTimeUSec)
 SB_META_PROPERTY_RO(UTCOffset, GetUTCOffset)
 SB_META_PROPERTY_RO(SystemLanguage, GetSystemLanguage)
@@ -210,6 +211,7 @@ namespace Sandbox {
         m_sound_mgr->SetSoundsDir("sound");
         
         m_need_restart = false;
+        m_need_exit = false;
         m_utc_offset = 0;
         
         //const char* test = "{\"val\":41,\"id\":\"CgkInqr15dUFEAIQAw\"}";
@@ -534,6 +536,12 @@ namespace Sandbox {
         Unload();
         Load();
     }
+    
+    void Application::DoExit() {
+        if (m_system) {
+            m_system->Exit();
+        }
+    }
         
     void Application::UpdateScreenSize() {
         if (!m_lua)
@@ -594,7 +602,11 @@ namespace Sandbox {
 	///
 	bool GHL_CALL Application::OnFrame( GHL::UInt32 usecs ) {
         sb_ensure_main_thread();
-        
+        if (m_need_exit) {
+            m_need_exit = false;
+            DoExit();
+            return false;
+        }
         if (m_need_restart) {
             m_need_restart = false;
             DoRestart();

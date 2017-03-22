@@ -64,6 +64,8 @@ namespace Sandbox {
         const sb::string& GetSystemLanguage() const { return m_system_language; }
         
         void Restart() { m_need_restart = true; }
+        void Exit() { m_need_exit = true; }
+        
         GHL::UInt32 GetScreenWidth() const { return m_width; }
         GHL::UInt32 GetScreenHeight() const { return m_height; }
         float GetDrawWidth() const { return m_draw_width; }
@@ -139,6 +141,7 @@ namespace Sandbox {
         
         void ReleaseGUI();
         virtual void DoRestart();
+        virtual void DoExit();
         
         virtual void ReportAppError(const char* reason) {}
         
@@ -200,6 +203,7 @@ namespace Sandbox {
         Network*    m_network;
 #endif
         bool    m_need_restart;
+        bool    m_need_exit;
         sb::string  m_url;
     public:
 		///
