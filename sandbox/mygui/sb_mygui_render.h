@@ -102,6 +102,7 @@ namespace Sandbox {
             
             ImagePtr getImage(const std::string& name);
             void setContext(const LuaContextPtr& ctx );
+            const Sandbox::LuaContextPtr& getContext() const { return m_context; }
             
             static RenderManager& getInstance() { return static_cast<RenderManager&>(MyGUI::RenderManager::getInstance()); }
             static RenderManager* getInstancePtr() { return static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr()); }
