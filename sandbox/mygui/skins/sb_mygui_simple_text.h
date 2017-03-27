@@ -26,6 +26,7 @@ namespace Sandbox
 		SimpleText();
 		virtual ~SimpleText();
 
+        virtual void updateRawData();
         virtual void setViewOffset(const MyGUI::IntPoint& _point);
 
 		virtual void doRender(MyGUI::IRenderTarget* _target);

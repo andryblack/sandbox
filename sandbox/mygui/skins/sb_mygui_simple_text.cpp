@@ -35,6 +35,28 @@ namespace Sandbox
 	void SimpleText::setViewOffset(const MyGUI::IntPoint& _point)
 	{
 	}
+        
+    void SimpleText::updateRawData() {
+        Base::updateRawData();
+        MyGUI::IntSize size = mTextView.getViewSize();
+        float scale = GetFontScale();
+        size.width *= scale;
+        size.height *= scale;
+        
+        if (mTextAlign.isRight())
+            mViewOffset.left = - (mCoord.width - size.width);
+        else if (mTextAlign.isHCenter())
+            mViewOffset.left = - ((mCoord.width - size.width) / 2);
+        else
+            mViewOffset.left = 0;
+        
+        if (mTextAlign.isBottom())
+            mViewOffset.top = - (mCoord.height - size.height);
+        else if (mTextAlign.isVCenter())
+            mViewOffset.top = - ((mCoord.height - size.height) / 2);
+        else
+            mViewOffset.top = 0;
+    }
 
 	void SimpleText::doRender(MyGUI::IRenderTarget* _target)
 	{
@@ -50,24 +72,6 @@ namespace Sandbox
 		if (mTextOutDate)
 			updateRawData();
 
-		MyGUI::IntSize size = mTextView.getViewSize();
-        float scale = GetFontScale();
-        size.width *= scale;
-        size.height *= scale;
-        
-		if (mTextAlign.isRight())
-			mViewOffset.left = - (mCoord.width - size.width);
-		else if (mTextAlign.isHCenter())
-			mViewOffset.left = - ((mCoord.width - size.width) / 2);
-		else
-			mViewOffset.left = 0;
-
-		if (mTextAlign.isBottom())
-			mViewOffset.top = - (mCoord.height - size.height);
-		else if (mTextAlign.isVCenter())
-			mViewOffset.top = - ((mCoord.height - size.height) / 2);
-		else
-			mViewOffset.top = 0;
 
 		Base::doRender(_target);
 	}

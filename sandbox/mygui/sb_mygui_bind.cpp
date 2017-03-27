@@ -636,6 +636,7 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_OBJECT(MyGUI::TextBox, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::TextBox)
 SB_META_PROPERTY_RO(textSize, getTextSize)
+SB_META_PROPERTY_RO(textCoord, getTextCoord)
 bind(property_rw("caption", &MyGUI::TextBox::getCaption, &MyGUI::TextBox::setCaption));
 bind(property_wo("captionWithTags",&MyGUI::TextBox::setCaptionWithReplacing));
 SB_META_PROPERTY_RW(fontName, getFontName, setFontName)

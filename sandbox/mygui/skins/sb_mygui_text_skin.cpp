@@ -106,25 +106,6 @@ namespace Sandbox {
                     m_scale = hscale;
                 }
             }
-        }
-        
-        void AutoWidthText::doRender(MyGUI::IRenderTarget* _target) {
-                        
-            if (nullptr == mFont)
-                return;
-            if (!mVisible || mEmptyView)
-                return;
-            
-            if (mTextOutDate) {
-                updateRawData();
-            }
-            
-            MyGUI::IntSize size = mTextView.getViewSize();
-            
-            size.width *= GetFontScale();
-            size.height *= GetFontScale();
-            
-            float scale = m_scale * GetFontScale();
             
             if (mTextAlign.isRight())
                 mViewOffset.left = - (mCoord.width - float(size.width)*m_scale);
@@ -139,7 +120,21 @@ namespace Sandbox {
                 mViewOffset.top = - ((mCoord.height - float(size.height)*m_scale) / 2);
             else
                 mViewOffset.top = 0;
+
+        }
+        
+        void AutoWidthText::doRender(MyGUI::IRenderTarget* _target) {
+                        
+            if (nullptr == mFont)
+                return;
+            if (!mVisible || mEmptyView)
+                return;
             
+            if (mTextOutDate) {
+                updateRawData();
+            }
+            
+            float scale = m_scale * GetFontScale();
             
             
             const TextData& textViewData = mTextView.getData();
