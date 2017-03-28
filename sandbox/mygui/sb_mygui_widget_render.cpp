@@ -73,6 +73,13 @@ namespace Sandbox {
             
         }
         
+        void WidgetRender::addChildNode(LayerItem* _item) {
+            _item->attachItemToNode(0, m_replaced_layer);
+        }
+        void WidgetRender::removeChildNode(LayerItem* _item) {
+            
+        }
+        
         void WidgetRender::render() {
             _updateChilds();
             
