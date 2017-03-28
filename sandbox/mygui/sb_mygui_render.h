@@ -130,6 +130,8 @@ namespace Sandbox {
             
             virtual float getDisplayScale() const;
             
+            void setRTScale(float s);
+            float getRTScale() const { return m_scale; }
             
             RenderTargetImpl* createTarget(MyGUI::IntSize size);
             
@@ -141,6 +143,7 @@ namespace Sandbox {
         private:
             sb::map<sb::string,TextureImpl*>  m_textures;
             Sandbox::LuaContextPtr  m_context;
+            float   m_scale;
         };
         
     }

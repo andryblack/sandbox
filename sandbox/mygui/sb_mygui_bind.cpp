@@ -883,6 +883,7 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::RenderManager)
 SB_META_STATIC_METHOD(getInstancePtr)
 SB_META_METHOD(renderLayout)
 SB_META_PROPERTY_WO(context, setContext)
+SB_META_PROPERTY_RW(RTScale, getRTScale, setRTScale)
 SB_META_END_KLASS_BIND()
 
 

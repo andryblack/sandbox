@@ -45,7 +45,9 @@ namespace Sandbox {
         void RenderTargetImpl::resize( const MyGUI::IntSize& size) {
             if (m_rendertarget_size == size)
                 return;
-            m_target = m_resources->CreateRenderTarget(size.width, size.height, m_resources->GetScale(), true, false);
+            float scale = RenderManager::getInstance().getRTScale();
+            m_target = m_resources->CreateRenderTarget(size.width, size.height,
+                                                       m_resources->GetScale() * scale, true, false);
             m_target->GetTexture()->SetFiltered(true);
             begin();
             end();
@@ -123,7 +125,7 @@ namespace Sandbox {
         
         
         
-        RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res,RenderTargetPtr()) {
+        RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res,RenderTargetPtr()) , m_scale(1.0f) {
             m_graphics = graphics;
         }
         
@@ -212,13 +214,19 @@ namespace Sandbox {
             return 0;
         }
         
+        void RenderManager::setRTScale(float s) {
+            m_scale = s;
+        }
+        
         RenderTargetImpl* RenderManager::createTarget(MyGUI::IntSize size) {
             if (size.width <= 0 || size.height <= 0)
                 return 0;
             RenderTargetPtr target = m_resources->CreateRenderTarget(size.width, size.height,
-                                                                    m_resources->GetScale(), true, false);
+                                                                    m_scale*m_resources->GetScale(),
+                                                                     true, false);
             if (!target) return 0;
-            return new RenderTargetImpl(m_graphics,m_resources,target);
+            RenderTargetImpl* impl = new RenderTargetImpl(m_graphics,m_resources,target);
+            return impl;
         }
         
         RenderTargetImpl* RenderManager::wrapTarget(const RenderTargetPtr& target ) {
