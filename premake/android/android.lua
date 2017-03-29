@@ -100,6 +100,35 @@ api.register {
 	list = true
 }
 
+api.register {
+	name = "android_build_dependencies",
+	scope = "solution",
+	kind = "string",
+	list = true
+}
+
+
+
+api.register {
+	name = "android_build_task",
+	scope = 'project',
+	kind = 'table',
+	list = true
+}
+
+api.register {
+	name = "android_build_plugin",
+	scope = 'project',
+	kind = 'string',
+	list = true
+}
+
+api.register {
+	name = "android_build_gradle",
+	scope = 'project',
+	kind = 'string'
+}
+
 -- Specify android activity name
 api.register {
 	name = "android_activity",

@@ -110,6 +110,11 @@ function build.generate_build_gradle(sln)
     	(sln.android_module.gcm or sln.android_module.fcm) then
     	_x(2,"classpath 'com.google.gms:google-services:3.0.0'")
 	end
+	if sln.android_build_dependencies then
+		for _,v in ipairs(sln.android_build_dependencies) do
+			_x(2,"classpath '"..v.."'")
+		end
+   	end
     _x(1,'}')
 	_x('}')
 	
@@ -130,6 +135,10 @@ function build.generate_build_gradle(sln)
 
 end
 
+local function make_abi_name(abi)
+	return string.gsub(abi,'-','_')
+end
+
 function build.generate_app_build_gradle( sln , prj )
 	premake.eol("\n")
 
@@ -141,7 +150,14 @@ function build.generate_app_build_gradle( sln , prj )
 	local target_api = sln.android_target_api_level or sln.android_api_level or 14
 
 	_x("apply plugin: 'com.android.application'")
+	if prj.android_build_plugin then
+		for i,plugin in ipairs(prj.android_build_plugin) do
+			_x("apply plugin: '%s'",plugin)
+		end
+	end
 	_p('')
+	
+	
 
 	_x('def build_files_location = "%s"' , prj.targetdir)
 
@@ -291,38 +307,59 @@ function build.generate_app_build_gradle( sln , prj )
 		local all_args = {"'-C'","'" .. path.getabsolute(path.join(sln.location,cfg.shortname)) .. "'"}
 		table.insert(all_args,"'V=1'")
 		table.insert(all_args,"'j=4'")
-		_x(1,'task buildJNI' .. cfg.name .. '(type: Exec) {')
-		_x(2,'commandLine "%s"',path.getabsolute(path.join(ndk_dir,'ndk-build')))
-		_x(2,"args " .. table.concat(all_args,',').. "")
-		_x(1,'}')
+		_x('task buildJNI' .. cfg.name .. '(type: Exec) {')
+		_x(1,'commandLine "%s"',path.getabsolute(path.join(ndk_dir,'ndk-build')))
+		_x(1,"args " .. table.concat(all_args,',').. "")
+		_x('}')
 	end
 
 	local libname = 'lib' .. prj.name .. '.so'
 
 	for cfg in project.eachconfig(prj) do
-		for abi in ipairs(sln.android_abis) do
-			_x(1,'task copyJNI' .. cfg.name .. abi .. 'sym(type: Copy) {')
-			_x(2,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'obj','local',abi,libname)) .. "'")
-			_x(2,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname .. '_symbols',abi)) .. "'")
-			_x(1,'}')
+		for _,abi in ipairs(sln.android_abis) do
+			_x('task copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym(type: Copy) {')
+			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'obj','local',abi,libname)) .. "'")
+			_x(1,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname .. '_symbols',abi)) .. "'")
+			_x('}')
 		end
 	end
 	for cfg in project.eachconfig(prj) do
-		for abi in ipairs(sln.android_abis) do
-			_x(1,'task copyJNI' .. cfg.name .. abi.. '(type: Copy) {')
-			_x(2,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'libs',abi,libname)) .. "'")
-			_x(2,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname,abi)) .. "'")
-			_x(1,'}')
+		for _,abi in ipairs(sln.android_abis) do
+			_x('task copyJNI' .. cfg.name .. make_abi_name(abi).. '(type: Copy) {')
+			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'libs',abi,libname)) .. "'")
+			_x(1,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname,abi)) .. "'")
+			_x('}')
 		end
 	end
 	
 
+	if prj.android_build_task then
+		for i,task in ipairs(prj.android_build_task) do
+			for cfg in project.eachconfig(prj) do
+				_x('task %s%s%s(type: %s) {',task.prefix or ('task'..i),cfg.name,task.postfix or '',task.type)
+				if task.content then
+					task.content(prj,cfg,_p)
+				end
+				_x('}')
+			end
+		end
+	end
+	
 	
 	_p('afterEvaluate {')
 	for cfg in project.eachconfig(prj) do
-		for abi in ipairs(sln.android_abis) do
-			_x(1,'copyJNI' .. cfg.name .. abi .. '.dependsOn buildJNI' .. cfg.name)
-			_x(1,'copyJNI' .. cfg.name .. abi .. 'sym.dependsOn buildJNI' .. cfg.name)
+		for _,abi in ipairs(sln.android_abis) do
+			_x(1,'copyJNI' .. cfg.name .. make_abi_name(abi) .. '.dependsOn buildJNI' .. cfg.name)
+			_x(1,'copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym.dependsOn buildJNI' .. cfg.name)
+		end
+	end
+	if prj.android_build_task then
+		for i,task in ipairs(prj.android_build_task) do
+			if task.dependsOn then
+				for cfg in project.eachconfig(prj) do
+					_x(1,'%s%s%s.dependsOn %s',task.prefix or ('task'..i),cfg.name,task.postfix or '',task.dependsOn(prj,cfg))
+				end
+			end
 		end
 	end
 
@@ -332,9 +369,9 @@ function build.generate_app_build_gradle( sln , prj )
 	for cfg in project.eachconfig(prj) do
 		_x(1,"if (task.name == 'generate%sAssets') {",cfg.name)
 		local abis = {}
-		for abi in ipairs(sln.android_abis) do
-			table.insert(abis,'copyJNI' .. cfg.name .. abi)
-			table.insert(abis,'copyJNI' .. cfg.name .. abi .. 'sym')
+		for _,abi in ipairs(sln.android_abis) do
+			table.insert(abis,'copyJNI' .. cfg.name .. make_abi_name(abi))
+			table.insert(abis,'copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym')
 		end
 		_x(2,'task.dependsOn ' .. 'prebuild_cmd_' .. cfg.shortname .. 
 				', buildJNI' .. cfg.name .. 
@@ -348,7 +385,10 @@ function build.generate_app_build_gradle( sln , prj )
     	end
 	end
 	_p('}')
-	
+
+	if prj.android_build_gradle then
+		_p(prj.android_build_gradle)
+	end
 	--_p('task build << {' )
 	--_p("\tdependsOn " .. crnt_name)
 	--_p('}')
