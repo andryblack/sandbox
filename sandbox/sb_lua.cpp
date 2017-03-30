@@ -59,6 +59,7 @@ namespace Sandbox {
             luaL_traceback(g_terminate_context,
                            g_terminate_thread?g_terminate_thread:g_terminate_context,text,1);
             LogError(MODULE) << lua_tostring(g_terminate_context, -1);
+            lua_pop(g_terminate_context, 1);
             LogError(MODULE) << "--- terminate ---";
         }
         return false;
