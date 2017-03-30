@@ -185,6 +185,21 @@ SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::ControllerUniformColor, Controller)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerUniformColor)
+SB_META_CONSTRUCTOR((const Sandbox::ShaderColorUniformPtr&))
+SB_META_PROPERTY_RW_DEF(Begin)
+SB_META_PROPERTY_RW_DEF(End)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_KLASS(Sandbox::ControllerUniformFloat, Controller)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerUniformFloat)
+SB_META_CONSTRUCTOR((const Sandbox::ShaderFloatUniformPtr&))
+SB_META_PROPERTY_RW_DEF(Begin)
+SB_META_PROPERTY_RW_DEF(End)
+SB_META_END_KLASS_BIND()
+
+
 SB_META_DECLARE_KLASS(Sandbox::AnimationData, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::AnimationData)
 SB_META_CONSTRUCTOR(())
@@ -236,6 +251,8 @@ namespace Sandbox {
         luabind::Class<ControllerAlpha>(lua);
         luabind::Class<ControllerSpriteColor>(lua);
         luabind::Class<ControllerSpriteAlpha>(lua);
+        luabind::Class<ControllerUniformColor>(lua);
+        luabind::Class<ControllerUniformFloat>(lua);
         luabind::Class<Animation>(lua);
         luabind::Class<AnimationData>(lua);
     }

@@ -42,6 +42,7 @@ namespace Sandbox {
 		explicit ShaderFloatUniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform),m_value(1.0f) {}
 		virtual void DoSet();
 		void SetValue(float v) { m_value = v;}
+        float GetValue() const { return m_value; }
 	private:
 		float m_value;
 	};
@@ -53,6 +54,7 @@ namespace Sandbox {
 		explicit ShaderVec2Uniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
 		virtual void DoSet();
 		void SetValue(const Vector2f& v) { m_value = v;}
+        const Vector2f& GetValue() const { return m_value; }
 	private:
 		Vector2f m_value;
 	};
@@ -64,6 +66,7 @@ namespace Sandbox {
         explicit ShaderColorUniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
         virtual void DoSet();
         void SetValue(const Color& v) { m_value = v;}
+        const Color& GetValue() const { return m_value; }
     private:
         Color m_value;
     };

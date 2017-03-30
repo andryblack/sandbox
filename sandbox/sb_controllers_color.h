@@ -13,6 +13,7 @@
 #include "sb_controller.h"
 #include "sb_draw_modificator.h"
 #include "sb_sprite.h"
+#include "sb_shader.h"
 
 namespace Sandbox {
 	
@@ -39,6 +40,16 @@ namespace Sandbox {
                 ctnr->SetAlpha(a);
             }
         };
+        struct LinearControllerSetShaderColor {
+            static void SetValue( const ShaderColorUniformPtr& ctnr,const Color& c) {
+                ctnr->SetValue(c);
+            }
+        };
+        struct LinearControllerSetShaderFloat {
+            static void SetValue( const ShaderFloatUniformPtr& ctnr,float v) {
+                ctnr->SetValue(v);
+            }
+        };
 	}
 	
 	typedef LinearController<Color,Impl::LinearControllerSetColor,ColorModificatorPtr> ControllerColor;
@@ -46,7 +57,9 @@ namespace Sandbox {
     typedef LinearController<Color,Impl::LinearControllerSetSpriteColor,ColorizedSpritePtr> ControllerSpriteColor;
     typedef LinearController<float,Impl::LinearControllerSetSpriteAlpha,ColorizedSpritePtr> ControllerSpriteAlpha;
     
-	
+    typedef LinearController<Color,Impl::LinearControllerSetShaderColor,ShaderColorUniformPtr> ControllerUniformColor;
+    typedef LinearController<float,Impl::LinearControllerSetShaderFloat,ShaderFloatUniformPtr> ControllerUniformFloat;
+    
 }
 
 #endif /*SB_CONTROLLERS_COLOR_H*/
