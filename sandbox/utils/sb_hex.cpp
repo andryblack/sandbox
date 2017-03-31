@@ -4,6 +4,16 @@
 namespace Sandbox {
     
     static const char hex_chars[] = "0123456789abcdef";
+    static const char hex_charsU[] = "0123456789ABCDEF";
+    
+    void EncodeByte(GHL::Byte d,char* buf) {
+        buf[0] = hex_chars[(d&0xf0)>>4];
+        buf[1] = hex_chars[(d&0xf0)>>4];
+    }
+    void EncodeByteU(GHL::Byte d,char* buf) {
+        buf[0] = hex_charsU[(d&0xf0)>>4];
+        buf[1] = hex_charsU[(d&0xf0)>>4];
+    }
     
     sb::string DataToHex(const void* data, size_t size) {
         sb::string res;
@@ -15,5 +25,6 @@ namespace Sandbox {
         }
         return res;
     }
+    
     
 }

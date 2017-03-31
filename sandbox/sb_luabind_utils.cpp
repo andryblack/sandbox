@@ -10,6 +10,7 @@
 #include "meta/sb_meta.h"
 #include "utils/sb_base64.h"
 #include "utils/sb_md5.h"
+#include "utils/sb_url.h"
 
 
 namespace Sandbox {
@@ -20,6 +21,7 @@ namespace Sandbox {
         ns( Sandbox::meta::static_method( "MD5File", &Sandbox::MD5SumFile));
         ns( Sandbox::meta::static_method( "Base64Decode" , &Sandbox::lua_Base64Decode) );
         ns( Sandbox::meta::static_method( "Base64Encode" , &Sandbox::Base64Encode) );
+        ns( Sandbox::meta::static_method( "UrlEncode", &Sandbox::UrlEncode ));
     }
     
 }
