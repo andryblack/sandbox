@@ -151,6 +151,13 @@ api.register {
 	list = true
 }
 
+api.register {
+	name = "android_provider",
+	scope = 'project',
+	kind = 'table',
+	list = true
+}
+
 -- Specify applicaton orientation
 api.register {
 	name = "android_screenorientation",
