@@ -8,11 +8,11 @@ namespace Sandbox {
     
     void EncodeByte(GHL::Byte d,char* buf) {
         buf[0] = hex_chars[(d&0xf0)>>4];
-        buf[1] = hex_chars[(d&0xf0)>>4];
+        buf[1] = hex_chars[(d&0x0f)];
     }
     void EncodeByteU(GHL::Byte d,char* buf) {
         buf[0] = hex_charsU[(d&0xf0)>>4];
-        buf[1] = hex_charsU[(d&0xf0)>>4];
+        buf[1] = hex_charsU[(d&0x0f)];
     }
     
     sb::string DataToHex(const void* data, size_t size) {
