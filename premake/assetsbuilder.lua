@@ -107,10 +107,14 @@
 			
 		}
 
+
 		sysincludedirs {
 			path.join(sandbox_dir,'include'),
 			path.join(sandbox_dir,'include/lua'),
 			path.join(sandbox_dir,'GHL','include'),
+			path.join(sandbox_dir,'GHL','src','sound','libogg','include'),
+			path.join(sandbox_dir,'GHL','src','sound','libvorbis','include'),
+			
 			path.join(sandbox_dir,'external/pugixml','src'),
 			path.join(sandbox_dir,'external/spine-runtime-c','include'),
 			path.join(sandbox_dir,'sandbox'),

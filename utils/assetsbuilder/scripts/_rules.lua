@@ -30,6 +30,7 @@ function _M.init_rules(rules)
 	rules.compile_files = {}
 	rules.dest_files = setmetatable({_={}},dest_files_mt)
 	rules.call_functions = {}
+	rules.encode_sounds = {}
 end
 
 _M.assets_rules = {}
@@ -59,10 +60,14 @@ local action_copy_files = 'copy_files'
 local action_compile_files = 'compile_files'
 local action_premultiply_images = 'premultiply_images'
 local action_convert_to_jpeg = 'convert_to_jpeg'
+local action_encode_sounds = 'encode_sounds'
 
 local file_remap = {}
 function file_remap.convert_to_jpeg( f )
 	return path.replaceextension(f,'jpg')
+end
+function file_remap.encode_sounds( f )
+	return path.replaceextension(f,'ogg')
 end
 function file_remap.premultiply_images( f )
 	return path.replaceextension(f,_images.image_file_format.ext)
@@ -144,12 +149,28 @@ function _M.assets_rules.compile_files( file_or_filelist )
 	end
 end
 
+function _M.assets_rules.encode_sounds( file_or_filelist )
+	if type(file_or_filelist) == 'table' then
+		for _,v in ipairs(file_or_filelist) do
+			process_files_pattern(v,action_encode_sounds)
+		end
+	elseif type(file_or_filelist) == 'string' then
+		process_files_pattern(file_or_filelist,action_encode_sounds)
+	else
+		error('encode_sounds table or string expected got ' .. type(file_or_filelist))
+	end
+end
+
 function _M.assets_rules.copy_files_to( src, pattern, dst )
 	process_files_pattern_to(src, pattern, dst, action_copy_files)
 end
 
 function _M.assets_rules.compile_files_to( src, pattern, dst )
 	process_files_pattern_to(src, pattern, dst, action_compile_files)
+end
+
+function _M.assets_rules.encode_sounds_to( src, pattern, dst )
+	process_files_pattern_to(src, pattern, dst, action_encode_sounds)
 end
 
 function _M.assets_rules.premultiply_images( file_or_filelist )
@@ -270,6 +291,19 @@ local function compile_files( files )
 	end
 end
 
+local function encode_sounds( files )
+	for src,dst in pairs(files) do
+		if dst then
+			if not update_only or os.check_file_new(path.join(src_path,src),path.join(application.dst_path,dst)) then
+				if not application:encode_sound(src,dst) then
+					error('failed encode sound ' .. src .. '->' .. dst)
+				end
+			end
+		end
+	end
+end
+
+
 
 
 function _M.apply_rules( rules )
@@ -283,6 +317,7 @@ function _M.apply_rules( rules )
 	make_dst_tree(dst_tree)
 	copy_files(rules.copy_files or {})
 	compile_files(rules.compile_files or {})
+	encode_sounds(rules.encode_sounds or {})
 
 	for _,v in ipairs(rules.call_functions) do
 		v(_G)

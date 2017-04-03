@@ -125,14 +125,23 @@ project 'GHL'
 
 		if use_vorbis then
 			sysincludedirs {
-				sandbox_dir .. '/sound/libogg/include',
-				sandbox_dir .. '/sound/libvorbis/include'
+				ghl_src .. '/sound/libogg/include',
+				ghl_src .. '/sound/libvorbis/include'
+			}
+			includedirs {
+				ghl_src .. '/sound/libvorbis/lib',
 			}
 			local ogg_files = {'bitwise.c','framing.c'}
 			files(append_path(ghl_src .. '/sound/libogg/src/',ogg_files))
 			local vorbis_files = {'bitrate.c','block.c','codebook.c','envelope.c','floor0.c','floor1.c','info.c','lookup.c',
 				'lpc.c','lsp.c','mapping0.c','mdct.c','psy.c','registry.c','res0.c','sharedbook.c','smallft.c','synthesis.c',
 				'vorbisfile.c','window.c'}
+			if build_cli_tools then
+				table.insert(vorbis_files,'analysis.c')
+				table.insert(vorbis_files,'vorbisenc.c')
+				table.insert(vorbis_files,'modes/*.h')
+				table.insert(vorbis_files,'books/**.h')
+			end
 			files(append_path(ghl_src .. '/sound/libvorbis/lib/',vorbis_files))
 		end
 

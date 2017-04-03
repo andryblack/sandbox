@@ -11,7 +11,7 @@
 #include <image/jpeg_image_decoder.h>
 
 #include "spine_convert.h"
-
+#include "vorbis_encoder.h"
 
 extern "C" {
 #include <lua.h>
@@ -156,6 +156,7 @@ SB_META_METHOD(store_texture)
 SB_META_METHOD(convert_spine)
 SB_META_METHOD(open_spine)
 SB_META_METHOD(write_text_file)
+SB_META_METHOD(encode_sound)
 SB_META_PROPERTY_RW(dst_path,get_dst_path,set_dst_path)
 SB_META_PROPERTY_RW(options,get_options,set_options)
 SB_META_END_KLASS_BIND()
@@ -491,6 +492,35 @@ bool Application::rebuild_image( const sb::string& src, const sb::string& dst ) 
         return store_texture(dst, data);
     }
     return false;
+}
+
+bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
+    VorbisEncoder en;
+    GHL::DataStream* src_ds = m_vfs->OpenFile(append_path(m_src_dir, src).c_str());
+    if (!src_ds) {
+        Sandbox::LogError() << "failed openng " << src;
+        return false;
+    }
+    GHL::SoundDecoder* decoder = GHL_CreateSoundDecoder(src_ds);
+    if (!decoder) {
+        src_ds->Release();
+        Sandbox::LogError() << "failed decode " << src;
+        return false;
+    }
+    GHL::WriteStream* dst_ds = OpenDestFile(dst.c_str());
+    if (!dst_ds) {
+        decoder->Release();
+        src_ds->Release();
+        Sandbox::LogError() << "failed open dst " << dst;
+        return false;
+    }
+    bool res = en.convert(decoder, dst_ds);
+    decoder->Release();
+    src_ds->Release();
+    dst_ds->Flush();
+    dst_ds->Close();
+    dst_ds->Release();
+    return res;
 }
 
 bool Application::convert_spine(const sb::string& atlas, const sb::string& skelet, const sb::string& outfile) {
