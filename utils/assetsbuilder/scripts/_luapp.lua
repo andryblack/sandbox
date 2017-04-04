@@ -2,7 +2,7 @@
 
 local M = {}
 
-function M.preprocess(file,defs)
+function M.preprocess(file,defs,fn)
   local chunk = {n=0}
   local funcs = {}
   local output = {n=0}
@@ -17,7 +17,7 @@ function M.preprocess(file,defs)
       table.insert(chunk,string.format('_put %q ', line))
     end
   end
-  load(table.concat(chunk,'\n'),'pp','t',mt)()
+  assert(load(table.concat(chunk,'\n'),'pp:'..(fn or 'file'),'t',mt))()
   return table.concat(output,'\n')
 end
 
