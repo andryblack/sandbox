@@ -729,18 +729,22 @@ public class IAPHelper  {
         else if (resultCode == Activity.RESULT_OK) {
             // result code was OK, but in-app billing response was not OK.
             logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(responseCode));
-            result = new IabResult(responseCode, "Problem purchashing item.");
+            result = new IabResult(responseCode, "Problem purchashing item:" + getResponseDesc(responseCode));
             on_iap_purchase_finished(result, null);
         }
         else if (resultCode == Activity.RESULT_CANCELED) {
             logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
-            result = new IabResult(IABHELPER_USER_CANCELLED, "User canceled.");
+            if (responseCode != BILLING_RESPONSE_RESULT_OK) {
+                result = new IabResult(responseCode, "cancled");
+            } else {
+                result = new IabResult(IABHELPER_USER_CANCELLED, "cancled/ok");
+            } 
             on_iap_purchase_finished(result, null);
         }
         else {
             logError("Purchase failed. Result code: " + Integer.toString(resultCode)
                     + ". Response: " + getResponseDesc(responseCode));
-            result = new IabResult(IABHELPER_UNKNOWN_PURCHASE_RESPONSE, "Unknown purchase response.");
+            result = new IabResult(IABHELPER_UNKNOWN_PURCHASE_RESPONSE, "Unknown purchase response: " + getResponseDesc(responseCode));
             on_iap_purchase_finished(result, null);
         }
         return true;
@@ -844,14 +848,14 @@ public class IAPHelper  {
         try {
             final Handler handler = new Handler();
             check_not_disposed();
-            check_setup_done("queryInventory");
-            flag_start_async("refresh inventory");
+            check_setup_done("restore_payments");
+            flag_start_async("restore_payments");
             (new Thread(new Runnable() {
                 public void run() {
                     try {
                         int r = queryPurchases();
                         if (r != BILLING_RESPONSE_RESULT_OK) {
-                            throw new IabException(r, "Error refreshing inventory (querying prices of items).");
+                            throw new IabException(r, "Error restore payments.");
                         }
                     }
                     catch (IabException ex) {

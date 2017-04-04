@@ -77,6 +77,8 @@ namespace Sandbox {
         
         ImagePtr RenderScreen();
         bool OpenURL(const sb::string& url);
+        virtual void ReportAppError(const char* reason) {}
+        
     protected:
 		Application();
 		virtual ~Application();
@@ -143,7 +145,7 @@ namespace Sandbox {
         virtual void DoRestart();
         virtual void DoExit();
         
-        virtual void ReportAppError(const char* reason) {}
+        
         
         void DoDrawScreen();
         
