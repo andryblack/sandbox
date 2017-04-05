@@ -51,6 +51,9 @@ namespace Sandbox {
             if (nullptr == mFont)
                 return;
             MyGUI::IntSize size = mTextView.getViewSize();
+            size.width *= GetFontScale();
+            size.height *= GetFontScale();
+            
             if (mWordWrap || mTextView.getData().data.size() > 1) {
                 while ((size.height*m_scale) > mCoord.height) {
                     m_scale -= 0.125f/4;
@@ -72,8 +75,25 @@ namespace Sandbox {
                         break;
                     }
                 }
+                updateOffset(size);
             }
 
+        }
+        
+        void AutoWidthText::updateOffset(const MyGUI::IntSize& size) {
+            if (mTextAlign.isRight())
+                mViewOffset.left = - (mCoord.width - float(size.width)*m_scale);
+            else if (mTextAlign.isHCenter())
+                mViewOffset.left = - ((mCoord.width - float(size.width)*m_scale) / 2);
+            else
+                mViewOffset.left = 0;
+            
+            if (mTextAlign.isBottom())
+                mViewOffset.top = - (mCoord.height - float(size.height)*m_scale);
+            else if (mTextAlign.isVCenter())
+                mViewOffset.top = - ((mCoord.height - float(size.height)*m_scale) / 2);
+            else
+                mViewOffset.top = 0;
         }
         
         void AutoWidthText::updateRawData() {
@@ -106,20 +126,7 @@ namespace Sandbox {
                     m_scale = hscale;
                 }
             }
-            
-            if (mTextAlign.isRight())
-                mViewOffset.left = - (mCoord.width - float(size.width)*m_scale);
-            else if (mTextAlign.isHCenter())
-                mViewOffset.left = - ((mCoord.width - float(size.width)*m_scale) / 2);
-            else
-                mViewOffset.left = 0;
-            
-            if (mTextAlign.isBottom())
-                mViewOffset.top = - (mCoord.height - float(size.height)*m_scale);
-            else if (mTextAlign.isVCenter())
-                mViewOffset.top = - ((mCoord.height - float(size.height)*m_scale) / 2);
-            else
-                mViewOffset.top = 0;
+            updateOffset(size);
 
         }
         

@@ -32,6 +32,7 @@ namespace Sandbox {
             virtual void doRender(MyGUI::IRenderTarget* _target);
         protected:
             virtual void updateRawData();
+            void updateOffset(const MyGUI::IntSize& viewSize);
              float   m_scale;
         };
         
