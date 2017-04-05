@@ -15,8 +15,8 @@ function M.preprocess(file,defs,fn)
   local mt = setmetatable(funcs,{__index=defs})
   local line_n = 0
   for line in file:lines() do
-     if string.find(line, "^#") then
-      table.insert(chunk, string.sub(line, 2))
+     if string.find(line, "^--#") then
+      table.insert(chunk, string.sub(line, 4))
      else
       table.insert(chunk,string.format('_put (%d,%q) ',line_n, line))
     end
