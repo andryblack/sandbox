@@ -55,10 +55,12 @@ namespace Sandbox {
     void Scroll::ScrollEnd( const Vector2f& pos ) {
         if (m_state == scroll_move) {
             ScrollMove(pos);
+            m_state = scroll_free;
         } else {
             m_last_speed = Sandbox::Vector2f(0,0);
+            m_state = scroll_none;
         }
-        m_state = scroll_free;
+        
     }
     
     void Scroll::Move(const Vector2f& delta,bool fire) {
