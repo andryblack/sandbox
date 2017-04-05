@@ -277,7 +277,7 @@ local function compile_files( files )
 			
 			local source = assert(io.open(path.getabsolute(path.join(src_path,v)),'r'))
 			
-			local pp_source = assert(luapp.preprocess(source,_M.definitions))
+			local pp_source = assert(luapp.preprocess(source,_M.definitions,v))
 			source:close()
 
 			local shunk = assert(load(pp_source,'@'..dst,'t'))
