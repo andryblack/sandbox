@@ -17,7 +17,7 @@ namespace Sandbox {
     sb::string MD5SumStream( GHL::DataStream* ds );
     sb::string MD5SumStream( GHL::DataStream* ds , size_t& size);
     int MD5SumFile( lua_State* L );
-    
+    unsigned int MD5Hash(const char* src);
 }
 
 #endif /*SB_MD5_H_INCLUDED*/

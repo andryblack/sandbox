@@ -514,7 +514,7 @@ bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
         Sandbox::LogError() << "failed open dst " << dst;
         return false;
     }
-    bool res = en.convert(decoder, dst_ds);
+    bool res = en.convert(decoder, dst_ds,Sandbox::MD5Hash(src.c_str()));
     decoder->Release();
     src_ds->Release();
     dst_ds->Flush();

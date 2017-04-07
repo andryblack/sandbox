@@ -23,7 +23,7 @@ private:
 public:
     VorbisEncoder();
 public:
-    bool convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output);
+    bool convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,int serial);
 };
 
 #endif /*_VORBIS_ENCODER_H_INCLUDED_*/

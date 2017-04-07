@@ -36,7 +36,7 @@ static float convert_sample8_m(const GHL::Byte* data,int /*ch*/,int s) {
 }
 typedef float(*convert_sample_t)(const GHL::Byte* data,int ch,int s);
 
-bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output) {
+bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,int serial) {
     
     bool eos = false;
     
@@ -65,7 +65,7 @@ bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output)
     vorbis_analysis_init(&m_vd,&m_vi);
     vorbis_block_init(&m_vd,&m_vb);
     
-    ogg_stream_init(&m_os,rand());
+    ogg_stream_init(&m_os,serial);
     
     /* Vorbis streams begin with three headers; the initial header (with
      most of the codec setup parameters) which is mandated by the Ogg
