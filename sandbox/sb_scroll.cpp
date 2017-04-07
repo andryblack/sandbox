@@ -15,6 +15,9 @@ namespace Sandbox {
     }
     
     void Scroll::ScrollBegin( const Vector2f& pos ) {
+        if (m_state == scroll_free) {
+            OnScrollEnd();
+        }
         m_prev_pos = pos;
         m_last_time = Time::Now();
         m_last_speed = Sandbox::Vector2f(0,0);
