@@ -79,6 +79,10 @@ namespace Sandbox {
         void ScrollArea::frameEntered(float dt) {
             if (!getVisible())
                 return;
+            update(dt);
+        }
+        
+        void ScrollArea::update(float dt) {
             Scroll::Update(dt);
         }
         

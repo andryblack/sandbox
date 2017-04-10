@@ -61,6 +61,8 @@ namespace Sandbox {
             
             virtual void OnScrollBegin();
             virtual void OnScrollEnd();
+            
+            virtual void update(float dt);
         private:
             
             void handleGlobalMouseMove(float x,float y);
