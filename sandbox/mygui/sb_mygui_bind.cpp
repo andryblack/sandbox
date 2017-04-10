@@ -355,6 +355,8 @@ SB_META_PROPERTY(right)
 SB_META_PROPERTY(bottom)
 SB_META_PROPERTY_RO(width, width)
 SB_META_PROPERTY_RO(height, height)
+bind( method( "inside" , static_cast<bool(MyGUI::IntRect::*)(const MyGUI::IntPoint&) const>(&MyGUI::IntRect::inside) ) );
+bind( method( "insidef" , static_cast<bool(MyGUI::IntRect::*)(const MyGUI::FloatPoint&) const>(&MyGUI::IntRect::inside) ) );
 SB_META_STATIC_METHOD(parse)
 SB_META_END_KLASS_BIND()
 
