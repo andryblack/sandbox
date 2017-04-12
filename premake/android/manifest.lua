@@ -19,10 +19,13 @@ function manifest.onsolution( sln )
 
 	for prj in solution.eachproject(sln) do
 		if prj.kind == premake.WINDOWEDAPP then
-			local function gen(sln)
-				manifest.generateManifest(sln,prj)
+			for cfg in project.eachconfig(prj) do
+				local function gen(sln)
+					manifest.generateManifest(sln,prj)
+				end
+				premake.generate(sln, manifest.getManifestFilename( sln,prj,cfg ), gen)
 			end
-			premake.generate(sln, manifest.getManifestFilename( sln,prj ), gen)
+			
 		end
 	end
 
@@ -33,8 +36,8 @@ function manifest.oncleansolution( sln )
 end
 
 -- Manifest goes in project dirctory
-function manifest.getManifestFilename(sln,prj)
-	return path.join(sln.location, prj.shortname or prj.name , ndk.MANIFEST )
+function manifest.getManifestFilename(sln,prj,cfg)
+	return path.join(sln.location, prj.shortname or prj.name , cfg.shortname, ndk.MANIFEST )
 end
 
 local function build_attribs(attribs)

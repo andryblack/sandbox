@@ -190,28 +190,6 @@ function build.generate_app_build_gradle( sln , prj )
 		end
 	end
 
-    _x(1,'sourceSets {')
-    _x(2,'main {')
-    _x(3,"manifest.srcFile 'AndroidManifest.xml'")
-    _x(3,"java.srcDirs = [" .. table.concat(src_dirs,',') .. "]")
-    _x(3,"resources.srcDirs = ['../src']")
-    _x(3,"res.srcDirs = ['../res']")
-    _x(3,"assets.srcDirs = []")
-    if next(aidl_dirs) then
-    	_x(3,"aidl.srcDirs = [" .. table.concat(aidl_dirs,',') .. "]")
-    end
-    --_x(3,"jniLibs.srcDir 'jni'")
-    _x(2,'}')
-    for cfg in project.eachconfig(prj) do
-		_x(2,cfg.shortname .. ' {')
-		if cfg.android_assets_path then
-			_x(3,'assets.srcDirs = ["%s"]','../' .. path.getrelative(sln.location,cfg.android_assets_path))
-		end
-		_x(3,'jniLibs.srcDirs = ["../' .. cfg.shortname .. '/libs"]')
-		_x(2,'}')
-	end
-	_x(1,'}')
-
 	_x(1,'signingConfigs {')
 		for cfg in project.eachconfig(prj) do
 			if cfg.android_key_store then
@@ -235,6 +213,52 @@ function build.generate_app_build_gradle( sln , prj )
 		end
     _x(1,'}')
 
+    _x(1,'sourceSets {')
+    for cfg in project.eachconfig(prj) do
+		_x(2,cfg.shortname .. ' {')
+		_x(3,'jniLibs.srcDirs = ["%s/libs"]',cfg.shortname)
+		_x(2,'}')
+	end
+	_x(1,'}')
+
+	_x(1,'buildTypes {')
+	for cfg in project.eachconfig(prj) do
+		_x(2,cfg.shortname .. ' {')
+			if cfg.android_key_store  then
+				_x(3,'signingConfig signingConfigs.' .. cfg.shortname)
+			end
+			if cfg.shortname == 'debug' then
+				_x(3,'debuggable = true')
+            	_x(3,'jniDebuggable = true')
+            	_x(3,'minifyEnabled false')
+            else
+            	_x(3,'minifyEnabled false')
+            	--_x(3,"proguardFile getDefaultProguardFile('proguard-android.txt')")
+            end
+			_x(3,'sourceSets {')
+				_x(4,'main {')
+					_x(5,"manifest.srcFile '%s/AndroidManifest.xml'",cfg.shortname)
+					_x(5,"java.srcDirs = [" .. table.concat(src_dirs,',') .. "]")
+				    _x(5,"resources.srcDirs = ['../src']")
+				    _x(5,"res.srcDirs = ['../res']")
+				    if next(aidl_dirs) then
+    					_x(5,"aidl.srcDirs = [" .. table.concat(aidl_dirs,',') .. "]")
+    				end
+				    if android_assets_path then
+				    	_x(5,'assets.srcDirs = ["%s"]','../' .. path.getrelative(sln.location,cfg.android_assets_path))
+				    else
+				    	_x(5,"assets.srcDirs = []")
+				    end
+				    _x(5,'jniLibs.srcDirs = ["%s/libs"]',cfg.shortname)
+				_x(4,'}')
+			_x(3,'}')
+		_x(2,'}')
+	end
+	_x(1,'}')
+
+   
+
+	
 	_x(1,'lintOptions {')
     _x(2,'abortOnError false')
   	_x(3,'}')
@@ -258,25 +282,6 @@ function build.generate_app_build_gradle( sln , prj )
 	_x(1,'}')
 
 
-    _x(1,'buildTypes {')
-	for cfg in project.eachconfig(prj) do
-		_x(2,cfg.shortname .. ' {')
-			if cfg.android_key_store  then
-				_x(3,'signingConfig signingConfigs.' .. cfg.shortname)
-			end
-			if cfg.shortname == 'debug' then
-				_x(3,'debuggable = true')
-            	_x(3,'jniDebuggable = true')
-            	_x(3,'minifyEnabled false')
-            else
-            	_x(3,'minifyEnabled false')
-            	--_x(3,"proguardFile getDefaultProguardFile('proguard-android.txt')")
-            end
-            
-		--_x(3,'jniLibs.srcDirs = ["' .. cfg.shortname .. '/libs"]')
-		_x(2,'}')
-	end
-	_x(1,'}')
 
 	_x(1,'applicationVariants.all { variant ->')
 		_x(2,'variant.outputs.each { output ->')
@@ -304,7 +309,7 @@ function build.generate_app_build_gradle( sln , prj )
 
 	for cfg in project.eachconfig(prj) do
 		build.buildCmds(cfg,'prebuild',prj)
-		local all_args = {"'-C'","'" .. path.getabsolute(path.join(sln.location,cfg.shortname)) .. "'"}
+		local all_args = {"'-C'","'" .. path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname)) .. "'"}
 		table.insert(all_args,"'V=1'")
 		table.insert(all_args,"'j=4'")
 		_x('task buildJNI' .. cfg.name .. '(type: Exec) {')
@@ -318,7 +323,7 @@ function build.generate_app_build_gradle( sln , prj )
 	for cfg in project.eachconfig(prj) do
 		for _,abi in ipairs(sln.android_abis) do
 			_x('task copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym(type: Copy) {')
-			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'obj','local',abi,libname)) .. "'")
+			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname,'obj','local',abi,libname)) .. "'")
 			_x(1,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname .. '_symbols',abi)) .. "'")
 			_x('}')
 		end
@@ -326,7 +331,7 @@ function build.generate_app_build_gradle( sln , prj )
 	for cfg in project.eachconfig(prj) do
 		for _,abi in ipairs(sln.android_abis) do
 			_x('task copyJNI' .. cfg.name .. make_abi_name(abi).. '(type: Copy) {')
-			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,cfg.shortname,'libs',abi,libname)) .. "'")
+			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname,'libs',abi,libname)) .. "'")
 			_x(1,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname,abi)) .. "'")
 			_x('}')
 		end
