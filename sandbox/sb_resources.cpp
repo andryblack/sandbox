@@ -526,13 +526,13 @@ namespace Sandbox {
 				LogError(MODULE) << "error creating shader " << ffilename;
 				//return ShaderPtr();
 			}
-			m_fshaders[vfilename]=fs;
+			m_fshaders[ffilename]=fs;
 		}
 		GHL::ShaderProgram* sp = m_render->CreateShaderProgram(vs,fs);
 		if (!sp) {
 			LogError(MODULE) << "error creating shader program from " << vfilename << " , " << ffilename ;
 			//return ShaderPtr();
-		}
+        }
 		ShaderPtr res = ShaderPtr(new Shader(sp));
 		m_shaders[name]=res;
 		return res;
@@ -548,7 +548,7 @@ namespace Sandbox {
         sb_assert(m_render);
         GHL::RenderTarget* rt = m_render->CreateRenderTarget(nw, nh, alpha ? GHL::TEXTURE_FORMAT_RGBA : GHL::TEXTURE_FORMAT_RGB, depth);
         if (!rt) {
-            LogError() << "failed create targer " << w << "x" << h;
+            LogError() << "failed create targer " << w << "x" << h << "->" << nw << "x" << nh;
             return RenderTargetPtr();
         }
         return RenderTargetPtr( new RenderTarget(rt,w*scale,h*scale,scale));
@@ -604,7 +604,13 @@ namespace Sandbox {
         }
         m_textures.clear();
         m_shaders.clear();
+        for (sb::map<sb::string,GHL::VertexShader*>::iterator it = m_vshaders.begin();it!=m_vshaders.end();++it) {
+            it->second->Release();
+        }
         m_vshaders.clear();
+        for (sb::map<sb::string,GHL::FragmentShader*>::iterator it = m_fshaders.begin();it!=m_fshaders.end();++it) {
+            it->second->Release();
+        }
         m_fshaders.clear();
         m_memory_used = 0;
     }
