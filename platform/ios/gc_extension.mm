@@ -114,9 +114,12 @@
     NSMutableArray* scoresData = [NSMutableArray arrayWithCapacity:scores.count];
     for (NSString* key in scores.allKeys) {
         GKScore* score = [[[GKScore alloc] initWithLeaderboardIdentifier:key] autorelease];
-        score.value = [(NSNumber*)[scores objectForKey:key] longLongValue];
-        NSLog(@"[GC] submitHighScore to %@ : %lld",score.leaderboardIdentifier,score.value);
-    }
+        if (score) {
+            score.value = [(NSNumber*)[scores objectForKey:key] longLongValue];
+            [scoresData addObject:score];
+            NSLog(@"[GC] submitHighScore to %@ : %lld",score.leaderboardIdentifier,score.value);
+        }
+    }   
     
     [GKScore reportScores:scoresData withCompletionHandler:^(NSError *error){
         if (error != nil) {
