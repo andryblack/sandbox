@@ -26,17 +26,19 @@
 
 #include <android/native_activity.h>
 
+static const char* MODULE = "GPGS";
+
 static sb::string is_auth_in_progress_;
 static std::unique_ptr<gpg::GameServices> game_services_;
 static sb::string me_player_data;
 
 sb::string BeginUserInitiatedSignIn() {
     if (!game_services_) {
-        Sandbox::LogError() << "[PGS]" << "BeginUserInitiatedSignIn : game_services_";
+        SB_LOGE( "BeginUserInitiatedSignIn : game_services_" );
         return "uninitialized";
     }
     if (!game_services_->IsAuthorized()) {
-        Sandbox::LogInfo() << "[PGS]" << "BeginUserInitiatedSignIn: StartAuthorizationUI";
+        SB_LOGI( "BeginUserInitiatedSignIn: StartAuthorizationUI" );
         game_services_->StartAuthorizationUI();
         return "pending";
     }
@@ -58,9 +60,10 @@ void SubmitHighScore(const sb::string& leaderboard_id, uint64_t score) {
     if (!game_services_)
         return;
     if (game_services_->IsAuthorized()) {
-        Sandbox::LogInfo() << "[PGS]" << "High score submitted " << score << " " << leaderboard_id;
+       SB_LOGI( "High score submitted " << score << " " << leaderboard_id);
         game_services_->Leaderboards().SubmitScore(leaderboard_id, score);
     } else {
+        SB_LOGW("SubmitHighScore: not authorized");
         //BeginUserInitiatedSignIn();
     }
 }
@@ -69,7 +72,7 @@ void UnlockAchievement(const sb::string& achivement_id) {
     if (!game_services_)
         return;
     if (game_services_->IsAuthorized()) {
-        Sandbox::LogInfo() << "[PGS]" << "Achievement unlocked " << achivement_id;
+        SB_LOGI( "Achievement unlocked " << achivement_id );
         game_services_->Achievements().Unlock(achivement_id);
     } else {
         //BeginUserInitiatedSignIn();
@@ -78,13 +81,19 @@ void UnlockAchievement(const sb::string& achivement_id) {
 
 sb::string ShowScoresUI() {
     if (!game_services_) {
-        Sandbox::LogError() << "[PGS]" << "ShowScoresUI error";
+        SB_LOGE( "ShowScoresUI error" );
         return "error";
     }
     if (game_services_->IsAuthorized()) {
-        Sandbox::LogInfo() << "[PGS]" << "High score show";
+        SB_LOGI( "High score show" );
         //game_services_->Leaderboards().FetchAllBlocking(gpg::DataSource::CACHE_OR_NETWORK);
-        game_services_->Leaderboards().ShowAllUI(nullptr);
+        game_services_->Leaderboards().ShowAllUI([](gpg::UIStatus const &status) {
+            if (gpg::IsSuccess(status)) {
+                SB_LOGI("Leaderboards Result: success.");
+            } else {
+                SB_LOGI("Leaderboards Result: failure.");
+            }
+        });
         return "success";
     } else {
         BeginUserInitiatedSignIn();
@@ -94,11 +103,11 @@ sb::string ShowScoresUI() {
 
 sb::string ShowAchievementsUI() {
     if (!game_services_) {
-        Sandbox::LogError() << "[PGS]" << "ShowAchievementsUI error";
+        SB_LOGE( "ShowAchievementsUI error" );
         return "error";
     }
     if (game_services_->IsAuthorized()) {
-        Sandbox::LogInfo() << "[PGS]" << "Achievements show";
+        SB_LOGI( "Achievements show" );
         //game_services_->Leaderboards().FetchAllBlocking(gpg::DataSource::CACHE_OR_NETWORK);
         game_services_->Achievements().ShowAllUI(nullptr);
         return "success";
@@ -124,7 +133,7 @@ public:
         ANativeActivity* activity = GetNativeActivity(m_app);
         if (activity) {
             // gpg-cpp: Set platform intiialization
-            Sandbox::LogInfo() << "GPSExtension AndroidInitialization";
+            SB_LOGI( "GPSExtension AndroidInitialization" );
             gpg::AndroidInitialization::ANativeActivity_onCreate(activity,0,0);
             
             // Get the platform configuration.
@@ -136,7 +145,7 @@ public:
             InitServices(platform_configuration);
             
         } else {
-            Sandbox::LogError() << "GPSExtension : not found activity";
+            SB_LOGE( "GPSExtension : not found activity" );
         }
     }
 
@@ -309,13 +318,28 @@ public:
 };
 
 void GPSExtension::InitServices(gpg::PlatformConfiguration const &pc) {
-    Sandbox::LogInfo() << "[PGS]" << "Initializing Services";
+    SB_LOGI( "Initializing Services" );
     if (!game_services_) {
-        Sandbox::LogInfo() << "[PGS]" << "Uninitialized services, so creating";
+        SB_LOGI( "Uninitialized services, so creating" );
         game_services_ = gpg::GameServices::Builder()
-        .SetOnLog(gpg::DEFAULT_ON_LOG, gpg::LogLevel::VERBOSE)
+        .SetOnLog([](gpg::LogLevel level, std::string const & msg) {
+            switch(level) {
+                case gpg::LogLevel::INFO:
+                    SB_LOGI(msg);
+                    break;
+                case gpg::LogLevel::WARNING:
+                    SB_LOGW(msg);
+                    break;
+                case gpg::LogLevel::ERROR:
+                    SB_LOGE(msg);
+                    break;
+                default:
+                    SB_LOGV(msg);
+                    break;
+            }
+        }, gpg::LogLevel::VERBOSE) 
         .SetOnAuthActionStarted([this](gpg::AuthOperation op) {
-            Sandbox::LogInfo() << "[PGS]" << "OnAuthActionStarted " << op;
+            SB_LOGI( "OnAuthActionStarted " << op );
             if (op == gpg::AuthOperation::SIGN_IN) {
                 is_auth_in_progress_ = "progress";
                 this->AddPendingResponse("GPSLogin","progress");
@@ -325,7 +349,7 @@ void GPSExtension::InitServices(gpg::PlatformConfiguration const &pc) {
         })
         .SetOnAuthActionFinished([this](gpg::AuthOperation op,
                                                      gpg::AuthStatus status) {
-            Sandbox::LogInfo() << "[PGS]" << "OnAuthActionFinished" << op << " with a result of " << status;
+            SB_LOGI( "OnAuthActionFinished" << op << " with a result of " << status);
             if (op == gpg::AuthOperation::SIGN_IN) {
                 if (gpg::IsSuccess(status)) {
                     game_services_->Players().FetchSelf([this](const gpg::PlayerManager::FetchSelfResponse& resp) {
@@ -364,7 +388,7 @@ void GPSExtension::InitServices(gpg::PlatformConfiguration const &pc) {
         })
         .Create(pc);
     }
-    Sandbox::LogInfo() << "Created";
+    SB_LOGI("Created");
 }
 
 extern "C" void *init_gps_extension() {
@@ -374,7 +398,7 @@ extern "C" void *init_gps_extension() {
 
 sb::string GPSExtension::BeginGetFriends() {
     if (!game_services_) {
-        Sandbox::LogError() << "[PGS]" << "BeginGetFriends error";
+        SB_LOGE("BeginGetFriends error");
         return "failed";
     }
     if (!game_services_->IsAuthorized()) {

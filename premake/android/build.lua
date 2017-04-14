@@ -249,7 +249,7 @@ function build.generate_app_build_gradle( sln , prj )
 				    else
 				    	_x(5,"assets.srcDirs = []")
 				    end
-				    _x(5,'jniLibs.srcDirs = ["%s/libs"]',cfg.shortname)
+				    --_x(5,'jniLibs.srcDirs = ["%s/libs"]',cfg.shortname)
 				_x(4,'}')
 			_x(3,'}')
 		_x(2,'}')
