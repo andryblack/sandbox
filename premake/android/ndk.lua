@@ -170,7 +170,9 @@ function ndk.generateAppMakefile(sln, cfg)
 	
 	ndk.writeStrings('APP_CPPFLAGS', '', flags)
 	_p('NDK_TOOLCHAIN_VERSION := %s', sln.android_toolchain or '4.8')
-	_p('NDK_MODULE_PATH := ' .. sln.android_modules_path or '')
+	if sln.android_modules_path then
+		_p('NDK_MODULE_PATH := ' .. sln.android_modules_path or '')
+	end
 	_p('')			
 end
 

@@ -50,8 +50,7 @@ solution( ProjectName )
 		end
 		
 		if use.AndroidGooglePlayService or use.IAP then
-			android_modules_path( path.getabsolute(sandbox_dir) )
-			--local sdk_dir = assert(_OPTIONS['android-sdk-dir'])
+			
 			android_dependencies('com.google.android.gms:play-services-base:10.2.1')
 			if use.AndroidGooglePlayService then
 				android_dependencies('com.google.android.gms:play-services-auth:10.2.1')
@@ -61,9 +60,6 @@ solution( ProjectName )
 				android_dependencies('com.android.support:support-v4:23.1.1')
 			end
 			
-			--android_libs(path.join(sdk_dir,'extras/google/google_play_services/libproject','google-play-services_lib'))
-			--android_libs(path.join(sdk_dir,'extras/android/support/v4/android-support-v4.jar'))
-			flags{ "C++11" }
 			android_metadata {
 				'com.google.android.gms.games.APP_ID=@string/google_play_services_app_id',
 				'com.google.android.gms.version=@integer/google_play_services_version'
@@ -93,6 +89,9 @@ solution( ProjectName )
 		if use.IAP then
 			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib','src')))
 			android_aidl(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib','aidl')))
+		end
+		if use.AndroidGooglePlayService then
+			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','gps_sandbox_lib','src')))
 		end
 		if AndroidConfig.permissions then
 			android_permissions( AndroidConfig.permissions )
@@ -342,10 +341,8 @@ solution( ProjectName )
 		elseif os.is('android') then
 			files { sandbox_dir .. '/platform/android/sb_android_extension.cpp' }
 			files { sandbox_dir .. '/platform/android/jni_utils.cpp' }
-			if use.AndroidGooglePlayService or use.IAP then
+			if use.AndroidGooglePlayService  then
 				files { sandbox_dir .. '/platform/android/gps_extension.cpp' }
-				includedirs { sandbox_dir .. '/external/gpg-cpp-sdk/android/include' }
-				
 			end
 			if use.IAP then
 				files { sandbox_dir .. '/platform/android/iap_extension.cpp' }
@@ -443,6 +440,7 @@ solution( ProjectName )
 		elseif os.is('android') then
 			files { sandbox_dir .. '/platform/android/main.cpp' }
 			links {
+				'atomic',
 				'android',
 				'log',
 				'EGL',
@@ -451,15 +449,6 @@ solution( ProjectName )
 				'GLESv2'
 			}
 			
-			if use.AndroidGooglePlayService or use.IAP then
-				android_ndk_static_libs {
-					'gpg-1',
-				}
-				android_ndk_modules {
-					'external/gpg-cpp-sdk/android'
-				}
-			end
-
 		elseif os.is('emscripten') then
 			
 			links {
