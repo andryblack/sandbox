@@ -638,7 +638,8 @@ namespace Sandbox {
 		float dt = float(usecs)/1000000.0f;
         if (m_main_scene)
             m_main_scene->Update(dt);
-    	m_main_thread->Update(dt);
+        if (m_main_thread)
+            m_main_thread->Update(dt);
 	
         Update(dt);
 

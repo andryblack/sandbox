@@ -28,14 +28,23 @@ extern "C" {
 namespace Sandbox {
     
     namespace luabind {
+    
  
         int lua_traceback (lua_State *L);
         
         void lua_argerror( lua_State* L, int idx, 
                           const char* expected, 
-                          const char* got );
+                          const char* got )
+#ifdef __clang__
+        __attribute__((noreturn))
+#endif
+        ;
         void lua_access_error( lua_State* L, int idx, 
-                              const char* got );
+                              const char* got )
+#ifdef __clang__
+        __attribute__((noreturn))
+#endif
+        ;
         
         struct data_holder {
             const meta::type_info* info;

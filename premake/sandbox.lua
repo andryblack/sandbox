@@ -139,6 +139,9 @@ solution( ProjectName )
 			ARCHS="$(ARCHS_STANDARD)",
 			IPHONEOS_DEPLOYMENT_TARGET='7.0'
 		}
+		buildoptions{'-Wno-undefined-var-template'}
+	elseif platform_id == 'macosx' then
+		buildoptions{'-Wno-undefined-var-template'}
 	elseif platform_id == 'windows' then
 		flags{ 'StaticRuntime' }
 	end
