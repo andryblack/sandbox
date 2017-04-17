@@ -92,11 +92,25 @@ function manifest.generateManifest(sln,prj)
             	_x(3,'<meta-data android:name="android.app.lib_name"')
                 	_x(4,'android:value="%s" />', mainLibName)
 
+                -- View intent
+				if prj.android_scheme then
+					_x(3, '<intent-filter>')
+					for _,v in ipairs(prj.android_scheme) do
+						_p(4, '<data android:scheme="%s" />',v)
+					end
+					_p(4, '<action android:name="android.intent.action.VIEW" />')
+					_p(4, '<category android:name="android.intent.category.DEFAULT" />')
+					_p(4, '<category android:name="android.intent.category.BROWSABLE" />')
+					_p(3, '</intent-filter>')
+				end
+				
 				-- Launcher intent
 				_x(3, '<intent-filter>')
 					_p(4, '<action android:name="android.intent.action.MAIN" />')
 					_p(4, '<category android:name="android.intent.category.LAUNCHER" />')
 				_p(3, '</intent-filter>')
+
+				
 			
 			_p(2, '</activity>')
 

@@ -1,7 +1,7 @@
 package com.sandbox;
 
 import android.util.Base64;
-import android.util.Log;
+import com.GHL.Log;
 
 import android.content.Context;
 import android.content.ComponentName;

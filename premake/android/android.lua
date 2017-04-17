@@ -145,6 +145,13 @@ api.register {
 }
 
 api.register {
+	name = "android_scheme",
+	scope = 'project',
+	kind = 'string',
+	list = true
+}
+
+api.register {
 	name = "android_metadata",
 	scope = 'project',
 	kind = 'string',

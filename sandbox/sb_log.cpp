@@ -43,15 +43,19 @@ namespace Sandbox {
         ~GHLLogger() {
             close();
         }
-        virtual void GHL_CALL AddMessage( GHL::LogLevel level, const char* message ) {
+        virtual bool GHL_CALL AddMessage( GHL::LogLevel level, const char* message ) {
+            bool res = false;
             if (m_file) {
                 m_file->Write(reinterpret_cast<const GHL::Byte*>(level_descr[level]), 2);
                 m_file->Write(reinterpret_cast<const GHL::Byte*>(message), ::strlen(message));
                 m_file->Write(rn, sizeof(rn));
+                res = true;
             }
             if (Sandbox::Logger::GetPlatformLogEnabled()) {
                 GHL_Log(level, message);
+                res = true;
             }
+            return res;
         }
         void close() {
             if (m_file) {

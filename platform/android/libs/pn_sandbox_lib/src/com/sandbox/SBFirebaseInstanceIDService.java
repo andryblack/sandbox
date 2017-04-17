@@ -16,7 +16,7 @@
 
 package com.sandbox;
 
-import android.util.Log;
+import com.GHL.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;

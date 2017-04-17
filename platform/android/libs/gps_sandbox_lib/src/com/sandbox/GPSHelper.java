@@ -15,7 +15,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import android.content.IntentSender;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import com.GHL.Log;
 
 import java.util.Iterator;
 
