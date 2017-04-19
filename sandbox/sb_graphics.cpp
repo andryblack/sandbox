@@ -209,7 +209,7 @@ namespace Sandbox {
         } 
     }
 	
-	void Graphics::Flush() {
+	void Graphics::FlushImpl() {
 		sb_assert( (m_render!=0) && "scene not started" );
         if (m_primitives==0) return;
         /// do batch
@@ -247,16 +247,16 @@ namespace Sandbox {
     bool Graphics::CheckFlush(bool force) {
         bool res = force;
         if (force) {
-            Flush();
+            FlushImpl();
         }
         if (m_state.blend_mode != m_draw_state.blend_mode) {
             res = true;
-            Flush();
+            FlushImpl();
             SetBlendModeI(m_state.blend_mode);
         }
         if (m_state.mask != m_draw_state.mask ||
             m_state.mask_mode != m_draw_state.mask_mode ) {
-            Flush();
+            FlushImpl();
             if (!m_state.mask) {
                 SetMaskModeI(m_state.mask_mode,0);
                 m_render->SetTexture(0,1);
@@ -266,22 +266,22 @@ namespace Sandbox {
             res = true;
         }
         if (m_state.calc2_tex != m_draw_state.calc2_tex) {
-            Flush();
+            FlushImpl();
             res = true;
         }
         if (m_state.depth_test != m_draw_state.depth_test ||
             m_state.depth_write != m_draw_state.depth_write ) {
-            Flush();
+            FlushImpl();
             m_render->SetupDepthTest(m_state.depth_test,GHL::COMPARE_FUNC_LEQUAL,m_state.depth_write);
             res = true;
         }
         if (m_state.texture != m_draw_state.texture ||
             m_state.ptype != m_draw_state.ptype) {
-            Flush();
+            FlushImpl();
             res = true;
         }
         if (m_state.shader != m_draw_state.shader) {
-            Flush();
+            FlushImpl();
             SetShaderI(m_state.shader);
             res = true;
         }
@@ -290,6 +290,10 @@ namespace Sandbox {
             return true;
         }
         return false;
+    }
+    
+    void Graphics::Flush() {
+        CheckFlush(true);
     }
     
     void Graphics::BeginDrawTexture(const TexturePtr& texture) {

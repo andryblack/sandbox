@@ -206,6 +206,7 @@ namespace Sandbox {
         float GetScale() const { return m_scale; }
         
         void SetFilter(DrawFilter* filter);
+       
    private:
         Resources*  m_resources;
 		GHL::Render* m_render;
@@ -241,6 +242,7 @@ namespace Sandbox {
         };
         State m_state;
         State m_draw_state;
+        void FlushImpl();
         bool CheckFlush(bool force);
         
 		GHL::UInt32      m_primitives;
