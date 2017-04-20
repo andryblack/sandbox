@@ -1040,11 +1040,17 @@ namespace Sandbox {
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onDeactivated");
             }
         }
+        if (m_sound_mgr) {
+            m_sound_mgr->Pause();
+        }
         StoreAppProfile();
 	}
 	///
 	void Application::OnActivated() {
         SB_LOGI( "OnActivated" );
+        if (m_sound_mgr) {
+            m_sound_mgr->Resume();
+        }
         if (m_lua) {
             if (m_lua->GetGlobalContext()->GetValue<bool>("application.onActivated")) {
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onActivated");

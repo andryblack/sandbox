@@ -123,6 +123,11 @@ namespace Sandbox {
             m_music->Pause();
         }
     }
+    void MusicInstance::Resume() {
+        if (m_music) {
+            m_music->Resume();
+        }
+    }
     
     void MusicInstance::Stop() {
         if (m_music) {
@@ -283,6 +288,27 @@ namespace Sandbox {
         }
         if (m_music && m_music->Update(dt)) {
             m_music.reset();
+        }
+    }
+    
+    void SoundManager::Pause() {
+        if (!m_sound)
+            return;
+        if (m_music) {
+            m_music->Pause();
+        }
+        for (MusicsList::iterator it = m_fade_outs_musics.begin();it!=m_fade_outs_musics.end();++it) {
+            (*it)->Pause();
+        }
+    }
+    void SoundManager::Resume() {
+        if (!m_sound)
+            return;
+        if (m_music) {
+            m_music->Resume();
+        }
+        for (MusicsList::iterator it = m_fade_outs_musics.begin();it!=m_fade_outs_musics.end();++it) {
+            (*it)->Resume();
         }
     }
     

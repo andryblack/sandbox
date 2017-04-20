@@ -75,6 +75,7 @@ namespace Sandbox {
         
         void Play(bool loop);
         void Pause();
+        void Resume();
         
         void Stop();
         void FadeOut(float time);
@@ -107,6 +108,8 @@ namespace Sandbox {
         void PlayMusic(const char* filename,bool loop);
         void PlayMusicEx(const char* filename,bool loop,float fade_in, float fade_out_current);
         
+        void Pause();
+        void Resume();
     private:
         friend class Sound;
         friend class SoundInstance;
