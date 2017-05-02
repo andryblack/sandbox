@@ -43,7 +43,11 @@ namespace Sandbox {
         }
         
         void ImageWidgetBase::setTexture(const std::string& filename ) {
-            setImage(RenderManager::getInstance().resources()->GetImage(filename.c_str(), false));
+            if (filename.empty()) {
+                setImage(ImagePtr());
+            } else {
+                setImage(RenderManager::getInstance().resources()->GetImage(filename.c_str(), false));
+            }
         }
         
         MYGUI_IMPL_TYPE_NAME(ImageWidget)
