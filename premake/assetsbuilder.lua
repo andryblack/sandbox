@@ -15,7 +15,10 @@
 
 	function _M.configure_solution()
 
-		defines {'GHL_STATIC_LIB','SB_SILENT' , 'GHL_SILENT' , 'GHL_BUILD_TOOLS' }
+		defines {
+			'GHL_STATIC_LIB',
+		}
+
 
 		flags       { "No64BitChecks", "ExtraWarnings", "StaticRuntime" }
 
@@ -27,6 +30,8 @@
 		configuration "Release"
 			targetdir   "bin/release"
 			defines     "NDEBUG"
+			defines 	"SB_SILENT"
+			defines 	"GHL_SILENT"
 			flags       { "OptimizeSize" }
 
 		configuration "vs*"
@@ -45,8 +50,8 @@
 		configuration "linux or hurd"
 			links       { "dl" }
 
-		configuration "macosx"
-			links       { "CoreServices.framework" , "Foundation.framework"}
+		--configuration "macosx"
+		--	links       { "CoreServices.framework" , "Foundation.framework"}
 
 		configuration { "macosx", "gmake" }
 			toolset "clang"

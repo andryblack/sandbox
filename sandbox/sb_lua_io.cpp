@@ -76,7 +76,7 @@ namespace Sandbox {
     
     
     static int lua_io_lines (lua_State *L) {
-        int toclose;
+        int toclose = 0;
         if (lua_isnone(L, 1)) lua_pushnil(L);  /* at least one argument */
         if (lua_isnil(L, 1)) {  /* no file name? */
             luaL_argerror(L, 1, "need file");

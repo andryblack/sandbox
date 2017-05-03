@@ -145,19 +145,24 @@ project 'GHL'
 			files(append_path(ghl_src .. '/sound/libvorbis/lib/',vorbis_files))
 		end
 
-		if os.is('macosx') or os.is('ios') then	
-			files { ghl_src .. 'vfs/vfs_cocoa.*', }
-		elseif os.is('windows') then
-			files { ghl_src .. 'vfs/vfs_win32.*', }
-		elseif os.is('android') then
-			files { ghl_src .. 'vfs/vfs_posix.*',
-				ghl_src .. 'vfs/vfs_android.*',}
-		elseif os.is('emscripten') then
-			files { ghl_src .. 'vfs/vfs_emscripten.*',
-				ghl_src .. 'vfs/vfs_posix.*',
-				ghl_src .. 'vfs/ghl_vfs_factory.*'}
-		else
+		if build_cli_tools then
+			defines{ 'GHL_BUILD_TOOLS' }
 			files { ghl_src .. 'vfs/vfs_posix.*', }
+		else
+			if os.is('macosx') or os.is('ios') then	
+				files { ghl_src .. 'vfs/vfs_cocoa.*', }
+			elseif os.is('windows') then
+				files { ghl_src .. 'vfs/vfs_win32.*', }
+			elseif os.is('android') then
+				files { ghl_src .. 'vfs/vfs_posix.*',
+					ghl_src .. 'vfs/vfs_android.*',}
+			elseif os.is('emscripten') then
+				files { ghl_src .. 'vfs/vfs_emscripten.*',
+					ghl_src .. 'vfs/vfs_posix.*',
+					ghl_src .. 'vfs/ghl_vfs_factory.*'}
+			else
+				files { ghl_src .. 'vfs/vfs_posix.*', }
+			end
 		end
 
 		if not ghl_disable_media then

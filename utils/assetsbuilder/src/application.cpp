@@ -22,6 +22,7 @@ extern "C" {
 #include <stdlib.h>
 
 static const double VERSION = 1.5;
+static const char* MODULE = "ab";
 
 #include <luabind/sb_luabind.h>
 
@@ -409,12 +410,16 @@ sb::string Application::get_output_filename( const char* name ) {
 
 TexturePtr Application::check_texture( const sb::string& file ) {
     GHL::DataStream* ds = m_vfs->OpenFile(append_path(m_src_dir, file).c_str());
-    if (!ds) return TexturePtr();
+    if (!ds) {
+        SB_LOGD("check_texture not exist " << file);
+        return TexturePtr();
+    }
     GHL::ImageInfo info;
     if (!m_image_decoder->GetFileInfo(ds, &info)) {
         ds->Release();
         return TexturePtr();
     }
+    ds->Release();
     return TexturePtr(new Texture(info.width,info.height));
 }
 
@@ -426,6 +431,7 @@ TextureDataPtr Application::load_texture( const sb::string& file ) {
         ds->Release();
         return TextureDataPtr();
     }
+    ds->Release();
     return TextureDataPtr(new TextureData(img));
 }
 
