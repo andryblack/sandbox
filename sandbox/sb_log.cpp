@@ -113,17 +113,23 @@ namespace Sandbox {
         return g_prev_log_path;
     }
     
-    Logger::Logger( GHL::LogLevel level , const char* module) :  m_module(module),m_level( level ){
-        m_stream << "[" << (m_module ? m_module : "sbx") << "] ";
+    Logger::Logger( GHL::LogLevel level , const char* module) :  m_module(module?module:"sbx"),m_level( level ){
+        m_stream << "[" << m_module << "] ";
     }
     
     Logger::~Logger() {
-        if (file_logger.opened()) {
-            file_logger.AddMessage(m_level, m_stream.str().c_str());
-        } else if (m_enable_platform_log)
-        {
-            GHL_Log(m_level, m_stream.str().c_str());
+        if (m_module) {
+            if (file_logger.opened()) {
+                file_logger.AddMessage(m_level, m_stream.str().c_str());
+            } else if (m_enable_platform_log)
+            {
+                GHL_Log(m_level, m_stream.str().c_str());
+            }
         }
+    }
+    
+    void Logger::Discard() {
+        m_module = 0;
     }
     
     void format_memory( char* buf, size_t size, size_t mem,const char* caption ) {
@@ -141,5 +147,18 @@ namespace Sandbox {
         char buf[64];
         format_memory(buf, 64, mem, "");
         return sb::string(buf);
+    }
+    
+    LogProfileTime::LogProfileTime(const char* module,const char* name) : Sandbox::Logger(GHL::LOG_LEVEL_VERBOSE,module),
+        m_start(Time::Now()){
+        *this << name << ":";
+    }
+    LogProfileTime::~LogProfileTime() {
+        TimeDiff td = Time::Now() - m_start;
+        if (td.msec() > 100) {
+            *this << td.ToFloat() << "s";
+        } else {
+            Discard();
+        }
     }
 }

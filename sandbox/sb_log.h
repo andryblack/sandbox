@@ -9,6 +9,7 @@
 #include <ghl_log.h>
 #include <ghl_types.h>
 #include <sbstd/sb_string.h>
+#include "sb_time.h"
 
 namespace GHL {
     struct VFS;
@@ -31,6 +32,8 @@ namespace Sandbox {
         static void flush();
         static sb::string GetCurrentPath();
         static sb::string GetPrevPath();
+    protected:
+        void Discard();
     private:
         Logger( const Logger& );
         Logger& operator = (const Logger&);
@@ -38,6 +41,7 @@ namespace Sandbox {
         GHL::LogLevel       m_level;
         std::stringstream   m_stream;
         static bool m_enable_platform_log;
+        
     };
     
     class EmptyLogger {
@@ -104,6 +108,15 @@ namespace Sandbox {
     
     void format_memory( char* buf, size_t size, size_t mem,const char* caption );
     sb::string format_memory( size_t mem );
+    
+    class LogProfileTime : Logger {
+    private:
+        Time    m_start;
+    public:
+        explicit LogProfileTime(const char* module,const char* name);
+        ~LogProfileTime();
+    };
+#define SB_PROFILE(n) ::Sandbox::LogProfileTime _profiler_(MODULE,n)
 }
 
 #endif /*SB_LOG_H_INCLUDED*/

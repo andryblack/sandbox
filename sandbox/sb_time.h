@@ -12,7 +12,7 @@ namespace Sandbox {
     public:
         explicit TimeDiff(GHL::Int32 dsec) : m_secs(dsec),m_usecs(0) {}
         explicit TimeDiff(GHL::Int32 dsec,GHL::Int32 dusec) : m_secs(dsec),m_usecs(dusec) {}
-        
+        GHL::UInt32 msec() const { return m_secs*1000+m_usecs/1000; }
         float ToFloat() const;
     };
     

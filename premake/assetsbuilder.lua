@@ -144,6 +144,7 @@
 			'sb_lua.*',
 			'sb_lua_io.*',
 			'sb_log.*',
+			'sb_time.*',
 			'sb_data.*',
 			'sb_color.*',
 			'sb_lua_context.*',
