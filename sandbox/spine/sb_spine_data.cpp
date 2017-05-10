@@ -7,6 +7,8 @@
 #include "sb_log.h"
 #include <sbstd/sb_assert.h>
 
+static const char* MODULE = "spine";
+
 SB_META_DECLARE_OBJECT(Sandbox::SpineData, Sandbox::meta::object)
 
 
@@ -137,34 +139,44 @@ namespace Sandbox {
         if (!res->m_atlas)
             return SpineDataPtr();
         
-        spSkeletonJson* json = spSkeletonJson_create(res->m_atlas);
-        ds = files->OpenFile(skeleton_file);
-        if (!ds)
-            return SpineDataPtr();
-        data = GHL_ReadAllData(ds);
-        ds->Release();
-        if (!data)
-            return SpineDataPtr();
-        res->m_skeleton = spSkeletonJson_readSkeletonData(json, reinterpret_cast<const char*>(data->GetData()));
-        if (!res->m_skeleton && json->error) {
-            LogError() << "[spine] " << json->error;
+        {
+            SB_PROFILE("load skeleton");
+            
+            spSkeletonJson* json = spSkeletonJson_create(res->m_atlas);
+            ds = files->OpenFile(skeleton_file);
+            if (!ds)
+                return SpineDataPtr();
+            data = GHL_ReadAllData(ds);
+            ds->Release();
+            if (!data)
+                return SpineDataPtr();
+            res->m_skeleton = spSkeletonJson_readSkeletonData(json, reinterpret_cast<const char*>(data->GetData()));
+            if (!res->m_skeleton && json->error) {
+                LogError() << "[spine] " << json->error;
+            }
+            spSkeletonJson_dispose(json);
+            data->Release();
+
         }
-        spSkeletonJson_dispose(json);
-        data->Release();
+        
         if (!res->m_skeleton)
             return SpineDataPtr();
         res->m_state = spAnimationStateData_create(res->m_skeleton);
         
-        for (int i=0;i<res->m_skeleton->eventsCount;++i) {
+        res->LoadEvents();
+        
+        return res;
+    }
+    
+    void SpineData::LoadEvents() {
+        for (int i=0;i<m_skeleton->eventsCount;++i) {
             EventPtr e(new Event());
-            const spEventData* event(res->m_skeleton->events[i]);
+            const spEventData* event(m_skeleton->events[i]);
             e->SetString("name", event->name);
             e->SetString("value", event->stringValue);
             e->SetInt("value", event->intValue);
-            res->m_events[event] = e;
+            m_events[event] = e;
         }
-        
-        return res;
     }
     
     SpineDataPtr SpineData::Load(const char* atlas_file,

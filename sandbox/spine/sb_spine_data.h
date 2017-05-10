@@ -28,6 +28,7 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<SpineAnimation> SpineAnimationPtr;
     
     
+    
     class SpineData : public meta::object {
         SB_META_OBJECT
     public:
@@ -59,6 +60,7 @@ namespace Sandbox {
         sb::map<const void*,DrawAttributesPtr> m_attributes;
         
         sb::map<const void*,EventPtr> m_events;
+        void LoadEvents();
     };
     
 }
