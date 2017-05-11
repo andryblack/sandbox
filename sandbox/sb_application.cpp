@@ -535,6 +535,7 @@ namespace Sandbox {
     
     void Application::DoRestart() {
         Unload();
+        Logger::StartSession(GetVFS());
         Load();
     }
     
