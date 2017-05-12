@@ -147,7 +147,11 @@ project 'GHL'
 
 		if build_cli_tools then
 			defines{ 'GHL_BUILD_TOOLS' }
-			files { ghl_src .. 'vfs/vfs_posix.*', }
+			if os.is('windows') then
+				files { ghl_src .. 'vfs/vfs_win32.*', }
+			else
+				files { ghl_src .. 'vfs/vfs_posix.*', }
+			end
 		else
 			if os.is('macosx') or os.is('ios') then	
 				files { ghl_src .. 'vfs/vfs_cocoa.*', }
@@ -209,6 +213,7 @@ project 'GHL'
 				files {
 					ghl_src .. 'winlib/winlib_win32.*',
 					ghl_src .. 'sound/dsound/*',
+					ghl_src .. 'winlib/winlib_posix_time.cpp',
 				}
 				if use_network then
 					files {

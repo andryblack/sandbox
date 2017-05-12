@@ -80,7 +80,7 @@ protected:
         sb::vector<frame> frames;
         struct event {
             size_t frame;
-            sb::string event;
+            sb::string fevent;
         };
         sb::vector<event> events;
     };

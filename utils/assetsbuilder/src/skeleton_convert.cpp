@@ -243,7 +243,7 @@ void SkeletonConvert::write_animations() {
         for (std::vector<animation::event>::const_iterator eit = anim->events.begin();eit!=anim->events.end();++eit) {
             pugi::xml_node e = events.append_child("event");
             e.append_attribute("frame").set_value(int(eit->frame));
-            e.append_attribute("event").set_value(eit->event.c_str());
+            e.append_attribute("event").set_value(eit->fevent.c_str());
         }
         
     }

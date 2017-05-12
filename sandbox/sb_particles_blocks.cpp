@@ -45,10 +45,10 @@ namespace Sandbox {
         p.pos+=p.speed*dt;
         return false;
     }
-    BLOCK_BEGIN(apply_speed_processor)
-    {}
-    BLOCK_END(apply_speed_processor,0,0,&speed_accept_processor)
-    
+    //BLOCK_BEGIN(apply_speed_processor)
+    //{}
+    //BLOCK_END(apply_speed_processor,0,0,&speed_accept_processor)
+	static const ParticleProcessorBlock apply_speed_processor = {0,0,0,&speed_accept_processor ,0};
     static void random_pos_generator( Particle& p, float* , const float* args, float  ) {
         p.pos.x+=randf(args[0],args[1]);
         p.pos.y+=randf(args[2],args[3]);

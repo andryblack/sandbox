@@ -380,6 +380,9 @@ GHL::DataStream* Application::OpenFile(const char* fn) {
     if (fn[0]=='/') {
         return m_vfs->OpenFile(fn);
     }
+	if (strlen(fn)>1 && fn[1] == ':') {
+		return m_vfs->OpenFile(fn);
+	}
     return m_vfs->OpenFile(append_path(m_src_dir, fn).c_str());
 }
 

@@ -6,8 +6,8 @@
 
 #if defined( _MSC_VER )
 #define SB_COMPILER_MSVC
-#define SB_BEGIN_PACKED pragma pack(push,1)
-#define SB_END_PACKED pragma pack(pop)
+#define SB_BEGIN_PACKED __pragma(pack(push,1))
+#define SB_END_PACKED __pragma(pack(pop))
 #endif
 
 #if defined( __GNUC__ )
