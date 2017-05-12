@@ -111,6 +111,8 @@ namespace Sandbox {
         
         void ClearPasses();
         void AddPass( const FontPassPtr& pass );
+        
+        const FontDataPtr GetMainData() const { return m_data; }
     protected:
         
         void    set_height(float height) { m_height = height; }

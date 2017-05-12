@@ -237,6 +237,8 @@ SB_META_ENUM_BIND(Sandbox::FontAlign,namespace Sandbox,
                   SB_META_ENUM_ITEM(ALIGN_CENTER))
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::FontData)
+SB_META_METHOD(FixupChars)
+SB_META_METHOD(SetSubsituteCode)
 SB_META_END_KLASS_BIND()
 
 
@@ -245,6 +247,7 @@ SB_META_PROPERTY_RO(Height, GetHeight)
 SB_META_PROPERTY_RO(Size, GetSize)
 SB_META_PROPERTY_RO(Baseline, GetBaseline)
 SB_META_PROPERTY_RO(XHeight, GetXHeight)
+SB_META_PROPERTY_RO(MainData, GetMainData)
 SB_META_METHOD(GetTextWidth)
 SB_META_METHOD(ClearPasses)
 SB_META_METHOD(AddPass)
