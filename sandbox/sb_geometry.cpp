@@ -156,7 +156,7 @@ namespace Sandbox {
         BuildLineContext ctx;
         ctx.buffer = &buffer;
         ctx.color = color.hw_premul();
-        ctx.ibase = buffer.vertexes.size();
+        ctx.ibase = GHL::UInt16(buffer.vertexes.size());
         ctx.z = 0;
         
         size_t vtcs = 8 + (points.size()-2)*corner_vertexes;
@@ -243,7 +243,7 @@ namespace Sandbox {
         BuildLineContext ctx;
         ctx.buffer = &buffer;
         ctx.color = color.hw_premul();
-        ctx.ibase = buffer.vertexes.size();
+        ctx.ibase = GHL::UInt16(buffer.vertexes.size());
         ctx.z = 0;
         
         size_t start_vertexes = buffer.vertexes.size();
@@ -315,7 +315,7 @@ namespace Sandbox {
         BuildFillContext ctx;
         ctx.buffer = &buffer;
         ctx.color = color.hw_premul();
-        ctx.ibase = buffer.vertexes.size();
+        ctx.ibase = GHL::UInt16(buffer.vertexes.size());
         ctx.z = 0;
         ctx.transform = tr;
         if (buffer.texture) {

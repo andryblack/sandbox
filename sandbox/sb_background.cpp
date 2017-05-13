@@ -37,8 +37,8 @@ namespace Sandbox {
             if (sw != m_data->width || sh != m_data->height) {
                 float sx = float(sw)/m_data->width;
                 float sy = float(sh)/m_data->height;
-                float ox = 0.0f;
-                float oy = 0.0f;
+                int ox = 0;
+                int oy = 0;
                 if (m_keep_aspect) {
                     if (sx > sy) {
                         sy = sx;
@@ -49,7 +49,7 @@ namespace Sandbox {
                         
                     }
                 }
-                g.SetTransform(tr.translated(ox,oy).scaled( sx,sy));
+                g.SetTransform(tr.translated(float(ox),float(oy)).scaled( sx,sy));
             }
         }
         for (size_t i=0;i<m_data->images.size();i++) {

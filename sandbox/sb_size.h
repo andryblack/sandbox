@@ -70,10 +70,10 @@ namespace Sandbox {
                 if (lua_istable(L, idx)) {
                     Size<T> res;
                     lua_rawgeti(L, idx, 1);
-                    res.w = lua_tonumber(L, -1);
+                    res.w = T(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 2);
-                    res.h = lua_tonumber(L, -1);
+                    res.h = T(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     return  res;
                 }

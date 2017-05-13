@@ -581,7 +581,7 @@ namespace Sandbox {
         float scale = m_resources->GetScale() * m_graphics->GetScale();
         float width = twidth / scale;
         float height = theight / scale;
-        RenderTargetPtr target = m_resources->CreateRenderTarget(width, height, scale, false, false);
+        RenderTargetPtr target = m_resources->CreateRenderTarget(int(width), int(height), scale, false, false);
         m_render->BeginScene(target->GetNative());
         m_graphics->BeginScene(m_render,target);
         DoDrawScreen();
@@ -982,8 +982,8 @@ namespace Sandbox {
 	
     void Application::TransformMouse(GHL::Int32 x,GHL::Int32 y,float& fx, float& fy) {
         if (!m_resources || !m_graphics) {
-            fx = x;
-            fy = y;
+            fx = float(x);
+            fy = float(y);
             return;
         }
         fx = x / (m_resources->GetScale()*m_graphics->GetScale());

@@ -1030,7 +1030,7 @@ namespace Sandbox {
         
         if (transform) {
             for (sb::vector<GHL::UInt16>::const_iterator it = geomentry.indexes.begin();it!=geomentry.indexes.end();++it) {
-                m_indexes.push_back(*it+index_offset);
+                m_indexes.push_back(GHL::UInt16(*it+index_offset));
             }
         } else {
             
@@ -1173,7 +1173,11 @@ namespace Sandbox {
 			m_render->SetupScisor( false );
 		} else {
             float draw_scale = (m_render_to_target ? m_render_to_target->GetScale() : m_scale * m_resources->GetScale()) ;
-			m_render->SetupScisor( true, rect.x * draw_scale,rect.y * draw_scale, rect.w * draw_scale,rect.h*draw_scale);
+			m_render->SetupScisor( true, 
+				GHL::UInt32(rect.x * draw_scale),
+				GHL::UInt32(rect.y * draw_scale), 
+				GHL::UInt32(rect.w * draw_scale),
+				GHL::UInt32(rect.h*draw_scale));
 		}
 	}
 		
@@ -1182,7 +1186,7 @@ namespace Sandbox {
         if (m_render_to_target) {
             draw_scale = m_render_to_target->GetScale();
         }
-        return (m_render ? m_render->GetWidth() : 0) / draw_scale;
+        return GHL::UInt32((m_render ? m_render->GetWidth() : 0) / draw_scale);
     }
     
     GHL::UInt32 Graphics::GetDrawHeight() const {
@@ -1190,7 +1194,7 @@ namespace Sandbox {
         if (m_render_to_target) {
             draw_scale = m_render_to_target->GetScale();
         }
-        return (m_render ? m_render->GetHeight() : 0) / draw_scale;
+        return GHL::UInt32((m_render ? m_render->GetHeight() : 0) / draw_scale);
     }
 		
 	void Graphics::BeginScene(GHL::Render* render, const RenderTargetPtr& target) {
@@ -1221,7 +1225,9 @@ namespace Sandbox {
 		SetProjectionMatrix(Matrix4f::ortho(0,float(render->GetWidth())/draw_scale,
 											float(render->GetHeight())/draw_scale,0,-10,10));
 		SetViewMatrix(Matrix4f::identity());
-		SetViewport(Recti(0,0,render->GetWidth() / draw_scale ,render->GetHeight() / draw_scale ));
+		SetViewport(Recti(0,0,
+			int(render->GetWidth() / draw_scale) ,
+			int(render->GetHeight() / draw_scale) ));
 		SetClipRect(GetViewport());
         m_render->SetTexture(0,0);
         m_render->SetTexture(0,1);

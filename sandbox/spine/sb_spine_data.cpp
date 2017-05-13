@@ -59,7 +59,7 @@ namespace Sandbox {
     }
     
     sb::string SpineData::GetSlotName(size_t idx) const {
-        if (idx < m_skeleton->slotsCount) {
+        if (idx < size_t(m_skeleton->slotsCount)) {
             return m_skeleton->slots[idx]->name;
         }
         return "";
@@ -84,18 +84,19 @@ namespace Sandbox {
         TexturePtr tex(static_cast<Texture*>(region->page->rendererObject));
         if (!tex) return ImagePtr();
         
-        ImagePtr img(new Image(tex,region->x,region->y,
-                  (region->rotate ? region->height : region->width),
-                  (region->rotate ? region->width : region->height)));
+        ImagePtr img(new Image(tex,
+				  float(region->x),float(region->y),
+                  float(region->rotate ? region->height : region->width),
+                  float(region->rotate ? region->width : region->height)));
         if (region->rotate) {
             img->SetRotated(true);
-            img->SetSize(region->width,region->height);
+            img->SetSize(float(region->width),float(region->height));
         }
         return img;
     }
     
     void SpineData::SetSlotAttribute(size_t idx, const DrawAttributesPtr& attribute) {
-        if (idx < m_skeleton->slotsCount) {
+        if (idx < size_t(m_skeleton->slotsCount)) {
             m_attributes[m_skeleton->slots[idx]] = attribute;
         }
     }

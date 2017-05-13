@@ -23,19 +23,19 @@ static int Sandbox_FreeTypeFont_Load(lua_State* L) {
     config.outline = lua_toboolean(L, -1);
     lua_pop(L, 1);
     lua_getfield(L, 3, "dpi");
-    config.dpi = lua_tonumber(L, -1);
+    config.dpi = float(lua_tonumber(L, -1));
     lua_pop(L, 1);
     lua_getfield(L, 3, "scale");
     if (lua_isnumber(L, -1))
-        config.scale = lua_tonumber(L, -1);
+        config.scale = float(lua_tonumber(L, -1));
     else
-        config.scale = 1.0;
+        config.scale = 1.0f;
     lua_pop(L, 1);
     lua_getfield(L, 3, "x_scale");
     if (lua_isnumber(L, -1))
-        config.x_scale = lua_tonumber(L, -1);
+        config.x_scale = float(lua_tonumber(L, -1));
     else
-        config.x_scale = 1.0;
+        config.x_scale = 1.0f;
     lua_pop(L, 1);
     lua_getfield(L, 3, "substitute_code");
     config.substitute_code = lua_tounsigned(L, -1);

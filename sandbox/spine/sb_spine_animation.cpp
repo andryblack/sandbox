@@ -340,20 +340,22 @@ namespace Sandbox {
                 TexturePtr tex(static_cast<Texture*>(region->page->rendererObject));
                 if (!tex) continue;
                 
-                Image img(tex,region->x,region->y,
-                          (region->rotate ? region->height : region->width),
-                          (region->rotate ? region->width : region->height));
+                Image img(tex,float(region->x),
+							float(region->y),
+                          float(region->rotate ? region->height : region->width),
+                          float(region->rotate ? region->width : region->height));
                 if (region->rotate) {
                     img.SetRotated(true);
-                    img.SetSize(region->width,region->height);
+                    img.SetSize(float(region->width),float(region->height));
                 }
-                float oy = (region->originalHeight-region->height-region->offsetY);
-                img.SetHotspot(Vector2f(region->originalWidth / 2 - region->offsetX,region->originalHeight / 2 - oy));
+                float oy = float(region->originalHeight-region->height-region->offsetY);
+                img.SetHotspot(Vector2f(float(region->originalWidth / 2 - region->offsetX),
+					float(region->originalHeight / 2 - oy)));
                 
                 float regionScaleX = ra->width / ra->regionOriginalWidth * ra->scaleX;
                 float regionScaleY = ra->height / ra->regionOriginalHeight * ra->scaleY;
                 
-                float radians = ra->rotation * M_PI / 180.0f;
+                float radians = ra->rotation * float(M_PI) / 180.0f;
                 Sandbox::Transform2d trAttachment;
                 trAttachment.translate(ra->x,ra->y);
                 trAttachment.rotate(radians);

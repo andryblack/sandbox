@@ -46,7 +46,7 @@ namespace Sandbox {
         }
 
         operator Vector2f () const {
-            return Vector2f(x,y);
+            return Vector2f(float(x),float(y));
         }
 	};
 	

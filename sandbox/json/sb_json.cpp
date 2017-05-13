@@ -1038,7 +1038,7 @@ namespace Sandbox {
             return 1;
         }
         static int yajl_parse_boolean(void * ctx, int boolVal) {
-            static_cast<Ctx*>(ctx)->traverser->OnBool(boolVal);
+            static_cast<Ctx*>(ctx)->traverser->OnBool(boolVal!=0);
             return 1;
         }
         static int yajl_parse_integer(void * ctx, long long integerVal) {

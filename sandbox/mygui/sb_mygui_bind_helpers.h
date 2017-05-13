@@ -227,10 +227,10 @@ namespace Sandbox {
                 if (lua_istable(L, idx)) {
                     MyGUI::types::TPoint<T> res;
                     lua_rawgeti(L, idx, 1);
-                    res.left = lua_tonumber(L, -1);
+                    res.left = T(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 2);
-                    res.top = lua_tonumber(L, -1);
+                    res.top = T(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     return  res;
                 }
@@ -249,10 +249,10 @@ namespace Sandbox {
                 if (lua_istable(L, idx)) {
                     MyGUI::IntSize res;
                     lua_rawgeti(L, idx, 1);
-                    res.width = float(lua_tonumber(L, -1));
+                    res.width = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 2);
-                    res.height = float(lua_tonumber(L, -1));
+                    res.height = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     return  res;
                 }
@@ -271,16 +271,16 @@ namespace Sandbox {
                 if (lua_istable(L, idx)) {
                     MyGUI::IntRect res;
                     lua_rawgeti(L, idx, 1);
-                    res.left = float(lua_tonumber(L, -1));
+                    res.left = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 2);
-                    res.top = float(lua_tonumber(L, -1));
+                    res.top = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 3);
-                    res.right = float(lua_tonumber(L, -1));
+                    res.right = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 4);
-                    res.bottom = float(lua_tonumber(L, -1));
+                    res.bottom = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     return  res;
                 }
@@ -299,16 +299,16 @@ namespace Sandbox {
                 if (lua_istable(L, idx)) {
                     MyGUI::IntCoord res;
                     lua_rawgeti(L, idx, 1);
-                    res.left = float(lua_tonumber(L, -1));
+                    res.left = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 2);
-                    res.top = float(lua_tonumber(L, -1));
+                    res.top = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 3);
-                    res.width = float(lua_tonumber(L, -1));
+                    res.width = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 4);
-                    res.height = float(lua_tonumber(L, -1));
+                    res.height = int(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     return  res;
                 }
@@ -326,7 +326,7 @@ namespace Sandbox {
                 else if (val.getType()==typeid(float))
                     stack<float>::push(L, *val.castType<float>());
                 else if (val.getType()==typeid(double))
-                    stack<float>::push(L, *val.castType<double>());
+                    stack<double>::push(L, *val.castType<double>());
                 else if (val.getType()==typeid(std::string))
                     stack<std::string>::push(L, *val.castType<std::string>());
                 else if (val.getType()==typeid(bool))

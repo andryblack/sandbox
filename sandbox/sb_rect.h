@@ -105,16 +105,16 @@ namespace Sandbox {
                 if (lua_istable(L, idx)) {
                     Rect<T> res;
                     lua_rawgeti(L, idx, 1);
-                    res.x = lua_tonumber(L, -1);
+                    res.x = T(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 2);
-                    res.y = lua_tonumber(L, -1);
+                    res.y = T(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 3);
-                    res.w = lua_tonumber(L, -1);
+                    res.w = T(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     lua_rawgeti(L, idx, 4);
-                    res.h = lua_tonumber(L, -1);
+                    res.h = T(lua_tonumber(L, -1));
                     lua_pop(L, 1);
                     return  res;
                 }

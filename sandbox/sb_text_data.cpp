@@ -88,7 +88,7 @@ namespace Sandbox {
                         text = next_it; // skip both as one newline
                 }
                 
-                line_info.width = (int)ceil(width);
+                line_info.width = ceil(width);
                 line_info.count = count;
                 length += line_info.count + 1;
                 
@@ -166,7 +166,7 @@ namespace Sandbox {
                 line_info.data.erase(line_info.data.begin() + roll_back.position, line_info.data.end());
                 
                 // запоминаем место отката, как полную строку
-                line_info.width = (int)ceil(width);
+                line_info.width = ceil(width);
                 line_info.count = count;
                 length += line_info.count + 1;
                 
@@ -193,7 +193,7 @@ namespace Sandbox {
             count ++;
         }
         
-        line_info.width = (int)ceil(width);
+        line_info.width = ceil(width);
         line_info.count = count;
         length += line_info.count;
         
@@ -232,28 +232,28 @@ namespace Sandbox {
                         break;
                     }
                 }
-                int max_asc = font->GetHeight()-font->GetBaseline();
-                int max_desc = font->GetBaseline();
+                int max_asc = int(font->GetHeight()-font->GetBaseline());
+                int max_desc = int(font->GetBaseline());
                 for (TextData::SymbolsData::const_iterator simbol = line->data.begin();simbol!=line->data.end();++simbol) {
                     if (simbol->type == TextData::SYMBOL_TEXT) {
                         const FontData::Glypth* info = font->GetGlyph(simbol->data.symbol.code);
                         if (info) {
                             if (-info->bearingY() > max_asc) {
-                                max_asc = -info->bearingY();
+                                max_asc = -int(info->bearingY());
                             }
                             if ((info->height()+info->bearingY()) > max_desc) {
-                                max_desc = info->height()+info->bearingY();
+                                max_desc = int(info->height()+info->bearingY());
                             }
                         }
                     }
                 }
-                int add_asc = max_asc-(font->GetHeight()-font->GetBaseline());
+                int add_asc = max_asc-int(font->GetHeight()-font->GetBaseline());
                 //int add_desc = max_desc - m_font->GetBaseline();
                 line->offset.y += add_asc;
                 move_down += add_asc;
                 size.h += add_asc;
             }
-            line->width = (int)ceil(width);
+            line->width = ceil(width);
             set_max(size.w, float(int(line->width)));
         }
         

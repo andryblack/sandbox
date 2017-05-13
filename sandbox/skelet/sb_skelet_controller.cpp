@@ -29,7 +29,7 @@ namespace Sandbox {
         if (m_animation && m_started) {
             bool stop = false;
             m_frame_time += dt;
-            size_t frames_drop = m_frame_time * m_animation->GetFPS();
+            size_t frames_drop = size_t(m_frame_time * m_animation->GetFPS());
             size_t from_frame = m_crnt_frame;
             m_crnt_frame += frames_drop;
             m_frame_time -= float(frames_drop) / m_animation->GetFPS();
@@ -126,7 +126,7 @@ namespace Sandbox {
     void SkeletController::SetTime( float time ) {
         if (!m_animation)
             return;
-        size_t frames = time * m_animation->GetFPS();
+        size_t frames = size_t(time * m_animation->GetFPS());
         m_crnt_frame = frames % m_animation->GetFrames();
         m_frame_time = time - frames / m_animation->GetFPS();
     }
@@ -172,7 +172,7 @@ namespace Sandbox {
     static inline SkeletonNodeFrame interpolate_frame(const SkeletonNodeFrame& a, const SkeletonNodeFrame& b, float k) {
         if (a.image!=b.image || a.node != b.node)
             return a;
-        float ak = 1.0 - k;
+        float ak = 1.0f - k;
         SkeletonNodeFrame f;
         f.transform.v = a.transform.v * ak + b.transform.v * k;
         f.transform.m = a.transform.m * ak + b.transform.m * k;

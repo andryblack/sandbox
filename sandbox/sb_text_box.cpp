@@ -56,7 +56,7 @@ namespace Sandbox {
     }
     void TextBox::UpdateText() {
         if (m_font) {
-            m_data.Fill(m_text.c_str(), m_font, m_width, m_align);
+            m_data.Fill(m_text.c_str(), m_font, int(m_width), m_align);
         }
     }
     

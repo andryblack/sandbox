@@ -58,7 +58,7 @@ namespace Sandbox {
         if (align == ALIGN_RIGHT) {
             align_x=GetTextWidthI(text);
         } else if (align==ALIGN_CENTER) {
-            align_x=int(GetTextWidthI(text)*0.5f);
+            align_x=float(int(GetTextWidthI(text)*0.5f));
         }
         pos.x-=align_x;
         return pos;
