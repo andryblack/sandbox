@@ -224,7 +224,7 @@ namespace Sandbox {
         delete m_main_thread;
 		delete m_main_scene;
 		
-        delete m_lua;
+        DestroyLua();
     	delete m_sound_mgr;
 
         ReleaseGUI();
@@ -334,9 +334,21 @@ namespace Sandbox {
                 base_path+="/";
             m_lua->SetBasePath(base_path.c_str());
             
+            OnLuaCreated();
+            
             InitLua();
             
             InitResources();
+        }
+    }
+    
+    void Application::DestroyLua() {
+
+        if (m_lua) {
+            OnLuaDestroy();
+            m_lua->Destroy();
+            delete m_lua;
+            m_lua = 0;
         }
     }
     
@@ -514,11 +526,8 @@ namespace Sandbox {
         m_mouse_ctx.reset();
         m_keyboard_ctx.reset();
         
-        if (m_lua) {
-            m_lua->Destroy();
-            delete m_lua;
-            m_lua = 0;
-        }
+        DestroyLua();
+        
         delete m_main_thread;
         delete m_main_scene;
         m_main_scene = 0;
@@ -1076,8 +1085,8 @@ namespace Sandbox {
         
         PlatformExtension::OnAppStoppedAll(this);
         
-        delete m_lua;
-        m_lua = 0;
+        DestroyLua();
+        
         delete m_sound_mgr;
         m_sound_mgr = 0;
         SB_LOGI( "Release application" );

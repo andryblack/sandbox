@@ -149,7 +149,10 @@ namespace Sandbox {
         
         void DoDrawScreen();
         
-        
+        // called after lua created
+        virtual void OnLuaCreated() {}
+        // called before lua destroyed
+        virtual void OnLuaDestroy() {}
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -191,7 +194,7 @@ namespace Sandbox {
         int m_utc_offset;
         
         void CreateLua();
-    
+        void DestroyLua();
         
 #ifdef SB_USE_MYGUI
         mygui::DataManager*     m_gui_data_manager;
