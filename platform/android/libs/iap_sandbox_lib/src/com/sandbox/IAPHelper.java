@@ -215,6 +215,7 @@ public class IAPHelper  {
     // (for logging/debugging)
     // if mAsyncInProgress == true, what asynchronous operation is in progress?
     String m_async_operation = "";
+    List<Thread> m_wait_operations = new ArrayList<Thread>();
 
     Map<String,Product> m_products_map = new HashMap<String,Product>();
     Map<String,Purchase> m_purchase_map = new HashMap<String,Purchase>();
@@ -567,8 +568,7 @@ public class IAPHelper  {
         final Handler handler = new Handler();
         check_not_disposed();
         check_setup_done("queryInventory");
-        flag_start_async("refresh inventory");
-        (new Thread(new Runnable() {
+        start_async(new Thread(new Runnable() {
             public void run() {
                 IabResult result = new IabResult(BILLING_RESPONSE_RESULT_OK, "Inventory refresh successful.");
                 try {
@@ -589,7 +589,7 @@ public class IAPHelper  {
                     });
                 }
             }
-        })).start();
+        }));
     }
 
     /**
@@ -791,8 +791,7 @@ public class IAPHelper  {
     void consumeAsyncInternal(final Purchase purchase)
             throws IabAsyncInProgressException {
         final Handler handler = new Handler();
-        flag_start_async("consume");
-        (new Thread(new Runnable() {
+        start_async(new Thread(new Runnable() {
             public void run() {
                 IabResult result;
                 try {
@@ -811,7 +810,7 @@ public class IAPHelper  {
                     }
                 });
             }
-        })).start();
+        }));
     }
     public void consumeAsync(Purchase purchase)
             throws IabAsyncInProgressException {
@@ -849,8 +848,7 @@ public class IAPHelper  {
             final Handler handler = new Handler();
             check_not_disposed();
             check_setup_done("restore_payments");
-            flag_start_async("restore_payments");
-            (new Thread(new Runnable() {
+            start_async(new Thread(new Runnable() {
                 public void run() {
                     try {
                         int r = queryPurchases();
@@ -876,8 +874,8 @@ public class IAPHelper  {
                         });
                     }
                 }
-            })).start();
-        } catch ( IabAsyncInProgressException e ) {
+            }));
+        } catch ( Exception e ) {
             logError(e.toString());
             return false;
 
@@ -1091,6 +1089,27 @@ public class IAPHelper  {
                     // Should not be thrown, because we reset mAsyncInProgress immediately before
                     // calling dispose().
                 }
+            } else {
+                if (!m_wait_operations.isEmpty()) {
+                    logDebug("Starting waited thread operation");
+                    m_async_operation = "thread";
+                    m_async_in_progress = true;
+                    Thread th = m_wait_operations.remove(0);
+                    th.start();
+                }
+            }
+        }
+    }
+
+    void start_async(Thread th) {
+        synchronized (m_async_in_progress_lock) {
+            if (m_async_in_progress) {
+                m_wait_operations.add(th);
+            } else {
+                logDebug("Starting async thread operation");
+                m_async_operation = "thread";
+                m_async_in_progress = true;
+                th.start();
             }
         }
     }
