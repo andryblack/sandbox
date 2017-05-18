@@ -719,14 +719,14 @@ namespace Sandbox {
         }
     };
     
-    struct JsonBuilder::Impl {
-        sb::string data;
+    struct JsonBuilderBase::Impl {
+        sb::string& data;
         yajl_gen g;
         static void yajl_encode_print(void * ctx,const char * str,size_t len) {
             Impl* c = static_cast<Impl*>(ctx);
             c->data.append(str,len);
         }
-        Impl() {
+        explicit Impl(sb::string& data) : data(data) {
             g = yajl_gen_alloc(0);
             yajl_gen_config(g,yajl_gen_print_callback,&Impl::yajl_encode_print,this);
         }
@@ -735,56 +735,57 @@ namespace Sandbox {
         }
     };
     
-    JsonBuilder::JsonBuilder() : m_impl(new Impl()) {
+    JsonBuilderBase::JsonBuilderBase(sb::string& data) : m_impl(new Impl(data)) {
         
     }
-    JsonBuilder::~JsonBuilder() {
+    JsonBuilderBase::~JsonBuilderBase() {
         reset();
     }
     
-    void JsonBuilder::reset() {
+    void JsonBuilderBase::reset() {
         delete m_impl;
         m_impl = 0;
     }
     
-    JsonBuilder& JsonBuilder::SetPretty(bool p) {
+    
+    JsonBuilderBase& JsonBuilderBase::SetPretty(bool p) {
         if (m_impl) {
             yajl_gen_config(m_impl->g, yajl_gen_beautify, (int)p);
         }
         return *this;
     }
     
-    JsonBuilder& JsonBuilder::BeginObject() {
+    JsonBuilderBase& JsonBuilderBase::BeginObject() {
         if (m_impl) yajl_gen_map_open(m_impl->g);
         return *this;
     }
-    JsonBuilder& JsonBuilder::EndObject() {
+    JsonBuilderBase& JsonBuilderBase::EndObject() {
         if (m_impl) yajl_gen_map_close(m_impl->g);
         return *this;
     }
     
-    JsonBuilder& JsonBuilder::BeginArray() {
+    JsonBuilderBase& JsonBuilderBase::BeginArray() {
         if (m_impl) yajl_gen_array_open(m_impl->g);
         return *this;
     }
-    JsonBuilder& JsonBuilder::EndArray() {
+    JsonBuilderBase& JsonBuilderBase::EndArray() {
         if (m_impl) yajl_gen_array_close(m_impl->g);
         return *this;
     }
     
-    JsonBuilder& JsonBuilder::Key(const char* name) {
+    JsonBuilderBase& JsonBuilderBase::Key(const char* name) {
         if (m_impl) yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(name), ::strlen(name));
         return *this;
     }
-    JsonBuilder& JsonBuilder::PutNull() {
+    JsonBuilderBase& JsonBuilderBase::PutNull() {
         if (m_impl) yajl_gen_null(m_impl->g);
         return *this;
     }
-    JsonBuilder& JsonBuilder::PutBool(bool v) {
+    JsonBuilderBase& JsonBuilderBase::PutBool(bool v) {
         if (m_impl) yajl_gen_bool(m_impl->g, v?1:0);
         return *this;
     }
-    JsonBuilder& JsonBuilder::PutString(const char* value) {
+    JsonBuilderBase& JsonBuilderBase::PutString(const char* value) {
         if (value) {
             if (m_impl) yajl_gen_string(m_impl->g, reinterpret_cast<const unsigned char*>(value), ::strlen(value));
         } else {
@@ -792,20 +793,35 @@ namespace Sandbox {
         }
         return *this;
     }
-    JsonBuilder& JsonBuilder::PutInteger(int value) {
+    JsonBuilderBase& JsonBuilderBase::PutInteger(int value) {
         if (m_impl) yajl_gen_integer(m_impl->g, value);
         return *this;
     }
-    JsonBuilder& JsonBuilder::PutNumber(double value) {
+    JsonBuilderBase& JsonBuilderBase::PutNumber(double value) {
         if (m_impl) yajl_gen_double(m_impl->g, value);
         return *this;
     }
     
     static const sb::string empty_string;
     
-    const sb::string& JsonBuilder::End() {
+    const sb::string& JsonBuilderBase::End() {
         return m_impl ? m_impl->data : empty_string;
     }
+    
+    JsonBuilder::JsonBuilder() : JsonBuilderBase( m_out_data ) {
+        
+    }
+    JsonBuilder::~JsonBuilder() {
+        reset();
+    }
+    
+    void JsonBuilder::reset() {
+        if (m_impl) {
+            yajl_gen_reset(m_impl->g, 0);
+        }
+        m_out_data.clear();
+    }
+
 
     namespace meta {
         static const type_info ti = {

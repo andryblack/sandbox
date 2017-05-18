@@ -312,10 +312,8 @@ namespace Sandbox {
             if (!request->GetErrorText().empty()) {
                 SB_LOGE( "network POST error: " << request->GetErrorText() );
             }
-            data_p->Release();
             return request->GetCompleted() ? request : NetworkRequestPtr();
         }
-        data_p->Release();
         return request;
     }
     

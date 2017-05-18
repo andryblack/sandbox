@@ -22,35 +22,56 @@ namespace Sandbox {
     LuaContextPtr convert_from_json(lua_State* L,const GHL::Data* data);
     
     bool json_parse_object(const char* data,sb::map<sb::string,sb::string>& res);
-
-    class JsonBuilder  {
-    private:
+    
+    class JsonBuilderBase {
+    protected:
         struct Impl;
         Impl* m_impl;
+        ~JsonBuilderBase();
+        explicit JsonBuilderBase(sb::string& outdata);
+        
+    private:
+        JsonBuilderBase(const JsonBuilderBase&);
+        JsonBuilderBase& operator = (const JsonBuilderBase&);
+    public:
+ 
+        void reset();
+        
+        JsonBuilderBase& SetPretty(bool p);
+        
+        JsonBuilderBase& BeginObject();
+        JsonBuilderBase& EndObject();
+        
+        JsonBuilderBase& BeginArray();
+        JsonBuilderBase& EndArray();
+        
+        JsonBuilderBase& Key(const char* name);
+        JsonBuilderBase& PutNull();
+        JsonBuilderBase& PutBool(bool v);
+        JsonBuilderBase& PutString(const char* value);
+        JsonBuilderBase& PutInteger(int value);
+        JsonBuilderBase& PutNumber(double value);
+        
+        const sb::string& End();
+    };
+    
+    class JsonBuilderRef : public JsonBuilderBase {
+    public:
+        explicit JsonBuilderRef(sb::string& data) : JsonBuilderBase(data) {}
+        ~JsonBuilderRef() {}
+    };
+
+    class JsonBuilder : public JsonBuilderBase {
+    private:
         JsonBuilder(const JsonBuilder&);
         JsonBuilder& operator = (const JsonBuilder&);
+        sb::string  m_out_data;
     public:
         void reset();
         JsonBuilder();
         ~JsonBuilder();
         
-        JsonBuilder& SetPretty(bool p);
-        
-        JsonBuilder& BeginObject();
-        JsonBuilder& EndObject();
-        
-        JsonBuilder& BeginArray();
-        JsonBuilder& EndArray();
-        
-        JsonBuilder& Key(const char* name);
-        JsonBuilder& PutNull();
-        JsonBuilder& PutBool(bool v);
-        JsonBuilder& PutString(const char* value);
-        JsonBuilder& PutInteger(int value);
-        JsonBuilder& PutNumber(double value);
-        
-        
-        const sb::string& End();
+        const sb::string& End() { return m_out_data; }
     };
     
     class JsonTraverser {

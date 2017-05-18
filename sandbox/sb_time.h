@@ -22,6 +22,7 @@ namespace Sandbox {
     public:
         static Time Now();
         TimeDiff operator - (const Time& t) const;
+        GHL::UInt32 sec() const { return m_tm.secs; }
     };
     
 }
