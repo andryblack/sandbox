@@ -204,6 +204,7 @@ SB_META_PROPERTY_RO(absolutePosition, getAbsolutePosition)
 SB_META_PROPERTY_RO(absoluteRect, getAbsoluteRect)
 SB_META_PROPERTY_RO(absoluteLeft, getAbsoluteLeft)
 SB_META_PROPERTY_RO(absoluteTop, getAbsoluteTop)
+SB_META_PROPERTY_RO(absoluteCoord, getAbsoluteCoord)
 
 SB_META_END_KLASS_BIND()
 
@@ -293,11 +294,16 @@ static bool widget_isTypeOf( const MyGUI::Widget* w , const char* name ) {
     if (!w) return false;
     return w->isTypeNameOf(name);
 }
+static const char* widget_getType( const MyGUI::Widget* w  ) {
+    if (!w) return "";
+    return w->getTypeName().c_str();
+}
 
 SB_META_DECLARE_OBJECT(MyGUI::Widget, MyGUI::ICroppedRectangle)
 SB_META_BEGIN_KLASS_BIND(MyGUI::Widget)
 SB_META_PROPERTY_RO(name, getName)
 SB_META_PROPERTY_RW(align, getAlign,setAlign)
+SB_META_PROPERTY_RO(widgetStyle, getWidgetStyle)
 SB_META_PROPERTY_RW(visible,getVisible,setVisible)
 SB_META_PROPERTY_RW(alpha, getAlpha, setAlpha)
 SB_META_PROPERTY_RW(inheritsAlpha, getInheritsAlpha, setInheritsAlpha)
@@ -375,6 +381,7 @@ SB_META_METHOD(setProperty)
 SB_META_METHOD(changeWidgetSkin)
 
 bind( method( "isTypeOf" , &widget_isTypeOf ) );
+bind( method( "getType" , &widget_getType ) );
 bind( method( "isUserString" , &widget_isUserString ) );
 bind( method( "getUserString" , &widget_getUserString ) );
 bind( method( "setUserString" , &widget_setUserString ) );
@@ -775,6 +782,11 @@ SB_META_END_KLASS_BIND()
 
 
 
+SB_META_DECLARE_KLASS(MyGUI::WidgetManager, void)
+SB_META_BEGIN_KLASS_BIND(MyGUI::WidgetManager)
+SB_META_STATIC_METHOD(getInstancePtr)
+SB_META_METHOD(createWidget)
+SB_META_END_KLASS_BIND()
 
 
 
@@ -844,6 +856,8 @@ namespace Sandbox {
             luabind::ExternClass<Sandbox::mygui::RenderManager>(lua);
             luabind::ExternClass<MyGUI::InputManager>(lua);
             luabind::ExternClass<MyGUI::LanguageManager>(lua);
+            luabind::ExternClass<MyGUI::WidgetManager>(lua);
+            
             
             luabind::ExternClass<MyGUI::ControllerManager>(lua);
             
