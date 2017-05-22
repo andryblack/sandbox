@@ -14,11 +14,13 @@ struct spSkeleton;
 struct spAnimationState;
 struct spAnimation;
 struct spEvent;
+struct spSlot;
 
 namespace Sandbox {
     
     class SpineData;
     typedef sb::intrusive_ptr<SpineData> SpineDataPtr;
+    class Resources;
     
     class SpineAnimation : public Thread {
         SB_META_OBJECT
@@ -84,10 +86,13 @@ namespace Sandbox {
         void SetAttachement(const sb::string& slot_name,const SceneObjectPtr& object);
         void RemoveAttachement(const sb::string& slot_name);
         void ApplySlotTransform(Transform2d& tr,const sb::string& slot_name) const;
+        bool CheckHit(const Vector2f& pos, Resources* resources);
+        bool CheckSlotHit(const char* slot,const Vector2f& pos, Resources* resources);
     private:
         SpineAnimationPtr   m_animation;
         typedef sb::map<sb::string,SpineSceneAttachementPtr> AttachementMap;
         AttachementMap m_attachements;
+        bool CheckSlotHitImpl(spSlot* slot,const Vector2f& pos, Resources* resources);
     };
     
 }

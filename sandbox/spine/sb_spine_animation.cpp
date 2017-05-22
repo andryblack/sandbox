@@ -2,6 +2,8 @@
 #include "sb_spine_data.h"
 #include "sb_graphics.h"
 #include <spine/spine.h>
+#include "sb_spine_attachment.h"
+#include <spine/extension.h>
 
 SB_META_DECLARE_OBJECT(Sandbox::SpineAnimation, Sandbox::Thread)
 SB_META_DECLARE_OBJECT(Sandbox::SpineSceneObject, Sandbox::Container)
@@ -246,6 +248,58 @@ namespace Sandbox {
         }
     }
     
+    bool SpineSceneObject::CheckSlotHitImpl(spSlot* slot,const Vector2f& pos, Resources* resources) {
+        spBone* bone = slot->bone;
+        spAttachment* attachment = slot->attachment;
+        if (attachment && attachment->type != SP_ATTACHMENT_REGION) {
+            return false;
+        }
+        Sandbox::Transform2d tr;
+        tr.m.matrix[0*2+0] = bone->a;
+        tr.m.matrix[0*2+1] = bone->c;
+        tr.m.matrix[1*2+0] = bone->b;
+        tr.m.matrix[1*2+1] = bone->d;
+        
+        spSkeleton* skeleton = m_animation->m_skeleton;
+        
+        tr.v.x = skeleton->x + bone->worldX;
+        tr.v.y = skeleton->y + bone->worldY;
+        
+        SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
+        if (ra->image) {
+            tr = tr * ra->tr;
+            tr.inverse();
+            Vector2f hit = tr.transform(pos);
+            if (ra->image->CheckBit(hit.x, hit.y,resources))
+                return true;
+        }
+
+        return false;
+    }
+    
+    bool SpineSceneObject::CheckHit(const Vector2f& pos, Resources* resources) {
+        if (!m_animation)
+            return false;
+        spSkeleton* skeleton = m_animation->m_skeleton;
+        for (int i = skeleton->slotsCount-1; i >=0 ; --i) {
+            spSlot* slot = skeleton->drawOrder[i];
+            if (!slot)
+                continue;
+            if (CheckSlotHitImpl(slot, pos,resources))
+                return true;
+            
+        }
+        return false;
+    }
+    bool SpineSceneObject::CheckSlotHit(const char* slot,const Vector2f& pos, Resources* resources) {
+        if (!m_animation)
+            return false;
+        spSlot* slot_ = spSkeleton_findSlot(m_animation->m_skeleton, slot);
+        if (!slot_)
+            return false;
+        return CheckSlotHitImpl(slot_, pos, resources);
+    }
+    
     void SpineSceneObject::ApplySlotTransform(Transform2d& atr,const sb::string& slot_name) const {
         if (!m_animation)
             return;
@@ -267,6 +321,7 @@ namespace Sandbox {
                 atr = atr * tr;
                 return;
             }
+            
         }
     }
     void SpineSceneObject::Draw(Graphics &gr) const {
@@ -335,37 +390,12 @@ namespace Sandbox {
             if (attachment)
             {
                 
-                spRegionAttachment* ra = (spRegionAttachment*)attachment;
-                spAtlasRegion* region = (spAtlasRegion*)ra->rendererObject;
-                TexturePtr tex(static_cast<Texture*>(region->page->rendererObject));
-                if (!tex) continue;
-                
-                Image img(tex,float(region->x),
-							float(region->y),
-                          float(region->rotate ? region->height : region->width),
-                          float(region->rotate ? region->width : region->height));
-                if (region->rotate) {
-                    img.SetRotated(true);
-                    img.SetSize(float(region->width),float(region->height));
+                SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
+                if (ra->image) {
+                    gr.SetTransform(str * (tr*ra->tr));
+                    const DrawAttributesPtr& attr = m_animation->m_data->GetSlotAttribute(slot->data);
+                    gr.DrawImage(*ra->image,attr.get(),0,0);
                 }
-                float oy = float(region->originalHeight-region->height-region->offsetY);
-                img.SetHotspot(Vector2f(float(region->originalWidth / 2 - region->offsetX),
-					float(region->originalHeight / 2 - oy)));
-                
-                float regionScaleX = ra->width / ra->regionOriginalWidth * ra->scaleX;
-                float regionScaleY = ra->height / ra->regionOriginalHeight * ra->scaleY;
-                
-                float radians = ra->rotation * float(M_PI) / 180.0f;
-                Sandbox::Transform2d trAttachment;
-                trAttachment.translate(ra->x,ra->y);
-                trAttachment.rotate(radians);
-                trAttachment.scale(regionScaleX,-regionScaleY);
-                tr =  tr * trAttachment;
-                
-                gr.SetTransform(str * tr);
-                const DrawAttributesPtr& attr = m_animation->m_data->GetSlotAttribute(slot->data);
-                gr.DrawImage(img,attr.get(),0,0);
-                
             }
             if (object_attachement) {
                 gr.SetTransform(str * tr);

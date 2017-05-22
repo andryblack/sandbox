@@ -14,6 +14,7 @@
 struct spAtlas;
 struct spSkeletonData;
 struct spAnimationStateData;
+struct spAtlasRegion;
 
 namespace Sandbox {
     
@@ -27,8 +28,7 @@ namespace Sandbox {
     class SpineAnimation;
     typedef sb::intrusive_ptr<SpineAnimation> SpineAnimationPtr;
     
-    
-    
+        
     class SpineData : public meta::object {
         SB_META_OBJECT
     public:
@@ -57,10 +57,17 @@ namespace Sandbox {
         spSkeletonData* m_skeleton;
         spAnimationStateData* m_state;
         friend class SpineAnimation;
-        sb::map<const void*,DrawAttributesPtr> m_attributes;
+        struct SpineSlotAttachment {
+            DrawAttributesPtr attributes;
+            ImagePtr  image;
+        };
+        sb::map<const void*,SpineSlotAttachment> m_attributes;
         
         sb::map<const void*,EventPtr> m_events;
         void LoadEvents();
+        void LoadAttachments();
+        
+        
     };
     
 }

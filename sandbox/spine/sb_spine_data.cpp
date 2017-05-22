@@ -6,6 +6,8 @@
 #include "sb_texture.h"
 #include "sb_log.h"
 #include <sbstd/sb_assert.h>
+#include <spine/extension.h>
+#include "sb_spine_attachment.h"
 
 static const char* MODULE = "spine";
 
@@ -34,9 +36,13 @@ extern "C" char* _spUtil_readFile (const char* path, int* length){
 }
 
 
+
+
+
+
 namespace Sandbox {
     
-    
+        
     SpineData::SpineData() : m_atlas(0), m_skeleton(0), m_state(0) {
         
     }
@@ -77,34 +83,20 @@ namespace Sandbox {
         spAttachment* attachment = spSkin_getAttachment(m_skeleton->defaultSkin, slot_index, slot->attachmentName);
         if (!attachment || attachment->type != SP_ATTACHMENT_REGION)
             return ImagePtr();
-        spRegionAttachment* ra = (spRegionAttachment*)attachment;
-        spAtlasRegion* region = (spAtlasRegion*)ra->rendererObject;
-        if (!region)
-            return ImagePtr();
-        TexturePtr tex(static_cast<Texture*>(region->page->rendererObject));
-        if (!tex) return ImagePtr();
-        
-        ImagePtr img(new Image(tex,
-				  float(region->x),float(region->y),
-                  float(region->rotate ? region->height : region->width),
-                  float(region->rotate ? region->width : region->height)));
-        if (region->rotate) {
-            img->SetRotated(true);
-            img->SetSize(float(region->width),float(region->height));
-        }
-        return img;
+        SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
+        return ra->image;
     }
     
     void SpineData::SetSlotAttribute(size_t idx, const DrawAttributesPtr& attribute) {
         if (idx < size_t(m_skeleton->slotsCount)) {
-            m_attributes[m_skeleton->slots[idx]] = attribute;
+            m_attributes[m_skeleton->slots[idx]].attributes = attribute;
         }
     }
     static const DrawAttributesPtr empty;
     const DrawAttributesPtr& SpineData::GetSlotAttribute(const void* idx) const {
-        sb::map<const void*,DrawAttributesPtr>::const_iterator it = m_attributes.find(idx);
+        sb::map<const void*,SpineSlotAttachment>::const_iterator it = m_attributes.find(idx);
         if (it!=m_attributes.end())
-            return it->second;
+            return it->second.attributes;
         return empty;
     }
     static const EventPtr empty_event;
@@ -142,8 +134,8 @@ namespace Sandbox {
         
         {
             SB_PROFILE("load skeleton");
-            
-            spSkeletonJson* json = spSkeletonJson_create(res->m_atlas);
+            SpineAttachmentLoader attachment_loader(res->m_atlas);
+            spSkeletonJson* json = spSkeletonJson_createWithLoader(&attachment_loader);
             ds = files->OpenFile(skeleton_file);
             if (!ds)
                 return SpineDataPtr();
@@ -169,6 +161,11 @@ namespace Sandbox {
         return res;
     }
     
+    void SpineData::LoadAttachments() {
+//        for (int i=0;i<m_skeleton->slotsCount;++i) {
+//            spSlotData* slot = m_skeleton->slots[i];
+//        }
+    }
     void SpineData::LoadEvents() {
         for (int i=0;i<m_skeleton->eventsCount;++i) {
             EventPtr e(new Event());
