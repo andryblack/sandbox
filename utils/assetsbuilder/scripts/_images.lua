@@ -55,7 +55,7 @@ local atlas = require '_atlas'
 local function load_images( dir  )
 	local fullpath = path.join(dir,'images.lua')
 	local ctx = { textures = {} , images = {} , animations = {}}
-	local sandbox = { textures = ctx.textures }
+	local sandbox = { textures = ctx.textures , lua = _G }
 	function sandbox.load_group( name )
 		return {path=name, data=load_images( path.join(dir,name) ) }
 	end
