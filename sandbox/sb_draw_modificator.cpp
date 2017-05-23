@@ -36,10 +36,15 @@ namespace Sandbox {
         tr.rotate(m_angle).scale(m_scale_x,m_scale_y);
         tr.translate(-m_origin);
     }
-    void TransformModificator::Transform(Vector2f& v) const {
+    void TransformModificator::UnTransform(Vector2f& v) const {
         Transform2d tr;
         Apply(tr);
         tr.inverse();
+        v = tr.transform(v);
+    }
+    void TransformModificator::Transform(Vector2f& v) const {
+        Transform2d tr;
+        Apply(tr);
         v = tr.transform(v);
     }
 }

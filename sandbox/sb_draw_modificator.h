@@ -67,6 +67,7 @@ namespace Sandbox {
         void SetScrewX(float a) { m_screw_x = a;}
         float GetScrewX() const { return m_screw_x;}
 
+        void UnTransform(Vector2f& v) const;
         void Transform(Vector2f& v) const;
         void Apply(Graphics& g) const;
         void Apply(Transform2d& tr) const;

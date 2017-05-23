@@ -29,7 +29,7 @@ namespace Sandbox {
         SceneObject::GlobalToLocalImpl(v);
         v += m_offset;
         if (GetTransformM()) {
-            GetTransformM()->Transform(v);
+            GetTransformM()->UnTransform(v);
         }
     }
     void ContainerScroll::GetTransformImpl(Transform2d& tr) const {

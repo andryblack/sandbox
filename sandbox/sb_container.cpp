@@ -171,7 +171,7 @@ namespace Sandbox {
     void Container::GlobalToLocalImpl(Vector2f& v) const {
         SceneObject::GlobalToLocalImpl(v);
         if (m_transform) {
-            m_transform->Transform(v);
+            m_transform->UnTransform(v);
         }
     }
     
