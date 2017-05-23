@@ -137,6 +137,7 @@ SB_META_PROPERTY_RO(SystemLanguage, GetSystemLanguage)
 SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 SB_META_PROPERTY_WO(FrameInterval, SetFrameInterval)
 SB_META_PROPERTY_WO(ResizeableWindow, SetResizeableWindow)
+SB_META_PROPERTY_WO(ScreenKeepOn, SetScreenKeepOn)
 SB_META_PROPERTY_RO(FPS, GetFPS)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 bind( method( "StoreProfileFile", &Sandbox::Application_StoreProfileFile));
@@ -771,6 +772,12 @@ namespace Sandbox {
     void    Application::SetResizeableWindow(bool v) {
         if (m_system) {
             m_system->SetDeviceState(GHL::DEVICE_STATE_RESIZEABLE_WINDOW, &v);
+        }
+    }
+    
+    void    Application::SetScreenKeepOn(bool v) {
+        if (m_system) {
+            m_system->SetDeviceState(GHL::DEVICE_STATE_KEEP_SCREEN_ON, &v);
         }
     }
     

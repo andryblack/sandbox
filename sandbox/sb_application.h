@@ -47,6 +47,7 @@ namespace Sandbox {
         void    SetKeyboardContext(const LuaContextPtr& ctx );
         void    SetFrameInterval(int interval);
         void    SetResizeableWindow(bool v);
+        void    SetScreenKeepOn(bool o);
         
         GHL::System* GetSystem() const { return m_system;}
         
