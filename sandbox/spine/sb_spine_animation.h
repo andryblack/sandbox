@@ -74,6 +74,7 @@ namespace Sandbox {
     public:
         explicit SpineSceneAttachement(const sb::string& attachement);
         virtual void GetTransformImpl(Transform2d& tr) const;
+        virtual void GlobalToLocalImpl(Vector2f& v) const;
     };
     typedef sb::intrusive_ptr<SpineSceneAttachement> SpineSceneAttachementPtr;
     

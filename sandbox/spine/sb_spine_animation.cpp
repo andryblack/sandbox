@@ -227,6 +227,22 @@ namespace Sandbox {
         }
     }
     
+    void SpineSceneAttachement::GlobalToLocalImpl(Vector2f& v) const {
+        SceneObject::GlobalToLocalImpl(v);
+        if (!GetParent())
+            return;
+        SpineSceneObject* parent = meta::sb_dynamic_cast<SpineSceneObject>(GetParent());
+        if (parent) {
+            Transform2d tr;
+            parent->ApplySlotTransform(tr,m_attachement);
+            tr.inverse();
+            v = tr.transform(v);
+        }
+        if (GetTransformM()) {
+            GetTransformM()->UnTransform(v);
+        }
+    }
+    
     SpineSceneObject::SpineSceneObject(const SpineAnimationPtr& animation) : m_animation(animation) {
         
     }
@@ -251,7 +267,9 @@ namespace Sandbox {
     bool SpineSceneObject::CheckSlotHitImpl(spSlot* slot,const Vector2f& pos, Resources* resources) {
         spBone* bone = slot->bone;
         spAttachment* attachment = slot->attachment;
-        if (attachment && attachment->type != SP_ATTACHMENT_REGION) {
+        if (!attachment)
+            return false;
+        if (attachment->type != SP_ATTACHMENT_REGION) {
             return false;
         }
         Sandbox::Transform2d tr;
@@ -284,6 +302,8 @@ namespace Sandbox {
         for (int i = skeleton->slotsCount-1; i >=0 ; --i) {
             spSlot* slot = skeleton->drawOrder[i];
             if (!slot)
+                continue;
+            if (slot->a < 0.5f)
                 continue;
             if (CheckSlotHitImpl(slot, pos,resources))
                 return true;
