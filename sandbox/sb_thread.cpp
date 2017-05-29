@@ -96,14 +96,11 @@ namespace Sandbox {
                         luabind::PushErrorHandler(th);
                         lua_pushvalue(th, -2);
                         lua_pcall(th, 1, 1, 0);
-                        LogError(LuaThreadModule) << lua_tostring(L, -1) ;
+                        LogError(LuaThreadModule) << luabind::stack<const char*>::get(th,-1);
                         lua_pop(th,2);
                     }
-                } else {
-                    lua_pop(L,1);
-                    //LogDebug(LuaThreadModule) << "thread " << th << " ended";
                 }
-                
+                lua_pop(L,1);
                 lua_settop(th, top);
                 
                 //LogVerbose(LuaThreadModule) << "update thread <<< " << lua_gettop(L);
