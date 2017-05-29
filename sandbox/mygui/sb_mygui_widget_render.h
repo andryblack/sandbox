@@ -3,9 +3,11 @@
 
 #include "MyGUI_Widget.h"
 #include "sb_image.h"
+#include "widgets/sb_mygui_cached_widget.h"
 
 namespace MyGUI {
     class SharedLayerNode;
+    class SharedLayer;
 }
 
 namespace Sandbox {
@@ -14,7 +16,7 @@ namespace Sandbox {
         
         class RenderTargetImpl;
     
-        class WidgetRender : public MyGUI::Widget {
+        class WidgetRender : public CachedWidget {
             MYGUI_RTTI_DERIVED( WidgetRender )
         private:
             typedef unsigned int counter_t;
@@ -22,13 +24,7 @@ namespace Sandbox {
         public:
             WidgetRender(MyGUI::IntSize size);
             ~WidgetRender();
-                        
-            virtual void onWidgetCreated(MyGUI::Widget* _widget);
             
-            virtual void addChildItem(LayerItem* _item);
-            virtual void removeChildItem(LayerItem* _item);
-            virtual void addChildNode(LayerItem* _item);
-            virtual void removeChildNode(LayerItem* _item);
 
             ImagePtr getImage() const { return m_image; }
             void render();
@@ -42,10 +38,6 @@ namespace Sandbox {
             void shutdownOverride();
             
         private:
-            RenderTargetImpl*        m_target;
-            
-            MyGUI::SharedLayerNode*  m_replaced_layer;
-            std::string m_texture_name;
             ImagePtr    m_image;
         };
 

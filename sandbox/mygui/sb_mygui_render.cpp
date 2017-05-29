@@ -20,7 +20,7 @@
 #include "sb_mygui_widget_render.h"
 #include "MyGUI_LayoutManager.h"
 #include "MyGUI_VertexData.h"
-
+#include <sbstd/sb_platform.h>
 
 SB_META_DECLARE_OBJECT(MyGUI::ITexture, MyGUI::IObject)
 
@@ -36,7 +36,7 @@ namespace Sandbox {
                 m_target->GetTexture()->SetFiltered(true);
                 m_rendertarget_size.width = m_target->GetWidth();
                 m_rendertarget_size.height = m_target->GetHeight();
-                m_texture = new TextureImpl("rt",m_target->GetTexture());
+                m_texture = new TextureImpl("",m_target->GetTexture());
                 begin();
                 end();
             }
@@ -56,7 +56,7 @@ namespace Sandbox {
             begin();
             end();
             if (!m_texture) {
-                m_texture = new TextureImpl("rt",m_target->GetTexture());
+                m_texture = new TextureImpl("",m_target->GetTexture());
             } else {
                 m_texture->SetTexture(m_target->GetTexture());
             }
@@ -162,6 +162,16 @@ namespace Sandbox {
         
         TextureImpl::TextureImpl( const sb::string& name,
                                  const TexturePtr& tex) : m_name(name),m_texture(tex) {
+            if (name.empty()) {
+                if (m_texture && !m_texture->GetName().empty()) {
+                    m_name = m_texture->GetName();
+                } else {
+                    char buff[128];
+                    sb::snprintf(buff, 128, "generated_%p",this);
+                    m_name = buff;
+                    if (m_texture) m_texture->SetName(m_name);
+                }
+            }
         }
         
         

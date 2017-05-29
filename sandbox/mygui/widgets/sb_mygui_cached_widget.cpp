@@ -90,10 +90,6 @@ namespace Sandbox {
         CachedWidget::CachedWidget() : m_render_content(false) {
             m_target = 0;
             m_replaced_layer = new ReplacedLayer();
-            m_texture_name = get_type_info()->name;
-            char buf[128];
-			sb::snprintf(buf, 128, "_%p", this);
-            m_texture_name += buf;
             m_suboffset = Sandbox::Vector2f(0,0);
         }
         
@@ -136,26 +132,32 @@ namespace Sandbox {
         }
         
         void CachedWidget::addChildItem(LayerItem* _item) {
-            m_replaced_layer->getRoot()->attachLayerItem(_item);
+            _item->_attachToLayerItemNode(m_replaced_layer->getRoot(), false);
         }
         
         void CachedWidget::removeChildItem(LayerItem* _item) {
-            _item->detachFromLayer();
+            //_item->detachFromLayer();
         }
         
         void CachedWidget::addChildNode(LayerItem* _item) {
+            //mLayerNodes.push_back(_item);
+            // создаем оверлаппеду новый айтем
             MyGUI::ILayerNode* child_node = _item->createChildItemNode(m_replaced_layer->getRoot());
-            child_node->attachLayerItem(_item);
+            _item->_attachToLayerItemNode(child_node, true);
         }
         
         void CachedWidget::removeChildNode(LayerItem* _item) {
-            MyGUI::ILayerNode* node = _item->getLayerNode();
-            if (node)
-                m_replaced_layer->getRoot()->destroyChildItemNode(node);
-            _item->detachFromLayer();
+//            MyGUI::ILayerNode* node = _item->getLayerNode();
+//            if (node) {
+//                node->detachLayerItem(_item);
+//                m_replaced_layer->getRoot()->destroyChildItemNode(node);
+//            }
         }
         
         void CachedWidget::frameEntered(float dt) {
+            renderToTarget();
+        }
+        RenderTargetImpl* CachedWidget::renderToTarget() {
             MyGUI::IntSize size = getSize();
             size.width = next_pot(size.width);
             size.height = next_pot(size.height);
@@ -177,7 +179,7 @@ namespace Sandbox {
                 _updateView();
             } else {
                 if (!m_replaced_layer->getRoot()->isOutOfDate() && !m_render_content)
-                    return;
+                    return 0;
             }
 
             if (m_target) {
@@ -188,6 +190,7 @@ namespace Sandbox {
                 m_target->graphics()->SetTransform(tr);
                 m_target->end();
             }
+            return m_target;
         }
         
         void CachedWidget::doRenderToTarget(MyGUI::IRenderTarget* rt) {

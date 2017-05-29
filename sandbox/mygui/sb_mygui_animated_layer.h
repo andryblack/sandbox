@@ -22,6 +22,7 @@ namespace Sandbox {
             void attachLayerNode(AnimatedLayerNode* node);
             void resetLayerNode(AnimatedLayerNode* node);
             void setNodeOutOfDate();
+            AnimatedLayerNode* getAnimatedLayerNode() { return m_node; }
         };
         
         class AnimatedLayer;

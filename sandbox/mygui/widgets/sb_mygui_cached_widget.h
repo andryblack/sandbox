@@ -72,19 +72,19 @@ namespace Sandbox {
             void setSubOffset(const Sandbox::Vector2f& sub) {
                 m_suboffset = sub;
             }
+            void setRenderContent(bool r) { m_render_content = r; }
             
         protected:
             void initialiseOverride();
             void shutdownOverride();
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
-            
+            RenderTargetImpl* renderToTarget();
             virtual void doRenderToTarget(MyGUI::IRenderTarget* rt);
         private:
             RenderTargetImpl*        m_target;
             
             ReplacedLayer*      m_replaced_layer;
             void frameEntered(float dt);
-            std::string m_texture_name;
             
             bool    m_render_content;
             Sandbox::Vector2f m_suboffset;

@@ -845,7 +845,7 @@ namespace Sandbox {
             
             luabind::ExternClass<MyGUI::EditBox>(lua);
             
-            luabind::Class<Sandbox::mygui::WidgetRender>(lua);
+            
             
 //            luabind::ExternClass<MyGUI::IFont>(lua);
 //            //luabind::ExternClass<Sandbox::mygui::ResourceTrueTypeFont>(lua);
@@ -876,7 +876,7 @@ namespace Sandbox {
             
             register_widgets(lua);
             
-            
+            luabind::Class<Sandbox::mygui::WidgetRender>(lua);
         }
                 
         
