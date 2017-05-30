@@ -777,6 +777,7 @@ SB_META_METHOD(removeWidgetModal)
 SB_META_METHOD(setKeyFocusWidget)
 SB_META_METHOD(setMouseFocusWidget)
 SB_META_METHOD(getMousePosition)
+SB_META_METHOD(resetMouseCaptureWidget)
 bind(method("resetKeyFocusWidget",
             static_cast<void(MyGUI::InputManager::*)()>(&MyGUI::InputManager::resetKeyFocusWidget)));
 bind(method("resetMouseFocusWidget",
