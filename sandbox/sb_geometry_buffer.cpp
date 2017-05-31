@@ -6,7 +6,7 @@
 //
 //
 
-#include "sb_geomerty_buffer.h"
+#include "sb_geometry_buffer.h"
 #include "sb_graphics.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::GeometryBuffer, Sandbox::SceneObject)

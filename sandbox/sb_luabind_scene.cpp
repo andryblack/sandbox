@@ -22,7 +22,7 @@
 #include "sb_scene.h"
 #include "sb_debug_geometry.h"
 #include "sb_rt_scene.h"
-#include "sb_geomerty_buffer.h"
+#include "sb_geometry_buffer.h"
 #include "sb_container_clip.h"
 #include "sb_container_scroll.h"
 #include "sb_text_box.h"
