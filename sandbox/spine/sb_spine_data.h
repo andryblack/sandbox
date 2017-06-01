@@ -45,6 +45,7 @@ namespace Sandbox {
         const DrawAttributesPtr& GetSlotAttribute(const void* idx) const;
         const EventPtr& GetEvent(const void* idx) const;
         ImagePtr GetSlotImage(const char* slot_name) const;
+        ImagePtr GetAttachmentImage(const char* slot_name,const char* attachment_name) const;
         
         static SpineDataPtr LoadI(const char* atlas_file,
                                  const char* skeleton_file,

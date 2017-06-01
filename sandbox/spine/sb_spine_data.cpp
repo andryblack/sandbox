@@ -87,6 +87,19 @@ namespace Sandbox {
         return ra->image;
     }
     
+    ImagePtr SpineData::GetAttachmentImage(const char* slot_name,const char* attachment_name) const {
+        if (!m_skeleton)
+            return ImagePtr();
+        int slot_index = spSkeletonData_findSlotIndex(m_skeleton, slot_name);
+        if (slot_index < 0 || slot_index>=m_skeleton->slotsCount)
+            return ImagePtr();
+        spAttachment* attachment = spSkin_getAttachment(m_skeleton->defaultSkin, slot_index, attachment_name);
+        if (!attachment || attachment->type != SP_ATTACHMENT_REGION)
+            return ImagePtr();
+        SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
+        return ra->image;
+    }
+    
     void SpineData::SetSlotAttribute(size_t idx, const DrawAttributesPtr& attribute) {
         if (idx < size_t(m_skeleton->slotsCount)) {
             m_attributes[m_skeleton->slots[idx]].attributes = attribute;
