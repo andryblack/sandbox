@@ -183,8 +183,8 @@ namespace Sandbox {
         for (int i=0;i<m_skeleton->eventsCount;++i) {
             EventPtr e(new Event());
             const spEventData* event(m_skeleton->events[i]);
-            e->SetString("name", event->name);
-            e->SetString("value", event->stringValue);
+            e->SetString("name", event->name ? event->name : "");
+            e->SetString("value", event->stringValue ? event->stringValue : "");
             e->SetInt("value", event->intValue);
             m_events[event] = e;
         }
