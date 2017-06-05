@@ -7,7 +7,7 @@
 #include <sbstd/sb_platform.h>
 #include <ghl_vfs.h>
 #include "meta/sb_meta.h"
-
+#include <ctime>
 
 
 
@@ -94,12 +94,25 @@ namespace Sandbox {
         file_logger.close();
         g_prev_log_path =path + prev_log;
         g_cur_log_path = path + curr_log;
-        vfs->DoRenameFile(g_cur_log_path.c_str(),g_prev_log_path.c_str());
+        if (vfs->IsFileExists(g_prev_log_path.c_str())) {
+            GHL_Log(GHL::LOG_LEVEL_INFO, (sb::string("remove ") + g_prev_log_path).c_str() );
+            vfs->DoRemoveFile(g_prev_log_path.c_str());
+        }
+        if (!vfs->DoRenameFile(g_cur_log_path.c_str(),g_prev_log_path.c_str())) {
+            GHL_Log(GHL::LOG_LEVEL_ERROR, (sb::string("failed rename ") + g_cur_log_path).c_str() );
+        }
         if (file_logger.open(vfs,g_cur_log_path.c_str())) {
             GHL_Log(GHL::LOG_LEVEL_INFO, (sb::string("start writing ") + g_cur_log_path).c_str() );
             GHL_SetLogger(&file_logger);
         }
 #endif
+        char time_format[128];
+        time_t rawtime;
+        struct tm * timeinfo;
+        time (&rawtime);
+        timeinfo = localtime (&rawtime);
+        strftime(time_format,sizeof(time_format),"%Y-%m-%d %H:%M:%S",timeinfo);
+        Sandbox::LogInfo("SB") << "start session at " << time_format;
     }
     
     void Logger::flush() {
