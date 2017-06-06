@@ -5,7 +5,7 @@
 #include "sb_graphics.h"
 #include "sb_log.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::mygui::ImageWidgetBase,Sandbox::mygui::AnimatedWidget)
+SB_META_DECLARE_OBJECT(Sandbox::mygui::ImageWidgetBase,Sandbox::mygui::ShaderWidget)
 SB_META_DECLARE_OBJECT(Sandbox::mygui::ImageWidget,Sandbox::mygui::ImageWidgetBase)
 
 namespace Sandbox {
@@ -27,6 +27,7 @@ namespace Sandbox {
                 img->GetTexture()->SetFiltered(true);
             }
         }
+        
         void ImageWidgetBase::setPropertyOverride(const std::string& _key, const std::string& _value) {
             if (_key == "Image") {
                 setImage(RenderManager::getInstance().getImage(_value.c_str()));

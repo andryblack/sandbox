@@ -28,17 +28,12 @@ namespace Sandbox {
             MaskImageWidget();
             ~MaskImageWidget();
             
-            void setPropertyOverride(const std::string& _key, const std::string& _value);
-            
             void setImage(const ImagePtr& img) { ImageWidgetBase::setImage(img); update_shader(); }
             
             void setShader(const ShaderPtr& s);
-            const ShaderPtr& getShader() const { return m_shader; }
             
         protected:
             void update_shader();
-        private:
-            ShaderPtr   m_shader;
         };
     }
 }

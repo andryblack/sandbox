@@ -25,6 +25,7 @@
 #include "sb_mygui_animated_widget.h"
 #include "sb_mygui_background_widget.h"
 #include "sb_mygui_text_input.h"
+#include "sb_mygui_shader_widget.h"
 
 #include "MyGUI_WidgetManager.h"
 #include "MyGUI_FactoryManager.h"
@@ -53,7 +54,6 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ImageWidget)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::MaskImageWidget)
-SB_META_PROPERTY_RW(shader, getShader, setShader)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::MaskTextWidget)
@@ -87,6 +87,10 @@ SB_META_PROPERTY_RW(Origin,GetOrigin,SetOrigin)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::BackgroundWidget)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ShaderWidget)
+SB_META_PROPERTY_RW(shader,getShader,setShader)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::TextInput)
@@ -144,6 +148,7 @@ namespace Sandbox {
             factory.registerFactory<AnimatedWidget>(category);
             factory.registerFactory<BackgroundWidget>(category);
             factory.registerFactory<TextInput>(category);
+            factory.registerFactory<ShaderWidget>(category);
         }
         void unregister_widgets() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
@@ -165,6 +170,7 @@ namespace Sandbox {
             factory.unregisterFactory<AnimatedWidget>(category);
             factory.unregisterFactory<BackgroundWidget>(category);
             factory.unregisterFactory<TextInput>(category);
+            factory.unregisterFactory<ShaderWidget>(category);
         }
 
         
@@ -177,7 +183,7 @@ namespace Sandbox {
             
             
             luabind::ExternClass<AnimatedWidget>(L);
-            
+            luabind::ExternClass<ShaderWidget>(L);
             luabind::ExternClass<ImageWidgetBase>(L);
             luabind::ExternClass<ImageWidget>(L);
             luabind::ExternClass<MaskImageWidget>(L);
@@ -194,6 +200,8 @@ namespace Sandbox {
             
             luabind::ExternClass<ScrollArea>(L);
             register_ScrollList(L);
+            
+            
             
         }
     }

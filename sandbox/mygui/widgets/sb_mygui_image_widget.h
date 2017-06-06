@@ -11,7 +11,7 @@
 
 #include "meta/sb_meta.h"
 #include "sb_rt_scene.h"
-#include "sb_mygui_animated_widget.h"
+#include "sb_mygui_shader_widget.h"
 #include "MyGUI_SubSkin.h"
 #include "MyGUI_MainSkin.h"
 #include "MyGUI_CommonStateInfo.h"
@@ -24,7 +24,7 @@ namespace Sandbox {
     
     namespace mygui {
         
-        class ImageWidgetBase : public AnimatedWidget {
+        class ImageWidgetBase : public ShaderWidget {
             MYGUI_RTTI_DERIVED( ImageWidgetBase )
         public:
             ImageWidgetBase();
@@ -34,6 +34,7 @@ namespace Sandbox {
             
             virtual void setImage(const ImagePtr& img);
             const ImagePtr& getImage() const { return m_image; }
+            
             
             void setTexture(const std::string& filename );
             
