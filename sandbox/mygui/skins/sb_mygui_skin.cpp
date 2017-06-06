@@ -318,34 +318,25 @@ namespace Sandbox {
         }
         
         
-        void KeepAspectMaskSubSkin::setMask(Sandbox::Graphics& g,const TexturePtr& texture,const MyGUI::FloatRect& uv) {
-            if (!texture) return;
-            Sandbox::Transform2d mTr = Sandbox::Transform2d();
+        void KeepAspectMaskSubSkin::setMask(Sandbox::Graphics& g,const Sandbox::Image& image) {
             
-            int x = mCroppedParent->getAbsoluteLeft();
-            int y = mCroppedParent->getAbsoluteTop();
-            int w = mCroppedParent->getWidth();
-            int h = mCroppedParent->getHeight();
+            float x = float(mCroppedParent->getAbsoluteLeft());
+            float y = float(mCroppedParent->getAbsoluteTop());
+            float w = float(mCroppedParent->getWidth());
+            float h = float(mCroppedParent->getHeight());
             
-            float tw = uv.width() * texture->GetWidth();
-            float th = uv.height() * texture->GetHeight();
-            
-            float sx = float(w) / tw;
-            float sy = float(h) / th;
+            float sx = w / image.GetWidth() ;
+            float sy = h / image.GetHeight() ;
             
             float s = (sx > sy) ? sx : sy;
             
-            float uvdx = (tw - float(w)/s) * 0.5f / texture->GetWidth();
-            float uvdy = (th - float(h)/s) * 0.5f / texture->GetHeight();
+            float sw = image.GetWidth() * s;
+            float sh = image.GetHeight() * s;
             
-            float uvsw = (1.0f/(s * texture->GetWidth() ) );
-            float uvsh = (1.0f/(s * texture->GetHeight() ) );
-
-            mTr.translate(uv.left+uvdx,uv.top+uvdy);
-            mTr.scale(uvsw, uvsh);
-            mTr.translate(-x,-y);
+            float dx = (w - sw) / 2.0f;
+            float dy = (h - sh) / 2.0f;
             
-            g.SetMask(MASK_MODE_ALPHA, texture, mTr);
+            g.SetMask(MASK_MODE_ALPHA, image, Sandbox::Rectf(dx+x,dy+y,sw,sh));
         }
         void register_skin() {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();

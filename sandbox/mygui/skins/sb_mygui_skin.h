@@ -112,7 +112,7 @@ namespace Sandbox {
             MYGUI_RTTI_DERIVED( KeepAspectMaskSubSkin )
         public:
             KeepAspectMaskSubSkin();
-            virtual void setMask(Sandbox::Graphics& g,const TexturePtr& texture,const MyGUI::FloatRect& uv);
+            virtual void setMask(Sandbox::Graphics& g,const Sandbox::Image& img);
         };
 
         
