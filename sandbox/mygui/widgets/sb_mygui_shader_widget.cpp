@@ -1,5 +1,5 @@
 #include "sb_mygui_shader_widget.h"
-#include "sb_mygui_render.h"
+#include "../sb_mygui_render.h"
 #include "sb_resources.h"
 #include "sb_graphics.h"
 
