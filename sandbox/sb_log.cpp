@@ -27,14 +27,22 @@ namespace Sandbox {
 #endif
     ;
     
-    static const char* level_descr[] = {
-        "F:",
-        "E:",
-        "W:",
-        "I:",
-        "V:",
-        "D:"
+    static const char level_descr[] = {
+        'F',
+        'E',
+        'W',
+        'I',
+        'V',
+        'D'
     };
+    
+    static void format_ts(char* buf,size_t bufsize,bool full) {
+        time_t rawtime;
+        struct tm * timeinfo;
+        time (&rawtime);
+        timeinfo = localtime (&rawtime);
+        strftime(buf,bufsize,full ? "%Y-%m-%d %H:%M:%S" : "%H:%M:%S" ,timeinfo);
+    }
 
     class GHLLogger : public GHL::Logger {
         GHL::WriteStream*   m_file;
@@ -46,7 +54,14 @@ namespace Sandbox {
         virtual bool GHL_CALL AddMessage( GHL::LogLevel level, const char* message ) {
             bool res = false;
             if (m_file) {
-                m_file->Write(reinterpret_cast<const GHL::Byte*>(level_descr[level]), 2);
+                char buf[128] = {0};
+                format_ts(buf, sizeof(buf), false);
+                size_t pos = strlen(buf);
+                buf[pos] = ':';++pos;
+                buf[pos] = level_descr[level];++pos;
+                buf[pos] = ':';++pos;
+                buf[pos] = 0;
+                m_file->Write(reinterpret_cast<const GHL::Byte*>(buf), pos);
                 m_file->Write(reinterpret_cast<const GHL::Byte*>(message), ::strlen(message));
                 m_file->Write(rn, sizeof(rn));
                 res = true;
@@ -83,6 +98,8 @@ namespace Sandbox {
     static sb::string g_cur_log_path;
     static sb::string g_prev_log_path;
     
+    
+    
     void Logger::StartSession(GHL::VFS* vfs) {
 #if !defined(GHL_PLATFORM_EMSCRIPTEN) && !defined(GHL_PLATFORM_FLASH)
         sb::string path = vfs->GetDir(GHL::DIR_TYPE_USER_PROFILE);
@@ -107,11 +124,7 @@ namespace Sandbox {
         }
 #endif
         char time_format[128];
-        time_t rawtime;
-        struct tm * timeinfo;
-        time (&rawtime);
-        timeinfo = localtime (&rawtime);
-        strftime(time_format,sizeof(time_format),"%Y-%m-%d %H:%M:%S",timeinfo);
+        format_ts(time_format,sizeof(time_format),true);
         Sandbox::LogInfo("SB") << "start session at " << time_format;
     }
     
