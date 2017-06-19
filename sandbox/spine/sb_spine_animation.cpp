@@ -347,6 +347,7 @@ namespace Sandbox {
     void SpineSceneObject::Draw(Graphics &gr) const {
         if (!m_animation)
             return;
+        
         Transform2d str = gr.GetTransform();
         Color clr = gr.GetColor();
         BlendMode bm = gr.GetBlendMode();
@@ -358,6 +359,8 @@ namespace Sandbox {
             GetColorM()->Apply(gr);
         }
 
+        Transform2d gstr = gr.GetTransform();
+        Color gclr = gr.GetColor();
         
         spSkeleton* skeleton = m_animation->m_skeleton;
         for (int i = 0; i < skeleton->slotsCount; ++i) {
@@ -397,7 +400,7 @@ namespace Sandbox {
             if (c.a <= 0.0f)
                 continue;
             c.clamp();
-            gr.SetColor(clr*c);
+            gr.SetColor(gclr*c);
             
             Sandbox::Transform2d tr;
             tr.m.matrix[0*2+0] = bone->a;
@@ -412,13 +415,13 @@ namespace Sandbox {
                 
                 SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
                 if (ra->image) {
-                    gr.SetTransform(str * (tr*ra->tr));
+                    gr.SetTransform(gstr * (tr*ra->tr));
                     const DrawAttributesPtr& attr = m_animation->m_data->GetSlotAttribute(slot->data);
                     gr.DrawImage(*ra->image,attr.get(),0,0);
                 }
             }
             if (object_attachement) {
-                gr.SetTransform(str * tr);
+                gr.SetTransform(gstr * tr);
                 object_attachement->Draw(gr);
             }
         }
