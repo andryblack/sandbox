@@ -1060,6 +1060,13 @@ namespace Sandbox {
         if (m_sound_mgr) {
             m_sound_mgr->Pause();
         }
+#ifdef SB_USE_MYGUI
+        if (MyGUI::InputManager::getInstancePtr()) {
+            MyGUI::InputManager::getInstance().resetKeyFocusWidget();
+            MyGUI::InputManager::getInstance().resetMouseCaptureWidget();
+            MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
+        }
+#endif
         StoreAppProfile();
 	}
 	///
