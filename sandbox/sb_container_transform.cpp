@@ -1,6 +1,6 @@
 #include "sb_container_transform.h"
 #include "sb_graphics.h"
-#include "sb_assert.h"
+#include <sbstd/sb_assert.h>
 
 SB_META_DECLARE_OBJECT(Sandbox::ContainerTransformBase, Sandbox::Container)
 SB_META_DECLARE_OBJECT(Sandbox::ContainerTransform, Sandbox::ContainerTransformBase)
