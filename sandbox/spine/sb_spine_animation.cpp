@@ -211,37 +211,28 @@ namespace Sandbox {
         return r;
     }
     
-    
-    
-    SpineSceneAttachement::SpineSceneAttachement(const sb::string& attachement) : m_attachement(attachement) {
-        
-    }
-    
-    void SpineSceneAttachement::GetTransformImpl(Transform2d& tr) const {
-        Container::GetTransformImpl(tr);
-        if (!GetParent())
-            return;
-        SpineSceneObject* parent = meta::sb_dynamic_cast<SpineSceneObject>(GetParent());
-        if (parent) {
-            parent->ApplySlotTransform(tr,m_attachement);
+    void SpineAnimation::ApplySlotTransform(Transform2d& atr,const sb::string& slot_name) const {
+        spSkeleton* skeleton = m_skeleton;
+        for (int i = 0; i < skeleton->slotsCount; ++i) {
+            spSlot* slot = skeleton->drawOrder[i];
+            if (!slot)
+                continue;
+            spBone* bone = slot->bone;
+            if (slot_name == slot->data->name) {
+                Sandbox::Transform2d tr;
+                tr.m.matrix[0*2+0] = bone->a;
+                tr.m.matrix[0*2+1] = bone->c;
+                tr.m.matrix[1*2+0] = bone->b;
+                tr.m.matrix[1*2+1] = bone->d;
+                tr.v.x = skeleton->x + bone->worldX;
+                tr.v.y = skeleton->y + bone->worldY;
+                
+                atr = atr * tr;
+                return;
+            }
         }
     }
     
-    void SpineSceneAttachement::GlobalToLocalImpl(Vector2f& v) const {
-        SceneObject::GlobalToLocalImpl(v);
-        if (!GetParent())
-            return;
-        SpineSceneObject* parent = meta::sb_dynamic_cast<SpineSceneObject>(GetParent());
-        if (parent) {
-            Transform2d tr;
-            parent->ApplySlotTransform(tr,m_attachement);
-            tr.inverse();
-            v = tr.transform(v);
-        }
-        if (GetTransformM()) {
-            GetTransformM()->UnTransform(v);
-        }
-    }
     
     SpineSceneObject::SpineSceneObject(const SpineAnimationPtr& animation) : m_animation(animation) {
         
@@ -252,7 +243,7 @@ namespace Sandbox {
         if (it!=m_attachements.end()) {
             RemoveObject(it->second);
         }
-        m_attachements[slot_name] = SpineSceneAttachementPtr(new SpineSceneAttachement(slot_name));
+        m_attachements[slot_name] = ContainerTransformPtr(new ContainerTransform());
         m_attachements[slot_name]->AddObject(object);
         AddObject(m_attachements[slot_name]);
     }
@@ -262,6 +253,19 @@ namespace Sandbox {
             RemoveObject(it->second);
             m_attachements.erase(it);
         }
+    }
+    
+    ContainerTransformPtr SpineSceneObject::GetAttachment(const sb::string& slot_name) {
+        AttachementMap::iterator it = m_attachements.find(slot_name);
+        if (it!=m_attachements.end()) {
+            return it->second;
+        }
+        if (!spSkeleton_findSlot(m_animation->m_skeleton, slot_name.c_str())) {
+            return ContainerTransformPtr();
+        }
+        
+        m_attachements[slot_name] = ContainerTransformPtr(new ContainerTransform());
+        return m_attachements[slot_name];
     }
     
     bool SpineSceneObject::CheckSlotHitImpl(spSlot* slot,const Vector2f& pos, Resources* resources) {
@@ -323,27 +327,9 @@ namespace Sandbox {
     void SpineSceneObject::ApplySlotTransform(Transform2d& atr,const sb::string& slot_name) const {
         if (!m_animation)
             return;
-        spSkeleton* skeleton = m_animation->m_skeleton;
-        for (int i = 0; i < skeleton->slotsCount; ++i) {
-            spSlot* slot = skeleton->drawOrder[i];
-            if (!slot)
-                continue;
-            spBone* bone = slot->bone;
-            if (slot_name == slot->data->name) {
-                Sandbox::Transform2d tr;
-                tr.m.matrix[0*2+0] = bone->a;
-                tr.m.matrix[0*2+1] = bone->c;
-                tr.m.matrix[1*2+0] = bone->b;
-                tr.m.matrix[1*2+1] = bone->d;
-                tr.v.x = skeleton->x + bone->worldX;
-                tr.v.y = skeleton->y + bone->worldY;
-                
-                atr = atr * tr;
-                return;
-            }
-            
-        }
+        m_animation->ApplySlotTransform(atr, slot_name);
     }
+    
     void SpineSceneObject::Draw(Graphics &gr) const {
         if (!m_animation)
             return;
@@ -369,7 +355,7 @@ namespace Sandbox {
                 continue;
             spBone* bone = slot->bone;
             spAttachment* attachment = slot->attachment;
-            SpineSceneAttachementPtr object_attachement;
+            ContainerTransformPtr object_attachement;
             {
                 AttachementMap::const_iterator it = m_attachements.find(slot->data->name);
                 if (it!=m_attachements.end()) {
@@ -421,7 +407,8 @@ namespace Sandbox {
                 }
             }
             if (object_attachement) {
-                gr.SetTransform(gstr * tr);
+                object_attachement->SetTransform(tr);
+                gr.SetTransform(gstr);
                 object_attachement->Draw(gr);
             }
         }

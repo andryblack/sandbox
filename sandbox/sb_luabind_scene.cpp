@@ -17,6 +17,7 @@
 #include "sb_container.h"
 #include "sb_container_blend.h"
 #include "sb_container_visible.h"
+#include "sb_container_transform.h"
 #include "sb_container_transform3d.h"
 #include "sb_container_shader.h"
 #include "sb_scene.h"
@@ -243,6 +244,17 @@ SB_META_METHOD(UnTransform)
 SB_META_METHOD(Transform)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerTransformBase)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerTransform)
+SB_META_CONSTRUCTOR(())
+SB_META_PROPERTY_RW(Transform, GetTransform, SetTransform)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerTransformCopy)
+SB_META_CONSTRUCTOR((Sandbox::ContainerTransformBasePtr))
+SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerTransform3d)
 SB_META_CONSTRUCTOR(())
@@ -312,6 +324,9 @@ namespace Sandbox {
         luabind::Class<TransformModificator>(lua);
         luabind::Class<ColorModificator>(lua);
         luabind::Class<ContainerVisible>(lua);
+        luabind::ExternClass<ContainerTransformBase>(lua);
+        luabind::Class<ContainerTransform>(lua);
+        luabind::Class<ContainerTransformCopy>(lua);
         luabind::Class<ContainerTransform3d>(lua);
         luabind::Class<ContainerShader>(lua);
         luabind::Class<ContainerScroll>(lua);

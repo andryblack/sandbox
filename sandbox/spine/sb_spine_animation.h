@@ -8,6 +8,7 @@
 #include "sb_rect.h"
 #include "sb_color.h"
 #include "sb_object_proxy.h"
+#include "sb_container_transform.h"
 
 
 struct spSkeleton;
@@ -49,6 +50,8 @@ namespace Sandbox {
         virtual void Clear();
         
         Rectf CalcBoundingBox() const;
+        void ApplySlotTransform(Transform2d& tr,const sb::string& slot_name) const;
+        void ApplySlotTransform(const TransformModificatorPtr& tr,const sb::string& slot_name) const;
     private:
         SpineDataPtr    m_data;
         spSkeleton*     m_skeleton;
@@ -68,15 +71,6 @@ namespace Sandbox {
     
     class SpineSceneObject;
     
-    class SpineSceneAttachement : public Container {
-    private:
-        sb::string  m_attachement;
-    public:
-        explicit SpineSceneAttachement(const sb::string& attachement);
-        virtual void GetTransformImpl(Transform2d& tr) const;
-        virtual void GlobalToLocalImpl(Vector2f& v) const;
-    };
-    typedef sb::intrusive_ptr<SpineSceneAttachement> SpineSceneAttachementPtr;
     
     class SpineSceneObject : public Container {
         SB_META_OBJECT
@@ -86,12 +80,13 @@ namespace Sandbox {
         void Draw(Graphics& g) const;
         void SetAttachement(const sb::string& slot_name,const SceneObjectPtr& object);
         void RemoveAttachement(const sb::string& slot_name);
+        ContainerTransformPtr GetAttachment(const sb::string& slot_name);
         void ApplySlotTransform(Transform2d& tr,const sb::string& slot_name) const;
         bool CheckHit(const Vector2f& pos, Resources* resources);
         bool CheckSlotHit(const char* slot,const Vector2f& pos, Resources* resources);
     private:
         SpineAnimationPtr   m_animation;
-        typedef sb::map<sb::string,SpineSceneAttachementPtr> AttachementMap;
+        typedef sb::map<sb::string,ContainerTransformPtr> AttachementMap;
         AttachementMap m_attachements;
         bool CheckSlotHitImpl(spSlot* slot,const Vector2f& pos, Resources* resources);
     };
