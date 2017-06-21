@@ -202,7 +202,7 @@ namespace Sandbox {
                     sb_assert(lua_isfunction(L, -1));
                     lua_remove(L, -2);          /// get
                     lua_pushvalue(L, 1);        /// get obj
-                    lua_call_method(L, 1, 1, "get");
+                    lua_call(L, 1, 1);
                     return true;
                 }
 				lua_pop(L, 2);                  /// mt
@@ -279,7 +279,7 @@ namespace Sandbox {
                     lua_remove(L, -2);          /// set
                     lua_pushvalue(L, 1);        /// set obj
                     lua_pushvalue(L, 3);        /// set obj val
-                    lua_call_method(L, 2, 0, "set");
+                    lua_call(L, 2, 0);
                     return true;
                 }
 				lua_pop(L, 2);                  /// mt

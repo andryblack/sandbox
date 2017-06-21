@@ -258,6 +258,7 @@ namespace Sandbox {
             }
             
             effect = m_sound->CreateEffect(decoder->GetSampleType(), decoder->GetFrequency(), data);
+            data->Release();
             decoder->Release();
             
         }

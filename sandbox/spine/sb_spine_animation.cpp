@@ -239,16 +239,24 @@ namespace Sandbox {
     }
     
     void SpineSceneObject::SetAttachement(const sb::string& slot_name,const SceneObjectPtr& object) {
-        AttachementMap::iterator it = m_attachements.find(slot_name);
+        const spSlot* slot = spSkeleton_findSlot(m_animation->m_skeleton, slot_name.c_str());
+        if (!slot) {
+            return;
+        }
+        AttachementMap::iterator it = m_attachements.find(slot->data);
         if (it!=m_attachements.end()) {
             RemoveObject(it->second);
         }
-        m_attachements[slot_name] = ContainerTransformPtr(new ContainerTransform());
-        m_attachements[slot_name]->AddObject(object);
-        AddObject(m_attachements[slot_name]);
+        m_attachements[slot->data] = ContainerTransformPtr(new ContainerTransform());
+        m_attachements[slot->data]->AddObject(object);
+        AddObject(m_attachements[slot->data]);
     }
     void SpineSceneObject::RemoveAttachement(const sb::string& slot_name) {
-        AttachementMap::iterator it = m_attachements.find(slot_name);
+        const spSlot* slot = spSkeleton_findSlot(m_animation->m_skeleton, slot_name.c_str());
+        if (!slot) {
+            return;
+        }
+        AttachementMap::iterator it = m_attachements.find(slot->data);
         if (it!=m_attachements.end()) {
             RemoveObject(it->second);
             m_attachements.erase(it);
@@ -256,16 +264,17 @@ namespace Sandbox {
     }
     
     ContainerTransformPtr SpineSceneObject::GetAttachment(const sb::string& slot_name) {
-        AttachementMap::iterator it = m_attachements.find(slot_name);
+        const spSlot* slot = spSkeleton_findSlot(m_animation->m_skeleton, slot_name.c_str());
+        if (!slot) {
+            return ContainerTransformPtr();
+        }
+        AttachementMap::iterator it = m_attachements.find(slot->data);
         if (it!=m_attachements.end()) {
             return it->second;
         }
-        if (!spSkeleton_findSlot(m_animation->m_skeleton, slot_name.c_str())) {
-            return ContainerTransformPtr();
-        }
         
-        m_attachements[slot_name] = ContainerTransformPtr(new ContainerTransform());
-        return m_attachements[slot_name];
+        m_attachements[slot->data] = ContainerTransformPtr(new ContainerTransform());
+        return m_attachements[slot->data];
     }
     
     bool SpineSceneObject::CheckSlotHitImpl(spSlot* slot,const Vector2f& pos, Resources* resources) {
@@ -357,7 +366,7 @@ namespace Sandbox {
             spAttachment* attachment = slot->attachment;
             ContainerTransformPtr object_attachement;
             {
-                AttachementMap::const_iterator it = m_attachements.find(slot->data->name);
+                AttachementMap::const_iterator it = m_attachements.find(slot->data);
                 if (it!=m_attachements.end()) {
                     object_attachement = it->second;
                 }

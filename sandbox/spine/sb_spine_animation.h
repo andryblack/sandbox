@@ -86,7 +86,7 @@ namespace Sandbox {
         bool CheckSlotHit(const char* slot,const Vector2f& pos, Resources* resources);
     private:
         SpineAnimationPtr   m_animation;
-        typedef sb::map<sb::string,ContainerTransformPtr> AttachementMap;
+        typedef sb::map<const void*,ContainerTransformPtr> AttachementMap;
         AttachementMap m_attachements;
         bool CheckSlotHitImpl(spSlot* slot,const Vector2f& pos, Resources* resources);
     };
