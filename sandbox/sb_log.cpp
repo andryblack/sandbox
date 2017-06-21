@@ -36,12 +36,14 @@ namespace Sandbox {
         'D'
     };
     
+    static sb::string log_time_format = "%H:%M:%S";
+    
     static void format_ts(char* buf,size_t bufsize,bool full) {
         time_t rawtime;
         struct tm * timeinfo;
         time (&rawtime);
         timeinfo = localtime (&rawtime);
-        strftime(buf,bufsize,full ? "%Y-%m-%d %H:%M:%S" : "%H:%M:%S" ,timeinfo);
+        strftime(buf,bufsize,full ? "%Y-%m-%d %H:%M:%S" : log_time_format.c_str() ,timeinfo);
     }
 
     class GHLLogger : public GHL::Logger {
@@ -57,7 +59,7 @@ namespace Sandbox {
                 char buf[128] = {0};
                 format_ts(buf, sizeof(buf), false);
                 size_t pos = strlen(buf);
-                buf[pos] = ':';++pos;
+                buf[pos] = '|';++pos;
                 buf[pos] = level_descr[level];++pos;
                 buf[pos] = ':';++pos;
                 buf[pos] = 0;
@@ -98,7 +100,9 @@ namespace Sandbox {
     static sb::string g_cur_log_path;
     static sb::string g_prev_log_path;
     
-    
+    void Logger::SetTimeFormat(const char *fmt) {
+        log_time_format = fmt;
+    }
     
     void Logger::StartSession(GHL::VFS* vfs) {
 #if !defined(GHL_PLATFORM_EMSCRIPTEN) && !defined(GHL_PLATFORM_FLASH)

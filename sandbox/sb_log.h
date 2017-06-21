@@ -29,6 +29,7 @@ namespace Sandbox {
         static void StartSession(GHL::VFS* vfs);
         static void SetPlatformLogEnabled(bool e) { m_enable_platform_log = e; }
         static bool GetPlatformLogEnabled() { return m_enable_platform_log; }
+        static void SetTimeFormat(const char* fmt);
         static void flush();
         static sb::string GetCurrentPath();
         static sb::string GetPrevPath();
