@@ -4,6 +4,8 @@
 #include <android/native_activity.h>
 #include <sbstd/sb_string.h>
 
+GHL_API jstring GHL_CALL GHL_JNI_CreateStringUTF8(JNIEnv* env,const char* str);
+
 namespace jni {
 	JNIEnv* get_env(Sandbox::Application* app) {
 	    GHL::System* sys = app->GetSystem();
@@ -44,6 +46,10 @@ namespace jni {
 	    env->ReleaseStringUTFChars( jstr, psz );
 
 	    return result;
+	}
+	
+	jstring jni_string::convert_utf8(JNIEnv* env,const char* str) {
+		return GHL_JNI_CreateStringUTF8(env,str);
 	}
 
 

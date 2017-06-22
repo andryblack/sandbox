@@ -31,14 +31,14 @@ namespace jni {
         jstring jstr;
         JNIEnv* env;
         explicit jni_string(const char* str, JNIEnv* env) : env(env) {
-            jstr = env->NewStringUTF( str );
+            jstr = convert_utf8(env,str);
         }
         explicit jni_string(jobject obj, JNIEnv* env) : jstr((jstring)obj),env(env){
         }
         ~jni_string() {
             env->DeleteLocalRef( jstr );
         }
-
+        static jstring convert_utf8(JNIEnv* env,const char* str);
         static std::string extract( const jstring jstr , JNIEnv* env ) {
         	return extract_jni_string(env,jstr);
         }

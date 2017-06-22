@@ -60,7 +60,7 @@ namespace Sandbox {
 		
 		return reinterpret_cast<const char*>(str);
     }
-    const char* next_char(const char* s)
+    static const char* next_char(const char* s)
     {
 		
 		const unsigned char* str = reinterpret_cast<const unsigned char*>(s);
