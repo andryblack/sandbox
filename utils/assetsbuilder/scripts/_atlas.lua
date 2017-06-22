@@ -92,6 +92,9 @@ function Atlas:build(  )
 			self:dump()
 			error(err)
 		end
+		if self.fixed_size then
+			error('atlas build failed ' .. self.width .. 'x' .. self.height)
+		end
 		if self.width > self.height then
 			self.height = self.height * 2
 		else
@@ -100,7 +103,7 @@ function Atlas:build(  )
 		self.rects = { {0,0,self.width,self.height} }
 	end
 	-- shunk down
-	if self.width > self.start_w or self.height > self.start_h then
+	if not self.fixed_size and ( self.width > self.start_w or self.height > self.start_h) then
 		local last_success = nil
 		while true do
 			last_success = {self.width,self.height}

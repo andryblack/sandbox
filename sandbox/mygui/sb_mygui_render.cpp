@@ -47,8 +47,14 @@ namespace Sandbox {
                 return;
             float scale = RenderManager::getInstance().getRTScale();
             RenderTargetPtr prev = m_target;
+            float full_scale = m_resources->GetScale() * scale;
+            if (m_target ) {
+                if (m_target->GetWidth() >= size.width &&
+                    m_target->GetHeight() >= size.height)
+                    return;
+            }
             m_target = m_resources->CreateRenderTarget(size.width, size.height,
-                                                       m_resources->GetScale() * scale, true, false);
+                                                       full_scale, true, false);
             if (!m_target) {
                 m_target = prev;
             }

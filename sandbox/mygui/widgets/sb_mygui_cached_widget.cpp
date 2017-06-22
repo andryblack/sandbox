@@ -155,12 +155,11 @@ namespace Sandbox {
         }
         
         void CachedWidget::frameEntered(float dt) {
-            renderToTarget();
+            if (getInheritedVisible() && getAlpha()>0.0f)
+                renderToTarget();
         }
         RenderTargetImpl* CachedWidget::renderToTarget() {
             MyGUI::IntSize size = getSize();
-            size.width = next_pot(size.width);
-            size.height = next_pot(size.height);
             bool need_recreate = !m_target;
             if (!need_recreate) {
                 if (size.width > m_target->getWidth())
