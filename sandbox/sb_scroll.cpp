@@ -59,6 +59,8 @@ namespace Sandbox {
         if (m_state == scroll_move) {
             ScrollMove(pos);
             m_state = scroll_free;
+        } else if (m_state == scroll_wait) {
+            m_state = scroll_free;
         } else {
             m_last_speed = Sandbox::Vector2f(0,0);
             m_state = scroll_none;
