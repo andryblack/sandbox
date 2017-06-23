@@ -416,6 +416,8 @@ namespace Sandbox {
                 }
             }
             if (object_attachement) {
+                tr.m.matrix[0*2+1] = -bone->c;
+                tr.m.matrix[1*2+1] = -bone->d;
                 object_attachement->SetTransform(tr);
                 gr.SetTransform(gstr);
                 object_attachement->Draw(gr);
