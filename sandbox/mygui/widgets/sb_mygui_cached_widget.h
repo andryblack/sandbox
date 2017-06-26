@@ -78,8 +78,9 @@ namespace Sandbox {
             void initialiseOverride();
             void shutdownOverride();
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
-            virtual RenderTargetImpl* renderToTarget();
+            virtual RenderTargetImpl* renderToTarget(bool update_);
             virtual void doRenderToTarget(MyGUI::IRenderTarget* rt);
+            void recursiveRenderChilds(MyGUI::Widget* ch);
         private:
             RenderTargetImpl*        m_target;
             

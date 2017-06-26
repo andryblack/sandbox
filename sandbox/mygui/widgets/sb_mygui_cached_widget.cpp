@@ -156,9 +156,24 @@ namespace Sandbox {
         
         void CachedWidget::frameEntered(float dt) {
             if (getInheritedVisible() && getAlpha()>0.0f)
-                renderToTarget();
+                renderToTarget(true);
         }
-        RenderTargetImpl* CachedWidget::renderToTarget() {
+        
+        void CachedWidget::recursiveRenderChilds(MyGUI::Widget* ch) {
+            for (MyGUI::EnumeratorWidgetPtr en = ch->getEnumerator();en.next();) {
+                recursiveRenderChilds(en.current());
+            }
+            for (MyGUI::EnumeratorWidgetPtr en = ch->getSkinEnumerator();en.next();) {
+                recursiveRenderChilds(en.current());
+            }
+            CachedWidget* cached = ch->castType<CachedWidget>(false);
+            if (cached) {
+                cached->renderToTarget(false);
+            }
+        }
+        
+        
+        RenderTargetImpl* CachedWidget::renderToTarget(bool update_) {
             MyGUI::IntSize size = getSize();
             bool need_recreate = !m_target;
             if (!need_recreate) {
@@ -180,6 +195,16 @@ namespace Sandbox {
                 if (!m_replaced_layer->getRoot()->isOutOfDate() && !m_render_content)
                     return 0;
             }
+            
+            if (update_) {
+                for (MyGUI::EnumeratorWidgetPtr en = getEnumerator();en.next();) {
+                    recursiveRenderChilds(en.current());
+                }
+                for (MyGUI::EnumeratorWidgetPtr en = getSkinEnumerator();en.next();) {
+                    recursiveRenderChilds(en.current());
+                }
+            }
+            
 
             if (m_target) {
                 m_target->begin();
@@ -188,7 +213,11 @@ namespace Sandbox {
                 doRenderToTarget(m_target);
                 m_target->graphics()->SetTransform(tr);
                 m_target->end();
+                if (update_) {
+                    _correctSkinItemView();
+                }
             }
+            
             return m_target;
         }
         

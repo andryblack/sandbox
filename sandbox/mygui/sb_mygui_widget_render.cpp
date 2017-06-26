@@ -57,7 +57,7 @@ namespace Sandbox {
         
         void WidgetRender::render() {
             _updateChilds();
-            RenderTargetImpl* target = renderToTarget();
+            RenderTargetImpl* target = renderToTarget(true);
             if (target) {
                 m_image->SetTexture( target->getTexture()->GetTexture() );
                 m_image->SetTextureRect(0, 0, getWidth(), getHeight());
