@@ -585,12 +585,15 @@ SB_META_DECLARE_OBJECT(MyGUI::ILayerNode, MyGUI::IObject)
 
 SB_META_DECLARE_OBJECT(MyGUI::LayerNode, MyGUI::ILayerNode)
 
-SB_META_DECLARE_OBJECT(MyGUI::SharedLayer, MyGUI::ILayer)
 SB_META_DECLARE_OBJECT(MyGUI::OverlappedLayer, MyGUI::ILayer)
 SB_META_BEGIN_KLASS_BIND(MyGUI::OverlappedLayer)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::SharedLayerNode, MyGUI::ILayerNode)
+
+SB_META_DECLARE_OBJECT(MyGUI::SharedLayer, MyGUI::ILayer)
+SB_META_BEGIN_KLASS_BIND(MyGUI::SharedLayer)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::TileRect, MyGUI::ISubWidgetRect)
 
@@ -696,10 +699,15 @@ SB_META_METHOD(loadLayout)
 SB_META_STATIC_METHOD(getInstancePtr)
 SB_META_END_KLASS_BIND()
 
+static MyGUI::ILayer* LayerManager_get_layer(MyGUI::LayerManager* m,const char* name) {
+    return m->getByName(name,false);
+}
+
 SB_META_DECLARE_KLASS(MyGUI::LayerManager, void)
 SB_META_BEGIN_KLASS_BIND(MyGUI::LayerManager)
 SB_META_STATIC_METHOD(getInstancePtr)
 SB_META_METHOD(attachToLayerNode)
+bind(method("getByName", &LayerManager_get_layer));
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(MyGUI::ResourceManager, void)
@@ -874,6 +882,7 @@ namespace Sandbox {
             
             luabind::ExternClass<MyGUI::ILayer>(lua);
             luabind::ExternClass<MyGUI::OverlappedLayer>(lua);
+            luabind::ExternClass<MyGUI::SharedLayer>(lua);
             luabind::ExternClass<AnimatedLayer>(lua);
             
             luabind::ExternClass<GUI>(lua);

@@ -52,7 +52,17 @@ namespace Sandbox {
                 g.SetTransform(tr.translated(float(ox),float(oy)).scaled( sx,sy));
             }
         }
+        float dw = g.GetDrawWidth();
+        float dh = g.GetDrawHeight();
         for (size_t i=0;i<m_data->images.size();i++) {
+            Vector2f tl = g.GetTransform().transform(-m_data->images[i].GetHotspot());
+            Vector2f br = g.GetTransform().transform(Vector2f(m_data->images[i].GetWidth(),
+                                                              m_data->images[i].GetHeight())-
+                                                     m_data->images[i].GetHotspot());
+            if ((tl.x > dw) ||
+                (tl.y > dh) ||
+                (br.x < 0) ||
+                (br.y < 0)) continue;
             g.DrawImage(m_data->images[i], GetDrawAttributes().get(), 0, 0);
         }
         g.SetTransform(tr);
