@@ -37,8 +37,14 @@ namespace Sandbox {
         Point<T> GetTopLeft() const {
             return Point<T>( x,y );
         }
+        Point<T> GetTopRight() const {
+            return Point<T>( x + w, y );
+        }
         Point<T> GetBottomRight() const {
             return Point<T>( x + w, y + h);
+        }
+        Point<T> GetBottomLeft() const {
+            return Point<T>( x, y + h);
         }
         Size<T> GetSize() const {
             return Size<T>( w, h );

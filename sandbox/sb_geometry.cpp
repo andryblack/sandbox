@@ -319,7 +319,7 @@ namespace Sandbox {
         ctx.z = 0;
         ctx.transform = tr;
         if (buffer.texture) {
-            ctx.transform.scale(1.0f/buffer.texture->GetWidth(), 1.0f/buffer.texture->GetHeight());
+            ctx.transform = Sandbox::Transform2d().scale(1.0f/buffer.texture->GetWidth(), 1.0f/buffer.texture->GetHeight()) * tr;
         }
         size_t idx_top = 0;
         size_t idx_bottom = points.size()-1;
