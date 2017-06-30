@@ -8,6 +8,7 @@
 #include <ghl_vfs.h>
 #include <ghl_image_decoder.h>
 #include <meta/sb_meta.h>
+#include "tasks_pool.h"
 
 namespace GHL {
     struct ImageDecoder;
@@ -57,7 +58,9 @@ public:
     GHL::ImageFileFormat GetImageFileFormat() const { return m_image_file_format; }
     void SetImageFileFormatPNG();
     void SetImageFileFormatJPEG();
+    void SetImageFileFormatETC1();
     bool IsJPEG() const { return m_image_file_format == GHL::IMAGE_FILE_FORMAT_JPEG; }
+    void Free();
 };
 typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 
@@ -69,6 +72,8 @@ public:
 
     void set_update_only(bool u);
     void set_dst_path(const sb::string& dst);
+    void set_threads(int threads);
+    void set_quality(int q);
     const sb::string& get_dst_path() const { return m_dst_dir; }
     void set_options(const sb::vector<sb::string>& o) { m_options = o;}
     const sb::vector<sb::string>& get_options() const { return m_options; }
@@ -99,12 +104,15 @@ public:
     virtual GHL::DataStream* OpenFile(const char* fn);
     virtual GHL::WriteStream* OpenDestFile(const char* fn);
     GHL::Data* LoadData(const char* fn);
+    
+    bool wait_tasks();
 protected:
     virtual double GetVersion() const;
     Sandbox::LuaVM* GetLua() { return m_lua; }
     virtual void Bind(lua_State* L);
     virtual sb::string get_output_filename( const char* name );
     virtual const GHL::Data* encode_texture(const TextureDataPtr& texture);
+    TasksPool* m_tasks;
 private:
 	Sandbox::LuaVM*	m_lua;
     GHL::VFS*   m_vfs;
@@ -116,6 +124,7 @@ private:
     sb::string  m_platform;
     bool        m_update_only;
     sb::vector<sb::string> m_arguments;
+    
 };
 
 #endif /*APPLICATION_H_INCLUDED*/

@@ -8,7 +8,7 @@ namespace Sandbox {
         m_height = img->GetHeight();
         size_t bwidth = (m_width + bits_count - 1) / bits_count;
         m_data.resize(bwidth*m_height,0);
-        const GHL::Byte* src = img->GetDataPtr();
+        const GHL::Byte* src = img->GetData()->GetData();
         size_t bpp = 1;
         switch (img->GetFormat()) {
             case GHL::IMAGE_FORMAT_RGBA:

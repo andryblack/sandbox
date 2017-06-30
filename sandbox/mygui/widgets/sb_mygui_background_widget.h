@@ -11,6 +11,7 @@ namespace Sandbox {
             MYGUI_RTTI_DERIVED( BackgroundWidget )
         public:
             BackgroundWidget();
+            void setBackground(const char* mame);
         protected:
             void setPropertyOverride(const std::string& _key, const std::string& _value);
             void initialiseOverride();

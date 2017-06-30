@@ -55,23 +55,41 @@ end
 
 
 
+function default_action_on_file( action, src, dst )
+	--print(action.name,src,dst)
+	local df = action.file_remap and action.file_remap(dst) or dst
+	assert(get_rules()[action.name])[src]=df
+	assert(not get_rules().dest_files[df],'conflict rules for file ' .. df)
+	get_rules().dest_files[df]=src
+end
 
-local action_copy_files = 'copy_files'
-local action_compile_files = 'compile_files'
-local action_premultiply_images = 'premultiply_images'
-local action_convert_to_jpeg = 'convert_to_jpeg'
-local action_encode_sounds = 'encode_sounds'
 
-local file_remap = {}
-function file_remap.convert_to_jpeg( f )
-	return path.replaceextension(f,'jpg')
-end
-function file_remap.encode_sounds( f )
-	return path.replaceextension(f,'ogg')
-end
-function file_remap.premultiply_images( f )
-	return path.replaceextension(f,_images.image_file_format.ext)
-end
+local action_copy_files = {
+	name = 'copy_files',
+	on_file = default_action_on_file
+}
+
+
+local action_compile_files = {
+	name = 'compile_files',
+	on_file = default_action_on_file
+}
+local action_convert_to_jpeg = {
+	name = 'convert_to_jpeg',
+	file_remap = function(f) return path.replaceextension(f,'jpg') end,
+	on_file = default_action_on_file
+}
+local action_encode_sounds = {
+	name = 'encode_sounds',
+	file_remap = function(f) return path.replaceextension(f,'ogg') end,
+	on_file = default_action_on_file
+}
+local action_premultiply_images = {
+	name = 'premultiply_images',
+	file_remap = function(f) return path.replaceextension(f,_images.image_file_format.ext) end,
+	on_file = default_action_on_file
+}
+
 
 local function process_files_pattern( pattern , action )
 	if type(pattern) ~= 'string' then
@@ -80,12 +98,8 @@ local function process_files_pattern( pattern , action )
 	--print('process_files_pattern:',pattern,action)
 	local files = os.matchfiles(path.join(src_path,pattern))
 	for k,v in ipairs(files) do
-		local f = path.getrelative(src_path,v) or v
-		local df = file_remap[action] and file_remap[action](f) or f
-		--print(action,k,f)
-		assert(get_rules()[assert(action)])[f]=df
-		assert(not get_rules().dest_files[df],'conflict rules for file ' .. df)
-		get_rules().dest_files[df]=f
+		local f = path.getrelative(src_path,v) or v;
+		action:on_file(f,f)
 	end
 end
 
@@ -97,11 +111,8 @@ local function process_files_pattern_to( src, pattern, dst , action)
 	local files = os.matchfiles(path.join(src_path,src,pattern))
 	for k,v in ipairs(files) do
 		local f = path.getrelative(src_path,v)
-		local fn = path.getrelative(src,f)
-		local df = path.join(dst,file_remap[action] and file_remap[action](fn) or fn)
-		assert(get_rules()[assert(action)])[f]=df
-		assert(not get_rules().dest_files[df],'conflict rules for file ' .. df)
-		get_rules().dest_files[df]=f
+		local fn = path.getrelative(src,f);
+		action:on_file(f,path.join(dst,fn))
 	end
 	
 end
@@ -301,6 +312,7 @@ local function encode_sounds( files )
 			end
 		end
 	end
+	assert(application:wait_tasks())
 end
 
 
@@ -348,5 +360,8 @@ function _M.chek_files(  )
 		error('not all files produced')
 	end
 end
+
+_M.process_files_pattern = process_files_pattern
+_M.process_files_pattern_to = process_files_pattern_to
 
 return _M

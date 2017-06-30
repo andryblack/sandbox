@@ -124,7 +124,8 @@
 			path.join(sandbox_dir,'external/spine-runtime-c','include'),
 			path.join(sandbox_dir,'sandbox'),
 			path.join(sandbox_dir,'external/tlsf'),
-			path.join(sandbox_dir,'GHL','src')
+			path.join(sandbox_dir,'GHL','src'),
+			path.join(sandbox_dir,'external/rg_etc1'),
 		}
 		
 		files(utils.append_path(sandbox_dir .. '/utils/assetsbuilder/',
@@ -136,6 +137,11 @@
 
 		files{
 			path.join(sandbox_dir,'GHL','src/winlib/winlib_posix_time.cpp'),
+		}
+
+		files{
+			path.join(sandbox_dir,'external','rg_etc1','*.cpp'),
+			path.join(sandbox_dir,'external','rg_etc1','*.h'),
 		}
 
 		_M.premake_files()

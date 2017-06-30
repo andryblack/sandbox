@@ -65,7 +65,9 @@ int main(int argc, char** argv) {
 	sb::string platform;
 	bool update_only = false;
 	sb::vector<sb::string> other_options;
-
+    int threads = 0;
+    int quality = 0;
+    
 	for(int i=1;i<argc;++i) {
 		if (::strcmp(argv[i],"--help")==0) {
 			return usage(argv[0]);
@@ -82,9 +84,19 @@ int main(int argc, char** argv) {
 			dst_dir = get_argument(arg);
 		} else if (strncmp(opt+2,"platform",8)==0) {
 			platform = get_argument(arg);
-		} else if (strncmp(opt+2,"update",8)==0) {
+		} else if (strcmp(opt+2,"update")==0) {
 			update_only = true;
-		} else {
+        } else if (strncmp(opt+2,"threads",7)==0) {
+            threads = atoi(get_argument(arg).c_str());
+            if (threads < 0) {
+                return error("invalid threads");
+            }
+        } else if (strncmp(opt+2,"quality",7)==0) {
+            quality = atoi(get_argument(arg).c_str());
+            if (quality < 0) {
+                return error("invalid quality");
+            }
+        } else {
 			other_options.push_back(opt+2);
 		}
 	}
@@ -114,6 +126,8 @@ int main(int argc, char** argv) {
 	app->set_paths(scripts_dir,src_dir,dst_dir);
 	app->set_options(other_options);
 	app->set_platform(platform);
+    app->set_threads(threads);
+    app->set_quality(quality);
 	int result = app->run();
     delete app;
     return result;

@@ -119,10 +119,9 @@ namespace Sandbox {
 		
 		friend class Atlaser;
 		
-        GHL::Image* LoadImage(const char* file,bool& variant,const char** ext = 0);
+        GHL::Image* LoadImage(const char* file,bool& variant);
 		bool ImageHaveAlpha(const GHL::Image* img) const;
-		bool ConvertImage(GHL::Image* img,GHL::Texture* tex) const;
-        bool GetImageInfo(sb::string& file,bool& variant,GHL::UInt32& w,GHL::UInt32& h);
+		bool GetImageInfo(sb::string& file,bool& variant,GHL::UInt32& w,GHL::UInt32& h);
 
         typedef sb::map<sb::string,TexturePtr > TexturesCacheMap;
         TexturesCacheMap m_textures;

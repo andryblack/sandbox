@@ -158,6 +158,7 @@ SB_META_METHOD(convert_spine)
 SB_META_METHOD(open_spine)
 SB_META_METHOD(write_text_file)
 SB_META_METHOD(encode_sound)
+SB_META_METHOD(wait_tasks)
 SB_META_PROPERTY_RW(dst_path,get_dst_path,set_dst_path)
 SB_META_PROPERTY_RW(options,get_options,set_options)
 SB_META_END_KLASS_BIND()
@@ -189,7 +190,9 @@ SB_META_METHOD(Crop)
 SB_META_METHOD(GetMD5)
 SB_META_METHOD(SetImageFileFormatPNG)
 SB_META_METHOD(SetImageFileFormatJPEG)
+SB_META_METHOD(SetImageFileFormatETC1)
 SB_META_METHOD(IsJPEG)
+SB_META_METHOD(Free)
 SB_META_END_KLASS_BIND()
 
 TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(GHL_CreateImage(w, h, GHL::IMAGE_FORMAT_RGBA)) {
@@ -216,15 +219,28 @@ void TextureData::SetImageFileFormatJPEG() {
     m_image_file_format = GHL::IMAGE_FILE_FORMAT_JPEG;
 }
 
+void TextureData::SetImageFileFormatETC1() {
+    if (m_data) {
+        m_data->Convert(GHL::IMAGE_FORMAT_RGB);
+    }
+    m_image_file_format = GHL::IMAGE_FILE_FORMAT_ETC;
+}
+
 TextureData::~TextureData() {
-    m_data->Release();
+    if (m_data) m_data->Release();
 }
 
 void TextureData::PremultiplyAlpha() {
+    sb_assert(m_data);
     if (m_data->GetFormat()==GHL::IMAGE_FORMAT_4444) {
         m_data->Convert(GHL::IMAGE_FORMAT_RGBA);
     }
     m_data->PremultiplyAlpha();
+}
+
+void TextureData::Free() {
+    m_data->Release();
+    m_data = 0;
 }
 
 void TextureData::Place( GHL::UInt32 x, GHL::UInt32 y, const sb::intrusive_ptr<TextureData>& img ) {
@@ -245,7 +261,7 @@ bool TextureData::Crop() {
     GHL::UInt32 min_y = height() - 1;
     GHL::UInt32 max_y = 0;
     for (GHL::UInt32 y = 0; y < height(); ++y) {
-        const GHL::Byte* line = m_data->GetDataPtr() + y * width() * 4;
+        const GHL::Byte* line = m_data->GetData()->GetData() + y * width() * 4;
         bool has_pixel = false;
         
         for (GHL::UInt32 x = 0; x < width(); ++x) {
@@ -284,7 +300,7 @@ Application::Application() : m_lua(0),m_vfs(0),m_update_only(false) {
 	m_lua = new Sandbox::LuaVM(this);
     m_vfs = GHL_CreateVFS();
     m_image_decoder = GHL_CreateImageDecoder();
-    
+    m_tasks = 0;
     
 
 #if defined( GHL_PLATFORM_MAC )
@@ -331,6 +347,7 @@ void Application::Bind(lua_State* L) {
 }
 
 Application::~Application() {
+    delete m_tasks;
 	delete m_lua;
     if (m_vfs) {
         GHL_DestroyVFS(m_vfs);
@@ -352,6 +369,21 @@ void Application::set_paths(const sb::vector<sb::string>& scripts, const sb::str
 
 void Application::set_dst_path(const sb::string& dst) {
     m_dst_dir = dst;
+}
+
+void Application::set_threads(int threads) {
+    if (m_tasks) {
+        delete m_tasks;
+        m_tasks = 0;
+    }
+    if (threads) {
+        m_tasks = new TasksPool(threads);
+    }
+}
+
+void encode_etc1_set_quality(int q);
+void Application::set_quality(int q) {
+    encode_etc1_set_quality(q);
 }
 
 void Application::set_arguments(const sb::vector<sb::string>& arguments) {
@@ -438,8 +470,14 @@ TextureDataPtr Application::load_texture( const sb::string& file ) {
     return TextureDataPtr(new TextureData(img));
 }
 
+GHL::Data* encode_etc1(TasksPool* pool,const GHL::Image* img,bool with_header);
+
 const GHL::Data* Application::encode_texture(const TextureDataPtr &texture) {
-    return m_image_decoder->Encode(texture->GetImage(), texture->GetImageFileFormat());
+    if (texture->GetImageFileFormat()==GHL::IMAGE_FILE_FORMAT_ETC) {
+        return encode_etc1(m_tasks,texture->GetImage(),true);
+    }
+    return m_image_decoder->Encode(texture->GetImage(),
+                                   texture->GetImageFileFormat());
 }
 
 bool Application::store_texture( const sb::string& file , const TextureDataPtr& data ) {
@@ -503,7 +541,49 @@ bool Application::rebuild_image( const sb::string& src, const sb::string& dst ) 
     return false;
 }
 
+class VorbisEncoderTask : public Task {
+private:
+    Application* m_app;
+    sb::string m_src;
+    sb::string m_dst;
+public:
+    VorbisEncoderTask(Application* app,const sb::string& src_file,const sb::string& dst_file) : m_app(app),
+        m_src(src_file),m_dst(dst_file) {}
+    virtual bool RunImpl() {
+        GHL::DataStream* src_ds = m_app->OpenFile(m_src.c_str());
+        if (!src_ds) {
+            Sandbox::LogError() << "failed openng " << m_src;
+            return false;
+        }
+        GHL::SoundDecoder* decoder = GHL_CreateSoundDecoder(src_ds);
+        if (!decoder) {
+            src_ds->Release();
+            Sandbox::LogError() << "failed decode " << m_src;
+            return false;
+        }
+        VorbisEncoder en;
+        GHL::WriteStream* dst_ds = m_app->OpenDestFile(m_dst.c_str());
+        if (!dst_ds) {
+            decoder->Release();
+            src_ds->Release();
+            Sandbox::LogError() << "failed open dst " << m_dst;
+            return false;
+        }
+        bool res = en.convert(decoder, dst_ds,Sandbox::MD5Hash(m_src.c_str()));
+        decoder->Release();
+        src_ds->Release();
+        dst_ds->Flush();
+        dst_ds->Close();
+        dst_ds->Release();
+        return res;
+    }
+};
+
 bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
+    if (m_tasks) {
+        m_tasks->AddTask(TaskPtr(new VorbisEncoderTask(this,src,dst)));
+        return true;
+    }
     VorbisEncoder en;
     GHL::DataStream* src_ds = m_vfs->OpenFile(append_path(m_src_dir, src).c_str());
     if (!src_ds) {
@@ -547,6 +627,16 @@ sb::intrusive_ptr<SpineConvert> Application::open_spine(const sb::string& atlas,
     if (!res->Load(atlas.c_str(), skelet.c_str(), this))
         return sb::intrusive_ptr<SpineConvert>();
     return res;
+}
+
+bool Application::wait_tasks() {
+    if (!m_tasks) return true;
+    while (!m_tasks->Completed()) {
+        if (!m_tasks->Process()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 int Application::run() {

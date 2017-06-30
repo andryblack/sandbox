@@ -102,7 +102,10 @@ namespace Sandbox {
         
         bool variant = false;
         GHL::Image* img = LoadImage(filename,variant);
-        if (!img) return BackgroundDataPtr();
+        if (!img) {
+            SB_LOGE("failed LoadBackground " << filename);
+            return BackgroundDataPtr();
+        }
         
         res = BackgroundDataPtr(new BackgroundData());
         
@@ -125,14 +128,14 @@ namespace Sandbox {
                 if (x!=0 || y!=0 || ipw != res->width || iph != res->height)
                     subimg = img->SubImage(x, y, ipw, iph);
                 if (!subimg) {
-                    LogError(MODULE) << "failed load subdiv image " << filename;
+                    SB_LOGE( "failed load subdiv image " << filename );
                     img->Release();
                     return BackgroundDataPtr();
                 }
                 GHL::Texture* texture = m_render->CreateTexture(pw, ph, GHL_ImageFormatToTextureFormat(subimg->GetFormat()),
                                                                 subimg);
                 if (!texture) {
-                    LogError(MODULE) << "failed load subdiv image " << filename;
+                    SB_LOGE( "failed texture subdiv image " << filename);
                     img->Release();
                     return BackgroundDataPtr();
                 }
@@ -162,7 +165,7 @@ namespace Sandbox {
         return img;
     }
     
-	GHL::Image* Resources::LoadImage(const char* filename,bool &variant,const char** ext) {
+	GHL::Image* Resources::LoadImage(const char* filename,bool &variant) {
         
         if (!m_vfs) {
             LogError(MODULE) << "VFS not initialized";
@@ -302,11 +305,8 @@ namespace Sandbox {
             tfmt = GHL::TEXTURE_FORMAT_RGBX;
             bpp = 4;
         } else if (img->GetFormat()==GHL::IMAGE_FORMAT_RGBA) {
-			tfmt = GHL::TEXTURE_FORMAT_RGBA;
-            if (premultiply) {
-                img->PremultiplyAlpha();
-            }
-            bpp = 4;
+		 	tfmt = GHL::TEXTURE_FORMAT_RGBA;
+             bpp = 4;
 		} else {
 			LogError(MODULE) <<"unsupported format";
 			return 0;
@@ -348,7 +348,7 @@ namespace Sandbox {
             //LogWarning(MODULE) << "image " << filename << "." << ext<< " NPOT " <<
             //img->GetWidth() << "x" << img->GetHeight() << " -> " <<
             //tw << "x" << th;
-            img->Convert(ifmt);
+            //img->Convert(ifmt);
             texture->SetData(0,0,img);
         } else {
 			//LogInfo(MODULE) << "Loaded image : " << filename << "." << ext << " " << img->GetWidth() << "x" << img->GetHeight() ;
@@ -358,8 +358,7 @@ namespace Sandbox {
     }
     GHL::Texture* Resources::LoadTexture( const sb::string& filename , bool& variant, bool premultiply ) {
         //LogDebug() << "load texture " << filename;
-        const char* ext = "";
-		GHL::Image* img = LoadImage(filename.c_str(),variant,&ext);
+        GHL::Image* img = LoadImage(filename.c_str(),variant);
 		if (!img) {
 			return 0;
 		}
@@ -392,12 +391,14 @@ namespace Sandbox {
     }
     
     BitmaskPtr Resources::LoadBitmask( const sb::string& filename ) {
-        const char* ext = "";
         bool variant = false;
-        GHL::Image* img = LoadImage(filename.c_str(),variant,&ext);
+        GHL::Image* img = LoadImage(filename.c_str(),variant);
         if (!img) {
             return BitmaskPtr();
         }
+        if (img->GetFormat() != GHL::IMAGE_FORMAT_RGBA &&
+            img->GetFormat() != GHL::IMAGE_FORMAT_GRAY)
+            return BitmaskPtr();
         BitmaskPtr res(new Bitmask(img));
         img->Release();
         return res;
@@ -407,26 +408,7 @@ namespace Sandbox {
 		return img->GetFormat()==GHL::IMAGE_FORMAT_RGBA;
 	}
 	
-	bool Resources::ConvertImage(GHL::Image* img,GHL::Texture* tex) const {
-		GHL::TextureFormat tfmt = tex->GetFormat();
-		GHL::ImageFormat ifmt;
-		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
-			ifmt = GHL::IMAGE_FORMAT_RGB;
-		}
-        else if (tfmt==GHL::TEXTURE_FORMAT_RGBX) {
-            ifmt = GHL::IMAGE_FORMAT_RGBX;
-        }
-		else if (tfmt==GHL::TEXTURE_FORMAT_RGBA) {
-			ifmt = GHL::IMAGE_FORMAT_RGBA;
-		} else {
-			LogError(MODULE) <<  "unexpected texture format";
-			return false;
-		}
-
-		img->Convert(ifmt);
-		return true;
-	}
-	
+		
 	ImagePtr Resources::GetImage(const char* filename,bool need_premultiply) {
         TexturePtr texture = GetTexture( filename , need_premultiply);
         if (!texture) {
@@ -452,7 +434,7 @@ namespace Sandbox {
             LogError() << "failed create image from data";
             return ImagePtr();
         }
-        GHL::Texture* texture = CreateTexture(img, true);
+        GHL::Texture* texture = CreateTexture(img,true);
         GHL::UInt32 img_w = img->GetWidth();
         GHL::UInt32 img_h = img->GetHeight();
         img->Release();

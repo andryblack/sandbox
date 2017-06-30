@@ -12,10 +12,13 @@ namespace Sandbox {
         BackgroundWidget::BackgroundWidget() : m_background(new Background()) {
             
         }
+        void BackgroundWidget::setBackground(const char* name) {
+            m_background->Load(name, RenderManager::getInstance().resources());
+        }
         
         void BackgroundWidget::setPropertyOverride(const std::string& _key, const std::string& _value) {
             if (_key == "Background") {
-                m_background->Load(_value.c_str(),RenderManager::getInstance().resources());
+                setBackground(_value.c_str());
             } else if (_key == "Fullscreen") {
                 m_background->SetFullScreen(MyGUI::utility::parseBool(_value));
             } else if (_key == "Filtered") {

@@ -87,6 +87,7 @@ SB_META_PROPERTY_RW(Origin,GetOrigin,SetOrigin)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::BackgroundWidget)
+SB_META_PROPERTY_WO(background, setBackground)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ShaderWidget)

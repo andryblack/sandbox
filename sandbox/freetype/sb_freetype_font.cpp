@@ -214,8 +214,10 @@ namespace Sandbox {
             int h = bm->rows;
             
             data.img = 0;
-            if (w * h) {
-                data.img = GHL_CreateImageWithData(w, h, GHL::IMAGE_FORMAT_GRAY, bm->buffer);
+            if ((w * h)>0) {
+        
+                data.img = GHL_CreateImage(w,h,GHL::IMAGE_FORMAT_GRAY);
+                ::memcpy(data.img->GetData()->GetDataPtr(), bm->buffer, w*h);
             }
             
             data.w = w;

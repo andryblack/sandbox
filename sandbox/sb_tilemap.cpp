@@ -39,8 +39,7 @@ namespace Sandbox {
             return;
         sb_assert(x<m_width);
         sb_assert(y<m_height);
-        m_data->SetData((x+y*m_width)*sizeof(data_t),
-                        reinterpret_cast<const GHL::Byte*>(&d), sizeof(d));
+        ::memcpy(m_data->GetDataPtr()+(x+y*m_width)*sizeof(data_t),reinterpret_cast<const GHL::Byte*>(&d), sizeof(d));
     }
     
     

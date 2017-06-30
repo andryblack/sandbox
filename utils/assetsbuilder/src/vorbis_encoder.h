@@ -11,6 +11,7 @@
 #include <ghl_sound.h>
 #include <ghl_data_stream.h>
 
+class Application;
 class VorbisEncoder {
 private:
     ogg_stream_state    m_os;
@@ -25,5 +26,7 @@ public:
 public:
     bool convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,int serial);
 };
+
+
 
 #endif /*_VORBIS_ENCODER_H_INCLUDED_*/

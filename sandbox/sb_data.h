@@ -11,6 +11,8 @@
 
 #include <sbstd/sb_vector.h>
 #include <sbstd/sb_string.h>
+#include <sbstd/sb_assert.h>
+
 #include "sb_ref_cntr.h"
 #include <ghl_data.h>
 #include "meta/sb_meta.h"
@@ -43,15 +45,8 @@ namespace Sandbox {
             return reinterpret_cast<const GHL::Byte*>(&m_data[0]);
         }
 		/// set data
-		virtual void GHL_CALL	SetData( GHL::UInt32 offset, const GHL::Byte* data, GHL::UInt32 size ) {
-            sb_assert((offset%sizeof(T))==0);
-            sb_assert((size%sizeof(T))==0);
-            const T* src = reinterpret_cast<const T*>(data);
-            size_t nsize = offset/sizeof(T)+size/sizeof(T);
-            if (m_data.size()<nsize) {
-                m_data.resize(nsize);
-            }
-            std::copy(src,src+size/sizeof(T),m_data.begin()+offset/sizeof(T));
+        virtual GHL::Byte* GHL_CALL	GetDataPtr() {
+            return reinterpret_cast<GHL::Byte*>(&m_data[0]);
         }
         /// clone data
         virtual GHL::Data* GHL_CALL  Clone() const {
@@ -81,13 +76,8 @@ namespace Sandbox {
             return reinterpret_cast<const GHL::Byte*>(m_data.c_str());
         }
         /// set data
-        virtual void GHL_CALL	SetData( GHL::UInt32 offset, const GHL::Byte* data, GHL::UInt32 size ) {
-            const char* src = reinterpret_cast<const char*>(data);
-            size_t nsize = offset+size;
-            if (m_data.size()<nsize) {
-                m_data.resize(nsize);
-            }
-            std::copy(src,src+size,m_data.begin()+offset);
+        virtual GHL::Byte* GHL_CALL	GetDataPtr(  ) {
+            return 0;
         }
         sb::string& string() { return m_data; }
         const sb::string& string() const { return m_data; }
@@ -109,8 +99,9 @@ namespace Sandbox {
             return static_cast<const GHL::Byte*>(m_data);
         }
         /// set data
-        virtual void GHL_CALL	SetData( GHL::UInt32 , const GHL::Byte* , GHL::UInt32  ) {
+        virtual GHL::Byte* GHL_CALL	GetDataPtr() {
             sb_assert(false);
+            return 0;
         }
         /// clone data
         virtual Data* GHL_CALL  Clone() const {
@@ -126,6 +117,39 @@ namespace Sandbox {
             sb_assert(false);
         }
     };
+    
+    class SubData : public RefCounter<GHL::Data> {
+    private:
+        const GHL::Data* m_data;
+        size_t m_offset;
+        size_t m_size;
+    public:
+        explicit SubData(const GHL::Data* data,size_t offset, size_t size) : m_data(data),m_offset(offset),m_size(size) {
+            sb_assert((offset+size)<=data->GetSize());
+            m_data->AddRef();;
+        }
+        virtual ~SubData() {
+            m_data->Release();
+        }
+        /// Data size
+        virtual GHL::UInt32 GHL_CALL	GetSize() const {
+            return m_size;
+        }
+        /// Const data ptr
+        virtual const GHL::Byte* GHL_CALL	GetData() const {
+            return m_data->GetData()+m_offset;
+        }
+        /// set data
+        virtual GHL::Byte* GHL_CALL	GetDataPtr() {
+            return 0;
+        }
+        /// clone data
+        virtual Data* GHL_CALL  Clone() const {
+            return GHL_HoldData(GetData(), GetSize());
+        }
+        
+    };
+
     
     class BinaryData : public meta::object {
         SB_META_OBJECT
