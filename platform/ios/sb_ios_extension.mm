@@ -45,6 +45,41 @@
     }
 }
 
+#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_9_3
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
+    BOOL handled = [super application:application openURL:url options:options];
+    Sandbox::iOSPlatformExtension* ext = Sandbox::iOSPlatformExtension::GetRoot();
+    while (ext) {
+        NSObject<UIApplicationDelegate>* obj = ext->GetObject();
+        if (obj && [obj respondsToSelector:@selector(application:openURL:options:)]) {
+            if ([obj application:application openURL:url options:options]) {
+                handled = YES;
+            }
+        }
+        ext = ext->GetNext();
+    }
+    return handled;
+}
+#endif
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(nullable NSString *)sourceApplication annotation:(id)annotation {
+    BOOL handled = [super application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
+    Sandbox::iOSPlatformExtension* ext = Sandbox::iOSPlatformExtension::GetRoot();
+    while (ext) {
+        NSObject<UIApplicationDelegate>* obj = ext->GetObject();
+        if (obj && [obj respondsToSelector:@selector(application:openURL:sourceApplication:annotation:)]) {
+            if ([obj application:application openURL:url sourceApplication:sourceApplication annotation:annotation]) {
+                handled = YES;
+            }
+        }
+        ext = ext->GetNext();
+    }
+    return handled;
+}
+
+
+
 -(void)forwardInvocation:(NSInvocation *)anInvocation {
     Sandbox::iOSPlatformExtension* ext = Sandbox::iOSPlatformExtension::GetRoot();
     bool handled = false;

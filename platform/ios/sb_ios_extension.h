@@ -3,6 +3,7 @@
 
 #include "sb_extension.h"
 #import <Foundation/Foundation.h>
+#import <UIKit/UIApplication.h>
 
 namespace Sandbox {
     
@@ -12,7 +13,7 @@ namespace Sandbox {
         iOSPlatformExtension();
         ~iOSPlatformExtension();
         
-        virtual NSObject* GetObject() { return 0; }
+        virtual NSObject<UIApplicationDelegate>* GetObject() { return 0; }
         
         static iOSPlatformExtension* GetRoot() { return static_cast<iOSPlatformExtension*>(PlatformExtension::GetRoot()); }
         iOSPlatformExtension* GetNext() { return static_cast<iOSPlatformExtension*>(PlatformExtension::GetNext()); }

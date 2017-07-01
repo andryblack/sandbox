@@ -101,7 +101,7 @@ public:
         m_mgr = [[pn_manager alloc] init:app];
     }
     
-    virtual NSObject* GetObject() { return m_mgr; }
+    virtual NSObject<UIApplicationDelegate>* GetObject() { return m_mgr; }
     
     virtual bool Process(Sandbox::Application* app,
                          const char* method,
