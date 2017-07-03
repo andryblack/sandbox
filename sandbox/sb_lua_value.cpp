@@ -21,6 +21,34 @@ namespace Sandbox {
         return res;
     }
     
+    size_t LuaValue::GetSize() const {
+        lua_State* L = get_state_with_value_on_top();
+        if (!L) return 0;
+        LUA_CHECK_STACK(-1)
+        size_t res = lua_rawlen(L, -1);
+        lua_pop(L,1);
+        return res;
+    }
+    
+    sb::intrusive_ptr<LuaValue> LuaValue::GetAt(size_t idx) const {
+        lua_State* L = get_state_with_value_on_top();
+        if (!L) return sb::intrusive_ptr<LuaValue>();
+        LUA_CHECK_STACK(-1)
+        if (lua_type(L,-1)!=LUA_TTABLE) {
+            lua_pop(L,1);
+            return sb::intrusive_ptr<LuaValue>();
+        }
+        lua_rawgeti(L, -1, idx);
+        if (lua_isnil(L, -1)) {
+            lua_pop(L,1);
+            return sb::intrusive_ptr<LuaValue>();
+        }
+        sb::intrusive_ptr<LuaValue> res(new LuaValue());
+        res->SetObject(L);
+        lua_pop(L,1);
+        return res;
+    }
+    
     void LuaValue::Traverse(LuaTableTraverser& tr) const {
         lua_State* L = get_state_with_value_on_top();
         if (!L) return;

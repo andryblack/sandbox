@@ -40,6 +40,8 @@ namespace Sandbox {
         bool IsNumber() const {
             return GetLuaType() == LUA_TNUMBER;
         }
+        size_t GetSize() const;
+        sb::intrusive_ptr<LuaValue> GetAt(size_t idx) const;
         
         void Traverse(LuaTableTraverser& tr) const;
     };

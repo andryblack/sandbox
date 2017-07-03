@@ -10,6 +10,7 @@
 
 
 #include "sb_mygui_scroll_list.h"
+#include "sb_mygui_items_list.h"
 #include "sb_mygui_cached_widget.h"
 #include "sb_mygui_scene_widget.h"
 #include "sb_mygui_image_widget.h"
@@ -134,6 +135,7 @@ namespace Sandbox {
             MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
             const std::string& category = MyGUI::WidgetManager::getInstance().getCategoryName();
             factory.registerFactory<ScrollList>(category);
+            factory.registerFactory<ItemsList>(category);
             factory.registerFactory<ScrollArea>(category);
             factory.registerFactory<CachedWidget>(category);
             factory.registerFactory<SceneWidget>(category);
@@ -158,6 +160,7 @@ namespace Sandbox {
             factory.unregisterFactory<TextEdit>(category);
             factory.unregisterFactory<SceneWidget>(category);
             factory.unregisterFactory<ScrollList>(category);
+            factory.unregisterFactory<ItemsList>(category);
             factory.unregisterFactory<ScrollArea>(category);
             factory.unregisterFactory<CachedWidget>(category);
             factory.unregisterFactory<MaskImageWidget>(category);
@@ -175,7 +178,9 @@ namespace Sandbox {
         }
 
         
+        void register_ScrollListBase(lua_State* L);
         void register_ScrollList(lua_State* L);
+        void register_ItemsList(lua_State* L);
         
         void register_widgets(lua_State* L) {
             luabind::ExternClass<CachedWidget>(L);
@@ -200,7 +205,9 @@ namespace Sandbox {
             luabind::ExternClass<TextInput>(L);
             
             luabind::ExternClass<ScrollArea>(L);
+            register_ScrollListBase(L);
             register_ScrollList(L);
+            register_ItemsList(L);
             
             
             
