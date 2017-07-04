@@ -411,6 +411,18 @@ namespace Sandbox {
 #ifdef GHL_PLATFORM_EMSCRIPTEN
         ctx->SetValue("platform.os", "emscripten");
 #endif
+        {
+            sb_assert(m_system);
+            char data[129];
+            memset(data,0,sizeof(data));
+            if (m_system->GetDeviceData(GHL::DEVICE_DATA_NAME, data)) {
+                ctx->SetValue<const char*>("platform.device", data);
+            }
+            memset(data,0,sizeof(data));
+            if (m_system->GetDeviceData(GHL::DEVICE_DATA_OS, data)) {
+                ctx->SetValue<const char*>("platform.os_name", data);
+            }
+        }
         
         luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
         luabind::RawClass<GHL::Settings>(m_lua->GetVM());
