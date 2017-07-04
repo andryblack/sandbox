@@ -389,15 +389,15 @@ namespace Sandbox {
         
         
 #ifdef GHL_PLATFORM_IOS
-        ctx->SetValue("platform.os", "iOS");
+        ctx->SetValue("platform.os", "ios");
 #endif
         
 #ifdef GHL_PLATFORM_MAC
-        ctx->SetValue("platform.os", "OSX");
+        ctx->SetValue("platform.os", "osx");
 #endif
         
 #ifdef GHL_PLATFORM_WIN
-        ctx->SetValue("platform.os", "WIN32");
+        ctx->SetValue("platform.os", "windows");
 #endif
         
 #ifdef GHL_PLATFORM_FLASH
