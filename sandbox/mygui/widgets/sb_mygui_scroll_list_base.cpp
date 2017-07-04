@@ -448,9 +448,6 @@ namespace Sandbox {
         MyGUI::Widget* ScrollListBase::createWidgetItem(size_t idx) {
             MyGUI::Widget* w = mRealClient->createWidget<MyGUI::Widget>("Default",
                                                                         MyGUI::IntCoord(0, 0, 10, 10), MyGUI::Align::Default);
-            if (m_delegate) {
-                m_delegate->createWidget(w,idx);
-            }
             w->eventMouseButtonClick += MyGUI::newDelegate(this,&ScrollListBase::handleItemClick);
             w->eventMouseButtonPressed += MyGUI::newDelegate(this,&ScrollListBase::handleItemPressed);
             return w;
@@ -470,6 +467,7 @@ namespace Sandbox {
         
         MyGUI::Widget* ScrollListBase::updateWidget(size_t i, MyGUI::VectorWidgetPtr& pool) {
             MyGUI::Widget* w = 0;
+            bool is_new = false;
             for (MyGUI::VectorWidgetPtr::iterator it = pool.begin();it!=pool.end();++it) {
                 if (!m_delegate || m_delegate->canReuseWidget(*it, i)) {
                     w = *it;
@@ -480,9 +478,13 @@ namespace Sandbox {
             if (!w) {
                 w = createWidgetItem(i);
                 m_all_items.push_back(w);
+                is_new = true;
             }
             w->setVisible(true);
             alignWidget(w,i);
+            if (is_new && m_delegate) {
+                m_delegate->createWidget(w, i);
+            }
             
             MyGUI::IBDrawItemInfo di(i,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
             drawItem(w, di);
