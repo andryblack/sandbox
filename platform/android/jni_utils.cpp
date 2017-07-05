@@ -34,7 +34,7 @@ namespace jni {
 	    }
 	    jsize size = env->GetStringUTFLength( jstr );
 	    if( size == 0 ) {
-	        return sb::string();;
+	        return sb::string();
 	    }
 	    jboolean is_copy = JNI_FALSE;
 	    const char* psz  = env->GetStringUTFChars( jstr, &is_copy );

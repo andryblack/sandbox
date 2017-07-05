@@ -8,7 +8,8 @@
 #include "jni_utils.h"
 #include <android/native_activity.h>
 #include <sbstd/sb_assert.h>
-#include <ghl_log.h>
+
+static const char* MODULE = "IAP";
 
 class IAPExtension : public Sandbox::AndroidPlatformExtension {
 private:
@@ -28,17 +29,17 @@ private:
 public:
 	IAPExtension() : m_application(0),m_activity(0),m_helper_objl(0) {
 		m_helper_ctr = 0;
-		GHL_Log(GHL::LOG_LEVEL_INFO,"IAPExtension::IAPExtension\n");
+        SB_LOGI("IAPExtension::IAPExtension");
 	}
 	~IAPExtension() {
-		GHL_Log(GHL::LOG_LEVEL_INFO,"IAPExtension::~IAPExtension\n");
+		SB_LOGI("IAPExtension::~IAPExtension");
 	}
-	void release_object() {
+	void release_object(JNIEnv* env) {
 		if (m_helper_objl) {
 			if (m_helper_dispose) {
-				m_activity->env->CallVoidMethod(m_helper_objl,m_helper_dispose);
+				env->CallVoidMethod(m_helper_objl,m_helper_dispose);
 			}
-			m_activity->env->DeleteGlobalRef(m_helper_objl);
+			env->DeleteGlobalRef(m_helper_objl);
 			m_helper_objl = 0;
 		}
 	}
@@ -83,6 +84,10 @@ public:
     virtual void OnAppStarted(Sandbox::Application* app) {
         m_application = app;
         m_activity = GetNativeActivity(m_application);
+    }
+    virtual void OnAppStopped(Sandbox::Application* app) {
+        m_application = 0;
+        m_activity = 0;
     }
     virtual bool Process(Sandbox::Application* app,
                          const char* method,
@@ -155,7 +160,9 @@ public:
     void processResponse(const sb::string& method, const sb::string& data) {
     	if (m_application) {
     		m_application->OnExtensionResponse(method.c_str(),data.c_str());
-    	}
+    	} else {
+            SB_LOGE("empty application");
+        }
     }
     
     virtual void nativeOnActivityCreated(
@@ -174,7 +181,7 @@ public:
     
     virtual void nativeOnActivityDestroyed(
                                            JNIEnv *env, jobject thiz, jobject activity) {
-    	release_object();
+    	release_object(env);
     }
     
     virtual void nativeOnActivityPaused(
@@ -205,7 +212,10 @@ public:
                                         jint result_code,
                                         jobject data) {
     	if (m_helper_objl) {
-    		return m_activity->env->CallBooleanMethod(m_helper_objl,m_helper_process_result,request_code,result_code,data);
+    		return m_activity->env->CallBooleanMethod(m_helper_objl,
+                m_helper_process_result,
+                request_code,
+                result_code,data);
     	}
     	return false;
     }
@@ -220,7 +230,7 @@ void JNICALL Java_com_sandbox_IAPHelper_nativeProcessResponse(
                                                                  jlong object,
                                                                  jobject method,
                                                                  jobject data) {
-    GHL_Log(GHL::LOG_LEVEL_INFO,"Java_com_sandbox_IAPHelper_nativeProcessResponse\n");
+    SB_LOGI("IAPHelper::nativeProcessResponse");
     sb::string str_method = jni::extract_jni_string(env,(jstring)method);
     sb::string str_data = jni::extract_jni_string(env,(jstring)data);
     static_cast<IAPExtension*>(init_iap_extension())->processResponse(str_method,str_data);
