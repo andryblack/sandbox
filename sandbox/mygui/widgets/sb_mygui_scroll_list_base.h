@@ -129,8 +129,13 @@ namespace Sandbox {
             
             bool m_align_on_cell;
             MyGUI::VectorWidgetPtr m_all_items;
+            void setCenteredOffset(int offset) { m_centered_offset = offset; }
+            int getCenteredOffset() const { return m_centered_offset; }
+            
+            virtual void updateScrollEnable();
         private:
             MyGUI::IntRect m_content_margins;
+            int m_centered_offset;
         };
     }
     

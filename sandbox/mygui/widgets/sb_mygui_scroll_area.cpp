@@ -24,6 +24,7 @@ namespace Sandbox {
                 
         ScrollArea::ScrollArea() {
             m_manual_scroll = true;
+            m_small_scroll_enabled = false;
         }
         
         ScrollArea::~ScrollArea() {
@@ -51,6 +52,8 @@ namespace Sandbox {
                 setScrollBounds(MyGUI::utility::parseValue<int>(_value));
             else if (_key == "ManualScroll")
                 setManualScroll(MyGUI::utility::parseValue<bool>(_value));
+            else if (_key == "SmallScrollEnabled")
+                setSmallScrollEnabled(MyGUI::utility::parseValue<bool>(_value));
             else
             {
                 Base::setPropertyOverride(_key, _value);
@@ -211,8 +214,7 @@ namespace Sandbox {
             Scroll::SetContentSize(Sizef(getCanvasSize()));
             Scroll::SetViewSize(Sizef(getViewSize()));
             Scroll::SetBounds(Scroll::GetViewSize()*0.25);
-            Scroll::SetHEnabled(Scroll::GetContentSize().w>Scroll::GetViewSize().w);
-            Scroll::SetVEnabled(Scroll::GetContentSize().h>Scroll::GetViewSize().h);
+            updateScrollEnable();
             if (mRealClient) {
                 Scroll::SetViewPos(Vector2f(-getViewOffset().left,-getViewOffset().top));
             }
@@ -269,5 +271,20 @@ namespace Sandbox {
             }
         }
         
+        void ScrollArea::updateRealSize(int w,int h) {
+            if (mRealClient) {
+                mRealClient->setSize(w,h);
+            }
+        }
+        
+        void ScrollArea::setSmallScrollEnabled(bool enabled) {
+            m_small_scroll_enabled = enabled;
+            updateScrollEnable();
+        }
+        
+        void ScrollArea::updateScrollEnable() {
+            Scroll::SetHEnabled(m_small_scroll_enabled || Scroll::GetContentSize().w>Scroll::GetViewSize().w);
+            Scroll::SetVEnabled(m_small_scroll_enabled || Scroll::GetContentSize().h>Scroll::GetViewSize().h);
+        }
     }
 }

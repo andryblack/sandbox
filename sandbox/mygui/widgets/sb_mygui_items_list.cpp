@@ -187,7 +187,6 @@ namespace Sandbox {
         
         
         ItemsList::ItemsList() {
-            m_centered_offset = 0;
         }
         
         ItemsList::~ItemsList() {
@@ -206,11 +205,11 @@ namespace Sandbox {
             if (getVerticalAlignment()) {
                 left = getContentMargins().left;
                 getDelegate()->alignItem(idx,top,height);
-                top += getContentMargins().top + m_centered_offset;
+                top += getContentMargins().top + getCenteredOffset();
                 width = (getViewSize().width-getContentMargins().left-getContentMargins().right);
             } else {
                 getDelegate()->alignItem(idx,left,width);
-                left += getContentMargins().left + m_centered_offset;
+                left += getContentMargins().left + getCenteredOffset();
                 top = getContentMargins().top;
                 height = (getViewSize().height-getContentMargins().top-getContentMargins().bottom);
             }
@@ -229,12 +228,14 @@ namespace Sandbox {
                         int required_height = getContentMargins().top+getContentMargins().bottom + height;
                         int client_height = getViewSize().height;
                         if( required_height < client_height ) {
-                            m_centered_offset = (client_height - required_height)/2;
+                            setCenteredOffset((client_height - required_height)/2);
+                        } else {
+                            setCenteredOffset(0);
                         }
                     }
                     
-                    mRealClient->setSize(getViewSize().width,
-                                         m_centered_offset+ height +
+                    updateRealSize(getViewSize().width,
+                                         getCenteredOffset()+ height +
                                          getContentMargins().top +
                                          getContentMargins().bottom);
                 } else {
@@ -243,10 +244,12 @@ namespace Sandbox {
                         int required_width = getContentMargins().left+getContentMargins().right + width;
                         int client_width = getViewSize().width;
                         if( required_width < client_width ) {
-                            m_centered_offset = (client_width - required_width)/2;
+                            setCenteredOffset((client_width - required_width)/2);
+                        } else {
+                            setCenteredOffset(0);
                         }
                     }
-                    mRealClient->setSize(m_centered_offset + width +
+                    updateRealSize(getCenteredOffset() + width +
                                          getContentMargins().left +
                                          getContentMargins().top,getViewSize().height);
                 }

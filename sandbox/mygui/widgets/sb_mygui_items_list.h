@@ -41,7 +41,6 @@ namespace Sandbox {
             virtual void updateContent();
             virtual void getVisibleItems(int& first, int& last) const;
             virtual Vector2f Normalize(const Vector2f& v,bool soft) const;
-            int  m_centered_offset;
         };
         
         

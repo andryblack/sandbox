@@ -44,6 +44,9 @@ namespace Sandbox {
             bool scrollActive() const { return Scroll::IsActive(); }
             void scrollToWidget(MyGUI::Widget* w);
             bool isWidgetFullVisible(MyGUI::Widget* w);
+            
+            void setSmallScrollEnabled(bool enabled);
+            bool getSmallScrollEnabled() const { return m_small_scroll_enabled; }
         protected:
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             
@@ -63,6 +66,9 @@ namespace Sandbox {
             virtual void OnScrollEnd();
             
             virtual void update(float dt);
+        protected:
+            void updateRealSize(int w,int h);
+            virtual void updateScrollEnable();
         private:
             
             void handleGlobalMouseMove(float x,float y);
@@ -71,7 +77,7 @@ namespace Sandbox {
             
             Sandbox::Vector2f   m_real_offset;
             bool    m_manual_scroll;
-            
+            bool    m_small_scroll_enabled;
         };
         
         

@@ -52,7 +52,6 @@ namespace Sandbox {
                 
         
         ScrollList::ScrollList() {
-            m_centered_offset = 0;
             m_item_size = 0;
             m_visible_count = 0;
             m_num_subitems = 1;
@@ -109,9 +108,9 @@ namespace Sandbox {
             int left, top;
             if (getVerticalAlignment()) {
                 left = getContentMargins().left+x*m_item_widget_size.width;
-                top = getContentMargins().top+l*m_item_size+m_centered_offset;
+                top = getContentMargins().top+l*m_item_size+getCenteredOffset();
             } else {
-                left = getContentMargins().left+l*m_item_size+m_centered_offset;
+                left = getContentMargins().left+l*m_item_size+getCenteredOffset();
                 top = getContentMargins().top+x*m_item_widget_size.height;
             }
             w->setPosition( left, top );
@@ -184,7 +183,6 @@ namespace Sandbox {
                 
                 int client_width = getViewSize().width;
                 int client_height = getViewSize().height;
-                m_centered_offset = 0;
                 
                 if (m_vertical) {
                     m_item_widget_size.width = (client_width-getContentMargins().left-getContentMargins().right) / m_num_subitems;
@@ -194,14 +192,15 @@ namespace Sandbox {
                         int required_height = getContentMargins().top+getContentMargins().bottom + count * m_item_size;
                         int client_height = getViewSize().height;
                         if( required_height < client_height ) {
-                            m_centered_offset = (client_height - required_height)/2;
+                            setCenteredOffset((client_height - required_height)/2);
+                        } else {
+                            setCenteredOffset(0);
                         }
                     }
-
-                    mRealClient->setSize(getViewSize().width,
-                                  m_centered_offset+ full_lines*m_item_size +
-                                  getContentMargins().top +
-                                  getContentMargins().bottom);
+                    updateRealSize(getViewSize().width,
+                                   getCenteredOffset()+ full_lines*m_item_size +
+                                   getContentMargins().top +
+                                   getContentMargins().bottom);
                 } else {
                     m_item_widget_size.width = m_item_size;
                     m_item_widget_size.height = (client_height-getContentMargins().top-getContentMargins().bottom) / m_num_subitems;
@@ -210,10 +209,12 @@ namespace Sandbox {
                         int required_width = getContentMargins().left+getContentMargins().right + count * m_item_size;
                         int client_width = getViewSize().width;
                         if( required_width < client_width ) {
-                            m_centered_offset = (client_width - required_width)/2;
+                            setCenteredOffset((client_width - required_width)/2);
+                        } else {
+                            setCenteredOffset(0);
                         }
                     }
-                    mRealClient->setSize(m_centered_offset + full_lines*m_item_size +
+                    updateRealSize(getCenteredOffset() + full_lines*m_item_size +
                                   getContentMargins().left +
                                   getContentMargins().top,getViewSize().height);
                 }

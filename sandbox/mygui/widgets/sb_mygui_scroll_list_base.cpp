@@ -111,7 +111,6 @@ SB_META_METHOD(getWidgetByIndex)
 SB_META_METHOD(getIndexByWidget)
 SB_META_METHOD(upWidget)
 SB_META_PROPERTY_RW(verticalAlignment,getVerticalAlignment,setVerticalAlignment)
-SB_META_PROPERTY_RW(manualScroll,manualScroll,setManualScroll)
 SB_META_PROPERTY_RO(selectionWidget, getSelectionWidget)
 SB_META_PROPERTY_RW(indexTop, getIndexTop,setIndexTop)
 SB_META_PROPERTY_RW(indexSelected, getIndexSelected, setIndexSelected)
@@ -134,14 +133,17 @@ namespace Sandbox {
         
         
         ScrollListBase::ScrollListBase() {
+            m_centered_offset = 0;
+            
             m_selection_widget = 0;
             m_centered = false;
             m_vertical = false;
             m_align_on_cell = false;
+            
             m_selected_index = MyGUI::ITEM_NONE;
             m_top_index = MyGUI::ITEM_NONE;
-            Scroll::SetVEnabled(m_vertical);
-            Scroll::SetHEnabled(!m_vertical);
+            updateScrollEnable();
+            setSmallScrollEnabled(true);
         }
         
         ScrollListBase::~ScrollListBase() {
@@ -299,8 +301,6 @@ namespace Sandbox {
             ScrollView::updateView();
             updateContent();
             Base::updateView();
-            Scroll::SetVEnabled(m_vertical);
-            Scroll::SetHEnabled(!m_vertical);
             ScrollArea::SetOffset(Normalize(GetOffset(), true));
             updateWidgets();
         }
@@ -308,8 +308,6 @@ namespace Sandbox {
         
         void ScrollListBase::setVerticalAlignment(bool _value) {
             m_vertical = _value;
-            Scroll::SetVEnabled(m_vertical);
-            Scroll::SetHEnabled(!m_vertical);
             updateView();
         }
         
@@ -325,6 +323,9 @@ namespace Sandbox {
         
         void ScrollListBase::setCentered(bool c) {
             m_centered = c;
+            if (!m_centered) {
+                setCenteredOffset(0);
+            }
             updateView();
         }
         
@@ -484,6 +485,7 @@ namespace Sandbox {
             alignWidget(w,i);
             if (is_new && m_delegate) {
                 m_delegate->createWidget(w, i);
+                w->setSize(w->getSize());
             }
             
             MyGUI::IBDrawItemInfo di(i,m_selected_index,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,MyGUI::ITEM_NONE,true,false);
@@ -562,7 +564,16 @@ namespace Sandbox {
             }
         }
 
-        
+        void ScrollListBase::updateScrollEnable() {
+            if (m_vertical) {
+                Scroll::SetVEnabled(getSmallScrollEnabled() || Scroll::GetContentSize().h>Scroll::GetViewSize().h);
+                Scroll::SetHEnabled(false);
+            } else {
+                Scroll::SetVEnabled(false);
+                Scroll::SetHEnabled(getSmallScrollEnabled() || Scroll::GetContentSize().w>Scroll::GetViewSize().w);
+            }
+            
+        }
 
 
     }

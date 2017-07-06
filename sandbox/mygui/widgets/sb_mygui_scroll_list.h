@@ -63,7 +63,6 @@ namespace Sandbox {
             
             MyGUI::IntSize   m_item_widget_size;
             
-            int  m_centered_offset;
         };
         
         
