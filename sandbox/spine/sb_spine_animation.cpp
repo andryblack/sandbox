@@ -274,6 +274,7 @@ namespace Sandbox {
         }
         
         m_attachements[slot->data] = ContainerTransformPtr(new ContainerTransform());
+        AddObject(m_attachements[slot->data]);
         return m_attachements[slot->data];
     }
     
