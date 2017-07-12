@@ -18,6 +18,8 @@ namespace Sandbox {
 		T y;
 		Point() {}
 		Point(T _x,T _y) : x(_x),y(_y) {}
+        template <class U>
+        explicit Point(const U& v) : x(v.x),y(v.y) {}
 		bool operator == (const Point& r) const {
 			return (x==r.x) && (y==r.y);
 		}

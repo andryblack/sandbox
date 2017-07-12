@@ -25,6 +25,7 @@ namespace Sandbox {
 		T h;
 		Rect() {}
 		Rect(T _x,T _y,T _w,T _h) : x(_x),y(_y),w(_w),h(_h) {}
+        Rect(const Point<T>& pos,const Size<T>& size) : x(pos.x),y(pos.y),w(size.w),h(size.h) {}
 		bool operator == (const Rect& r) const {
 			return (x==r.x) && (y==r.y) && (w==r.w) && (h==r.h);
 		}

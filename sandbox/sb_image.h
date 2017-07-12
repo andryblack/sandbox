@@ -12,6 +12,7 @@
 
 #include "sb_texture.h"
 #include "sb_vector2.h"
+#include "sb_size.h"
 
 namespace Sandbox {
 
@@ -61,6 +62,7 @@ namespace Sandbox {
 		
         float GetWidth() const { return m_width;}
         float GetHeight() const { return m_height;}
+        Sizef GetSize() const { return Sizef(GetWidth(),GetHeight()); }
 		
         /// set real size ( recalc hotspot )
         void SetSize(float w,float h);

@@ -103,19 +103,16 @@ namespace Sandbox {
     void SpriteWithMask::Draw( Graphics& g ) const {
         if (m_image) {
             if (m_mask) {
-                const TexturePtr& mt = m_mask->GetTexture();
                 MaskMode m = g.GetMaskMode();
                 TexturePtr t = g.GetMaskTexture();
                 Transform2d tr = g.GetMaskTransform();
-                Transform2d mtr;// = g.GetTransform();
                 
-                if (mt) {
-                    mtr.scale(1.0f/mt->GetWidth(),1.0f/mt->GetHeight());
-                    mtr.translate(-GetPos());
-                } else {
-                    mtr.translate(-GetPos());
-                }
-                g.SetMask(MASK_MODE_ALPHA, mt, mtr);
+                Rectf rect(GetPos().x-m_mask->GetHotspot().x*m_mask->GetWidth()/m_mask->GetTextureW(),
+                      GetPos().y-m_mask->GetHotspot().y*m_mask->GetHeight()/m_mask->GetTextureH(),
+                      m_mask->GetWidth(),
+                      m_mask->GetHeight());
+                g.SetMask(MASK_MODE_ALPHA, *m_mask, rect);
+                
                 g.DrawImage(*m_image,GetDrawAttributes().get(),GetPos());
                 g.SetMask(m, t, tr);
                 
