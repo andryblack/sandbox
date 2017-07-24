@@ -408,7 +408,10 @@ namespace Sandbox
 
 	MyGUI::IntPoint EditText::getViewOffset() const
 	{
-		return mViewOffset;
+        MyGUI::IntPoint point;
+        point.left = mViewOffset.left;
+        point.top = mViewOffset.top;
+		return point;
 	}
 
 	size_t EditText::getCursorPosition(const MyGUI::IntPoint& _point)
@@ -421,7 +424,8 @@ namespace Sandbox
 
 		MyGUI::IntPoint point = _point;
 		point -= mCroppedParent->getAbsolutePosition();
-		point += mViewOffset;
+		point.left += mViewOffset.left;
+        point.top += mViewOffset.top;
 		point -= mCoord.point();
         
         float scale = GetFontScale();
@@ -446,7 +450,8 @@ namespace Sandbox
         point.top *= scale;
         
 		point += mCroppedParent->getAbsolutePosition();
-		point -= mViewOffset;
+        point.left -= mViewOffset.left;
+        point.top -= mViewOffset.top;
 		point += mCoord.point();
 
 		return MyGUI::IntCoord(point.left, point.top, 2, mFontHeight);

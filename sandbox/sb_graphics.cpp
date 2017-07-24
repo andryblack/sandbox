@@ -187,10 +187,15 @@ namespace Sandbox {
 		
 		GHL::UInt32 clr = (m_color).hw_premul();
         
-        const GHL::Texture* t = texture->Present(m_resources);
-		
-        m_itw = 1.0f / t->GetWidth();
-        m_ith = 1.0f / t->GetHeight();
+        if (texture) {
+            const GHL::Texture* t = texture->Present(m_resources);
+
+            m_itw = 1.0f / t->GetWidth();
+            m_ith = 1.0f / t->GetHeight();
+        } else {
+            m_itw = 1.0;
+            m_ith = 1.0f;
+        }
         
         const float tx = rect.x * m_itw;
         const float ty = rect.y * m_ith;

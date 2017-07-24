@@ -54,6 +54,7 @@ namespace Sandbox {
     
     void TextData::Fill(const char* text, const FontPtr& font, int max_width, FontAlign align) {
         
+
         
         RollBackPoint roll_back;
         
@@ -88,7 +89,7 @@ namespace Sandbox {
                         text = next_it; // skip both as one newline
                 }
                 
-                line_info.width = ceil(width);
+                line_info.width = width;
                 line_info.count = count;
                 length += line_info.count + 1;
                 
@@ -166,7 +167,7 @@ namespace Sandbox {
                 line_info.data.erase(line_info.data.begin() + roll_back.position, line_info.data.end());
                 
                 // запоминаем место отката, как полную строку
-                line_info.width = ceil(width);
+                line_info.width = width;
                 line_info.count = count;
                 length += line_info.count + 1;
                 
@@ -193,7 +194,7 @@ namespace Sandbox {
             count ++;
         }
         
-        line_info.width = ceil(width);
+        line_info.width = width;
         line_info.count = count;
         length += line_info.count;
         
@@ -253,8 +254,8 @@ namespace Sandbox {
                 move_down += add_asc;
                 size.h += add_asc;
             }
-            line->width = ceil(width);
-            set_max(size.w, float(int(line->width)));
+            line->width = width;
+            set_max(size.w, float(int(ceil(line->width))));
         }
         
         if (!data.empty()) {

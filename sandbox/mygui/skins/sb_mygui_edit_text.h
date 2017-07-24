@@ -170,7 +170,7 @@ namespace Sandbox
 		size_t mCursorPosition;
 		bool mVisibleCursor;
 		
-		MyGUI::IntPoint mViewOffset; // смещение текста
+		MyGUI::FloatPoint mViewOffset; // смещение текста
 
 		MyGUI::ILayerNode* mNode;
 		MyGUI::RenderItem* mRenderItem;
