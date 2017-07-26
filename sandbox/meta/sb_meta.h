@@ -13,6 +13,7 @@
 #include <new>
 #include <sbstd/sb_intrusive_ptr.h>
 #include <sbstd/sb_shared_ptr.h>
+#include <sbstd/sb_platform.h>
 
 namespace Sandbox {
      
@@ -72,9 +73,15 @@ namespace Sandbox {
             static const type_info* get_static_type_info() { return object::get_static_type_info(); }
         };
         
-#define SB_META_OBJECT \
+#define SB_META_OBJECT_BASE \
     public: \
         virtual const Sandbox::meta::type_info* get_type_info() const;\
+        static const Sandbox::meta::type_info* get_static_type_info();\
+    private: \
+
+#define SB_META_OBJECT \
+    public: \
+        virtual const Sandbox::meta::type_info* get_type_info() const SB_OVERRIDE;\
         static const Sandbox::meta::type_info* get_static_type_info();\
     private: \
      
@@ -182,21 +189,27 @@ namespace Sandbox {
 #define SB_META_DECLARE_KLASS(Type,Parent) SB_META_DECLARE_KLASS_X(Type,Parent,ANONYMOUS_VARIABLE(private_),#Type)
 
 #define SB_META_DECLARE_NAMED_KLASS(Type,Name,Parent) SB_META_DECLARE_KLASS_X(Type,Parent,ANONYMOUS_VARIABLE(private_),Name)
-#define SB_META_DECLARE_OBJECT_IMPL(Klass)\
+#define SB_META_DECLARE_OBJECT_IMPL(Klass,Prefix)\
+    Prefix\
     const Sandbox::meta::type_info* Klass::get_static_type_info() {\
         return Sandbox::meta::type<Klass>::info(); \
     }\
+    Prefix\
     const Sandbox::meta::type_info* Klass::get_type_info() const { \
         return get_static_type_info(); \
     }
         
 #define SB_META_DECLARE_OBJECT(Klass,Parent)  \
         SB_META_DECLARE_KLASS(Klass,Parent) \
-        SB_META_DECLARE_OBJECT_IMPL(Klass)
+        SB_META_DECLARE_OBJECT_IMPL(Klass,)
+
+#define SB_META_DECLARE_OBJECT_T(Klass,Parent)  \
+    SB_META_DECLARE_KLASS(Klass,Parent) \
+    SB_META_DECLARE_OBJECT_IMPL(Klass,template<>)
 
 #define SB_META_DECLARE_OBJECT2(Klass,Parent1,Parent2)  \
     SB_META_DECLARE_KLASS2(Klass,Parent1,Parent2) \
-    SB_META_DECLARE_OBJECT_IMPL(Klass)
+    SB_META_DECLARE_OBJECT_IMPL(Klass,)
 
 
         
@@ -244,9 +257,10 @@ namespace Sandbox {
             void* vo = o;
             while (ti) {
                 if (ti == rt) return static_cast<T*>(vo);
-                ti = ti->parent.info;
-                if (!ti) return 0;
+                if (!ti->parent.info)
+                    return 0;
                 vo = ti->parent.downcast(vo);
+                ti = ti->parent.info;               
             }
             return 0;
         }
@@ -258,9 +272,11 @@ namespace Sandbox {
             void* vo = const_cast<U*>(o);
             while (ti) {
                 if (ti == rt) return static_cast<const T*>(vo);
-                ti = ti->parent.info;
-                if (!ti) return 0;
+                if (!ti->parent.info)
+                    return 0;
                 vo = ti->parent.downcast(vo);
+                ti = ti->parent.info;
+                
             }
             return 0;
         }

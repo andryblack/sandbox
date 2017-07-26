@@ -58,6 +58,14 @@ namespace sb
 		
         element_ref front() { return *begin();}
         get_type front() const { return *begin();}
+        
+        bool operator == (const array& o) const {
+            for (size_t i=0;i<c_size;++i) {
+                if (o[i]!=a[i])
+                    return false;
+                return true;
+            }
+        }
     };
 }
 

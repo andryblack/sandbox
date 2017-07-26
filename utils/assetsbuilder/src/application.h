@@ -65,7 +65,7 @@ public:
 typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 
 class Application : public Sandbox::FileProvider {
-    SB_META_OBJECT
+    SB_META_OBJECT_BASE
 public:
 	Application();
 	virtual ~Application();

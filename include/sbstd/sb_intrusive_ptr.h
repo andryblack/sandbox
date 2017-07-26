@@ -86,6 +86,9 @@ namespace sb {
         bool operator != (const intrusive_ptr<T>& other) const {
             return (ptr != other.ptr);
         }
+        bool operator < (const intrusive_ptr<T>& other) const {
+            return (ptr < other.ptr);
+        }
         
         T* get() const { return ptr;}
         

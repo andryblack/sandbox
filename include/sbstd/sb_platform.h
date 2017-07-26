@@ -30,6 +30,13 @@
 #define SB_END_PACKED
 #endif
 
+#if __cplusplus > 199711L
+#define SB_OVERRIDE override
+#endif
+#ifndef SB_OVERRIDE
+#define SB_OVERRIDE
+#endif
+
 
 namespace sb {
 

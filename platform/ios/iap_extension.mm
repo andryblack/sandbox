@@ -43,7 +43,7 @@
                                                                     transaction.payment.productIdentifier,@"product_id",
                                                                     @"purchased",@"state",
                                                                     [self getReceiptForTransaction:transaction],@"transaction",
-                                                                    nil] options:nil error:nil];
+                                                                    nil] options:0 error:nil];
     
     NSString* newStr = [[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding];
     m_application->OnExtensionResponse("iap_purchase",newStr.UTF8String);
@@ -98,7 +98,7 @@
     if (m_application) {
         NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:[NSDictionary dictionaryWithObjectsAndKeys:
                                                                         [NSString stringWithFormat:@"%p",request],@"request_id",
-                                                                        error.description,@"error", nil] options:nil error:nil];
+                                                                        error.description,@"error", nil] options:0 error:nil];
         NSString* newStr = [[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding];
         m_application->OnExtensionResponse("iap_get_products_info",newStr.UTF8String);
         [newStr release];
@@ -137,7 +137,7 @@
                                                                       products_info,@"products",
                                                                       response.invalidProductIdentifiers,@"invalid",
                                                                     [NSString stringWithFormat:@"%p",request],@"request_id",
-                                                                    nil] options:nil error:nil];
+                                                                    nil] options:0 error:nil];
     if (m_application) {
         NSString* newStr = [[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding];
         m_application->OnExtensionResponse("iap_get_products_info",newStr.UTF8String);
@@ -215,7 +215,7 @@
                 break;
         }
         if (m_application) {
-            NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:dict options:nil error:nil];
+            NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:dict options:0 error:nil];
             NSString* newStr = [[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding];
             m_application->OnExtensionResponse(method,newStr.UTF8String);
             [newStr release];

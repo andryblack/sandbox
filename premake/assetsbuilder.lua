@@ -13,14 +13,22 @@
 	use_network = false
 	lua_build_all = true
 
-	function _M.configure_solution()
+	function _M.configure_solution( data )
 
 		defines {
-			'GHL_STATIC_LIB',
+			'GHL_STATIC_LIB','GHL_BUILD_TOOLS'
 		}
 
 
 		flags       { "No64BitChecks", "ExtraWarnings", "StaticRuntime" }
+
+		if data and data.flags then
+			flags(data.flags)
+		end
+
+		if data and data.xcodebuildsettings then
+			xcodebuildsettings(data.xcodebuildsettings)
+		end
 
 		configuration "Debug"
 			targetdir   "bin/debug"

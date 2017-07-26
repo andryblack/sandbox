@@ -26,7 +26,7 @@ namespace GHL {
 namespace Sandbox {
 	
 	class ShaderUniform : public sb::ref_countered_base_not_copyable {
-        SB_META_OBJECT
+        SB_META_OBJECT_BASE
 	public:
         virtual ~ShaderUniform() {}
 		virtual void DoSet() = 0;
@@ -40,7 +40,7 @@ namespace Sandbox {
         SB_META_OBJECT
 	public:
 		explicit ShaderFloatUniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform),m_value(1.0f) {}
-		virtual void DoSet();
+		virtual void DoSet() SB_OVERRIDE;
 		void SetValue(float v) { m_value = v;}
         float GetValue() const { return m_value; }
 	private:
@@ -73,7 +73,7 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<ShaderColorUniform> ShaderColorUniformPtr;
     
 	class Shader : public sb::ref_countered_base_not_copyable {
-        SB_META_OBJECT
+        SB_META_OBJECT_BASE
 	public:
 		explicit Shader( GHL::ShaderProgram* prg);
 		~Shader();
