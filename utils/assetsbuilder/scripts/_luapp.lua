@@ -15,14 +15,20 @@ function M.preprocess(file,defs,fn)
   local mt = setmetatable(funcs,{__index=defs})
   local line_n = 0
   for line in file:lines() do
-     if string.find(line, "^--#") then
+     if string.find(line, "^%-%-#") then
       table.insert(chunk, string.sub(line, 4))
      else
       table.insert(chunk,string.format('_put (%d,%q) ',line_n, line))
     end
     line_n = line_n + 1
   end
-  assert(load(table.concat(chunk,'\n'),'pp:'..(fn or 'file'),'t',mt))()
+  local src = table.concat(chunk,'\n')
+  local res,err = load(src,'pp:'..(fn or 'file'),'t',mt)
+  if not res or type(res)~='function' then
+    print('preprocessed:\n',src)
+    error(err)
+  end
+  res()
   return table.concat(output,'\n')
 end
 

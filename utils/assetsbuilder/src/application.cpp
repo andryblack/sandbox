@@ -443,6 +443,10 @@ sb::string Application::get_output_filename( const char* name ) {
     return append_path(m_dst_dir, name);
 }
 
+sb::string Application::get_src_path(const char* fn) const {
+    return append_path(m_src_dir, fn);
+}
+
 TexturePtr Application::check_texture( const sb::string& file ) {
     GHL::DataStream* ds = m_vfs->OpenFile(append_path(m_src_dir, file).c_str());
     if (!ds) {

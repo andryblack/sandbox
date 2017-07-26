@@ -78,6 +78,10 @@ namespace Sandbox {
 		BackgroundDataPtr LoadBackground(const char* filename);
 		
 		ShaderPtr GetShader(const char* vfn,const char* ffn);
+        ShaderPtr CreateShader(const char* vfn,
+                               const char* vdata,
+                               const char* ffn,
+                               const char* fdata);
 		
 		GHL::Render* GetRender() { return m_render;}
 		GHL::ImageDecoder* GetImageDecoder() {return m_image;}

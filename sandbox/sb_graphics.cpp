@@ -1223,6 +1223,8 @@ namespace Sandbox {
         m_state.calc2_tex = false;
         m_state.depth_test = false;
         m_state.depth_write = false;
+        m_state.texture = TexturePtr();
+        
         m_draw_state = m_state;
         
         float draw_scale = (target ? target->GetScale() : m_scale * m_resources->GetScale()) ;
@@ -1238,10 +1240,11 @@ namespace Sandbox {
         m_render->SetTexture(0,1);
         m_render->SetIndexBuffer(0);
         m_render->SetVertexBuffer(0);
+        m_render->SetShader(0);
         m_render->SetupTextureStageColorOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
         m_render->SetupTextureStageAlphaOp(GHL::TEX_OP_MODULATE,GHL::TEX_ARG_TEXTURE,GHL::TEX_ARG_CURRENT,0);
         m_render->SetupDepthTest(m_state.depth_test,GHL::COMPARE_FUNC_LEQUAL,m_state.depth_write);
-        
+        m_render->SetupFaceCull(false);
         m_draw_state = m_state;
     }
 	size_t Graphics::EndScene() {

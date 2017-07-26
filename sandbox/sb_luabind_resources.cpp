@@ -206,6 +206,10 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderVec2Uniform)
 SB_META_PROPERTY_RW_DEF(Value)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderMat4Uniform)
+SB_META_PROPERTY_RW_DEF(Value)
+SB_META_END_KLASS_BIND()
+
 SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderColorUniform)
 SB_META_PROPERTY_RW_DEF(Value)
 SB_META_END_KLASS_BIND()
@@ -280,6 +284,7 @@ SB_META_METHOD(GetImage)
 bind( method( "GetTexture" ,
              static_cast<Sandbox::TexturePtr(Sandbox::Resources::*)(const char*,bool)>(&Sandbox::Resources::GetTexture) ) );
 SB_META_METHOD(GetShader)
+SB_META_METHOD(CreateShader)
 SB_META_METHOD(CreateRenderTarget)
 SB_META_PROPERTY_RO(Scale, GetScale)
 SB_META_PROPERTY_WO(BasePath, SetBasePath)
@@ -380,6 +385,7 @@ namespace Sandbox {
         luabind::ExternClass<ShaderFloatUniform>(lua);
         luabind::ExternClass<ShaderVec2Uniform>(lua);
         luabind::ExternClass<ShaderColorUniform>(lua);
+        luabind::ExternClass<ShaderMat4Uniform>(lua);
         luabind::ExternClass<Shader>(lua);
         
     }

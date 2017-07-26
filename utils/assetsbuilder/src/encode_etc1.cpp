@@ -79,7 +79,7 @@ public:
     }
 };
 
-#define big_word(v) (((v)&0xff00)>>8),((v)&0x00ff)
+#define big_word(v) GHL::Byte((((v)&0xff00)>>8)),GHL::Byte(((v)&0x00ff))
 
 void encode_etc1_set_quality(int q) {
     if (q == 0) {
@@ -139,7 +139,8 @@ GHL::Data* encode_etc1(TasksPool* pool,const GHL::Image* img,bool with_header) {
     if (pool) {
         while (!pool->Completed()) {
             if (!pool->Process()) {
-                res = false;
+                if (res) res->Release();
+                res = 0;
                 break;
             }
         }

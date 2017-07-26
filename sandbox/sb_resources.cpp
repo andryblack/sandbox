@@ -19,6 +19,7 @@
 
 #include "sb_atlaser.h"
 #include "sb_bitmask.h"
+#include "sb_data.h"
 
 #include "sb_log.h"
 
@@ -519,8 +520,61 @@ namespace Sandbox {
 		m_shaders[name]=res;
 		return res;
 	}
+    
+    ShaderPtr Resources::CreateShader(const char* vfn,
+                           const char* vdata,
+                           const char* ffn,
+                           const char* fdata) {
+        std::string vfilename = vfn;
+        std::string ffilename = ffn;
+        
+        
+        std::string name = vfilename+"+"+ffilename;
+        if (ShaderPtr sh = m_shaders[name]) {
+            return sh;
+        }
+        
+        GHL::VertexShader* vs = 0;
+        GHL::FragmentShader* fs = 0;
+        
+        {
+            std::map<std::string,GHL::VertexShader*>::iterator it = m_vshaders.find(vfilename);
+            if (it!=m_vshaders.end()) vs = it->second;
+        }
+        {
+            std::map<std::string,GHL::FragmentShader*>::iterator it = m_fshaders.find(ffilename);
+            if (it!=m_fshaders.end()) fs = it->second;
+        }
+        
+        if (!vs) {
+            InlinedData dsd(vdata,strlen(vdata));
+            vs = m_render->CreateVertexShader(&dsd);
+            if (!vs) {
+                LogError(MODULE) << "error create shader " << vfilename;
+                //return ShaderPtr();
+            }
+            m_vshaders[vfilename]=vs;
+        }
+        if (!fs) {
+            InlinedData dsd(fdata,strlen(fdata));
+            fs = m_render->CreateFragmentShader(&dsd);
+            if (!fs) {
+                LogError(MODULE) << "error creating shader " << ffilename;
+                //return ShaderPtr();
+            }
+            m_fshaders[ffilename]=fs;
+        }
+        GHL::ShaderProgram* sp = m_render->CreateShaderProgram(vs,fs);
+        if (!sp) {
+            LogError(MODULE) << "error creating shader program from " << vfilename << " , " << ffilename ;
+            //return ShaderPtr();
+        }
+        ShaderPtr res = ShaderPtr(new Shader(sp));
+        m_shaders[name]=res;
+        return res;
+    }
 	
-	    
+    
     RenderTargetPtr Resources::CreateRenderTarget(int w, int h, float scale, bool alpha, bool depth) {
         sb_assert(w>0);
         sb_assert(h>0);

@@ -2,7 +2,8 @@
 #define SB_FILE_PROVIDER_H
 
 namespace GHL {
-struct DataStream;
+    struct Data;
+    struct DataStream;
 }
 namespace Sandbox {
 
@@ -14,7 +15,7 @@ namespace Sandbox {
             variant = false;
             return OpenFile(fn);
         }
-
+        virtual GHL::Data* LoadData(const char* fn);
     };
 
 }

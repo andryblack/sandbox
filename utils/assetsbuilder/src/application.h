@@ -105,13 +105,16 @@ public:
     virtual GHL::WriteStream* OpenDestFile(const char* fn);
     GHL::Data* LoadData(const char* fn);
     
+    sb::string get_src_path(const char* fn) const;
     bool wait_tasks();
+    virtual const GHL::Data* encode_texture(const TextureDataPtr& texture);
 protected:
     virtual double GetVersion() const;
     Sandbox::LuaVM* GetLua() { return m_lua; }
     virtual void Bind(lua_State* L);
+
     virtual sb::string get_output_filename( const char* name );
-    virtual const GHL::Data* encode_texture(const TextureDataPtr& texture);
+    
     TasksPool* m_tasks;
 private:
 	Sandbox::LuaVM*	m_lua;

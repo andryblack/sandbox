@@ -16,6 +16,7 @@
 #include <sbstd/sb_map.h>
 #include "meta/sb_meta.h"
 #include "sb_vector2.h"
+#include "sb_matrix4.h"
 #include "sb_color.h"
 
 namespace GHL {
@@ -48,28 +49,35 @@ namespace Sandbox {
 	};
     typedef sb::intrusive_ptr<ShaderFloatUniform> ShaderFloatUniformPtr;
     
-    class ShaderVec2Uniform : public ShaderUniform {
-        SB_META_OBJECT
-	public:
-		explicit ShaderVec2Uniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
-		virtual void DoSet();
-		void SetValue(const Vector2f& v) { m_value = v;}
-        const Vector2f& GetValue() const { return m_value; }
-	private:
-		Vector2f m_value;
-	};
-    typedef sb::intrusive_ptr<ShaderVec2Uniform> ShaderVec2UniformPtr;
-    
-    class ShaderColorUniform : public ShaderUniform {
+    template <class T>
+    class ShaderUniformVec : public ShaderUniform {
         SB_META_OBJECT
     public:
-        explicit ShaderColorUniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
-        virtual void DoSet();
-        void SetValue(const Color& v) { m_value = v;}
-        const Color& GetValue() const { return m_value; }
+        explicit ShaderUniformVec(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
+        virtual void DoSet() SB_OVERRIDE;
+        void SetValue(const T& v) { m_value = v;}
+        const T& GetValue() const { return m_value; }
     private:
-        Color m_value;
+        T m_value;
     };
+    typedef ShaderUniformVec<Vector2f> ShaderVec2Uniform;
+    typedef sb::intrusive_ptr<ShaderVec2Uniform> ShaderVec2UniformPtr;
+    typedef ShaderUniformVec<Vector3f> ShaderVec3Uniform;
+    typedef sb::intrusive_ptr<ShaderVec3Uniform> ShaderVec3UniformPtr;
+    
+    class ShaderMat4Uniform : public ShaderUniform {
+        SB_META_OBJECT
+    public:
+        explicit ShaderMat4Uniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
+        virtual void DoSet() SB_OVERRIDE;
+        void SetValue(const Matrix4f& v) { m_value = v;}
+        const Matrix4f& GetValue() const { return m_value; }
+    private:
+        Matrix4f m_value;
+    };
+    typedef sb::intrusive_ptr<ShaderMat4Uniform> ShaderMat4UniformPtr;
+    
+    typedef ShaderUniformVec<Color> ShaderColorUniform;
     typedef sb::intrusive_ptr<ShaderColorUniform> ShaderColorUniformPtr;
     
 	class Shader : public sb::ref_countered_base_not_copyable {
@@ -80,8 +88,11 @@ namespace Sandbox {
 		void Set(GHL::Render* r);
 		ShaderFloatUniformPtr GetFloatUniform(const char* name);
         ShaderVec2UniformPtr GetVec2Uniform(const char* name);
+        ShaderVec3UniformPtr GetVec3Uniform(const char* name);
+        ShaderMat4UniformPtr GetMat4Uniform(const char* name);
         ShaderColorUniformPtr GetColorUniform(const char* name);
         sb::intrusive_ptr<Shader> Clone();
+        GHL::ShaderUniform* GetRawUniform(const char* name);
   	private:
         template <class T>
         ShaderUniformPtr GetUniform(const char* name);
