@@ -79,6 +79,8 @@ namespace Sandbox {
 		/// view matrix
 		const Matrix4f& GetViewMatrix() const { return m_view_matrix;}
 		void SetViewMatrix(const Matrix4f& m);
+        /// projection-view matrix
+        const Matrix4f& GetProjectionViewMatrix() const { return m_projection_view_matrix;}
 		/// viewport
 		const Recti& GetViewport() const { return m_viewport;}
 		void SetViewport(const Recti& rect);
@@ -222,6 +224,8 @@ namespace Sandbox {
         
 		Matrix4f	m_projection_matrix;
 		Matrix4f	m_view_matrix;
+        Matrix4f    m_projection_view_matrix;
+        
         Recti		m_viewport;
         Recti		m_clip_rect;
         float       m_itw;

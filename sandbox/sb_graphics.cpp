@@ -1157,12 +1157,14 @@ namespace Sandbox {
 	void Graphics::SetProjectionMatrix(const Matrix4f& m) {
 		CheckFlush(true);
 		m_projection_matrix = m;
+        m_projection_view_matrix = m_projection_matrix * m_view_matrix;
 		m_render->SetProjectionMatrix(m.matrix);
 	}
 	
 	void Graphics::SetViewMatrix(const Matrix4f& m) {
 		CheckFlush(true);
 		m_view_matrix = m;
+        m_projection_view_matrix = m_projection_matrix * m_view_matrix;
 		m_render->SetViewMatrix(m.matrix);
 	}
 	

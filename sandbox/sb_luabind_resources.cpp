@@ -335,6 +335,31 @@ SB_META_PROPERTY_RO(Height, GetHeight)
 bind( static_method( "LoadTileMapTMX" , &Sandbox::LoadTileMapTMX ) );
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(GHL::VertexAttributeUsage,void);
+SB_META_ENUM_BIND(GHL::VertexAttributeUsage,namespace GHL,
+                  SB_META_ENUM_ITEM(VERTEX_POSITION)
+                  SB_META_ENUM_ITEM(VERTEX_TEX_COORD0)
+                  SB_META_ENUM_ITEM(VERTEX_TEX_COORD1)
+                  SB_META_ENUM_ITEM(VERTEX_COLOR)
+                  SB_META_ENUM_ITEM(VERTEX_NORMAL)
+                  SB_META_ENUM_ITEM(VERTEX_WEIGHT)
+                  SB_META_ENUM_ITEM(VERTEX_INDEX)
+                  SB_META_ENUM_ITEM(VERTEX_TANGENT))
+
+SB_META_DECLARE_KLASS(GHL::VertexDataType,void);
+SB_META_ENUM_BIND(GHL::VertexDataType,namespace GHL,
+                  SB_META_ENUM_ITEM(VERTEX_4_BYTE)
+                  SB_META_ENUM_ITEM(VERTEX_2_FLOAT)
+                  SB_META_ENUM_ITEM(VERTEX_3_FLOAT)
+                  SB_META_ENUM_ITEM(VERTEX_4_FLOAT))
+
+SB_META_DECLARE_KLASS(GHL::VertexAttributeDef, void)
+SB_META_BEGIN_KLASS_BIND(GHL::VertexAttributeDef)
+SB_META_PROPERTY(offset)
+SB_META_PROPERTY(data)
+SB_META_PROPERTY(usage)
+SB_META_END_KLASS_BIND()
+
 struct UTF8 {
     static  sb::string GetChar(const char* src) {
         Sandbox::UTF32Char ch = 0;
@@ -387,6 +412,10 @@ namespace Sandbox {
         luabind::ExternClass<ShaderColorUniform>(lua);
         luabind::ExternClass<ShaderMat4Uniform>(lua);
         luabind::ExternClass<Shader>(lua);
+        
+        luabind::Enum<GHL::VertexAttributeUsage>(lua);
+        luabind::Enum<GHL::VertexDataType>(lua);
+        luabind::ExternClass<GHL::VertexAttributeDef>(lua);
         
     }
 

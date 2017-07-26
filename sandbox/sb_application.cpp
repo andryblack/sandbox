@@ -684,7 +684,7 @@ namespace Sandbox {
 			m_render->Clear(m_clear_color.r,
 							m_clear_color.g,
 							m_clear_color.b,
-							m_clear_color.a,0);
+							m_clear_color.a,1.0);
 		m_graphics->BeginScene(m_render,RenderTargetPtr());
         
         DoDrawScreen();
