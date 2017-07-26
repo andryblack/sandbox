@@ -68,13 +68,23 @@ namespace Sandbox {
         return 1;
     }
 }
-
+SB_META_DECLARE_KLASS(Sandbox::Quaternion, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Quaternion)
+SB_META_CONSTRUCTOR((float,float,float,float));
+SB_META_PROPERTY(x)
+SB_META_PROPERTY(y)
+SB_META_PROPERTY(z)
+SB_META_PROPERTY(w)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Matrix4f, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Matrix4f)
 bind( constructor(&Sandbox::constructor_Matrix4f) );
 SB_META_OPERATOR_MUL_(Sandbox::Matrix4f(Sandbox::Matrix4f::*)(const Sandbox::Matrix4f&)const)
 SB_META_METHOD(inverted)
+SB_META_STATIC_METHOD(perspective)
+bind( static_method( "translate", static_cast<Sandbox::Matrix4f(*)(float,float,float)>(&Sandbox::Matrix4f::translate) ) );
+bind( static_method( "scale", static_cast<Sandbox::Matrix4f(*)(float,float,float)>(&Sandbox::Matrix4f::scale) ) );
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Transform2d, void)
@@ -87,6 +97,7 @@ namespace Sandbox {
     void register_math( lua_State* lua ) {
         luabind::RawClass<Vector2f>(lua);
         luabind::RawClass<Vector3f>(lua);
+        luabind::RawClass<Quaternion>(lua);
         luabind::RawClass<Matrix4f>(lua);
         luabind::RawClass<Transform2d>(lua);
     }

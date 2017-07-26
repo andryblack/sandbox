@@ -30,11 +30,14 @@ namespace Sandbox {
             float z;
 
             Vector3f() : x(0), y(0), z(0) { }
+        
             explicit Vector3f(const Vector2f &copy) { x = copy.x; y = copy.y; z = 0; }
             explicit Vector3f(const Vector4f &copy);
 
             Vector3f(const Vector3f &copy);
 
+            template <class U>
+            explicit Vector3f(const U& v) : x(v.x),y(v.y),z(v.z) {}
             Vector3f(float p1, float p2 , float p3) : x(p1), y(p2), z(p3) { }
 
             /// \brief Normalizes a vector
@@ -287,6 +290,34 @@ namespace Sandbox {
             return dest;
     }
 
+    namespace luabind {
+        template <>
+        struct stack<Vector3f> {
+            typedef stack_help<Vector3f, false > help;
+            static void push( lua_State* L, const Vector3f& val ) {
+                help::push(L,val);
+            }
+            static Vector3f get( lua_State* L, int idx ) {
+                if (lua_istable(L, idx)) {
+                    Vector3f res;
+                    lua_rawgeti(L, idx, 1);
+                    res.x = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 2);
+                    res.y = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    lua_rawgeti(L, idx, 3);
+                    res.z = float(lua_tonumber(L, -1));
+                    lua_pop(L, 1);
+                    return  res;
+                }
+                return help::get(L,idx);
+            }
+        };
+        template <>
+        struct stack<const Vector3f&> : stack<Vector3f> {};
+        
+    }
 
 
    

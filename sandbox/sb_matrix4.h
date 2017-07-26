@@ -7,6 +7,7 @@
 #include "sb_matrix3.h"
 #include "sb_vector3.h"
 #include "sb_vector4.h"
+#include "sb_quaternion.h"
 #include <sbstd/sb_assert.h>
 
 #include <float.h>
@@ -118,6 +119,10 @@ namespace Sandbox {
             static inline Matrix4f rotate(const Sandbox::Vector3f& v, EulerOrder euler) {
                 return rotate(v.x, v.y, v.z, euler);
             }
+        
+            static Matrix4f rotate(const Quaternion& q);
+        
+
             /// \brief Create a scale matrix
             ///
             /// \param x = Scale X
@@ -1101,28 +1106,15 @@ namespace Sandbox {
 
     inline Matrix4f &Matrix4f::transpose()
     {
-            float original[16];
-            for (int cnt=0; cnt<16; cnt++)
-                    original[cnt] = matrix[cnt];
-
-            matrix[0] = original[0];
-            matrix[1] = original[4];
-            matrix[2] = original[8];
-            matrix[3] = original[12];
-            matrix[4] = original[1];
-            matrix[5] = original[5];
-            matrix[6] = original[9];
-            matrix[7] = original[13];
-            matrix[8] = original[2];
-            matrix[9] = original[6];
-            matrix[10] = original[10];
-            matrix[11] = original[14];
-            matrix[12] = original[3];
-            matrix[13] = original[7];
-            matrix[14] = original[11];
-            matrix[15] = original[13];
-
-            return *this;
+        float original[16];
+        for (int cnt=0; cnt<16; cnt++)
+                original[cnt] = matrix[cnt];
+        for (int y=0;y<4;++y) {
+            for (int x=0;x<4;++x) {
+                matrix[y*4+x]=original[x*4+y];
+            }
+        }
+        return *this;
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -1180,6 +1172,40 @@ namespace Sandbox {
                     m.matrix[0*4+3]*v.x + m.matrix[1*4+3]*v.y + m.matrix[2*4+3]*v.z + m.matrix[3*4+3]*v.w);
     }
 
+    inline Matrix4f Matrix4f::rotate(const Sandbox::Quaternion &q) {
+        Matrix4f m;
+        float x2 = q.x * q.x;
+        float y2 = q.y * q.y;
+        float z2 = q.z * q.z;
+        float w2 = q.w * q.w;
+        
+        float isq = 1.0f / (x2+y2+z2+w2);
+        
+        m.matrix[0*4+0] = (x2-y2-z2+w2) * isq;
+        m.matrix[1*4+1] = (-x2+y2-z2+w2) * isq;
+        m.matrix[2*4+2] = (-x2-y2+z2+w2) * isq;
+        
+        m.matrix[1*4+0] = 2.0f*(q.x*q.y - q.w*q.z)*isq;
+        m.matrix[0*4+1] = 2.0f*(q.x*q.y + q.w*q.z)*isq;
+       
+        m.matrix[2*4+0] = 2.0f*(q.x*q.z + q.w*q.y)*isq;
+        m.matrix[0*4+2] = 2.0f*(q.x*q.z - q.w*q.y)*isq;
+        
+        m.matrix[2*4+1] = 2.0f*(q.y*q.z - q.w*q.x)*isq;
+        m.matrix[1*4+2] = 2.0f*(q.y*q.z + q.w*q.x)*isq;
+        
+        m.matrix[0*4+3] = 0.0f;
+        m.matrix[1*4+3] = 0.0f;
+        m.matrix[2*4+3] = 0.0f;
+        
+        m.matrix[3*4+0] = 0.0f;
+        m.matrix[3*4+1] = 0.0f;
+        m.matrix[3*4+2] = 0.0f;
+        m.matrix[3*4+3] = 1.0f;
+        
+        
+        return m;
+    }
 
 
 }
