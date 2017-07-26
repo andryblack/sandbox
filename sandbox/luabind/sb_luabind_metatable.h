@@ -20,7 +20,7 @@ namespace Sandbox {
             static const int __parent = 1;
             static const int __props = 2;
             static const int __methods = 3;
-            static const int __metatable = 4;
+            static const int __info = 4;
             static const int __get = 1;
             static const int __set = 2;
         }

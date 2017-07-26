@@ -109,12 +109,8 @@ namespace Sandbox {
         void lua_set_metatable( lua_State* L, const data_holder& holder ) {
             if (lua_isnil(L, -1))
                 return;
-            get_table( L, InplaceString(holder.info->name) );   /// obj mntbl
-            sb_assert(lua_istable(L, -1));
-            lua_rawgeti(L, -1, mt_indexes::__metatable);   /// obj mntbl mt
-            sb_assert(lua_istable(L, -1));
-            lua_setmetatable(L, -3);                    /// obj mntbl
-            lua_pop(L, 1);
+            get_table( L, InplaceString(holder.info->name) , true );   /// obj mntbl
+            lua_setmetatable(L, -2);                    /// obj mntbl
         }
         
         void lua_set_value( lua_State* L, const char* path ) {
@@ -342,6 +338,8 @@ namespace Sandbox {
             return 0;
         }
         
+       
+        
         static int object_compare( lua_State* L ) {
             if (lua_isuserdata(L, 1) && lua_isuserdata(L, 2)) {
                 data_holder* holder1 = reinterpret_cast<data_holder*>(lua_touserdata(L, 1));
@@ -356,6 +354,31 @@ namespace Sandbox {
             }
             return 1;
         }
+        
+        static int is_object( lua_State* L) {
+            if (!lua_isuserdata(L, 2)) {
+                lua_pushboolean(L, 0);
+            } else if (!lua_istable(L, 1)) {
+                lua_pushboolean(L, 0);
+            } else {
+                lua_rawgeti(L, 1, mt_indexes::__info);
+                if (!lua_isuserdata(L, -1)) {
+                    lua_pushboolean(L, 0);
+                } else {
+                    const meta::type_info* info_src = reinterpret_cast<data_holder*>(lua_touserdata(L, 2))->info;
+                    const meta::type_info* info_dst = reinterpret_cast<const meta::type_info*>(lua_touserdata(L, -1));
+                    while (info_src) {
+                        if (info_dst == info_src) {
+                            break;
+                        }
+                        info_src = info_src->parent.info;
+                    }
+                    lua_pushboolean(L, (info_src == info_dst) ? 1 : 0);
+                }
+                lua_remove(L, -2);
+            }
+            return 1;
+        }
 
         
         void lua_create_metatable(lua_State* L) {
@@ -365,22 +388,16 @@ namespace Sandbox {
             lua_rawseti(L, -2, mt_indexes::__props);                 /// mntbl
             lua_createtable(L, 0, 0);                     /// mntbl props
             lua_rawseti(L, -2, mt_indexes::__methods);                 /// mntbl
-            lua_createtable(L, 5, 7);                     /// mntbl raw_ptr
-            lua_pushcfunction(L, &destructor_func);               /// mntbl raw_ptr destructor_func
-			lua_setfield(L, -2, "__gc");                  /// mntbl raw_ptr
-            lua_pushcfunction(L, &getter_indexer);               /// mntbl raw_ptr indexer
-			lua_setfield(L, -2, "__index");               /// mntbl raw_ptr
-            lua_pushcfunction(L, &setter_indexer);               /// mntbl raw_ptr indexer
-			lua_setfield(L, -2, "__newindex");               /// mntbl raw_ptr
-            lua_pushcfunction(L, &object_to_string);               /// mntbl raw_ptr object_to_string
-			lua_setfield(L, -2, "__tostring");               /// mntbl raw_ptr
-            lua_pushcfunction(L, &object_compare);               /// mntbl raw_ptr object_to_string
-            lua_setfield(L, -2, "__eq");               /// mntbl raw_ptr
-            lua_rawgeti(L, -2, mt_indexes::__props);                 /// mntbl raw_ptr props
-            lua_rawseti(L, -2, mt_indexes::__props);                 /// mntbl raw_ptr
-            lua_rawgeti(L, -2, mt_indexes::__methods);                 /// mntbl raw_ptr methods
-            lua_rawseti(L, -2, mt_indexes::__methods);                 /// mntbl raw_ptr
-            lua_rawseti(L, -2, mt_indexes::__metatable);  /// mntbl
+            lua_pushcfunction(L, &destructor_func);               /// mntbl  destructor_func
+			lua_setfield(L, -2, "__gc");                  /// mntbl
+            lua_pushcfunction(L, &getter_indexer);               /// mntbl  indexer
+			lua_setfield(L, -2, "__index");               /// mntbl
+            lua_pushcfunction(L, &setter_indexer);               /// mntbl  indexer
+			lua_setfield(L, -2, "__newindex");               /// mntbl
+            lua_pushcfunction(L, &object_to_string);               /// mntbl  object_to_string
+			lua_setfield(L, -2, "__tostring");               /// mntbl
+            lua_pushcfunction(L, &object_compare);               /// mntbl  object_to_string
+            lua_setfield(L, -2, "__eq");               /// mntbl
         }
         
         
@@ -396,10 +413,6 @@ namespace Sandbox {
                 }
                 //lua_get_create_table(L,info->parent.info->name,2);  /// [metatatable] ptbl
                 lua_rawseti(L, -2, mt_indexes::__parent);
-                lua_rawgeti(L, -1, mt_indexes::__metatable);
-                lua_rawgeti(L, -2, mt_indexes::__parent);                 /// mntbl raw_ptr parent
-                lua_rawseti(L, -2, mt_indexes::__parent);                 /// mntbl raw_ptr
-                lua_pop(L, 1);
             }
             
             lua_getfield(L, -1, "__constructor");
@@ -410,7 +423,10 @@ namespace Sandbox {
                 lua_setmetatable(L, -3);    /// mn fn
             } 
             lua_pop(L, 1);
-            
+            lua_pushcfunction(L, &is_object);
+            lua_setfield(L,-2,"is");
+            lua_pushlightuserdata(L, const_cast< meta::type_info*>(info));
+            lua_rawseti(L,-2, mt_indexes::__info);
             lua_set_metatable(L, info->name);
         }
         
@@ -418,10 +434,8 @@ namespace Sandbox {
         
         void lua_register_enum_metatable(lua_State* L,const meta::type_info* info,lua_CFunction compare) {
             sb_assert(info->parent.info==meta::type<void>::info());
-            lua_rawgeti(L, -1, mt_indexes::__metatable); // mn mt
             lua_pushcclosure(L, compare, 0);    // mn mt cmp
             lua_setfield(L, -2,"__eq");         // mn mt
-            lua_pop(L, 1);                      // mn
             lua_set_metatable(L, info->name);
         }
         

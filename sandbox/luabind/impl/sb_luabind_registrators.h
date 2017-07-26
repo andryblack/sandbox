@@ -173,10 +173,8 @@ namespace Sandbox {
             template <class Func>
             void operator()( const meta::operator_holder<Func>& func ) {
                 sb_assert(lua_istable(m_L, -1));
-                lua_rawgeti(m_L, -1, mt_indexes::__metatable);/// metatable
-                sb_assert(lua_istable(m_L, -1)); 
-                Func* ptr = 
-                reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// methods ud
+                Func* ptr =
+                    reinterpret_cast<Func*>(lua_newuserdata(m_L, sizeof(Func)));    /// methods ud
                 *ptr = func.func;
                 lua_pushcclosure(m_L, &method_helper<T,Func>::call, 1);
                 static const char* meta_operator[] = {
@@ -187,7 +185,6 @@ namespace Sandbox {
                     "__index"
                 };
                 lua_setfield(m_L, -2, meta_operator[func.name]);               /// methods 
-                lua_pop(m_L, 1);
             }
             template <class Func>
             void operator()( const meta::static_method_holder<Func>& func ) {

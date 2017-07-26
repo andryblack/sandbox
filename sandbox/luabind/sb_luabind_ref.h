@@ -68,7 +68,7 @@ namespace Sandbox {
                 }
             }
             static sb::intrusive_ptr<T> get(lua_State* L, int idx) {
-                if (lua_isnil(L, idx)) {
+                if (lua_isnoneornil(L, idx)) {
                     return sb::intrusive_ptr<T>();
                 }
                 sb::intrusive_ptr<T> res(new T());
