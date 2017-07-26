@@ -273,7 +273,9 @@ public class IAPHelper  {
     }
 
     private boolean start_setup(String signature) {
-        m_public_key = signature;
+        
+         m_public_key = signature;
+   
         check_not_disposed();
 
         if (m_setup_done) return false;
@@ -343,6 +345,7 @@ public class IAPHelper  {
                             "Billing service unavailable on device."));
         }
         return true;
+    
     }
 
     public boolean iap_init(String key) {
@@ -352,7 +355,7 @@ public class IAPHelper  {
         try {
             res = start_setup(key);
         } catch (Exception e) {
-            logError(e.getMessage());
+            logError("iap_init: " + e.getMessage());
         }
         return res;
     }
@@ -367,8 +370,9 @@ public class IAPHelper  {
     public void dispose() throws IabAsyncInProgressException {
         synchronized (m_async_in_progress_lock) {
             if (m_async_in_progress) {
-                throw new IabAsyncInProgressException("Can't dispose because an async operation " +
-                        "(" + m_async_operation + ") is in progress.");
+                 logDebug("Disposing scheduled");
+                m_dispose_after_async = true;
+                return;
             }
         }
         logDebug("Disposing.");
@@ -386,7 +390,7 @@ public class IAPHelper  {
 
 
 
-    int queryPurchases() throws JSONException, RemoteException {
+    private int queryPurchases() throws JSONException, RemoteException {
         // Query purchases
         logDebug("Querying owned items");
         logDebug("Package name: " + m_activity.getPackageName());
@@ -450,7 +454,7 @@ public class IAPHelper  {
         return verificationFailed ? IABHELPER_VERIFICATION_FAILED : BILLING_RESPONSE_RESULT_OK;
     }
 
-    int querySkuDetails(String itemType, List<String> moreSkus)
+    private int querySkuDetails(String itemType, List<String> moreSkus)
             throws RemoteException {
         logDebug("Querying SKU details.");
         ArrayList<String> skuList = new ArrayList<String>();
@@ -535,7 +539,7 @@ public class IAPHelper  {
      *     Ignored if null or if querySkuDetails is false.
      * @throws IabException if a problem occurs while refreshing the inventory.
      */
-    public void queryInventory( List<String> moreItemSkus) throws IabException {
+    private void queryInventory( List<String> moreItemSkus) throws IabException {
         check_not_disposed();
         check_setup_done("queryInventory");
         try {
@@ -563,7 +567,7 @@ public class IAPHelper  {
      *
      * @param moreItemSkus as in {@link #queryInventory}
      */
-    public void queryInventoryAsync(final List<String> moreItemSkus)
+    private void queryInventoryAsync(final List<String> moreItemSkus)
             throws IabAsyncInProgressException {
         final Handler handler = new Handler();
         check_not_disposed();
@@ -605,7 +609,7 @@ public class IAPHelper  {
      *      data when the purchase completes. This extra data will be permanently bound to that
      *      purchase and will always be returned when the purchase is queried.
      */
-    public void launchPurchaseFlow(String sku, String extraData)
+    private void launchPurchaseFlow(String sku, String extraData)
             throws IabAsyncInProgressException {
         check_not_disposed();
         check_setup_done("launchPurchaseFlow");
@@ -666,88 +670,92 @@ public class IAPHelper  {
      *     false if the result was not related to a purchase, in which case you should
      *     handle it normally.
      */
-    public boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
+    private boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
         IabResult result;
         if (requestCode != PURCHASE_FLOW_RC) return false;
+        try {
+            check_not_disposed();
+            check_setup_done("handleActivityResult");
 
-        check_not_disposed();
-        check_setup_done("handleActivityResult");
+            // end of async purchase operation that started on launchPurchaseFlow
+            flag_end_async();
 
-        // end of async purchase operation that started on launchPurchaseFlow
-        flag_end_async();
-
-        if (data == null) {
-            logError("Null data in IAB activity result.");
-            result = new IabResult(IABHELPER_BAD_RESPONSE, "Null data in IAB result");
-            on_iap_purchase_finished(result,   null);
-            return true;
-        }
-
-        int responseCode = getResponseCodeFromIntent(data);
-        String purchaseData = data.getStringExtra(RESPONSE_INAPP_PURCHASE_DATA);
-        String dataSignature = data.getStringExtra(RESPONSE_INAPP_SIGNATURE);
-
-        if (resultCode == Activity.RESULT_OK && responseCode == BILLING_RESPONSE_RESULT_OK) {
-            logDebug("Successful resultcode from purchase activity.");
-            logDebug("Purchase data: " + purchaseData);
-            logDebug("Data signature: " + dataSignature);
-            logDebug("Extras: " + data.getExtras());
-            //logDebug("Expected item type: " + mPurchasingItemType);
-
-            if (purchaseData == null || dataSignature == null) {
-                logError("BUG: either purchaseData or dataSignature is null.");
-                logDebug("Extras: " + data.getExtras().toString());
-                result = new IabResult(IABHELPER_UNKNOWN_ERROR, "IAB returned null purchaseData or dataSignature");
-                on_iap_purchase_finished(result,  null);
+            if (data == null) {
+                logError("Null data in IAB activity result.");
+                result = new IabResult(IABHELPER_BAD_RESPONSE, "Null data in IAB result");
+                on_iap_purchase_finished(result,   null);
                 return true;
             }
 
-            Purchase purchase = null;
-            try {
-                purchase = new Purchase( purchaseData, dataSignature);
-                String sku = purchase.getSku();
+            int responseCode = getResponseCodeFromIntent(data);
+            String purchaseData = data.getStringExtra(RESPONSE_INAPP_PURCHASE_DATA);
+            String dataSignature = data.getStringExtra(RESPONSE_INAPP_SIGNATURE);
 
-                // Verify signature
-                if (!verifyPurchase(m_public_key, purchaseData, dataSignature)) {
-                    logError("Purchase signature verification FAILED for sku " + sku);
-                    result = new IabResult(IABHELPER_VERIFICATION_FAILED, "Signature verification failed for sku " + sku);
-                    on_iap_purchase_finished(result, purchase);
+            if (resultCode == Activity.RESULT_OK && responseCode == BILLING_RESPONSE_RESULT_OK) {
+                logDebug("Successful resultcode from purchase activity.");
+                logDebug("Purchase data: " + purchaseData);
+                logDebug("Data signature: " + dataSignature);
+                logDebug("Extras: " + data.getExtras());
+                //logDebug("Expected item type: " + mPurchasingItemType);
+
+                if (purchaseData == null || dataSignature == null) {
+                    logError("BUG: either purchaseData or dataSignature is null.");
+                    logDebug("Extras: " + data.getExtras().toString());
+                    result = new IabResult(IABHELPER_UNKNOWN_ERROR, "IAB returned null purchaseData or dataSignature");
+                    on_iap_purchase_finished(result,  null);
                     return true;
                 }
-                logDebug("Purchase signature successfully verified.");
-            }
-            catch (JSONException e) {
-                logError("Failed to parse purchase data.");
-                e.printStackTrace();
-                result = new IabResult(IABHELPER_BAD_RESPONSE, "Failed to parse purchase data.");
-                on_iap_purchase_finished(result, null);
-                return true;
-            }
 
-            on_iap_purchase_finished(new IabResult(BILLING_RESPONSE_RESULT_OK, "Success"), purchase);
+                Purchase purchase = null;
+                try {
+                    purchase = new Purchase( purchaseData, dataSignature);
+                    String sku = purchase.getSku();
+
+                    // Verify signature
+                    if (!verifyPurchase(m_public_key, purchaseData, dataSignature)) {
+                        logError("Purchase signature verification FAILED for sku " + sku);
+                        result = new IabResult(IABHELPER_VERIFICATION_FAILED, "Signature verification failed for sku " + sku);
+                        on_iap_purchase_finished(result, purchase);
+                        return true;
+                    }
+                    logDebug("Purchase signature successfully verified.");
+                }
+                catch (JSONException e) {
+                    logError("Failed to parse purchase data.");
+                    e.printStackTrace();
+                    result = new IabResult(IABHELPER_BAD_RESPONSE, "Failed to parse purchase data.");
+                    on_iap_purchase_finished(result, null);
+                    return true;
+                }
+
+                on_iap_purchase_finished(new IabResult(BILLING_RESPONSE_RESULT_OK, "Success"), purchase);
+            }
+            else if (resultCode == Activity.RESULT_OK) {
+                // result code was OK, but in-app billing response was not OK.
+                logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(responseCode));
+                result = new IabResult(responseCode, "Problem purchashing item:" + getResponseDesc(responseCode));
+                on_iap_purchase_finished(result, null);
+            }
+            else if (resultCode == Activity.RESULT_CANCELED) {
+                logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
+                if (responseCode != BILLING_RESPONSE_RESULT_OK) {
+                    result = new IabResult(responseCode, "cancled");
+                } else {
+                    result = new IabResult(IABHELPER_USER_CANCELLED, "cancled/ok");
+                } 
+                on_iap_purchase_finished(result, null);
+            }
+            else {
+                logError("Purchase failed. Result code: " + Integer.toString(resultCode)
+                        + ". Response: " + getResponseDesc(responseCode));
+                result = new IabResult(IABHELPER_UNKNOWN_PURCHASE_RESPONSE, "Unknown purchase response: " + getResponseDesc(responseCode));
+                on_iap_purchase_finished(result, null);
+            }
+            return true;
+        } catch (Exception e) {
+            logError("handleActivityResult: " + e.toString());
         }
-        else if (resultCode == Activity.RESULT_OK) {
-            // result code was OK, but in-app billing response was not OK.
-            logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(responseCode));
-            result = new IabResult(responseCode, "Problem purchashing item:" + getResponseDesc(responseCode));
-            on_iap_purchase_finished(result, null);
-        }
-        else if (resultCode == Activity.RESULT_CANCELED) {
-            logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
-            if (responseCode != BILLING_RESPONSE_RESULT_OK) {
-                result = new IabResult(responseCode, "cancled");
-            } else {
-                result = new IabResult(IABHELPER_USER_CANCELLED, "cancled/ok");
-            } 
-            on_iap_purchase_finished(result, null);
-        }
-        else {
-            logError("Purchase failed. Result code: " + Integer.toString(resultCode)
-                    + ". Response: " + getResponseDesc(responseCode));
-            result = new IabResult(IABHELPER_UNKNOWN_PURCHASE_RESPONSE, "Unknown purchase response: " + getResponseDesc(responseCode));
-            on_iap_purchase_finished(result, null);
-        }
-        return true;
+        return false;
     }
 
     /**
@@ -759,7 +767,7 @@ public class IAPHelper  {
      * @param itemInfo The PurchaseInfo that represents the item to consume.
      * @throws IabException if there is a problem during consumption.
      */
-    void consume(Purchase itemInfo) throws IabException {
+    private void consume(Purchase itemInfo) throws IabException {
         check_not_disposed();
         check_setup_done("consume");
 
@@ -788,7 +796,7 @@ public class IAPHelper  {
         }
     }
 
-    void consumeAsyncInternal(final Purchase purchase)
+    private void consumeAsyncInternal(final Purchase purchase)
             throws IabAsyncInProgressException {
         final Handler handler = new Handler();
         start_async(new Thread(new Runnable() {
@@ -812,7 +820,7 @@ public class IAPHelper  {
             }
         }));
     }
-    public void consumeAsync(Purchase purchase)
+    private void consumeAsync(Purchase purchase)
             throws IabAsyncInProgressException {
         check_not_disposed();
         check_setup_done("consume");
@@ -837,6 +845,9 @@ public class IAPHelper  {
             return false;
 
         } catch ( JSONException e ) {
+            logError(e.toString());
+            return false;
+        } catch ( Exception e ) {
             logError(e.toString());
             return false;
         }
@@ -890,6 +901,10 @@ public class IAPHelper  {
             logError(e.toString());
             return false;
 
+        } catch ( Exception e ) {
+            logError(e.toString());
+            return false;
+
         }
         return true;
     }
@@ -914,13 +929,17 @@ public class IAPHelper  {
         } catch ( IabAsyncInProgressException e) {
             logError(e.toString());
             return false;
+        } catch ( Exception e ) {
+            logError(e.toString());
+            return false;
+
         }
         return result;
     }
 
     private static native void nativeProcessResponse(long obj,String method,String data);
 
-    JSONArray buildProductsJson() throws JSONException {
+    private JSONArray buildProductsJson() throws JSONException {
         JSONArray a = new JSONArray();
         for(Product product:m_products_map.values())
         {
@@ -998,7 +1017,7 @@ public class IAPHelper  {
     }
 
     // Workaround to bug where sometimes response codes come as Long instead of Integer
-    int getResponseCodeFromBundle(Bundle b) {
+    private int getResponseCodeFromBundle(Bundle b) {
         Object o = b.get(RESPONSE_CODE);
         if (o == null) {
             logDebug("Bundle with null response code, assuming OK (known issue)");
@@ -1020,7 +1039,7 @@ public class IAPHelper  {
      * @return A human-readable string explaining the result code.
      *     It also includes the result code numerically.
      */
-    public static String getResponseDesc(int code) {
+    private static String getResponseDesc(int code) {
         String[] iab_msgs = ("0:OK/1:User Canceled/2:Unknown/" +
                 "3:Billing Unavailable/4:Item unavailable/" +
                 "5:Developer Error/6:Error/7:Item Already Owned/" +
@@ -1048,7 +1067,7 @@ public class IAPHelper  {
     }
 
     // Workaround to bug where sometimes response codes come as Long instead of Integer
-    int getResponseCodeFromIntent(Intent i) {
+    private int getResponseCodeFromIntent(Intent i) {
         Object o = i.getExtras().get(RESPONSE_CODE);
         if (o == null) {
             logError("Intent with no response code, assuming OK (known issue)");
@@ -1186,13 +1205,19 @@ public class IAPHelper  {
     }
 
      boolean verifyPurchase(String base64PublicKey, String signedData, String signature) {
-        if (TextUtils.isEmpty(signedData) || TextUtils.isEmpty(base64PublicKey) ||
+        try {
+            if (TextUtils.isEmpty(signedData) || TextUtils.isEmpty(base64PublicKey) ||
                 TextUtils.isEmpty(signature)) {
-            logError( "Purchase verification failed: missing data.");
+                logError( "Purchase verification failed: missing data.");
+                return false;
+            }
+
+            PublicKey key = generatePublicKey(base64PublicKey);
+            return verify(key, signedData, signature);
+        } catch (Exception e) {
+            logError("verifyPurchase " + e.toString());
             return false;
         }
-
-        PublicKey key = generatePublicKey(base64PublicKey);
-        return verify(key, signedData, signature);
+        
     }
 }
