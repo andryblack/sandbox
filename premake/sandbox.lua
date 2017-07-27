@@ -45,6 +45,9 @@ solution( ProjectName )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 		android_packageversion( AndroidConfig.versioncode or 1)
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
+		if AndroidConfig.manifest then
+			android_manifest(path.getabsolute(path.join(_WORKING_DIR,AndroidConfig.manifest)))
+		end
 		for _,v in ipairs(AndroidConfig.receivers or {} ) do
 			android_receiver( v )
 		end

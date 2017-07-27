@@ -40,22 +40,24 @@ function manifest.getManifestFilename(sln,prj,cfg)
 	return path.join(sln.location, prj.shortname or prj.name , cfg.shortname, ndk.MANIFEST )
 end
 
-local function build_attribs(attribs)
-	if not attribs then
-		return ''
-	end
-	local a = ''
-	local attribss = {}
-	for k,v in pairs(attribs) do
-		table.insert(attribss,{k=k,v=v})
-	end
-	table.sort(attribss,function(a,b) return a.k < b.k end)
-	for _,v in ipairs(attribss) do
-		a = a .. string.format('%s="%s" ',v.k,v.v)
-	end
-	return a
-end
+
 function manifest.generateManifest(sln,prj)
+
+	if sln.android_manifest then
+		local mainfest_file = assert(io.open(sln.android_manifest,'r'))
+
+		local manifest_data = mainfest_file:read('*a')
+		mainfest_file:close()
+
+		local detoken = premake.detoken
+
+		local manifest_out = detoken.expand(manifest_data, {
+			prj = prj, sln = sln
+		})
+		_p(manifest_out)
+		return
+	end
+
 	local packagename = prj.android_packagename or 'com.example.app'
 	local activity = prj.android_activity or 'android.app.NativeActivity'
 	local attributes = 'android:hasCode="true"'

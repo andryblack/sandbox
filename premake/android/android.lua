@@ -279,6 +279,12 @@ api.register {
 	keyed = true
 }
 
+api.register {
+	name = "android_manifest",
+	scope = 'solution',
+	kind = 'path',
+}
+
 
 newoption {
 	trigger = "android-ndk-dir",
