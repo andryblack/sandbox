@@ -263,6 +263,16 @@ namespace Sandbox {
         }
     }
     
+    static void appy_slot_transform( const spSlot* slot, Transform2d& tr ) {
+        tr.m.matrix[0*2+0] = slot->bone->a;
+        tr.m.matrix[0*2+1] = -slot->bone->c;
+        tr.m.matrix[1*2+0] = slot->bone->b;
+        tr.m.matrix[1*2+1] = -slot->bone->d;
+        tr.v.x = slot->bone->worldX;
+        tr.v.y = slot->bone->worldY;
+
+    }
+    
     ContainerTransformPtr SpineSceneObject::GetAttachment(const sb::string& slot_name) {
         const spSlot* slot = spSkeleton_findSlot(m_animation->m_skeleton, slot_name.c_str());
         if (!slot) {
@@ -273,7 +283,10 @@ namespace Sandbox {
             return it->second;
         }
         
-        m_attachements[slot->data] = ContainerTransformPtr(new ContainerTransform());
+        ContainerTransformPtr attachment(new ContainerTransform());
+        m_attachements[slot->data] = attachment;
+        appy_slot_transform(slot,attachment->GetTransformM());
+        attachment->GetTransformM().v += Sandbox::Vector2f(m_animation->m_skeleton->x,m_animation->m_skeleton->y);
         AddObject(m_attachements[slot->data]);
         return m_attachements[slot->data];
     }
