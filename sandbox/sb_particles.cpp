@@ -123,7 +123,7 @@ namespace Sandbox {
             it = next;
         }
         if (emmit_amount > int(m_max_amount))
-            emmit_amount = m_max_amount;
+            emmit_amount = int(m_max_amount);
         //emmit_amount = std::min(emmit_amount,int(m_max_amount)-int(instance.particles.size()));
         int free_particles = (int(m_max_amount)-int(instance.particles.size()));
         //LogVerbose() << "emit: " << emmit_amount << " free: " << free_particles << " dt:" << dt << " circle: " << instance.cicle_time;

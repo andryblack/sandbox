@@ -21,7 +21,7 @@ namespace Sandbox {
 		ContainerTransform3d();
 		~ContainerTransform3d();
 		
-		void Draw(Graphics& g) const;
+		void Draw(Graphics& g) const SB_OVERRIDE;
 		
 		void SetProjectionMatrix(const Matrix4f& m) { m_projection = m; }
 		const Matrix4f& GetProjectionMatrix() const { return m_projection;}

@@ -25,8 +25,8 @@ namespace Sandbox {
         SB_META_OBJECT;
     public:
         explicit FreeTypeFontChild( const FontPtr& parent, const FontDataPtr& data );
-        virtual void AllocateSymbols( const char* text );
-        virtual bool HasGlyph(GHL::UInt32 code) const {
+        virtual void AllocateSymbols( const char* text ) SB_OVERRIDE;
+        virtual bool HasGlyph(GHL::UInt32 code) const SB_OVERRIDE{
             return m_parent ? m_parent->HasGlyph(code) : Font::HasGlyph(code);
         }
     private:
@@ -39,7 +39,7 @@ namespace Sandbox {
     public:
         static sb::intrusive_ptr<FreeTypeFont> Load( Resources* resources, const char* file, const FreeTypeFontConfig& config );
         virtual ~FreeTypeFont();
-        virtual void AllocateSymbols( const char* text );
+        virtual void AllocateSymbols( const char* text ) SB_OVERRIDE;
         
         const FontDataPtr& GetMainData() const { return m_data; }
         const FontDataPtr& GetOutlineData() const { return m_outline_data; }
@@ -49,7 +49,7 @@ namespace Sandbox {
         
         void SetCharImage(GHL::UInt32 code,const Sandbox::ImagePtr& image,float advance);
         void AddCharImage(GHL::UInt32 code,const Sandbox::ImagePtr& image,float advance);
-        virtual bool HasGlyph(GHL::UInt32 code) const;
+        virtual bool HasGlyph(GHL::UInt32 code) const SB_OVERRIDE;
     private:
         struct Impl;
         Impl*   m_impl;

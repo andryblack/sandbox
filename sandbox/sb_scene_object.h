@@ -74,8 +74,8 @@ namespace Sandbox {
         void MoveY(float y) { m_pos.y += y; }
     private:
         Vector2f    m_pos;
-        virtual void GlobalToLocalImpl(Vector2f& v) const;
-        virtual void GetTransformImpl(Transform2d& tr) const;
+        virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
+        virtual void GetTransformImpl(Transform2d& tr) const SB_OVERRIDE;
     };
     typedef sb::intrusive_ptr<SceneObjectWithPosition> SceneObjectWithPositionPtr;
 }

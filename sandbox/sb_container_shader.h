@@ -22,7 +22,7 @@ namespace Sandbox {
         ContainerShader();
 		~ContainerShader();
 		
-		void Draw(Graphics& g) const;
+		void Draw(Graphics& g) const SB_OVERRIDE;
 		
 		void SetShader(const ShaderPtr& sh) { m_shader = sh;}
 		const ShaderPtr& GetShader() const { return m_shader;}

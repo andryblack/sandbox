@@ -37,3 +37,9 @@ project 'freetype'
 		sandbox_dir .. '/include',
 		sandbox_dir .. '/external/freetype/include'
 	}
+
+	disablewarnings{ 'shorten-64-to-32' }
+	xcodebuildsettings {
+		GCC_WARN_64_TO_32_BIT_CONVERSION='NO'
+	}
+

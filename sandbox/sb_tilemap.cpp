@@ -13,7 +13,7 @@ SB_META_DECLARE_OBJECT(Sandbox::TileMap, Sandbox::meta::object)
 namespace Sandbox {
     
     TileMapLayer::TileMapLayer( size_t w, size_t h) : m_width(w),m_height(h),m_data(0) {
-        m_data = GHL_CreateData(m_width * m_height * sizeof(data_t));
+        m_data = GHL_CreateData(GHL::UInt32(m_width * m_height * sizeof(data_t)));
     }
     
     TileMapLayer::TileMapLayer( size_t w, size_t h, GHL::Data* data ) : m_width(w),m_height(h),m_data(data) {
@@ -118,7 +118,7 @@ namespace Sandbox {
                         }
                         if (!d) continue;
                         if (::strcmp(data_node.attribute("compression").as_string(),"zlib")==0) {
-                            GHL::UInt32 size = sizeof(GHL::UInt32)*lw*lh;
+                            GHL::UInt32 size = GHL::UInt32(sizeof(GHL::UInt32)*lw*lh);
                             VectorData<GHL::Byte>* dd = new VectorData<GHL::Byte>();
                             dd->vector().resize(size);
                             

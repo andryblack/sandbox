@@ -23,8 +23,8 @@ namespace Sandbox {
     public:
         void SetPassColor(const sb::string& pass_name,const Color& c);
     protected:
-        virtual bool BeginPass(Graphics& g, const FontPass& pass) const;
-        virtual void EndPass(Graphics& g, const FontPass& pass) const;
+        virtual bool BeginPass(Graphics& g, const FontPass& pass) const SB_OVERRIDE;
+        virtual void EndPass(Graphics& g, const FontPass& pass) const SB_OVERRIDE;
     private:
         sb::map<sb::string,Color> m_pass_colors;
     };
@@ -34,14 +34,14 @@ namespace Sandbox {
     public:
         TextBox();
         ~TextBox();
-        void Draw(Graphics& g) const;
+        void Draw(Graphics& g) const SB_OVERRIDE;
         void SetWidth(float w);
         float GetWidth() const { return m_width; }
         const Sizef& GetSize() const {
             return m_data.size;
         }
     protected:
-        virtual void UpdateText();
+        virtual void UpdateText() SB_OVERRIDE;
         TextData    m_data;
         float       m_width;
     };

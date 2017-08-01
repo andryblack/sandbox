@@ -213,27 +213,27 @@ namespace Sandbox {
         sb::string  m_url;
     public:
 		///
-		virtual void GHL_CALL SetSystem( GHL::System* sys );
+		virtual void GHL_CALL SetSystem( GHL::System* sys ) SB_OVERRIDE;
 		///
-		virtual void GHL_CALL SetVFS( GHL::VFS* vfs ) ;
+		virtual void GHL_CALL SetVFS( GHL::VFS* vfs ) SB_OVERRIDE ;
 		///
-		virtual void GHL_CALL SetRender( GHL::Render* render ) ;
+		virtual void GHL_CALL SetRender( GHL::Render* render ) SB_OVERRIDE;
 		///
-		virtual void GHL_CALL SetImageDecoder( GHL::ImageDecoder* decoder ) ;
+		virtual void GHL_CALL SetImageDecoder( GHL::ImageDecoder* decoder ) SB_OVERRIDE;
 		///
-		virtual void GHL_CALL SetSound( GHL::Sound* sound) ;
+		virtual void GHL_CALL SetSound( GHL::Sound* sound) SB_OVERRIDE;
 		///
-		virtual void GHL_CALL FillSettings( GHL::Settings* settings );
+		virtual void GHL_CALL FillSettings( GHL::Settings* settings ) SB_OVERRIDE;
         ///
-		virtual bool GHL_CALL Load() ;
+		virtual bool GHL_CALL Load() SB_OVERRIDE;
         ///
-        virtual void GHL_CALL Unload();
+        virtual void GHL_CALL Unload() SB_OVERRIDE;
 		///
-		virtual bool GHL_CALL OnFrame( GHL::UInt32 usecs ) ;
+		virtual bool GHL_CALL OnFrame( GHL::UInt32 usecs ) SB_OVERRIDE;
         ///
-        virtual void GHL_CALL OnEvent( GHL::Event* event );
+        virtual void GHL_CALL OnEvent( GHL::Event* event ) SB_OVERRIDE;
 		///
-		virtual void GHL_CALL Release(  ) ;
+		virtual void GHL_CALL Release(  ) SB_OVERRIDE;
 		
 	};
 	

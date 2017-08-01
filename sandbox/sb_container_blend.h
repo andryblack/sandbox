@@ -19,7 +19,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         ContainerBlend();
-		void Draw(Graphics& g) const;
+		void Draw(Graphics& g) const SB_OVERRIDE;
 		void SetMode(BlendMode mode) { m_mode = mode;}
 		BlendMode GetMode() const { return m_mode;}
 	private:

@@ -250,5 +250,10 @@ project 'GHL'
 			sandbox_dir .. '/GHL/include'
 		}
 
+		disablewarnings{ 'shorten-64-to-32' }
+		xcodebuildsettings {
+			GCC_WARN_64_TO_32_BIT_CONVERSION='NO'
+		}
+
 		configuration "Debug"
    			defines "GHL_DEBUG"

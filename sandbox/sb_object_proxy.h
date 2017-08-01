@@ -21,7 +21,7 @@ namespace Sandbox {
     public:
   
 		explicit ObjectDrawProxy(const sb::function<void(Graphics&)>& func);
-		void Draw(Graphics& g) const;
+		void Draw(Graphics& g) const SB_OVERRIDE;
         
   	private:
 		sb::function<void(Graphics&)> m_func;
@@ -32,7 +32,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         explicit SceneObjectProxy(const SceneObjectPtr& ref);
-        void Draw(Graphics& g) const;
+        void Draw(Graphics& g) const SB_OVERRIDE;
     private:
         SceneObjectPtr  m_ref;
     };

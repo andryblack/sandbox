@@ -23,7 +23,7 @@ namespace Sandbox {
     public:
 		Label();
 		~Label();
-		void Draw(Graphics& g) const;
+		void Draw(Graphics& g) const SB_OVERRIDE;
         void SetFont(const FontPtr& font);
 		const FontPtr& GetFont() const { return m_font;}
         void SetAlign( FontAlign align);
@@ -41,7 +41,7 @@ namespace Sandbox {
     class ColorizedLabel : public Label {
         SB_META_OBJECT
     public:
-        void Draw(Graphics& g) const;
+        void Draw(Graphics& g) const SB_OVERRIDE;
         void SetColor(const Color& c) { m_color = c; }
         const Color& GetColor() const { return m_color; }
     private:

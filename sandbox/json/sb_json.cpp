@@ -1058,7 +1058,7 @@ namespace Sandbox {
             return 1;
         }
         static int yajl_parse_integer(void * ctx, long long integerVal) {
-            static_cast<Ctx*>(ctx)->traverser->OnInteger(integerVal);
+            static_cast<Ctx*>(ctx)->traverser->OnInteger(int(integerVal));
             return 1;
         }
         static int yajl_parse_double(void * ctx, double doubleVal) {

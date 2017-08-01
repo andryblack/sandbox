@@ -138,6 +138,6 @@ namespace Sandbox {
     }
     
     GHL::UInt32 MemoryMgr::allocated() const {
-        return INITIAL_SIZE + m_pools.size() * POOL_SIZE;
+        return GHL::UInt32(INITIAL_SIZE + m_pools.size() * POOL_SIZE);
     }
 }

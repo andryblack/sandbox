@@ -19,7 +19,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
 		explicit ContainerVisible(const sb::function<bool()>& func);
-		void Draw(Graphics& g) const;
+		void Draw(Graphics& g) const SB_OVERRIDE;
 		bool GetInvert() const { return m_invert;}
 		void SetInvert(bool i) { m_invert = i;}
 	private:

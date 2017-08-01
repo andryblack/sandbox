@@ -63,8 +63,8 @@ namespace Sandbox {
                 buf[pos] = level_descr[level];++pos;
                 buf[pos] = ':';++pos;
                 buf[pos] = 0;
-                m_file->Write(reinterpret_cast<const GHL::Byte*>(buf), pos);
-                m_file->Write(reinterpret_cast<const GHL::Byte*>(message), ::strlen(message));
+                m_file->Write(reinterpret_cast<const GHL::Byte*>(buf), GHL::UInt32(pos));
+                m_file->Write(reinterpret_cast<const GHL::Byte*>(message), GHL::UInt32(::strlen(message)));
                 m_file->Write(rn, sizeof(rn));
                 res = true;
             }

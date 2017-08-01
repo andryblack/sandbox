@@ -97,7 +97,7 @@ namespace Sandbox {
         LUA_CHECK_STACK(2)
         GetObject(L);
         lua_len(L,-1);
-        int len = lua_tointeger(L, -1);
+        lua_Integer len = lua_tointeger(L, -1);
         lua_pop(L, 1);
         lua_pushinteger(L, len + 1);
         return L;

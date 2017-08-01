@@ -19,7 +19,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         ContainerClip();
-        void Draw(Graphics& g) const;
+        void Draw(Graphics& g) const SB_OVERRIDE;
         void SetRect(const Recti& rect) { m_rect = rect;}
         const Recti& GetRect() const { return m_rect;}
     private:

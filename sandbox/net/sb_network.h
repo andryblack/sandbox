@@ -34,27 +34,27 @@ namespace Sandbox {
         ~NetworkRequestBase();
         /// ghl counter
         /// add reference
-        virtual void GHL_CALL AddRef() const;
+        virtual void GHL_CALL AddRef() const SB_OVERRIDE;
         /// release reference
-        virtual void GHL_CALL Release() const;
+        virtual void GHL_CALL Release() const SB_OVERRIDE;
         /// ghl interface
         /// url
-        virtual const char* GHL_CALL GetURL() const;
+        virtual const char* GHL_CALL GetURL() const SB_OVERRIDE;
         /// headers
-        virtual GHL::UInt32 GHL_CALL GetHeadersCount() const;
-        virtual const char* GHL_CALL GetHeaderName(GHL::UInt32 idx) const;
-        virtual const char* GHL_CALL GetHeaderValue(GHL::UInt32 idx) const;
+        virtual GHL::UInt32 GHL_CALL GetHeadersCount() const SB_OVERRIDE;
+        virtual const char* GHL_CALL GetHeaderName(GHL::UInt32 idx) const SB_OVERRIDE;
+        virtual const char* GHL_CALL GetHeaderValue(GHL::UInt32 idx) const SB_OVERRIDE;
         
         /// received response
-        virtual void GHL_CALL OnResponse(GHL::UInt32 status);
+        virtual void GHL_CALL OnResponse(GHL::UInt32 status) SB_OVERRIDE;
         /// received header
-        virtual void GHL_CALL OnHeader(const char* name,const char* value);
+        virtual void GHL_CALL OnHeader(const char* name,const char* value) SB_OVERRIDE;
         /// received data
-        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size);
+        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size) SB_OVERRIDE;
         /// received complete
-        virtual void GHL_CALL OnComplete();
+        virtual void GHL_CALL OnComplete() SB_OVERRIDE;
         /// received error
-        virtual void GHL_CALL OnError(const char* error);
+        virtual void GHL_CALL OnError(const char* error) SB_OVERRIDE;
         
         bool GetError() const { return m_error; }
         bool GetCompleted() const { return m_completed; }
@@ -84,7 +84,7 @@ namespace Sandbox {
         explicit NetworkRequest(const sb::string& url) : NetworkRequestBase(url) {}
         const sb::string& GetData() const { return m_data; }
         /// received data
-        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size);
+        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size) SB_OVERRIDE;
     protected:
         void SetData(const sb::string& d) { m_data = d; }
         void AppendData(const char* data,size_t size) { m_data.append(data,size); }
@@ -101,7 +101,7 @@ namespace Sandbox {
         ~NetworkDataRequest();
         const GHL::Data*    GetData() const { return m_data; }
         /// received data
-        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size);
+        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size) SB_OVERRIDE;
     protected:
         void ReleaseData();
     private:
@@ -113,8 +113,8 @@ namespace Sandbox {
     public:
         explicit NetworkFileRequest(const sb::string& url, GHL::WriteStream* wd);
         ~NetworkFileRequest();
-        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size);
-        virtual void GHL_CALL OnComplete();
+        virtual void GHL_CALL OnData(const GHL::Byte* data,GHL::UInt32 size) SB_OVERRIDE;
+        virtual void GHL_CALL OnComplete() SB_OVERRIDE;
     protected:
         void ReleaseData();
         GHL::WriteStream*   m_ds;
@@ -127,7 +127,7 @@ namespace Sandbox {
     public:
         explicit ImageRequest(const sb::string& url,Resources* res) :  NetworkDataRequest(url),m_resources(res) {}
         const ImagePtr& GetImage() const { return m_img; }
-        virtual void GHL_CALL OnComplete();
+        virtual void GHL_CALL OnComplete() SB_OVERRIDE;
     private:
         ImagePtr    m_img;
         Resources*  m_resources;
@@ -152,7 +152,7 @@ namespace Sandbox {
     public:
         NetworkMultipartFormData();
         ~NetworkMultipartFormData();
-        virtual void Setup(NetworkRequestBase* request);
+        virtual void Setup(NetworkRequestBase* request) SB_OVERRIDE;
         void AddFile(const sb::string& name,
                      const sb::string& filename,
                      const sb::string& content_type,

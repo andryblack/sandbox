@@ -18,7 +18,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         ClearScene() : m_depth(1.0) {}
-        void Draw( Graphics& g ) const;
+        void Draw( Graphics& g ) const SB_OVERRIDE;
         
         void SetColor( const Color& c ) { m_color = c; }
         const Color& GetColor() const { return m_color; }

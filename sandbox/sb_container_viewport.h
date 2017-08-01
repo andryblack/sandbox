@@ -21,7 +21,7 @@ namespace Sandbox {
 		ContainerViewport();
 		~ContainerViewport();
 		
-		void Draw(Graphics& g) const;
+		void Draw(Graphics& g) const SB_OVERRIDE;
 		
 		void Set(const Recti& r) { m_rect = r;}
 		const Recti& Get() const { return m_rect;}

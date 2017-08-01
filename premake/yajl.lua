@@ -16,4 +16,8 @@ project 'yajl'
 		
 		files(utils.append_path(sandbox_dir .. '/external/yajl/src/',yajl_files))
 
+		disablewarnings{ 'shorten-64-to-32' }
+		xcodebuildsettings {
+			GCC_WARN_64_TO_32_BIT_CONVERSION='NO'
+		}
 		

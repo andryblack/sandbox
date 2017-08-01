@@ -94,8 +94,8 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         explicit ParticlesSystem(const ParticlesControllerPtr& controller);
-        void Draw( Graphics& g ) const;
-        void Update( float dt );
+        void Draw( Graphics& g ) const SB_OVERRIDE;
+        void Update( float dt ) SB_OVERRIDE;
         
         static void Bind( LuaVM* lua );
         static void BindProcessor( LuaVM* lua, const char* name,const ParticleProcessorBlock* block);

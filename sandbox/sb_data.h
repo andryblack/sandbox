@@ -92,7 +92,7 @@ namespace Sandbox {
         explicit InlinedData(const void* data, size_t size) : m_data(data),m_size(size) {}
         /// Data size
         virtual GHL::UInt32 GHL_CALL	GetSize() const {
-            return m_size;
+            return GHL::UInt32(m_size);
         }
         /// Const data ptr
         virtual const GHL::Byte* GHL_CALL	GetData() const {
@@ -133,7 +133,7 @@ namespace Sandbox {
         }
         /// Data size
         virtual GHL::UInt32 GHL_CALL	GetSize() const {
-            return m_size;
+            return GHL::UInt32(m_size);
         }
         /// Const data ptr
         virtual const GHL::Byte* GHL_CALL	GetData() const {

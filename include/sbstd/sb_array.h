@@ -17,6 +17,7 @@
 
 #include "sb_assert.h"
 #include <vector>
+#include <cstddef>
 
 namespace sb
 {
