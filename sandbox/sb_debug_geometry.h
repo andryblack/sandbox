@@ -19,7 +19,7 @@ namespace Sandbox {
     public:
         explicit CircleObject(const Vector2f& pos, float r);
         
-        virtual void Draw(Graphics& g) const;
+        virtual void Draw(Graphics& g) const SB_OVERRIDE;
         
         float GetR() const { return m_r; }
         void SetR(float r) { m_r = r; }
@@ -33,7 +33,7 @@ namespace Sandbox {
     public:
         explicit LineObject(const Vector2f& a, const Vector2f& b);
         
-        virtual void Draw(Graphics& g) const;
+        virtual void Draw(Graphics& g) const SB_OVERRIDE;
         
         const Vector2f& GetA() const {return m_a; }
         void SetA(const Vector2f& v) { m_a = v; }

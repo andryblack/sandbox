@@ -61,8 +61,8 @@ namespace Sandbox
         SB_META_OBJECT
         public:
             EditText* parent;
-            virtual bool BeginPass(Graphics& g, const FontPass& pass) const;
-            virtual void EndPass(Graphics& g, const FontPass& pass) const;
+            virtual bool BeginPass(Graphics& g, const FontPass& pass) const SB_OVERRIDE;
+            virtual void EndPass(Graphics& g, const FontPass& pass) const SB_OVERRIDE;
         };
 
 	class EditText :

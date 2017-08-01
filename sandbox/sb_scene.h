@@ -21,9 +21,9 @@ namespace Sandbox {
 	public:
         Scene();
         /// draw scene
-		virtual void Draw(Graphics& g) const;
+		virtual void Draw(Graphics& g) const SB_OVERRIDE;
         /// update
-        void Update( float dt );
+        void Update( float dt ) SB_OVERRIDE;
         
         void SetScale( float scale );
         float GetScale() const;

@@ -22,7 +22,7 @@ namespace Sandbox {
     public:
         GeometryBuffer();
         ~GeometryBuffer();
-        virtual void Draw(Graphics& g) const;
+        virtual void Draw(Graphics& g) const SB_OVERRIDE;
         
         void SetColor(const Color& c) { m_color = c; }
         const Color& GetColor() const { return m_color; }

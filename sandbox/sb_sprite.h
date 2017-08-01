@@ -27,7 +27,7 @@ namespace Sandbox {
 		~Sprite();
 		void SetImage(const ImagePtr& img) { m_image = img;}
 		const ImagePtr& GetImage() const { return m_image;}
-		virtual void Draw( Graphics& g ) const;
+		virtual void Draw( Graphics& g ) const SB_OVERRIDE;
         bool CheckHit(const Vector2f& pos) const;
 	protected:
 		ImagePtr m_image;
@@ -43,7 +43,7 @@ namespace Sandbox {
         const Vector2f& GetSize() const { return m_size; }
         void SetRect(const Rectf& rect);
         Rectf GetRect() const;
-		virtual void Draw( Graphics& g ) const;
+		virtual void Draw( Graphics& g ) const SB_OVERRIDE;
 	protected:
 		Vector2f m_size;
 	};
@@ -52,7 +52,7 @@ namespace Sandbox {
     class ColorizedSprite : public Sprite {
         SB_META_OBJECT
     public:
-        virtual void Draw( Graphics& g ) const;
+        virtual void Draw( Graphics& g ) const SB_OVERRIDE;
         void SetColor( const Color& color ) { m_color = color; }
         const Color& GetColor() const { return m_color; }
         void SetAlpha( float a ) { m_color.a = a; }
@@ -67,7 +67,7 @@ namespace Sandbox {
     public:
         void SetImage(const ImageBoxPtr& img) { m_image = img; }
         const ImageBoxPtr& GetImage() const { return m_image; }
-        virtual void Draw( Graphics& g ) const;
+        virtual void Draw( Graphics& g ) const SB_OVERRIDE;
         void SetSize(const Sizef& size) { m_size = size; }
         const Sizef& GetSize() const { return m_size; }
     protected:
@@ -78,7 +78,7 @@ namespace Sandbox {
     class ColorizedSpriteBox : public SpriteBox {
         SB_META_OBJECT
     public:
-        virtual void Draw( Graphics& g ) const;
+        virtual void Draw( Graphics& g ) const SB_OVERRIDE;
         void SetColor( const Color& color ) { m_color = color; }
         const Color& GetColor() const { return m_color; }
         void SetAlpha( float a ) { m_color.a = a; }
@@ -90,7 +90,7 @@ namespace Sandbox {
     class SpriteWithMask : public Sprite {
         SB_META_OBJECT
     public:
-        virtual void Draw( Graphics& g ) const;
+        virtual void Draw( Graphics& g ) const SB_OVERRIDE;
         const ImagePtr& GetMask() const { return m_mask; }
         void SetMask(const ImagePtr& m) { m_mask = m; }
     private:

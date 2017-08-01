@@ -25,7 +25,7 @@ namespace Sandbox {
     public:
         Background();
         bool Load( const char* file, Resources* res );
-        void Draw( Graphics& g ) const;
+        void Draw( Graphics& g ) const SB_OVERRIDE;
         void SetFiltered( bool f );
         void SetFullScreen(bool fs);
         void SetKeepAspect(bool k);

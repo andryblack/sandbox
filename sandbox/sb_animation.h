@@ -66,7 +66,7 @@ namespace Sandbox {
         const SignalPtr& GetOnEnd() const { return m_end_signal; }
 		
         void AddSync( const sb::intrusive_ptr<Animation>& anim );
-		virtual bool Update(float dt);
+		virtual bool Update(float dt) SB_OVERRIDE;
 	private:
 		void SetImages();
 		AnimationDataPtr		m_data;

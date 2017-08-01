@@ -38,7 +38,7 @@ namespace Sandbox {
             lua_pop(L,1);
             return sb::intrusive_ptr<LuaValue>();
         }
-        lua_rawgeti(L, -1, idx);
+        lua_rawgeti(L, -1, int(idx));
         if (lua_isnil(L, -1)) {
             lua_pop(L,1);
             return sb::intrusive_ptr<LuaValue>();

@@ -324,8 +324,8 @@ namespace Sandbox {
             m_outline_data.reset(new FontData());
         }
         FT_Face ftFace = m_impl->face->face;
-        int fontAscent = ftFace->size->metrics.ascender >> 6;
-        int fontDescent = -ftFace->size->metrics.descender >> 6;
+        int fontAscent = int(ftFace->size->metrics.ascender >> 6);
+        int fontDescent = -int(ftFace->size->metrics.descender >> 6);
         
         TT_OS2* os2 = (TT_OS2*)FT_Get_Sfnt_Table(ftFace, ft_sfnt_os2);
         

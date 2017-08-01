@@ -28,7 +28,7 @@ namespace Sandbox {
     public:
         explicit SpineAnimation(const SpineDataPtr& data);
         ~SpineAnimation();
-        virtual bool Update(float dt);
+        virtual bool Update(float dt) SB_OVERRIDE;
         void StartAnimation(const char* name,int loop);
         void SetAnimation(const char* name);
         void AddAnimation(const char* name,int loop);
@@ -47,7 +47,7 @@ namespace Sandbox {
         
         bool IsComplete() const;
         
-        virtual void Clear();
+        virtual void Clear() SB_OVERRIDE;
         
         Rectf CalcBoundingBox() const;
         void ApplySlotTransform(Transform2d& tr,const sb::string& slot_name) const;
@@ -77,7 +77,7 @@ namespace Sandbox {
     public:
         explicit SpineSceneObject( const SpineAnimationPtr& animation );
         /// self drawing implementation
-        void Draw(Graphics& g) const;
+        void Draw(Graphics& g) const SB_OVERRIDE;
         void SetAttachement(const sb::string& slot_name,const SceneObjectPtr& object);
         void RemoveAttachement(const sb::string& slot_name);
         ContainerTransformPtr GetAttachment(const sb::string& slot_name);

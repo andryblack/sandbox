@@ -22,7 +22,7 @@ namespace Sandbox {
     public:
         explicit SkeletController( const SkeletonDataPtr& data );
         void ChangeData( const SkeletonDataPtr& data );
-        virtual bool Update(float dt);
+        virtual bool Update(float dt) SB_OVERRIDE;
         void StartAnimation(const char* name,int loop);
         void SetAnimation(const char* name);
         void AddAnimation(const char* name,int loop);
@@ -45,7 +45,7 @@ namespace Sandbox {
         
         bool IsComplete() const { return !m_animation || !m_started; }
         
-        virtual void Clear();
+        virtual void Clear() SB_OVERRIDE;
     protected:
         size_t  m_crnt_frame;
         float   m_frame_time;
@@ -70,7 +70,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         explicit InterpolatedSkeletController( const SkeletonDataPtr& data );
-        virtual void ApplyFrame();
+        virtual void ApplyFrame() SB_OVERRIDE;
     };
 }
 

@@ -39,7 +39,6 @@ namespace Sandbox {
             if ( luabind::LuaVMHelperPtr lua = m_ref.GetHelper()) {
                 lua_State* L = lua->lua;
                 LUA_CHECK_STACK(0)
-                int main_top = lua_gettop(L);
                 //LogVerbose(LuaThreadModule) << "update thread >>> " << lua_gettop(L);
                 
                 sb_assert(L);

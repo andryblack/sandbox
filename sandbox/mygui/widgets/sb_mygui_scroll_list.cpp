@@ -102,8 +102,8 @@ namespace Sandbox {
         }
                         
         void ScrollList::alignWidget(MyGUI::Widget* w,size_t idx) const {
-            int l = (idx/m_num_subitems);
-            int x = (idx%m_num_subitems);
+            size_t l = (idx/m_num_subitems);
+            size_t x = (idx%m_num_subitems);
             
             int left, top;
             if (getVerticalAlignment()) {
@@ -189,7 +189,7 @@ namespace Sandbox {
                     m_item_widget_size.height = m_item_size;
                     
                     if( m_centered ) {
-                        int required_height = getContentMargins().top+getContentMargins().bottom + count * m_item_size;
+                        int required_height = getContentMargins().top+getContentMargins().bottom + int(count) * m_item_size;
                         int client_height = getViewSize().height;
                         if( required_height < client_height ) {
                             setCenteredOffset((client_height - required_height)/2);
@@ -198,7 +198,7 @@ namespace Sandbox {
                         }
                     }
                     updateRealSize(getViewSize().width,
-                                   getCenteredOffset()+ full_lines*m_item_size +
+                                   getCenteredOffset()+ int(full_lines)*m_item_size +
                                    getContentMargins().top +
                                    getContentMargins().bottom);
                 } else {
@@ -206,7 +206,7 @@ namespace Sandbox {
                     m_item_widget_size.height = (client_height-getContentMargins().top-getContentMargins().bottom) / m_num_subitems;
                     
                     if( m_centered ) {
-                        int required_width = getContentMargins().left+getContentMargins().right + count * m_item_size;
+                        int required_width = getContentMargins().left+getContentMargins().right + int(count) * m_item_size;
                         int client_width = getViewSize().width;
                         if( required_width < client_width ) {
                             setCenteredOffset((client_width - required_width)/2);
@@ -214,7 +214,7 @@ namespace Sandbox {
                             setCenteredOffset(0);
                         }
                     }
-                    updateRealSize(getCenteredOffset() + full_lines*m_item_size +
+                    updateRealSize(getCenteredOffset() + int(full_lines)*m_item_size +
                                   getContentMargins().left +
                                   getContentMargins().top,getViewSize().height);
                 }
@@ -222,8 +222,8 @@ namespace Sandbox {
         }
         
         void ScrollList::getVisibleItems(int& first, int& last) const {
-            int count = m_delegate->getItemsCount();
-            int lines = (count + m_num_subitems - 1) / m_num_subitems;
+            int count = int(m_delegate->getItemsCount());
+            int lines = int((count + m_num_subitems - 1) / m_num_subitems);
             int item_size = getItemSize();
             first = (getScroll() - item_size) / item_size;
             last = (getScroll() + getScrollAreaSize() + item_size) / item_size;

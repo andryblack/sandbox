@@ -21,11 +21,11 @@ namespace Sandbox {
 		ThreadsMgr();
 		~ThreadsMgr();
 		
-		bool Update(float dt);
+		bool Update(float dt) SB_OVERRIDE;
 		
 		void AddThread(const ThreadPtr& t);
 		void RemoveThread(const ThreadPtr& t);
-		void Clear();
+		void Clear() SB_OVERRIDE;
         
         bool GetDropEmpty() const { return m_drop_empty; }
         void SetDropEmpty(bool d) { m_drop_empty = d; }
@@ -46,7 +46,7 @@ namespace Sandbox {
     class PermanentThreadsMgr : public ThreadsMgr {
         SB_META_OBJECT
     public:
-        bool Update(float dt);
+        bool Update(float dt) SB_OVERRIDE;
     };
 }
 

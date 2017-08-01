@@ -21,7 +21,7 @@ namespace Sandbox {
         BlendMode   m_blend;
     public:
         SkeletonNode();
-        virtual void Draw(Graphics& g) const;
+        virtual void Draw(Graphics& g) const SB_OVERRIDE;
         void SetNode(const SkeletonNodeData& mode);
         void SetFrame(const SkeletonNodeFrame& frame);
         void SetImage(const ImagePtr& img) { m_image = img; }
@@ -35,7 +35,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         /// self drawing implementation
-        virtual void Draw(Graphics& g) const;
+        virtual void Draw(Graphics& g) const SB_OVERRIDE;
         void SetSlot(size_t idx,
                      const SkeletonNodeData& node,
                      const SkeletonNodeFrame& frame,

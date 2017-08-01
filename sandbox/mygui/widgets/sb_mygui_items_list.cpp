@@ -141,8 +141,8 @@ namespace Sandbox {
                     if (!item) continue;
                     int size = item->GetValueRaw<int>("size");
                     if (res < from)
-                        first = i;
-                    last = i;
+                        first = int(i);
+                    last = int(i);
                     item->SetValue("offset", res);
                     if (res>to) {
                         break;

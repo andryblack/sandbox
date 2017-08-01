@@ -496,7 +496,7 @@ namespace Sandbox {
         void ScrollListBase::updateWidgets() {
             if (!m_delegate)
                 return;
-            int count = m_delegate->getItemsCount();
+            int count = int(m_delegate->getItemsCount());
             if (count == 0) {
                 resetWidgets();
                 return;

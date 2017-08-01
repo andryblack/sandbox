@@ -23,12 +23,12 @@ namespace Sandbox {
 		~Container();
 		
 		void Reserve(size_t size);
-		virtual void Draw(Graphics& g) const;
+		virtual void Draw(Graphics& g) const SB_OVERRIDE;
 		void AddObject(const SceneObjectPtr& o);
 		void RemoveObject(const SceneObjectPtr& obj);
 		void Clear();
         
-        void Update( float dt );
+        void Update( float dt ) SB_OVERRIDE;
         
         void SetTransformModificator(const TransformModificatorPtr& ptr);
         TransformModificatorPtr GetTransformModificator();
@@ -55,8 +55,8 @@ namespace Sandbox {
     protected:
     	void UpdateChilds( float dt );
 		sb::vector<SceneObjectPtr> m_objects;
-        virtual void GlobalToLocalImpl(Vector2f& v) const;
-        virtual void GetTransformImpl(Transform2d& tr) const;
+        virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
+        virtual void GetTransformImpl(Transform2d& tr) const SB_OVERRIDE;
         virtual void DrawChilds( Graphics& g ) const;
         const TransformModificatorPtr& GetTransformM() const { return m_transform; }
         const ColorModificatorPtr GetColorM() const { return m_color; }

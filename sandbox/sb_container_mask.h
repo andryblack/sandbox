@@ -19,7 +19,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         ContainerMask();
-        void Draw(Graphics& g) const;
+        void Draw(Graphics& g) const SB_OVERRIDE;
         void SetMode(MaskMode mode) { m_mode = mode;}
         MaskMode GetMode() const { return m_mode;}
         const ImagePtr& GetImage() const { return m_image; }

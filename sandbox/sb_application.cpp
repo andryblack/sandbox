@@ -1004,7 +1004,8 @@ namespace Sandbox {
                     m_url = event->data.handle_url.url;
                 }
                 break;
-            
+            default:
+                break;
         }
     }
 	

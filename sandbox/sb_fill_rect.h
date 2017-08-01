@@ -18,7 +18,7 @@ namespace Sandbox {
     class FillRect : public SceneObjectWithPosition {
         SB_META_OBJECT
     public:
-        virtual void Draw( Graphics& g ) const;
+        virtual void Draw( Graphics& g ) const SB_OVERRIDE;
         
         const TexturePtr& GetTexture() const { return m_texture; }
         void SetTexture( const TexturePtr& texture ) { m_texture = texture; }
