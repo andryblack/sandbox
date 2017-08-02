@@ -8,6 +8,7 @@ SB_META_ENUM_BIND(GHL::MouseButton,namespace GHL,
                   SB_META_ENUM_ITEM(MOUSE_BUTTON_LEFT)
                   SB_META_ENUM_ITEM(MOUSE_BUTTON_RIGHT)
                   SB_META_ENUM_ITEM(MOUSE_BUTTON_MIDDLE)
+                  SB_META_ENUM_ITEM(MULTITOUCH_1)
                   )
 
 SB_META_DECLARE_KLASS(GHL::KeyMod,void);
