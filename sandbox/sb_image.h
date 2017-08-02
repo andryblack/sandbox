@@ -12,7 +12,7 @@
 
 #include "sb_texture.h"
 #include "sb_vector2.h"
-#include "sb_size.h"
+#include "sb_rect.h"
 
 namespace Sandbox {
 
@@ -57,6 +57,9 @@ namespace Sandbox {
         /// get hotspot in sprite-size
         Vector2f GetHotspotReal() const {
             return Vector2f(m_hotspot.x*m_width/m_src_w, m_hotspot.y*m_height/m_src_h);
+        }
+        Rectf GetBounds() const {
+            return Rectf(-m_hotspot.x*m_width/m_src_w,-m_hotspot.y*m_height/m_src_h,m_width,m_height);
         }
         void SetHotspot( const Vector2f& hs );
 		

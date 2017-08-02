@@ -42,6 +42,8 @@ namespace Sandbox {
         virtual void SetOffset(const Vector2f& offset) = 0;
         bool IsFreeMove() const { return m_state == scroll_free; }
         bool IsTargetMove() const { return m_state == scroll_target; }
+        
+        const Vector2f& GetPrevPos() const { return m_prev_pos; }
     public:
         Scroll();
         

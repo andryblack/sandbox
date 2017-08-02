@@ -19,6 +19,8 @@ namespace Sandbox {
         Size(T _x,T _y) : w(_x),h(_y) {}
         template <class U>
         explicit Size(const U& s) : w(s.width),h(s.height) {}
+        template <class U>
+        explicit Size(const Size<U>& s) : w(s.w),h(s.h) {}
         bool operator == (const Size& r) const {
             return (w==r.w) && (h==r.h);
         }
