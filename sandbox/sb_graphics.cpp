@@ -613,6 +613,50 @@ namespace Sandbox {
 		
 	}
     
+    
+    void Graphics::DrawQuadRaw(const Image& img,const DrawAttributes* attributes,
+                            const Vector2f& poslt,const Vector2f& posrt,
+                               const Vector2f& poslb,const Vector2f& posrb, GHL::UInt32 clr) {
+        sb_assert( (m_render!=0) && "scene not started" );
+        BeginDrawImage(img);
+        
+        CheckFlush(false);
+        
+        appendQuad();
+        
+        
+        if (!m_state.calc2_tex)
+        {
+            appendVertexRaw(poslt.x,poslt.y,
+                         img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
+            appendVertexRaw(posrt.x,posrt.y,
+                         img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith,clr);
+            appendVertexRaw(poslb.x,poslb.y,
+                         img.GetTextureX()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+            appendVertexRaw(posrb.x,posrb.y,
+                         img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+        } else {
+            appendVertex2Raw(poslt.x,poslt.y,
+                          img.GetTextureX()*m_itw,
+                          img.GetTextureY()*m_ith,clr);
+            appendVertex2Raw(posrt.x,posrt.y,
+                          img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                          img.GetTextureY()*m_ith,clr);
+            appendVertex2Raw(poslb.x,poslb.y,
+                          img.GetTextureX()*m_itw,
+                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+            appendVertex2Raw(posrb.x,posrb.y,
+                          img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
+                          img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+            
+        }
+
+    }
+    
     void Graphics::DrawImageBox(const ImageBox& img, const DrawAttributes* attributes,const Vector2f& pos, const Sizef& size) {
         sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);

@@ -60,6 +60,7 @@ namespace Sandbox {
         virtual void DrawChilds( Graphics& g ) const;
         const TransformModificatorPtr& GetTransformM() const { return m_transform; }
         const ColorModificatorPtr GetColorM() const { return m_color; }
+        void DrawImpl( Graphics& g ) const;
     private:
         friend class SceneObject;
         TransformModificatorPtr     m_transform;
