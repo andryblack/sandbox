@@ -71,8 +71,8 @@ namespace Sandbox {
             if ((*i)->GetVisible()) (*i)->Draw(g);
         }
     }
-	void Container::Draw(Graphics& g) const {
-        if (m_objects.empty()) return;
+	void Container::DrawImpl(Graphics& g) const {
+        
         
         Transform2d tr = g.GetTransform();
         Color clr = g.GetColor();
@@ -91,6 +91,11 @@ namespace Sandbox {
         if (m_transform) {
             g.SetTransform(tr);
         }
+    }
+    
+    void Container::Draw(Sandbox::Graphics &g) const {
+        if (m_objects.empty()) return;
+        DrawImpl(g);
     }
     
     

@@ -150,6 +150,10 @@ namespace Sandbox {
                        const Vector2f& pos,const Color& clr,float scale) {
             DrawImage(img,attributes,pos.x,pos.y,clr,scale);
         }
+        void DrawQuadRaw(const Image& img,const DrawAttributes* attributes,
+                      const Vector2f& poslt,const Vector2f& posrt,const Vector2f& poslb,const Vector2f& posrb,
+                         GHL::UInt32 clr = 0xffffffff);
+        
         void DrawImageBox(const ImageBox& img,const  DrawAttributes* attributes,
                           const Vector2f& pos, const Sizef& size);
         /// @}
@@ -281,6 +285,29 @@ namespace Sandbox {
             v.t2x *= m_mask_itw;
             v.t2y *= m_mask_ith;
 		}
+        inline void appendVertexRaw(float x,float y,float tx,float ty,GHL::UInt32 color=0xffffffff) {
+            m_vertexes.push_back(GHL::Vertex());
+            GHL::Vertex& v(m_vertexes.back());
+            v.x = x;
+            v.y = y;
+            v.z = 0.0f;
+            v.color=color;
+            v.tx = tx;
+            v.ty = ty;
+        }
+        inline void appendVertex2Raw(float x,float y,float tx,float ty,GHL::UInt32 color=0xffffffff) {
+            m_vertexes2tex.push_back(GHL::Vertex2Tex());
+            GHL::Vertex2Tex& v(m_vertexes2tex.back());
+            v.x = x;
+            v.y = y;
+            v.z = 0.0f;
+            v.color=color;
+            v.tx = tx;
+            v.ty = ty;
+            m_mask_transform.transform(v.x, v.y, v.t2x, v.t2y);
+            v.t2x *= m_mask_itw;
+            v.t2y *= m_mask_ith;
+        }
 		void appendTriangle(GHL::Int16 i1,GHL::Int16 i2,GHL::Int16 i3);
         inline void appendQuad() {
             GHL::UInt16 base = m_state.calc2_tex ? static_cast<GHL::UInt16>(m_vertexes2tex.size()) : static_cast<GHL::UInt16>(m_vertexes.size());
