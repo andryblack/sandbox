@@ -193,6 +193,7 @@ SB_META_PROPERTY_RO(Width,GetWidth)
 SB_META_PROPERTY_RO(Height,GetHeight)
 SB_META_PROPERTY_RW(Texture,GetTexture,SetTexture)
 SB_META_PROPERTY_RW(Hotspot,GetHotspot,SetHotspot)
+SB_META_PROPERTY_RO(Bounds, GetBounds)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderUniform)
@@ -389,6 +390,8 @@ namespace Sandbox {
         luabind::RawClass<Recti>(lua);
         luabind::RawClass<Sizef>(lua);
         luabind::RawClass<Sizei>(lua);
+        luabind::RawClass<Pointf>(lua);
+        luabind::RawClass<Pointi>(lua);
         luabind::ExternClass<FontData>(lua);
         luabind::Class<FontPass>(lua);
         luabind::Class<Font>(lua);
