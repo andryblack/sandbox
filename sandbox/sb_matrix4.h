@@ -85,7 +85,7 @@ namespace Sandbox {
                     float aspect,
                     float z_near,
                     float z_far);
-
+        
             /// \brief Create a ortho matrix
             ///
             /// Matrix is created in the Column-Major matrix format (opengl native)
@@ -147,20 +147,14 @@ namespace Sandbox {
             /// \brief Create the "look at" matrix
             ///
             /// Matrix is created in the Column-Major matrix format (opengl native)
-            /// \param eye_x = Eye position X
-            /// \param eye_y = Eye position Y
-            /// \param eye_z = Eye position Z
-            /// \param center_x = Center X
-            /// \param center_y = Center Y
-            /// \param center_z = Center Z
-            /// \param up_x = Translation X
-            /// \param up_y = Translation Y
-            /// \param up_z = Translation Z
+            /// \param eye = Eye position
+            /// \param center = Center
+            /// \param up = Translation
             /// \return The matrix (in column-major format)
             static Matrix4f look_at(
-                    float eye_x, float eye_y, float eye_z,
-                    float center_x, float center_y, float center_z,
-                    float up_x, float up_y, float up_z);
+                    const Vector3f& eye,
+                    const Vector3f& center,
+                    const Vector3f& up);
 
             /// \brief Multiply 2 matrices
             ///
@@ -491,6 +485,35 @@ namespace Sandbox {
             projection_matrix.matrix[3+2*4] = -1.0f;
             return projection_matrix;
     }
+    
+    inline Matrix4f Matrix4f::look_at(const Vector3f& eye,const Vector3f& at, const Vector3f& up)
+    {
+        Vector3f zaxis = (eye-at).normalize();
+        Vector3f xaxis = Vector3f::cross(up, zaxis).normalize();
+        Vector3f yaxis = Vector3f::cross(zaxis, xaxis);
+        
+        Matrix4f m = null();
+        m.matrix[0+0*4] = xaxis.x;
+        m.matrix[1+0*4] = yaxis.x;
+        m.matrix[2+0*4] = zaxis.x;
+        
+        m.matrix[0+1*4] = xaxis.y;
+        m.matrix[1+1*4] = yaxis.y;
+        m.matrix[2+1*4] = zaxis.y;
+        
+        m.matrix[0+2*4] = xaxis.z;
+        m.matrix[1+2*4] = yaxis.z;
+        m.matrix[2+2*4] = zaxis.z;
+    
+        m.matrix[0+3*4] = -Vector3f::dot(xaxis, eye);
+        m.matrix[1+3*4] = -Vector3f::dot(yaxis, eye);
+        m.matrix[2+3*4] = -Vector3f::dot(zaxis, eye);
+        
+        m.matrix[3+3*4] = 1.0f;
+        
+        return m;
+    }
+
 
     inline Matrix4f Matrix4f::ortho(float left, float right, float bottom, float top, float z_near, float z_far)
     {
@@ -767,42 +790,6 @@ namespace Sandbox {
 
 
 
-    // For floats
-    inline Matrix4f Matrix4f::look_at(
-            float eye_x, float eye_y, float eye_z,
-            float center_x, float center_y, float center_z,
-            float up_x, float up_y, float up_z)
-    {
-            float f[3] = { center_x - eye_x, center_y - eye_y, center_z - eye_z };
-            float length_f = std::sqrt(f[0]*f[0] + f[1]*f[1] + f[2]*f[2]);
-            f[0] /= length_f;
-            f[1] /= length_f;
-            f[2] /= length_f;
-
-            float up[3] = { up_x, up_y, up_z };
-            float length_up = std::sqrt(up[0]*up[0] + up[1]*up[1] + up[2]*up[2]);
-            up[0] /= length_up;
-            up[1] /= length_up;
-            up[2] /= length_up;
-
-            Vector4f fv = Vector4f(f[0], f[1], f[2],0.0f);
-            Vector4f s = Vector4f::cross3(fv, Vector4f(up[0], up[1], up[2],0.0f));
-            Vector4f u = Vector4f::cross3(s, fv);
-
-            Matrix4f m = null();
-            m.matrix[0+0*4] =  s.x;
-            m.matrix[0+1*4] =  s.y;
-            m.matrix[0+2*4] =  s.z;
-            m.matrix[1+0*4] =  u.x;
-            m.matrix[1+1*4] =  u.y;
-            m.matrix[1+2*4] =  u.z;
-            m.matrix[2+0*4] =  -f[0];
-            m.matrix[2+1*4] =  -f[1];
-            m.matrix[2+2*4] =  -f[2];
-            m.matrix[3+3*4] = 1;
-            m.multiply(translate( -eye_x,  -eye_y,  -eye_z));
-            return m;
-    }
 
     inline Matrix4f Matrix4f::multiply(const Matrix4f &matrix_1, const Matrix4f &matrix_2)
     {
