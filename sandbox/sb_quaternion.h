@@ -72,6 +72,15 @@ namespace Sandbox {
             float im = 1.0f / magnitude();
             return Quaternion(x*im,y*im,z*im,w*im);
         }
+        
+        static Quaternion FromAxisAngle(const Vector3f& axis,float angle) {
+            float sa = sin(angle * 0.5f);
+            return Quaternion(
+                              axis.x * sa,
+                              axis.y * sa,
+                              axis.z * sa,
+                              cos(angle*0.5f));
+        }
     };
     
     namespace luabind {

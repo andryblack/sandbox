@@ -75,6 +75,7 @@ SB_META_PROPERTY(x)
 SB_META_PROPERTY(y)
 SB_META_PROPERTY(z)
 SB_META_PROPERTY(w)
+SB_META_STATIC_METHOD(FromAxisAngle)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Matrix4f, void)
@@ -83,8 +84,10 @@ bind( constructor(&Sandbox::constructor_Matrix4f) );
 SB_META_OPERATOR_MUL_(Sandbox::Matrix4f(Sandbox::Matrix4f::*)(const Sandbox::Matrix4f&)const)
 SB_META_METHOD(inverted)
 SB_META_STATIC_METHOD(perspective)
+SB_META_STATIC_METHOD(look_at)
 bind( static_method( "translate", static_cast<Sandbox::Matrix4f(*)(float,float,float)>(&Sandbox::Matrix4f::translate) ) );
 bind( static_method( "scale", static_cast<Sandbox::Matrix4f(*)(float,float,float)>(&Sandbox::Matrix4f::scale) ) );
+bind( static_method( "rotate", static_cast<Sandbox::Matrix4f(*)(const Sandbox::Quaternion&)>(&Sandbox::Matrix4f::rotate) ) );
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Transform2d, void)
