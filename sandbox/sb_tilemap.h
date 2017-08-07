@@ -5,6 +5,9 @@
 #include <ghl_types.h>
 #include <sbstd/sb_map.h>
 #include <sbstd/sb_string.h>
+#include "sb_size.h"
+
+#include <pugixml.hpp>
 
 namespace GHL {
     struct Data;
@@ -41,15 +44,31 @@ namespace Sandbox {
         size_t m_height;
         typedef sb::map<sb::string,TileMapLayerPtr> layers_map_t;
         layers_map_t    m_layers;
+        Sizei m_tilesize;
     public:
         explicit TileMap( size_t w, size_t h);
         void SetLayer( const char* name, const TileMapLayerPtr& layer );
         TileMapLayerPtr GetLayer(const char* name) const;
         size_t GetWidth() const { return m_width; }
         size_t GetHeight() const { return m_height; }
+        const Sizei& GetTileSize() const { return m_tilesize; }
+        void SetTileSize(const Sizei& s) { m_tilesize = s; }
     };
     typedef sb::intrusive_ptr<TileMap> TileMapPtr;
     
+    class TileMapTMXLoader {
+    private:
+        pugi::xml_document m_document;
+        TileMapPtr m_map;
+    protected:
+        void LoadLayer(const pugi::xml_node& node);
+        virtual bool ProcessNode(const pugi::xml_node& node);
+    public:
+        bool Load(GHL::Data* data);
+        bool Load(FileProvider* fp, const char* filename);
+        bool Parse();
+        const TileMapPtr& GetMap() const { return m_map; }
+    };
     TileMapPtr LoadTileMapTMX(FileProvider* fp, const char* filename);
 }
 

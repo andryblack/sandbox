@@ -190,6 +190,7 @@ namespace Sandbox {
 		m_main_scene = 0;
 		m_main_thread = 0;
 		m_clear_buffer = false;
+        m_clear_depth = 0.0f;
         m_batches = 0.0f;
         m_batches_rt = 0.0f;
         m_sound_enabled = true;
@@ -684,7 +685,8 @@ namespace Sandbox {
 			m_render->Clear(m_clear_color.r,
 							m_clear_color.g,
 							m_clear_color.b,
-							m_clear_color.a,0);
+							m_clear_color.a,
+                            m_clear_depth);
 		m_graphics->BeginScene(m_render,RenderTargetPtr());
         
         DoDrawScreen();
@@ -797,6 +799,11 @@ namespace Sandbox {
 		m_clear_buffer = true;
 		m_clear_color = c;
 	}
+    
+    void Application::SetClearDepth(float d) {
+        m_clear_buffer = true;
+        m_clear_depth = d;
+    }
     
     void Application::SetTitle(const sb::string& title) {
         m_title = title;
