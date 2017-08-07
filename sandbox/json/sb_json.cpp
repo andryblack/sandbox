@@ -797,6 +797,10 @@ namespace Sandbox {
         if (m_impl) yajl_gen_integer(m_impl->g, value);
         return *this;
     }
+    JsonBuilderBase& JsonBuilderBase::PutUnsigned(unsigned int value) {
+        if (m_impl) yajl_gen_integer(m_impl->g, value);
+        return *this;
+    }
     JsonBuilderBase& JsonBuilderBase::PutNumber(double value) {
         if (m_impl) yajl_gen_double(m_impl->g, value);
         return *this;

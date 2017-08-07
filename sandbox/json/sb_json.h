@@ -50,6 +50,7 @@ namespace Sandbox {
         JsonBuilderBase& PutBool(bool v);
         JsonBuilderBase& PutString(const char* value);
         JsonBuilderBase& PutInteger(int value);
+        JsonBuilderBase& PutUnsigned(unsigned int value);
         JsonBuilderBase& PutNumber(double value);
         
         const sb::string& End();
