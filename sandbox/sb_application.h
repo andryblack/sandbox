@@ -108,6 +108,7 @@ namespace Sandbox {
         Scene* GetScene() const { return m_main_scene; }
 		
 		void SetClearColor(const Color& c);
+        void SetClearDepth(float d);
         void SetTitle(const sb::string& title);
         
         bool RestoreAppProfile();
@@ -183,6 +184,7 @@ namespace Sandbox {
         
 		bool		m_clear_buffer;
 		Color		m_clear_color;
+        float       m_clear_depth;
         
         float       m_batches;
         float       m_batches_rt;

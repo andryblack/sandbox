@@ -61,6 +61,12 @@ namespace Sandbox {
             m*=Matrix2f(c,s,-s,c);
             return *this;
         }
+        Transform2d& rotate(const Vector2f& dir) {
+            float c = dir.x;
+            float s = -dir.y;
+            m*=Matrix2f(c,s,-s,c);
+            return *this;
+        }
         // screw, radians
         Transform2d& screw_x(float _a) {
             float a = _a;
@@ -73,6 +79,10 @@ namespace Sandbox {
 			Transform2d res(*this);
 			return Transform2d(*this).rotate(a);
 		}
+        Transform2d rotated(const Vector2f& dir) const {
+            Transform2d res(*this);
+            return Transform2d(*this).rotate(dir);
+        }
         Transform2d& scale(float s) {
             m*=Matrix2f(s,0,0,s);
             return *this;

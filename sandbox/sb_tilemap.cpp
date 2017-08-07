@@ -60,9 +60,102 @@ namespace Sandbox {
         return TileMapLayerPtr();
     }
     
+    bool TileMapTMXLoader::Load(GHL::Data* data) {
+        pugi::xml_parse_result parse_res = m_document.load_buffer(data->GetData(),
+                                                           data->GetSize(),
+                                                           pugi::parse_default, pugi::encoding_utf8);
+        if (!parse_res) {
+            LogError() << "failed parse";
+            LogError() << parse_res.description();
+            return false;
+        }
+        
+        return true;
+    }
     
-    TileMapPtr LoadTileMapTMX(FileProvider* fp, const char* filename) {
-        if (!fp || !filename) return  TileMapPtr();
+    
+    bool TileMapTMXLoader::ProcessNode(const pugi::xml_node& node) {
+        if (::strcmp(node.name(), "layer")==0) {
+            LoadLayer(node);
+        }
+        return true;
+    }
+    
+    bool TileMapTMXLoader::Parse() {
+    
+    
+    
+        pugi::xml_node n = m_document.document_element();
+        size_t w = n.attribute("width").as_uint();
+        size_t h = n.attribute("height").as_uint();
+        
+        m_map = TileMapPtr(new TileMap(w,h));
+        m_map->SetTileSize(Sizei(n.attribute("tilewidth").as_int(),n.attribute("tileheight").as_int()));
+        for (pugi::xml_node_iterator it = n.begin();it!=n.end();++it) {
+            if (!ProcessNode(*it))
+                return false;
+        }
+        return true;
+        
+    }
+    void TileMapTMXLoader::LoadLayer(const pugi::xml_node &node) {
+        size_t lw = node.attribute("width").as_uint();
+        size_t lh = node.attribute("height").as_uint();
+        pugi::xml_node data_node = node.child("data");
+        if (data_node) {
+            TileMapLayerPtr layer;
+            if (!data_node.attribute("compression") &&
+                !data_node.attribute("encoding")) {
+                size_t x = 0;
+                size_t y = 0;
+                layer = TileMapLayerPtr(new TileMapLayer(lw,lh));
+                for (pugi::xml_node_iterator ii=data_node.begin(); ii!=data_node.end(); ++ii) {
+                    if (::strcmp(ii->name(), "tile")==0) {
+                        TileMapLayer::data_t d = ii->attribute("gid").as_uint();
+                        layer->SetAt(x, y, d);
+                        ++x;
+                        if (x>=lw) {
+                            ++y;
+                            x = 0;
+                        }
+                    }
+                }
+            }
+            if (!layer) {
+                GHL::Data* d = 0;
+                if (::strcmp(data_node.attribute("encoding").as_string(),"base64")==0) {
+                    d = Base64DecodeData(data_node.child_value());
+                } else {
+                    return;
+                }
+                if (!d) return;
+                if (::strcmp(data_node.attribute("compression").as_string(),"zlib")==0) {
+                    GHL::UInt32 size = GHL::UInt32(sizeof(GHL::UInt32)*lw*lh);
+                    VectorData<GHL::Byte>* dd = new VectorData<GHL::Byte>();
+                    dd->vector().resize(size);
+                    
+                    if( GHL_UnpackZlib(d, dd->vector().data(), &size ) && size == dd->GetSize() ) {
+                        d->Release();
+                        d = dd;
+                    } else {
+                        dd->Release();
+                        d->Release();
+                        return;
+                    }
+                } else if (data_node.attribute("compression")) {
+                    LogError() << "unsupported compression " << data_node.attribute("compression").as_string();
+                    d->Release();
+                    return;
+                }
+                layer = TileMapLayerPtr(new TileMapLayer(lw,lh,d));
+            }
+            if (layer) {
+                m_map->SetLayer(node.attribute("name").as_string(), layer);
+            }
+        }
+    }
+    
+    bool TileMapTMXLoader::Load(FileProvider* fp, const char* filename) {
         GHL::DataStream* ds = fp->OpenFile(filename);
         if (!ds) {
             LogError() << "not found file " << filename;
@@ -71,79 +164,20 @@ namespace Sandbox {
         GHL::Data* tmx_data = GHL_ReadAllData( ds );
         ds->Release();
         sb_assert(tmx_data);
-        pugi::xml_document doc;
-        pugi::xml_parse_result parse_res = doc.load_buffer(tmx_data->GetData(),
-                                                           tmx_data->GetSize(),
-                                                           pugi::parse_default, pugi::encoding_utf8);
+        bool res = Load(tmx_data);
         tmx_data->Release();
-        if (!parse_res) {
-            LogError() << "failed parse " << filename;
-            LogError() << parse_res.description();
-            return TileMapPtr();
+        return res;
+    }
+    
+    TileMapPtr LoadTileMapTMX(FileProvider* fp, const char* filename) {
+        if (!fp || !filename) return  TileMapPtr();
+        
+        TileMapTMXLoader loader;
+        if (loader.Load(fp,filename)) {
+            if (loader.Parse())
+                return loader.GetMap();
         }
-        pugi::xml_node n = doc.document_element();
-        size_t w = n.attribute("width").as_uint();
-        size_t h = n.attribute("height").as_uint();
-        TileMapPtr map = TileMapPtr(new TileMap(w,h));
-        for (pugi::xml_node_iterator it = n.begin();it!=n.end();++it) {
-            if (::strcmp(it->name(), "layer")==0) {
-                size_t lw = it->attribute("width").as_uint();
-                size_t lh = it->attribute("height").as_uint();
-                pugi::xml_node data_node = it->child("data");
-                if (data_node) {
-                    TileMapLayerPtr layer;
-                    if (!data_node.attribute("compression") &&
-                        !data_node.attribute("encoding")) {
-                        size_t x = 0;
-                        size_t y = 0;
-                        layer = TileMapLayerPtr(new TileMapLayer(lw,lh));
-                        for (pugi::xml_node_iterator ii=data_node.begin(); ii!=data_node.end(); ++ii) {
-                            if (::strcmp(ii->name(), "tile")==0) {
-                                TileMapLayer::data_t d = ii->attribute("gid").as_uint();
-                                layer->SetAt(x, y, d);
-                                ++x;
-                                if (x>=lw) {
-                                    ++y;
-                                    x = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (!layer) {
-                        GHL::Data* d = 0;
-                        if (::strcmp(data_node.attribute("encoding").as_string(),"base64")==0) {
-                            d = Base64DecodeData(data_node.child_value());
-                        } else {
-                            continue;
-                        }
-                        if (!d) continue;
-                        if (::strcmp(data_node.attribute("compression").as_string(),"zlib")==0) {
-                            GHL::UInt32 size = GHL::UInt32(sizeof(GHL::UInt32)*lw*lh);
-                            VectorData<GHL::Byte>* dd = new VectorData<GHL::Byte>();
-                            dd->vector().resize(size);
-                            
-                            if( GHL_UnpackZlib(d, dd->vector().data(), &size ) && size == dd->GetSize() ) {
-                                d->Release();
-                                d = dd;
-                            } else {
-                                dd->Release();
-                                d->Release();
-                                continue;
-                            }
-                        } else if (data_node.attribute("compression")) {
-                            LogError() << "unsupported compression " << data_node.attribute("compression").as_string();
-                            d->Release();
-                            continue;
-                        }
-                        layer = TileMapLayerPtr(new TileMapLayer(lw,lh,d));
-                    }
-                    if (layer) {
-                        map->SetLayer(it->attribute("name").as_string(), layer);
-                    }
-                }
-            }
-        }
-        return map;
+        return TileMapPtr();
     }
     
     

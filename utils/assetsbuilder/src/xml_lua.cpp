@@ -121,6 +121,7 @@ namespace XML {
                 return 0;
             return m_node.attribute(name).value();
         }
+        
         static int enumerate_childs(lua_State* L) {
             Node* self = Sandbox::luabind::stack<Node*>::get(L, 1, false);
             NodeIterator iterator = { NodePtr(self), self->m_node.begin(), self->m_node.end() };
@@ -128,6 +129,9 @@ namespace XML {
             Sandbox::luabind::stack<NodeIterator>::push(L, iterator);
             lua_pushnil(L);
             return 3;
+        }
+        void remove_child(const Node* n) {
+            m_node.remove_child(n->m_node);
         }
     };
     
@@ -172,6 +176,7 @@ SB_META_METHOD(get_attribute)
 SB_META_METHOD(remove_attribute)
 SB_META_METHOD(has_attribute)
 SB_META_METHOD(append_child)
+SB_META_METHOD(remove_child)
 bind(method("enumerate_childs",&XML::Node::enumerate_childs));
 SB_META_END_KLASS_BIND()
 

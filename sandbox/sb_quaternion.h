@@ -73,6 +73,14 @@ namespace Sandbox {
             return Quaternion(x*im,y*im,z*im,w*im);
         }
         
+        static float dot( const Quaternion& q1, const Quaternion& q2) {
+            return q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
+        }
+        
+        static Quaternion lerp( const Quaternion& q1, const Quaternion& q2 , float k) {
+            return (q1 * (1.0f-k) + q2 * k).normalized();
+        }
+        
         static Quaternion FromAxisAngle(const Vector3f& axis,float angle) {
             float sa = sin(angle * 0.5f);
             return Quaternion(
@@ -115,6 +123,18 @@ namespace Sandbox {
         
     }
 
+    inline Quaternion interpolate(const Quaternion& a, const Quaternion& b,float k) {
+        float dot = Quaternion::dot(a, b);
+        Quaternion c = b;
+        if (dot < 0.0f) {
+            dot = -dot;
+            c*=-1.0f;
+        }
+        if (dot > 0.995f)
+            return Quaternion::lerp(a,c,k);
+        float angle = acosf(dot);
+        return (a*sinf(angle*(1.0f-k)) + c*sinf(angle*k))*(1.0f/sinf(angle));
+    }
 }
 
 #endif /*SB_QUATERNION_H_INCLUDED*/

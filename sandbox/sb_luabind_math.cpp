@@ -13,6 +13,11 @@
 #include "sb_matrix4.h"
 #include "sb_transform2d.h"
 
+
+static void Sandbox_Vector2f_normalize( Sandbox::Vector2f* v) {
+    v->normalize();
+}
+
 SB_META_DECLARE_KLASS(Sandbox::Vector2f, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Vector2f)
 SB_META_CONSTRUCTOR((float,float))
@@ -21,6 +26,7 @@ SB_META_PROPERTY(y)
 SB_META_METHOD(length)
 SB_META_METHOD(unit)
 SB_META_METHOD(normal)
+bind( method( "normalize" , &Sandbox_Vector2f_normalize ) );
 //SB_META_METHOD(rotate)
 SB_META_METHOD(rotated)
 SB_META_METHOD(dir)
@@ -83,8 +89,11 @@ SB_META_BEGIN_KLASS_BIND(Sandbox::Matrix4f)
 bind( constructor(&Sandbox::constructor_Matrix4f) );
 SB_META_OPERATOR_MUL_(Sandbox::Matrix4f(Sandbox::Matrix4f::*)(const Sandbox::Matrix4f&)const)
 SB_META_METHOD(inverted)
+bind( static_method("inverse", static_cast<Sandbox::Matrix4f(*)(const Sandbox::Matrix4f&)>(&Sandbox::Matrix4f::inverse) ));
 SB_META_STATIC_METHOD(perspective)
+SB_META_STATIC_METHOD(frustum)
 SB_META_STATIC_METHOD(look_at)
+
 bind( static_method( "translate", static_cast<Sandbox::Matrix4f(*)(float,float,float)>(&Sandbox::Matrix4f::translate) ) );
 bind( static_method( "scale", static_cast<Sandbox::Matrix4f(*)(float,float,float)>(&Sandbox::Matrix4f::scale) ) );
 bind( static_method( "rotate", static_cast<Sandbox::Matrix4f(*)(const Sandbox::Quaternion&)>(&Sandbox::Matrix4f::rotate) ) );
