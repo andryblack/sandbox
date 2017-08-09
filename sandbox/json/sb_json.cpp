@@ -902,7 +902,7 @@ namespace Sandbox {
                 m_ctx->call_self("OnBeginObject");
             }
         }
-        virtual void OnEndObject() {
+        virtual void OnEndObject() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnEndObject")) {
                 m_ctx->call_self("OnEndObject");
             }
@@ -1114,12 +1114,18 @@ namespace Sandbox {
         yajl_handle h = yajl_alloc(&ctx.cb, 0, &ctx);
         unsigned char buffer[1024];
         yajl_status s = yajl_status_ok;
+        size_t shunk_size = 0;
         while (!ds->Eof() && s == yajl_status_ok) {
-            size_t shunk_size = ds->Read(buffer, sizeof(buffer));
+            shunk_size = ds->Read(buffer, sizeof(buffer));
             s = yajl_parse(h,buffer,shunk_size);
         }
         if (s == yajl_status_ok)
             s = yajl_complete_parse(h);
+        else {
+            unsigned char* err = yajl_get_error(h, false, 0, 0);
+            m_error = reinterpret_cast<const char*>(err);
+            yajl_free_error(h,err);
+        }
         yajl_free(h);
         return s == yajl_status_ok;
     }
@@ -1132,6 +1138,11 @@ namespace Sandbox {
         s = yajl_parse(h,reinterpret_cast<const unsigned char*>(ds),::strlen(ds));
         if (s == yajl_status_ok)
             s = yajl_complete_parse(h);
+        else {
+            unsigned char* err = yajl_get_error(h, false, 0, 0);
+            m_error = reinterpret_cast<const char*>(err);
+            yajl_free_error(h,err);
+        }
         yajl_free(h);
         return s == yajl_status_ok;
     }

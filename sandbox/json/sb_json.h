@@ -77,6 +77,7 @@ namespace Sandbox {
     class JsonTraverser {
     private:
         sb::vector<char> m_stack;
+        sb::string m_error;
         
         void BeginObject();
         void EndObject();
@@ -105,6 +106,8 @@ namespace Sandbox {
         
         bool TraverseStream( GHL::DataStream* ds );
         bool TraverseString( const char* ds );
+        
+        const sb::string& GetError() const { return m_error; }
     };
     
     
