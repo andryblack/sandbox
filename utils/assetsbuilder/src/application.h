@@ -84,6 +84,7 @@ public:
 
     TexturePtr check_texture( const sb::string& file );
     TextureDataPtr load_texture( const sb::string& file );
+    TextureDataPtr decode_texture( const GHL::Data* data );
     bool store_texture( const sb::string& file , const TextureDataPtr& data );
     virtual bool store_file(  const sb::string& file , const GHL::Data* data );
     bool write_text_file( const sb::string& file , const char* data  );

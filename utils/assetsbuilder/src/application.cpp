@@ -474,6 +474,18 @@ TextureDataPtr Application::load_texture( const sb::string& file ) {
     return TextureDataPtr(new TextureData(img));
 }
 
+TextureDataPtr Application::decode_texture( const GHL::Data* data ) {
+    GHL::DataStream* ds = GHL_CreateMemoryStream(data);
+    GHL::Image* img = m_image_decoder->Decode(ds);
+    if (!img) {
+        ds->Release();
+        return TextureDataPtr();
+    }
+    ds->Release();
+    return TextureDataPtr(new TextureData(img));
+
+}
+
 GHL::Data* encode_etc1(TasksPool* pool,const GHL::Image* img,bool with_header);
 
 const GHL::Data* Application::encode_texture(const TextureDataPtr &texture) {
