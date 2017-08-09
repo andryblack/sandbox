@@ -49,8 +49,7 @@ namespace Sandbox {
         JsonBuilderBase& PutNull();
         JsonBuilderBase& PutBool(bool v);
         JsonBuilderBase& PutString(const char* value);
-        JsonBuilderBase& PutInteger(int value);
-        JsonBuilderBase& PutUnsigned(unsigned int value);
+        JsonBuilderBase& PutInteger(long long value);
         JsonBuilderBase& PutNumber(double value);
         
         const sb::string& End();
@@ -100,7 +99,7 @@ namespace Sandbox {
         virtual void OnNull() {}
         virtual void OnBool(bool v) {}
         virtual void OnString(const sb::string& v) {}
-        virtual void OnInteger(int v) {}
+        virtual void OnInteger(long long v) {}
         virtual void OnNumber(double v) {}
         
         

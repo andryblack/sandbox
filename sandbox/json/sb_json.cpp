@@ -793,14 +793,11 @@ namespace Sandbox {
         }
         return *this;
     }
-    JsonBuilderBase& JsonBuilderBase::PutInteger(int value) {
+    JsonBuilderBase& JsonBuilderBase::PutInteger(long long value) {
         if (m_impl) yajl_gen_integer(m_impl->g, value);
         return *this;
     }
-    JsonBuilderBase& JsonBuilderBase::PutUnsigned(unsigned int value) {
-        if (m_impl) yajl_gen_integer(m_impl->g, value);
-        return *this;
-    }
+    
     JsonBuilderBase& JsonBuilderBase::PutNumber(double value) {
         if (m_impl) yajl_gen_double(m_impl->g, value);
         return *this;
@@ -900,7 +897,7 @@ namespace Sandbox {
     public:
         explicit LuaJSONTraverser( LuaContextPtr ctx ) : m_ctx(ctx) {}
         
-        virtual void OnBeginObject() {
+        virtual void OnBeginObject() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnBeginObject")) {
                 m_ctx->call_self("OnBeginObject");
             }
@@ -910,44 +907,44 @@ namespace Sandbox {
                 m_ctx->call_self("OnEndObject");
             }
         }
-        virtual void OnBeginArray() {
+        virtual void OnBeginArray() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnBeginArray")) {
                 m_ctx->call_self("OnBeginArray");
             }
         }
-        virtual void OnEndArray() {
+        virtual void OnEndArray() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnEndArray")) {
                 m_ctx->call_self("OnEndArray");
             }
         }
-        virtual void OnKey(const sb::string& v) {
+        virtual void OnKey(const sb::string& v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnKey")) {
                 m_ctx->call_self("OnKey",v);
             }
         }
-        virtual void OnNull() {
+        virtual void OnNull() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnNull")) {
                 m_ctx->call_self("OnNull");
             }
         }
-        virtual void OnBool(bool v) {
+        virtual void OnBool(bool v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnBool")) {
                 m_ctx->call_self("OnBool",v);
             }
         }
-        virtual void OnString(const sb::string& v) {
+        virtual void OnString(const sb::string& v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnString")) {
                 m_ctx->call_self("OnString",v);
             }
         }
-        virtual void OnInteger(int v) {
+        virtual void OnInteger(long long v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnInteger")) {
                 m_ctx->call_self("OnInteger",v);
             } else if (m_ctx->GetValue<bool>("OnNumber")) {
                 m_ctx->call_self("OnNumber",v);
             }
         }
-        virtual void OnNumber(double v) {
+        virtual void OnNumber(double v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnNumber")) {
                 m_ctx->call_self("OnNumber",v);
             }
@@ -1062,7 +1059,7 @@ namespace Sandbox {
             return 1;
         }
         static int yajl_parse_integer(void * ctx, long long integerVal) {
-            static_cast<Ctx*>(ctx)->traverser->OnInteger(int(integerVal));
+            static_cast<Ctx*>(ctx)->traverser->OnInteger(integerVal);
             return 1;
         }
         static int yajl_parse_double(void * ctx, double doubleVal) {
