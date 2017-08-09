@@ -423,6 +423,7 @@ struct UTF8 {
     static  sb::string GetChar(const char* src) {
         Sandbox::UTF32Char ch = 0;
         const char* next = Sandbox::get_char(src, ch);
+        if (!ch) return "";
         sb::string res;
         res.assign(src,next);
         return res;
