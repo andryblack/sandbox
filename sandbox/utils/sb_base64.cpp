@@ -163,6 +163,15 @@ namespace Sandbox {
         return 1;
     }
     
+    int lua_Base64Encode(lua_State* L) {
+        size_t data_len = 0;
+        const char* data_string = luaL_checklstring(L, 1, &data_len);
+        sb::string ret;
+        base64_encode(reinterpret_cast<const GHL::Byte*>(data_string),data_len,ret);
+        lua_pushstring(L, ret.c_str());
+        return 1;
+    }
+    
     GHL::Data* Base64DecodeData(const char* src) {
         if (!src)
             return 0;

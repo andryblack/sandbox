@@ -11,6 +11,7 @@ struct lua_State;
 namespace Sandbox {
     
     int lua_Base64Decode(lua_State* L);
+    int lua_Base64Encode(lua_State* L);
     sb::string Base64Decode(const char* src);
     GHL::Data* Base64DecodeData(const char* src);
     sb::string Base64EncodeData(const GHL::Byte* data,size_t size);
