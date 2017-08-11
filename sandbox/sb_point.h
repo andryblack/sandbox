@@ -23,6 +23,9 @@ namespace Sandbox {
 		bool operator == (const Point& r) const {
 			return (x==r.x) && (y==r.y);
 		}
+        bool operator != (const Point& r) const {
+            return (x!=r.x) || (y!=r.y);
+        }
         bool operator < (const Point& r) const {
             if (x == r.x) return y < r.y;
             return x < r.x;

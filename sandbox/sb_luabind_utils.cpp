@@ -12,8 +12,13 @@
 #include "utils/sb_md5.h"
 #include "utils/sb_url.h"
 
+#include "sb_data.h"
+
 
 namespace Sandbox {
+    
+    int lua_ZlibUncompress(lua_State* L);
+    int lua_ZlibCompress(lua_State* L);
         
     void register_utils( lua_State* lua ) {
         luabind::Namespace ns(lua,"Sandbox.utils");
@@ -21,8 +26,10 @@ namespace Sandbox {
         ns( Sandbox::meta::static_method( "MD5Hash", &Sandbox::MD5Hash) );
         ns( Sandbox::meta::static_method( "MD5File", &Sandbox::MD5SumFile));
         ns( Sandbox::meta::static_method( "Base64Decode" , &Sandbox::lua_Base64Decode) );
-        ns( Sandbox::meta::static_method( "Base64Encode" , &Sandbox::Base64Encode) );
+        ns( Sandbox::meta::static_method( "Base64Encode" , &Sandbox::lua_Base64Encode) );
         ns( Sandbox::meta::static_method( "UrlEncode", &Sandbox::UrlEncode ));
+        ns( Sandbox::meta::static_method( "ZlibUncompress" , &Sandbox::lua_ZlibUncompress) );
+        ns( Sandbox::meta::static_method( "ZlibCompress" , &Sandbox::lua_ZlibCompress) );
     }
     
 }

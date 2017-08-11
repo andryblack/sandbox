@@ -93,13 +93,21 @@ namespace XML {
             return m_node.child_value();
         }
         void set_value(const char* v) {
-            m_node.set_value(v);
+            while (m_node.first_child())
+                m_node.remove_child(m_node.first_child());
+            m_node.append_child(pugi::node_pcdata).set_value(v);
         }
         
         NodePtr append_child(const char* name) {
             pugi::xml_node n = m_node.append_child(name);
             return NodePtr(new Node(m_parent,n));
         }
+        
+        NodePtr find_child(const char* name) {
+            pugi::xml_node n = m_node.child(name);
+            return n ? NodePtr(new Node(m_parent,n)) : NodePtr();
+        }
+        
         void set_attribute(const char* name,const char* value) {
             if (!value) {
                 m_node.remove_attribute(name);
@@ -177,6 +185,7 @@ SB_META_METHOD(remove_attribute)
 SB_META_METHOD(has_attribute)
 SB_META_METHOD(append_child)
 SB_META_METHOD(remove_child)
+SB_META_METHOD(find_child)
 bind(method("enumerate_childs",&XML::Node::enumerate_childs));
 SB_META_END_KLASS_BIND()
 
