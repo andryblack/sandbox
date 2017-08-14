@@ -30,7 +30,7 @@ extern "C" {
 #include "sb_lua_context.h"
 #include "sb_data.h"
 
-#if !defined(SB_DNT_USE_MEM_MGR) && !defined(GHL_PLATFORM_FLASH)
+#if !defined(SB_DNT_USE_MEM_MGR) && !defined(GHL_PLATFORM_FLASH) && !defined(GHL_PLATFORM_EMSCRIPTEN)
 #define SB_USE_MEM_MGR
 #endif
 
