@@ -52,7 +52,8 @@ namespace Sandbox {
 	}
 
 	GHL::DataStream* Resources::OpenFile(const char* filename) {
-		std::string fn = m_base_path + filename;
+        if (!filename) return 0;
+        sb::string fn = (filename[0] == '/') ? sb::string(filename) : (m_base_path + filename);
         return m_vfs->OpenFile(fn.c_str());
 	}
     

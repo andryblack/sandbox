@@ -110,6 +110,8 @@ namespace Sandbox {
         RenderTargetPtr CreateRenderTarget(int w, int h, float scale,bool alpha, bool depth);
         float GetScale() const { return m_scale; }
         void    ProcessMemoryMgmt();
+        
+        const sb::string& GetCachePath() const { return m_cache_path; }
     protected:
         virtual GHL::Image* ImageFromData( const GHL::Data* data );
         virtual GHL::Image* ImageFromStream( GHL::DataStream* ds );
