@@ -4,6 +4,8 @@
 #include <sbstd/sb_intrusive_ptr.h>
 #include <sbstd/sb_list.h>
 
+#include <cstring>
+
 class Task : public sb::ref_countered_base_not_copyable {
 private:
     bool m_error;
@@ -31,7 +33,7 @@ private:
     struct Impl;
     Impl* m_impl;
 public:
-    TasksPool(size_t tasks);
+    explicit TasksPool(size_t tasks);
     ~TasksPool();
     void AddTask(const TaskPtr& t);
     bool Process();

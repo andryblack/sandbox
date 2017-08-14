@@ -14,11 +14,13 @@
 
 SB_META_DECLARE_OBJECT(Sandbox::ShaderUniform, void)
 SB_META_DECLARE_OBJECT(Sandbox::ShaderFloatUniform, Sandbox::ShaderUniform)
-SB_META_DECLARE_OBJECT_T(Sandbox::ShaderVec2Uniform, Sandbox::ShaderUniform)
-SB_META_DECLARE_OBJECT_T(Sandbox::ShaderVec3Uniform, Sandbox::ShaderUniform)
 SB_META_DECLARE_OBJECT(Sandbox::ShaderMat4Uniform, Sandbox::ShaderUniform)
-SB_META_DECLARE_OBJECT_T(Sandbox::ShaderColorUniform, Sandbox::ShaderUniform)
 SB_META_DECLARE_OBJECT(Sandbox::Shader, void)
+
+SB_META_DECLARE_OBJECT_T(Sandbox,ShaderVec2Uniform, ShaderUniform)
+SB_META_DECLARE_OBJECT_T(Sandbox,ShaderVec3Uniform, ShaderUniform)
+SB_META_DECLARE_OBJECT_T(Sandbox,ShaderColorUniform, ShaderUniform)
+
 
 namespace Sandbox {
 

@@ -66,8 +66,10 @@
 			buildoptions { "-mmacosx-version-min=10.8" }
 			linkoptions  { "-mmacosx-version-min=10.8" }
 
-
-		configuration( nil )
+		configuration { "linux" }
+			links {"pthread"}
+		
+		configuration{}
 
 	
 

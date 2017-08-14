@@ -203,9 +203,9 @@ namespace Sandbox {
         SB_META_DECLARE_KLASS(Klass,Parent) \
         SB_META_DECLARE_OBJECT_IMPL(Klass,)
 
-#define SB_META_DECLARE_OBJECT_T(Klass,Parent)  \
-    SB_META_DECLARE_KLASS(Klass,Parent) \
-    SB_META_DECLARE_OBJECT_IMPL(Klass,template<>)
+#define SB_META_DECLARE_OBJECT_T(NS,Klass,Parent)  \
+    SB_META_DECLARE_NAMED_KLASS(NS::Klass,#NS"::"#Klass,Parent) \
+    namespace NS { SB_META_DECLARE_OBJECT_IMPL(Klass,template<>) }
 
 #define SB_META_DECLARE_OBJECT2(Klass,Parent1,Parent2)  \
     SB_META_DECLARE_KLASS2(Klass,Parent1,Parent2) \

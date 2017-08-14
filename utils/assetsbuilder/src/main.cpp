@@ -3,6 +3,7 @@
 #include <sbstd/sb_string.h>
 
 #include <sys/stat.h>
+#include <cstdlib>
 
 #include "application.h"
 
