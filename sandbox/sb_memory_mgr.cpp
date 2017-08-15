@@ -11,7 +11,7 @@
 #include "sb_log.h"
 #include <tlsf.h>
 
-#include <cstdint>
+#include <stdint.h>
 
 //#define SB_MEMORY_MGR_DEBUG
 
