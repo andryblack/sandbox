@@ -497,6 +497,32 @@ bind(method("eventEditTextChange", delegate_bind<MyGUI::EditBox,
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ComboBox, MyGUI::EditBox)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ComboBox)
+SB_META_METHOD(addItem)
+SB_META_METHOD(getItemCount)
+SB_META_METHOD(removeItemAt)
+SB_META_METHOD(removeAllItems)
+SB_META_METHOD(setIndexSelected)
+SB_META_METHOD(clearIndexSelected)
+SB_META_PROPERTY_RW(indexSelected,getIndexSelected,setIndexSelected)
+SB_META_METHOD(setItemNameAt)
+SB_META_METHOD(getItemNameAt)
+SB_META_METHOD(beginToItemAt)
+SB_META_METHOD(beginToItemFirst)
+SB_META_METHOD(beginToItemLast)
+SB_META_METHOD(beginToItemSelected)
+SB_META_PROPERTY_RW(comboModeDrop, getComboModeDrop, setComboModeDrop)
+SB_META_PROPERTY_RW(smoothShow, getSmoothShow, setSmoothShow)
+SB_META_PROPERTY_RW(maxListLength, getMaxListLength, setMaxListLength)
+bind(method("eventComboAccept", delegate_bind<MyGUI::ComboBox,
+            MyGUI::ComboBox,
+            MyGUI::EventHandle_ComboBoxPtrSizeT,
+            &MyGUI::ComboBox::eventComboAccept>::lua_func));
+bind(method("eventComboChangePosition", delegate_bind<MyGUI::ComboBox,
+            MyGUI::ComboBox,
+            MyGUI::EventHandle_ComboBoxPtrSizeT,
+            &MyGUI::ComboBox::eventComboChangePosition>::lua_func));
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::TabItem, MyGUI::TextBox)
 
@@ -856,6 +882,7 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ScrollBar>(lua);
             
             luabind::ExternClass<MyGUI::EditBox>(lua);
+            luabind::ExternClass<MyGUI::ComboBox>(lua);
             
             
             
