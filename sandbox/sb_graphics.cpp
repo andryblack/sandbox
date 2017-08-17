@@ -958,7 +958,8 @@ namespace Sandbox {
 	void Graphics::BeginDrawCircle() {
 		m_state.texture = TexturePtr();
         m_state.ptype = GHL::PRIMITIVE_TYPE_LINE_STRIP;
-	}
+        FlushImpl();
+  	}
 	void Graphics::DrawCircle(const Vector2f& pos, float r) {
 		sb_assert( (m_render!=0) && "scene not started" );
 #ifndef GHL_PLATFORM_FLASH
