@@ -221,18 +221,7 @@ namespace Sandbox {
 		return true;
     }
     
-	TexturePtr Resources::CreateTexture( GHL::UInt32 w, GHL::UInt32 h,float scale,bool alpha, const GHL::Image* data) {
-        GHL::UInt32 tw = 0;
-        GHL::UInt32 th = 0;
-        GetTextureSize(w, h, tw, th, false);
-        bool setData = ( tw == w ) && ( th == h );
-		GHL::Texture* texture = m_render->CreateTexture(tw,
-                                                        th,alpha ? GHL::TEXTURE_FORMAT_RGBA:GHL::TEXTURE_FORMAT_RGB,
-                                                        setData ? data : 0);
-		if (data && !setData) texture->SetData(0,0,data);
-        return TexturePtr( new Texture(texture,scale,w,h));
-	}
-    
+  
     TexturePtr Resources::CreateTexture( const GHL::Image* image,
                              float scale,
                              GHL::TextureFormat fmt) {
@@ -358,7 +347,7 @@ namespace Sandbox {
         texture->DiscardInternal();
         return texture;
     }
-    GHL::Texture* Resources::LoadTexture( const sb::string& filename , bool& variant, bool premultiply ) {
+    GHL::Texture* Resources::ManagedLoadTexture( const sb::string& filename , bool& variant, bool premultiply ) {
         //LogDebug() << "load texture " << filename;
         GHL::Image* img = LoadImage(filename.c_str(),variant);
 		if (!img) {
@@ -375,23 +364,7 @@ namespace Sandbox {
         
         return texture;
     }
-    
-    TexturePtr Resources::LoadTexture( GHL::DataStream* ds ) {
-        GHL::Image* img = ImageFromStream(ds);
-        if (!img) {
-            return TexturePtr();
-        }
-        GHL::UInt32 w = img->GetWidth();
-        GHL::UInt32 h = img->GetHeight();
-        GHL::Texture* texture = CreateTexture(img, false);
-        img->Release();
-        if (texture) {
-            TexturePtr tex(new Texture(texture,1.0f,w,h));
-            return TexturePtr(tex);
-        }
-        return TexturePtr();
-    }
-    
+        
     BitmaskPtr Resources::LoadBitmask( const sb::string& filename ) {
         bool variant = false;
         GHL::Image* img = LoadImage(filename.c_str(),variant);

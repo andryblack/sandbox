@@ -27,6 +27,7 @@ namespace Sandbox {
         float GetScale() const;
         GHL::UInt32 GetWidth() const;
         GHL::UInt32 GetHeight() const;
+        void Discard();
     private:
         GHL::RenderTarget*   m_rt;
         TexturePtr  m_texture;

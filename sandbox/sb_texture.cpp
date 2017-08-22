@@ -47,7 +47,7 @@ namespace Sandbox {
     GHL::Texture* Texture::Present(Resources* resources) {
         if (!m_texture) {
             bool variant = false;
-            m_texture = resources->LoadTexture( m_file ,variant, m_need_premultiply );
+            m_texture = resources->ManagedLoadTexture( m_file ,variant, m_need_premultiply );
             if (m_texture) {
                 m_texture->SetMinFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);
                 m_texture->SetMagFilter(m_filtered?GHL::TEX_FILTER_LINEAR:GHL::TEX_FILTER_NEAR);

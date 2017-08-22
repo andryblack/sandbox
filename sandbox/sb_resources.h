@@ -67,10 +67,10 @@ namespace Sandbox {
         
         ImagePtr CreateImageFromData( const GHL::Data* data );
 		
-        TexturePtr LoadTexture( GHL::DataStream* ds );
+        
 		TexturePtr GetTexture(const char* filename, bool need_premultiply);
         
-        virtual TexturePtr GetTexture(const char* filename) {
+        virtual TexturePtr GetTexture(const char* filename) SB_OVERRIDE {
             return GetTexture(filename, false);
         }
         
@@ -88,20 +88,16 @@ namespace Sandbox {
 		GHL::VFS* GetVFS() { return m_vfs;}
 		const std::string& GetBasePath() const { return m_base_path;}
 		
-		TexturePtr CreateTexture( GHL::UInt32 w, 
-                                 GHL::UInt32 h,
-                                 float scale,
-                                 bool alpha, 
-                                 const GHL::Image* data);
         TexturePtr CreateTexture( const GHL::Image* image,
                                  float scale,
                                  GHL::TextureFormat fmt);
-        GHL::Texture* LoadTexture( const sb::string& filename , bool& variant, bool premultiply);
+        
         BitmaskPtr LoadBitmask( const sb::string& filename );
         
         size_t  GetLiveTicks() const { return m_live_ticks; }
         
         size_t  GetMemoryLimit() const { return m_memory_limit; }
+        void SetMemoryLimit(size_t limit) { m_memory_limit = limit; }
         size_t  GetMemoryUsed() const { return m_memory_used; }
         
         void SetResourcesVariant(float scale,const sb::string& postfix);
@@ -112,10 +108,15 @@ namespace Sandbox {
         void    ProcessMemoryMgmt();
         
         const sb::string& GetCachePath() const { return m_cache_path; }
+    
+    
     protected:
         virtual GHL::Image* ImageFromData( const GHL::Data* data );
         virtual GHL::Image* ImageFromStream( GHL::DataStream* ds );
         virtual bool GetImageInfo(GHL::ImageInfo &info,GHL::DataStream* ds);
+    
+        friend class Texture;
+        GHL::Texture* ManagedLoadTexture( const sb::string& filename , bool& variant, bool premultiply);
     private:
 		GHL::VFS* m_vfs;
 		GHL::Render* m_render;

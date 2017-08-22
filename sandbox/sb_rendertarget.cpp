@@ -31,8 +31,15 @@ namespace Sandbox {
     }
     
     RenderTarget::~RenderTarget() {
+        Discard();
+    }
+    
+    void RenderTarget::Discard() {
         m_texture.reset();
-        m_rt->Release();
+        if (m_rt) {
+            m_rt->Release();
+            m_rt = 0;
+        }
     }
     
 }
