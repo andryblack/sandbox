@@ -26,10 +26,12 @@ namespace Sandbox {
     class JsonBuilderBase {
     protected:
         struct Impl;
+        struct ImplRef;
         Impl* m_impl;
-        ~JsonBuilderBase();
-        explicit JsonBuilderBase(sb::string& outdata);
+        virtual ~JsonBuilderBase();
+        explicit JsonBuilderBase();
         
+        virtual void Write(const char* data,size_t len) = 0;
     private:
         JsonBuilderBase(const JsonBuilderBase&);
         JsonBuilderBase& operator = (const JsonBuilderBase&);
@@ -52,13 +54,19 @@ namespace Sandbox {
         JsonBuilderBase& PutInteger(long long value);
         JsonBuilderBase& PutNumber(double value);
         
-        const sb::string& End();
+        
     };
     
     class JsonBuilderRef : public JsonBuilderBase {
+    protected:
+        sb::string& m_data;
+        virtual void Write(const char* data,size_t len) SB_OVERRIDE {
+            m_data.append(data,len);
+        }
     public:
-        explicit JsonBuilderRef(sb::string& data) : JsonBuilderBase(data) {}
+        explicit JsonBuilderRef(sb::string& data) : m_data(data) {}
         ~JsonBuilderRef() {}
+        const sb::string& End() const { return m_data; }
     };
 
     class JsonBuilder : public JsonBuilderBase {
@@ -66,12 +74,15 @@ namespace Sandbox {
         JsonBuilder(const JsonBuilder&);
         JsonBuilder& operator = (const JsonBuilder&);
         sb::string  m_out_data;
+        virtual void Write(const char* data,size_t len) SB_OVERRIDE {
+            m_out_data.append(data,len);
+        }
     public:
         void reset();
         JsonBuilder();
         ~JsonBuilder();
         
-        const sb::string& End() { return m_out_data; }
+        const sb::string& End() const { return m_out_data; }
     };
     
     class JsonTraverser {

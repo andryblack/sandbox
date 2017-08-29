@@ -720,23 +720,26 @@ namespace Sandbox {
     };
     
     struct JsonBuilderBase::Impl {
-        sb::string& data;
         yajl_gen g;
         static void yajl_encode_print(void * ctx,const char * str,size_t len) {
-            Impl* c = static_cast<Impl*>(ctx);
-            c->data.append(str,len);
+            JsonBuilderBase* c = static_cast<JsonBuilderBase*>(ctx);
+            c->Write(str, len);
         }
-        explicit Impl(sb::string& data) : data(data) {
+        explicit Impl()  {
             g = yajl_gen_alloc(0);
-            yajl_gen_config(g,yajl_gen_print_callback,&Impl::yajl_encode_print,this);
+            
+        }
+        void init(JsonBuilderBase* buider) {
+            yajl_gen_config(g,yajl_gen_print_callback,&Impl::yajl_encode_print,buider);
         }
         ~Impl() {
             yajl_gen_free(g);
         }
     };
     
-    JsonBuilderBase::JsonBuilderBase(sb::string& data) : m_impl(new Impl(data)) {
-        
+    
+    JsonBuilderBase::JsonBuilderBase() : m_impl(new Impl()) {
+        m_impl->init(this);
     }
     JsonBuilderBase::~JsonBuilderBase() {
         reset();
@@ -805,11 +808,9 @@ namespace Sandbox {
     
     static const sb::string empty_string;
     
-    const sb::string& JsonBuilderBase::End() {
-        return m_impl ? m_impl->data : empty_string;
-    }
     
-    JsonBuilder::JsonBuilder() : JsonBuilderBase( m_out_data ) {
+    
+    JsonBuilder::JsonBuilder() : JsonBuilderBase( ) {
         
     }
     JsonBuilder::~JsonBuilder() {
@@ -822,6 +823,7 @@ namespace Sandbox {
         }
         m_out_data.clear();
     }
+    
 
 
     namespace meta {

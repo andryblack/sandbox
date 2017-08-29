@@ -33,6 +33,7 @@ namespace Sandbox {
         static void flush();
         static sb::string GetCurrentPath();
         static sb::string GetPrevPath();
+        static void Write(GHL::LogLevel level,const char* msg);
     protected:
         void Discard();
     private:

@@ -24,6 +24,7 @@ extern "C" {
 }
 
 #include "sb_luabind_metatable.h"
+#include <exception>
 
 namespace Sandbox {
     
@@ -491,7 +492,9 @@ namespace Sandbox {
                 if (top != m_top) {
                     LogError() << "top is: " << top << " expected: " << m_top;
                 }
-                sb_assert( top == m_top );
+                if (!std::uncaught_exception()) {
+                    sb_assert( top == m_top );
+                }
             }
             bool check_state() const {
                 return lua_gettop(m_L) == m_top;

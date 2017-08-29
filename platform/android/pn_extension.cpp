@@ -88,13 +88,12 @@ public:
         if (jni::check_exception(env) || token_jni == 0) {
             return pending_get;
         }
-        sb::string res = Sandbox::JsonBuilder()
-            .BeginObject()
+        Sandbox::JsonBuilder json;
+        json.BeginObject()
                 .Key("status").PutString("success")
                 .Key("token").PutString(jni::extract_jni_string(env,token_jni).c_str())
-            .EndObject()
-        .End();
-        return res;
+            .EndObject();
+        return json.End();
     }
     virtual bool Process(Sandbox::Application* app,
                          const char* method,
@@ -109,13 +108,12 @@ public:
     
     void sendToken(const sb::string& token) {
     	if (m_application) {
-            sb::string res = Sandbox::JsonBuilder()
-                .BeginObject()
+            Sandbox::JsonBuilder json;
+            json.BeginObject()
                     .Key("status").PutString("success")
                     .Key("token").PutString(token.c_str())
-                .EndObject()
-            .End();
-            m_application->OnExtensionResponse("PNGetToken", res.c_str());
+                .EndObject();
+            m_application->OnExtensionResponse("PNGetToken", json.End().c_str());
     	}
     }
     

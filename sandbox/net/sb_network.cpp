@@ -23,6 +23,7 @@ SB_META_DECLARE_OBJECT(Sandbox::ImageRequest, Sandbox::NetworkDataRequest)
 #endif
 SB_META_DECLARE_OBJECT(Sandbox::NetworkPostData, Sandbox::meta::object)
 SB_META_DECLARE_OBJECT(Sandbox::NetworkMultipartFormData, Sandbox::NetworkPostData)
+SB_META_DECLARE_OBJECT(Sandbox::NetworkMultipartFormStream, Sandbox::meta::object)
 namespace Sandbox {
     
     static const char* MODULE = "sb_net";
@@ -221,6 +222,7 @@ namespace Sandbox {
     NetworkPostData::~NetworkPostData() {
         m_data->Release();
     }
+    
     static const char* rn = "\r\n";
     static const char* dashes = "--";
     
@@ -302,6 +304,71 @@ namespace Sandbox {
         request->SetHeader("Content-Type", "multipart/form-data; boundary=" + m_boundary);
     }
     
+    
+    NetworkMultipartFormStream::NetworkMultipartFormStream() {
+        m_boundary.assign("0-------------sandbox-multipart-form-data-stream----123456789");
+        
+    }
+    void NetworkMultipartFormStream::Setup(NetworkRequestBase *request) {
+        request->SetHeader("Content-Type", "multipart/form-data; boundary=" + m_boundary);
+//        char buf[32];
+//        sb::snprintf(buf, sizeof(buf), "%d",GetTotalSize());
+//        request->SetHeader("Content-Length", buf);
+    }
+    
+    void NetworkMultipartFormStream::write_boundary() {
+        AddString(dashes);
+        AddString(m_boundary);
+        AddString(rn);
+    }
+
+    void NetworkMultipartFormStream::AddFormField(const sb::string& field, const sb::string& data) {
+        write_boundary();
+        AddString("Content-Disposition: form-data; name=\"");
+        AddString(field);
+        AddString("\"");
+        AddString(rn);
+        AddString(rn);
+        AddString(data);
+        AddString(rn);
+    }
+    
+    void NetworkMultipartFormStream::AddStream(const sb::string& name,
+                   const sb::string& filename,
+                   const sb::string& content_type,
+                                               GHL::DataStream* data) {
+        
+        write_boundary();
+        if (!content_type.empty()) {
+            AddString("Content-Type: ");
+            AddString(content_type);
+            AddString(rn);
+        }
+        AddString("Content-Disposition: form-data");
+        if (!name.empty()) {
+            AddString("; name=\"");
+            AddString(name);
+            AddString("\"");
+        }
+        if (!filename.empty()) {
+            AddString("; filename=\"");
+            AddString(filename);
+            AddString("\"");
+        }
+        AddString(rn);
+        AddString(rn);
+        MultiStream::AddStream(data);
+        AddString(rn);
+    }
+    
+    
+    void NetworkMultipartFormStream::Close() {
+        AddString(dashes);
+        AddString(m_boundary);
+        AddString(dashes);
+    }
+       
+    
     NetworkRequestPtr Network::POST(const sb::string& url, const NetworkPostDataPtr& data) {
         if (!m_net) return NetworkRequestPtr();
         NetworkRequestPtr request(new NetworkRequest(url));
@@ -309,6 +376,21 @@ namespace Sandbox {
         ApplyCookie(request);
         GHL::Data* data_p = data->GetData();
         if (!m_net->Post(request.get(),data_p)) {
+            if (!request->GetErrorText().empty()) {
+                SB_LOGE( "network POST error: " << request->GetErrorText() );
+            }
+            return request->GetCompleted() ? request : NetworkRequestPtr();
+        }
+        return request;
+    }
+    
+    NetworkRequestPtr Network::POSTFormStream(const sb::string& url,
+                                 const NetworkMultipartFormStreamPtr& data) {
+        if (!m_net) return NetworkRequestPtr();
+        NetworkRequestPtr request(new NetworkRequest(url));
+        data->Setup(request.get());
+        ApplyCookie(request);
+        if (!m_net->PostStream(request.get(),data.get())) {
             if (!request->GetErrorText().empty()) {
                 SB_LOGE( "network POST error: " << request->GetErrorText() );
             }

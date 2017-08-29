@@ -11,7 +11,7 @@
 
 #include <sbstd/sb_assert.h>
 #include <ghl_api.h>
-
+#include "meta/sb_meta.h"
 
 namespace Sandbox {
     
@@ -42,6 +42,19 @@ namespace Sandbox {
             }
         }
         
+    };
+    
+    template <class T>
+    class GHLObjectImpl : virtual public T, public meta::object {
+    public:
+        /// add reference
+        virtual void GHL_CALL AddRef() const SB_OVERRIDE {
+            add_ref();
+        }
+        /// release reference
+        virtual void GHL_CALL Release() const SB_OVERRIDE {
+            remove_ref();
+        }
     };
 
     

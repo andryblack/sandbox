@@ -33,25 +33,23 @@
             }
         }
         //= Sandbox::Base64EncodeData(static_cast<const GHL::Byte*>(deviceToken.bytes),deviceToken.length);
-        sb::string res = Sandbox::JsonBuilder()
-            .BeginObject()
+        Sandbox::JsonBuilder json;
+        json.BeginObject()
                 .Key("status").PutString("success")
                 .Key("token").PutString(token.c_str())
-            .EndObject()
-        .End();
-        m_application->OnExtensionResponse("PNGetToken", res.c_str());
+        .EndObject();
+        m_application->OnExtensionResponse("PNGetToken", json.End().c_str());
     }
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
     NSLog(@"didFailToRegisterForRemoteNotificationsWithError: %@",error);
-    sb::string res = Sandbox::JsonBuilder()
-        .BeginObject()
+    Sandbox::JsonBuilder json;
+    json.BeginObject()
             .Key("status").PutString("failed")
             .Key("error").PutString([error description].UTF8String)
-        .EndObject()
-    .End();
-    m_application->OnExtensionResponse("PNGetToken", res.c_str());
+    .EndObject();
+    m_application->OnExtensionResponse("PNGetToken", json.End().c_str());
 }
 
 -(void)registerForNotifications {
