@@ -64,8 +64,8 @@ namespace sb
             for (size_t i=0;i<c_size;++i) {
                 if (o[i]!=a[i])
                     return false;
-                return true;
             }
+            return true;
         }
     };
 }
