@@ -333,6 +333,33 @@ namespace Sandbox {
         AddString(rn);
     }
     
+    void NetworkMultipartFormStream::AddFormField(const sb::string& name,
+                                                  const sb::string& filename,
+                                                  const sb::string& content_type,
+                                                  const sb::string& data) {
+        write_boundary();
+        if (!content_type.empty()) {
+            AddString("Content-Type: ");
+            AddString(content_type);
+            AddString(rn);
+        }
+        AddString("Content-Disposition: form-data");
+        if (!name.empty()) {
+            AddString("; name=\"");
+            AddString(name);
+            AddString("\"");
+        }
+        if (!filename.empty()) {
+            AddString("; filename=\"");
+            AddString(filename);
+            AddString("\"");
+        }
+        AddString(rn);
+        AddString(rn);
+        AddString(data);
+        AddString(rn);
+    }
+    
     void NetworkMultipartFormStream::AddStream(const sb::string& name,
                    const sb::string& filename,
                    const sb::string& content_type,

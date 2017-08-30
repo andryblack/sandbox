@@ -188,6 +188,10 @@ namespace Sandbox {
                      const sb::string& content_type,
                      GHL::DataStream* data);
         void AddFormField(const sb::string& field, const sb::string& data);
+        void AddFormField(const sb::string& name,
+                          const sb::string& filename,
+                          const sb::string& content_type,
+                          const sb::string& data);
         void Close();
     };
     typedef sb::intrusive_ptr<NetworkMultipartFormStream> NetworkMultipartFormStreamPtr;
