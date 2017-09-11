@@ -22,7 +22,7 @@ namespace Sandbox {
     }
     GHL::UInt32 MultiStream::StreamDataField::Read(GHL::Byte* dest,GHL::UInt32 bytes) {
         GHL::UInt32 readed = 0;
-        while (bytes && !m_ds->Eof()) {
+        while (m_ds && bytes && !m_ds->Eof()) {
             GHL::UInt32 r = m_ds->Read(dest, bytes);
             dest += r;
             bytes -= r;
@@ -92,12 +92,13 @@ namespace Sandbox {
             return true;
         } else if (offset == 0 && st == GHL::F_SEEK_BEGIN) {
             m_writed = 0;
+            m_current_field = 0;
             return true;
         }
         return false;
     }
     /// End of file
     bool GHL_CALL MultiStream::Eof() const {
-        return m_current_field > m_fields.size();
+        return m_current_field >= m_fields.size();
     }
 }
