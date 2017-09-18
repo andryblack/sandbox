@@ -47,6 +47,7 @@ namespace Sandbox {
             
             void setSmallScrollEnabled(bool enabled);
             bool getSmallScrollEnabled() const { return m_small_scroll_enabled; }
+            void cancelScroll();
         protected:
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
             

@@ -1,5 +1,7 @@
 #include "sb_scroll.h"
+#include "sb_log.h"
 
+#define MODULE "scroll"
 //SB_META_DECLARE_KLASS(Sandbox::Scroll,void)
 
 namespace Sandbox {
@@ -8,6 +10,7 @@ namespace Sandbox {
         m_bounds = Sizef(0,0);
         m_fade = 0.9f;
         m_normalization_time = 1.0f / 8.0f;
+        m_scroll_start_length = 2.0f;
     }
     
     void Scroll::SetViewSize(const Sizef& r) {
@@ -22,16 +25,25 @@ namespace Sandbox {
         m_last_time = Time::Now();
         m_last_speed = Sandbox::Vector2f(0,0);
         m_state = scroll_wait;
+        //SB_LOGD("ScrollBegin:" << pos << "->wait");
     }
     void Scroll::ScrollMove( const Vector2f& pos ) {
         if (!IsMove())
             return;
+        //SB_LOGD("ScrollMove:" << pos);
         Vector2f delta = -( pos - m_prev_pos );
+        if (!m_h_enabled)
+            delta.x = 0;
+        if (!m_v_enabled)
+            delta.y = 0;
         if (m_state == scroll_wait) {
-            if (delta.length() >= 2.0f){
+            if (delta.length() >= m_scroll_start_length){
                 m_last_time = Time::Now();
                 OnScrollBegin();
                 m_state = scroll_move;
+                
+                delta = delta.unit() * (delta.length() - m_scroll_start_length);
+                //SB_LOGD("wait->scroll");
             } else {
                 return;
             }
@@ -66,6 +78,15 @@ namespace Sandbox {
             m_state = scroll_none;
         }
         
+    }
+    
+    void Scroll::Cancel() {
+        if (m_state == scroll_move) {
+            OnScrollEnd();
+            m_state = scroll_none;
+        } else if (m_state == scroll_wait) {
+            m_state = scroll_none;
+        } 
     }
     
     void Scroll::Move(const Vector2f& delta,bool fire) {

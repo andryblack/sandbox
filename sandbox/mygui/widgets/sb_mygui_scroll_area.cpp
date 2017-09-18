@@ -12,6 +12,7 @@
 #include "MyGUI_ILayer.h"
 #include "MyGUI_InputManager.h"
 #include "MyGUI_ScrollBar.h"
+#include "MyGUI_LanguageManager.h"
 
 #include "sb_log.h"
 #include "sb_mygui_cached_widget.h"
@@ -54,6 +55,8 @@ namespace Sandbox {
                 setManualScroll(MyGUI::utility::parseValue<bool>(_value));
             else if (_key == "SmallScrollEnabled")
                 setSmallScrollEnabled(MyGUI::utility::parseValue<bool>(_value));
+            else if (_key == "ScrollStartLength")
+                SetScrollStartLength(MyGUI::utility::parseFloat(MyGUI::LanguageManager::getInstance().replaceTags(_value)));
             else
             {
                 Base::setPropertyOverride(_key, _value);
@@ -103,6 +106,10 @@ namespace Sandbox {
             MyGUI::ScrollView::notifyScrollChangePosition(_sender, _position);
             SetOffset(Vector2f(-getViewOffset().left,-getViewOffset().top));
             OnScrollMove();
+        }
+        
+        void ScrollArea::cancelScroll() {
+            Scroll::Cancel();
         }
         
         void ScrollArea::handleGlobalMouseMove(float x,float y) {

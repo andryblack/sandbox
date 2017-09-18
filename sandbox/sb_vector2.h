@@ -133,6 +133,10 @@ namespace Sandbox {
         struct stack<const Vector2f&> : stack<Vector2f> {};
         
     }
+    
+    static inline std::ostream& operator << (std::ostream& os,const Vector2f& v) {
+        return os << "{" << v.x << "," << v.y << "}";
+    }
   
 }
 
