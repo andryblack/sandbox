@@ -4,6 +4,8 @@
 #include "sb_math.h"
 #include "luabind/sb_luabind_stack.h"
 
+#include <iostream>
+
 namespace Sandbox {
 
     /// 2D vector
