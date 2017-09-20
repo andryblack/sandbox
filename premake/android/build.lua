@@ -189,6 +189,13 @@ function build.generate_app_build_gradle( sln , prj )
 			table.insert(aidl_dirs,"'" .. p .. "'")
 		end
 	end
+	local res_dirs = {}
+	if prj.android_res then
+		for _,v in ipairs(prj.android_res) do
+			local p = '../' .. path.getrelative(sln.location,v)
+			table.insert(res_dirs,"'" .. p .. "'")
+		end
+	end
 
 	_x(1,'signingConfigs {')
 		for cfg in project.eachconfig(prj) do
@@ -240,7 +247,9 @@ function build.generate_app_build_gradle( sln , prj )
 					_x(5,"manifest.srcFile '%s/AndroidManifest.xml'",cfg.shortname)
 					_x(5,"java.srcDirs = [" .. table.concat(src_dirs,',') .. "]")
 				    _x(5,"resources.srcDirs = ['../src']")
-				    _x(5,"res.srcDirs = ['../res']")
+				    if next(res_dirs) then
+				    	_x(5,"res.srcDirs = [" .. table.concat(res_dirs,',') .. "]")
+					end
 				    if next(aidl_dirs) then
     					_x(5,"aidl.srcDirs = [" .. table.concat(aidl_dirs,',') .. "]")
     				end
