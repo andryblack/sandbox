@@ -252,6 +252,13 @@ api.register {
 }
 
 api.register {
+	name = 'android_res',
+	scope = 'project',
+	kind = 'string',
+	list = true
+}
+
+api.register {
 	name = "android_dependencies",
 	scope = 'project',
 	kind = 'string',
