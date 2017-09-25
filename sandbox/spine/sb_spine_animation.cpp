@@ -201,11 +201,11 @@ namespace Sandbox {
                     r.h = 0;
                     first = false;
                 } else {
-                    r.Extend(Vector2f(vert[SP_VERTEX_X1],vert[SP_VERTEX_Y1]));
+                    r.Extend(Pointf(vert[SP_VERTEX_X1],vert[SP_VERTEX_Y1]));
                 }
-                r.Extend(Vector2f(vert[SP_VERTEX_X2],vert[SP_VERTEX_Y2]));
-                r.Extend(Vector2f(vert[SP_VERTEX_X3],vert[SP_VERTEX_Y3]));
-                r.Extend(Vector2f(vert[SP_VERTEX_X4],vert[SP_VERTEX_Y4]));
+                r.Extend(Pointf(vert[SP_VERTEX_X2],vert[SP_VERTEX_Y2]));
+                r.Extend(Pointf(vert[SP_VERTEX_X3],vert[SP_VERTEX_Y3]));
+                r.Extend(Pointf(vert[SP_VERTEX_X4],vert[SP_VERTEX_Y4]));
             }
         }
         return r;

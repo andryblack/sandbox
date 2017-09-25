@@ -84,7 +84,7 @@ namespace Sandbox {
         Rect operator - (const Point<T>& v) const {
             return Rect(x-v.x,y-v.y,w,h);
         }
-        void Extend( const Vector2f& pos ) {
+        void Extend( const Point<T>& pos ) {
             if (pos.x < GetLeft()) {
                 SetLeft(pos.x);
             } else if (pos.x > GetRight()) {
