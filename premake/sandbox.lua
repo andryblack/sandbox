@@ -328,7 +328,7 @@ solution( ProjectName )
 			files { sandbox_dir .. '/platform/ios/sb_ios_extension.*',
 					sandbox_dir .. '/platform/ios/main.*',}
 			if UseModules.IAP then
-				files { sandbox_dir .. '/platform/ios/iap_extension.*',}
+				files { sandbox_dir .. '/platform/ios/sb_iap_extension.*',}
 			end
 			if UseModules.iOSGC then
 				files { sandbox_dir .. '/platform/ios/gc_extension.*',}
