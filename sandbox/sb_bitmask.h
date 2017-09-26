@@ -18,9 +18,13 @@ namespace Sandbox {
         typedef GHL::Byte store_t;
         sb::vector<store_t> m_data;
         static const size_t bits_count = sizeof(store_t)*8;
+        static GHL::Byte m_threshold;
     public:
         explicit Bitmask(GHL::Image* img);
         bool Get(int x,int y) const;
+        
+        static GHL::Byte GetThreshold();
+        static void SetThreshold(GHL::Byte val);
     };
     
 }

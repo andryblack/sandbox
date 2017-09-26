@@ -3,6 +3,15 @@
 
 namespace Sandbox {
     
+    GHL::Byte Bitmask::m_threshold = 0x04;
+    
+    GHL::Byte Bitmask::GetThreshold() {
+        return m_threshold;
+    }
+    void Bitmask::SetThreshold(GHL::Byte val) {
+        m_threshold = val;
+    }
+    
     Bitmask::Bitmask(GHL::Image* img) {
         m_width = img->GetWidth();
         m_height = img->GetHeight();
@@ -26,7 +35,7 @@ namespace Sandbox {
                 store_t s = 0;
                 for (size_t i=0;i<bits_count;++i) {
                     if (x<m_width) {
-                        if (line[3]>0x04) {
+                        if (line[3]>m_threshold) {
                             s = s | (1<<i);
                         }
                     }

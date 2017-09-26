@@ -11,6 +11,7 @@
 #include "sb_resources.h"
 #include "sb_texture.h"
 #include "sb_image.h"
+#include "sb_bitmask.h"
 #include "sb_font.h"
 #include "sb_bitmap_font.h"
 #include "sb_shader.h"
@@ -171,6 +172,7 @@ SB_META_PROPERTY_RW(Filtered, GetFiltered, SetFiltered)
 SB_META_PROPERTY_RW(Tiled,GetTiled, SetTiled)
 SB_META_PROPERTY_RO(RealWidth, GetRealWidth)
 SB_META_PROPERTY_RO(RealHeight, GetRealHeight)
+SB_META_METHOD(GetBitmask)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::RenderTarget, void)
@@ -194,6 +196,14 @@ SB_META_PROPERTY_RO(Height,GetHeight)
 SB_META_PROPERTY_RW(Texture,GetTexture,SetTexture)
 SB_META_PROPERTY_RW(Hotspot,GetHotspot,SetHotspot)
 SB_META_PROPERTY_RO(Bounds, GetBounds)
+SB_META_END_KLASS_BIND()
+
+
+SB_META_DECLARE_KLASS(Sandbox::Bitmask, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Bitmask)
+SB_META_STATIC_METHOD(GetThreshold)
+SB_META_STATIC_METHOD(SetThreshold)
+SB_META_METHOD(Get)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::ShaderUniform)
@@ -416,6 +426,7 @@ namespace Sandbox {
         luabind::ExternClass<ShaderColorUniform>(lua);
         luabind::ExternClass<ShaderMat4Uniform>(lua);
         luabind::ExternClass<Shader>(lua);
+        luabind::ExternClass<Bitmask>(lua);
         
         luabind::Enum<GHL::VertexAttributeUsage>(lua);
         luabind::Enum<GHL::VertexDataType>(lua);
