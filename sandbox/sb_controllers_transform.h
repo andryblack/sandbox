@@ -54,6 +54,12 @@ namespace Sandbox {
 				tr->SetScaleY(s);
 			}
 		};
+        struct LinearControllerSetScaleXY {
+            static void SetValue( const TransformModificatorPtr& tr,const Vector2f& s) {
+                tr->SetScaleX(s.x);
+                tr->SetScaleY(s.y);
+            }
+        };
 		struct LinearControllerSetAngle {
 			static void SetValue( const TransformModificatorPtr& tr,float a) {
 				tr->SetAngle(a);
@@ -70,6 +76,7 @@ namespace Sandbox {
 	typedef LinearController<float,Impl::LinearControllerSetScale,TransformModificatorPtr> ControllerScale;
 	typedef LinearController<float,Impl::LinearControllerSetScaleX,TransformModificatorPtr> ControllerScaleX;
 	typedef LinearController<float,Impl::LinearControllerSetScaleY,TransformModificatorPtr> ControllerScaleY;
+    typedef LinearController<Vector2f,Impl::LinearControllerSetScaleXY,TransformModificatorPtr> ControllerScaleXY;
 	typedef LinearController<float,Impl::LinearControllerSetAngle,TransformModificatorPtr> ControllerAngle;
 }
 
