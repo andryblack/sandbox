@@ -74,6 +74,13 @@ SB_META_PROPERTY_RW_DEF(Begin)
 SB_META_PROPERTY_RW_DEF(End)
 SB_META_END_KLASS_BIND()
 
+SB_META_DECLARE_KLASS(Sandbox::ControllerScaleXY, Controller)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerScaleXY)
+SB_META_CONSTRUCTOR((TransformModificatorPtr))
+SB_META_PROPERTY_RW_DEF(Begin)
+SB_META_PROPERTY_RW_DEF(End)
+SB_META_END_KLASS_BIND()
+
 SB_META_DECLARE_KLASS(Sandbox::ControllerBidirect, Controller)
 SB_META_BEGIN_KLASS_BIND(Sandbox::ControllerBidirect)
 SB_META_CONSTRUCTOR((ControllerPtr))
@@ -235,6 +242,7 @@ namespace Sandbox {
         luabind::Class<ControllerScale>(lua);
         luabind::Class<ControllerScaleX>(lua);
         luabind::Class<ControllerScaleY>(lua);
+        luabind::Class<ControllerScaleXY>(lua);
         luabind::Class<ControllerBidirect>(lua);
         luabind::Class<ControllerPhase>(lua);
         luabind::Class<ControllerOffsets>(lua);
