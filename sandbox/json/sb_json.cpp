@@ -236,7 +236,7 @@ namespace Sandbox {
         lua_pushnil(L);             // +2
         while (lua_next(L, -2) != 0) {  // +3
             /* uses 'key' (at index -2) and 'value' (at index -1) */
-            if (lua_isnumber(L, -2)) {
+            if (lua_type(L, -2) == LUA_TNUMBER) {
                 lua_Integer i = lua_tointeger(L, -2);
                 lua_Number n = lua_tonumber(L, -2);
                 if ( lua_Number(i) == n ) {
