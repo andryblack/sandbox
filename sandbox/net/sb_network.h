@@ -161,6 +161,7 @@ namespace Sandbox {
                      const BinaryDataPtr& data);
         void AddFormField(const sb::string& field, const sb::string& data);
         void Close();
+        const sb::string& GetBoundary() const { return m_boundary; }
     private:
         sb::string  m_boundary;
         void write_boundary();
@@ -182,7 +183,7 @@ namespace Sandbox {
         NetworkMultipartFormStream();
         
         
-        void Setup(NetworkRequestBase* request);
+        virtual void Setup(NetworkRequestBase* request);
         void AddStream(const sb::string& name,
                      const sb::string& filename,
                      const sb::string& content_type,

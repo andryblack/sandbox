@@ -14,6 +14,21 @@ namespace Sandbox {
         buf[0] = hex_charsU[(d&0xf0)>>4];
         buf[1] = hex_charsU[(d&0x0f)];
     }
+    static GHL::UInt32 decode_hex(char d) {
+        if (d >= '0' && d <= '9'){
+            return d-'0';
+        }
+        if (d >= 'a' && d <= 'f'){
+            return d-'a' + 10;
+        }
+        if (d >= 'A' && d <= 'F'){
+            return d-'A' + 10;
+        }
+        return 0;
+    }
+    GHL::Byte DecodeHEXByte(const char* buf) {
+        return (decode_hex(buf[0])<<4) | decode_hex(buf[1]);
+    }
     
     sb::string DataToHex(const void* data, size_t size) {
         sb::string res;

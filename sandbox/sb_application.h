@@ -79,6 +79,8 @@ namespace Sandbox {
         ImagePtr RenderScreen();
         bool OpenURL(const sb::string& url);
         virtual void ReportAppError(const char* reason) {}
+        Network* GetNetwork();
+        GHL::VFS* GetVFS() const { return m_vfs;}
         
     protected:
 		Application();
@@ -98,7 +100,7 @@ namespace Sandbox {
 		virtual void OnLoaded() {}
 		virtual void ConfigureDevice(GHL::System*) {}
 		
-		GHL::VFS* GetVFS() const { return m_vfs;}
+		
 		GHL::Render* GetRender() const { return m_render;}
         GHL::ImageDecoder* GetImageDecoder() const { return m_image_decoder; }
 		LuaVM* GetLua() const { return m_lua;}
@@ -139,7 +141,7 @@ namespace Sandbox {
         virtual Network* CreateNetwork();
         virtual void InitResources();
         virtual void ReleaseResources();
-        Network* GetNetwork();
+        
         
         void InitLua();
         
