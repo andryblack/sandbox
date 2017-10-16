@@ -80,6 +80,12 @@ api.register {
 	kind = "string"
 }
 
+api.register {
+	name = "android_namespace",
+	scope = "project",
+	kind = "string"
+}
+
 -- Specify android package version
 api.register {
 	name = "android_packageversion",
@@ -284,6 +290,18 @@ api.register {
 	scope = 'solution',
 	kind = 'string',
 	keyed = true
+}
+
+api.register {
+	name = "android_manifest",
+	scope = 'solution',
+	kind = 'path',
+}
+
+api.register {
+	name = 'android_google_services_file',
+	scope = 'solution',
+	kind = 'string'
 }
 
 

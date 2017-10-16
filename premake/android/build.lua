@@ -304,11 +304,13 @@ function build.generate_app_build_gradle( sln , prj )
 	if sln.android_module and
     	(sln.android_module.gcm or sln.android_module.fcm) then
 
+    	local file = sln.android_google_services_file or 'google-services.json'
+
     	_x("task copyGoogleServicesJSON(type: Copy) {")
-    	_x(1,"description = 'Copy google-services.json'")
-    	_x(1,'from ".."')
-    	_x(1,'include "google-services.json"')
+    	_x(1,"description = 'Copy "..file.."'")
+    	_x(1,'from "../'..file..'"')
     	_x(1,'into "."')
+    	_x(1,'rename { String fileName -> "google-services.json" }')
 		_x('}')
 	
     	_x("apply plugin: 'com.google.gms.google-services'")

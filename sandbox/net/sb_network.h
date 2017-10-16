@@ -18,6 +18,7 @@
 #include "meta/sb_meta.h"
 #include "sb_data.h"
 #include "sb_image.h"
+#include "sb_multi_stream.h"
 
 namespace GHL {
     struct WriteStream;
@@ -146,6 +147,7 @@ namespace Sandbox {
     protected:
         VectorData<GHL::Byte>* m_data;
     };
+    typedef sb::intrusive_ptr<NetworkPostData> NetworkPostDataPtr;
     
     class NetworkMultipartFormData : public NetworkPostData {
         SB_META_OBJECT
@@ -159,13 +161,41 @@ namespace Sandbox {
                      const BinaryDataPtr& data);
         void AddFormField(const sb::string& field, const sb::string& data);
         void Close();
+        const sb::string& GetBoundary() const { return m_boundary; }
     private:
         sb::string  m_boundary;
         void write_boundary();
         void write_string(const char* str);
     };
     
-    typedef sb::intrusive_ptr<NetworkPostData> NetworkPostDataPtr;
+    typedef sb::intrusive_ptr<NetworkMultipartFormData> NetworkMultipartFormDataPtr;
+    
+    
+    class NetworkMultipartFormStream : public MultiStream {
+        SB_META_OBJECT
+    private:
+        sb::string m_boundary;
+        
+        
+        void write_boundary();
+        
+    public:
+        NetworkMultipartFormStream();
+        
+        
+        virtual void Setup(NetworkRequestBase* request);
+        void AddStream(const sb::string& name,
+                     const sb::string& filename,
+                     const sb::string& content_type,
+                     GHL::DataStream* data);
+        void AddFormField(const sb::string& field, const sb::string& data);
+        void AddFormField(const sb::string& name,
+                          const sb::string& filename,
+                          const sb::string& content_type,
+                          const sb::string& data);
+        void Close();
+    };
+    typedef sb::intrusive_ptr<NetworkMultipartFormStream> NetworkMultipartFormStreamPtr;
     
     class Network : public meta::object {
         SB_META_OBJECT
@@ -179,6 +209,8 @@ namespace Sandbox {
         NetworkRequestPtr SimplePOST(const sb::string& url, const sb::string& data);
         NetworkRequestPtr POST(const sb::string& url,
                                const NetworkPostDataPtr& data);
+        NetworkRequestPtr POSTFormStream(const sb::string& url,
+                              const NetworkMultipartFormStreamPtr& data);
         NetworkFileRequestPtr GETFile(const sb::string& url,const sb::string& filename);
         void SetCookie(const sb::string& host,
                        const sb::string& cookie) {

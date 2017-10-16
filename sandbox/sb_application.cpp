@@ -520,8 +520,11 @@ namespace Sandbox {
         
         if (!m_url.empty()) {
             if (m_lua && m_lua->GetGlobalContext()->GetValue<bool>("application.onOpenURL")) {
+                SB_LOGI("handle url: " << m_url);
                 m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
                 ->call("onOpenURL",m_url);
+            } else {
+                SB_LOGW("not found url handler");
             }
             m_url.clear();
         }
@@ -1005,10 +1008,12 @@ namespace Sandbox {
                 break;
             case GHL::EVENT_TYPE_HANDLE_URL:
                 if (m_lua && m_lua->GetGlobalContext()->GetValue<bool>("application.onOpenURL")) {
+                    SB_LOGI("handle url: " << event->data.handle_url.url);
                     m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
                     ->call("onOpenURL",event->data.handle_url.url);
                 } else {
                     m_url = event->data.handle_url.url;
+                    SB_LOGI("store url: " << m_url);
                 }
                 break;
             default:

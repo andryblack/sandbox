@@ -26,10 +26,12 @@ namespace Sandbox {
     class JsonBuilderBase {
     protected:
         struct Impl;
+        struct ImplRef;
         Impl* m_impl;
-        ~JsonBuilderBase();
-        explicit JsonBuilderBase(sb::string& outdata);
+        virtual ~JsonBuilderBase();
+        explicit JsonBuilderBase();
         
+        virtual void Write(const char* data,size_t len) = 0;
     private:
         JsonBuilderBase(const JsonBuilderBase&);
         JsonBuilderBase& operator = (const JsonBuilderBase&);
@@ -49,16 +51,22 @@ namespace Sandbox {
         JsonBuilderBase& PutNull();
         JsonBuilderBase& PutBool(bool v);
         JsonBuilderBase& PutString(const char* value);
-        JsonBuilderBase& PutInteger(int value);
+        JsonBuilderBase& PutInteger(long long value);
         JsonBuilderBase& PutNumber(double value);
         
-        const sb::string& End();
+        
     };
     
     class JsonBuilderRef : public JsonBuilderBase {
+    protected:
+        sb::string& m_data;
+        virtual void Write(const char* data,size_t len) SB_OVERRIDE {
+            m_data.append(data,len);
+        }
     public:
-        explicit JsonBuilderRef(sb::string& data) : JsonBuilderBase(data) {}
+        explicit JsonBuilderRef(sb::string& data) : m_data(data) {}
         ~JsonBuilderRef() {}
+        const sb::string& End() const { return m_data; }
     };
 
     class JsonBuilder : public JsonBuilderBase {
@@ -66,17 +74,21 @@ namespace Sandbox {
         JsonBuilder(const JsonBuilder&);
         JsonBuilder& operator = (const JsonBuilder&);
         sb::string  m_out_data;
+        virtual void Write(const char* data,size_t len) SB_OVERRIDE {
+            m_out_data.append(data,len);
+        }
     public:
         void reset();
         JsonBuilder();
         ~JsonBuilder();
         
-        const sb::string& End() { return m_out_data; }
+        const sb::string& End() const { return m_out_data; }
     };
     
     class JsonTraverser {
     private:
         sb::vector<char> m_stack;
+        sb::string m_error;
         
         void BeginObject();
         void EndObject();
@@ -99,12 +111,14 @@ namespace Sandbox {
         virtual void OnNull() {}
         virtual void OnBool(bool v) {}
         virtual void OnString(const sb::string& v) {}
-        virtual void OnInteger(int v) {}
+        virtual void OnInteger(long long v) {}
         virtual void OnNumber(double v) {}
         
         
         bool TraverseStream( GHL::DataStream* ds );
         bool TraverseString( const char* ds );
+        
+        const sb::string& GetError() const { return m_error; }
     };
     
     

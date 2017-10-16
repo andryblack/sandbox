@@ -4,6 +4,8 @@
 #include "sb_math.h"
 #include "luabind/sb_luabind_stack.h"
 
+#include <iostream>
+
 namespace Sandbox {
 
     /// 2D vector
@@ -132,6 +134,10 @@ namespace Sandbox {
         template <>
         struct stack<const Vector2f&> : stack<Vector2f> {};
         
+    }
+    
+    static inline std::ostream& operator << (std::ostream& os,const Vector2f& v) {
+        return os << "{" << v.x << "," << v.y << "}";
     }
   
 }

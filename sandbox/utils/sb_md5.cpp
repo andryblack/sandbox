@@ -21,7 +21,7 @@ namespace Sandbox {
         MD5_Final(sum, &ctx);
         return DataToHex(sum,16);
     }
-    unsigned int MD5Hash(const char* src) {
+    GHL::UInt32 MD5Hash(const char* src) {
         size_t len = ::strlen(src);
         MD5_CTX ctx;
         MD5_Init(&ctx);

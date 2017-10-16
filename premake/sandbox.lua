@@ -45,6 +45,9 @@ solution( ProjectName )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 		android_packageversion( AndroidConfig.versioncode or 1)
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
+		if AndroidConfig.manifest then
+			android_manifest(path.getabsolute(path.join(_WORKING_DIR,AndroidConfig.manifest)))
+		end
 		for _,v in ipairs(AndroidConfig.receivers or {} ) do
 			android_receiver( v )
 		end
@@ -325,7 +328,7 @@ solution( ProjectName )
 			files { sandbox_dir .. '/platform/ios/sb_ios_extension.*',
 					sandbox_dir .. '/platform/ios/main.*',}
 			if UseModules.IAP then
-				files { sandbox_dir .. '/platform/ios/iap_extension.*',}
+				files { sandbox_dir .. '/platform/ios/sb_iap_extension.*',}
 			end
 			if UseModules.iOSGC then
 				files { sandbox_dir .. '/platform/ios/gc_extension.*',}

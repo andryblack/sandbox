@@ -236,7 +236,7 @@ namespace Sandbox {
         lua_pushnil(L);             // +2
         while (lua_next(L, -2) != 0) {  // +3
             /* uses 'key' (at index -2) and 'value' (at index -1) */
-            if (lua_isnumber(L, -2)) {
+            if (lua_type(L, -2) == LUA_TNUMBER) {
                 lua_Integer i = lua_tointeger(L, -2);
                 lua_Number n = lua_tonumber(L, -2);
                 if ( lua_Number(i) == n ) {
@@ -720,23 +720,26 @@ namespace Sandbox {
     };
     
     struct JsonBuilderBase::Impl {
-        sb::string& data;
         yajl_gen g;
         static void yajl_encode_print(void * ctx,const char * str,size_t len) {
-            Impl* c = static_cast<Impl*>(ctx);
-            c->data.append(str,len);
+            JsonBuilderBase* c = static_cast<JsonBuilderBase*>(ctx);
+            c->Write(str, len);
         }
-        explicit Impl(sb::string& data) : data(data) {
+        explicit Impl()  {
             g = yajl_gen_alloc(0);
-            yajl_gen_config(g,yajl_gen_print_callback,&Impl::yajl_encode_print,this);
+            
+        }
+        void init(JsonBuilderBase* buider) {
+            yajl_gen_config(g,yajl_gen_print_callback,&Impl::yajl_encode_print,buider);
         }
         ~Impl() {
             yajl_gen_free(g);
         }
     };
     
-    JsonBuilderBase::JsonBuilderBase(sb::string& data) : m_impl(new Impl(data)) {
-        
+    
+    JsonBuilderBase::JsonBuilderBase() : m_impl(new Impl()) {
+        m_impl->init(this);
     }
     JsonBuilderBase::~JsonBuilderBase() {
         reset();
@@ -793,10 +796,11 @@ namespace Sandbox {
         }
         return *this;
     }
-    JsonBuilderBase& JsonBuilderBase::PutInteger(int value) {
+    JsonBuilderBase& JsonBuilderBase::PutInteger(long long value) {
         if (m_impl) yajl_gen_integer(m_impl->g, value);
         return *this;
     }
+    
     JsonBuilderBase& JsonBuilderBase::PutNumber(double value) {
         if (m_impl) yajl_gen_double(m_impl->g, value);
         return *this;
@@ -804,11 +808,9 @@ namespace Sandbox {
     
     static const sb::string empty_string;
     
-    const sb::string& JsonBuilderBase::End() {
-        return m_impl ? m_impl->data : empty_string;
-    }
     
-    JsonBuilder::JsonBuilder() : JsonBuilderBase( m_out_data ) {
+    
+    JsonBuilder::JsonBuilder() : JsonBuilderBase( ) {
         
     }
     JsonBuilder::~JsonBuilder() {
@@ -821,6 +823,7 @@ namespace Sandbox {
         }
         m_out_data.clear();
     }
+    
 
 
     namespace meta {
@@ -896,54 +899,54 @@ namespace Sandbox {
     public:
         explicit LuaJSONTraverser( LuaContextPtr ctx ) : m_ctx(ctx) {}
         
-        virtual void OnBeginObject() {
+        virtual void OnBeginObject() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnBeginObject")) {
                 m_ctx->call_self("OnBeginObject");
             }
         }
-        virtual void OnEndObject() {
+        virtual void OnEndObject() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnEndObject")) {
                 m_ctx->call_self("OnEndObject");
             }
         }
-        virtual void OnBeginArray() {
+        virtual void OnBeginArray() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnBeginArray")) {
                 m_ctx->call_self("OnBeginArray");
             }
         }
-        virtual void OnEndArray() {
+        virtual void OnEndArray() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnEndArray")) {
                 m_ctx->call_self("OnEndArray");
             }
         }
-        virtual void OnKey(const sb::string& v) {
+        virtual void OnKey(const sb::string& v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnKey")) {
                 m_ctx->call_self("OnKey",v);
             }
         }
-        virtual void OnNull() {
+        virtual void OnNull() SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnNull")) {
                 m_ctx->call_self("OnNull");
             }
         }
-        virtual void OnBool(bool v) {
+        virtual void OnBool(bool v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnBool")) {
                 m_ctx->call_self("OnBool",v);
             }
         }
-        virtual void OnString(const sb::string& v) {
+        virtual void OnString(const sb::string& v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnString")) {
                 m_ctx->call_self("OnString",v);
             }
         }
-        virtual void OnInteger(int v) {
+        virtual void OnInteger(long long v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnInteger")) {
                 m_ctx->call_self("OnInteger",v);
             } else if (m_ctx->GetValue<bool>("OnNumber")) {
                 m_ctx->call_self("OnNumber",v);
             }
         }
-        virtual void OnNumber(double v) {
+        virtual void OnNumber(double v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnNumber")) {
                 m_ctx->call_self("OnNumber",v);
             }
@@ -1113,12 +1116,18 @@ namespace Sandbox {
         yajl_handle h = yajl_alloc(&ctx.cb, 0, &ctx);
         unsigned char buffer[1024];
         yajl_status s = yajl_status_ok;
+        size_t shunk_size = 0;
         while (!ds->Eof() && s == yajl_status_ok) {
-            size_t shunk_size = ds->Read(buffer, sizeof(buffer));
+            shunk_size = ds->Read(buffer, sizeof(buffer));
             s = yajl_parse(h,buffer,shunk_size);
         }
         if (s == yajl_status_ok)
             s = yajl_complete_parse(h);
+        else {
+            unsigned char* err = yajl_get_error(h, false, 0, 0);
+            m_error = reinterpret_cast<const char*>(err);
+            yajl_free_error(h,err);
+        }
         yajl_free(h);
         return s == yajl_status_ok;
     }
@@ -1131,6 +1140,11 @@ namespace Sandbox {
         s = yajl_parse(h,reinterpret_cast<const unsigned char*>(ds),::strlen(ds));
         if (s == yajl_status_ok)
             s = yajl_complete_parse(h);
+        else {
+            unsigned char* err = yajl_get_error(h, false, 0, 0);
+            m_error = reinterpret_cast<const char*>(err);
+            yajl_free_error(h,err);
+        }
         yajl_free(h);
         return s == yajl_status_ok;
     }

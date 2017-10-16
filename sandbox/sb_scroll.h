@@ -28,6 +28,7 @@ namespace Sandbox {
         Sizef   m_bounds;
         float m_fade;
         float   m_normalization_time;
+        float m_scroll_start_length;
     protected:
         virtual Vector2f Normalize(const Vector2f& offset,bool soft) const;
         Vector2f Limit(const Vector2f& v) const;
@@ -67,6 +68,8 @@ namespace Sandbox {
         Vector2f GetViewPos() const { return GetOffset(); }
         float GetNormalizationTime() const { return m_normalization_time; }
         void SetNormalizationTime(float t) { m_normalization_time = t; }
+        float GetScrollStartLength() const { return m_scroll_start_length; }
+        void SetScrollStartLength(float s) { m_scroll_start_length = s; }
         
         void ScrollBegin( const Vector2f& pos );
         void ScrollMove( const Vector2f& pos );
@@ -75,6 +78,7 @@ namespace Sandbox {
         void ScrollTo( const Vector2f& targer );
         
         void Reset();
+        void Cancel();
         
         void Update(float dt);
         

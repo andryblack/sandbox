@@ -101,13 +101,13 @@
 }
 -(sb::string) dumpPlayer {
     GKLocalPlayer* player = [GKLocalPlayer localPlayer];
-    return Sandbox::JsonBuilder()
-        .BeginObject()
+    Sandbox::JsonBuilder json;
+    json.BeginObject()
             .Key("id").PutString([[player playerID] UTF8String])
             .Key("name").PutString([[player displayName] UTF8String])
             .Key("nickname").PutString([[player alias] UTF8String])
-        .EndObject()
-    .End();
+    .EndObject();
+    return json.End();
 }
 
 -(void) submitHighScores: (NSDictionary*) scores {

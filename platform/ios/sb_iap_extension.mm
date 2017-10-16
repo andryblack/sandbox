@@ -1,16 +1,15 @@
-#import <StoreKit/StoreKit.h>
+#include "sb_iap_extension.h"
+
 #include <sbstd/sb_intrusive_ptr.h>
 #include "sb_application.h"
 #include "sb_ios_extension.h"
 #include "json/sb_json.h"
 #include "utils/sb_base64.h"
 
-@interface iap_manager : NSObject<SKProductsRequestDelegate,SKPaymentTransactionObserver> {
-    @public
+@interface iap_manager() {
     Sandbox::Application* m_application;
     NSMutableDictionary<NSString*,SKProduct*> *m_products;
 }
-
 @end
 
 @implementation iap_manager
@@ -18,6 +17,7 @@
 -(id)init {
     if (self = [super init]) {
         m_products = [[NSMutableDictionary alloc] init];
+        m_application = 0;
     }
     [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     return self;
@@ -28,13 +28,21 @@
     [m_products release];
 }
 
+-(SKProduct*)getProductWithIdentifier:(NSString*)identifier {
+    return [m_products objectForKey:identifier];
+}
+
+-(void)setApplication:(Sandbox::Application*) app {
+    m_application = app;
+}
+
 -(NSString*) reqiestProductsInformation:(NSArray*)products{
     if (!products || products.count == 0)
         return nil;
     SKProductsRequest *productsRequest = [[SKProductsRequest alloc]
                                           initWithProductIdentifiers:[NSSet setWithArray:products]];
     productsRequest.delegate = self;
-    [productsRequest performSelector:@selector(start) withObject:nil afterDelay:0.01];
+    [productsRequest start];
     return [NSString stringWithFormat:@"%p",productsRequest];
 }
 -(void) doPaymentResponse:(SKPaymentTransaction*) transaction {
@@ -46,7 +54,8 @@
                                                                     nil] options:0 error:nil];
     
     NSString* newStr = [[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding];
-    m_application->OnExtensionResponse("iap_purchase",newStr.UTF8String);
+    if (m_application)
+        m_application->OnExtensionResponse("iap_purchase",newStr.UTF8String);
     [newStr release];
 }
 
@@ -238,59 +247,59 @@
 
 @end
 
-class iap_platform_extension : public Sandbox::iOSPlatformExtension {
-private:
-    iap_manager* m_mgr;
-public:
-    iap_platform_extension() {
-        m_mgr = [[iap_manager alloc] init];
-    }
-    ~iap_platform_extension() {
-        [m_mgr release];
-    }
-    virtual void OnAppStarted(Sandbox::Application* app) {
-        m_mgr->m_application = app;
-    }
-    virtual bool Process(Sandbox::Application* app,
+iap_platform_extension::iap_platform_extension(iap_manager* mgr) {
+    m_mgr = mgr;
+}
+iap_platform_extension::iap_platform_extension() {
+    m_mgr = [[iap_manager alloc] init];
+}
+iap_platform_extension::~iap_platform_extension() {
+    [m_mgr release];
+}
+void iap_platform_extension::OnAppStarted(Sandbox::Application* app) {
+    [m_mgr setApplication:app];
+}
+
+bool iap_platform_extension::Process(Sandbox::Application* app,
                          const char* method,
                          const char* args,
                          sb::string& res) {
-        if (::strcmp(method, "iap_get_products_info")==0) {
-            NSError *err;
-            NSArray *productIdentifiers = [NSJSONSerialization
-                                           JSONObjectWithData:[NSData dataWithBytes:args length: ::strlen(args)] options:NULL error:&err];
-            if (!productIdentifiers) {
-                Sandbox::LogError() << "[iap] failed parse products " << (err ? err.description.UTF8String : "");
-                return false;
-            }
-            NSString* request_id = [m_mgr reqiestProductsInformation:productIdentifiers];
-            if (!request_id) {
-                return false;
-            }
-            res = request_id.UTF8String;
-            return true;
-        } else if (::strcmp(method, "iap_purchase")==0) {
-            NSString* request_id = [m_mgr performPayment:[NSString stringWithUTF8String:args]];
-            if (!request_id) {
-                return false;
-            }
-            res = request_id.UTF8String;
-            return true;
-        } else if (::strcmp(method, "iap_confirm_transaction")==0) {
-            if ([m_mgr confirmTransaction:[NSString stringWithUTF8String:args]]) {
-                res = "success";
-            } else {
-                res = "failed";
-            }
-            return true;
-        }else if (::strcmp(method, "iap_restore_payments")==0) {
-            [m_mgr restorePayments];
-            res = "success";
-            return true;
+    if (::strcmp(method, "iap_get_products_info")==0) {
+        NSError *err;
+        NSArray *productIdentifiers = [NSJSONSerialization
+                                       JSONObjectWithData:[NSData dataWithBytes:args length: ::strlen(args)] options:NULL error:&err];
+        if (!productIdentifiers) {
+            Sandbox::LogError() << "[iap] failed parse products " << (err ? err.description.UTF8String : "");
+            return false;
         }
-        return false;
+        NSString* request_id = [m_mgr reqiestProductsInformation:productIdentifiers];
+        if (!request_id) {
+            return false;
+        }
+        res = request_id.UTF8String;
+        return true;
+    } else if (::strcmp(method, "iap_purchase")==0) {
+        NSString* request_id = [m_mgr performPayment:[NSString stringWithUTF8String:args]];
+        if (!request_id) {
+            return false;
+        }
+        res = request_id.UTF8String;
+        return true;
+    } else if (::strcmp(method, "iap_confirm_transaction")==0) {
+        if ([m_mgr confirmTransaction:[NSString stringWithUTF8String:args]]) {
+            res = "success";
+        } else {
+            res = "failed";
+        }
+        return true;
+    }else if (::strcmp(method, "iap_restore_payments")==0) {
+        [m_mgr restorePayments];
+        res = "success";
+        return true;
     }
-};
+    return false;
+}
+
 
 
 

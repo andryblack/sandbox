@@ -66,6 +66,9 @@ namespace Sandbox {
                 m_file->Write(reinterpret_cast<const GHL::Byte*>(buf), GHL::UInt32(pos));
                 m_file->Write(reinterpret_cast<const GHL::Byte*>(message), GHL::UInt32(::strlen(message)));
                 m_file->Write(rn, sizeof(rn));
+                if (level <= GHL::LOG_LEVEL_FATAL) {
+                    m_file->Flush();
+                }
                 res = true;
             }
             if (Sandbox::Logger::GetPlatformLogEnabled()) {
@@ -155,6 +158,15 @@ namespace Sandbox {
             {
                 GHL_Log(m_level, m_stream.str().c_str());
             }
+        }
+    }
+    
+    void Logger::Write(GHL::LogLevel level,const char* msg) {
+        if (file_logger.opened()) {
+            file_logger.AddMessage(level, msg);
+        } else if (m_enable_platform_log)
+        {
+            GHL_Log(level, msg);
         }
     }
     

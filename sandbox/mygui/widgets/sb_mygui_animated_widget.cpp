@@ -86,7 +86,9 @@ namespace Sandbox {
         }
         
         void AnimatedWidget::Update(float dt) {
-            m_thread->Update(dt);
+            if (!m_thread->Update(dt)) {
+                setNodeOutOfDate();
+            }
         }
         
         MyGUI::ILayerNode* AnimatedWidget::createChildItemNode(MyGUI::ILayerNode* _node) {

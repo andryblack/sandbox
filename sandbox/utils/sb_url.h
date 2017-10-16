@@ -5,7 +5,8 @@
 
 namespace Sandbox {
     
-    sb::string UrlEncode(const sb::string& data);
+    sb::string UrlEncode(const char* data);
+    sb::string UrlDecode(const char* data);
     
 }
 

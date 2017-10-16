@@ -1,10 +1,8 @@
 #include "sb_ios_extension.h"
 #import <UIKit/UIKit.h>
-#import "../../GHL/src/winlib/winlib_cocoatouch.h"
 
-@interface SandboxAppDelegate : WinLibAppDelegate
 
-@end
+
 
 @implementation SandboxAppDelegate
 

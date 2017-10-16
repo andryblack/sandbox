@@ -178,6 +178,7 @@ SB_META_END_KLASS_BIND()
 SB_META_DECLARE_KLASS(Sandbox::RenderTarget, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::RenderTarget)
 SB_META_PROPERTY_RO(Texture, GetTexture)
+SB_META_METHOD(Discard)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::Image, void)
@@ -302,6 +303,7 @@ SB_META_PROPERTY_WO(BasePath, SetBasePath)
 SB_META_PROPERTY_RO(CachePath, GetCachePath)
 SB_META_PROPERTY_RO(ResourcesPostfix, GetResourcesPostfix)
 SB_META_PROPERTY_RO(MemoryUsed, GetMemoryUsed)
+SB_META_PROPERTY_RW(MemoryLimit, GetMemoryLimit, SetMemoryLimit)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_KLASS(Sandbox::SoundInstance, void)
@@ -427,7 +429,6 @@ namespace Sandbox {
         luabind::ExternClass<ShaderMat4Uniform>(lua);
         luabind::ExternClass<Shader>(lua);
         luabind::ExternClass<Bitmask>(lua);
-        
         luabind::Enum<GHL::VertexAttributeUsage>(lua);
         luabind::Enum<GHL::VertexDataType>(lua);
         luabind::ExternClass<GHL::VertexAttributeDef>(lua);

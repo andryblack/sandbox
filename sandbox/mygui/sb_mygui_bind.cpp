@@ -682,6 +682,10 @@ SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ControllerPosition, MyGUI::ControllerItem)
 SB_META_BEGIN_KLASS_BIND(MyGUI::ControllerPosition)
+SB_META_PROPERTY_WO(position, setPosition)
+SB_META_PROPERTY_WO(time, setTime)
+SB_META_PROPERTY_WO(function, setFunction)
+SB_META_PROPERTY_WO(coord, setCoord)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::ControllerFadeAlpha, MyGUI::ControllerItem)

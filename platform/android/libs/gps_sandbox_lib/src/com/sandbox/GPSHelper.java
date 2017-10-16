@@ -59,6 +59,10 @@ public class GPSHelper
 		if (!is_available()) {
 			return false;
 		}
+		if (m_google_api_client.isConnected()) {
+			nativeSignInResponse("success");
+			return true;
+		}
 		m_signin_called = use_ui;
 		m_google_api_client.connect();
 		return true;
@@ -80,6 +84,9 @@ public class GPSHelper
 
 	public String get_player() {
 		try {
+			if (!m_google_api_client.isConnected()) {
+				return null;
+			}
 			Player p = Games.Players.getCurrentPlayer(m_google_api_client);
 			if (p!=null) {
 				JSONObject obj = new JSONObject();

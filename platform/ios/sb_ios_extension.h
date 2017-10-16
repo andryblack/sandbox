@@ -21,4 +21,11 @@ namespace Sandbox {
 
 }
 
+#ifdef __OBJC__
+#import "../../GHL/src/winlib/winlib_cocoatouch.h"
+@interface SandboxAppDelegate : WinLibAppDelegate
+
+@end
+#endif
+
 #endif /*SB_IOS_EXTENSION_H_INCLUDED*/
