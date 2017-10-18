@@ -18,6 +18,7 @@ namespace Sandbox {
         float   dpi;
         float   scale;
         float   x_scale;
+        float   outline_width;
         GHL::UInt32 substitute_code;
     };
     
