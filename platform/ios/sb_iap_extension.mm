@@ -101,10 +101,14 @@ static const char* MODULE = "iap";
     }
 }
 
+-(void)finishTransaction:(SKPaymentTransaction*) transaction {
+    [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+}
+
 -(BOOL)confirmTransaction:(NSString*)transactionIdentifier {
     for (SKPaymentTransaction *transaction in [[SKPaymentQueue defaultQueue] transactions]) {
         if ([[self getReceiptForTransaction:transaction] isEqual:transactionIdentifier]) {
-            [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+            [self finishTransaction:transaction];
             return TRUE;
         }
     }
@@ -165,10 +169,10 @@ static const char* MODULE = "iap";
     [request release];
 }
 
-- (NSString*) encodeTransactionReciept:(SKPaymentTransaction*) transaction reciept:(NSData*) receipt{
+- (NSString*) encodeTransaction:(SKPaymentTransaction*) transaction receipt:(NSData*) receipt{
     NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
      transaction.transactionIdentifier,@"id",
-     [receipt base64EncodedStringWithOptions:0],@"reciept",
+     [receipt base64EncodedStringWithOptions:0],@"receipt",
                           nil];
     NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:dict options:0 error:nil];
     return [[[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding] autorelease];
@@ -187,12 +191,12 @@ static const char* MODULE = "iap";
             return @"error:nodata";
         }
         if (receipt) { /* No local receipt -- handle the error. */
-            return [self encodeTransactionReciept:transaction reciept:receipt];
+            return [self encodeTransaction:transaction receipt:receipt];
         }
     } else {
         NSData* receipt = transaction.transactionReceipt;
         if (receipt) {
-            return [self encodeTransactionReciept:transaction reciept:receipt];
+            return [self encodeTransaction:transaction receipt:receipt];
         }
     }
     return @"error";

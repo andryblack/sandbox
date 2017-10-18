@@ -105,7 +105,7 @@ public class IAPHelper  {
     /**
      * Represents an in-app billing purchase.
      */
-    class Purchase {
+    public class Purchase {
         String mOrderId;
         String mPackageName;
         String mSku;
@@ -909,6 +909,10 @@ public class IAPHelper  {
         return true;
     }
 
+    public void on_consume_purchase(Purchase purchase) {
+        consumeAsync(purchase);
+    }
+
     public boolean iap_confirm_transaction(String signature) {
         logDebug("iap_confirm_transaction :" + signature);
         boolean result = false;
@@ -919,7 +923,7 @@ public class IAPHelper  {
                     logDebug("check purchase :" + purchase.getSku() + " transaction:" + transaction);
                     if (transaction.equals(signature)) {
                         logDebug("found purchase for confirm " + purchase.getSku());
-                        consumeAsync(purchase);
+                        on_consume_purchase(purchase);
                         result = true;
                     }
                 } catch ( JSONException e) {
