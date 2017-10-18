@@ -22,6 +22,12 @@ static int Sandbox_FreeTypeFont_Load(lua_State* L) {
     lua_getfield(L, 3, "outline");
     config.outline = lua_toboolean(L, -1);
     lua_pop(L, 1);
+    lua_getfield(L, 3, "outline_width");
+    if (lua_isnumber(L, -1))
+        config.outline_width = float(lua_tonumber(L, -1));
+    else
+        config.outline_width = 1.0f;
+    lua_pop(L, 1);
     lua_getfield(L, 3, "dpi");
     config.dpi = float(lua_tonumber(L, -1));
     lua_pop(L, 1);
