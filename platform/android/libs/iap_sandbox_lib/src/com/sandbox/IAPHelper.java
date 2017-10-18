@@ -909,7 +909,8 @@ public class IAPHelper  {
         return true;
     }
 
-    public void on_consume_purchase(Purchase purchase) {
+    public void on_consume_purchase(Purchase purchase) 
+        throws IabAsyncInProgressException {
         consumeAsync(purchase);
     }
 

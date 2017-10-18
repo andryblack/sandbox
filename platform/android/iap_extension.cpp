@@ -4,7 +4,7 @@
 #include <json/sb_json.h>
 #include <sbstd/sb_map.h>
 
-
+#include "iap_extension.h"
 #include "jni_utils.h"
 
 #include <sbstd/sb_assert.h>
