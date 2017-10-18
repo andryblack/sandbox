@@ -6,6 +6,8 @@
 #include "json/sb_json.h"
 #include "utils/sb_base64.h"
 
+static const char* MODULE = "iap";
+
 @interface iap_manager() {
     Sandbox::Application* m_application;
     NSMutableDictionary<NSString*,SKProduct*> *m_products;
@@ -55,25 +57,27 @@
     
     NSString* newStr = [[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding];
     if (m_application)
-        m_application->OnExtensionResponse("iap_purchase",newStr.UTF8String);
+        m_application->OnExtensionResponse("iap_restore_payments",newStr.UTF8String);
     [newStr release];
 }
 
--(NSString*) performPayment:(NSString*) productIdentifier {
+-(NSString*) performPayment:(NSString*) productIdentifier status:(NSString**) status {
     for (SKPaymentTransaction *transaction in [[SKPaymentQueue defaultQueue] transactions]) {
         if ([transaction.payment.productIdentifier isEqualToString:productIdentifier]) {
             if (transaction.transactionState == SKPaymentTransactionStatePurchased) {
-                
-                // already purchased, go back
-                if (m_application) {
-                    [self performSelector:@selector(doPaymentResponse:) withObject:transaction afterDelay:0.01];
-                    return [NSString stringWithFormat:@"%p",transaction.payment];
+                SB_LOGE("already purchased: " << productIdentifier.UTF8String);
+                if (status) {
+                    *status = @"already_purchased";
                 }
+                return nil;
             }
         }
     }
     SKProduct* product = [m_products objectForKey:productIdentifier];
     if (!product) {
+        if (status) {
+            *status = @"unknown_product";
+        }
         return nil;
     }
     SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:product];
@@ -89,6 +93,12 @@
 }
 -(void) restorePayments {
     [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
+    
+    for (SKPaymentTransaction *transaction in [[SKPaymentQueue defaultQueue] transactions]) {
+        if (transaction.transactionState == SKPaymentTransactionStatePurchased) {
+            [self performSelector:@selector(doPaymentResponse:) withObject:transaction afterDelay:0.01];
+        }
+    }
 }
 
 -(BOOL)confirmTransaction:(NSString*)transactionIdentifier {
@@ -103,7 +113,7 @@
 
 // SKRequestDelegate
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error {
-    NSLog(@"[iap] request:%@didFailWithError:%@",[request description],[error description]);
+    SB_LOGE("request: " << request.description.UTF8String << " didFailWithError: " << error.description.UTF8String);
     if (m_application) {
         NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:[NSDictionary dictionaryWithObjectsAndKeys:
                                                                         [NSString stringWithFormat:@"%p",request],@"request_id",
@@ -155,10 +165,19 @@
     [request release];
 }
 
+- (NSString*) encodeTransactionReciept:(SKPaymentTransaction*) transaction reciept:(NSData*) receipt{
+    NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
+     transaction.transactionIdentifier,@"id",
+     [receipt base64EncodedStringWithOptions:0],@"reciept",
+                          nil];
+    NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:dict options:0 error:nil];
+    return [[[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding] autorelease];
+}
+
 - (NSString*) getReceiptForTransaction:(SKPaymentTransaction*) transaction {
     // Load the receipt from the app bundle.
     NSBundle* b = [NSBundle mainBundle];
-    if ([b respondsToSelector:@selector(appStoreReceiptURL)]) {
+    if (NO && [b respondsToSelector:@selector(appStoreReceiptURL)]) {
         NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
         if (!receiptURL) {
             return @"error:nourl";
@@ -168,13 +187,12 @@
             return @"error:nodata";
         }
         if (receipt) { /* No local receipt -- handle the error. */
-            return [receipt base64EncodedStringWithOptions:0];
+            return [self encodeTransactionReciept:transaction reciept:receipt];
         }
     } else {
         NSData* receipt = transaction.transactionReceipt;
         if (receipt) {
-            sb::string base64 = Sandbox::Base64EncodeData((const GHL::Byte*)receipt.bytes, receipt.length);
-            return [NSString stringWithUTF8String:base64.c_str()];
+            return [self encodeTransactionReciept:transaction reciept:receipt];
         }
     }
     return @"error";
@@ -189,7 +207,7 @@
         NSString* request_id = [NSString stringWithFormat:@"%p",transaction.payment];
         NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:5];
         [dict setObject:request_id forKey:@"request_id"];
-        NSLog(@"[iap] paymentQueue:updatedTransactions:%@",[transaction description]);
+        SB_LOGI("paymentQueue:updatedTransactions: " << transaction.description.UTF8String);
         if (transaction.payment)
             [dict setObject:transaction.payment.productIdentifier forKey:@"product_id"];
         switch (transaction.transactionState) {
@@ -220,7 +238,7 @@
                 break;
             default:
                 // For debugging
-                NSLog(@"Unexpected transaction state %@", @(transaction.transactionState));
+                SB_LOGE("Unexpected transaction state: " << transaction.transactionState);
                 break;
         }
         if (m_application) {
@@ -269,7 +287,7 @@ bool iap_platform_extension::Process(Sandbox::Application* app,
         NSArray *productIdentifiers = [NSJSONSerialization
                                        JSONObjectWithData:[NSData dataWithBytes:args length: ::strlen(args)] options:NULL error:&err];
         if (!productIdentifiers) {
-            Sandbox::LogError() << "[iap] failed parse products " << (err ? err.description.UTF8String : "");
+            SB_LOGE("failed parse products " << (err ? err.description.UTF8String : ""));
             return false;
         }
         NSString* request_id = [m_mgr reqiestProductsInformation:productIdentifiers];
@@ -279,8 +297,12 @@ bool iap_platform_extension::Process(Sandbox::Application* app,
         res = request_id.UTF8String;
         return true;
     } else if (::strcmp(method, "iap_purchase")==0) {
-        NSString* request_id = [m_mgr performPayment:[NSString stringWithUTF8String:args]];
+        NSString* status = 0;
+        NSString* request_id = [m_mgr performPayment:[NSString stringWithUTF8String:args] status:&status];
         if (!request_id) {
+            if (status) {
+                res = status.UTF8String;
+            }
             return false;
         }
         res = request_id.UTF8String;

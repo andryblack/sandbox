@@ -9,6 +9,7 @@ namespace Sandbox {
 #import <StoreKit/StoreKit.h>
 @interface iap_manager : NSObject<SKProductsRequestDelegate,SKPaymentTransactionObserver> 
 -(SKProduct*)getProductWithIdentifier:(NSString*)identifier;
+-(NSString*) reqiestProductsInformation:(NSArray*)products;
 @end
 #else
 struct iap_manager;
