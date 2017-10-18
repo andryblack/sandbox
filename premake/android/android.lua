@@ -226,7 +226,8 @@ api.register {
 api.register {
 	name = "android_assets_path",
 	scope = "config",
-	kind = "path"
+	kind = "string",
+	list = true
 }
 
 api.register {

@@ -670,7 +670,7 @@ public class IAPHelper  {
      *     false if the result was not related to a purchase, in which case you should
      *     handle it normally.
      */
-    private boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
+    public boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
         IabResult result;
         if (requestCode != PURCHASE_FLOW_RC) return false;
         try {
