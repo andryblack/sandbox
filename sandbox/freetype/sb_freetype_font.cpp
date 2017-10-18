@@ -437,7 +437,7 @@ namespace Sandbox {
         Impl* impl = new Impl(library,face);
         impl->size = size;
         impl->scale = scale;
-        impl->outline_width = 1.0f * scale;
+        impl->outline_width = 1.0f * scale * config.outline_width;
         impl->config = config;
         
         res.reset(new FreeTypeFont(impl));
