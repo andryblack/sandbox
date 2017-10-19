@@ -10,7 +10,7 @@ namespace Sandbox {
 @interface iap_manager : NSObject<SKProductsRequestDelegate,SKPaymentTransactionObserver> 
 -(SKProduct*)getProductWithIdentifier:(NSString*)identifier;
 -(NSString*) reqiestProductsInformation:(NSArray*)products;
--(BOOL)confirmTransaction:(NSString*)transactionIdentifier;
+-(BOOL)confirmTransaction:(NSString*)transactionData error:(NSString**) error;
 -(void)finishTransaction:(SKPaymentTransaction*) transaction;
 @end
 #else

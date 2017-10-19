@@ -105,7 +105,7 @@ static const char* MODULE = "iap";
     [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
 }
 
--(BOOL)confirmTransaction:(NSString*)transactionData {
+-(BOOL)confirmTransaction:(NSString*)transactionData error:(NSString**) error{
     sb::string transaction_id;
     sb::map<sb::string, sb::string> transaction_data;
     if (Sandbox::json_parse_object(transactionData.UTF8String, transaction_data)) {
@@ -113,8 +113,12 @@ static const char* MODULE = "iap";
     } else {
         transaction_id = transactionData.UTF8String;
     }
-    if (transaction_id.empty())
+    if (transaction_id.empty()) {
+        if (error) {
+            *error = @"transaction empty";
+        }
         return FALSE;
+    }
     NSString* transactionIdentifier = [NSString stringWithUTF8String:transaction_id.c_str()];
     for (SKPaymentTransaction *transaction in [[SKPaymentQueue defaultQueue] transactions]) {
         if (transaction.transactionState == SKPaymentTransactionStatePurchased ||
@@ -124,6 +128,9 @@ static const char* MODULE = "iap";
                 return TRUE;
             }
         }
+    }
+    if (error) {
+        *error = @"transaction not found";
     }
     return FALSE;
 }
@@ -240,6 +247,9 @@ static const char* MODULE = "iap";
             case SKPaymentTransactionStateFailed:
                 //[self failedTransaction:transaction];
                 [dict setObject:@"failed" forKey:@"state"];
+                if (transaction.error) {
+                    [dict setObject:transaction.error.description forKey:@"error"];
+                }
                 [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
                 break;
             case SKPaymentTransactionStatePurchased:
@@ -325,10 +335,12 @@ bool iap_platform_extension::Process(Sandbox::Application* app,
         res = request_id.UTF8String;
         return true;
     } else if (::strcmp(method, "iap_confirm_transaction")==0) {
-        if ([m_mgr confirmTransaction:[NSString stringWithUTF8String:args]]) {
+        NSString* err = 0;
+        if ([m_mgr confirmTransaction:[NSString stringWithUTF8String:args] error:&err]) {
             res = "success";
         } else {
-            res = "failed";
+            res = err ? err.UTF8String : "failed";
+            return false;
         }
         return true;
     }else if (::strcmp(method, "iap_restore_payments")==0) {
