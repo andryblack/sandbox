@@ -831,6 +831,11 @@ public class IAPHelper  {
         return m_setup_done;
     }
 
+    public void on_query_inventory(ArrayList<String> products) 
+        throws IabAsyncInProgressException {
+        queryInventoryAsync(products);
+    }
+
     public boolean iap_get_products_info(String json_list) {
         try {
             JSONArray jsonArray = new JSONArray(json_list);
@@ -839,7 +844,7 @@ public class IAPHelper  {
             {
                 stringArray.add(jsonArray.getString(i));
             }
-            queryInventoryAsync(stringArray);
+            on_query_inventory(stringArray);
         } catch ( IabAsyncInProgressException e ) {
             logError(e.toString());
             return false;

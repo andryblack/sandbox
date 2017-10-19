@@ -105,11 +105,24 @@ static const char* MODULE = "iap";
     [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
 }
 
--(BOOL)confirmTransaction:(NSString*)transactionIdentifier {
+-(BOOL)confirmTransaction:(NSString*)transactionData {
+    sb::string transaction_id;
+    sb::map<sb::string, sb::string> transaction_data;
+    if (Sandbox::json_parse_object(transactionData.UTF8String, transaction_data)) {
+        transaction_id = transaction_data["id"];
+    } else {
+        transaction_id = transactionData.UTF8String;
+    }
+    if (transaction_id.empty())
+        return FALSE;
+    NSString* transactionIdentifier = [NSString stringWithUTF8String:transaction_id.c_str()];
     for (SKPaymentTransaction *transaction in [[SKPaymentQueue defaultQueue] transactions]) {
-        if ([[self getReceiptForTransaction:transaction] isEqual:transactionIdentifier]) {
-            [self finishTransaction:transaction];
-            return TRUE;
+        if (transaction.transactionState == SKPaymentTransactionStatePurchased ||
+            transaction.transactionState == SKPaymentTransactionStateRestored) {
+            if ([transaction.transactionIdentifier isEqual:transactionIdentifier]) {
+                [self finishTransaction:transaction];
+                return TRUE;
+            }
         }
     }
     return FALSE;
@@ -181,7 +194,7 @@ static const char* MODULE = "iap";
 - (NSString*) getReceiptForTransaction:(SKPaymentTransaction*) transaction {
     // Load the receipt from the app bundle.
     NSBundle* b = [NSBundle mainBundle];
-    if (NO && [b respondsToSelector:@selector(appStoreReceiptURL)]) {
+    if ([b respondsToSelector:@selector(appStoreReceiptURL)]) {
         NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
         if (!receiptURL) {
             return @"error:nourl";
