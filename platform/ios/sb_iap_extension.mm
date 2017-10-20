@@ -278,7 +278,13 @@ static const char* MODULE = "iap";
 }
 
 //// Sent when transactions are removed from the queue (via finishTransaction:).
-//- (void)paymentQueue:(SKPaymentQueue *)queue removedTransactions:(NSArray<SKPaymentTransaction *> *)transactions NS_AVAILABLE_IOS(3_0);
+- (void)paymentQueue:(SKPaymentQueue *)queue removedTransactions:(NSArray<SKPaymentTransaction *> *)transactions {
+    for (SKPaymentTransaction* tr in transactions) {
+        if (tr.transactionIdentifier) {
+            SB_LOGI("removed transaction: " << tr.transactionIdentifier.UTF8String);
+        }
+    }
+}
 //
 //// Sent when an error is encountered while adding transactions from the user's purchase history back to the queue.
 //- (void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error NS_AVAILABLE_IOS(3_0);
