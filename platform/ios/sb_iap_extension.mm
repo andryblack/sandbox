@@ -121,12 +121,16 @@ static const char* MODULE = "iap";
     }
     NSString* transactionIdentifier = [NSString stringWithUTF8String:transaction_id.c_str()];
     for (SKPaymentTransaction *transaction in [[SKPaymentQueue defaultQueue] transactions]) {
-        if (transaction.transactionState == SKPaymentTransactionStatePurchased ||
-            transaction.transactionState == SKPaymentTransactionStateRestored) {
-            if ([transaction.transactionIdentifier isEqual:transactionIdentifier]) {
-                [self finishTransaction:transaction];
-                return TRUE;
+        if (transaction.transactionIdentifier) {
+            if (transaction.transactionState == SKPaymentTransactionStatePurchased||
+                transaction.transactionState == SKPaymentTransactionStateRestored) {
+                if ([transaction.transactionIdentifier isEqualToString:transactionIdentifier]) {
+                    SB_LOGI("transaction found");
+                    [self finishTransaction:transaction];
+                    return TRUE;
+                }
             }
+            SB_LOGI("transaction: " << transaction.transactionIdentifier.UTF8String);
         }
     }
     if (error) {
