@@ -48,8 +48,11 @@ namespace Sandbox {
 
         void clear();
 
+        float get_tension() const { return m_tension; }
         void set_tension(float value) { m_tension=value;recalc();}
+        float get_continuity() const { return m_continuity; }
         void set_continuity(float value) { m_continuity=value;recalc();}
+        float get_bias() const { return m_bias; }
         void set_bias(float value) { m_bias = value;recalc();}
 
         float angle(float t) const;
