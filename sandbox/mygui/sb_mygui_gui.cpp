@@ -44,7 +44,8 @@ namespace Sandbox {
             if (m_ctx) {
                 if (m_ctx->GetValue<bool>("application.onKeyboardFocusChanged")) {
                     m_ctx->GetValue<LuaContextPtr>("application")
-                        ->call("onKeyboardFocusChanged",static_cast<MyGUI::Widget*>(0));
+                        ->call("onKeyboardFocusChanged",
+                            static_cast<MyGUI::Widget*>(w));
                 }
             }
             if (w) {
