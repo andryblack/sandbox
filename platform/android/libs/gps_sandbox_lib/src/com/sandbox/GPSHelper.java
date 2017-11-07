@@ -152,10 +152,18 @@ public class GPSHelper
 	}
 
 	public void show_ui(String ui) {
-		if (ui.equals("leaderboards")) {
-			m_activity.startActivityForResult(Games.Leaderboards.getAllLeaderboardsIntent(m_google_api_client), REQUEST_LEADERBOARD);
-		} else if (ui.equals("achievements")) {
-			m_activity.startActivityForResult(Games.Achievements.getAchievementsIntent(m_google_api_client), REQUEST_ACHIEVEMENTS);
+		try {
+			if (!m_google_api_client.isConnected()) {
+				Log.e(TAG, "show_ui() failed! not connected");
+				return;
+			}
+			if (ui.equals("leaderboards")) {
+				m_activity.startActivityForResult(Games.Leaderboards.getAllLeaderboardsIntent(m_google_api_client), REQUEST_LEADERBOARD);
+			} else if (ui.equals("achievements")) {
+				m_activity.startActivityForResult(Games.Achievements.getAchievementsIntent(m_google_api_client), REQUEST_ACHIEVEMENTS);
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "show_ui() failed! " + e.toString());
 		}
 	}
 

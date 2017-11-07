@@ -377,9 +377,13 @@ public class IAPHelper  {
         }
         logDebug("Disposing.");
         m_setup_done = false;
-        if (m_service_conn != null) {
-            logDebug("Unbinding from service.");
-            if (m_activity != null) m_activity.unbindService(m_service_conn);
+        try {
+            if (m_service_conn != null) {
+                logDebug("Unbinding from service.");
+                if (m_activity != null) m_activity.unbindService(m_service_conn);
+            }
+        } catch (Exception e) {
+            logError("dispose: " + e.getMessage());
         }
         m_disposed = true;
         m_activity = null;

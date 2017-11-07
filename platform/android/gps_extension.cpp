@@ -89,20 +89,20 @@ public:
      }
 
     bool sign_in(bool use_ui) {
-        if (m_helper_obj) {
+        if (m_helper_obj && m_activity && m_activity->env) {
             JNIEnv* env = m_activity->env;
             return env->CallBooleanMethod(m_helper_obj,m_helper_sign_in,use_ui ? JNI_TRUE : JNI_FALSE);
         }
         return false;
     }
     void logout() {
-        if (m_helper_obj) {
+        if (m_helper_obj && m_activity && m_activity->env) {
             JNIEnv* env = m_activity->env;
             env->CallVoidMethod(m_helper_obj,m_helper_sign_out);
         }
     }
     sb::string get_player() {
-        if (m_helper_obj) {
+        if (m_helper_obj && m_activity && m_activity->env) {
             JNIEnv* env = m_activity->env;
             jobject obj = env->CallObjectMethod(m_helper_obj,m_helper_get_player);
             if (obj) {
@@ -115,14 +115,14 @@ public:
     }
 
     bool send_scores(const char* data) {
-        if (!m_helper_obj)
+        if (!m_helper_obj || !m_activity || !m_activity->env)
             return false;
         JNIEnv* env = m_activity->env;
         jni::jni_string str(data,env);
         return env->CallBooleanMethod(m_helper_obj,m_helper_send_scores,str.jstr);
     }
     bool send_achievements(const char* data) {
-        if (!m_helper_obj)
+        if (!m_helper_obj || !m_activity || !m_activity->env)
             return false;
         JNIEnv* env = m_activity->env;
         jni::jni_string str(data,env);
@@ -130,13 +130,13 @@ public:
     }
 
     bool get_friends() {
-        if (!m_helper_obj)
+        if (!m_helper_obj || !m_activity || !m_activity->env)
             return false;
         JNIEnv* env = m_activity->env;
         return env->CallBooleanMethod(m_helper_obj,m_helper_get_friends);
     }
     bool show_ui(const char* name) {
-        if (!m_helper_obj)
+        if (!m_helper_obj || !m_activity || !m_activity->env)
             return false;
         JNIEnv* env = m_activity->env;
         jni::jni_string namej(name,env);
@@ -207,9 +207,9 @@ public:
         return false;
     }
 
-    void release_object() {
+    void release_object(JNIEnv *env) {
         if (m_helper_obj) {
-            m_activity->env->DeleteGlobalRef(m_helper_obj);
+            env->DeleteGlobalRef(m_helper_obj);
             m_helper_obj = 0;
         }
     }
@@ -231,7 +231,7 @@ public:
     
     virtual void nativeOnActivityDestroyed(
                                            JNIEnv *env, jobject thiz, jobject activity) {
-        release_object();
+        release_object(env);
     }
     
     virtual void nativeOnActivityPaused(
@@ -265,7 +265,7 @@ public:
                                         jint result_code,
                                         jobject data) {
         if (m_helper_obj) {
-            return m_activity->env->CallBooleanMethod(m_helper_obj,m_helper_process_result,request_code,result_code,data);
+            return env->CallBooleanMethod(m_helper_obj,m_helper_process_result,request_code,result_code,data);
         }
         return false;
     }

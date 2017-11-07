@@ -84,7 +84,7 @@ void IAPExtension::OnAppStopped(Sandbox::Application* app) {
                      const char* args,
                      sb::string& res) {
 	if (::strcmp("iap_init",method) == 0) {
-		if (m_helper_objl) {
+		if (m_helper_objl && m_activity && m_activity->env) {
 			JNIEnv* env = m_activity->env;
 			jni::jni_string key(args,env);
 			if (env->CallBooleanMethod(m_helper_objl,m_helper_init,key.jstr)) {
@@ -96,7 +96,7 @@ void IAPExtension::OnAppStopped(Sandbox::Application* app) {
 		}
 	} else
     if (::strcmp("iap_get_products_info",method)==0) {
-        if (m_helper_objl) {
+        if (m_helper_objl && m_activity && m_activity->env) {
         	JNIEnv* env = m_activity->env;
 			jni::jni_string key(args,env);
 			if (env->CallBooleanMethod(m_helper_objl,m_helper_get_products_info,key.jstr)) {
@@ -108,7 +108,7 @@ void IAPExtension::OnAppStopped(Sandbox::Application* app) {
         }
     }
     if (::strcmp("iap_purchase",method)==0) {
-        if (m_helper_objl) {
+        if (m_helper_objl && m_activity && m_activity->env) {
         	JNIEnv* env = m_activity->env;
 			jni::jni_string key(args,env);
 			jni::jni_string data("",env);
@@ -121,7 +121,7 @@ void IAPExtension::OnAppStopped(Sandbox::Application* app) {
         }
     }
     if (::strcmp("iap_confirm_transaction",method)==0) {
-        if (m_helper_objl) {
+        if (m_helper_objl && m_activity && m_activity->env) {
         	JNIEnv* env = m_activity->env;
         	jni::jni_string key(args,env);
 			if (env->CallBooleanMethod(m_helper_objl,m_helper_confirm_transaction,key.jstr)) {
@@ -133,7 +133,7 @@ void IAPExtension::OnAppStopped(Sandbox::Application* app) {
         }
     }
     if (::strcmp("iap_restore_payments",method)==0) {
-        if (m_helper_objl) {
+        if (m_helper_objl && m_activity && m_activity->env) {
         	JNIEnv* env = m_activity->env;
 			if (env->CallBooleanMethod(m_helper_objl,m_helper_restore_payments)) {
 				res = "pending";
@@ -203,7 +203,7 @@ void IAPExtension::nativeOnActivityStopped(
                                     jint result_code,
                                     jobject data) {
 	if (m_helper_objl) {
-		return m_activity->env->CallBooleanMethod(m_helper_objl,
+		return env->CallBooleanMethod(m_helper_objl,
             m_helper_process_result,
             request_code,
             result_code,data);
