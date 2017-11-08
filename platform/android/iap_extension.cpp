@@ -20,7 +20,7 @@ IAPExtension::~IAPExtension() {
 	SB_LOGI("IAPExtension::~IAPExtension");
 }
 void IAPExtension::set_helper_class(const char* str) {
-    sb_assert(m_helper_ctr == 0);
+    sb_assert(m_helper_ctr == 0 || m_helper_class == str);
     m_helper_class = str;
 }
 void IAPExtension::release_object(JNIEnv* env) {
