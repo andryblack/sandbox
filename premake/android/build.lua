@@ -230,6 +230,17 @@ function build.generate_app_build_gradle( sln , prj )
 
 	_x(1,'buildTypes {')
 	for cfg in project.eachconfig(prj) do
+
+		local assets_dirs = {}
+		if cfg.android_assets_path then
+			for _,v in ipairs(cfg.android_assets_path) do
+				local p = '../' .. path.getrelative(sln.location,v)
+				table.insert(assets_dirs,"'" .. p .. "'")
+			end
+		end
+			
+
+
 		_x(2,cfg.shortname .. ' {')
 			if cfg.android_key_store  then
 				_x(3,'signingConfig signingConfigs.' .. cfg.shortname)
@@ -253,8 +264,8 @@ function build.generate_app_build_gradle( sln , prj )
 				    if next(aidl_dirs) then
     					_x(5,"aidl.srcDirs = [" .. table.concat(aidl_dirs,',') .. "]")
     				end
-				    if android_assets_path then
-				    	_x(5,'assets.srcDirs = ["%s"]','../' .. path.getrelative(sln.location,cfg.android_assets_path))
+				    if next(assets_dirs) then
+				    	_x(5,'assets.srcDirs = [' .. table.concat(assets_dirs,',') .. "]")
 				    else
 				    	_x(5,"assets.srcDirs = []")
 				    end

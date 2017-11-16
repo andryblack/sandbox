@@ -29,6 +29,10 @@ public:
         m_application = app;
         m_activity = GetNativeActivity(m_application);
     }
+    virtual void OnAppStopped(Sandbox::Application* app){
+        m_application = 0;
+        m_activity = 0;
+    }
 
     virtual void nativeOnActivityCreated(
                                          JNIEnv *env,
@@ -73,7 +77,7 @@ public:
     }
 
     sb::string get_pn_token() {
-        if (!m_SBFirebaseInstanceIDService) {
+        if (!m_SBFirebaseInstanceIDService || !m_activity || !m_activity->env) {
             return failed_get;
         }
         JNIEnv* env = m_activity->env;

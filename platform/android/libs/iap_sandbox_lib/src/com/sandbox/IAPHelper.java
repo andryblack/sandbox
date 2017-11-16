@@ -79,7 +79,7 @@ public class IAPHelper  {
         String mName;
         String mDescription;
         String mCurrencyCode;
-        int mPriceInCents;
+        double mPriceValue;
         public Product( String jsonProduct ) throws JSONException {
             JSONObject o = new JSONObject(jsonProduct);
             mSku = o.optString("productId");
@@ -87,7 +87,7 @@ public class IAPHelper  {
             mName = o.optString("title");
             mDescription = o.optString("description");
             mCurrencyCode = o.optString("price_currency_code");
-            mPriceInCents = o.optInt("price_amount_micros") / 10000;
+            mPriceValue = o.optLong("price_amount_micros") / 1000000.0;
         }
         public String getSku() { return mSku; }
         public JSONObject toJson() throws JSONException {
@@ -97,7 +97,7 @@ public class IAPHelper  {
             obj.put("localized_name",mName);
             obj.put("localized_descr",mDescription);
             obj.put("currency_code",mCurrencyCode);
-            obj.put("int_price",mPriceInCents);
+            obj.put("price",mPriceValue);
             return obj;
         }
     }
@@ -105,7 +105,7 @@ public class IAPHelper  {
     /**
      * Represents an in-app billing purchase.
      */
-    class Purchase {
+    public class Purchase {
         String mOrderId;
         String mPackageName;
         String mSku;
@@ -377,9 +377,13 @@ public class IAPHelper  {
         }
         logDebug("Disposing.");
         m_setup_done = false;
-        if (m_service_conn != null) {
-            logDebug("Unbinding from service.");
-            if (m_activity != null) m_activity.unbindService(m_service_conn);
+        try {
+            if (m_service_conn != null) {
+                logDebug("Unbinding from service.");
+                if (m_activity != null) m_activity.unbindService(m_service_conn);
+            }
+        } catch (Exception e) {
+            logError("dispose: " + e.getMessage());
         }
         m_disposed = true;
         m_activity = null;
@@ -670,7 +674,7 @@ public class IAPHelper  {
      *     false if the result was not related to a purchase, in which case you should
      *     handle it normally.
      */
-    private boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
+    public boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
         IabResult result;
         if (requestCode != PURCHASE_FLOW_RC) return false;
         try {
@@ -831,6 +835,11 @@ public class IAPHelper  {
         return m_setup_done;
     }
 
+    public void on_query_inventory(ArrayList<String> products) 
+        throws IabAsyncInProgressException {
+        queryInventoryAsync(products);
+    }
+
     public boolean iap_get_products_info(String json_list) {
         try {
             JSONArray jsonArray = new JSONArray(json_list);
@@ -839,7 +848,7 @@ public class IAPHelper  {
             {
                 stringArray.add(jsonArray.getString(i));
             }
-            queryInventoryAsync(stringArray);
+            on_query_inventory(stringArray);
         } catch ( IabAsyncInProgressException e ) {
             logError(e.toString());
             return false;
@@ -909,6 +918,11 @@ public class IAPHelper  {
         return true;
     }
 
+    public void on_consume_purchase(Purchase purchase) 
+        throws IabAsyncInProgressException {
+        consumeAsync(purchase);
+    }
+
     public boolean iap_confirm_transaction(String signature) {
         logDebug("iap_confirm_transaction :" + signature);
         boolean result = false;
@@ -919,7 +933,7 @@ public class IAPHelper  {
                     logDebug("check purchase :" + purchase.getSku() + " transaction:" + transaction);
                     if (transaction.equals(signature)) {
                         logDebug("found purchase for confirm " + purchase.getSku());
-                        consumeAsync(purchase);
+                        on_consume_purchase(purchase);
                         result = true;
                     }
                 } catch ( JSONException e) {

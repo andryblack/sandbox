@@ -58,8 +58,6 @@ solution( ProjectName )
 			if use.AndroidGooglePlayService then
 				android_dependencies('com.google.android.gms:play-services-auth:10.2.1')
 				android_dependencies('com.google.android.gms:play-services-games:10.2.1')
-				android_dependencies('com.google.android.gms:play-services-nearby:10.2.1')
-				android_dependencies('com.google.android.gms:play-services-plus:10.2.1')
 				android_dependencies('com.android.support:support-v4:23.1.1')
 			end
 			
@@ -71,7 +69,6 @@ solution( ProjectName )
 
 		if use.AndroidPN then
 			android_module{fcm=true}
-			--android_permissions('com.nordx.battle.android.permission.C2D_MESSAGE')
 			android_dependencies('com.google.firebase:firebase-core:10.2.1')
 			android_dependencies('com.google.firebase:firebase-messaging:10.2.1')
 
