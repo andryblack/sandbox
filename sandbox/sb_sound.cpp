@@ -299,17 +299,15 @@ namespace Sandbox {
             m_music->Pause();
         }
         for (MusicsList::iterator it = m_fade_outs_musics.begin();it!=m_fade_outs_musics.end();++it) {
-            (*it)->Pause();
+            (*it)->Stop();
         }
+        m_fade_outs_musics.clear();
     }
     void SoundManager::Resume() {
         if (!m_sound)
             return;
         if (m_music) {
             m_music->Resume();
-        }
-        for (MusicsList::iterator it = m_fade_outs_musics.begin();it!=m_fade_outs_musics.end();++it) {
-            (*it)->Resume();
         }
     }
     

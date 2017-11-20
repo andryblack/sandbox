@@ -44,6 +44,7 @@ public class SBFirebaseInstanceIDService extends FirebaseInstanceIdService {
     // [START refresh_token]
     @Override
     public void onTokenRefresh() {
+        com.GHL.Activity.ensureLoadLibraryForContext(getApplicationContext());
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
