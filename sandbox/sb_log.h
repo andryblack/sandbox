@@ -34,6 +34,8 @@ namespace Sandbox {
         static sb::string GetCurrentPath();
         static sb::string GetPrevPath();
         static void Write(GHL::LogLevel level,const char* msg);
+        static void SetVerbose(bool v) { m_verbose_enabled = v; }
+        static bool GetVerbose() { return m_verbose_enabled; }
     protected:
         void Discard();
     private:
@@ -43,7 +45,7 @@ namespace Sandbox {
         GHL::LogLevel       m_level;
         std::stringstream   m_stream;
         static bool m_enable_platform_log;
-        
+        static bool m_verbose_enabled;
     };
     
     class EmptyLogger {
@@ -76,19 +78,22 @@ namespace Sandbox {
             
         }
     };
+    class LogVerbose : public Logger {
+    public:
+        LogVerbose( const char* module = 0) : Logger( GHL::LOG_LEVEL_VERBOSE,module) {
+        }
+    };
+
     
 #define SB_LOGE( X ) do { ::Sandbox::LogError(MODULE) << X ; } while(false)
 #define SB_LOGW( X ) do { ::Sandbox::LogWarning(MODULE) << X ; } while(false)
 #define SB_LOGI( X ) do { ::Sandbox::LogInfo(MODULE) << X ; } while(false)
+#define SB_LOGV( X ) do { if (::Sandbox::Logger::GetVerbose()) { ::Sandbox::LogVerbose(MODULE) << X ; } } while(false)
+
     
 #if defined(SB_DEBUG) && !defined(SB_SILENT)
     
-    class LogVerbose : public Logger {
-    public:
-        LogVerbose( const char* module = 0) : Logger( GHL::LOG_LEVEL_VERBOSE,module) {
-            
-        }
-    };
+    
     
     class LogDebug : public Logger {
     public:
@@ -96,18 +101,16 @@ namespace Sandbox {
             
         }
     };
-#define SB_LOGV( X ) do { ::Sandbox::LogVerbose(MODULE) << X ; } while(false)
 #define SB_LOGD( X ) do { ::Sandbox::LogDebug(MODULE) << X ; } while(false)
 
 #else
-    typedef EmptyLogger LogVerbose;
     typedef EmptyLogger LogDebug;
 
-#define SB_LOGV( X ) do { } while(false)
 #define SB_LOGD( X ) do { } while(false)
 
 #endif
-    
+
+
     void format_memory( char* buf, size_t size, size_t mem,const char* caption );
     sb::string format_memory( size_t mem );
     

@@ -112,6 +112,7 @@ namespace Sandbox {
             bind(static_method("error", &lua_log_func<GHL::LOG_LEVEL_ERROR>));
             bind(static_method("fatal", &lua_log_func<GHL::LOG_LEVEL_FATAL>));
             SB_META_STATIC_METHOD(SetPlatformLogEnabled)
+            SB_META_STATIC_METHOD(SetVerbose)
         }
     }
 		
@@ -304,11 +305,11 @@ namespace Sandbox {
         int res = lua_load(m_L,&lua_read_func,&data,mname.c_str(),0);  /// MF tf
 
         if (res!=0) {
-            LogError(MODULE) << "Failed to load script: " << name;
-            LogError(MODULE) << lua_tostring(m_L, -1) ;
+            SB_LOGE("Failed to load script: " << name);
+            SB_LOGE(lua_tostring(m_L, -1));
 			return false;
 		} else {
-            LogVerbose(MODULE) << "Loaded script: " << name;
+            SB_LOGV("Loaded script: " << name);
             
             if (env) {
                 env->GetObject(m_L);
@@ -317,9 +318,9 @@ namespace Sandbox {
             //
             int res = lua_pcall(m_L, 0, results, -2);
             if (res) {
-                LogError(MODULE) << "pcall : " << res;
+                SB_LOGE("pcall : " << res);
                 const char* err = lua_tostring(m_L, -1) ;
-                LogError(MODULE) << (err ? err : "failed");
+                SB_LOGE((err ? err : "failed"));
                 return false;
             }
             lua_remove(m_L, traceback_index);
@@ -369,7 +370,7 @@ namespace Sandbox {
         path.append(".lua");
         GHL::DataStream* ds = this_->m_resources->OpenFile(path.c_str());
         if (!ds) {
-			LogError(MODULE) << "error opening module file " << name;
+			SB_LOGE("error opening module file " << name);
 			return 0;
 		}
 		lua_read_data data = {ds,{}};
@@ -377,8 +378,8 @@ namespace Sandbox {
 		int res = lua_load(L,&lua_read_func,&data,mname.c_str(),0);
 		ds->Release();
 		if (res!=0) {
-			LogError(MODULE) << "Failed to load module: " << name;
-            LogError(MODULE) << lua_tostring(L, -1) ;
+			SB_LOGE("Failed to load module: " << name);
+            SB_LOGE(lua_tostring(L, -1));
 			return 0;
 		} 
         lua_pushstring(L, name);

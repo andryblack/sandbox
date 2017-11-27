@@ -27,6 +27,14 @@ namespace Sandbox {
 #endif
     ;
     
+    bool Logger::m_verbose_enabled =
+#if defined(SB_DEBUG) && !defined(SB_SILENT)
+    true
+#else
+    false
+#endif
+    ;
+    
     static const char level_descr[] = {
         'F',
         'E',
