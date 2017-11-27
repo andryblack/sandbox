@@ -503,6 +503,8 @@ SB_META_DECLARE_OBJECT(MyGUI::TabItem, MyGUI::TextBox)
 SB_META_DECLARE_OBJECT(MyGUI::MenuBar, MyGUI::MenuControl)
 
 SB_META_DECLARE_OBJECT(MyGUI::ListBox, MyGUI::Widget)
+SB_META_BEGIN_KLASS_BIND(MyGUI::ListBox)
+SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(MyGUI::DDContainer, MyGUI::Widget)
 SB_META_BEGIN_KLASS_BIND(MyGUI::DDContainer)
@@ -860,6 +862,8 @@ namespace Sandbox {
             luabind::ExternClass<MyGUI::ScrollBar>(lua);
             
             luabind::ExternClass<MyGUI::EditBox>(lua);
+            luabind::ExternClass<MyGUI::ListBox>(lua);
+            luabind::ExternClass<MyGUI::ComboBox>(lua);
             
             
             
