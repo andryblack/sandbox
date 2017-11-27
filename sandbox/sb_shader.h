@@ -93,6 +93,9 @@ namespace Sandbox {
         ShaderColorUniformPtr GetColorUniform(const char* name);
         sb::intrusive_ptr<Shader> Clone();
         GHL::ShaderUniform* GetRawUniform(const char* name);
+        bool Compare(const sb::intrusive_ptr<Shader>& other) {
+            return other && (m_program == other->m_program);
+        }
   	private:
         template <class T>
         ShaderUniformPtr GetUniform(const char* name);
