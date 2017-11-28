@@ -99,7 +99,7 @@ namespace Sandbox {
                 need_update = true;
                 mIsMargin = true; // при изменении размеров все пересчитывать
             } else {
-                MYGUI_ASSERT(false, "HAlign must be left or right");
+                MYGUI_ASSERT(false, "VAlign must be top or bottom");
             }
             
             // первоначальное выравнивание
