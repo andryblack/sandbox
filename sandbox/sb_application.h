@@ -215,6 +215,8 @@ namespace Sandbox {
         bool    m_need_restart;
         bool    m_need_exit;
         sb::string  m_url;
+        
+        bool m_need_resize;
     public:
 		///
 		virtual void GHL_CALL SetSystem( GHL::System* sys ) SB_OVERRIDE;

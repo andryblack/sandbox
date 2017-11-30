@@ -217,6 +217,8 @@ namespace Sandbox {
         m_need_exit = false;
         m_utc_offset = 0;
         
+        m_need_resize = false;
+        
         //const char* test = "{\"val\":41,\"id\":\"CgkInqr15dUFEAIQAw\"}";
         //sb::map<sb::string,sb::string> res;
         //json_parse(test, res);
@@ -585,9 +587,23 @@ namespace Sandbox {
         ctx->SetValue("application.size.width", m_draw_width);
         ctx->SetValue("application.size.height", m_draw_height);
         ctx->SetValue("application.size.scale", graphics_scal * resources_scale);
+        
+        Rectf draw_rect;
+        draw_rect.x = 0;
+        draw_rect.y = 0;
+        draw_rect.w = GetDrawWidth();
+        draw_rect.h = GetDrawHeight();
+        GHL::Int32 borders[4];
+        if (GetSystem()->GetDeviceData(GHL::DEVICE_DATA_SCREEN_BORDERS, borders)) {
+            draw_rect.x += float(borders[0]) / (graphics_scal * resources_scale);
+            draw_rect.y += float(borders[2]) / (graphics_scal * resources_scale);
+            draw_rect.w -= float(borders[0]+borders[1]) / (graphics_scal * resources_scale);
+            draw_rect.h -= float(borders[2]+borders[3]) / (graphics_scal * resources_scale);
+        }
+        ctx->SetValue("application.size.rect", draw_rect);
 #ifdef SB_USE_MYGUI
         if (m_gui_render) {
-            m_gui_render->reshape(GetDrawWidth(), GetDrawHeight());
+            m_gui_render->reshape(GetDrawWidth(),GetDrawHeight());
         }
 #endif
     }
@@ -641,7 +657,7 @@ namespace Sandbox {
         }
         GHL::UInt32 width = m_render->GetWidth();
         GHL::UInt32 height = m_render->GetHeight();
-        if (width != m_width || height != m_height) {
+        if (width != m_width || height != m_height || m_need_resize) {
             m_width = width;
             m_height = height;
             OnResize();
@@ -993,6 +1009,9 @@ namespace Sandbox {
             case GHL::EVENT_TYPE_DEACTIVATE:
                 OnDeactivated();
                 break;
+            case GHL::EVENT_TYPE_RELAYOUT:
+                m_need_resize = true;
+                break;
             case GHL::EVENT_TYPE_VISIBLE_RECT_CHANGED:
                 if (m_lua) {
                     if (m_lua->GetGlobalContext()->GetValue<bool>("application.onVisibleRectChanged")) {
@@ -1117,6 +1136,7 @@ namespace Sandbox {
                 }
             }
         }
+        m_need_resize = false;
     }
 	///
 	void GHL_CALL Application::Release(  ) {
