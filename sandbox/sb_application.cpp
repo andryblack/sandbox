@@ -588,19 +588,13 @@ namespace Sandbox {
         ctx->SetValue("application.size.height", m_draw_height);
         ctx->SetValue("application.size.scale", graphics_scal * resources_scale);
         
-        Rectf draw_rect;
-        draw_rect.x = 0;
-        draw_rect.y = 0;
-        draw_rect.w = GetDrawWidth();
-        draw_rect.h = GetDrawHeight();
         GHL::Int32 borders[4];
         if (GetSystem()->GetDeviceData(GHL::DEVICE_DATA_SCREEN_BORDERS, borders)) {
-            draw_rect.x += float(borders[0]) / (graphics_scal * resources_scale);
-            draw_rect.y += float(borders[2]) / (graphics_scal * resources_scale);
-            draw_rect.w -= float(borders[0]+borders[1]) / (graphics_scal * resources_scale);
-            draw_rect.h -= float(borders[2]+borders[3]) / (graphics_scal * resources_scale);
+            ctx->SetValue("application.size.borders.left", borders[0]);
+            ctx->SetValue("application.size.borders.right", borders[1]);
+            ctx->SetValue("application.size.borders.top", borders[2]);
+            ctx->SetValue("application.size.borders.bottom", borders[3]);
         }
-        ctx->SetValue("application.size.rect", draw_rect);
 #ifdef SB_USE_MYGUI
         if (m_gui_render) {
             m_gui_render->reshape(GetDrawWidth(),GetDrawHeight());
