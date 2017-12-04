@@ -588,6 +588,11 @@ namespace Sandbox {
         ctx->SetValue("application.size.height", m_draw_height);
         ctx->SetValue("application.size.scale", graphics_scal * resources_scale);
         
+        char orientation[32];
+        if (GetSystem()->GetDeviceData(GHL::DEVICE_DATA_ORIENTATION, orientation)) {
+            ctx->SetValue("application.size.orientation",static_cast<const char*>(orientation));
+        }
+        
         GHL::Int32 borders[4];
         if (GetSystem()->GetDeviceData(GHL::DEVICE_DATA_SCREEN_BORDERS, borders)) {
             ctx->SetValue("application.size.borders.left", borders[0]);
