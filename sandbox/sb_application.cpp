@@ -321,7 +321,22 @@ namespace Sandbox {
 	}
 	///
 	void GHL_CALL Application::SetSound( GHL::Sound* sound) {
+        if (!sound) {
+            SB_LOGI("reset sound");
+            if (m_lua && m_lua->GetGlobalContext()->GetValue<bool>("application.onResetSound")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
+                    ->call("onResetSound");
+            }
+            if (m_sound_mgr) {
+                m_sound_mgr->Deinit();
+            }
+        }
 		m_sound = sound;
+        if (m_sound) {
+            if (m_sound_mgr && m_resources) {
+                m_sound_mgr->Init(m_sound, m_resources);
+            }
+        }
 	}
     
     Resources* Application::CreateResourcesManager() {
