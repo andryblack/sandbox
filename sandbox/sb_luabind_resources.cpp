@@ -387,12 +387,22 @@ struct UTF8 {
         Sandbox::get_char(src, ch);
         return ch;
     }
+    static size_t GetLength(const char* src) {
+        Sandbox::UTF32Char ch = 0;
+        size_t len = 0;
+        while (*src) {
+            src = Sandbox::get_char(src, ch);
+            ++len;
+        }
+        return len;
+    }
 };
 
 SB_META_DECLARE_KLASS(UTF8, void)
 SB_META_BEGIN_KLASS_BIND(UTF8)
 SB_META_STATIC_METHOD(GetChar)
 SB_META_STATIC_METHOD(GetCode)
+SB_META_STATIC_METHOD(GetLength)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
