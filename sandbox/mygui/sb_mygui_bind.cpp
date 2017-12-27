@@ -323,6 +323,11 @@ bind(method("eventMouseButtonClick", delegate_bind<MyGUI::Widget,
             MyGUI::EventHandle_WidgetVoid,
             &MyGUI::WidgetInput::eventMouseButtonClick>::lua_func));
 
+bind(method("eventMouseButtonDoubleClick", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetVoid,
+            &MyGUI::WidgetInput::eventMouseButtonDoubleClick>::lua_func));
+
 bind(method("eventMouseButtonPressed", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
             MyGUI::EventHandle_WidgetFloatFloatButton,
