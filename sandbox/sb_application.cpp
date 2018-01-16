@@ -1023,6 +1023,15 @@ namespace Sandbox {
             case GHL::EVENT_TYPE_DEACTIVATE:
                 OnDeactivated();
                 break;
+            case GHL::EVENT_TYPE_SUSPEND:
+                OnSuspended();
+                break;
+            case GHL::EVENT_TYPE_RESUME:
+                OnResumed();
+                break;
+            case GHL::EVENT_TYPE_TRIM_MEMORY:
+                TrimMemory();
+                break;
             case GHL::EVENT_TYPE_RELAYOUT:
                 m_need_resize = true;
                 break;
@@ -1120,7 +1129,6 @@ namespace Sandbox {
         }
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstancePtr()) {
-            MyGUI::InputManager::getInstance().resetKeyFocusWidget();
             MyGUI::InputManager::getInstance().resetMouseCaptureWidget();
             MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
         }
@@ -1140,6 +1148,23 @@ namespace Sandbox {
         }
 	}
     
+    void Application::OnSuspended() {
+        SB_LOGI("OnSuspended");
+        if (m_lua) {
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onSuspended")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onSuspended");
+            }
+        }
+    }
+    void Application::OnResumed() {
+        SB_LOGI("OnResumed");
+        if (m_lua) {
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onResumed")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onResumed");
+            }
+        }
+    }
+    
     void Application::OnResize() {
         if (m_lua) {
             LuaContextPtr ctx = m_lua->GetGlobalContext();
@@ -1151,6 +1176,18 @@ namespace Sandbox {
             }
         }
         m_need_resize = false;
+    }
+    
+    void Application::TrimMemory() {
+        if (m_lua) {
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onLowMemory")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onLowMemory");
+            }
+            m_lua->DoGC();
+        }
+        if (m_resources) {
+            m_resources->ProcessMemoryMgmt();
+        }
     }
 	///
 	void GHL_CALL Application::Release(  ) {

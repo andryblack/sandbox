@@ -135,6 +135,11 @@ namespace Sandbox {
         
         virtual void OnActivated() ;
         
+        virtual void OnSuspended();
+        virtual void OnResumed();
+        
+        virtual void TrimMemory();
+        
         virtual void OnSystemSet();
         
         virtual Resources* CreateResourcesManager();
