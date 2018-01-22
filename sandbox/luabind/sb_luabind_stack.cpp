@@ -204,7 +204,19 @@ namespace Sandbox {
             return res ? res : "";
         }
 
+        void stack<long long>::push( lua_State* L, long long val) {
+            lua_pushnumber(L, val);
+        }
+        long long stack<long long>::get( lua_State* L, int idx ) {
+            return (long long)lua_tonumber(L, idx);
+        }
         
+        void stack<unsigned long long>::push( lua_State* L, unsigned long long val) {
+            lua_pushnumber(L, val);
+        }
+        unsigned long long stack<unsigned long long>::get( lua_State* L, int idx ) {
+            return (unsigned long long)lua_tonumber(L, idx);
+        }
         
         
                 
