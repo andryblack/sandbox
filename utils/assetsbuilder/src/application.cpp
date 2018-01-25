@@ -187,6 +187,7 @@ SB_META_METHOD(PremultiplyAlpha)
 SB_META_METHOD(Place)
 SB_META_METHOD(SetAlpha)
 SB_META_METHOD(Crop)
+SB_META_METHOD(GetTextureByRect)
 SB_META_METHOD(GetMD5)
 SB_META_METHOD(SetImageFileFormatPNG)
 SB_META_METHOD(SetImageFileFormatJPEG)
@@ -289,6 +290,15 @@ bool TextureData::Crop() {
     m_offset_y = min_y;
     SetSize(m_data->GetWidth(), m_data->GetHeight());
     return true;
+}
+
+TextureDataPtr TextureData::GetTextureByRect(GHL::UInt32 x,GHL::UInt32 y,GHL::UInt32 w,GHL::UInt32 h) {
+    GHL::Image* cropped_img = m_data->SubImage(x, y, w, h);
+    if (!cropped_img) return TextureDataPtr();
+    
+    TextureDataPtr cropped(new TextureData(w, h));
+    cropped->m_data->Draw(0, 0, cropped_img);
+    return cropped;
 }
 
 sb::string TextureData::GetMD5() const {
