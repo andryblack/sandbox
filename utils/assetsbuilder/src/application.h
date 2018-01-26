@@ -33,6 +33,9 @@ public:
 };
 typedef sb::intrusive_ptr<Texture> TexturePtr;
 
+class TextureData;
+typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
+
 class TextureData : public Texture {
     SB_META_OBJECT
 private:
@@ -56,6 +59,8 @@ public:
     sb::string GetMD5() const;
     
     bool Crop();
+    TextureDataPtr GetTextureByRect(GHL::UInt32 x,GHL::UInt32 y,GHL::UInt32 w,GHL::UInt32 h);
+
     GHL::ImageFileFormat GetImageFileFormat() const { return m_image_file_format; }
     void SetImageFileFormatPNG(int settings);
     void SetImageFileFormatJPEG(int settings);
@@ -65,7 +70,6 @@ public:
 
     GHL::Int32 GetEncodeSettings() const { return m_encode_settings; }
 };
-typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 
 class Application : public Sandbox::FileProvider {
     SB_META_OBJECT_BASE
