@@ -9,6 +9,7 @@
 #include <ghl_image_decoder.h>
 #include <meta/sb_meta.h>
 #include "tasks_pool.h"
+#include "texture.h"
 
 namespace GHL {
     struct ImageDecoder;
@@ -18,54 +19,7 @@ namespace GHL {
 class SkeletonConvert;
 class SpineConvert;
 
-class Texture : public Sandbox::meta::object {
-    SB_META_OBJECT
-private:
-    GHL::UInt32         m_width;
-    GHL::UInt32         m_height;
-protected:
-    void SetSize(GHL::UInt32 w,GHL::UInt32 h) { m_width = w; m_height = h;}
-public:
-    explicit Texture( GHL::UInt32 w, GHL::UInt32 h) :
-        m_width(w), m_height(h) {}
-    GHL::UInt32 width() const { return m_width; }
-    GHL::UInt32 height() const { return m_height; }
-};
-typedef sb::intrusive_ptr<Texture> TexturePtr;
 
-class TextureData : public Texture {
-    SB_META_OBJECT
-private:
-    GHL::Image* m_data;
-    GHL::UInt32 m_offset_x;
-    GHL::UInt32 m_offset_y;
-    GHL::ImageFileFormat m_image_file_format;
-    GHL::Int32 m_encode_settings;
-public:
-    explicit TextureData( GHL::UInt32 w, GHL::UInt32 h );
-    explicit TextureData( GHL::Image* img );
-    ~TextureData();
-    void PremultiplyAlpha();
-    const GHL::Image* GetImage() const { return m_data; }
-    void Place( GHL::UInt32 x, GHL::UInt32 y, const sb::intrusive_ptr<TextureData>& img );
-    bool SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex );
-    
-    GHL::UInt32 GetOffsetX() const { return m_offset_x; }
-    GHL::UInt32 GetOffsetY() const { return m_offset_y; }
-    
-    sb::string GetMD5() const;
-    
-    bool Crop();
-    GHL::ImageFileFormat GetImageFileFormat() const { return m_image_file_format; }
-    void SetImageFileFormatPNG(int settings);
-    void SetImageFileFormatJPEG(int settings);
-    void SetImageFileFormatETC1();
-    bool IsJPEG() const { return m_image_file_format == GHL::IMAGE_FILE_FORMAT_JPEG; }
-    void Free();
-
-    GHL::Int32 GetEncodeSettings() const { return m_encode_settings; }
-};
-typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 
 class Application : public Sandbox::FileProvider {
     SB_META_OBJECT_BASE

@@ -132,6 +132,7 @@ static const luaL_Reg string_functions[] = {
 int luaopen_xml(lua_State* L);
 namespace Sandbox {
     void register_utils( lua_State* lua );
+    void register_math( lua_State* lua );
 }
 
 bool (*sb_terminate_handler)() = 0;
@@ -178,127 +179,39 @@ SB_META_PROPERTY_RO(width, width)
 SB_META_PROPERTY_RO(height, height)
 SB_META_END_KLASS_BIND()
 
-SB_META_DECLARE_OBJECT(TextureData, Texture)
+SB_META_DECLARE_OBJECT(TextureSubData, Texture)
+SB_META_BEGIN_KLASS_BIND(TextureSubData)
+SB_META_PROPERTY_RO(rect,GetRect)
+SB_META_METHOD(Crop)
+SB_META_METHOD(GetMD5)
+SB_META_METHOD(GetMD5Rotated)
+SB_META_METHOD(Free)
+SB_META_METHOD(Extract)
+SB_META_END_KLASS_BIND()
+
+SB_META_DECLARE_OBJECT(TextureData, TextureSubData)
 SB_META_BEGIN_KLASS_BIND(TextureData)
 SB_META_CONSTRUCTOR((int,int))
-SB_META_PROPERTY_RO(offset_x, GetOffsetX)
-SB_META_PROPERTY_RO(offset_y, GetOffsetY)
 SB_META_METHOD(PremultiplyAlpha)
 SB_META_METHOD(Place)
 SB_META_METHOD(SetAlpha)
-SB_META_METHOD(Crop)
-SB_META_METHOD(GetMD5)
 SB_META_METHOD(SetImageFileFormatPNG)
 SB_META_METHOD(SetImageFileFormatJPEG)
 SB_META_METHOD(SetImageFileFormatETC1)
 SB_META_METHOD(IsJPEG)
-SB_META_METHOD(Free)
+SB_META_METHOD(ExtractSubData)
 SB_META_END_KLASS_BIND()
 
-TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(GHL_CreateImage(w, h, GHL::IMAGE_FORMAT_RGBA)) {
-    m_offset_x = 0;
-    m_offset_y = 0;
-    m_encode_settings = 0;
-    m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
-    sb_assert(m_data);
-    m_data->Fill(0x00000000);
-}
+SB_META_DECLARE_KLASS(Sandbox::Recti, void)
+SB_META_BEGIN_KLASS_BIND(Sandbox::Recti)
+SB_META_CONSTRUCTOR((int,int,int,int))
+SB_META_PROPERTY(x)
+SB_META_PROPERTY(y)
+SB_META_PROPERTY(w)
+SB_META_PROPERTY(h)
+SB_META_METHOD(PointInside)
+SB_META_END_KLASS_BIND()
 
-TextureData::TextureData( GHL::Image* img ) : Texture(img->GetWidth(),img->GetHeight()) , m_data(img) {
-    m_offset_x = 0;
-    m_offset_y = 0;
-    m_encode_settings = 0;
-    m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
-}
-
-void TextureData::SetImageFileFormatPNG(int settings) {
-    m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
-    m_encode_settings = settings;
-}
-void TextureData::SetImageFileFormatJPEG(int settings) {
-    if (m_data) {
-        m_data->Convert(GHL::IMAGE_FORMAT_RGB);
-    }
-    m_image_file_format = GHL::IMAGE_FILE_FORMAT_JPEG;
-    m_encode_settings = settings;
-}
-
-void TextureData::SetImageFileFormatETC1() {
-    if (m_data) {
-        m_data->Convert(GHL::IMAGE_FORMAT_RGB);
-    }
-    m_image_file_format = GHL::IMAGE_FILE_FORMAT_ETC;
-}
-
-TextureData::~TextureData() {
-    if (m_data) m_data->Release();
-}
-
-void TextureData::PremultiplyAlpha() {
-    sb_assert(m_data);
-    if (m_data->GetFormat()==GHL::IMAGE_FORMAT_4444) {
-        m_data->Convert(GHL::IMAGE_FORMAT_RGBA);
-    }
-    m_data->PremultiplyAlpha();
-}
-
-void TextureData::Free() {
-    m_data->Release();
-    m_data = 0;
-}
-
-void TextureData::Place( GHL::UInt32 x, GHL::UInt32 y, const sb::intrusive_ptr<TextureData>& img ) {
-    sb_assert(img);
-    m_data->Draw(x, y, img->GetImage());
-}
-
-bool TextureData::SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex ) {
-    if (!m_data) return false;
-    return m_data->SetAlpha(alpha_tex->GetImage());
-}
-
-bool TextureData::Crop() {
-    if (!m_data) return false;
-    if (m_data->GetFormat() != GHL::IMAGE_FORMAT_RGBA) return false;
-    GHL::UInt32 min_x = width() - 1;
-    GHL::UInt32 max_x = 0;
-    GHL::UInt32 min_y = height() - 1;
-    GHL::UInt32 max_y = 0;
-    for (GHL::UInt32 y = 0; y < height(); ++y) {
-        const GHL::Byte* line = m_data->GetData()->GetData() + y * width() * 4;
-        bool has_pixel = false;
-        
-        for (GHL::UInt32 x = 0; x < width(); ++x) {
-            if (line[x*4+3]) {
-                has_pixel = true;
-                if (x>max_x) max_x = x;
-                if (x<min_x) min_x = x;
-            }
-        }
-        if (has_pixel) {
-            if (y < min_y) min_y = y;
-            if (y > max_y) max_y = y;
-        }
-    }
-    
-    if (max_x < min_x || max_y < min_y) {
-        /// empty image, save pixel
-        min_x = max_x = min_y = max_y = 0;
-    }
-    GHL::Image* cropped = m_data->SubImage(min_x, min_y, max_x-min_x+1, max_y-min_y+1);
-    if (!cropped) return false;
-    m_data->Release();
-    m_data = cropped;
-    m_offset_x = min_x;
-    m_offset_y = min_y;
-    SetSize(m_data->GetWidth(), m_data->GetHeight());
-    return true;
-}
-
-sb::string TextureData::GetMD5() const {
-    if (!m_data) return "nil";
-    return Sandbox::MD5SumData( m_data->GetData()->GetData(), m_data->GetData()->GetSize());
-}
 
 Application::Application() : m_lua(0),m_vfs(0),m_update_only(false) {
 	m_lua = new Sandbox::LuaVM(this);
@@ -340,7 +253,10 @@ void Application::Bind(lua_State* L) {
     luaL_register(L, "os",       os_functions);
     luaL_register(L, "string",   string_functions);
     
+    Sandbox::luabind::RawClass<Sandbox::Recti>(L);
+    
     Sandbox::luabind::Class<Texture>(L);
+    Sandbox::luabind::Class<TextureSubData>(L);
     Sandbox::luabind::Class<TextureData>(L);
     Sandbox::luabind::ExternClass<FileProvider>(L);
     Sandbox::luabind::ExternClass<Application>(L);
@@ -348,6 +264,7 @@ void Application::Bind(lua_State* L) {
     Sandbox::luabind::ExternClass<SpineConvert>(L);
     Sandbox::register_json(L);
     Sandbox::register_utils(L);
+    Sandbox::register_math(L);
 }
 
 Application::~Application() {
@@ -494,9 +411,9 @@ GHL::Data* encode_etc1(TasksPool* pool,const GHL::Image* img,bool with_header);
 
 const GHL::Data* Application::encode_texture(const TextureDataPtr &texture) {
     if (texture->GetImageFileFormat()==GHL::IMAGE_FILE_FORMAT_ETC) {
-        return encode_etc1(m_tasks,texture->GetImage(),true);
+        return encode_etc1(m_tasks,texture->GetSubImage(),true);
     }
-    return m_image_decoder->Encode(texture->GetImage(),
+    return m_image_decoder->Encode(texture->GetSubImage(),
                                    texture->GetImageFileFormat(),
                                    texture->GetEncodeSettings());
 }
