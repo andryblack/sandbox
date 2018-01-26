@@ -217,6 +217,8 @@ namespace Sandbox {
         m_need_exit = false;
         m_utc_offset = 0;
         
+        m_need_resize = false;
+        
         //const char* test = "{\"val\":41,\"id\":\"CgkInqr15dUFEAIQAw\"}";
         //sb::map<sb::string,sb::string> res;
         //json_parse(test, res);
@@ -319,7 +321,22 @@ namespace Sandbox {
 	}
 	///
 	void GHL_CALL Application::SetSound( GHL::Sound* sound) {
+        if (!sound) {
+            SB_LOGI("reset sound");
+            if (m_lua && m_lua->GetGlobalContext()->GetValue<bool>("application.onResetSound")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")
+                    ->call("onResetSound");
+            }
+            if (m_sound_mgr) {
+                m_sound_mgr->Deinit();
+            }
+        }
 		m_sound = sound;
+        if (m_sound) {
+            if (m_sound_mgr && m_resources) {
+                m_sound_mgr->Init(m_sound, m_resources);
+            }
+        }
 	}
     
     Resources* Application::CreateResourcesManager() {
@@ -585,9 +602,22 @@ namespace Sandbox {
         ctx->SetValue("application.size.width", m_draw_width);
         ctx->SetValue("application.size.height", m_draw_height);
         ctx->SetValue("application.size.scale", graphics_scal * resources_scale);
+        
+        char orientation[32];
+        if (GetSystem()->GetDeviceData(GHL::DEVICE_DATA_ORIENTATION, orientation)) {
+            ctx->SetValue("application.size.orientation",static_cast<const char*>(orientation));
+        }
+        
+        GHL::Int32 borders[4];
+        if (GetSystem()->GetDeviceData(GHL::DEVICE_DATA_SCREEN_BORDERS, borders)) {
+            ctx->SetValue("application.size.borders.left", borders[0]);
+            ctx->SetValue("application.size.borders.right", borders[1]);
+            ctx->SetValue("application.size.borders.top", borders[2]);
+            ctx->SetValue("application.size.borders.bottom", borders[3]);
+        }
 #ifdef SB_USE_MYGUI
         if (m_gui_render) {
-            m_gui_render->reshape(GetDrawWidth(), GetDrawHeight());
+            m_gui_render->reshape(GetDrawWidth(),GetDrawHeight());
         }
 #endif
     }
@@ -641,7 +671,7 @@ namespace Sandbox {
         }
         GHL::UInt32 width = m_render->GetWidth();
         GHL::UInt32 height = m_render->GetHeight();
-        if (width != m_width || height != m_height) {
+        if (width != m_width || height != m_height || m_need_resize) {
             m_width = width;
             m_height = height;
             OnResize();
@@ -993,6 +1023,18 @@ namespace Sandbox {
             case GHL::EVENT_TYPE_DEACTIVATE:
                 OnDeactivated();
                 break;
+            case GHL::EVENT_TYPE_SUSPEND:
+                OnSuspended();
+                break;
+            case GHL::EVENT_TYPE_RESUME:
+                OnResumed();
+                break;
+            case GHL::EVENT_TYPE_TRIM_MEMORY:
+                TrimMemory();
+                break;
+            case GHL::EVENT_TYPE_RELAYOUT:
+                m_need_resize = true;
+                break;
             case GHL::EVENT_TYPE_VISIBLE_RECT_CHANGED:
                 if (m_lua) {
                     if (m_lua->GetGlobalContext()->GetValue<bool>("application.onVisibleRectChanged")) {
@@ -1087,7 +1129,6 @@ namespace Sandbox {
         }
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstancePtr()) {
-            MyGUI::InputManager::getInstance().resetKeyFocusWidget();
             MyGUI::InputManager::getInstance().resetMouseCaptureWidget();
             MyGUI::InputManager::getInstance()._resetMouseFocusWidget();
         }
@@ -1107,6 +1148,23 @@ namespace Sandbox {
         }
 	}
     
+    void Application::OnSuspended() {
+        SB_LOGI("OnSuspended");
+        if (m_lua) {
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onSuspended")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onSuspended");
+            }
+        }
+    }
+    void Application::OnResumed() {
+        SB_LOGI("OnResumed");
+        if (m_lua) {
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onResumed")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onResumed");
+            }
+        }
+    }
+    
     void Application::OnResize() {
         if (m_lua) {
             LuaContextPtr ctx = m_lua->GetGlobalContext();
@@ -1116,6 +1174,19 @@ namespace Sandbox {
                     m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onResize");
                 }
             }
+        }
+        m_need_resize = false;
+    }
+    
+    void Application::TrimMemory() {
+        if (m_lua) {
+            if (m_lua->GetGlobalContext()->GetValue<bool>("application.onLowMemory")) {
+                m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onLowMemory");
+            }
+            m_lua->DoGC();
+        }
+        if (m_resources) {
+            m_resources->ProcessMemoryMgmt();
         }
     }
 	///

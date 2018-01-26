@@ -57,6 +57,21 @@ public class GPSHelper
 
 	public boolean sign_in(boolean use_ui) {
 		if (!is_available()) {
+			if (use_ui) {
+				int errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(m_activity);
+				Log.w(TAG, "sign_in !is_available " + errorCode);
+				
+				if (GoogleApiAvailability.getInstance().isUserResolvableError(errorCode)) {
+					Log.i(TAG, "sign_in isUserResolvableError");
+					Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(m_activity,
+						errorCode, RC_SIGN_IN);
+			        if (dialog != null) {
+			            dialog.show();
+			        } 
+				} else {
+					show_error(errorCode,RC_SIGN_IN);
+				}
+			}
 			return false;
 		}
 		if (m_google_api_client.isConnected()) {
@@ -241,10 +256,19 @@ public class GPSHelper
 	    return false;
 	}
 
+	void show_error(int errorCode,int requestCode) {
+		Dialog dialog = GooglePlayServicesUtil.getErrorDialog(errorCode,
+                    m_activity, requestCode);
+        if (dialog != null) {
+            dialog.show();
+        } 
+	}
+
 
 	boolean resolveConnectionFailure(ConnectionResult result, int requestCode) {
 
         if (result.hasResolution()) {
+        	Log.i(TAG, "hasResolution");
             try {
                 result.startResolutionForResult(m_activity, requestCode);
                 return true;
@@ -257,11 +281,7 @@ public class GPSHelper
         } else {
             // not resolvable... so show an error message
             int errorCode = result.getErrorCode();
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(errorCode,
-                    m_activity, requestCode);
-            if (dialog != null) {
-                dialog.show();
-            } 
+            show_error(errorCode,requestCode);
             return false;
         }
     }

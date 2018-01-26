@@ -59,6 +59,7 @@ namespace Sandbox {
     public:
         explicit Sound( SoundManager* mgr, GHL::SoundEffect* eff );
         ~Sound();
+        void Release();
         void Play();
         void PlayEx(float vol,float pan);
         SoundInstancePtr    PlayExControl(float fadeIn,float vol,float pan);
@@ -118,7 +119,8 @@ namespace Sandbox {
         sb::string  m_sounds_dir;
         float       m_sounds_volume;
         float       m_music_volume;
-        sb::map<sb::string,SoundPtr>    m_sounds;
+        typedef sb::map<sb::string,SoundPtr> SoundsMap;
+        SoundsMap    m_sounds;
         typedef sb::list<SoundInstancePtr> SoundsList;
         SoundsList  m_fade_ins;
         SoundsList  m_fade_outs;

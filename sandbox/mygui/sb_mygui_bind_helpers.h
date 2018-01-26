@@ -7,7 +7,14 @@
 #include "MyGUI_Delegate.h"
 #include "luabind/sb_luabind_function.h"
 #include "luabind/sb_luabind.h"
-         
+#include "MyGUI_Types.h"
+#include "MyGUI_UString.h"
+#include "MyGUI_Any.h"
+#include "MyGUI_Colour.h"
+#include "MyGUI_MouseButton.h"
+#include "MyGUI_WidgetStyle.h"
+
+
         template <typename A1,typename A2,typename A3,typename A4>
         class LuaDelegate4 : public MyGUI::delegates::IDelegate4<A1,A2,A3,A4>, public MyGUI::delegates::IDelegateUnlink {
         private:

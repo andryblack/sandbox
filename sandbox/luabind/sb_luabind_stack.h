@@ -527,6 +527,8 @@ namespace Sandbox {
         LUABIND_DECLARE_RAW_STACK_TYPE(unsigned short)
         LUABIND_DECLARE_RAW_STACK_TYPE(unsigned int)
         LUABIND_DECLARE_RAW_STACK_TYPE(const char*)
+        LUABIND_DECLARE_RAW_STACK_TYPE(long long)
+        LUABIND_DECLARE_RAW_STACK_TYPE(unsigned long long)
         
         
         template <>

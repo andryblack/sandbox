@@ -40,6 +40,7 @@ private:
     GHL::UInt32 m_offset_x;
     GHL::UInt32 m_offset_y;
     GHL::ImageFileFormat m_image_file_format;
+    GHL::Int32 m_encode_settings;
 public:
     explicit TextureData( GHL::UInt32 w, GHL::UInt32 h );
     explicit TextureData( GHL::Image* img );
@@ -56,11 +57,13 @@ public:
     
     bool Crop();
     GHL::ImageFileFormat GetImageFileFormat() const { return m_image_file_format; }
-    void SetImageFileFormatPNG();
-    void SetImageFileFormatJPEG();
+    void SetImageFileFormatPNG(int settings);
+    void SetImageFileFormatJPEG(int settings);
     void SetImageFileFormatETC1();
     bool IsJPEG() const { return m_image_file_format == GHL::IMAGE_FILE_FORMAT_JPEG; }
     void Free();
+
+    GHL::Int32 GetEncodeSettings() const { return m_encode_settings; }
 };
 typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 

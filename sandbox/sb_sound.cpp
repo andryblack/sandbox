@@ -176,6 +176,13 @@ namespace Sandbox {
         m_mgr->m_sound->PlayEffect(m_effect,m_mgr->m_sounds_volume*vol,pan*100.0f,0);
     }
     
+    void Sound::Release() {
+        if (m_effect) {
+            m_effect->Release();
+            m_effect = 0;
+        }
+    }
+    
     SoundInstancePtr    Sound::PlayExControl(float fadeIn,float vol,float pan) {
         if (!m_effect) return SoundInstancePtr(new SoundInstance(SoundPtr(this),static_cast<GHL::SoundInstance*>(0),0.0f));
         float initialVol = vol;
@@ -207,7 +214,12 @@ namespace Sandbox {
     }
     
     void SoundManager::Deinit() {
+        for (SoundsMap::iterator it = m_sounds.begin();it!=m_sounds.end();++it) {
+            it->second->Release();
+        }
         m_sounds.clear();
+        m_fade_ins.clear();
+        m_fade_outs.clear();
         m_music.reset();
         m_fade_outs_musics.clear();
         m_sound = 0;
@@ -299,17 +311,15 @@ namespace Sandbox {
             m_music->Pause();
         }
         for (MusicsList::iterator it = m_fade_outs_musics.begin();it!=m_fade_outs_musics.end();++it) {
-            (*it)->Pause();
+            (*it)->Stop();
         }
+        m_fade_outs_musics.clear();
     }
     void SoundManager::Resume() {
         if (!m_sound)
             return;
         if (m_music) {
             m_music->Resume();
-        }
-        for (MusicsList::iterator it = m_fade_outs_musics.begin();it!=m_fade_outs_musics.end();++it) {
-            (*it)->Resume();
         }
     }
     

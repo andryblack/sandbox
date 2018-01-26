@@ -198,6 +198,7 @@ SB_META_END_KLASS_BIND()
 TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(GHL_CreateImage(w, h, GHL::IMAGE_FORMAT_RGBA)) {
     m_offset_x = 0;
     m_offset_y = 0;
+    m_encode_settings = 0;
     m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
     sb_assert(m_data);
     m_data->Fill(0x00000000);
@@ -206,17 +207,20 @@ TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : Texture(w,h), m_data(G
 TextureData::TextureData( GHL::Image* img ) : Texture(img->GetWidth(),img->GetHeight()) , m_data(img) {
     m_offset_x = 0;
     m_offset_y = 0;
+    m_encode_settings = 0;
     m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
 }
 
-void TextureData::SetImageFileFormatPNG() {
+void TextureData::SetImageFileFormatPNG(int settings) {
     m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
+    m_encode_settings = settings;
 }
-void TextureData::SetImageFileFormatJPEG() {
+void TextureData::SetImageFileFormatJPEG(int settings) {
     if (m_data) {
         m_data->Convert(GHL::IMAGE_FORMAT_RGB);
     }
     m_image_file_format = GHL::IMAGE_FILE_FORMAT_JPEG;
+    m_encode_settings = settings;
 }
 
 void TextureData::SetImageFileFormatETC1() {
@@ -493,7 +497,8 @@ const GHL::Data* Application::encode_texture(const TextureDataPtr &texture) {
         return encode_etc1(m_tasks,texture->GetImage(),true);
     }
     return m_image_decoder->Encode(texture->GetImage(),
-                                   texture->GetImageFileFormat());
+                                   texture->GetImageFileFormat(),
+                                   texture->GetEncodeSettings());
 }
 
 bool Application::store_texture( const sb::string& file , const TextureDataPtr& data ) {

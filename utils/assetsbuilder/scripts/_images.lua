@@ -4,6 +4,9 @@ local _M = {}
 _M.assets_rules = {}
 _M.use_variants = {}
 
+_M.png_encode_settings = 0
+_M.jpeg_encode_settings = 0
+
 function _M.init_rules(rules)
 	rules.images = {}
 	rules.atlases = {}
@@ -15,19 +18,28 @@ end
 _M.image_file_format = {
 	ext = 'png',
 	store_texture = function ( self, name, img )
+		img:SetImageFileFormatPNG(_M.png_encode_settings)
 		return application:store_texture( name , img)
 	end
 }
 
 function _M.assets_rules.set_alpha_file_format( func )
-
 	_M.alpha_file_format = func
-
 end
 
 function _M.assets_rules.set_image_file_format( func )
 
 	_M.image_file_format = func
+
+end
+
+function _M.assets_rules.set_jpeg_encode_settings( settings )
+	_M.jpeg_encode_settings = settings
+end
+
+function _M.assets_rules.set_png_encode_settings( settings )
+
+	_M.png_encode_settings = func
 
 end
 
@@ -515,11 +527,11 @@ function _M.do_convert_to_jpeg_file( src, dstconf  )
 		end
 	end
 	local t = assert(application:load_texture(src))
-	if t:IsJPEG() then
+	if t:IsJPEG() and _M.jpeg_encode_settings==0 then
 		assert(application:strip_jpeg(src,conf.dst))
 		return
 	end
-	t:SetImageFileFormatJPEG()
+	t:SetImageFileFormatJPEG(_M.jpeg_encode_settings)
 	return application:store_texture(conf.dst,t)
 end
 

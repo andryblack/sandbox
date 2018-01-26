@@ -28,6 +28,7 @@ namespace Sandbox {
         void Draw( Graphics& g ) const SB_OVERRIDE;
         void SetFiltered( bool f );
         void SetFullScreen(bool fs);
+        bool GetFullScreen() const { return m_fullscreen; }
         void SetKeepAspect(bool k);
         void Clear();
         
