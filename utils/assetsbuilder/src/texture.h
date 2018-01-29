@@ -56,9 +56,7 @@ typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 class TextureData : public TextureSubData {
     SB_META_OBJECT
 private:
-    
     GHL::ImageFileFormat m_image_file_format;
-    GHL::Int32 m_encode_settings;
 public:
     explicit TextureData( GHL::UInt32 w, GHL::UInt32 h );
     explicit TextureData( GHL::Image* img );
@@ -74,12 +72,11 @@ public:
     TextureDataPtr ExtractSubData(int x,int y,int w,int h);
     
     GHL::ImageFileFormat GetImageFileFormat() const { return m_image_file_format; }
-    void SetImageFileFormatPNG(int settings);
-    void SetImageFileFormatJPEG(int settings);
+    void SetImageFileFormatPNG();
+    void SetImageFileFormatJPEG();
     void SetImageFileFormatETC1();
     bool IsJPEG() const { return m_image_file_format == GHL::IMAGE_FILE_FORMAT_JPEG; }
-    
-    GHL::Int32 GetEncodeSettings() const { return m_encode_settings; };
+
 };
 
 

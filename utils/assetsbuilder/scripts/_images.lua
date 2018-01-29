@@ -4,8 +4,6 @@ local _M = {}
 _M.assets_rules = {}
 _M.use_variants = {}
 
-_M.png_encode_settings = 0
-_M.jpeg_encode_settings = 0
 
 function _M.init_rules(rules)
 	rules.images = {}
@@ -18,7 +16,6 @@ end
 _M.image_file_format = {
 	ext = 'png',
 	store_texture = function ( self, name, img )
-		img:SetImageFileFormatPNG(_M.png_encode_settings)
 		return application:store_texture( name , img)
 	end
 }
@@ -34,13 +31,11 @@ function _M.assets_rules.set_image_file_format( func )
 end
 
 function _M.assets_rules.set_jpeg_encode_settings( settings )
-	_M.jpeg_encode_settings = settings
+	application.jpeg_encode_settings = settings
 end
 
 function _M.assets_rules.set_png_encode_settings( settings )
-
-	_M.png_encode_settings = func
-
+	application.png_encode_settings = settings
 end
 
 function _M.assets_rules.use_variant( v , scale , override_base )

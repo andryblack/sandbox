@@ -65,6 +65,11 @@ public:
     sb::string get_src_path(const char* fn) const;
     bool wait_tasks();
     virtual const GHL::Data* encode_texture(const TextureDataPtr& texture);
+    
+    void set_png_encode_settings(GHL::Int32 settings);
+    GHL::Int32 get_png_encode_settings() const { return m_png_encode_settings; }
+    void set_jpeg_encode_settings(GHL::Int32 settings);
+    GHL::Int32 get_jpeg_encode_settings() const { return m_jpeg_encode_settings; }
 protected:
     virtual double GetVersion() const;
     Sandbox::LuaVM* GetLua() { return m_lua; }
@@ -84,7 +89,8 @@ private:
     sb::string  m_platform;
     bool        m_update_only;
     sb::vector<sb::string> m_arguments;
-    
+    GHL::Int32 m_jpeg_encode_settings;
+    GHL::Int32 m_png_encode_settings;
 };
 
 #endif /*APPLICATION_H_INCLUDED*/

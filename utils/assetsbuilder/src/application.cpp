@@ -160,6 +160,8 @@ SB_META_METHOD(open_spine)
 SB_META_METHOD(write_text_file)
 SB_META_METHOD(encode_sound)
 SB_META_METHOD(wait_tasks)
+SB_META_PROPERTY_RW(png_encode_settings, get_png_encode_settings, set_png_encode_settings)
+SB_META_PROPERTY_RW(jpeg_encode_settings, get_jpeg_encode_settings, set_jpeg_encode_settings)
 SB_META_PROPERTY_RW(dst_path,get_dst_path,set_dst_path)
 SB_META_PROPERTY_RW(options,get_options,set_options)
 SB_META_END_KLASS_BIND()
@@ -213,11 +215,15 @@ SB_META_METHOD(PointInside)
 SB_META_END_KLASS_BIND()
 
 
+
 Application::Application() : m_lua(0),m_vfs(0),m_update_only(false) {
 	m_lua = new Sandbox::LuaVM(this);
     m_vfs = GHL_CreateVFS();
     m_image_decoder = GHL_CreateImageDecoder();
     m_tasks = 0;
+    
+    m_png_encode_settings = 0;
+    m_jpeg_encode_settings = 0;
     
 
 #if defined( GHL_PLATFORM_MAC )
@@ -386,13 +392,29 @@ TexturePtr Application::check_texture( const sb::string& file ) {
 TextureDataPtr Application::load_texture( const sb::string& file ) {
     GHL::DataStream* ds = m_vfs->OpenFile(append_path(m_src_dir, file).c_str());
     if (!ds) return TextureDataPtr();
+    GHL::ImageInfo info;
+    m_image_decoder->GetFileInfo(ds, &info);
+    ds->Seek(0, GHL::F_SEEK_BEGIN);
     GHL::Image* img = m_image_decoder->Decode(ds);
     if (!img) {
         ds->Release();
         return TextureDataPtr();
     }
     ds->Release();
-    return TextureDataPtr(new TextureData(img));
+    TextureData* td = new TextureData(img);
+    if (info.file_format == GHL::IMAGE_FILE_FORMAT_JPEG) {
+        td->SetImageFileFormatJPEG();
+    }
+    return TextureDataPtr(td);
+}
+
+void Application::set_png_encode_settings(GHL::Int32 settings) {
+    m_png_encode_settings = settings;
+    m_image_decoder->SetEncodeSettings(GHL::IMAGE_FILE_FORMAT_PNG, settings);
+}
+void Application::set_jpeg_encode_settings(GHL::Int32 settings) {
+    m_jpeg_encode_settings = settings;
+    m_image_decoder->SetEncodeSettings(GHL::IMAGE_FILE_FORMAT_JPEG, settings);
 }
 
 GHL::Data* encode_etc1(TasksPool* pool,const GHL::Image* img,bool with_header);
@@ -402,8 +424,7 @@ const GHL::Data* Application::encode_texture(const TextureDataPtr &texture) {
         return encode_etc1(m_tasks,texture->GetSubImage(),true);
     }
     return m_image_decoder->Encode(texture->GetSubImage(),
-                                   texture->GetImageFileFormat(),
-                                   texture->GetEncodeSettings());
+                                   texture->GetImageFileFormat());
 }
 
 bool Application::store_texture( const sb::string& file , const TextureDataPtr& data ) {

@@ -151,7 +151,6 @@ bool TextureSubData::Crop() {
 
 
 TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : TextureSubData(GHL_CreateImage(w, h, GHL::IMAGE_FORMAT_RGBA),Sandbox::Recti(0,0,w,h)) {
-     m_encode_settings = 0;
     m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
     sb_assert(GetImage());
     GetImage()->Release();
@@ -160,20 +159,17 @@ TextureData::TextureData( GHL::UInt32 w, GHL::UInt32 h) : TextureSubData(GHL_Cre
 
 TextureData::TextureData( GHL::Image* img ) : TextureSubData(img,Sandbox::Recti(0,0,img->GetWidth(),img->GetHeight())) {
     img->Release();
-    m_encode_settings = 0;
     m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
 }
 
-void TextureData::SetImageFileFormatPNG(int settings) {
+void TextureData::SetImageFileFormatPNG() {
     m_image_file_format = GHL::IMAGE_FILE_FORMAT_PNG;
-    m_encode_settings = settings;
 }
-void TextureData::SetImageFileFormatJPEG(int settings) {
+void TextureData::SetImageFileFormatJPEG() {
     if (GetImage()) {
         GetImage()->Convert(GHL::IMAGE_FORMAT_RGB);
     }
     m_image_file_format = GHL::IMAGE_FILE_FORMAT_JPEG;
-    m_encode_settings = settings;
 }
 
 void TextureData::SetImageFileFormatETC1() {
