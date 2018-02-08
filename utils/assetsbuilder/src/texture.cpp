@@ -18,14 +18,41 @@ TextureSubData::TextureSubData( GHL::Image* image,const Sandbox::Recti& rect) : 
 const GHL::Image* TextureSubData::GetSubImage() {
     if (m_rect.x == 0 &&
         m_rect.y == 0 &&
-        m_rect.w == m_data->GetWidth() &&
-        m_rect.h == m_data->GetHeight()) {
+        GHL::UInt32(m_rect.w) == m_data->GetWidth() &&
+        GHL::UInt32(m_rect.h) == m_data->GetHeight()) {
         return m_data;
     }
     m_data = m_data->SubImage(m_rect.x, m_rect.y, m_rect.w, m_rect.h);
     m_rect.x = 0;
     m_rect.y = 0;
     return  m_data;
+}
+
+GHL::Image* TextureSubData::GetSubImageRotated() {
+    GHL::Image* src = 0;
+    if (m_rect.x == 0 &&
+        m_rect.y == 0 &&
+        GHL::UInt32(m_rect.w) == m_data->GetWidth() &&
+        GHL::UInt32(m_rect.h) == m_data->GetHeight()) {
+        src = m_data->Clone();
+    } else {
+        src = m_data->SubImage(m_rect.x, m_rect.y, m_rect.w, m_rect.h);
+    }
+    src->RotateCW();
+    return src;
+}
+GHL::Image* TextureSubData::GetSubImageUnrotated() {
+    GHL::Image* src = 0;
+    if (m_rect.x == 0 &&
+        m_rect.y == 0 &&
+        GHL::UInt32(m_rect.w) == m_data->GetWidth() &&
+        GHL::UInt32(m_rect.h) == m_data->GetHeight()) {
+        src = m_data->Clone();
+    } else {
+        src = m_data->SubImage(m_rect.x, m_rect.y, m_rect.w, m_rect.h);
+    }
+    src->RotateCCW();
+    return src;
 }
 
 TextureSubDataPtr TextureSubData::Extract(const Sandbox::Recti &rect) {
@@ -87,7 +114,7 @@ sb::string TextureSubData::GetMD5Rotated() const {
     
     for (int i=0;i<m_rect.w;++i) {
         for (int j=0;j<m_rect.h;++j) {
-            const GHL::Byte* dd = ddS + ((m_rect.x + m_rect.w - i - 1) + (m_rect.y + j)*m_data->GetWidth())*bpp;
+            const GHL::Byte* dd = ddS + ((m_rect.x + i) + (m_rect.y + m_rect.h - j - 1)*m_data->GetWidth())*bpp;
             MD5_Update(&ctx, dd, bpp);
         }
     }
@@ -194,6 +221,19 @@ void TextureData::PremultiplyAlpha() {
 void TextureData::Place( GHL::UInt32 x, GHL::UInt32 y, const TextureSubDataPtr& img ) {
     sb_assert(img);
     GetImage()->Draw(x, y, img->GetSubImage());
+}
+void TextureData::PlaceRotated( GHL::UInt32 x, GHL::UInt32 y,
+                  const TextureSubDataPtr& img ) {
+    sb_assert(img);
+    GHL::Image* i = img->GetSubImageRotated();
+    GetImage()->Draw(x, y, i);
+    i->Release();
+}
+void TextureData::PlaceUnrotated( GHL::UInt32 x, GHL::UInt32 y,
+                    const TextureSubDataPtr& img ) {
+    GHL::Image* i = img->GetSubImageUnrotated();
+    GetImage()->Draw(x, y, i);
+    i->Release();
 }
 
 bool TextureData::SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex ) {

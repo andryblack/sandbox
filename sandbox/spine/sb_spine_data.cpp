@@ -27,7 +27,10 @@ extern "C" void _spAtlasPage_createTexture (spAtlasPage* self, const char* path)
 }
 
 extern "C" void _spAtlasPage_disposeTexture (spAtlasPage* self){
-    static_cast<Sandbox::Texture*>(self->rendererObject)->remove_ref();
+    if (self->rendererObject) {
+        static_cast<Sandbox::Texture*>(self->rendererObject)->remove_ref();
+        self->rendererObject = 0;
+    }
 }
 
 extern "C" char* _spUtil_readFile (const char* path, int* length){

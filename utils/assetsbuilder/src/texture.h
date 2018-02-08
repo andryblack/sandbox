@@ -40,6 +40,9 @@ public:
     explicit TextureSubData(GHL::Image* img,const Sandbox::Recti& rect);
     ~TextureSubData();
     const GHL::Image* GetSubImage();
+    GHL::Image* GetSubImageRotated();
+    GHL::Image* GetSubImageUnrotated();
+    
     const Sandbox::Recti& GetRect() const { return m_rect; }
     TextureSubDataPtr Extract( const Sandbox::Recti& rect );
     sb::string GetMD5() const;
@@ -66,6 +69,10 @@ public:
     
     void Place( GHL::UInt32 x, GHL::UInt32 y,
                const TextureSubDataPtr& img );
+    void PlaceRotated( GHL::UInt32 x, GHL::UInt32 y,
+                      const TextureSubDataPtr& img );
+    void PlaceUnrotated( GHL::UInt32 x, GHL::UInt32 y,
+                      const TextureSubDataPtr& img );
     
     bool SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex );
      
