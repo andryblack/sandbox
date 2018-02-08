@@ -10,7 +10,6 @@
 
 #include <image/jpeg_image_decoder.h>
 
-#include "spine_convert.h"
 #include "vorbis_encoder.h"
 
 extern "C" {
@@ -155,8 +154,6 @@ SB_META_BEGIN_KLASS_BIND(Application)
 SB_META_METHOD(check_texture)
 SB_META_METHOD(load_texture)
 SB_META_METHOD(store_texture)
-SB_META_METHOD(convert_spine)
-SB_META_METHOD(open_spine)
 SB_META_METHOD(write_text_file)
 SB_META_METHOD(encode_sound)
 SB_META_METHOD(wait_tasks)
@@ -164,15 +161,6 @@ SB_META_PROPERTY_RW(png_encode_settings, get_png_encode_settings, set_png_encode
 SB_META_PROPERTY_RW(jpeg_encode_settings, get_jpeg_encode_settings, set_jpeg_encode_settings)
 SB_META_PROPERTY_RW(dst_path,get_dst_path,set_dst_path)
 SB_META_PROPERTY_RW(options,get_options,set_options)
-SB_META_END_KLASS_BIND()
-
-SB_META_BEGIN_KLASS_BIND(SkeletonConvert)
-SB_META_METHOD(RenameAnimation)
-SB_META_END_KLASS_BIND()
-
-SB_META_BEGIN_KLASS_BIND(SpineConvert)
-SB_META_METHOD(Load)
-SB_META_METHOD(Export)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(Texture, Sandbox::meta::object)
@@ -266,8 +254,6 @@ void Application::Bind(lua_State* L) {
     Sandbox::luabind::Class<TextureData>(L);
     Sandbox::luabind::ExternClass<FileProvider>(L);
     Sandbox::luabind::ExternClass<Application>(L);
-    Sandbox::luabind::ExternClass<SkeletonConvert>(L);
-    Sandbox::luabind::ExternClass<SpineConvert>(L);
     Sandbox::register_json(L);
     Sandbox::register_utils(L);
     Sandbox::register_math(L);
@@ -559,22 +545,6 @@ bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
     return res;
 }
 
-bool Application::convert_spine(const sb::string& atlas, const sb::string& skelet, const sb::string& outfile) {
-    SpineConvert convert;
-    if (!convert.Load(atlas.c_str(), skelet.c_str(), this))
-        return false;
-    convert.Export(outfile.c_str(),this);
-
-    return true;
-}
-
-sb::intrusive_ptr<SpineConvert> Application::open_spine(const sb::string& atlas,
-                                           const sb::string& skelet ) {
-    sb::intrusive_ptr<SpineConvert> res(new SpineConvert);
-    if (!res->Load(atlas.c_str(), skelet.c_str(), this))
-        return sb::intrusive_ptr<SpineConvert>();
-    return res;
-}
 
 bool Application::wait_tasks() {
     if (!m_tasks) return true;

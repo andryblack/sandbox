@@ -16,8 +16,6 @@ namespace GHL {
     struct Image;
 }
 
-class SkeletonConvert;
-class SpineConvert;
 
 
 
@@ -44,11 +42,6 @@ public:
     bool store_texture( const sb::string& file , const TextureDataPtr& data );
     virtual bool store_file(  const sb::string& file , const GHL::Data* data );
     bool write_text_file( const sb::string& file , const char* data  );
-    sb::intrusive_ptr<SpineConvert> open_spine(const sb::string& atlas,
-                                                const sb::string& skelet );
-    bool convert_spine(const sb::string& atlas,
-                       const sb::string& skelet,
-                       const sb::string& outfolder);
     bool premultiply_image( const sb::string& src, const sb::string& dst );
     bool rebuild_image( const sb::string& src, const sb::string& dst );
     bool encode_sound( const sb::string& src, const sb::string& dst );
