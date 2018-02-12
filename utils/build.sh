@@ -63,7 +63,7 @@ rm -Rf obj
 $BOOTSTRAPPREMAKE clean
 $BOOTSTRAPPREMAKE embed || exit 1
 $BOOTSTRAPPREMAKE --no-curl $TARGET || exit 1
-$MAKE config=release || exit 1
+$MAKE config=release -j8 || exit 1
 cp $UTILS/premake5/bin/release/* $BIN/$PLATFORM
 PREMAKE5=$BIN/$PLATFORM/premake5$EXE
 cd $UTILS
@@ -72,6 +72,6 @@ echo "rebuild assetsbuilder"
 cd $UTILS/assetsbuilder
 rm -rf Makefile obj *.make
 $PREMAKE5 --scripts=$ROOT/premake $TARGET || exit 1
-$MAKE config=release || exit 1
+$MAKE config=release -j8 || exit 1
 cp $UTILS/assetsbuilder/bin/release/* $BIN/$PLATFORM
 cd $UTILS

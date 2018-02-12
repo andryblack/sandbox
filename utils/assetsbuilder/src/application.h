@@ -67,6 +67,7 @@ protected:
     virtual double GetVersion() const;
     Sandbox::LuaVM* GetLua() { return m_lua; }
     virtual void Bind(lua_State* L);
+    GHL::ImageDecoder* get_image_decoder() { return m_image_decoder; }
 
     virtual sb::string get_output_filename( const char* name );
     

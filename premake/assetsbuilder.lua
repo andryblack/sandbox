@@ -162,6 +162,7 @@
 			'sb_log.*',
 			'sb_time.*',
 			'sb_data.*',
+			'sb_data_stream.*',
 			'sb_color.*',
 			'sb_lua_context.*',
             'sb_resources.*',
