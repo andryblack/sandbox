@@ -11,6 +11,8 @@ function _M.init_rules(rules)
 	rules.premultiply_images = {}
 	rules.convert_to_jpeg = {}
 	rules.copy_images = {}
+	rules._jpeg_encode_settings = _M._jpeg_encode_settings
+	rules._png_encode_settings = _M._png_encode_settings
 end
 
 _M.image_file_format = {
@@ -25,17 +27,17 @@ function _M.assets_rules.set_alpha_file_format( func )
 end
 
 function _M.assets_rules.set_image_file_format( func )
-
 	_M.image_file_format = func
-
 end
 
 function _M.assets_rules.set_jpeg_encode_settings( settings )
-	application.jpeg_encode_settings = settings
+	_M._jpeg_encode_settings = settings
+	get_rules()._jpeg_encode_settings = settings
 end
 
 function _M.assets_rules.set_png_encode_settings( settings )
-	application.png_encode_settings = settings
+	_M._png_encode_settings = settings
+	get_rules()._png_encode_settings = settings
 end
 
 function _M.assets_rules.use_variant( v , scale , override_base )
@@ -554,6 +556,14 @@ function _M.filter_files( filelist )
 
 end
 
+function _M.begin_apply_rules( rules )
+	if rules._jpeg_encode_settings then
+		application.jpeg_encode_settings = rules._jpeg_encode_settings
+	end
+	if rules._png_encode_settings then
+		application.png_encode_settings = rules._png_encode_settings
+	end
+end
 function _M.apply_rules( rules )
 	--log.debug('images apply:',rules)
 	local images = rules.images or {}
