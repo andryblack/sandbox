@@ -101,7 +101,7 @@ static const char* MODULE = "iap";
     }
 }
 
--(void)finishTransaction:(SKPaymentTransaction*) transaction {
+-(void)finishTransaction:(SKPaymentTransaction*) transaction withData:(const sb::map<sb::string,sb::string>&) data; {
     [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
 }
 
@@ -126,7 +126,7 @@ static const char* MODULE = "iap";
                 transaction.transactionState == SKPaymentTransactionStateRestored) {
                 if ([transaction.transactionIdentifier isEqualToString:transactionIdentifier]) {
                     SB_LOGI("transaction found");
-                    [self finishTransaction:transaction];
+                    [self finishTransaction:transaction withData:transaction_data];
                     return TRUE;
                 }
             }

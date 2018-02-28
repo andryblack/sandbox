@@ -1,6 +1,9 @@
 #ifndef SB_IOS_IAP_EXTENSION_H_INCLUDED
 #define SB_IOS_IAP_EXTENSION_H_INCLUDED
 
+#include <sbstd/sb_map.h>
+#include <sbstd/sb_string.h>
+
 namespace Sandbox {
     class Application;
 }
@@ -11,7 +14,7 @@ namespace Sandbox {
 -(SKProduct*)getProductWithIdentifier:(NSString*)identifier;
 -(NSString*) reqiestProductsInformation:(NSArray*)products;
 -(BOOL)confirmTransaction:(NSString*)transactionData error:(NSString**) error;
--(void)finishTransaction:(SKPaymentTransaction*) transaction;
+-(void)finishTransaction:(SKPaymentTransaction*) transaction withData:(const sb::map<sb::string,sb::string>&) data;
 @end
 #else
 struct iap_manager;
@@ -24,6 +27,7 @@ private:
     iap_manager* m_mgr;
 protected:
     explicit iap_platform_extension( iap_manager* mgr );
+    iap_manager* get_manager() { return m_mgr; }
 public:
     iap_platform_extension();
     ~iap_platform_extension();

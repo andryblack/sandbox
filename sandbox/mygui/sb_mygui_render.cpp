@@ -58,6 +58,8 @@ namespace Sandbox {
             if (!m_target) {
                 m_target = prev;
             }
+            if (!m_target)
+                return;
             m_target->GetTexture()->SetFiltered(true);
             begin();
             end();
