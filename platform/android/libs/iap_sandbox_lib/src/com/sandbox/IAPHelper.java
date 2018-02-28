@@ -145,6 +145,12 @@ public class IAPHelper  {
             return obj.toString();
         }
 
+        public boolean transactionEquals(JSONObject transaction) {
+            String ticket = transaction.optString("ticket","");
+            String signature = transaction.optString("signature","");
+            return ticket.equals(getOriginalJson()) && signature.equals(getSignature());
+        }
+
         @Override
         public String toString() { return "PurchaseInfo:" + mOriginalJson; }
     }
@@ -961,7 +967,7 @@ public class IAPHelper  {
         return true;
     }
 
-    public void on_consume_purchase(Purchase purchase)  {
+    public void on_consume_purchase(Purchase purchase,JSONObject transaction)  {
         StartOperation(new ConsumePurchase(purchase));
     }
 
@@ -969,13 +975,13 @@ public class IAPHelper  {
         logDebug("iap_confirm_transaction :" + signature);
         boolean result = false;
         try {
+            JSONObject transaction = new JSONObject(signature);
             for (Purchase purchase: m_purchase_map.values()) {
                 try {
-                    String transaction = purchase.getTransaction();
-                    logDebug("check purchase :" + purchase.getSku() + " transaction:" + transaction);
-                    if (transaction.equals(signature)) {
+                    logDebug("check purchase :" + purchase.getSku());
+                    if (purchase.transactionEquals(transaction)) {
                         logDebug("found purchase for confirm " + purchase.getSku());
-                        on_consume_purchase(purchase);
+                        on_consume_purchase(purchase,transaction);
                         result = true;
                     }
                 } catch ( JSONException e) {
