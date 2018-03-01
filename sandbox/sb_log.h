@@ -31,6 +31,7 @@ namespace Sandbox {
         static bool GetPlatformLogEnabled() { return m_enable_platform_log; }
         static void SetTimeFormat(const char* fmt);
         static void flush();
+        static void stop();
         static sb::string GetCurrentPath();
         static sb::string GetPrevPath();
         static void Write(GHL::LogLevel level,const char* msg);
