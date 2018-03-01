@@ -977,15 +977,11 @@ public class IAPHelper  {
         try {
             JSONObject transaction = new JSONObject(signature);
             for (Purchase purchase: m_purchase_map.values()) {
-                try {
-                    logDebug("check purchase :" + purchase.getSku());
-                    if (purchase.transactionEquals(transaction)) {
-                        logDebug("found purchase for confirm " + purchase.getSku());
-                        on_consume_purchase(purchase,transaction);
-                        result = true;
-                    }
-                } catch ( JSONException e) {
-                    logError(e.toString());
+                logDebug("check purchase :" + purchase.getSku());
+                if (purchase.transactionEquals(transaction)) {
+                    logDebug("found purchase for confirm " + purchase.getSku());
+                    on_consume_purchase(purchase,transaction);
+                    result = true;
                 }
             }
         } catch ( Exception e ) {
