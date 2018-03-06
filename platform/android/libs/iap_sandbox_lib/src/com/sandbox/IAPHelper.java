@@ -140,6 +140,7 @@ public class IAPHelper  {
 
         public String getTransaction() throws JSONException {
             JSONObject obj = new JSONObject();
+            obj.put("product_id",getSku());
             obj.put("ticket",getOriginalJson());
             obj.put("signature",getSignature());
             return obj.toString();
