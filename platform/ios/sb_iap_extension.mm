@@ -171,7 +171,7 @@ static const char* MODULE = "iap";
         [products_info addObject:[NSDictionary dictionaryWithObjectsAndKeys:
                                   product.productIdentifier,
                                   @"product_id",
-                                  product.price,
+                                  [NSNumber numberWithDouble: product.price.doubleValue],
                                   @"price",
                                   formattedString,
                                   @"localized_price",
@@ -196,6 +196,7 @@ static const char* MODULE = "iap";
 - (NSString*) encodeTransaction:(SKPaymentTransaction*) transaction receipt:(NSData*) receipt{
     NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
      transaction.transactionIdentifier,@"id",
+     transaction.payment.productIdentifier,@"product_id",
      [receipt base64EncodedStringWithOptions:0],@"receipt",
                           nil];
     NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:dict options:0 error:nil];
@@ -253,11 +254,12 @@ static const char* MODULE = "iap";
                 [dict setObject:@"failed" forKey:@"state"];
                 if (transaction.error) {
                     [dict setObject:transaction.error.description forKey:@"error"];
+                    [dict setObject:[NSNumber numberWithInteger:transaction.error.code] forKey:@"error_code"];
+                    [dict setObject:transaction.error.domain forKey:@"error_domain"];
                 }
                 [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
                 break;
             case SKPaymentTransactionStatePurchased:
-                //[self completeTransaction:transaction];
                 [dict setObject:@"purchased" forKey:@"state"];
                 [dict setObject:[self getReceiptForTransaction:transaction] forKey:@"transaction"];
                 break;
