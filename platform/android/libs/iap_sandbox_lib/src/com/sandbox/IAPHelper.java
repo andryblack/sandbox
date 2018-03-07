@@ -755,14 +755,18 @@ public class IAPHelper  {
     class PurchaseFlow  extends IAPOperation {
         String m_sku;
         String m_extra_data;
+        boolean m_need_complete;
         public PurchaseFlow(String sku,String extraData) {
             super("PurchaseFlow");
             m_sku = sku;
             m_extra_data = extraData;
+            m_need_complete = false;
         }
         @Override
         public void OnComplete() {
-
+            if (m_need_complete) {
+                super.OnComplete();
+            }
         }
         @Override
         public void run() {
@@ -780,6 +784,7 @@ public class IAPHelper  {
                     logError("Unable to buy item, Error response: " + getResponseDesc(response));
                     result = new IabResult(response, "Unable to buy item");
                     on_iap_purchase_finished(m_sku, result, null);
+                    m_need_complete = true;
                     return;
                 }
 
@@ -796,6 +801,7 @@ public class IAPHelper  {
                 
                 result = new IabResult(IABHELPER_SEND_INTENT_FAILED, "Failed to send intent.");
                 on_iap_purchase_finished(m_sku, result,  null);
+                m_need_complete = true;
             }
             catch (RemoteException e) {
                 logError("RemoteException while launching purchase flow for sku " + m_sku);
@@ -803,6 +809,7 @@ public class IAPHelper  {
                 
                 result = new IabResult(IABHELPER_REMOTE_EXCEPTION, "Remote exception while starting purchase flow");
                 on_iap_purchase_finished(m_sku, result, null);
+                m_need_complete = true;
             }
         } 
 
