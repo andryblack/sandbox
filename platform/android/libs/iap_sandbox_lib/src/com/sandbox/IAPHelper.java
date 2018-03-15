@@ -355,6 +355,7 @@ public class IAPHelper  {
                 logDebug("Billing service disconnected.");
                 m_service = null;
                 m_setup_done = false;
+                on_iap_service_disconnected();
             }
 
             @Override
@@ -455,6 +456,19 @@ public class IAPHelper  {
         m_native_object = 0;
     }
 
+    private void on_iap_service_disconnected() {
+        logDebug("on_iap_service_disconnected");
+        try {
+            if (m_activity != null && m_service_conn != null) {
+                m_activity.unbindService(m_service_conn);
+            }
+        } catch (Exception e) {
+            logError("unbindService: " + e.getMessage());
+        }
+        m_service_conn = null;
+        if (m_native_object != 0)
+                nativeProcessResponse(m_native_object,"iap_init","{\"disconnected\":true}");
+    }
 
     class QueryPurchases  extends IAPAsyncOperation {
 
