@@ -584,6 +584,11 @@ public class IAPHelper  {
             logDebug("Querying SKU details.");
             ArrayList<String> skuList = new ArrayList<String>();
 
+            if (m_service == null ||
+                m_activity == null) {
+                return IABHELPER_BAD_RESPONSE;
+            }
+
             if (m_sku_list != null) {
                 for (String sku : m_sku_list) {
                     if (!skuList.contains(sku)) {
