@@ -64,6 +64,33 @@ namespace Sandbox {
         }
         return false;
     }
+    
+    size_t dump_lua_terminate_backtrace( char* buffer, size_t max_size ) {
+        if (g_terminate_context) {
+            const char* text = "unknown";
+            if (lua_gettop(g_terminate_context)<1 || !lua_isstring(g_terminate_context, -1)){
+                //text = "unknown";
+            } else {
+                text = lua_tostring(g_terminate_context, -1);
+            }
+            luaL_traceback(g_terminate_context,
+                           g_terminate_thread?g_terminate_thread:g_terminate_context,text,1);
+            size_t size = 0;
+            const char* data = lua_tolstring(g_terminate_context, -1, &size);
+            if (data) {
+                if (size > max_size) {
+                    size = max_size;
+                }
+                memcpy(buffer,data,size);
+                
+                lua_pop(g_terminate_context, 1);
+                
+                return size;
+            }
+            lua_pop(g_terminate_context, 1);
+        }
+        return 0;
+    }
 		
     
 	struct lua_read_data {

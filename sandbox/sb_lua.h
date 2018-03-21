@@ -34,6 +34,8 @@ namespace Sandbox {
     typedef sb::intrusive_ptr<LuaContext> LuaContextPtr;
 	
     extern lua_State* g_terminate_thread;
+    extern size_t dump_lua_terminate_backtrace( char* buffer, size_t max_size );
+    
     typedef int (*LuaCFunction)(lua_State*);
     
     class LuaVM : public NotCopyable {
