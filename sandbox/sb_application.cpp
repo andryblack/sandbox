@@ -636,6 +636,10 @@ namespace Sandbox {
         float width = twidth / scale;
         float height = theight / scale;
         RenderTargetPtr target = m_resources->CreateRenderTarget(int(width), int(height), scale, false, false);
+        if (!target) {
+            ImagePtr img(new Image(TexturePtr(),0,0,width,height,width,height));
+            return img;
+        }
         m_render->BeginScene(target->GetNative());
         m_graphics->BeginScene(m_render,target);
         DoDrawScreen();

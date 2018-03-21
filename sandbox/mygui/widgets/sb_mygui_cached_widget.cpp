@@ -100,9 +100,6 @@ namespace Sandbox {
         void CachedWidget::initialiseOverride() {
             Base::initialiseOverride();
             MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate( this, &CachedWidget::frameEntered );
-            m_target = static_cast<mygui::RenderManager*>(MyGUI::RenderManager::getInstancePtr())->createTarget(getSize());
-            if (m_target)
-                setRenderItemTexture(m_target->getTexture());
         }
         
         void CachedWidget::shutdownOverride() {
