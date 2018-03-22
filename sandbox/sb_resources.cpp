@@ -320,6 +320,9 @@ namespace Sandbox {
 		GHL::Image* fillData = setData ? 0 : GHL_CreateImage(tw,th,img->GetFormat());
         if (fillData) fillData->Fill(0);
         GHL::Texture* texture = m_render->CreateTexture(tw,th,tfmt,setData ? img : fillData);
+        if (!texture) {
+            return 0;
+        }
 		tfmt = texture->GetFormat();
 		GHL::ImageFormat ifmt;
 		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
