@@ -108,6 +108,7 @@ namespace Sandbox {
 		Resources* GetResources() const { return m_resources;}
         Graphics* GetGraphics() const { return m_graphics; }
         Scene* GetScene() const { return m_main_scene; }
+        SoundManager* GetSoundManager() const { return m_sound_mgr; }
 		
 		void SetClearColor(const Color& c);
         void SetClearDepth(float d);

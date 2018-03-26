@@ -7,6 +7,7 @@
 #include <sb_file_provider.h>
 #include <ghl_vfs.h>
 #include <ghl_image_decoder.h>
+#include <ghl_sound.h>
 #include <meta/sb_meta.h>
 #include "tasks_pool.h"
 #include "texture.h"
@@ -63,6 +64,9 @@ public:
     GHL::Int32 get_png_encode_settings() const { return m_png_encode_settings; }
     void set_jpeg_encode_settings(GHL::Int32 settings);
     GHL::Int32 get_jpeg_encode_settings() const { return m_jpeg_encode_settings; }
+
+
+    virtual GHL::SoundDecoder* create_sound_decoder(GHL::DataStream* ds);
 protected:
     virtual double GetVersion() const;
     Sandbox::LuaVM* GetLua() { return m_lua; }

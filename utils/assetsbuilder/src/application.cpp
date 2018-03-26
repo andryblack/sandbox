@@ -490,7 +490,7 @@ public:
             Sandbox::LogError() << "failed openng " << m_src;
             return false;
         }
-        GHL::SoundDecoder* decoder = GHL_CreateSoundDecoder(src_ds);
+        GHL::SoundDecoder* decoder = m_app->create_sound_decoder(src_ds);
         if (!decoder) {
             src_ds->Release();
             Sandbox::LogError() << "failed decode " << m_src;
@@ -525,7 +525,7 @@ bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
         Sandbox::LogError() << "failed openng " << src;
         return false;
     }
-    GHL::SoundDecoder* decoder = GHL_CreateSoundDecoder(src_ds);
+    GHL::SoundDecoder* decoder = create_sound_decoder(src_ds);
     if (!decoder) {
         src_ds->Release();
         Sandbox::LogError() << "failed decode " << src;
@@ -545,6 +545,10 @@ bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
     dst_ds->Close();
     dst_ds->Release();
     return res;
+}
+
+GHL::SoundDecoder* Application::create_sound_decoder(GHL::DataStream* ds) {
+    return GHL_CreateSoundDecoder(ds);
 }
 
 
