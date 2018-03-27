@@ -106,6 +106,8 @@ namespace Sandbox {
         void    SetMusicVolume( float v);
         float   GetMusicVolume() const { return m_music_volume; }
         
+        void ClearCache();
+        
         void PlayMusic(const char* filename,bool loop);
         void PlayMusicEx(const char* filename,bool loop,float fade_in, float fade_out_current);
         

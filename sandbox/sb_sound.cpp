@@ -214,16 +214,20 @@ namespace Sandbox {
     }
     
     void SoundManager::Deinit() {
-        for (SoundsMap::iterator it = m_sounds.begin();it!=m_sounds.end();++it) {
-            it->second->Release();
-        }
-        m_sounds.clear();
+        ClearCache();
         m_fade_ins.clear();
         m_fade_outs.clear();
         m_music.reset();
         m_fade_outs_musics.clear();
         m_sound = 0;
         m_resources = 0;
+    }
+    
+    void SoundManager::ClearCache() {
+        for (SoundsMap::iterator it = m_sounds.begin();it!=m_sounds.end();++it) {
+            it->second->Release();
+        }
+        m_sounds.clear();
     }
     
     void    SoundManager::SetSoundsDir(const char* dir) {
