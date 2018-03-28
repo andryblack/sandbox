@@ -575,9 +575,11 @@ namespace Sandbox {
     }
     
     void Application::DoRestart() {
+        SB_LOGI("DoRestart >>>");
         Unload();
         Logger::StartSession(GetVFS());
         Load();
+        SB_LOGI("DoRestart <<<");
     }
     
     void Application::DoExit() {

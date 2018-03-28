@@ -71,7 +71,7 @@ namespace Sandbox {
     
     class MusicInstance : public sb::ref_countered_base_not_copyable {
     public:
-        explicit MusicInstance( GHL::MusicInstance* );
+        explicit MusicInstance(  GHL::MusicInstance* );
         ~MusicInstance();
         
         void Play(bool loop);
@@ -85,10 +85,12 @@ namespace Sandbox {
         bool Update( float dt );
         void SetVolume( float vol );
     private:
+         GHL::MusicInstance* m_music;
+        
         float m_volume;
         float m_fade_volume;
         float m_fade_speed;
-        GHL::MusicInstance* m_music;
+        
     };
     typedef sb::intrusive_ptr<MusicInstance> MusicInstancePtr;
     
@@ -116,6 +118,8 @@ namespace Sandbox {
     private:
         friend class Sound;
         friend class SoundInstance;
+        friend class MusicInstance;
+        
         GHL::Sound* m_sound;
         Resources*  m_resources;
         sb::string  m_sounds_dir;
@@ -129,6 +133,9 @@ namespace Sandbox {
         MusicInstancePtr m_music;
         typedef sb::list<MusicInstancePtr> MusicsList;
         MusicsList  m_fade_outs_musics;
+        
+        GHL::MusicInstance* open_music(const char* fn);
+        sb::string m_last_music;
     };
     
 }
