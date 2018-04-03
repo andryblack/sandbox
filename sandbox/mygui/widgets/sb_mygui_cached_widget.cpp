@@ -154,6 +154,9 @@ namespace Sandbox {
         void CachedWidget::frameEntered(float dt) {
             if (getInheritedVisible() && getAlpha()>0.0f)
                 renderToTarget(true);
+            else {
+                releaseTarget();
+            }
         }
         
         void CachedWidget::recursiveRenderChilds(MyGUI::Widget* ch) {
@@ -169,6 +172,13 @@ namespace Sandbox {
             }
         }
         
+        void CachedWidget::releaseTarget() {
+            if (m_target) {
+                delete m_target;
+                m_target = 0;
+                setRenderItemTexture(0);
+            }
+        }
         
         RenderTargetImpl* CachedWidget::renderToTarget(bool update_) {
             MyGUI::IntSize size = getSize();

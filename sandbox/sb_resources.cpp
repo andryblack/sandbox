@@ -582,7 +582,7 @@ namespace Sandbox {
                 memory_used += t->GetMemoryUsage();
                 if (need_release) {
                     size_t lt = t->GetLiveTicks();
-                    if ( lt && lt < m_live_ticks ) {
+                    if ( (lt && lt < m_live_ticks) || t->unique() ) {
                         
                         size_t released = t->Release();
                         memory_used-=released;
@@ -618,11 +618,11 @@ namespace Sandbox {
         m_textures.clear();
         m_shaders.clear();
         for (sb::map<sb::string,GHL::VertexShader*>::iterator it = m_vshaders.begin();it!=m_vshaders.end();++it) {
-            it->second->Release();
+            if (it->second) it->second->Release();
         }
         m_vshaders.clear();
         for (sb::map<sb::string,GHL::FragmentShader*>::iterator it = m_fshaders.begin();it!=m_fshaders.end();++it) {
-            it->second->Release();
+            if (it->second) it->second->Release();
         }
         m_fshaders.clear();
         m_memory_used = 0;
