@@ -34,7 +34,7 @@ namespace Sandbox {
             
             EventHandle_GHLEventPtr eventGHLEvent;
         protected:
-            void get_mygui_localization(const MyGUI::UString & key,MyGUI::UString& value);
+            virtual void get_mygui_localization(const MyGUI::UString & key,MyGUI::UString& value);
             void mygui_change_key_focus( MyGUI::Widget* w );
             void mygui_clipboard_changed( const std::string& type, const std::string& text );
             void mygui_clipboard_requested( const std::string& type, std::string& text  );

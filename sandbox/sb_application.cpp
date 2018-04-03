@@ -377,6 +377,12 @@ namespace Sandbox {
 #endif
     }
     
+#ifdef SB_USE_MYGUI
+    mygui::GUI* Application::CreateGUI() {
+        return new mygui::GUI(m_system);
+    }
+#endif
+    
     ///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
         sb_ensure_main_thread();
@@ -501,7 +507,7 @@ namespace Sandbox {
         }
         
         if (!m_gui) {
-            m_gui = new mygui::GUI(m_system);
+            m_gui = CreateGUI();
             m_gui->initialize(m_lua->GetGlobalContext());
             mygui::register_factory();
             RegisterWidgets();

@@ -145,6 +145,9 @@ namespace Sandbox {
         
         virtual Resources* CreateResourcesManager();
         virtual Network* CreateNetwork();
+#ifdef SB_USE_MYGUI
+        virtual mygui::GUI* CreateGUI();
+#endif
         virtual void InitResources();
         virtual void ReleaseResources();
         
