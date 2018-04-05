@@ -103,6 +103,7 @@ namespace Sandbox {
 		
 		GHL::Render* GetRender() const { return m_render;}
         GHL::ImageDecoder* GetImageDecoder() const { return m_image_decoder; }
+        GHL::Sound* GetSound() const { return m_sound; }
 		LuaVM* GetLua() const { return m_lua;}
 		ThreadsMgr* GetThreads() const { return m_main_thread;}
 		Resources* GetResources() const { return m_resources;}

@@ -66,7 +66,14 @@ project 'GHL'
 		local use_vorbis = true
 
 		if os.is('ios') or os.is('macosx') then
-			use_openal = not ghl_disable_media
+			if not ghl_disable_media then
+				if ghl_use_avaudioengine then
+					defines 'GHL_USE_AVAUDIOENGINE'
+				else
+					use_openal = true
+				end
+			end
+			
 			use_opengl = not ghl_disable_media
 		end
 
