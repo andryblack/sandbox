@@ -54,10 +54,11 @@ namespace Sandbox {
                 raw_ptr,
                 shared_ptr,
                 intrusive_ptr
-            } type;
-            bool    is_const;
+            } type:8;
+            bool    is_const:8;
             void    (*destructor)(data_holder* data);
         };
+        GHL_STATIC_ASSERT(sizeof(data_holder)==(sizeof(void*)*3));
         
         template <class T>
         struct destructor_helper {

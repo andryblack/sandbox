@@ -89,14 +89,18 @@ namespace Sandbox {
 #endif
         for (size_t i=0;i<m_pools.size();++i) {
             tlsf_remove_pool(m_tlsf, m_pools[i]->pool);
-            delete m_pools[i];
+            ::free(m_pools[i]);
         }
         tlsf_destroy(m_tlsf);
     }
     
     void MemoryMgr::append_pool() {
         LogInfo() << "append_pool";
-        pool_block_t* block = new pool_block_t();
+        pool_block_t* block = static_cast<pool_block_t*>(::malloc(sizeof(pool_block_t)));
+        if (!block) {
+            LogError() << "failed allocate block";
+            return;
+        }
         uintptr_t addr  = (uintptr_t)block->mem;
         size_t remove = 0;
         if (addr % mem_align != 0) {
@@ -114,6 +118,7 @@ namespace Sandbox {
         if (!data) {
             append_pool();
             data = tlsf_malloc(m_tlsf,size+MEM_HEADER+MEM_FOOTER);
+            if (!data) return 0;
         }
         MEM_INIT(data,size)
         return static_cast<GHL::Byte*>(data)+MEM_HEADER;
@@ -134,6 +139,7 @@ namespace Sandbox {
         if (!data) {
             append_pool();
             data = tlsf_realloc(m_tlsf,ptr-MEM_HEADER,nsize+MEM_HEADER+MEM_FOOTER);
+            if (!data) return 0;
         }
         MEM_INIT(data,nsize)
         return static_cast<GHL::Byte*>(data)+MEM_HEADER;
