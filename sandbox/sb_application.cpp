@@ -775,7 +775,7 @@ namespace Sandbox {
         m_batches_rt = m_batches_rt * 0.875f + 0.125f*batches;    /// interpolate 4 frames
     }
 	
-	void Application::DrawDebugInfo() {
+	int Application::DrawDebugInfo() {
 		char buf[128];
 		sb::snprintf(buf,128,"fps:%0.2f",m_fps);
 		m_render->SetProjectionMatrix(Matrix4f::ortho(0.0f,
@@ -799,6 +799,7 @@ namespace Sandbox {
         sb::snprintf(buf,128,"objects:%d",int(meta::object::count()));
         m_render->DebugDrawText( 10, y, buf );
         y += 11;
+        return y;
 	}
     
     void    Application::AddScene( const RTScenePtr& scene ) {

@@ -167,6 +167,8 @@ namespace Sandbox {
         virtual void OnLuaCreated() {}
         // called before lua destroyed
         virtual void OnLuaDestroy() {}
+        
+        virtual int DrawDebugInfo();
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -185,7 +187,7 @@ namespace Sandbox {
 		GHL::UInt32		m_frames_time;
 		float			m_fps;
         bool            m_draw_debug_info;
-		void DrawDebugInfo();
+		
 		ThreadsMgr*		m_main_thread;
 		Scene*			m_main_scene;
         sb::list<RTScenePtr>    m_rt_scenes;
