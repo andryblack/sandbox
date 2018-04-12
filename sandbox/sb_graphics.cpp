@@ -528,8 +528,8 @@ namespace Sandbox {
         BeginDrawImage(img);
         const float w = img.GetWidth();
 		const float h = img.GetHeight();
-		x-=img.GetHotspot().x*w/img.GetTextureW();
-        y-=img.GetHotspot().y*h/img.GetTextureH();
+		x-=img.GetHotspot().x*w/img.GetTextureDrawW();
+        y-=img.GetHotspot().y*h/img.GetTextureDrawH();
         CheckFlush(false);
         
         appendQuad();
@@ -572,8 +572,8 @@ namespace Sandbox {
         BeginDrawImage(img);
 		const float w = img.GetWidth()*scale;
 		const float h = img.GetHeight()*scale;
-		x-=img.GetHotspot().x*w/img.GetTextureW();
-        y-=img.GetHotspot().y*h/img.GetTextureH();
+		x-=img.GetHotspot().x*w/img.GetTextureDrawW();
+        y-=img.GetHotspot().y*h/img.GetTextureDrawH();
         
         CheckFlush(false);
         

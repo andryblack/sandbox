@@ -491,8 +491,8 @@ public:
             return false;
         }
         GHL::SoundDecoder* decoder = m_app->create_sound_decoder(src_ds);
+        src_ds->Release();
         if (!decoder) {
-            src_ds->Release();
             Sandbox::LogError() << "failed decode " << m_src;
             return false;
         }
@@ -500,13 +500,11 @@ public:
         GHL::WriteStream* dst_ds = m_app->OpenDestFile(m_dst.c_str());
         if (!dst_ds) {
             decoder->Release();
-            src_ds->Release();
             Sandbox::LogError() << "failed open dst " << m_dst;
             return false;
         }
         bool res = en.convert(decoder, dst_ds,Sandbox::MD5Hash(m_src.c_str()));
         decoder->Release();
-        src_ds->Release();
         dst_ds->Flush();
         dst_ds->Close();
         dst_ds->Release();
@@ -526,21 +524,19 @@ bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
         return false;
     }
     GHL::SoundDecoder* decoder = create_sound_decoder(src_ds);
+    src_ds->Release();
     if (!decoder) {
-        src_ds->Release();
         Sandbox::LogError() << "failed decode " << src;
         return false;
     }
     GHL::WriteStream* dst_ds = OpenDestFile(dst.c_str());
     if (!dst_ds) {
         decoder->Release();
-        src_ds->Release();
         Sandbox::LogError() << "failed open dst " << dst;
         return false;
     }
     bool res = en.convert(decoder, dst_ds,Sandbox::MD5Hash(src.c_str()));
     decoder->Release();
-    src_ds->Release();
     dst_ds->Flush();
     dst_ds->Close();
     dst_ds->Release();
