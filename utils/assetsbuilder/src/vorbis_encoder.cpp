@@ -6,9 +6,10 @@
 // based on https://svn.xiph.org/trunk/vorbis/examples/encoder_example.c
 
 #include "vorbis_encoder.h"
+#include "application.h"
 #include <stdlib.h>
 
-VorbisEncoder::VorbisEncoder() {
+VorbisEncoder::VorbisEncoder(Application* app) : m_app(app) {
     
 }
 
@@ -35,6 +36,13 @@ static float convert_sample8_m(const GHL::Byte* data,int /*ch*/,int s) {
     return (float(data[s]) / 255.0f)*2-255.0f;
 }
 typedef float(*convert_sample_t)(const GHL::Byte* data,int ch,int s);
+
+static void _v_writestring(oggpack_buffer *o,const char *s, int bytes){
+    
+    while(bytes--){
+        oggpack_write(o,*s++,8);
+    }
+}
 
 bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,int serial) {
     
@@ -82,6 +90,43 @@ bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,
         vorbis_analysis_headerout(&m_vd,&m_vc,&header,&header_comm,&header_code);
         ogg_stream_packetin(&m_os,&header); /* automatically placed in its own
                                            page */
+        
+        const char* override_encoder_comment = m_app->get_vorbis_encoder_comment();
+        if (override_encoder_comment) {
+            oggpack_buffer opb;
+            oggpack_writeinit(&opb);
+            
+            ogg_int32_t bytes = ::strlen(override_encoder_comment);
+            
+            /* preamble */
+            oggpack_write(&opb,0x03,8);
+            _v_writestring(&opb,"vorbis", 6);
+            
+            /* vendor */
+            oggpack_write(&opb,bytes,32);
+            _v_writestring(&opb,override_encoder_comment, bytes);
+            
+            /* comments */
+            
+            oggpack_write(&opb,m_vc.comments,32);
+            if(m_vc.comments){
+                int i;
+                for(i=0;i<m_vc.comments;i++){
+                    if(m_vc.user_comments[i]){
+                        oggpack_write(&opb,m_vc.comment_lengths[i],32);
+                        _v_writestring(&opb,m_vc.user_comments[i], m_vc.comment_lengths[i]);
+                    }else{
+                        oggpack_write(&opb,0,32);
+                    }
+                }
+            }
+            oggpack_write(&opb,1,1);
+            
+            header_comm.packet = static_cast<unsigned char*>(::malloc(oggpack_bytes(&opb)));
+            header_comm.bytes = oggpack_bytes(&opb);
+            memcpy(header_comm.packet,opb.buffer,oggpack_bytes(&opb));
+        }
+        
         ogg_stream_packetin(&m_os,&header_comm);
         ogg_stream_packetin(&m_os,&header_code);
         
@@ -95,6 +140,9 @@ bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,
             output->Write(reinterpret_cast<const GHL::Byte*>(m_og.body), m_og.body_len);
         }
         
+        if (override_encoder_comment) {
+            ::free(header_comm.packet);
+        }
     }
     
     convert_sample_t convert_sample = 0;

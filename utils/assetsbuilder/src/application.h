@@ -67,6 +67,7 @@ public:
 
 
     virtual GHL::SoundDecoder* create_sound_decoder(GHL::DataStream* ds);
+    virtual const char* get_vorbis_encoder_comment() const { return 0; }
 protected:
     virtual double GetVersion() const;
     Sandbox::LuaVM* GetLua() { return m_lua; }

@@ -14,6 +14,7 @@
 class Application;
 class VorbisEncoder {
 private:
+    Application*        m_app;
     ogg_stream_state    m_os;
     ogg_page            m_og;
     ogg_packet          m_op;
@@ -22,7 +23,7 @@ private:
     vorbis_dsp_state    m_vd;
     vorbis_block        m_vb;
 public:
-    VorbisEncoder();
+    explicit VorbisEncoder(Application* app);
 public:
     bool convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,int serial);
 };

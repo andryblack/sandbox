@@ -496,7 +496,7 @@ public:
             Sandbox::LogError() << "failed decode " << m_src;
             return false;
         }
-        VorbisEncoder en;
+        VorbisEncoder en(m_app);
         GHL::WriteStream* dst_ds = m_app->OpenDestFile(m_dst.c_str());
         if (!dst_ds) {
             decoder->Release();
@@ -517,7 +517,7 @@ bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
         m_tasks->AddTask(TaskPtr(new VorbisEncoderTask(this,src,dst)));
         return true;
     }
-    VorbisEncoder en;
+    VorbisEncoder en(this);
     GHL::DataStream* src_ds = m_vfs->OpenFile(append_path(m_src_dir, src).c_str());
     if (!src_ds) {
         Sandbox::LogError() << "failed openng " << src;
