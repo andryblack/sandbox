@@ -52,6 +52,8 @@ namespace Sandbox {
                                  FileProvider* files,
                                  TextureProvider* textures);
         Sizef GetSize() const;
+        sb::vector<EventPtr> GetAnimationEvents(const char* animation) const;
+        void PreloadTextures(Resources* resources);
     protected:
         SpineData();
         spAtlas*   m_atlas;
