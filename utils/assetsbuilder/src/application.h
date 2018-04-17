@@ -45,7 +45,7 @@ public:
     bool write_text_file( const sb::string& file , const char* data  );
     bool premultiply_image( const sb::string& src, const sb::string& dst );
     bool rebuild_image( const sb::string& src, const sb::string& dst );
-    bool encode_sound( const sb::string& src, const sb::string& dst );
+    bool encode_sound( const sb::string& src, const sb::string& dst , bool force_mono);
     
 	int run();
     
@@ -68,6 +68,9 @@ public:
 
     virtual GHL::SoundDecoder* create_sound_decoder(GHL::DataStream* ds);
     virtual const char* get_vorbis_encoder_comment() const { return 0; }
+    
+    GHL::UInt32 get_sounds_encode_bps() const { return m_sound_encode_bps;}
+    void set_sounds_encode_bps(GHL::UInt32 bps) { m_sound_encode_bps = bps;}
 protected:
     virtual double GetVersion() const;
     Sandbox::LuaVM* GetLua() { return m_lua; }
@@ -90,6 +93,7 @@ private:
     sb::vector<sb::string> m_arguments;
     GHL::Int32 m_jpeg_encode_settings;
     GHL::Int32 m_png_encode_settings;
+    GHL::UInt32 m_sound_encode_bps;
 };
 
 #endif /*APPLICATION_H_INCLUDED*/

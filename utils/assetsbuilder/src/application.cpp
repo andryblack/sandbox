@@ -161,6 +161,7 @@ SB_META_PROPERTY_RW(png_encode_settings, get_png_encode_settings, set_png_encode
 SB_META_PROPERTY_RW(jpeg_encode_settings, get_jpeg_encode_settings, set_jpeg_encode_settings)
 SB_META_PROPERTY_RW(dst_path,get_dst_path,set_dst_path)
 SB_META_PROPERTY_RW(options,get_options,set_options)
+SB_META_PROPERTY_RW(sounds_encode_bps, get_sounds_encode_bps, set_sounds_encode_bps)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(Texture, Sandbox::meta::object)
@@ -214,7 +215,7 @@ Application::Application() : m_lua(0),m_vfs(0),m_update_only(false) {
     
     m_png_encode_settings = 0;
     m_jpeg_encode_settings = 0;
-    
+    m_sound_encode_bps = 128000;
 
 #if defined( GHL_PLATFORM_MAC )
     m_platform = "osx";
@@ -479,10 +480,14 @@ bool Application::rebuild_image( const sb::string& src, const sb::string& dst ) 
 class VorbisEncoderTask : public Task {
 private:
     Application* m_app;
+    bool m_stereo;
     sb::string m_src;
     sb::string m_dst;
 public:
-    VorbisEncoderTask(Application* app,const sb::string& src_file,const sb::string& dst_file) : m_app(app),
+    VorbisEncoderTask(Application* app,
+                      const sb::string& src_file,
+                      const sb::string& dst_file,
+                      bool stereo) : m_app(app),
         m_src(src_file),m_dst(dst_file) {}
     virtual bool RunImpl() {
         GHL::DataStream* src_ds = m_app->OpenFile(m_src.c_str());
@@ -496,7 +501,7 @@ public:
             Sandbox::LogError() << "failed decode " << m_src;
             return false;
         }
-        VorbisEncoder en(m_app);
+        VorbisEncoder en(m_app,m_stereo);
         GHL::WriteStream* dst_ds = m_app->OpenDestFile(m_dst.c_str());
         if (!dst_ds) {
             decoder->Release();
@@ -512,12 +517,12 @@ public:
     }
 };
 
-bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
+bool Application::encode_sound( const sb::string& src, const sb::string& dst , bool force_mono) {
     if (m_tasks) {
-        m_tasks->AddTask(TaskPtr(new VorbisEncoderTask(this,src,dst)));
+        m_tasks->AddTask(TaskPtr(new VorbisEncoderTask(this,src,dst,!force_mono)));
         return true;
     }
-    VorbisEncoder en(this);
+    VorbisEncoder en(this,!force_mono);
     GHL::DataStream* src_ds = m_vfs->OpenFile(append_path(m_src_dir, src).c_str());
     if (!src_ds) {
         Sandbox::LogError() << "failed openng " << src;

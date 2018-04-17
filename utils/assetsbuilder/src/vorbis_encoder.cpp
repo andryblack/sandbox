@@ -9,7 +9,7 @@
 #include "application.h"
 #include <stdlib.h>
 
-VorbisEncoder::VorbisEncoder(Application* app) : m_app(app) {
+VorbisEncoder::VorbisEncoder(Application* app,bool stereo) : m_app(app),m_stereo(stereo) {
     
 }
 
@@ -60,7 +60,7 @@ bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,
      Encoding using an average bitrate mode (ABR).
      example: 44kHz stereo coupled, average 128kbps VBR
     */
-    int ret = vorbis_encode_init(&m_vi,channels,decoder->GetFrequency(),-1,128000,-1);
+    int ret = vorbis_encode_init(&m_vi,m_stereo?channels:1,decoder->GetFrequency(),-1,m_app->get_sounds_encode_bps(),-1);
     if (ret != 0) {
         return false;
     }
@@ -181,9 +181,20 @@ bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,
             /* expose the buffer to submit data */
             float **buffer=vorbis_analysis_buffer(&m_vd,READ_SAMPLES);
             /* uninterleave samples */
-            for (int ch=0;ch<channels;++ch) {
+            if (!m_stereo) {
                 for (GHL::UInt32 s=0;s<samples;++s) {
-                    buffer[ch][s]=convert_sample(samples_buffer,ch,s);
+                    float d = 0.0f;
+                    for (int ch=0;ch<channels;++ch) {
+                        d+=convert_sample(samples_buffer,ch,s);
+                    }
+                    d = d / channels;
+                    buffer[0][s]=d;
+                }
+            } else {
+                for (int ch=0;ch<channels;++ch) {
+                    for (GHL::UInt32 s=0;s<samples;++s) {
+                        buffer[ch][s]=convert_sample(samples_buffer,ch,s);
+                    }
                 }
             }
             /* tell the library how much we actually submitted */
