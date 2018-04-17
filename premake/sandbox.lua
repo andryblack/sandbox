@@ -382,6 +382,8 @@ solution( ProjectName )
 			'GHL'
 		} )
 
+		links(ghl_links)
+
 		if use.MyGUI then
 			links { 'MyGUI' }
 			includedirs { sandbox_dir .. '/external/MyGUI/MyGUIEngine/include' }

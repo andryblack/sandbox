@@ -6,25 +6,35 @@ end
 
 local append_path = utils.append_path
 
-project 'GHL'
+local ghl_src = sandbox_dir .. '/GHL/src/'
+ghl_links = {}
+
+project 'GHL-zlib'
 		kind 'StaticLib'
-
-		local ghl_src = sandbox_dir .. '/GHL/src/'
-
 		configure_lib_targetdir()
+		targetname ('GHL-zlib-' .. platform_dir)
+		buildoptions{'-O3'}
 		
-		targetname ('GHL-' .. platform_dir)
-
 		local zlib_files = { 'inffixed.h', 'inftrees.c', 'inftrees.h', 'adler32.c', 'crc32.c', 'crc32.h', 'crypt.h',
 							 'deflate.c', 'deflate.h', 'inffast.c', 'inffast.h', 'inflate.c', 'inflate.h', 'ioapi.h',
 							 'zconf.h',  'zlib.h', 'zutil.c', 'zutil.h', 'trees.h', 'trees.c', 'compress.c', 'uncompr.c'}
 
 		files(append_path(ghl_src .. '/zlib/',zlib_files))
+		table.insert(ghl_links,1,'GHL-zlib')
+
+local ghl_defines = {}
+local ghl_sysincludes = {}
+
 
 		if (os.is('ios') or os.is('macosx')) and not ghl_disable_media  then
 			ghl_disable_jpeg = true
 		end
 		if not ghl_disable_jpeg then
+			project 'GHL-jpeg'
+			kind 'StaticLib'
+			configure_lib_targetdir()
+			targetname ('GHL-jpeg-' .. platform_dir)
+
 			local jpeg_files = {
 				'jaricom.c', 'jcapimin.c', 'jcapistd.c', 'jcarith.c', 'jccoefct.c','jccolor.c',
 				'jcdctmgr.c', 'jchuff.c', 'jcinit.c', 'jcmainct.c', 'jcmarker.c', 'jcmaster.c', 'jcomapi.c', 'jcparam.c',
@@ -34,15 +44,89 @@ project 'GHL'
 				'jidctfst.c', 'jidctint.c', 'jmemmgr.c', 'jmemnobs.c', 'jquant1.c', 'jquant2.c', 'jutils.c',	'transupp.c' 
 			}
 			files(append_path(ghl_src .. '/image/jpeg/',jpeg_files))
+			table.insert(ghl_links,1,'GHL-jpeg')
 		else
-			defines 'GHL_DISABLE_JPEG'
+			table.insert(ghl_defines, 'GHL_DISABLE_JPEG')
 		end
 
+project 'GHL-png'
+		kind 'StaticLib'
+		configure_lib_targetdir()
+		targetname ('GHL-png-' .. platform_dir)
+		buildoptions{'-O3'}
+		
 		local png_files = {
 			'png.c', 'pngerror.c', 'pngget.c', 'pngmem.c', 'pngpread.c', 'pngread.c', 'pngrio.c', 'pngrtran.c',
 			'pngrutil.c', 'pngset.c', 'pngtrans.c', 'pngwio.c', 'pngwrite.c', 'pngwtran.c', 'pngwutil.c' 
 		}
 		files(append_path(ghl_src .. '/image/libpng/',png_files))
+		table.insert(ghl_links,1,'GHL-png')
+
+project 'GHL-ogg'
+		kind 'StaticLib'
+		configure_lib_targetdir()
+		targetname ('GHL-ogg-' .. platform_dir)
+		buildoptions{'-O3'}
+		
+		sysincludedirs {
+			ghl_src .. '/sound/libogg/include'
+		}
+
+		local ogg_files = {'bitwise.c','framing.c','*.h'}
+		files(append_path(ghl_src .. '/sound/libogg/src/',ogg_files))
+		files(ghl_src .. '/sound/libogg/include/**.h')
+
+		table.insert(ghl_sysincludes,ghl_src .. '/sound/libogg/include')
+
+		table.insert(ghl_links,1,'GHL-ogg')
+
+project 'GHL-vorbis'
+		kind 'StaticLib'
+		configure_lib_targetdir()
+		targetname ('GHL-vorbis-' .. platform_dir)
+		buildoptions{'-O3'}
+		
+		includedirs {
+			ghl_src .. '/sound/libvorbis/lib',
+		}
+
+		local vorbis_files = {'bitrate.c','block.c','codebook.c','envelope.c','floor0.c','floor1.c','info.c','lookup.c',
+				'lpc.c','lsp.c','mapping0.c','mdct.c','psy.c','registry.c','res0.c','sharedbook.c','smallft.c','synthesis.c',
+				'vorbisfile.c','window.c','*.h'}
+		if build_cli_tools then
+			table.insert(vorbis_files,'analysis.c')
+			table.insert(vorbis_files,'vorbisenc.c')
+			table.insert(vorbis_files,'modes/*.h')
+			table.insert(vorbis_files,'books/**.h')
+		end
+
+		sysincludedirs {
+			ghl_src .. '/sound/libogg/include',
+			ghl_src .. '/sound/libvorbis/include'
+		}
+
+		files(append_path(ghl_src .. '/sound/libvorbis/lib/',vorbis_files))
+		files(ghl_src .. '/sound/libvorbis/include/**.h')
+		table.insert(ghl_sysincludes,ghl_src .. '/sound/libvorbis/include')
+		links{'GHL-ogg'}
+		table.insert(ghl_links,1,'GHL-vorbis')
+project 'GHL'
+		kind 'StaticLib'
+
+		configure_lib_targetdir()
+		
+		targetname ('GHL-' .. platform_dir)
+
+		
+		if next(ghl_defines) then
+			defines(ghl_defines)
+		end
+
+		if next(ghl_sysincludes) then
+			sysincludedirs(ghl_sysincludes)
+		end
+		
+		includedirs(ghl_src)
 
 		files {
 			sandbox_dir .. '/GHL/include/**.h',
@@ -56,6 +140,7 @@ project 'GHL'
 			ghl_src .. 'sound/ghl_sound_impl.h',
 			ghl_src .. 'sound/sound_decoders.cpp',
 			ghl_src .. 'sound/wav_decoder.*',
+			ghl_src .. 'sound/vorbis_decoder.*',
 			ghl_src .. 'render/buffer_impl.*',
 			ghl_src .. 'render/lucida_console_regular_8.*',
 			ghl_src .. 'render/render_impl.*',
@@ -67,8 +152,7 @@ project 'GHL'
 
 		local use_openal = false
 		local use_opengl = false
-		local use_vorbis = true
-
+		
 		if os.is('ios') or os.is('macosx') then
 			if not ghl_disable_media then
 				if ghl_use_avaudioengine then
@@ -83,7 +167,6 @@ project 'GHL'
 
 		if os.is('windows') then
 			use_opengl = not ghl_disable_media
-			use_vorbis = true
 		end
 
 		if os.is('android') then
@@ -102,12 +185,6 @@ project 'GHL'
 			}
 		end
 
-		if use_vorbis then
-
-			files {
-				ghl_src .. 'sound/vorbis_decoder.*'
-			}
-		end
 
 		if use_opengl then
 			files {
@@ -134,28 +211,7 @@ project 'GHL'
 		end
 
 
-		if use_vorbis then
-			sysincludedirs {
-				ghl_src .. '/sound/libogg/include',
-				ghl_src .. '/sound/libvorbis/include'
-			}
-			includedirs {
-				ghl_src .. '/sound/libvorbis/lib',
-			}
-			local ogg_files = {'bitwise.c','framing.c'}
-			files(append_path(ghl_src .. '/sound/libogg/src/',ogg_files))
-			local vorbis_files = {'bitrate.c','block.c','codebook.c','envelope.c','floor0.c','floor1.c','info.c','lookup.c',
-				'lpc.c','lsp.c','mapping0.c','mdct.c','psy.c','registry.c','res0.c','sharedbook.c','smallft.c','synthesis.c',
-				'vorbisfile.c','window.c'}
-			if build_cli_tools then
-				table.insert(vorbis_files,'analysis.c')
-				table.insert(vorbis_files,'vorbisenc.c')
-				table.insert(vorbis_files,'modes/*.h')
-				table.insert(vorbis_files,'books/**.h')
-			end
-			files(append_path(ghl_src .. '/sound/libvorbis/lib/',vorbis_files))
-		end
-
+		
 		if build_cli_tools then
 			defines{ 'GHL_BUILD_TOOLS' }
 			if os.is('windows') then

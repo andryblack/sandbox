@@ -191,6 +191,8 @@
 			'yajl',
 			'tlsf'
 		} 
+
+		links(ghl_links)
 	end
 	
 --

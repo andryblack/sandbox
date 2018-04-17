@@ -238,6 +238,13 @@ api.register {
 }
 
 api.register {
+	name = "android_ndk_arm_mode",
+	scope = "project",
+	kind = "boolean",
+}
+
+
+api.register {
 	name = "android_ndk_static_libs",
 	scope = "project",
 	kind = "string",
