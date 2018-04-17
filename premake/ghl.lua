@@ -80,6 +80,36 @@ project 'GHL-ogg'
 
 		table.insert(ghl_links,1,'GHL-ogg')
 
+if ghl_use_tremor then
+project 'GHL-tremor'
+		kind 'StaticLib'
+		configure_lib_targetdir()
+		targetname ('GHL-tremor-' .. platform_dir)
+		buildoptions{'-O3'}
+		if os.is('android') then
+			android_ndk_arm_mode(true)
+		end
+		
+		includedirs {
+			ghl_src .. '/sound/tremor',
+		}
+
+		local tremor_files = {'mdct.c', 'block.c', 'window.c',
+                        'synthesis.c', 'info.c',
+                        'floor1.c', 'floor0.c', 'vorbisfile.c', 
+                        'res012.c', 'mapping0.c', 'registry.c', 'codebook.c',
+						'sharedbook.c', '*.h'}
+		
+		sysincludedirs {
+			ghl_src .. '/sound/libogg/include',
+		}
+
+
+		files(append_path(ghl_src .. '/sound/tremor/',tremor_files))
+		--table.insert(ghl_sysincludes,ghl_src .. '/sound/tremor')
+		table.insert(ghl_links,1,'GHL-tremor')
+		table.insert(ghl_defines, 'GHL_USE_TREMOR')
+else
 project 'GHL-vorbis'
 		kind 'StaticLib'
 		configure_lib_targetdir()
@@ -110,6 +140,11 @@ project 'GHL-vorbis'
 		table.insert(ghl_sysincludes,ghl_src .. '/sound/libvorbis/include')
 		links{'GHL-ogg'}
 		table.insert(ghl_links,1,'GHL-vorbis')
+end
+			
+
+
+
 project 'GHL'
 		kind 'StaticLib'
 
