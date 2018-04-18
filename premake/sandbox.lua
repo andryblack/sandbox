@@ -54,11 +54,11 @@ solution( ProjectName )
 		
 		if use.AndroidGooglePlayService or use.IAP then
 			
-			android_dependencies('com.google.android.gms:play-services-base:10.2.1')
+			android_dependencies('com.google.android.gms:play-services-base:15.0.0')
 			if use.AndroidGooglePlayService then
-				android_dependencies('com.google.android.gms:play-services-auth:10.2.1')
-				android_dependencies('com.google.android.gms:play-services-games:10.2.1')
-				android_dependencies('com.android.support:support-v4:23.1.1')
+				android_dependencies('com.google.android.gms:play-services-auth:15.0.0')
+				android_dependencies('com.google.android.gms:play-services-games:15.0.0')
+				android_dependencies('com.android.support:support-v4:27.0.2')
 			end
 			
 			android_metadata {
@@ -69,8 +69,8 @@ solution( ProjectName )
 
 		if use.AndroidPN then
 			android_module{fcm=true}
-			android_dependencies('com.google.firebase:firebase-core:10.2.1')
-			android_dependencies('com.google.firebase:firebase-messaging:10.2.1')
+			android_dependencies('com.google.firebase:firebase-core:15.0.0')
+			android_dependencies('com.google.firebase:firebase-messaging:15.0.0')
 
 			android_service {
 				{
@@ -91,6 +91,7 @@ solution( ProjectName )
 			android_aidl(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib','aidl')))
 		end
 		if use.AndroidGooglePlayService then
+			android_module{gps=true}
 			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','gps_sandbox_lib','src')))
 		end
 		if AndroidConfig.permissions then
