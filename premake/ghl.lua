@@ -80,6 +80,7 @@ project 'GHL-ogg'
 
 		table.insert(ghl_links,1,'GHL-ogg')
 
+if not ghl_disable_vorbis then
 project 'GHL-vorbis'
 		kind 'StaticLib'
 		configure_lib_targetdir()
@@ -110,6 +111,10 @@ project 'GHL-vorbis'
 		table.insert(ghl_sysincludes,ghl_src .. '/sound/libvorbis/include')
 		links{'GHL-ogg'}
 		table.insert(ghl_links,1,'GHL-vorbis')
+else
+		table.insert(ghl_defines, 'GHL_DISABLE_VORBIS')
+end
+
 project 'GHL'
 		kind 'StaticLib'
 
