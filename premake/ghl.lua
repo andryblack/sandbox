@@ -109,7 +109,6 @@ project 'GHL-vorbis'
 		files(append_path(ghl_src .. '/sound/libvorbis/lib/',vorbis_files))
 		files(ghl_src .. '/sound/libvorbis/include/**.h')
 		table.insert(ghl_sysincludes,ghl_src .. '/sound/libvorbis/include')
-		links{'GHL-ogg'}
 		table.insert(ghl_links,1,'GHL-vorbis')
 else
 		table.insert(ghl_defines, 'GHL_DISABLE_VORBIS')
