@@ -488,6 +488,7 @@ public:
                       const sb::string& src_file,
                       const sb::string& dst_file,
                       bool stereo) : m_app(app),
+        m_stereo(stereo),
         m_src(src_file),m_dst(dst_file) {}
     virtual bool RunImpl() {
         GHL::DataStream* src_ds = m_app->OpenFile(m_src.c_str());
