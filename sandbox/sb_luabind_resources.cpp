@@ -372,6 +372,20 @@ struct UTF8 {
         }
         return len;
     }
+    static int CharIterate(lua_State* L) {
+        const char* str = Sandbox::luabind::stack<const char*>::get(L, 1);
+        int pos = luaL_optint(L, 2, 1);
+        str += pos - 1;
+        if (*str == 0) {
+            lua_pushnil(L);
+            return 1;
+        }
+        Sandbox::UTF32Char ch = 0;
+        const char* next = Sandbox::get_char(str, ch);
+        lua_pushlstring(L, str, next-str);
+        lua_pushinteger(L, pos + next-str);
+        return 2;
+    }
 };
 
 SB_META_DECLARE_KLASS(UTF8, void)
@@ -379,6 +393,7 @@ SB_META_BEGIN_KLASS_BIND(UTF8)
 SB_META_STATIC_METHOD(GetChar)
 SB_META_STATIC_METHOD(GetCode)
 SB_META_STATIC_METHOD(GetLength)
+SB_META_STATIC_METHOD(CharIterate)
 SB_META_END_KLASS_BIND()
 
 namespace Sandbox {
