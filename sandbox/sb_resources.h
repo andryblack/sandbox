@@ -92,7 +92,7 @@ namespace Sandbox {
                                  float scale,
                                  GHL::TextureFormat fmt);
         
-        BitmaskPtr LoadBitmask( const sb::string& filename );
+        virtual BitmaskPtr LoadBitmask( const sb::string& filename );
         
         size_t  GetLiveTicks() const { return m_live_ticks; }
         

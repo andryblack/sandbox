@@ -13,7 +13,9 @@ project 'GHL-zlib'
 		kind 'StaticLib'
 		configure_lib_targetdir()
 		targetname ('GHL-zlib-' .. platform_dir)
-		buildoptions{'-O3'}
+		if not os.is('macosx') then
+			buildoptions{'-O3'}
+		end
 		
 		local zlib_files = { 'inffixed.h', 'inftrees.c', 'inftrees.h', 'adler32.c', 'crc32.c', 'crc32.h', 'crypt.h',
 							 'deflate.c', 'deflate.h', 'inffast.c', 'inffast.h', 'inflate.c', 'inflate.h', 'ioapi.h',

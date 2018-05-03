@@ -173,10 +173,9 @@ namespace Sandbox {
             LogError(MODULE) << "VFS not initialized";
             return 0;
         }
-		std::string fn = filename;
 		GHL::DataStream* ds = OpenFileVariant(filename,variant);
         if ( !ds ) {
-            LogError(MODULE) <<"failed opening file " << fn;
+            LogError(MODULE) <<"failed opening file " << filename;
             return 0;
         }
 		GHL::Image* img = ImageFromStream(ds);
@@ -375,8 +374,10 @@ namespace Sandbox {
             return BitmaskPtr();
         }
         if (img->GetFormat() != GHL::IMAGE_FORMAT_RGBA &&
-            img->GetFormat() != GHL::IMAGE_FORMAT_GRAY)
+            img->GetFormat() != GHL::IMAGE_FORMAT_GRAY) {
+            img->Release();
             return BitmaskPtr();
+        }
         BitmaskPtr res(new Bitmask(img));
         img->Release();
         return res;
