@@ -79,10 +79,11 @@ namespace Sandbox {
         template <class T>
         inline T* get_ptr( const meta::type_info* from, void* data ) {
             const meta::type_info* to = meta::type<T>::info();
-            if ( from == to ) return reinterpret_cast<T*>(data);
-            if (from->parent.info) {
-                T* r = get_ptr<T>(from->parent.info, from->parent.downcast(data) );
-                if ( r ) return r;
+            while (true) {
+                if ( from == to ) return static_cast<T*>(data);
+                if (!from->parent.info) break;
+                data = from->parent.downcast(data);
+                from = from->parent.info;
             }
             return 0;
         }
