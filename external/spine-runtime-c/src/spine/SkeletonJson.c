@@ -646,7 +646,7 @@ spSkeletonData* spSkeletonJson_readSkeletonData (spSkeletonJson* self, const cha
 					if (strcmp(typeString, "region") == 0)
 						type = SP_ATTACHMENT_REGION;
 					else if (strcmp(typeString, "mesh") == 0)
-						type = SP_ATTACHMENT_MESH;
+						type = SP_ATTACHMENT_WEIGHTED_MESH;
 					else if (strcmp(typeString, "weightedmesh") == 0 || strcmp(typeString, "skinnedmesh") == 0)
 						type = SP_ATTACHMENT_WEIGHTED_MESH;
 					else if (strcmp(typeString, "linkedmesh") == 0)

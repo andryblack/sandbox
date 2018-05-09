@@ -57,6 +57,16 @@ namespace Sandbox {
         spSkeleton*     m_skeleton;
         spAnimationState* m_state;
         spAnimation* m_last_animation;
+        struct vertices_data {
+            struct vertex {
+                Vector2f pos;
+                Vector2f tex;
+            };
+            sb::vector<float> world_vertices_pos;
+            sb::vector<vertex> vertices;
+        };
+        sb::vector<vertices_data> m_vertices;
+
         friend class SpineSceneObject;
         friend void spine_animation_event_listener(spAnimationState* state, int trackIndex, spEventType type, spEvent* event,
                                                         int loopCount);
@@ -90,7 +100,6 @@ namespace Sandbox {
         AttachementMap m_attachements;
         bool CheckSlotHitImpl(spSlot* slot,const Vector2f& pos, Resources* resources);
     };
-    
 }
 
 #endif /*SB_SPINE_ANIMATION_H_INCLUDED*/

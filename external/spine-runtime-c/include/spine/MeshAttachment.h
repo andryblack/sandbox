@@ -55,7 +55,7 @@ struct spMeshAttachment {
 	int trianglesCount;
 	unsigned short* triangles;
 
-	spMeshAttachment* const parentMesh;
+	spMeshAttachment* parentMesh;
 	int/*bool*/inheritFFD;
 
 	float r, g, b, a;

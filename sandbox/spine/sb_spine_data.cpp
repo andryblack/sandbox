@@ -81,10 +81,16 @@ namespace Sandbox {
         if (!slot || !slot->attachmentName)
             return ImagePtr();
         spAttachment* attachment = spSkin_getAttachment(m_skeleton->defaultSkin, slot_index, slot->attachmentName);
-        if (!attachment || attachment->type != SP_ATTACHMENT_REGION)
-            return ImagePtr();
-        SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
-        return ra->image;
+        if (attachment) {
+            if(attachment->type == SP_ATTACHMENT_REGION) {
+                SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
+                return ra->image;
+            } else if(attachment->type == SP_ATTACHMENT_WEIGHTED_MESH) {
+                SpineWeightedMeshAttachment* mesh = static_cast<SpineWeightedMeshAttachment*>(SUB_CAST(spWeightedMeshAttachment,attachment));
+                return mesh->image;
+            }
+        }
+        return ImagePtr();
     }
     
     ImagePtr SpineData::GetAttachmentImage(const char* slot_name,const char* attachment_name) const {
@@ -94,10 +100,16 @@ namespace Sandbox {
         if (slot_index < 0 || slot_index>=m_skeleton->slotsCount)
             return ImagePtr();
         spAttachment* attachment = spSkin_getAttachment(m_skeleton->defaultSkin, slot_index, attachment_name);
-        if (!attachment || attachment->type != SP_ATTACHMENT_REGION)
-            return ImagePtr();
-        SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
-        return ra->image;
+        if (attachment) {
+            if (attachment->type == SP_ATTACHMENT_REGION) {
+                SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
+                return ra->image;
+            } else if(attachment->type == SP_ATTACHMENT_WEIGHTED_MESH) {
+                SpineWeightedMeshAttachment* mesh = static_cast<SpineWeightedMeshAttachment*>(SUB_CAST(spWeightedMeshAttachment,attachment));
+                return mesh->image;
+            }
+        }
+        return ImagePtr();
     }
     
     void SpineData::SetSlotAttribute(size_t idx, const DrawAttributesPtr& attribute) {
