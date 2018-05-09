@@ -4,6 +4,8 @@
 
 #include <spine/AttachmentLoader.h>
 #include <spine/RegionAttachment.h>
+#include <spine/MeshAttachment.h>
+#include <spine/WeightedMeshAttachment.h>
 
 #include "sb_transform2d.h"
 #include "sb_image.h"
@@ -15,7 +17,13 @@ namespace Sandbox {
         ImagePtr image;
         Transform2d tr;
     };
-    
+
+    struct SpineWeightedMeshAttachment : public spWeightedMeshAttachment {
+        explicit SpineWeightedMeshAttachment(const char* name);
+        ImagePtr image;
+        int vertices_index;
+    };
+
     struct SpineAttachmentLoader : spAttachmentLoader {
         spAtlas* atlas;
         explicit SpineAttachmentLoader(spAtlas* atlas);

@@ -58,7 +58,7 @@ struct spWeightedMeshAttachment {
 	float* uvs;
 	int hullLength;
 
-	spWeightedMeshAttachment* const parentMesh;
+	spWeightedMeshAttachment* parentMesh;
 	int/*bool*/inheritFFD;
 
 	float r, g, b, a;

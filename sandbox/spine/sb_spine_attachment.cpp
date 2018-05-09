@@ -20,6 +20,21 @@ namespace Sandbox {
         _spAttachment_init(SUPER(this), name, SP_ATTACHMENT_REGION, SpineImageAttachment_dispose);
     }
     
+    static void SpineWeightedMeshAttachment_dispose(spAttachment* a) {
+        delete static_cast<SpineWeightedMeshAttachment*>(SUB_CAST(spWeightedMeshAttachment, a));
+    }
+    
+    SpineWeightedMeshAttachment::SpineWeightedMeshAttachment(const char* name) {
+        this->r = 1;
+        this->g = 1;
+        this->b = 1;
+        this->a = 1;
+        this->uvs = 0;
+        this->parentMesh = 0;
+        this->inheritFFD = 0;
+        this->vertices_index = -1;
+        _spAttachment_init(SUPER(this), name, SP_ATTACHMENT_WEIGHTED_MESH, SpineWeightedMeshAttachment_dispose);
+    }
     
     static spAttachment* _ImageAttachmentLoader_createAttachment (spAttachmentLoader* loader, spSkin* skin, spAttachmentType type,
                                                                   const char* name, const char* path) {
@@ -47,6 +62,28 @@ namespace Sandbox {
             }
             case SP_ATTACHMENT_BOUNDING_BOX:
                 return SUPER(spBoundingBoxAttachment_create(name));
+            case SP_ATTACHMENT_WEIGHTED_MESH: {
+                SpineWeightedMeshAttachment* attachment;
+                spAtlasRegion* region = spAtlas_findRegion(self->atlas, path);
+                if (!region) {
+                    _spAttachmentLoader_setError(loader, "Region not found: ", path);
+                    return 0;
+                }
+                attachment = new SpineWeightedMeshAttachment(name);
+                attachment->rendererObject = region;
+                attachment->regionU = region->u;
+                attachment->regionV = region->v;
+                attachment->regionU2 = region->u2;
+                attachment->regionV2 = region->v2;
+                attachment->regionRotate = region->rotate;
+                attachment->regionOffsetX = region->offsetX;
+                attachment->regionOffsetY = region->offsetY;
+                attachment->regionWidth = region->width;
+                attachment->regionHeight = region->height;
+                attachment->regionOriginalWidth = region->originalWidth;
+                attachment->regionOriginalHeight = region->originalHeight;
+                return SUPER(attachment);
+            }
             default:
                 _spAttachmentLoader_setUnknownTypeError(loader, type);
                 return 0;
@@ -80,6 +117,19 @@ namespace Sandbox {
             attachment->tr.translate(attachment->x,attachment->y);
             attachment->tr.rotate(radians);
             attachment->tr.scale(regionScaleX,-regionScaleY);
+        } else if (a->type == SP_ATTACHMENT_WEIGHTED_MESH) {
+            SpineWeightedMeshAttachment* attachment = static_cast<SpineWeightedMeshAttachment*>(SUB_CAST(spWeightedMeshAttachment, a));
+            spAtlasRegion* region = static_cast<spAtlasRegion*>(attachment->rendererObject);
+            TexturePtr tex(static_cast<Texture*>(region->page->rendererObject));
+            
+            attachment->image.reset(new Image(tex,float(region->x),
+                                              float(region->y),
+                                              float(region->rotate ? region->height : region->width),
+                                              float(region->rotate ? region->width : region->height)));
+            if (region->rotate) {
+                attachment->image->SetRotated(true);
+                attachment->image->SetSize(float(region->width),float(region->height));
+            }
         }
     }
     
