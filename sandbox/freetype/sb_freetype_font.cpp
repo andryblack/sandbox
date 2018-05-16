@@ -24,8 +24,10 @@
 SB_META_DECLARE_OBJECT(Sandbox::FreeTypeFont,Sandbox::Font)
 SB_META_DECLARE_OBJECT(Sandbox::FreeTypeFontChild,Sandbox::Font)
 
+
 namespace Sandbox {
-    
+
+    static const char* MODULE = "ft";
     
     class TexturePool {
         int         m_initial_texture_width;
@@ -64,6 +66,7 @@ namespace Sandbox {
             }
             if (!data) {
                 /// allocate new texture
+                SB_LOGI("allocate texture " << m_initial_texture_width << "x" << m_initial_texture_height);
                 GHL::Image* fill = GHL_CreateImage(m_initial_texture_width,
                                                    m_initial_texture_height,
                                                    GHL::IMAGE_FORMAT_GRAY);
@@ -108,6 +111,11 @@ namespace Sandbox {
             }
             m_changed_textures.clear();
         }
+        
+        void clear() {
+            m_changed_textures.clear();
+            m_textures.clear();
+        }
 
     };
     
@@ -149,6 +157,13 @@ namespace Sandbox {
             }
             return sb::intrusive_ptr<Library>(m_instance);
         }
+        static void check_released() {
+            if (m_instance != 0) {
+                SB_LOGE("not all fonts released on exit");
+                sb_assert(false);
+                m_instance->textures.clear();
+            }
+        }
         typedef sb::map<sb::string,FacePtr> FaceMap;
         FaceMap m_face_cache;
         
@@ -159,7 +174,7 @@ namespace Sandbox {
                 return it->second;
             GHL::DataStream* ds = res->OpenFile(file);
             if (!ds) {
-                LogError() << "failed opening font file " << file;
+                SB_LOGE("failed opening font file " << file);
                 return FacePtr();
             }
             GHL::Data* data = GHL_ReadAllData(ds);
@@ -173,7 +188,7 @@ namespace Sandbox {
             }
             if (int error = FT_Select_Charmap(  face->face,               /* target face object */
                                   FT_ENCODING_UNICODE )) {
-                LogError() << "FT_Select_CharMap " << error;
+                SB_LOGE("FT_Select_CharMap " << error);
             }
             m_face_cache[facename] = face;
             return face;
@@ -247,7 +262,7 @@ namespace Sandbox {
                 data.left = ft_bitmap_glyph->left;
                 data.top = ft_bitmap_glyph->top;
             } else {
-                LogError() << "FT_Get_Glyph failed";
+                SB_LOGE("FT_Get_Glyph failed");
             }
             // Clean up afterwards.
             FT_Stroker_Done(stroker);
@@ -431,7 +446,7 @@ namespace Sandbox {
                                      size_y,
                                      config.dpi * config.x_scale,
                                      config.dpi)) {
-            LogError() << "FT_Set_Char_Size " << error;
+            SB_LOGE( "FT_Set_Char_Size " << error );
         }
         
         Impl* impl = new Impl(library,face);
@@ -444,6 +459,10 @@ namespace Sandbox {
         
         library->textures.commit();
         return res;
+    }
+    
+    void FreeTypeFont::Release() {
+        Library::check_released();
     }
     
     bool FreeTypeFont::preallocate_symb(GHL::UInt32 ch) {

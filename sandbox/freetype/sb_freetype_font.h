@@ -39,6 +39,7 @@ namespace Sandbox {
         SB_META_OBJECT
     public:
         static sb::intrusive_ptr<FreeTypeFont> Load( Resources* resources, const char* file, const FreeTypeFontConfig& config );
+        static void Release();
         virtual ~FreeTypeFont();
         virtual void AllocateSymbols( const char* text ) SB_OVERRIDE;
         
