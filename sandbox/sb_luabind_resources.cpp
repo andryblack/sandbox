@@ -23,7 +23,8 @@
 #include "sb_rendertarget.h"
 #include "sb_utf.h"
 #include "sb_tilemap.h"
-
+#include "sb_system_font.h"
+#include "sb_font_chain.h"
 
 namespace Sandbox {
     namespace luabind {
@@ -257,17 +258,32 @@ SB_META_METHOD(FixupChars)
 SB_META_METHOD(SetSubsituteCode)
 SB_META_END_KLASS_BIND()
 
+SB_META_BEGIN_KLASS_BIND(Sandbox::FontDataProvider)
+SB_META_PROPERTY_RO(MainData, GetMainData)
+SB_META_METHOD(AddCharImage)
+SB_META_METHOD(SetCharImage)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::OutlineFontDataProvider)
+SB_META_PROPERTY_RO(OutlineData, GetOutlineData)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::FontChain)
+SB_META_CONSTRUCTOR((const Sandbox::FontDataProviderPtr&))
+SB_META_METHOD(Add)
+SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Font)
+SB_META_CONSTRUCTOR((const FontDataProviderPtr&))
 SB_META_PROPERTY_RO(Height, GetHeight)
 SB_META_PROPERTY_RO(Size, GetSize)
 SB_META_PROPERTY_RO(Baseline, GetBaseline)
 SB_META_PROPERTY_RO(XHeight, GetXHeight)
-SB_META_PROPERTY_RO(MainData, GetMainData)
 SB_META_METHOD(GetTextWidth)
 SB_META_METHOD(ClearPasses)
 SB_META_METHOD(AddPass)
 SB_META_END_KLASS_BIND()
+
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::FontPass)
 SB_META_CONSTRUCTOR((const Sandbox::FontDataPtr&,const sb::string&))
@@ -284,6 +300,58 @@ SB_META_METHOD(SetHeight)
 SB_META_METHOD(SetSize)
 SB_META_METHOD(SetBaseline)
 SB_META_METHOD(SetXHeight)
+SB_META_END_KLASS_BIND()
+
+
+static int Sandbox_SystemFont_Load(lua_State* L) {
+    Sandbox::Application* app = Sandbox::luabind::stack<Sandbox::Application*>::get(L, 1);
+    if (!app) {
+        luaL_argerror(L, 1, "need Application");
+    }
+    if (!lua_isstring(L, 2)) {
+        luaL_argerror(L, 2, "need string");
+    }
+    if (!lua_istable(L, 3)) {
+        luaL_argerror(L, 3, "need table");
+    }
+    const char* filename = lua_tostring(L, 2);
+    Sandbox::SystemFontConfig config;
+    lua_getfield(L, 3, "size");
+    config.size = lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, 3, "outline");
+    config.outline = lua_toboolean(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, 3, "outline_width");
+    if (lua_isnumber(L, -1))
+        config.outline_width = float(lua_tonumber(L, -1));
+    else
+        config.outline_width = 1.0f;
+    lua_pop(L, 1);
+//    lua_getfield(L, 3, "dpi");
+//    config.dpi = float(lua_tonumber(L, -1));
+//    lua_pop(L, 1);
+    lua_getfield(L, 3, "scale");
+    if (lua_isnumber(L, -1))
+        config.scale = float(lua_tonumber(L, -1));
+    else
+        config.scale = 1.0f;
+    lua_pop(L, 1);
+    lua_getfield(L, 3, "x_scale");
+    if (lua_isnumber(L, -1))
+        config.x_scale = float(lua_tonumber(L, -1));
+    else
+        config.x_scale = 1.0f;
+    lua_pop(L, 1);
+//    lua_getfield(L, 3, "substitute_code");
+//    config.substitute_code = lua_tounsigned(L, -1);
+//    lua_pop(L, 1);
+    Sandbox::luabind::stack<sb::intrusive_ptr<Sandbox::SystemFont> >::push(L, Sandbox::SystemFont::Load(app, filename, config));
+    return 1;
+}
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::SystemFont)
+bind( static_method( "Load" , &Sandbox_SystemFont_Load ) );
 SB_META_END_KLASS_BIND()
 
 
@@ -409,7 +477,11 @@ namespace Sandbox {
         luabind::ExternClass<FontData>(lua);
         luabind::Class<FontPass>(lua);
         luabind::Class<Font>(lua);
+        luabind::Class<FontDataProvider>(lua);
+        luabind::Class<OutlineFontDataProvider>(lua);
         luabind::Class<BitmapFont>(lua);
+        luabind::Class<SystemFont>(lua);
+        luabind::Class<FontChain>(lua);
         luabind::Enum<FontAlign>(lua);
         luabind::Class<Image>(lua);
         luabind::Class<ImageBox>(lua);

@@ -610,6 +610,7 @@ namespace Sandbox {
     }
     
     void Resources::ReleaseAll() {
+        m_default_pool.reset();
         for (TexturesCacheMap::iterator it = m_textures.begin();it!=m_textures.end();++it) {
             TexturePtr& t = it->second;
             if (t) {
@@ -636,5 +637,12 @@ namespace Sandbox {
             need_release = m_memory_used - m_memory_limit;
         }
         m_memory_used = FreeMemory(need_release,true);
+    }
+    
+    TexturePoolPtr Resources::GetDefaultTexturePool() {
+        if (!m_default_pool) {
+            m_default_pool.reset( new TexturePool(this) );
+        }
+        return m_default_pool;
     }
 }

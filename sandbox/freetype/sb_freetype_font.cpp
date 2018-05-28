@@ -11,6 +11,7 @@
 #include <ghl_image.h>
 #include "sb_graphics.h"
 #include "sb_log.h"
+#include "sb_texture_pool.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -21,103 +22,14 @@
 #include FT_WINFONTS_H
 
 
-SB_META_DECLARE_OBJECT(Sandbox::FreeTypeFont,Sandbox::Font)
-SB_META_DECLARE_OBJECT(Sandbox::FreeTypeFontChild,Sandbox::Font)
+SB_META_DECLARE_OBJECT(Sandbox::FreeTypeFont,Sandbox::OutlineFontDataProvider)
 
 
 namespace Sandbox {
 
     static const char* MODULE = "ft";
     
-    class TexturePool {
-        int         m_initial_texture_width;
-        int         m_initial_texture_height;
-        Resources*  m_resources;
-        sb::vector<GHL::Texture*> m_changed_textures;
-        struct TextureData {
-            TexturePtr  tex;
-            int pos_x;
-            int pos_y;
-            int max_h;
-        };
-        typedef sb::vector<TextureData> TextureDataVector;
-        TextureDataVector m_textures;
-    public:
-        TexturePool( Resources* resources  ) : m_resources(resources) {
-            m_initial_texture_width = 512 * resources->GetScale();
-            m_initial_texture_height = 512 * resources->GetScale();
-        }
-        
-        TexturePtr alloc(int w, int h, int& x, int& y,GHL::Texture* &ntex) {
-            TextureData* data = 0;
-            for (TextureDataVector::iterator it = m_textures.begin();it!=m_textures.end();++it) {
-                int tw = it->tex->GetRealWidth();
-                int th = it->tex->GetRealHeight();
-                if ((it->pos_x + w) > tw) {
-                    if ((it->pos_y + it->max_h + h) > th) {
-                        continue;
-                    }
-                }
-                if ((it->pos_y+h) > th) {
-                    continue;
-                }
-                data = &(*it);
-                break;
-            }
-            if (!data) {
-                /// allocate new texture
-                SB_LOGI("allocate texture " << m_initial_texture_width << "x" << m_initial_texture_height);
-                GHL::Image* fill = GHL_CreateImage(m_initial_texture_width,
-                                                   m_initial_texture_height,
-                                                   GHL::IMAGE_FORMAT_GRAY);
-                fill->Fill(0x00000000);
-                TexturePtr tex = m_resources->CreateTexture(fill, 1.0f / m_resources->GetScale(), GHL::TEXTURE_FORMAT_ALPHA);
-                fill->Release();
-                tex->SetFiltered(true);
-                TextureData d;
-                d.tex = tex;
-                d.pos_x = 1;
-                d.pos_y = 1;
-                d.max_h = 0;
-                m_textures.push_back(d);
-                data = &m_textures.back();
-            }
-            int tw = data->tex->GetRealWidth();
-            int th = data->tex->GetRealHeight();
-            if ((data->pos_x + w) > tw) {
-                data->pos_x = 1;
-                data->pos_y += data->max_h;
-                data->max_h = 0;
-            }
-            x = data->pos_x;
-            y = data->pos_y;
-            sb_assert((x+w)<=tw);
-            sb_assert((y+h)<=th);
-            
-            if (h>data->max_h)
-                data->max_h = h;
-            data->pos_x += w;
-            ntex = data->tex->Present(m_resources);
-            if (std::find(m_changed_textures.begin(),m_changed_textures.end(),ntex)==m_changed_textures.end()) {
-                m_changed_textures.push_back(ntex);
-            }
-            
-            return data->tex;
-        }
-        
-        void commit() {
-            for (sb::vector<GHL::Texture*>::iterator it = m_changed_textures.begin();it!=m_changed_textures.end();++it) {
-                (*it)->DiscardInternal();
-            }
-            m_changed_textures.clear();
-        }
-        
-        void clear() {
-            m_changed_textures.clear();
-            m_textures.clear();
-        }
-
-    };
+    
     
     struct Face : public sb::ref_countered_base {
         FT_Face face;
@@ -161,7 +73,7 @@ namespace Sandbox {
             if (m_instance != 0) {
                 SB_LOGE("not all fonts released on exit");
                 sb_assert(false);
-                m_instance->textures.clear();
+                m_instance->textures.Clear();
             }
         }
         typedef sb::map<sb::string,FacePtr> FaceMap;
@@ -276,7 +188,7 @@ namespace Sandbox {
             
             if (img.img) {
                 GHL::Texture* ntex = 0;
-                tex = library->textures.alloc(img.w+1,img.h+1,img.x,img.y,ntex);
+                tex = library->textures.Alloc(img.w+1,img.h+1,img.x,img.y,ntex);
                 ntex->SetData(img.x, img.y, img.img);
                 img.img->Release();
                 img.img = 0;
@@ -315,16 +227,7 @@ namespace Sandbox {
     };
     
     
-    FreeTypeFontChild::FreeTypeFontChild(const FontPtr& font, const FontDataPtr& data) : Font(data),m_parent(font) {
-        set_size(m_parent->GetSize());
-        set_height(m_parent->GetHeight());
-        set_baseline(m_parent->GetBaseline());
-    }
     
-    void FreeTypeFontChild::AllocateSymbols(const char *text) {
-        if (m_parent)
-            m_parent->AllocateSymbols(text);
-    }
     
     template<typename T>
     void setMax(T& _var, const T& _newValue)
@@ -334,9 +237,9 @@ namespace Sandbox {
     }
 
     
-    FreeTypeFont::FreeTypeFont(Impl* impl) : Font(FontDataPtr(new FontData())), m_impl(impl) {
+    FreeTypeFont::FreeTypeFont(Impl* impl) : OutlineFontDataProvider(), m_impl(impl) {
         if (m_impl->config.outline) {
-            m_outline_data.reset(new FontData());
+            set_outline_data(FontDataPtr(new FontData()));
         }
         FT_Face ftFace = m_impl->face->face;
         int fontAscent = int(ftFace->size->metrics.ascender >> 6);
@@ -402,22 +305,6 @@ namespace Sandbox {
         m_impl->put_image(gl, img);
     }
     
-    void FreeTypeFont::SetCharImage(GHL::UInt32 code,const Sandbox::ImagePtr& image,float advance) {
-        FontData::Glypth* g = m_data->add_glypth_int(code);
-        if (image)
-            g->img = *image;
-        g->asc = advance;
-        if (m_outline_data) {
-            g = m_outline_data->add_glypth_int(code);
-            g->asc = advance;
-        }
-    }
-    
-    void FreeTypeFont::AddCharImage(GHL::UInt32 code,const Sandbox::ImagePtr& image,float advance) {
-        if (HasGlyph(code))
-            return;
-        SetCharImage(code,image,advance);
-    }
     
     FreeTypeFont::~FreeTypeFont() {
         delete m_impl;
@@ -457,7 +344,7 @@ namespace Sandbox {
         
         res.reset(new FreeTypeFont(impl));
         
-        library->textures.commit();
+        library->textures.Commit();
         return res;
     }
     
@@ -487,42 +374,11 @@ namespace Sandbox {
         return true;
     }
     
-    void FreeTypeFont::preallocate_text(const char* text) {
-        while (*text) {
-            UTF32Char ch = 0;
-            text = get_char(text,ch);
-            if (ch) {
-                FontData::Glypth* gl = m_data->get_glypth_int(ch);
-                if (gl) {
-                    continue;
-                }
-                preallocate_symb(ch);
-            } else {
-                break;
-            }
-        }
-        m_impl->library->textures.commit();
-    }
-    
-    bool FreeTypeFont::HasGlyph(GHL::UInt32 code) const {
-        if (Font::HasGlyph(code))
-            return true;
-        if (const_cast<FreeTypeFont*>(this)->preallocate_symb(code)) {
-            m_impl->library->textures.commit();
-            return true;
-        }
-        return false;
-    }
     
     void FreeTypeFont::AllocateSymbols( const char* _text ) {
-        if (_text)
-            const_cast<FreeTypeFont*>(this)->preallocate_text(_text);
+        FontDataProvider::AllocateSymbols(_text);
+        m_impl->library->textures.Commit();
     }
     
-    FreeTypeFontChildPtr FreeTypeFont::CreateMainChild() {
-        return FreeTypeFontChildPtr(new FreeTypeFontChild(FontPtr(this),GetMainData()));
-    }
-    FreeTypeFontChildPtr FreeTypeFont::CreateOutlineChild() {
-        return FreeTypeFontChildPtr(new FreeTypeFontChild(FontPtr(this),GetOutlineData()));
-    }
+    
 }

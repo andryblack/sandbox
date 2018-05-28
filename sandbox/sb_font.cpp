@@ -129,12 +129,8 @@ namespace Sandbox {
     }
 
 		
-    Font::Font(const FontDataPtr& main_data) : m_data(main_data) {
-        
-        m_size = 8.0f;
-        m_height = 16.0f;
-        m_baseline = 0.0f;
-        m_xheight = m_height;
+    Font::Font(const FontDataProviderPtr& main_data) : m_data_provider(main_data) {
+      
 	}
 	
 	Font::~Font() {
@@ -154,14 +150,16 @@ namespace Sandbox {
     float Font::GetTextWidth(const char* text) const {
         if (!text) return 0.0f;
         const_cast<Font*>(this)->AllocateSymbols(text);
-        return m_data->GetTextWidthI( text );
+        const FontDataPtr& data = m_data_provider->GetMainData();
+        return data->GetTextWidthI( text );
     }
     
     bool Font::MovePosition(Vector2f& pos,UTF32Char prev,UTF32Char next) const {
         if (next) {
-            const FontData::Glypth* gl = m_data->get_glypth(next);
+            const FontDataPtr& data = m_data_provider->GetMainData();
+            const FontData::Glypth* gl = data->get_glypth(next);
             if (gl) {
-                const FontData::Glypth* glprev = m_data->get_glypth(prev);
+                const FontData::Glypth* glprev = data->get_glypth(prev);
                 pos.x+=gl->asc;
                 pos.x+=FontData::getKerning(glprev,next);
             }
@@ -173,7 +171,8 @@ namespace Sandbox {
     float Font::Draw(Graphics& g, const DrawAttributes* attributes, const Vector2f& _pos,const char* text,FontAlign align) const {
         if (!text) return 0;
         const_cast<Font*>(this)->AllocateSymbols(text);
-        Sandbox::Vector2f pos = m_data->AlignI(_pos,align,text);
+        const FontDataPtr& data = m_data_provider->GetMainData();
+        Sandbox::Vector2f pos = data->AlignI(_pos,align,text);
         float res = 0.0f;
         for (FontPassList::const_iterator it = m_passes.begin();it!=m_passes.end();++it) {
             res = (*it)->DrawI(g, attributes, pos, text);
@@ -194,5 +193,6 @@ namespace Sandbox {
             (*it)->DrawCroppedI(g, attributes, rect,  data);
         }
     }
-
+    
+    
 }

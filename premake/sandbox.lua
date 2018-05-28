@@ -448,6 +448,7 @@ solution( ProjectName )
 			links {
 				'atomic',
 				'android',
+				'jnigraphics',
 				'log',
 				'EGL',
 				'OpenSLES',

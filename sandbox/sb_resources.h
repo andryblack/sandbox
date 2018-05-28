@@ -21,6 +21,8 @@
 #include <ghl_image.h>
 #include <ghl_render.h>
 
+#include "sb_texture_pool.h"
+
 namespace GHL {
 	struct VFS;
 	struct Render;
@@ -109,6 +111,7 @@ namespace Sandbox {
         
         const sb::string& GetCachePath() const { return m_cache_path; }
     
+        TexturePoolPtr GetDefaultTexturePool();
     
     protected:
         virtual GHL::Image* ImageFromData( const GHL::Data* data );
@@ -139,6 +142,8 @@ namespace Sandbox {
         typedef sb::weak_ptr<BackgroundData> BackgroundDataCachePtr;
         typedef sb::map<sb::string, BackgroundDataCachePtr> BackgroundsDataCache;
         BackgroundsDataCache m_backgrounds_cache;
+        
+        TexturePoolPtr m_default_pool;
         
         size_t    m_live_ticks;
         size_t    m_memory_limit;

@@ -153,7 +153,8 @@ project 'GHL'
 			ghl_src .. 'render/rendertarget_impl.*',
 			ghl_src .. 'render/shader_impl.*',
 			ghl_src .. 'render/texture_impl.*',
-			ghl_src .. 'render/pfpl/*'
+			ghl_src .. 'render/pfpl/*',
+			ghl_src .. 'font/font_impl.*'
 		}
 
 		local use_openal = false
@@ -247,7 +248,8 @@ project 'GHL'
 				files { 
 					ghl_src .. 'winlib/winlib_cocoa.*',
 					ghl_src .. 'winlib/winlib_cocoa_time.*',
-					ghl_src .. 'sound/cocoa/*'
+					ghl_src .. 'sound/cocoa/*',
+					ghl_src .. 'font/font_ct.*'
 				}
 				if use_network then
 					files {
@@ -261,7 +263,8 @@ project 'GHL'
 					ghl_src .. 'winlib/WinLibCocoaTouchContext.*',
 					ghl_src .. 'winlib/WinLibCocoaTouchContext2.*',
 					ghl_src .. 'winlib/winlib_cocoa_time.*',
-					ghl_src .. 'sound/cocoa/*'
+					ghl_src .. 'sound/cocoa/*',
+					ghl_src .. 'font/font_ct.*'
 				}
 				if use_network then
 					files {
@@ -298,7 +301,8 @@ project 'GHL'
 				files {
 					ghl_src .. 'winlib/winlib_android.*',
 					ghl_src .. 'winlib/winlib_posix_time.cpp',
-					ghl_src .. 'sound/android/*'
+					ghl_src .. 'sound/android/*',
+					ghl_src .. 'font/font_android.*'
 				}
 				if use_network then
 					files {

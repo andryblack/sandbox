@@ -81,6 +81,7 @@ namespace Sandbox {
         virtual void ReportAppError(const char* reason) {}
         Network* GetNetwork();
         GHL::VFS* GetVFS() const { return m_vfs;}
+        Resources* GetResources() const { return m_resources;}
         
     protected:
 		Application();
@@ -106,7 +107,6 @@ namespace Sandbox {
         GHL::Sound* GetSound() const { return m_sound; }
 		LuaVM* GetLua() const { return m_lua;}
 		ThreadsMgr* GetThreads() const { return m_main_thread;}
-		Resources* GetResources() const { return m_resources;}
         Graphics* GetGraphics() const { return m_graphics; }
         Scene* GetScene() const { return m_main_scene; }
         SoundManager* GetSoundManager() const { return m_sound_mgr; }

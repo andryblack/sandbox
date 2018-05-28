@@ -50,24 +50,15 @@ static int Sandbox_FreeTypeFont_Load(lua_State* L) {
     return 1;
 }
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::FreeTypeFontChild)
-SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::FreeTypeFont)
 bind( static_method( "Load" , &Sandbox_FreeTypeFont_Load ) );
-SB_META_PROPERTY_RO(MainData, GetMainData)
-SB_META_PROPERTY_RO(OutlineData,GetOutlineData)
-SB_META_METHOD(CreateMainChild)
-SB_META_METHOD(CreateOutlineChild)
-SB_META_METHOD(SetCharImage)
-SB_META_METHOD(AddCharImage)
 SB_META_END_KLASS_BIND()
 
 
 namespace Sandbox {
     
     void register_freetype( lua_State* lua ) {
-        luabind::ExternClass<FreeTypeFontChild>(lua);
         luabind::ExternClass<FreeTypeFont>(lua);
     }
     
