@@ -67,17 +67,23 @@ namespace Sandbox {
             config.placeholder = 0;
             config.accept_button = GHL::TIAB_DONE;
             config.max_length = 0;
+            config.text = 0;
+            config.cursor_position = 0;
             if (widget->getUserString("accept_button")=="send") {
                 config.accept_button = GHL::TIAB_SEND;
             }
             if (widget->isType(MYGUI_RTTI_GET_TYPE(MyGUI::EditBox))) {
+                MyGUI::EditBox* eb = widget->castType<MyGUI::EditBox>();
                 config.system_input = false;
-                config.max_length = widget->castType<MyGUI::EditBox>()->getMaxTextLength();
+                config.text = eb->getCaption().c_str();
+                config.max_length = GHL::UInt32(eb->getMaxTextLength());
+                config.cursor_position = GHL::UInt32(eb->getTextCursor());
                 m_system->ShowKeyboard(&config);
             } else if (widget->isType(MYGUI_RTTI_GET_TYPE(TextInput))) {
+                TextInput* ti =widget->castType<TextInput>();
                 config.system_input = true;
-                config.placeholder = widget->castType<TextInput>()->getPlaceholder().c_str();
-                config.max_length = widget->castType<TextInput>()->getMaxTextLength();
+                config.placeholder = ti->getPlaceholder().c_str();
+                config.max_length = GHL::UInt32(ti->getMaxTextLength());
                 m_system->ShowKeyboard(&config);
             } else {
                 m_system->HideKeyboard();

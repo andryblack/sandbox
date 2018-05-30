@@ -260,6 +260,7 @@ project 'GHL'
 				defines 'GHL_PLATFORM_IOS'
 				files {
 					ghl_src .. 'winlib/winlib_cocoatouch.*',
+					ghl_src .. 'winlib/cocoatouch_input.*',
 					ghl_src .. 'winlib/WinLibCocoaTouchContext.*',
 					ghl_src .. 'winlib/WinLibCocoaTouchContext2.*',
 					ghl_src .. 'winlib/winlib_cocoa_time.*',

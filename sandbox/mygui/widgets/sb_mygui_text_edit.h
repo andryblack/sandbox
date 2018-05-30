@@ -5,6 +5,9 @@
 #include "meta/sb_meta.h"
 #include "MyGUI_EditBox.h"
 
+namespace GHL {
+    struct Event;
+}
 
 namespace Sandbox {
     
@@ -18,6 +21,7 @@ namespace Sandbox {
             
             void setPropertyOverride(const std::string& _key, const std::string& _value);
             void initialiseOverride();
+            void shutdownOverride();
             
             const std::string& getPlaceholder() const { return m_placeholder; }
             void setPlaceholder(const std::string& ph );
@@ -28,6 +32,8 @@ namespace Sandbox {
             MyGUI::TextBox* m_placeholder_widget;
             void updatePlaceholder();
             virtual void updateEditState();
+            virtual void updateCursorPosition();
+            void onEvent(GHL::Event* e);
         };
     }
 }
