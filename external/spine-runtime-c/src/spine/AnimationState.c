@@ -141,7 +141,8 @@ void spAnimationState_apply (spAnimationState* self, spSkeleton* skeleton) {
 					current->loop, internal->events, &eventsCount, current->mix,0);
 			}
 		} else {
-			float alpha = current->mixTime / current->mixDuration * current->mix;
+            float mix = current->mixDuration * current->mix;
+            float alpha = (mix==0.0f) ? 1.0f : (current->mixTime / mix);
 
 			float previousTime = previous->time;
 			if (!previous->loop && previousTime > previous->endTime) previousTime = previous->endTime;
@@ -184,8 +185,11 @@ void spAnimationState_apply (spAnimationState* self, spSkeleton* skeleton) {
 		/* Check if completed the animation or a loop iteration. */
 		if (current->loop ? (FMOD(current->lastTime, current->endTime) > FMOD(time, current->endTime))
 				: (current->lastTime < current->endTime && time >= current->endTime)) {
-			int count = (int)(time / current->endTime);
-			if (current->listener) {
+            int count = 1;
+            if (current->animation->duration>0.0f) {
+                count = (int)(time/current->endTime);
+            }
+            if (current->listener) {
 				current->listener(self, i, SP_ANIMATION_COMPLETE, 0, count);
 				if (self->tracks[i] != current) continue;
 			}

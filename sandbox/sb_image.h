@@ -56,10 +56,11 @@ namespace Sandbox {
         const Vector2f& GetHotspot() const { return m_hotspot;}
         /// get hotspot in sprite-size
         Vector2f GetHotspotReal() const {
-            return Vector2f(m_hotspot.x*m_width/m_src_w, m_hotspot.y*m_height/m_src_h);
+            return (m_src_w!=0.0f && m_src_h!=0.0f) ? Vector2f(m_hotspot.x*m_width/m_src_w, m_hotspot.y*m_height/m_src_h)
+                : m_hotspot;
         }
         Rectf GetBounds() const {
-            return Rectf(-m_hotspot.x*m_width/m_src_w,-m_hotspot.y*m_height/m_src_h,m_width,m_height);
+            return (m_src_w!=0.0f && m_src_h!=0.0f) ? Rectf(-m_hotspot.x*m_width/m_src_w,-m_hotspot.y*m_height/m_src_h,m_width,m_height) : Rectf(-m_hotspot.x,-m_hotspot.y,m_width,m_height);
         }
         void SetHotspot( const Vector2f& hs );
 		

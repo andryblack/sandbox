@@ -300,8 +300,8 @@ namespace Sandbox {
         } else if (type == LUA_TBOOLEAN) {
             yajl_gen_bool(g, lua_toboolean(L, indx));
         } else if (type == LUA_TNUMBER) {
-            lua_Integer i = lua_tointeger(L, indx);
             lua_Number n = lua_tonumber(L, indx);
+            long long int i = (long long int)(n);
             if ( lua_Number(i) == n ) {
                 yajl_gen_integer(g, i);
             } else {

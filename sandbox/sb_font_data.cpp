@@ -106,7 +106,8 @@ namespace Sandbox {
     }
     
     
-    FontDataProvider::FontDataProvider() : m_data(new FontData()) {
+    FontDataProvider::FontDataProvider() : m_data(new FontData())
+        , m_size(10.0f),m_height(10.0f),m_xheight(10.0f),m_baseline(0.0f) {
         
     }
     

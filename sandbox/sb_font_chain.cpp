@@ -20,6 +20,9 @@ namespace Sandbox {
     }
     
     void FontChain::Add(const Sandbox::FontDataProviderPtr &next) {
+        if (!next) {
+            return;
+        }
         next->set_data(GetMainData());
         OutlineFontDataProvider* p = meta::sb_dynamic_cast<OutlineFontDataProvider>(next.get());
         if (p) {
