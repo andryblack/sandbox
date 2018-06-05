@@ -213,6 +213,8 @@ namespace Sandbox {
         float GetScale() const { return m_scale; }
         
         void SetFilter(DrawFilter* filter);
+
+        const RenderTargetPtr& GetRenderTarget() const { return m_render_to_target; }
        
    private:
         Resources*  m_resources;
