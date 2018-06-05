@@ -1261,8 +1261,9 @@ namespace Sandbox {
         return GHL::UInt32((m_render ? m_render->GetHeight() : 0) / draw_scale);
     }
 		
-	void Graphics::BeginScene(GHL::Render* render, const RenderTargetPtr& target) {
+    void Graphics::BeginScene(GHL::Render* render, const RenderTargetPtr& target) {
         sb_assert( (m_render==0) && "scene already started" );
+        sb_assert( render );
 		m_render = render;
         m_render_to_target = target;
 		m_state.blend_mode = BLEND_MODE_COPY;

@@ -209,6 +209,11 @@ project 'GHL'
 					ghl_src .. 'render/opengl/gles2_api.*',
 					ghl_src .. 'render/opengl/render_opengles.*',
 				}
+				if os.is('emscripten') then
+					files {
+						ghl_src .. 'render/opengl/render_webgl.*',
+					}
+				end
 			else
 				files {
 					ghl_src .. 'render/opengl/dynamic/dynamic_gl.*',
@@ -312,6 +317,9 @@ project 'GHL'
 				end
 			elseif os.is('emscripten') then
 				defines 'GHL_NO_ES1'
+				buildoptions {
+					'-s USE_SDL=2'
+				}
 				files {
 					ghl_src .. 'winlib/winlib_sdl.*',
 					ghl_src .. 'winlib/winlib_posix_time.cpp',
