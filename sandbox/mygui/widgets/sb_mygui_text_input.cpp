@@ -28,6 +28,7 @@ namespace Sandbox {
                 emitAccept();
             } else if (e->type == GHL::EVENT_TYPE_TEXT_INPUT_TEXT_CHANGED) {
                 setCaption(e->data.text_input_text_changed.text);
+                emitChanged();
             } else if (e->type == GHL::EVENT_TYPE_TEXT_INPUT_CLOSED) {
                 MyGUI::InputManager::getInstance().resetKeyFocusWidget();
             }
@@ -36,6 +37,9 @@ namespace Sandbox {
         
         void TextInput::emitAccept() {
             eventEditAccept(this);
+        }
+        void TextInput::emitChanged() {
+            eventEditTextChange(this);
         }
         
         void TextInput::setPlaceholder(const sb::string& text) {

@@ -111,6 +111,7 @@ namespace Sandbox {
                 } else {
                     Base::updateCursorPosition();
                 }
+                eventEditTextChange(this);
             } 
         }
     }
