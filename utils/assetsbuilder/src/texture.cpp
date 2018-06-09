@@ -218,6 +218,14 @@ void TextureData::PremultiplyAlpha() {
     GetImage()->PremultiplyAlpha();
 }
 
+bool TextureData::Grayscale() {
+    sb_assert(GetImage());
+    if (GetImage()->GetFormat()==GHL::IMAGE_FORMAT_RGB) {
+        return GetImage()->Convert(GHL::IMAGE_FORMAT_GRAY);
+    }
+    return false;
+}
+
 void TextureData::Place( GHL::UInt32 x, GHL::UInt32 y, const TextureSubDataPtr& img ) {
     sb_assert(img);
     GetImage()->Draw(x, y, img->GetSubImage());
