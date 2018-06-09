@@ -64,7 +64,8 @@ public:
     explicit TextureData( GHL::Image* img );
     ~TextureData();
     void PremultiplyAlpha();
-    
+    bool Grayscale();
+
     
     void Place( GHL::UInt32 x, GHL::UInt32 y,
                const TextureSubDataPtr& img );

@@ -298,6 +298,9 @@ namespace Sandbox {
         } else if (img->GetFormat()==GHL::IMAGE_FORMAT_RGBA) {
 		 	tfmt = GHL::TEXTURE_FORMAT_RGBA;
              bpp = 4;
+        } else if (img->GetFormat()==GHL::IMAGE_FORMAT_GRAY) {
+            tfmt = GHL::TEXTURE_FORMAT_ALPHA;
+            bpp = 1;
 		} else {
 			LogError(MODULE) <<"unsupported format";
 			return 0;
