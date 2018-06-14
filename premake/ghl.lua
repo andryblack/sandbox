@@ -317,11 +317,8 @@ project 'GHL'
 				end
 			elseif os.is('emscripten') then
 				defines 'GHL_NO_ES1'
-				buildoptions {
-					'-s USE_SDL=2'
-				}
 				files {
-					ghl_src .. 'winlib/winlib_sdl.*',
+					ghl_src .. 'winlib/winlib_emscripten.*',
 					ghl_src .. 'winlib/winlib_posix_time.cpp',
 				}
 				if use_network then

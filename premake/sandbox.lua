@@ -458,10 +458,7 @@ solution( ProjectName )
 			
 		elseif os.is('emscripten') then
 			links {
-				'SDL'
-			}
-			linkoptions  {
-				'-s USE_SDL=2'
+				'EGL','GL'
 			}
 		end
 
