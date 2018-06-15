@@ -388,6 +388,9 @@ namespace Sandbox {
             return 0;
         }
         GHL::MusicInstance* music = m_sound->OpenMusic(ds);
+        if (!music) {
+            SB_LOGD("failed open music " << filename);
+        }
         ds->Release();
         return music;
     }

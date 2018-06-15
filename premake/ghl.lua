@@ -8,6 +8,7 @@ local append_path = utils.append_path
 
 local ghl_src = sandbox_dir .. '/GHL/src/'
 ghl_links = {}
+ghl_includes = {}
 
 project 'GHL-zlib'
 		kind 'StaticLib'
@@ -82,7 +83,7 @@ project 'GHL-ogg'
 
 		table.insert(ghl_links,1,'GHL-ogg')
 
-if not ghl_disable_vorbis then
+if not ghl_use_tremor then
 project 'GHL-vorbis'
 		kind 'StaticLib'
 		configure_lib_targetdir()
@@ -112,8 +113,36 @@ project 'GHL-vorbis'
 		files(ghl_src .. '/sound/libvorbis/include/**.h')
 		table.insert(ghl_sysincludes,ghl_src .. '/sound/libvorbis/include')
 		table.insert(ghl_links,1,'GHL-vorbis')
+		table.insert(ghl_defines, 'GHL_USE_VORBIS_DECODER')
 else
-		table.insert(ghl_defines, 'GHL_DISABLE_VORBIS')
+project 'GHL-tremor'
+		kind 'StaticLib'
+		configure_lib_targetdir()
+		targetname ('GHL-tremor-' .. platform_dir)
+		buildoptions{'-O3'}
+		if os.is('android') then
+			android_ndk_arm_mode(true)
+		end
+		
+		includedirs {
+			ghl_src .. '/sound/tremor',
+		}
+
+		local tremor_files = {'mdct.c', 'block.c', 'window.c',
+                        'synthesis.c', 'info.c',
+                        'floor1.c', 'floor0.c', 'vorbisfile.c', 
+                        'res012.c', 'mapping0.c', 'registry.c', 'codebook.c',
+						'sharedbook.c', '*.h'}
+		
+		sysincludedirs {
+			ghl_src .. '/sound/libogg/include',
+		}
+
+
+		files(utils.append_path(ghl_src .. '/sound/tremor/',tremor_files))
+		table.insert(ghl_includes,ghl_src .. '/sound/tremor')
+		table.insert(ghl_links,1,'GHL-tremor')
+		table.insert(ghl_defines, 'GHL_USE_IVORBIS_DECODER')
 end
 
 project 'GHL'
@@ -146,7 +175,6 @@ project 'GHL'
 			ghl_src .. 'sound/ghl_sound_impl.h',
 			ghl_src .. 'sound/sound_decoders.cpp',
 			ghl_src .. 'sound/wav_decoder.*',
-			ghl_src .. 'sound/vorbis_decoder.*',
 			ghl_src .. 'render/buffer_impl.*',
 			ghl_src .. 'render/lucida_console_regular_8.*',
 			ghl_src .. 'render/render_impl.*',
@@ -154,8 +182,10 @@ project 'GHL'
 			ghl_src .. 'render/shader_impl.*',
 			ghl_src .. 'render/texture_impl.*',
 			ghl_src .. 'render/pfpl/*',
-			ghl_src .. 'font/font_impl.*'
+			ghl_src .. 'font/font_impl.*',
+			ghl_src .. 'sound/vorbis_decoder.*',
 		}
+
 
 		local use_openal = false
 		local use_opengl = false
@@ -320,6 +350,7 @@ project 'GHL'
 				files {
 					ghl_src .. 'winlib/winlib_emscripten.*',
 					ghl_src .. 'winlib/winlib_posix_time.cpp',
+					ghl_src .. 'sound/emscripten/*',
 				}
 				if use_network then
 					files {
