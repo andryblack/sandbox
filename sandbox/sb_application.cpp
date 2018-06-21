@@ -305,7 +305,7 @@ namespace Sandbox {
         language[0] = 0;
         if (m_system->GetDeviceData(GHL::DEVICE_DATA_LANGUAGE, language) && language[0]) {
             language[32] = 0;
-            m_system_language = language;
+            SetSystemLanguage(language);
         }
         OnSystemSet();
 	}

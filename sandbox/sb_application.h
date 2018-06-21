@@ -96,6 +96,9 @@ namespace Sandbox {
 		void SetResourcesBasePath( const char* path ) {
 			m_resources_base_path = path;
 		}
+        void SetSystemLanguage(const char* lang) {
+            m_system_language = lang;
+        }
         /// bind Lua modules
 		virtual void BindModules( LuaVM* );
 		virtual void OnLoaded() {}
