@@ -125,7 +125,8 @@ solution( ProjectName )
 		gccprefix ( flascc_sdk_dir .. '/usr/bin/' )
 		buildoptions {'-Wno-write-strings', '-Wno-trigraphs' }
 	elseif platform_id == 'emscripten' then
-		buildoptions { '-s NO_EXIT_RUNTIME=1' }
+		buildoptions { '-s NO_EXIT_RUNTIME=1','-s STRICT=1'}
+		linkoptions{ '-s STRICT=1' }
 	elseif platform_id ~= 'windows' then
 		table.insert(hide_options,'-fvisibility=hidden')
 	end
@@ -458,7 +459,7 @@ solution( ProjectName )
 			
 		elseif os.is('emscripten') then
 			links {
-				'EGL','GL'
+				'gl.js','egl.js','idbstore.js','idbfs.js'
 			}
 		end
 
