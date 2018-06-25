@@ -314,6 +314,7 @@ SB_META_PROPERTY_WO(colour, setColour)
 SB_META_PROPERTY_RW(alpha, getAlpha,setAlpha)
 SB_META_PROPERTY_RW(depth, getDepth,setDepth)
 SB_META_PROPERTY_RW(needMouse, getNeedMouseFocus, setNeedMouseFocus)
+SB_META_PROPERTY_RW(needWheel, getNeedMouseWheel, setNeedMouseWheel)
 SB_META_PROPERTY_RW(needKey, getNeedKeyFocus, setNeedKeyFocus)
 bind( property_rw( "inheritsPick", &widget_getInheritsPick, &widget_setInheritsPick ) );
 SB_META_PROPERTY_RW(inheritsState, getInheritsState, setInheritsState)

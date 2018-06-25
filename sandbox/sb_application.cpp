@@ -1031,6 +1031,15 @@ namespace Sandbox {
 #endif
                 OnMouseUp(event->data.mouse_release.button, event->data.mouse_release.x, event->data.mouse_release.y);
                 break;
+            case GHL::EVENT_TYPE_WHEEL:
+#ifdef SB_USE_MYGUI
+                if (MyGUI::InputManager::getInstancePtr()) {
+                    if (MyGUI::InputManager::getInstance().injectWheel(event->data.wheel.delta)) {
+                        
+                    }
+                }
+#endif
+                break;
             case GHL::EVENT_TYPE_APP_STARTED:
                 OnAppStarted();
                 break;
@@ -1110,7 +1119,7 @@ namespace Sandbox {
         TransformMouse(x,y,fx,fy);
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstancePtr())
-        if (MyGUI::InputManager::getInstance().injectMouseMove(fx, fy, 0)||
+        if (MyGUI::InputManager::getInstance().injectMouseMove(fx, fy)||
             MyGUI::InputManager::getInstance().isModalAny())
             return;
 #endif
