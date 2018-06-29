@@ -311,6 +311,10 @@ public class IAPHelper  {
         m_native_object = obj;
     }
 
+    public Activity getActivity() {
+        return m_activity;
+    }
+
     void OnStartOperation(IAPOperation op) {
         logInfo("Start operation " + op.name());  
         m_current_operation = op;
