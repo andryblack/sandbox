@@ -123,7 +123,7 @@ function build.generate_build_gradle(sln)
     _x(2,"classpath 'com.android.tools.build:gradle:3.0.1'")
     if sln.android_module and
     	(sln.android_module.gcm or sln.android_module.fcm or sln.android_module.gps) then
-    	_x(2,"classpath 'com.google.gms:google-services:3.2.1'")
+    	_x(2,"classpath 'com.google.gms:google-services:"..(sln.android_google_services_version or '4.0.1').."'")
 	end
 	if sln.android_build_dependencies then
 		for _,v in ipairs(sln.android_build_dependencies) do

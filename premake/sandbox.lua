@@ -45,6 +45,10 @@ solution( ProjectName )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 		android_packageversion( AndroidConfig.versioncode or 1)
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
+
+		local firebase_version = AndroidConfig.firebase_version 
+		local play_version = AndroidConfig.play_version or '15.0.0'
+
 		if AndroidConfig.manifest then
 			android_manifest(path.getabsolute(path.join(_WORKING_DIR,AndroidConfig.manifest)))
 		end
@@ -54,10 +58,10 @@ solution( ProjectName )
 		
 		if use.AndroidGooglePlayService or use.IAP then
 			
-			android_dependencies('com.google.android.gms:play-services-base:15.0.0')
+			android_dependencies('com.google.android.gms:play-services-base:' .. play_version)
 			if use.AndroidGooglePlayService then
-				android_dependencies('com.google.android.gms:play-services-auth:15.0.0')
-				android_dependencies('com.google.android.gms:play-services-games:15.0.0')
+				android_dependencies('com.google.android.gms:play-services-auth:' .. play_version)
+				android_dependencies('com.google.android.gms:play-services-games:' .. play_version)
 				android_dependencies('com.android.support:support-v4:27.0.2')
 			end
 			
@@ -69,8 +73,8 @@ solution( ProjectName )
 
 		if use.AndroidPN then
 			android_module{fcm=true}
-			android_dependencies('com.google.firebase:firebase-core:15.0.0')
-			android_dependencies('com.google.firebase:firebase-messaging:15.0.0')
+			android_dependencies('com.google.firebase:firebase-core:' .. ((firebase_version and firebase_version.core) or '16.0.1'))
+			android_dependencies('com.google.firebase:firebase-messaging:' .. ((firebase_version and firebase_version.messaging) or '17.1.0'))
 
 			android_service {
 				{
