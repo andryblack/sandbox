@@ -312,6 +312,12 @@ api.register {
 	kind = 'string'
 }
 
+api.register {
+	name = 'android_google_services_version',
+	scope = 'solution',
+	kind = 'string'
+}
+
 
 newoption {
 	trigger = "android-ndk-dir",
