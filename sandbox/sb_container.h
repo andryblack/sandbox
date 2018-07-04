@@ -57,6 +57,7 @@ namespace Sandbox {
 		sb::vector<SceneObjectPtr> m_objects;
         virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
         virtual void GetTransformImpl(Transform2d& tr) const SB_OVERRIDE;
+        virtual void GetTransformToImpl(const SceneObject* root,Transform2d& tr) const SB_OVERRIDE;
         virtual void DrawChilds( Graphics& g ) const;
         const TransformModificatorPtr& GetTransformM() const { return m_transform; }
         const ColorModificatorPtr GetColorM() const { return m_color; }

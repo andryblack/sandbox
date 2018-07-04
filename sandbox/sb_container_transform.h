@@ -17,6 +17,7 @@ namespace Sandbox {
     public:
         virtual void DrawChilds(Graphics& g) const SB_OVERRIDE;
         virtual void GetTransformImpl(Transform2d& tr) const SB_OVERRIDE;
+        virtual void GetTransformToImpl(const SceneObject* root,Transform2d& tr) const SB_OVERRIDE;
         virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
         virtual const Transform2d& GetTransformM() const = 0;
     };

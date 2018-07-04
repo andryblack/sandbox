@@ -31,6 +31,7 @@ namespace Sandbox {
         }
         virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
         virtual void GetTransformImpl(Transform2d& tr) const SB_OVERRIDE;
+        virtual void GetTransformToImpl(const SceneObject* root,Transform2d& tr) const SB_OVERRIDE;
         
     };
     typedef sb::intrusive_ptr<ContainerScroll> ContainerScrollPtr;

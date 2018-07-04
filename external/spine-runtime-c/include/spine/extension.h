@@ -61,7 +61,21 @@
 #define DEG_RAD (PI / 180)
 #define RAD_DEG (180 / PI)
 
-#ifdef __STDC_VERSION__
+#if defined(__EMSCRIPTEN__)
+#define _GNU_SOURCE
+#endif
+
+#if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
+#define FMOD(A,B) fmodf(A, B)
+#define ATAN2(A,B) EM_ASM_DOUBLE({return Math_atan2($0,$1)},A,B)
+#define SIN(A) EM_ASM_DOUBLE({return Math_sin($0)},A)
+#define COS(A) EM_ASM_DOUBLE({return Math_cos($0)},A)
+#define SINCOSF(A,S,C) EM_ASM({HEAPF32[$1>>2]=Math_sin($0);HEAPF32[$2>>2]=Math_cos($0);},A,S,C);
+#define SQRT(A) EM_ASM_DOUBLE({return Math_sqrt($0)},A)
+#define ACOS(A) EM_ASM_DOUBLE({return Math_acos($0)},A)
+#define ABS(A) fabsf(A)
+#elif defined(__STDC_VERSION__)
 #define FMOD(A,B) fmodf(A, B)
 #define ATAN2(A,B) atan2f(A, B)
 #define SIN(A) sinf(A)

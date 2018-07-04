@@ -288,7 +288,7 @@ struct spBaseTimeline* _spBaseTimeline_create (int framesCount, spTimelineType t
 static const int ROTATE_PREV_FRAME_TIME = -2;
 static const int ROTATE_FRAME_VALUE = 1;
 
-void _spRotateTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, float lastTime, float time, spEvent** firedEvents,
+static void _spRotateTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, float lastTime, float time, spEvent** firedEvents,
 		int* eventsCount, float alpha) {
 	spBone *bone;
 	int frameIndex;
@@ -302,10 +302,10 @@ void _spRotateTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, 
 
 	if (time >= self->frames[self->framesCount - 2]) { /* Time is after last frame. */
 		float amount = bone->data->rotation + self->frames[self->framesCount - 1] - bone->rotation;
-		while (amount > 180)
-			amount -= 360;
-		while (amount < -180)
-			amount += 360;
+		while (amount > 180.0f)
+			amount -= 360.0f;
+		while (amount < -180.0f)
+			amount += 360.0f;
 		bone->rotation += amount * alpha;
 		return;
 	}
@@ -315,18 +315,18 @@ void _spRotateTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, 
 	prevFrameValue = self->frames[frameIndex - 1];
 	frameTime = self->frames[frameIndex];
 	percent = 1 - (time - frameTime) / (self->frames[frameIndex + ROTATE_PREV_FRAME_TIME] - frameTime);
-	percent = spCurveTimeline_getCurvePercent(SUPER(self), (frameIndex >> 1) - 1, percent < 0 ? 0 : (percent > 1 ? 1 : percent));
+	percent = spCurveTimeline_getCurvePercent(SUPER(self), (frameIndex >> 1) - 1, percent < 0.0f ? 0.0f : (percent > 1.0f ? 1.0f : percent));
 
 	amount = self->frames[frameIndex + ROTATE_FRAME_VALUE] - prevFrameValue;
-	while (amount > 180)
-		amount -= 360;
-	while (amount < -180)
-		amount += 360;
+	while (amount > 180.0f)
+		amount -= 360.0f;
+	while (amount < -180.0f)
+		amount += 360.0f;
 	amount = bone->data->rotation + (prevFrameValue + amount * percent) - bone->rotation;
-	while (amount > 180)
-		amount -= 360;
-	while (amount < -180)
-		amount += 360;
+	while (amount > 180.0f)
+		amount -= 360.0f;
+	while (amount < -180.0f)
+		amount += 360.0f;
 	bone->rotation += amount * alpha;
 
 	UNUSED(lastTime);

@@ -21,6 +21,13 @@ namespace Sandbox {
         tr = tr * GetTransformM();
     }
     
+    void ContainerTransformBase::GetTransformToImpl(const SceneObject* root,Transform2d& tr) const {
+        Container::GetTransformToImpl(root,tr);
+        if (root != this) {
+            tr = tr * GetTransformM();
+        }
+    }
+    
     void ContainerTransformBase::GlobalToLocalImpl(Vector2f& v) const {
         SceneObject::GlobalToLocalImpl(v);
         Transform2d tr = GetTransformM().inverted();

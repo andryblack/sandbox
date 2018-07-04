@@ -372,6 +372,10 @@ namespace Sandbox {
         Color gclr = gr.GetColor();
         
         spSkeleton* skeleton = m_animation->m_skeleton;
+        gclr.r*=skeleton->r;
+        gclr.g*=skeleton->g;
+        gclr.b*=skeleton->b;
+        gclr.a*=skeleton->a;
         for (int i = 0; i < skeleton->slotsCount; ++i) {
             spSlot* slot = skeleton->drawOrder[i];
             if (!slot)
@@ -405,7 +409,7 @@ namespace Sandbox {
                     break;
             }
             
-            Sandbox::Color c(skeleton->r*slot->r,skeleton->g*slot->g,skeleton->b*slot->b,skeleton->a*slot->a);
+            Sandbox::Color c(slot->r,slot->g,slot->b,slot->a);
             if (c.a <= 0.0f)
                 continue;
             c.clamp();
