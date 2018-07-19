@@ -497,6 +497,7 @@ namespace Sandbox {
                         gr.SetTransform(gstr * (tr*ra->tr));
                         const DrawAttributesPtr& attr = m_animation->m_data->GetSlotAttribute(slot->data);
                         gr.DrawImage(*ra->image,attr.get(),0,0);
+                        gr.SetTransform(gstr);
                     }
                 } else if (attachment->type == SP_ATTACHMENT_WEIGHTED_MESH) {
                     SpineWeightedMeshAttachment* mesh = static_cast<SpineWeightedMeshAttachment*>(SUB_CAST(SpineWeightedMeshAttachment,attachment));
@@ -515,7 +516,7 @@ namespace Sandbox {
                 tr.m.matrix[0*2+1] = -bone->c;
                 tr.m.matrix[1*2+1] = -bone->d;
                 object_attachement->SetTransform(tr);
-                gr.SetTransform(gstr);
+                //gr.SetTransform(gstr);
                 object_attachement->Draw(gr);
             }
         }
