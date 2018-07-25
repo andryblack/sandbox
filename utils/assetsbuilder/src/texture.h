@@ -79,6 +79,7 @@ public:
     void SetImageFileFormatJPEG(int settings);
     void SetImageFileFormatETC1();
     bool IsJPEG() const { return m_image_file_format == GHL::IMAGE_FILE_FORMAT_JPEG; }
+    bool HasBits(int treshold);
     
     GHL::Int32 GetEncodeSettings() const { return m_encode_settings; };
 };
