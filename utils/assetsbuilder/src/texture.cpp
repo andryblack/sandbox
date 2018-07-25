@@ -255,5 +255,26 @@ TextureDataPtr TextureData::ExtractSubData(int x,int y,int w,int h) {
     return TextureDataPtr(new TextureData(cropped_img));
 }
 
+bool TextureData::HasBits(int treshold) {
+    GHL::Image* image = GetImage();
+    if (!image) return false;
+    if (!image->GetData()) return false;
+    const GHL::Byte* data = image->GetData()->GetData();
+    if (!data) return false;
+    
+    if (GetImage()->GetFormat()!=GHL::IMAGE_FORMAT_RGBA) {
+        return true;
+    }
+
+    size_t len = image->GetWidth() * image->GetHeight();
+    for (size_t i=0;i<len;i++) {
+        if (data[i*4+3] > treshold) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 
