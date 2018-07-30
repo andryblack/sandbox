@@ -25,10 +25,16 @@ function dest_files_mt:__ipairs()
 	return ipairs(self._)
 end
 
+local function remove_dest_file( t, n )
+	t._[n]=nil
+	_M.all_dest_files[n]=nil
+end
+
 function _M.init_rules(rules) 
 	rules.copy_files = {}
 	rules.compile_files = {}
-	rules.dest_files = setmetatable({_={}},dest_files_mt)
+	rules.dest_files = setmetatable({_={},remove=remove_dest_file},dest_files_mt)
+
 	rules.call_functions = {}
 	rules.encode_sounds = {}
 end
@@ -371,7 +377,7 @@ function _M.chek_files(  )
 		end
 	end
 	if next(_M.all_dest_files) then
-		for k,v in pairs(all_dest_files) do
+		for k,v in pairs(_M.all_dest_files) do
 			log.error("not produced declared file:",k)
 		end
 		error('not all files produced')
