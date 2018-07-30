@@ -100,9 +100,12 @@ function build.generate_build_gradle(sln)
     _x(2,'jcenter()')
     if sln.android_repository then
     	for _,v in ipairs(sln.android_repository) do
-    		_x(2,'%s()',v)
+    		_x(2,'%s',v)
     	end
     end
+    	_x(2,'maven {')
+            _x(3,'url "https://maven.google.com"')
+    	_x(2,'}')
     _x(1,'}')
     _x(1,'dependencies {')
     _x(2,"classpath 'com.android.tools.build:gradle:2.2.3'")
@@ -124,6 +127,14 @@ function build.generate_build_gradle(sln)
 	_x('allprojects {')
     _x(1,'repositories {')
     _x(2,'jcenter()')
+    if sln.android_repository then
+    	for _,v in ipairs(sln.android_repository) do
+    		_x(2,'%s',v)
+    	end
+    end
+    	_x(2,'maven {')
+            _x(3,'url "https://maven.google.com"')
+    	_x(2,'}')
     _x(1,'}')
 	_x('}')
 
