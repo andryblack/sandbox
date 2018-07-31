@@ -93,8 +93,8 @@ namespace Sandbox {
                 lua_setfield(m_L, -2, prop.name);               /// props 
                 lua_pop(m_L, 1);
             }
-            template <class Getter>
-            void operator()( const meta::property_holder_ro<T, Getter>& prop ) {
+            template <class U,class Getter>
+            void operator()( const meta::property_holder_ro<U, Getter>& prop ) {
                 sb_assert(lua_istable(m_L, -1)); 
                 lua_rawgeti(m_L, -1 , __props);                 /// props
                 sb_assert(lua_istable(m_L, -1)); 

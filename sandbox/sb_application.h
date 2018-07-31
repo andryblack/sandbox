@@ -48,6 +48,7 @@ namespace Sandbox {
         void    SetFrameInterval(int interval);
         void    SetResizeableWindow(bool v);
         void    SetScreenKeepOn(bool o);
+        void    SetCursor(GHL::SystemCursor cursor);
         
         GHL::System* GetSystem() const { return m_system;}
         

@@ -90,6 +90,11 @@ namespace Sandbox {
             }
             
         }
+        
+        void GUI::setCursor(GHL::SystemCursor cursor) {
+            GHL::UInt32 v = cursor;
+            m_system->SetDeviceState(GHL::DEVICE_STATE_SYSTEM_CURSOR, &v);
+        }
 
     }
 }

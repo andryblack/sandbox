@@ -31,6 +31,7 @@ namespace Sandbox {
                 return static_cast<GUI*>(MyGUI::Gui::getInstancePtr());
             }
             GHL::System* getSystem() { return m_system; }
+            void setCursor(GHL::SystemCursor cursor);
             
             EventHandle_GHLEventPtr eventGHLEvent;
         protected:

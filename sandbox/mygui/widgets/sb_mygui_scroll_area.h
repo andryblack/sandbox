@@ -83,6 +83,7 @@ namespace Sandbox {
             bool    m_manual_scroll;
             bool    m_small_scroll_enabled;
             float m_wheel_scroll_speed;
+            GHL::SystemCursor   m_scroll_cursor;
         };
         
         

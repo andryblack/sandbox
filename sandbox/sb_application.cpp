@@ -118,6 +118,12 @@ namespace Sandbox {
     }
 }
 
+SB_META_DECLARE_KLASS(GHL::SystemCursor,void);
+SB_META_ENUM_BIND(GHL::SystemCursor,namespace GHL,
+                  SB_META_ENUM_ITEM(SYSTEM_CURSOR_DEFAULT)
+                  SB_META_ENUM_ITEM(SYSTEM_CURSOR_HAND)
+                  )
+
 SB_META_DECLARE_OBJECT(Sandbox::Application, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
 SB_META_METHOD(AddScene)
@@ -138,6 +144,7 @@ SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 SB_META_PROPERTY_WO(FrameInterval, SetFrameInterval)
 SB_META_PROPERTY_WO(ResizeableWindow, SetResizeableWindow)
 SB_META_PROPERTY_WO(ScreenKeepOn, SetScreenKeepOn)
+SB_META_PROPERTY_WO(Cursor, SetCursor)
 SB_META_PROPERTY_RO(FPS, GetFPS)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 bind( method( "StoreProfileFile", &Sandbox::Application_StoreProfileFile));
@@ -451,6 +458,7 @@ namespace Sandbox {
             }
         }
         
+        luabind::Enum<GHL::SystemCursor>(m_lua->GetVM());
         luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
         luabind::RawClass<GHL::Settings>(m_lua->GetVM());
         
@@ -842,6 +850,13 @@ namespace Sandbox {
     void    Application::SetScreenKeepOn(bool v) {
         if (m_system) {
             m_system->SetDeviceState(GHL::DEVICE_STATE_KEEP_SCREEN_ON, &v);
+        }
+    }
+    
+    void    Application::SetCursor(GHL::SystemCursor cursor) {
+        if (m_system) {
+            GHL::UInt32 v = cursor;
+            m_system->SetDeviceState(GHL::DEVICE_STATE_SYSTEM_CURSOR, &v);
         }
     }
     

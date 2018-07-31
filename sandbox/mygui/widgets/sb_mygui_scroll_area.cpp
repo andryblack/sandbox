@@ -16,6 +16,7 @@
 
 #include "sb_log.h"
 #include "sb_mygui_cached_widget.h"
+#include "../sb_mygui_gui.h"
 
 namespace Sandbox {
     
@@ -27,6 +28,7 @@ namespace Sandbox {
             m_manual_scroll = true;
             m_small_scroll_enabled = false;
             m_wheel_scroll_speed = 5.0f;
+            m_scroll_cursor = GHL::SYSTEM_CURSOR_HAND;
         }
         
         ScrollArea::~ScrollArea() {
@@ -163,6 +165,7 @@ namespace Sandbox {
                 }
                 if (client_rect.inside(pos_in_layer)) {
                     Scroll::ScrollBegin(Vector2f(x,y));
+                    GUI::getInstancePtr()->setCursor(m_scroll_cursor);
                 }
             }
         }
@@ -172,6 +175,7 @@ namespace Sandbox {
                 return;
             if (_id == MyGUI::MouseButton::Left) {
                 Scroll::ScrollEnd(Vector2f(x,y));
+                GUI::getInstancePtr()->setCursor(GHL::SYSTEM_CURSOR_DEFAULT);
             }
         }
         
