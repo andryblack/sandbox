@@ -344,6 +344,11 @@ bind(method("eventMouseDrag", delegate_bind<MyGUI::Widget,
             MyGUI::EventHandle_WidgetFloatFloatButton,
             &MyGUI::WidgetInput::eventMouseDrag>::lua_func));
 
+bind(method("eventMouseMove", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetFloatFloat,
+            &MyGUI::WidgetInput::eventMouseMove>::lua_func));
+
 bind(method("eventKeySetFocus", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
             MyGUI::EventHandle_WidgetWidget,
@@ -828,6 +833,12 @@ bind(method("resetKeyFocusWidget",
             static_cast<void(MyGUI::InputManager::*)()>(&MyGUI::InputManager::resetKeyFocusWidget)));
 bind(method("resetMouseFocusWidget",
             static_cast<void(MyGUI::InputManager::*)()>(&MyGUI::InputManager::_resetMouseFocusWidget)));
+bind(method("eventChangeMouseFocus",
+            delegate_bind<MyGUI::InputManager,
+            MyGUI::InputManager,
+            MyGUI::delegates::CMultiDelegate1<MyGUI::Widget*>,
+            &MyGUI::InputManager::eventChangeMouseFocus>::lua_func));
+
 SB_META_END_KLASS_BIND()
 
 

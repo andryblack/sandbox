@@ -122,6 +122,7 @@ SB_META_DECLARE_KLASS(GHL::SystemCursor,void);
 SB_META_ENUM_BIND(GHL::SystemCursor,namespace GHL,
                   SB_META_ENUM_ITEM(SYSTEM_CURSOR_DEFAULT)
                   SB_META_ENUM_ITEM(SYSTEM_CURSOR_HAND)
+                  SB_META_ENUM_ITEM(SYSTEM_CURSOR_MOVE)
                   )
 
 SB_META_DECLARE_OBJECT(Sandbox::Application, void)

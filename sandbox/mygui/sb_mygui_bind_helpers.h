@@ -145,6 +145,21 @@
                 return 0;
             }
         };
+        template <class O,class T,class A1,class A2,class A3,MyGUI::delegates::CMultiDelegate3<A1, A2, A3> T::*obj>
+        struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate3<A1, A2, A3>, obj > {
+            typedef LuaDelegate3<A1,A2,A3> LuaDelegate;
+            typedef MyGUI::delegates::CMultiDelegate3<A1, A2, A3> MultiDelegate;
+            static int lua_func( lua_State* L ) {
+                O* t = Sandbox::luabind::stack<O*>::get(L,1);
+                LuaDelegate* delegate = new LuaDelegate();
+                lua_pushvalue(L, 2);
+                delegate->SetObject(L);
+                MultiDelegate& md(t->*obj);
+                md.clear();
+                md += delegate;
+                return 0;
+            }
+        };
         template <class O,class T,class A1,class A2,MyGUI::delegates::CMultiDelegate2<A1, A2> T::*obj>
         struct delegate_bind<O,T,MyGUI::delegates::CMultiDelegate2<A1, A2>, obj > {
             typedef LuaDelegate2<A1,A2> LuaDelegate;

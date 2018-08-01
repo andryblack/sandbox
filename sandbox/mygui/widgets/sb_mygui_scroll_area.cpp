@@ -28,7 +28,7 @@ namespace Sandbox {
             m_manual_scroll = true;
             m_small_scroll_enabled = false;
             m_wheel_scroll_speed = 5.0f;
-            m_scroll_cursor = GHL::SYSTEM_CURSOR_HAND;
+            m_scroll_cursor = GHL::SYSTEM_CURSOR_MOVE;
         }
         
         ScrollArea::~ScrollArea() {
@@ -165,7 +165,6 @@ namespace Sandbox {
                 }
                 if (client_rect.inside(pos_in_layer)) {
                     Scroll::ScrollBegin(Vector2f(x,y));
-                    GUI::getInstancePtr()->setCursor(m_scroll_cursor);
                 }
             }
         }
@@ -261,6 +260,7 @@ namespace Sandbox {
         void ScrollArea::OnScrollBegin() {
             MyGUI::InputManager::getInstance().setMouseFocusWidget(this);
             scrollBegin(this, getViewOffset());
+            GUI::getInstancePtr()->setCursor(m_scroll_cursor);
         }
         
         void ScrollArea::OnScrollEnd() {

@@ -26,6 +26,8 @@ namespace Sandbox {
                 MyGUI::newDelegate(this,&GUI::get_mygui_localization);
             mInputManager->eventChangeKeyFocus +=
                 MyGUI::newDelegate(this,&GUI::mygui_change_key_focus);
+            mInputManager->eventChangeMouseFocus +=
+            MyGUI::newDelegate(this,&GUI::mygui_change_mouse_focus);
             mClipboardManager->eventClipboardChanged +=
                 MyGUI::newDelegate(this,&GUI::mygui_clipboard_changed);
             mClipboardManager->eventClipboardRequested +=
@@ -52,6 +54,15 @@ namespace Sandbox {
                 showKeyboard(w);
             } else {
                 m_system->HideKeyboard();
+            }
+        }
+        void GUI::mygui_change_mouse_focus( MyGUI::Widget* w) {
+            if (m_ctx) {
+                if (m_ctx->GetValue<bool>("application.onMouseFocusChanged")) {
+                    m_ctx->GetValue<LuaContextPtr>("application")
+                    ->call("onMouseFocusChanged",
+                           static_cast<MyGUI::Widget*>(w));
+                }
             }
         }
         void GUI::mygui_clipboard_changed( const std::string& type, const std::string& text ) {
