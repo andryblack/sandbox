@@ -53,7 +53,7 @@ struct spWeightedMeshAttachment {
 	int trianglesCount;
 	unsigned short* triangles;
 
-	int uvsCount;
+	int worldVerticesLength;
 	float* regionUVs;
 	float* uvs;
 	int hullLength;

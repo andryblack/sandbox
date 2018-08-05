@@ -58,24 +58,29 @@ spWeightedMeshAttachment* spWeightedMeshAttachment_create (const char* name) {
 }
 
 void spWeightedMeshAttachment_updateUVs (spWeightedMeshAttachment* self) {
-	int i;
-	float width = self->regionU2 - self->regionU, height = self->regionV2 - self->regionV;
-	FREE(self->uvs);
-	self->uvs = MALLOC(float, self->uvsCount);
-	if (self->regionRotate) {
-		for (i = 0; i < self->uvsCount; i += 2) {
-			self->uvs[i] = self->regionU + self->regionUVs[i + 1] * width;
-			self->uvs[i + 1] = self->regionV + height - self->regionUVs[i] * height;
-		}
-	} else {
-		for (i = 0; i < self->uvsCount; i += 2) {
-			self->uvs[i] = self->regionU + self->regionUVs[i] * width;
-			self->uvs[i + 1] = self->regionV + self->regionUVs[i + 1] * height;
-		}
-	}
+    int i;
+    float width = self->regionU2 - self->regionU, height = self->regionV2 - self->regionV;
+    int verticesLength = self->worldVerticesLength;
+    FREE(self->uvs);
+    self->uvs = MALLOC(float, verticesLength);
+    if (self->regionRotate) {
+        for (i = 0; i < verticesLength; i += 2) {
+            self->uvs[i] = self->regionU + self->regionUVs[i + 1] * width;
+            self->uvs[i + 1] = self->regionV + height - self->regionUVs[i] * height;
+        }
+    } else {
+        for (i = 0; i < verticesLength; i += 2) {
+            self->uvs[i] = self->regionU + self->regionUVs[i] * width;
+            self->uvs[i + 1] = self->regionV + self->regionUVs[i + 1] * height;
+        }
+    }
 }
 
+static void spVertexAttachment_computeWorldVertices1 (spWeightedMeshAttachment* self, int start, int count, spSlot* slot, float* worldVertices, int offset);
+
 void spWeightedMeshAttachment_computeWorldVertices (spWeightedMeshAttachment* self, spSlot* slot, float* worldVertices) {
+    spVertexAttachment_computeWorldVertices1(self, 0, self->worldVerticesLength, slot, worldVertices, 0);
+    /*
 	int w = 0, v = 0, b = 0, f = 0;
 	float x = slot->bone->skeleton->x, y = slot->bone->skeleton->y;
 	spBone** skeletonBones = slot->bone->skeleton->bones;
@@ -109,6 +114,78 @@ void spWeightedMeshAttachment_computeWorldVertices (spWeightedMeshAttachment* se
 			worldVertices[w + 1] = wy + y;
 		}
 	}
+    */
+}
+
+void spVertexAttachment_computeWorldVertices1 (spWeightedMeshAttachment* self, int start, int count, spSlot* slot, float* worldVertices, int offset) {
+    spSkeleton* skeleton;
+    float x, y;
+    int deformLength;
+    float* deform;
+    float* vertices;
+    int* bones;
+    
+    count += offset;
+    skeleton = slot->bone->skeleton;
+    x = skeleton->x;
+    y = skeleton->y;
+    deformLength = slot->attachmentVerticesCount;
+    deform = slot->attachmentVertices;
+    vertices = self->weights;
+    bones = self->bones;
+    if (!bones) {
+        spBone* bone;
+        int v, w;
+        if (deformLength > 0) vertices = deform;
+        bone = slot->bone;
+        x += bone->worldX;
+        y += bone->worldY;
+        for (v = start, w = offset; w < count; v += 2, w += 2) {
+            float vx = vertices[v], vy = vertices[v + 1];
+            worldVertices[w] = vx * bone->a + vy * bone->b + x;
+            worldVertices[w + 1] = vx * bone->c + vy * bone->d + y;
+        }
+    } else {
+        int v = 0, skip = 0, i;
+        spBone** skeletonBones;
+        for (i = 0; i < start; i += 2) {
+            int n = bones[v];
+            v += n + 1;
+            skip += n;
+        }
+        skeletonBones = skeleton->bones;
+        if (deformLength == 0) {
+            int w, b;
+            for (w = offset, b = skip * 3; w < count; w += 2) {
+                float wx = x, wy = y;
+                int n = bones[v++];
+                n += v;
+                for (; v < n; v++, b += 3) {
+                    spBone* bone = skeletonBones[bones[v]];
+                    float vx = vertices[b], vy = vertices[b + 1], weight = vertices[b + 2];
+                    wx += (vx * bone->a + vy * bone->b + bone->worldX) * weight;
+                    wy += (vx * bone->c + vy * bone->d + bone->worldY) * weight;
+                }
+                worldVertices[w] = wx;
+                worldVertices[w + 1] = wy;
+            }
+        } else {
+            int w, b, f;
+            for (w = offset, b = skip * 3, f = skip << 1; w < count; w += 2) {
+                float wx = x, wy = y;
+                int n = bones[v++];
+                n += v;
+                for (; v < n; v++, b += 3, f += 2) {
+                    spBone* bone = skeletonBones[bones[v]];
+                    float vx = vertices[b] + deform[f], vy = vertices[b + 1] + deform[f + 1], weight = vertices[b + 2];
+                    wx += (vx * bone->a + vy * bone->b + bone->worldX) * weight;
+                    wy += (vx * bone->c + vy * bone->d + bone->worldY) * weight;
+                }
+                worldVertices[w] = wx;
+                worldVertices[w + 1] = wy;
+            }
+        }
+    }
 }
 
 void spWeightedMeshAttachment_setParentMesh (spWeightedMeshAttachment* self, spWeightedMeshAttachment* parentMesh) {
@@ -121,7 +198,7 @@ void spWeightedMeshAttachment_setParentMesh (spWeightedMeshAttachment* self, spW
 		self->weightsCount = parentMesh->weightsCount;
 
 		self->regionUVs = parentMesh->regionUVs;
-		self->uvsCount = parentMesh->uvsCount;
+		self->worldVerticesLength = parentMesh->worldVerticesLength;
 
 		self->triangles = parentMesh->triangles;
 		self->trianglesCount = parentMesh->trianglesCount;

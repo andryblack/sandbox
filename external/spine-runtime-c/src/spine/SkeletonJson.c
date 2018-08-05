@@ -774,7 +774,7 @@ spSkeletonData* spSkeletonJson_readSkeletonData (spSkeletonJson* self, const cha
 						entry = Json_getItem(attachmentMap, "parent");
 						if (!entry) {
 							entry = Json_getItem(attachmentMap, "uvs");
-							mesh->uvsCount = entry->size;
+							mesh->worldVerticesLength = entry->size;
 							mesh->regionUVs = MALLOC(float, entry->size);
 							for (entry = entry->child, i = 0; entry; entry = entry->next, ++i)
 								mesh->regionUVs[i] = entry->valueFloat;

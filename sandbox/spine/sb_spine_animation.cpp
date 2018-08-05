@@ -31,14 +31,8 @@ namespace Sandbox {
             if (!attachment || attachment->type != SP_ATTACHMENT_WEIGHTED_MESH) continue;
             
             SpineWeightedMeshAttachment* mesh = static_cast<SpineWeightedMeshAttachment*>(SUB_CAST(SpineWeightedMeshAttachment,attachment));
-            int num_vertices = 0;
-            for (int w = 0, v = 0; v < mesh->bonesCount; w += 2) {
-                const int nn = mesh->bones[v] + v;
-                v++;
-                for (; v <= nn; v++) ++num_vertices;
-            }
             vertices_data vd;
-            vd.world_vertices_pos.resize(num_vertices);
+            vd.world_vertices_pos.resize(mesh->worldVerticesLength);
             vd.vertices.resize(mesh->trianglesCount);
             m_vertices.push_back(vd);
             mesh->vertices_index = vertices_index++;
