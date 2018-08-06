@@ -260,7 +260,7 @@ namespace Sandbox {
         }
         
         void KeepAspectSkin::_setUVSet(const MyGUI::FloatRect& _rect) {
-            updateRect(_rect.width(),_rect.height());
+            updateRect(::fabs(_rect.width()),::fabs(_rect.height()));
             Base::_setUVSet(_rect);
         }
         void KeepAspectSkin::updateRect(float tw, float th) {
