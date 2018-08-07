@@ -145,6 +145,7 @@ SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 SB_META_PROPERTY_WO(FrameInterval, SetFrameInterval)
 SB_META_PROPERTY_WO(ResizeableWindow, SetResizeableWindow)
 SB_META_PROPERTY_WO(ScreenKeepOn, SetScreenKeepOn)
+SB_META_PROPERTY_RW(FullScreen, GetFullScreen, SetFullScreen)
 SB_META_PROPERTY_WO(Cursor, SetCursor)
 SB_META_PROPERTY_RO(FPS, GetFPS)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
@@ -854,6 +855,19 @@ namespace Sandbox {
         }
     }
     
+    void    Application::SetFullScreen(bool fs) {
+        if (m_system) {
+            m_system->SwitchFullscreen(fs);
+        }
+    }
+    
+    bool    Application::GetFullScreen() const {
+        if (!m_system) {
+            return false;
+        }
+        return m_system->IsFullscreen();
+    }
+    
     void    Application::SetCursor(GHL::SystemCursor cursor) {
         if (m_system) {
             GHL::UInt32 v = cursor;
@@ -1100,6 +1114,9 @@ namespace Sandbox {
                     SB_LOGI("store url: " << m_url);
                 }
                 break;
+            case GHL::EVENT_TYPE_FULLSCREEN_CHANGED:
+                OnFullScreenChanged();
+                break;
             default:
                 break;
         }
@@ -1218,6 +1235,21 @@ namespace Sandbox {
             }
         }
         m_need_resize = false;
+    }
+    
+    void Application::OnFullScreenChanged() {
+#ifdef SB_USE_MYGUI
+        if (MyGUI::InputManager::getInstancePtr())
+            MyGUI::InputManager::getInstance().resetMouseCaptureWidget();
+#endif
+        if (m_lua) {
+            LuaContextPtr ctx = m_lua->GetGlobalContext();
+            if (ctx) {
+                if (m_lua->GetGlobalContext()->GetValue<bool>("application.onFullScreenChanged")) {
+                    m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onFullScreenChanged");
+                }
+            }
+        }
     }
     
     void Application::TrimMemory() {

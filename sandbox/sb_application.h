@@ -49,6 +49,8 @@ namespace Sandbox {
         void    SetResizeableWindow(bool v);
         void    SetScreenKeepOn(bool o);
         void    SetCursor(GHL::SystemCursor cursor);
+        void    SetFullScreen(bool fs);
+        bool    GetFullScreen() const;
         
         GHL::System* GetSystem() const { return m_system;}
         
@@ -147,6 +149,7 @@ namespace Sandbox {
         virtual void TrimMemory();
         
         virtual void OnSystemSet();
+        virtual void OnFullScreenChanged();
         
         virtual Resources* CreateResourcesManager();
         virtual Network* CreateNetwork();
