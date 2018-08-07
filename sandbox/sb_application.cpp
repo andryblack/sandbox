@@ -148,6 +148,8 @@ SB_META_PROPERTY_WO(ScreenKeepOn, SetScreenKeepOn)
 SB_META_PROPERTY_RW(FullScreen, GetFullScreen, SetFullScreen)
 SB_META_PROPERTY_WO(Cursor, SetCursor)
 SB_META_PROPERTY_RO(FPS, GetFPS)
+SB_META_PROPERTY_RW(SoundEnabled, GetSoundEnabled, SetSoundEnabled)
+SB_META_PROPERTY_RW(MusicEnabled, GetMusicEnabled, SetMusicEnabled)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 bind( method( "StoreProfileFile", &Sandbox::Application_StoreProfileFile));
 bind( method( "LoadProfileFile", &Sandbox::Application_LoadProfileFile));
@@ -201,8 +203,7 @@ namespace Sandbox {
         m_clear_depth = 0.0f;
         m_batches = 0.0f;
         m_batches_rt = 0.0f;
-        m_sound_enabled = true;
-        m_music_enabled = true;
+        
 #ifdef SB_DEBUG
         m_draw_debug_info = true;
 #else
@@ -893,30 +894,23 @@ namespace Sandbox {
     }
     
     void Application::SetSoundEnabled( bool e ) {
-        m_sound_enabled = e;
-        if (m_sound) {
-            /// @todo
+        if (m_sound_mgr) {
+            m_sound_mgr->SetSoundEnabled(e);
         }
     }
     
     bool Application::GetSoundEnabled() const {
-        return m_sound_enabled;
+        return m_sound_mgr && m_sound_mgr->GetSoundEnabled();
     }
     
     void Application::SetMusicEnabled( bool e ) {
-        m_music_enabled = e;
-        if (m_sound) {
-            /*
-            if (m_music_enabled)
-                m_sound->Music_Play(true);
-            else
-                m_sound->Music_Stop();
-             */
+        if (m_sound_mgr) {
+            m_sound_mgr->SetMusicEnabled(e);
         }
     }
     
     bool Application::GetMusicEnabled() const {
-        return m_music_enabled;
+        return m_sound_mgr && m_sound_mgr->GetMusicEnabled();
     }
     
     bool Application::RestoreAppProfile() {

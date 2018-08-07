@@ -170,7 +170,7 @@ namespace Sandbox {
     
     void    Sound::Play() {
         if (!m_effect) return;
-        if (m_mgr->m_sounds_volume > SILENCE)
+        if (m_mgr->m_sounds_volume > SILENCE && m_mgr->m_sound_enabled)
             m_mgr->m_sound->PlayEffect(m_effect,m_mgr->m_sounds_volume,0.0f,0);
     }
 
@@ -196,7 +196,7 @@ namespace Sandbox {
         }
         initialVol *= m_mgr->m_sounds_volume;
         vol *= m_mgr->m_sounds_volume;
-        if (vol > SILENCE) {
+        if (vol > SILENCE && m_mgr->m_sound_enabled) {
             GHL::SoundInstance* instance = 0;
             m_mgr->m_sound->PlayEffect(m_effect,initialVol,pan*100.0f,&instance);
             SoundInstancePtr res(new SoundInstance(SoundPtr(this),instance,initialVol));
@@ -212,6 +212,8 @@ namespace Sandbox {
     SoundManager::SoundManager( ) : m_sound(0),m_resources(0) {
         m_sounds_volume = 70.0f;
         m_music_volume = 70.0f;
+        m_sound_enabled = true;
+        m_music_enabled = true;
     }
     
     SoundManager::~SoundManager() {
@@ -250,9 +252,23 @@ namespace Sandbox {
         m_music_volume = v;
         if (m_music) {
             m_music->SetVolume(m_music_volume);
-        } else if (m_music_volume > SILENCE) {
+        } else if (m_music_volume > SILENCE && m_music_enabled) {
             if (!m_last_music.empty()) {
                 PlayMusicEx(m_last_music.c_str(), true, 0.0f,0.0f);
+            }
+        }
+    }
+    
+    void SoundManager::SetMusicEnabled(bool e) {
+        if (e != m_music_enabled) {
+            m_music_enabled = e;
+            if (e) {
+                if (!m_last_music.empty() && (m_music_volume > SILENCE)) {
+                    PlayMusicEx(m_last_music.c_str(), true, 0.0f,0.0f);
+                }
+            } else if (m_music) {
+                m_music->Stop();
+                m_music.reset();
             }
         }
     }
@@ -358,7 +374,7 @@ namespace Sandbox {
             }
             m_music.reset();
         }
-        if (m_music_volume <= SILENCE) {
+        if (m_music_volume <= SILENCE || !m_music_enabled) {
             
         } else {
             GHL::MusicInstance* music = open_music(filename);

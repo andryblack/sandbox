@@ -107,6 +107,10 @@ namespace Sandbox {
         float   GetSoundsVolume() const { return m_sounds_volume; }
         void    SetMusicVolume( float v);
         float   GetMusicVolume() const { return m_music_volume; }
+        void    SetSoundEnabled(bool e) { m_sound_enabled = e; }
+        bool    GetSoundEnabled() const { return m_sound_enabled; }
+        void    SetMusicEnabled(bool e) ;
+        bool    GetMusicEnabled() const { return m_music_enabled; }
         
         void ClearCache();
         
@@ -136,6 +140,8 @@ namespace Sandbox {
         
         GHL::MusicInstance* open_music(const char* fn);
         sb::string m_last_music;
+        bool    m_sound_enabled;
+        bool    m_music_enabled;
     };
     
 }

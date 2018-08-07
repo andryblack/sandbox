@@ -210,9 +210,6 @@ namespace Sandbox {
         float       m_batches;
         float       m_batches_rt;
         
-        bool    m_sound_enabled;
-        bool    m_music_enabled;
-        
         sb::string  m_title;
         sb::string  m_system_language;
         int m_utc_offset;
