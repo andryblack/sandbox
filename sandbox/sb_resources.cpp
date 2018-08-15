@@ -64,6 +64,10 @@ namespace Sandbox {
         return m_vfs->OpenFileWrite(filename);
     }
     
+    void Resources::RemoveFile(const char* fn) {
+        m_vfs->DoRemoveFile(fn);
+    }
+    
     GHL::DataStream* Resources::OpenFileVariant(const char* fn,bool& variant) {
         variant = false;
         GHL::DataStream* ds = 0;

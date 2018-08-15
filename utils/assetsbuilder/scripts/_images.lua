@@ -61,12 +61,20 @@ end
 
 local atlas = require '_atlas'
 
-local function load_images( dir  )
+local function rebase_file_to( file , from_dir, to_dir )
+	local len = #from_dir
+	assert(string.sub(file,1,len + 1)==from_dir .. '/')
+	local res = path.join(to_dir,string.sub(file,len+2))
+	--print('rebase file to',file,from_dir,to_dir,res)
+	return res
+end
+
+local function load_images( dir , dst_dir )
 	local fullpath = path.join(dir,'images.lua')
 	local ctx = { textures = {} , images = {} , animations = {}}
 	local sandbox = { textures = ctx.textures , lua = _G }
 	function sandbox.load_group( name )
-		return {path=name, data=load_images( path.join(dir,name) ) }
+		return {path=name, data=load_images( path.join(dir,name) , dst_dir and path.join(dst_dir,name)) }
 	end
 	function sandbox._textures( textures )
 		for k,v in pairs(textures) do
@@ -75,6 +83,9 @@ local function load_images( dir  )
 			v.texture_info = tex
 
 			local destfilename = path.replaceextension(filename,_M.image_file_format.ext)
+			if dst_dir and dst_dir ~= dir then
+				destfilename = rebase_file_to(destfilename,dir,dst_dir)
+			end
 			local premultiplied = v.premultiplied
 			if premultiplied then
 				get_rules().copy_images[filename]=destfilename
@@ -93,9 +104,11 @@ local function load_images( dir  )
 				v._need_premultiply = true
 			end
 			assert(not get_rules().dest_files[destfilename],'conflict rules for file ' .. destfilename)
+			--print('produce image file',destfilename)
 			get_rules().dest_files[destfilename]=filename
 			v._name = k
 			v._path = dir
+			v._dst_path = dst_dir or dir
 			ctx.textures[k] = v
 
 			if _M.use_variants then
@@ -107,6 +120,9 @@ local function load_images( dir  )
 					local vname = path.join(dir,k .. vk.. '.' .. v.type)
 					local vtex = application:check_texture(vname)
 					local destvname = path.replaceextension(vname,_M.image_file_format.ext)
+					if dst_dir and dst_dir ~= dir then
+						destvname = rebase_file_to(destvname,dir,dst_dir)
+					end
 					if vtex then
 						if premultiplied then
 							get_rules().copy_images[vname]= destvname
@@ -150,6 +166,7 @@ local function load_images( dir  )
 end
 
 local function find_images_folder( root , path )
+	--print('find_images_folder',root,path)
 	local first,other = string.match(path,'([^/]+)/(.+)')
 	local prefix = ''
 	if not first then
@@ -157,18 +174,36 @@ local function find_images_folder( root , path )
 		return root[path],root[path],''
 	end
 	local point = root[first]
+	local root_point = point
 	for i in string.gmatch(other, "[^/]+") do
 		if prefix~='' then
 			prefix = prefix .. '/'
 		end
 		prefix = prefix .. i
 		--print('find_images_folder:',first,i)
-  		point = point[i].data
+		local d = point[i] 
+		if not d then
+			local p = first .. '/' .. prefix
+			--print('not found at current path, try restart at',p)
+			d = root[p]
+			if not d then
+				--print('dnt found')
+				return nil
+			end
+			prefix = ''
+			root_point = d
+			point = root_point
+		else
+			point = d.data
+		end
+  		
   		if not point then
+  			print('not found next point')
   			return nil
   		end
 	end 
-	return point,root[first],prefix
+	--print('end:',point,root_point,prefix)
+	return point,root_point,prefix
 end
 
 local function find_textures( from, mask )
@@ -178,10 +213,12 @@ local function find_textures( from, mask )
 		return name:match(wmask)
 	end 
 	local function filter_group( g )
+		--print('filter_group:',g)
 		local t = g._textures 
 		for _,v in pairs(t) do
-			if match(v._path .. '/' .. v._name) and not v.noatlas then
-				--print('filtered:',v._path .. '/' .. v._name)
+			--print('chek texture',v._dst_path .. '/' .. v._name)
+			if match(v._dst_path .. '/' .. v._name) and not v.noatlas then
+				--print('filtered:',v._dst_path .. '/' .. v._name)
 				table.insert(res,v)
 			end
 		end
@@ -197,7 +234,7 @@ local function find_textures( from, mask )
 		end
 	end
 	filter_group(assert(find_images_folder(get_rules().images,from),"not found images '" .. from .."'"))
-	table.sort(res,function(a,b) return (a._path .. a._name) < (b._path .. b._name) end)
+	table.sort(res,function(a,b) return (a._dst_path .. a._name) < (b._dst_path .. b._name) end)
 	return res
 end
 
@@ -207,6 +244,12 @@ function _M.assets_rules.build_images( p )
 	get_rules().dest_files[path.join(p,'images.lua')]=true
 end
 
+function _M.assets_rules.build_images_to( src, dst )
+	local i = assert(get_rules().images)
+	i[dst]=load_images(src,dst)
+	get_rules().dest_files[path.join(dst,'images.lua')]=true
+end
+
 
 
 function _M.assets_rules.build_atlas( from, mask , name,  w, h )
@@ -214,18 +257,21 @@ function _M.assets_rules.build_atlas( from, mask , name,  w, h )
 	local a = atlas.Atlas.new(w,h)
 	
 	local g,root,atlas_prefix = assert(find_images_folder(get_rules().images,from))
+	--print('build atlas',name,'with prefix:',atlas_prefix)
 	local atlas_name = name
 	if atlas_prefix ~='' then
 		atlas_name = string.gsub(atlas_prefix,'/','_') .. '_' .. atlas_name
 	end
 	a.name = atlas_name
 	for _,v in ipairs(i) do
-		local ipath = path.join(v._path,v._name .. '.' .. v.type)
+		local dstpath = path.join(v._dst_path,v._name .. '.' .. _M.image_file_format.ext)
+		local srcpath = path.join(v._path,v._name .. '.' .. v.type)
+		--print('put image',ipath)
 		a:add_image( {width=v.texture_info.width+2, height=v.texture_info.height+2, src = v, 
 			premultiply = v._need_premultiply} )
 		--log.debug('put to atlas:',ipath,v._need_premultiply and true or false)
-		get_rules().dest_files[path.replaceextension(ipath,_M.image_file_format.ext)] = nil
-		get_rules().premultiply_images[ipath] = nil
+		get_rules().dest_files[dstpath] = nil
+		get_rules().premultiply_images[srcpath] = nil
 		v._atlas = a
 	end
 	a:build()

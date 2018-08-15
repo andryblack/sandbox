@@ -10,6 +10,26 @@
 
 namespace Sandbox {
     
+    void GeometryData::AddVertex(const Sandbox::Vector2f& pos,const Sandbox::Vector2f& uv,GHL::UInt32 clr) {
+        size_t idx = vertexes.size();
+        vertexes.resize(idx+1);
+        GHL::Vertex& v(vertexes[idx]);
+        v.x = pos.x;
+        v.y = pos.y;
+        v.z = 0.0f;
+        v.tx = uv.x;
+        v.ty = uv.y;
+        v.color = clr;
+    }
+    
+    void GeometryData::AddTriangle(GHL::UInt16 i1,GHL::UInt16 i2,GHL::UInt16 i3) {
+        size_t idx = indexes.size();
+        indexes.resize(idx+3);
+        indexes[idx]=i1;
+        indexes[idx+1]=i2;
+        indexes[idx+2]=i3;
+    }
+    
     static void build_line_segment(){
         
     }

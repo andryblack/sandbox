@@ -21,8 +21,7 @@ namespace Sandbox {
         virtual void OnScrollMove() SB_OVERRIDE;
        
         virtual void Draw( Graphics& g ) const SB_OVERRIDE;
-    private:
-        Vector2f    m_offset;
+    protected:
         virtual Vector2f GetOffset() const SB_OVERRIDE {
             return m_offset;
         }
@@ -32,7 +31,8 @@ namespace Sandbox {
         virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
         virtual void GetTransformImpl(Transform2d& tr) const SB_OVERRIDE;
         virtual void GetTransformToImpl(const SceneObject* root,Transform2d& tr) const SB_OVERRIDE;
-        
+    private:
+        Vector2f    m_offset;
     };
     typedef sb::intrusive_ptr<ContainerScroll> ContainerScrollPtr;
 }

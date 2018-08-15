@@ -366,6 +366,7 @@ bind( method( "GetTexture" ,
 SB_META_METHOD(GetShader)
 SB_META_METHOD(CreateShader)
 SB_META_METHOD(CreateRenderTarget)
+SB_META_METHOD(RemoveFile)
 SB_META_PROPERTY_RO(Scale, GetScale)
 SB_META_PROPERTY_WO(BasePath, SetBasePath)
 SB_META_PROPERTY_RO(CachePath, GetCachePath)
