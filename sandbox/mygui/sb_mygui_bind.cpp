@@ -319,6 +319,11 @@ SB_META_PROPERTY_RW(needKey, getNeedKeyFocus, setNeedKeyFocus)
 bind( property_rw( "inheritsPick", &widget_getInheritsPick, &widget_setInheritsPick ) );
 SB_META_PROPERTY_RW(inheritsState, getInheritsState, setInheritsState)
 
+bind(method("eventChangeCoord", delegate_bind<MyGUI::Widget,
+            MyGUI::Widget,
+            MyGUI::EventHandle_WidgetVoid,
+            &MyGUI::Widget::eventChangeCoord>::lua_func));
+
 bind(method("eventMouseButtonClick", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
             MyGUI::EventHandle_WidgetVoid,
@@ -822,6 +827,8 @@ SB_META_BEGIN_KLASS_BIND(MyGUI::InputManager)
 SB_META_STATIC_METHOD(getInstancePtr)
 SB_META_PROPERTY_RO(keyFocusWidget, getKeyFocusWidget)
 SB_META_PROPERTY_RO(mouseFocusWidget, getMouseFocusWidget)
+SB_META_PROPERTY_RO(shiftPressed, isShiftPressed)
+SB_META_PROPERTY_RO(controlPressed, isControlPressed)
 SB_META_METHOD(getTopModalWidget)
 SB_META_METHOD(addWidgetModal)
 SB_META_METHOD(removeWidgetModal)

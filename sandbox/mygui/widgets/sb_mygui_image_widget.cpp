@@ -78,6 +78,29 @@ namespace Sandbox {
             
         }
         
+        void ImageWidget::setMaskTexture( const TexturePtr& tex ) {
+            m_mask = tex;
+        }
+        
+        void ImageWidget::DrawContent(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update) {
+            if (m_shader) {
+                Graphics& g = *static_cast<RenderTargetImpl*>(rt)->graphics();
+                ShaderPtr old = g.GetShader();
+                g.SetShader(m_shader);
+                Graphics::MaskContext mask;
+                if (m_mask) {
+                    g.StoreMask(mask);
+                    g.SetMaskTexture( m_mask, false );
+                }
+                AnimatedWidget::DrawContent(rt,node,update);
+                g.SetShader(old);
+                if (m_mask) {
+                    g.RestoreMask(mask);
+                }
+            } else {
+                Base::DrawContent(rt,node,update);
+            }
+        }
         
         
         

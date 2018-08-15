@@ -158,6 +158,9 @@ namespace Sandbox {
         
         void BeginDrawTriangles(const TexturePtr& texture);
         void AppendVertex(const Vector2f& pos, const Vector2f& tex, const Color& clr);
+        void AppendVertexRaw(const Vector2f& pos, const Vector2f& tex,  GHL::UInt32 clr = 0xffffffff);
+        void AppendImageVertex(const Vector2f& pos, const Vector2f& img);
+        void AppendImageVertex(const Vector2f& pos, const Vector2f& img,GHL::UInt32 clr );
         void AppendQuad(const Vector2f& poslt, const Vector2f& texlt, const Color& clrlt,
                         const Vector2f& posrt, const Vector2f& texrt, const Color& clrrt,
                         const Vector2f& poslb, const Vector2f& texlb, const Color& clrlb,

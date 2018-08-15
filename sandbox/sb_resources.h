@@ -66,6 +66,7 @@ namespace Sandbox {
 		GHL::DataStream* OpenFile(const char* fn);
         GHL::DataStream* OpenFileVariant(const char* fn,bool& variant);
         GHL::WriteStream* OpenWrite(const char* fn,bool remove);
+        void RemoveFile(const char* fn);
         
         ImagePtr CreateImageFromData( const GHL::Data* data );
 		

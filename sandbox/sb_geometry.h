@@ -26,6 +26,8 @@ namespace Sandbox {
         sb::vector<GHL::UInt16> indexes;
         TexturePtr  texture;
         GHL::PrimitiveType  primitives;
+        void AddVertex(const Sandbox::Vector2f& pos,const Sandbox::Vector2f& uv,GHL::UInt32 clr);
+        void AddTriangle(GHL::UInt16 i1,GHL::UInt16 i2,GHL::UInt16 i3);
     };
     
     class GeometryBuilder {
