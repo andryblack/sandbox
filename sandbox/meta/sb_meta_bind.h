@@ -141,6 +141,7 @@ namespace Sandbox {
             op_mul,
             op_div,
             op_sub,
+            op_eq,
             op_index
         };
         template <class Func> struct operator_holder {
@@ -193,10 +194,12 @@ namespace Sandbox {
 #define SB_META_OPERATOR_MUL() bind( operator_( op_mul , &ThisType::operator* ) );
 #define SB_META_OPERATOR_DIV() bind( operator_( op_div , &ThisType::operator/ ) );
 #define SB_META_OPERATOR_SUB() bind( operator_( op_sub , &ThisType::operator- ) );
+#define SB_META_OPERATOR_EQ() bind( operator_( op_eq , &ThisType::operator== ) );
 #define SB_META_OPERATOR_ADD_(S) bind( operator_( op_add , (S)&ThisType::operator+ ) );
 #define SB_META_OPERATOR_MUL_(S) bind( operator_( op_mul , (S)&ThisType::operator* ) );
 #define SB_META_OPERATOR_DIV_(S) bind( operator_( op_div , (S)&ThisType::operator/ ) );
 #define SB_META_OPERATOR_SUB_(S) bind( operator_( op_sub , (S)&ThisType::operator- ) );
+#define SB_META_OPERATOR_EQ_(S) bind( operator_( op_eq , (S)&ThisType::operator== ) );
 #define SB_META_STATIC_METHOD( name ) bind( static_method( #name , &ThisType::name ) );
 #define SB_META_CONSTRUCTOR( args ) bind( constructor<void args>() );
         
