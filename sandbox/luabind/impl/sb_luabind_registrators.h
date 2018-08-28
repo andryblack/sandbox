@@ -182,6 +182,7 @@ namespace Sandbox {
                     "__mul",
                     "__div",
                     "__sub",
+                    "__eq",
                     "__index"
                 };
                 lua_setfield(m_L, -2, meta_operator[func.name]);               /// methods 
