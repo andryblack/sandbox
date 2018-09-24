@@ -10,12 +10,13 @@ private:
 	Sandbox::Application*	m_application;
 	ANativeActivity* 		m_activity;
 	jmethodID	m_helper_ctr;
-	jmethodID	m_helper_dispose;
+	jmethodID	m_helper_destroy;
 	jmethodID	m_helper_init;
-	jmethodID	m_helper_get_products_info;
+	jmethodID	m_helper_get_items_info;
+    jmethodID   m_helper_get_subscriptions_info;
 	jmethodID   m_helper_setup_done;
 	jmethodID	m_helper_purchase;
-	jmethodID	m_helper_process_result;
+   jmethodID	m_helper_process_result;
 	jmethodID	m_helper_restore_payments;
 	jmethodID	m_helper_confirm_transaction;
 	jobject		m_helper_objl;

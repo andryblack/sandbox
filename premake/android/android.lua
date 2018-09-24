@@ -55,6 +55,12 @@ api.register {
 	kind = "number"
 }
 
+api.register {
+	name = 'android_build_tools_version',
+	scope = 'solution',
+	kind = 'string'
+}
+
 -- Specify android STL support
 api.register {
 	name = "android_stl",
@@ -277,6 +283,17 @@ api.register {
 	scope = 'project',
 	kind = 'string',
 	list = true
+}
+
+api.register {
+	name = "android_custom_dependencies",
+	scope = 'project',
+	kind = 'string',
+}
+api.register {
+	name = "android_custom_build_pre",
+	scope = 'project',
+	kind = 'string',
 }
 
 api.register {

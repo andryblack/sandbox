@@ -119,15 +119,13 @@ function build.generate_build_gradle(sln)
 
 	_x('buildscript {')
     _x(1,'repositories {')
+    _x(2,'google()')
     _x(2,'jcenter()')
     if sln.android_repository then
     	for _,v in ipairs(sln.android_repository) do
     		_x(2,'%s',v)
     	end
     end
-    	_x(2,'maven {')
-            _x(3,'url "https://maven.google.com"')
-    	_x(2,'}')
     _x(1,'}')
     _x(1,'dependencies {')
     _x(2,"classpath 'com.android.tools.build:gradle:3.2.0'")
@@ -135,7 +133,7 @@ function build.generate_build_gradle(sln)
     	(sln.android_module.gcm or sln.android_module.fcm or sln.android_module.gps) then
     	_x(2,"classpath 'com.google.gms:google-services:"..(sln.android_google_services_version or '4.0.1').."'")
 	end
-	if sln.android_build_dependencies then
+    if sln.android_build_dependencies then
 		for _,v in ipairs(sln.android_build_dependencies) do
 			_x(2,"classpath '"..v.."'")
 		end
@@ -148,15 +146,14 @@ function build.generate_build_gradle(sln)
  --    }
 	_x('allprojects {')
     _x(1,'repositories {')
+    _x(2,'google()')
     _x(2,'jcenter()')
     if sln.android_repository then
     	for _,v in ipairs(sln.android_repository) do
     		_x(2,'%s',v)
     	end
     end
-    	_x(2,'maven {')
-            _x(3,'url "https://maven.google.com"')
-    	_x(2,'}')
+
     _x(1,'}')
 	_x('}')
 
@@ -194,9 +191,13 @@ function build.generate_app_build_gradle( sln , prj )
 
 	_x('def build_files_location = "%s"' , prj.targetdir)
 
+	if prj.android_custom_build_pre then
+		_x(prj.android_custom_build_pre)
+	end
+
 	_x('android {')
-    _x(1,'compileSdkVersion ' .. prj.android_build_api_level or target_api)
-    _x(1,'buildToolsVersion "28.0.2"')
+    _x(1,'compileSdkVersion ' .. (prj.android_build_api_level or target_api))
+    _x(1,'buildToolsVersion "' .. (prj.android_build_tools_version or '28.0.2') .. '"')
 
     _x(1,'defaultConfig {')
     _x(2,'applicationId "%s"',prj.android_packagename or 'com.sandboxgames.sample')
@@ -337,6 +338,9 @@ function build.generate_app_build_gradle( sln , prj )
 			local ln = path.getname(v)
 			_x(2,"implementation files('" .. v .."')")
 		end
+	end
+	if prj.android_custom_dependencies then
+		_x(2,prj.android_custom_dependencies)
 	end
 	_x(1,'}')
 
