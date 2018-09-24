@@ -225,9 +225,6 @@ namespace Sandbox {
                 lua_Number n = lua_tonumber(L, -2);
                 if ( lua_Number(i) == n ) {
                     ++count;
-                    if (count!=i) {
-                        only_integers = false;
-                    }
                 } else {
                     only_integers = false;
                 }
@@ -256,16 +253,22 @@ namespace Sandbox {
         } // +1
         if (only_integers && count!=0) {
             yajl_gen_array_open(g);
-            lua_pushnil(L); // +2
-            while (lua_next(L, -2) != 0) { // +3
-                /* uses 'key' (at index -2) and 'value' (at index -1) */
+            lua_Integer i = 1;
+            while (true) {
+                lua_pushinteger(L, i);
+                lua_gettable(L, -2);
+                if (lua_isnil(L, -1)) {
+                    lua_pop(L,1);
+                    break;
+                }
                 do_json_encode(L, -1, g, sort_keys);
-                /* removes 'value'; keeps 'key' for next iteration */
                 lua_pop(L, 1);
+                ++i;
             }
             // +1
             yajl_gen_array_close(g);
         } else if (sort_keys) {
+            sb_assert(count==0); // integer keys encoding failed
             std::sort(keys.begin(), keys.end());
             yajl_gen_map_open(g);
             for (sb::vector<sb::string>::const_iterator it = keys.begin();it!=keys.end();++it) {
