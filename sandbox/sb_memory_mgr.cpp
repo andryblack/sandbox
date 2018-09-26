@@ -12,6 +12,7 @@
 #include <tlsf.h>
 
 #include <stdint.h>
+#include <cstdlib>
 
 //#define SB_MEMORY_MGR_DEBUG
 
