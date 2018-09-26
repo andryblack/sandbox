@@ -254,7 +254,7 @@ function build.generate_app_build_gradle( sln , prj )
     _x(1,'sourceSets {')
     for cfg in project.eachconfig(prj) do
 		_x(2,cfg.shortname .. ' {')
-		
+			_x(3,"jniLibs.srcDirs = ['./%s/libs']",cfg.shortname)
 		_x(2,'}')
 	end
 	_x(1,'}')
@@ -286,7 +286,7 @@ function build.generate_app_build_gradle( sln , prj )
             end
 			_x(3,'sourceSets {')
 				_x(4,'main {')
-					_x(5,'jniLibs.srcDirs = ["./%s/libs"]',cfg.shortname)
+					_x(5,"jniLibs.srcDirs = ['./%s/libs']",cfg.shortname)
 					_x(5,"manifest.srcFile './%s/AndroidManifest.xml'",cfg.shortname)
 					_x(5,"java.srcDirs = [" .. table.concat(src_dirs,',') .. "]")
 				    _x(5,"resources.srcDirs = ['../src']")
