@@ -71,6 +71,7 @@ function build.buildCmds(cfg, event, prj)
     			end
 				_p("\tcommandLine '" .. cmdline .. "'")
 				_p("\targs " .. table.concat(all_args,',').. "")
+				_p("\toutputs.upToDateWhen { false }")
 			_p('}')
 			if i ~= 1 then
 				_p(crnt_name .. ".dependsOn " .. prev_name)
@@ -95,6 +96,7 @@ function build.buildCmds(cfg, event, prj)
 				end
 			end
 			_x(1,"outputs.dirs(%s)",table.concat(assets_dirs,','))
+			_x(1,"outputs.upToDateWhen { false }")
 		end
 	_p('}')
 
@@ -367,6 +369,7 @@ function build.generate_app_build_gradle( sln , prj )
 		_x(1,'commandLine "%s"',path.getabsolute(path.join(ndk_dir,'ndk-build')))
 		_x(1,"args " .. table.concat(all_args,',').. "")
 		_x(1,"outputs.dir '%s'",path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname,'libs')))
+		_x(1,"outputs.upToDateWhen { false }")
 		_x('}')
 	end
 
