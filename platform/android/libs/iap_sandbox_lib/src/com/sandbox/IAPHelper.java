@@ -98,6 +98,10 @@ public class IAPHelper implements PurchasesUpdatedListener {
         }
     }
 
+    public SkuDetails getSkuDetails(String sku) {
+        return m_products_map.get(sku);
+    }
+
     public Activity getActivity() {
         return m_activity;
     }
