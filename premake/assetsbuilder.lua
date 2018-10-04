@@ -63,8 +63,8 @@
 
 		configuration { "macosx", "gmake" }
 			toolset "clang"
-			buildoptions { "-mmacosx-version-min=10.8" }
-			linkoptions  { "-mmacosx-version-min=10.8" }
+			buildoptions { "-mmacosx-version-min=10.9" }
+			linkoptions  { "-mmacosx-version-min=10.9" }
 
 		configuration { "linux" }
 			links {"pthread"}
