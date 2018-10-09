@@ -19,6 +19,7 @@ private:
    jmethodID	m_helper_process_result;
 	jmethodID	m_helper_restore_payments;
 	jmethodID	m_helper_confirm_transaction;
+    jmethodID   m_helper_confirm_subscription;
 	jobject		m_helper_objl;
 
 	sb::string m_helper_class;

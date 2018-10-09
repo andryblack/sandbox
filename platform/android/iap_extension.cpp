@@ -69,6 +69,9 @@ void IAPExtension::resolve_methods(JNIEnv *env) {
     m_helper_confirm_transaction = env->GetMethodID(IAPHelper.clazz,"iap_confirm_transaction","(Ljava/lang/String;)Z");
 	jni::check_exception(env);
     sb_assert(m_helper_confirm_transaction);
+    m_helper_confirm_subscription = env->GetMethodID(IAPHelper.clazz,"iap_confirm_subscription","(Ljava/lang/String;)Z");
+    jni::check_exception(env);
+    sb_assert(m_helper_confirm_subscription);
 }
     
 void IAPExtension::OnAppStarted(Sandbox::Application* app) {
@@ -142,6 +145,18 @@ void IAPExtension::OnAppStopped(Sandbox::Application* app) {
 				res = "failed";
 			}
 			return true;
+        }
+    }
+    if (::strcmp("iap_confirm_subscription",method)==0) {
+        if (m_helper_objl && m_activity && m_activity->env) {
+            JNIEnv* env = m_activity->env;
+            jni::jni_string key(args,env);
+            if (env->CallBooleanMethod(m_helper_objl,m_helper_confirm_subscription,key.jstr)) {
+                res = "pending";
+            } else {
+                res = "failed";
+            }
+            return true;
         }
     }
     if (::strcmp("iap_restore_payments",method)==0) {

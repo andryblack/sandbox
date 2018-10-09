@@ -120,27 +120,27 @@ public class IAPHelper implements PurchasesUpdatedListener {
 
     @Override
     public void onPurchasesUpdated(int resultCode, List<Purchase> purchases) {
-        Purchase pending_purchase = null;
+        Log.d(TAG,"onPurchasesUpdated: " + resultCode + " purchases: " + ( purchases==null ? "null" : "yes"));
         if (resultCode == BillingResponse.OK) {
-            for (Purchase purchase : purchases) {
-                if (m_pending_purchase_sku != null &&
-                    m_pending_purchase_sku.equals(purchase.getSku())) {
-                    pending_purchase = purchase;
-                } else {
+            if (purchases != null) {
+                for (Purchase purchase:purchases) {
                     handlePurchase(purchase);
                 }
+                onPurchasesUpdated();
+            } else {
+                queryPurchases();
             }
-            onPurchasesUpdated();
         } else if (resultCode == BillingResponse.USER_CANCELED) {
             Log.i(TAG, "onPurchasesUpdated() - user cancelled the purchase flow - skipping");
         } else {
             Log.w(TAG, "onPurchasesUpdated() got unknown resultCode: " + resultCode);
         }
-        if (m_pending_purchase_sku != null) {
-            if (pending_purchase != null) {
-                handlePurchase(pending_purchase);    
-            }
-            on_iap_purchase_finished(m_pending_purchase_sku,resultCode,pending_purchase);
+        if (resultCode != BillingResponse.OK && 
+            m_pending_purchase_sku != null) {
+            Log.d(TAG,"report failed purchase");
+        
+            on_iap_purchase_finished(m_pending_purchase_sku,
+                            resultCode,null);
             m_pending_purchase_sku = null;
         }
     }        
@@ -160,8 +160,28 @@ public class IAPHelper implements PurchasesUpdatedListener {
 
     private void onPurchasesUpdated() {
         Log.d(TAG, "Purchases updated.");
+        String skip_restore = null;
+        if (m_pending_purchase_sku != null) {
+            Log.d(TAG,"Has pending purchase sku: " + m_pending_purchase_sku);
+            for (Purchase purchase: m_purchase_map.values()) {
+                Log.d(TAG,"Process purchase for sku: " + purchase.getSku());
+                if (purchase.getSku().equals(m_pending_purchase_sku)) {
+                    Log.d(TAG,"Found purchase for pending sku");
+                    on_iap_purchase_finished(m_pending_purchase_sku,
+                        BillingResponse.OK,purchase);
+                    skip_restore = m_pending_purchase_sku;
+                    m_pending_purchase_sku = null;
+                    break;
+                }
+            }
+        }
+
         for (Purchase purchase: m_purchase_map.values()) {
             try {
+                if (skip_restore!= null && 
+                    skip_restore.equals(purchase.getSku())) {
+                    continue;
+                }
                 JSONObject obj = new JSONObject();
                 obj.put("product_id", purchase.getSku());
                 obj.put("token",purchase.getPurchaseToken());
@@ -182,15 +202,13 @@ public class IAPHelper implements PurchasesUpdatedListener {
                 Log.e(TAG,"need product_id");
                 return false;
             }
-            String account = obj.optString("account_id");
             String type = obj.optString("type",SkuType.INAPP);
-            String oldSku = obj.optString("old_product_id");
-            initiatePurchaseFlow(sku, oldSku, type, account);
+            initiatePurchaseFlow(sku, type);
             return true;
         } catch ( JSONException e) {
             Log.w(TAG,e.toString());
         }
-        initiatePurchaseFlow(data, null, SkuType.INAPP,null);
+        initiatePurchaseFlow(data,  SkuType.INAPP);
         return true;
     }
     
@@ -202,7 +220,7 @@ public class IAPHelper implements PurchasesUpdatedListener {
             {
                 stringArray.add(jsonArray.getString(i));
             }
-            on_quert_products(SkuType.INAPP,stringArray);
+            on_query_products(SkuType.INAPP,stringArray);
             return true;
         }  catch ( JSONException e) {
             Log.e(TAG,e.toString());
@@ -217,7 +235,7 @@ public class IAPHelper implements PurchasesUpdatedListener {
             {
                 stringArray.add(jsonArray.getString(i));
             }
-            on_quert_products(SkuType.SUBS,stringArray);
+            on_query_products(SkuType.SUBS,stringArray);
             return true;
         }  catch ( JSONException e) {
             Log.e(TAG,e.toString());
@@ -228,21 +246,20 @@ public class IAPHelper implements PurchasesUpdatedListener {
     /**
      * Start a purchase or subscription replace flow
      */
-    public void initiatePurchaseFlow(final String skuId, final String oldSku,
-            final @SkuType String billingType,final String account_id) {
+    public void initiatePurchaseFlow(final String skuId, 
+            final @SkuType String billingType) {
         Runnable purchaseFlowRequest = new Runnable() {
             @Override
             public void run() {
                 IAPHelper.this.m_pending_purchase_sku = skuId;
-                Log.d(TAG, "Launching in-app purchase flow. Replace old SKU? " + (oldSku != null) + 
+                Log.d(TAG, "Launching in-app purchase flow." + 
                     "\n skuId:"+skuId + 
                     "\n billingType:"+billingType);
-                BillingFlowParams purchaseParams = BillingFlowParams.newBuilder()
+               
+                int res = m_client.launchBillingFlow(m_activity, 
+                    BillingFlowParams.newBuilder()
                         .setSku(skuId).setType(billingType)
-                        .setOldSku(oldSku)
-                        .setAccountId(account_id)
-                        .build();
-                int res = m_client.launchBillingFlow(m_activity, purchaseParams);
+                        .build() );
                 if (res != BillingResponse.OK) {
                     on_iap_purchase_finished(skuId,res,null);
                 }
@@ -256,7 +273,7 @@ public class IAPHelper implements PurchasesUpdatedListener {
     //             nativeProcessResponse(m_native_object,"iap_init","{\"disconnected\":true}");
 
 
-    protected void on_quert_products(@SkuType final String itemType, final List<String> skuList) {
+    protected void on_query_products(@SkuType final String itemType, final List<String> skuList) {
         // Creating a runnable from the request to use it inside our connection retry policy below
         Runnable queryRequest = new Runnable() {
             @Override
@@ -316,7 +333,27 @@ public class IAPHelper implements PurchasesUpdatedListener {
             Log.i(TAG, "Unknown purchase");
             return false;
         }
+
         on_consume_purchase(purchase,transactionObj);
+        return true;
+    }
+
+    public boolean iap_confirm_subscription(final String transaction) {
+        JSONObject transactionObj = null;
+        try {
+           transactionObj = new JSONObject(transaction);
+        } catch (JSONException e) {
+           Log.e(TAG,e.toString());
+           return false;
+        }
+
+        Purchase purchase = findPurchase(transactionObj);
+        if (purchase == null) {
+            Log.i(TAG, "Unknown purchase");
+            return false;
+        }
+
+        on_consume_subscription(purchase,transactionObj);
         return true;
     }
 
@@ -334,7 +371,6 @@ public class IAPHelper implements PurchasesUpdatedListener {
             return;
         }
         m_tokens_to_be_consumed.add(purchaseToken);
-
 
         // Generating Consume Response listener
         final ConsumeResponseListener onConsumeListener = new ConsumeResponseListener() {
@@ -356,6 +392,21 @@ public class IAPHelper implements PurchasesUpdatedListener {
         executeServiceRequest(consumeRequest);
     }
 
+    protected void on_consume_subscription(Purchase purchase, JSONObject transaction) {
+        final String purchaseToken = purchase.getPurchaseToken();
+        final String product_id = purchase.getSku();
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("product_id",product_id);
+            obj.put("token",purchaseToken);
+        } catch (JSONException e) {
+           Log.e(TAG,e.toString());
+        }
+        m_tokens_to_be_consumed.add(purchaseToken);
+        m_purchase_map.remove(purchaseToken);
+        nativeProcessResponse(m_native_object,"iap_confirm_subscription",obj.toString());
+    }
+
     private void onConsumeFinished(@BillingResponse int responseCode, String purchaseToken,String product_id) {
          try {
 
@@ -368,8 +419,7 @@ public class IAPHelper implements PurchasesUpdatedListener {
             JSONObject obj = new JSONObject();
             obj.put("product_id",product_id);
             obj.put("token",purchaseToken);
-            obj.put("result",responseCode);
-            obj.put("state",responseCode == BillingResponse.OK ? "success" : "failed");
+            putResult(obj,responseCode);
             nativeProcessResponse(m_native_object,"iap_confirm_transaction",obj.toString());
         } catch (JSONException e) {
             Log.e(TAG, e.toString());
@@ -438,7 +488,12 @@ public class IAPHelper implements PurchasesUpdatedListener {
         }
 
         Log.d(TAG, "Got a verified purchase: " + purchase);
-        m_purchase_map.put(purchase.getPurchaseToken(),purchase);
+        String purchaseToken = purchase.getPurchaseToken();
+        if (m_tokens_to_be_consumed!=null && m_tokens_to_be_consumed.contains(purchaseToken)) {
+            Log.i(TAG, "Already consumed");
+        } else {
+            m_purchase_map.put(purchaseToken,purchase);
+        }
     }
 
     private Purchase findPurchase(JSONObject transaction) {
@@ -529,7 +584,6 @@ public class IAPHelper implements PurchasesUpdatedListener {
             JSONObject obj = new JSONObject();
             obj.put("product_id",sku);
             putResult(obj,result);
-            obj.put("state",result == BillingResponse.OK  ? "purchased" : "failed");
             if (info != null) {
                 obj.put("transaction",getTransaction(info));
             }
