@@ -97,8 +97,6 @@ SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::TextInput)
 SB_META_PROPERTY_RW(Placeholder, getPlaceholder, setPlaceholder)
-SB_META_PROPERTY_RW(placeholder, getPlaceholder, setPlaceholder)
-SB_META_PROPERTY_RW(maxTextLength, getMaxTextLength, setMaxTextLength)
 bind(method("eventEditAccept", delegate_bind<Sandbox::mygui::TextInput,
             Sandbox::mygui::TextInput,
             Sandbox::mygui::EventHandle_TextInputPtr,
