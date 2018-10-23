@@ -6,10 +6,13 @@ project 'MyGUI'
 
 	files {
 		sandbox_dir .. '/external/MyGUI/MyGUIEngine/**.h',
-		sandbox_dir .. '/external/MyGUI/MyGUIEngine/**.cpp'
+		sandbox_dir .. '/external/MyGUI/MyGUIEngine/**.cpp',
+	}
+
+	includedirs {
+		sandbox_dir .. '/external/MyGUI/MyGUIEngine/include',
 	}
 
 	sysincludedirs {
-		sandbox_dir .. '/external/MyGUI/MyGUIEngine/include',
 		sandbox_dir .. '/include',
 	}

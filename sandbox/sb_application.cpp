@@ -49,7 +49,7 @@
 #include "sb_data.h"
 
 #include "sb_particles.h"
-
+#include "freetype/sb_freetype_font.h"
 
 SB_META_DECLARE_KLASS(GHL::Settings, void)
 SB_META_BEGIN_KLASS_BIND(GHL::Settings)
@@ -118,6 +118,13 @@ namespace Sandbox {
     }
 }
 
+SB_META_DECLARE_KLASS(GHL::SystemCursor,void);
+SB_META_ENUM_BIND(GHL::SystemCursor,namespace GHL,
+                  SB_META_ENUM_ITEM(SYSTEM_CURSOR_DEFAULT)
+                  SB_META_ENUM_ITEM(SYSTEM_CURSOR_HAND)
+                  SB_META_ENUM_ITEM(SYSTEM_CURSOR_MOVE)
+                  )
+
 SB_META_DECLARE_OBJECT(Sandbox::Application, void)
 SB_META_BEGIN_KLASS_BIND(Sandbox::Application)
 SB_META_METHOD(AddScene)
@@ -138,7 +145,11 @@ SB_META_PROPERTY_WO(DrawDebugInfo,SetDrawDebugInfo)
 SB_META_PROPERTY_WO(FrameInterval, SetFrameInterval)
 SB_META_PROPERTY_WO(ResizeableWindow, SetResizeableWindow)
 SB_META_PROPERTY_WO(ScreenKeepOn, SetScreenKeepOn)
+SB_META_PROPERTY_RW(FullScreen, GetFullScreen, SetFullScreen)
+SB_META_PROPERTY_WO(Cursor, SetCursor)
 SB_META_PROPERTY_RO(FPS, GetFPS)
+SB_META_PROPERTY_RW(SoundEnabled, GetSoundEnabled, SetSoundEnabled)
+SB_META_PROPERTY_RW(MusicEnabled, GetMusicEnabled, SetMusicEnabled)
 bind( method( "CallExtension" , &Sandbox::Application_CallExtension ) );
 bind( method( "StoreProfileFile", &Sandbox::Application_StoreProfileFile));
 bind( method( "LoadProfileFile", &Sandbox::Application_LoadProfileFile));
@@ -158,7 +169,6 @@ namespace Sandbox {
     void register_thread( lua_State* lua );
 	void register_controller( lua_State* lua );
     void register_keys( lua_State* lua );
-    void register_skelet( lua_State* lua );
     
 #ifdef SB_USE_MYGUI
     namespace mygui {
@@ -193,8 +203,7 @@ namespace Sandbox {
         m_clear_depth = 0.0f;
         m_batches = 0.0f;
         m_batches_rt = 0.0f;
-        m_sound_enabled = true;
-        m_music_enabled = true;
+        
 #ifdef SB_DEBUG
         m_draw_debug_info = true;
 #else
@@ -232,6 +241,11 @@ namespace Sandbox {
     	delete m_sound_mgr;
 
         ReleaseGUI();
+        
+        if (m_resources) {
+            m_resources->ReleaseAll();
+        }
+        FreeTypeFont::Release();
         
 #ifdef SB_USE_NETWORK
         delete  m_network;
@@ -272,7 +286,6 @@ namespace Sandbox {
         mygui::register_mygui(lua->GetVM());
 #endif
 
-        register_skelet(lua->GetVM());
 #ifdef SB_USE_NETWORK
         BindNetwork(lua);
 #endif
@@ -302,7 +315,7 @@ namespace Sandbox {
         language[0] = 0;
         if (m_system->GetDeviceData(GHL::DEVICE_DATA_LANGUAGE, language) && language[0]) {
             language[32] = 0;
-            m_system_language = language;
+            SetSystemLanguage(language);
         }
         OnSystemSet();
 	}
@@ -379,6 +392,12 @@ namespace Sandbox {
 #endif
     }
     
+#ifdef SB_USE_MYGUI
+    mygui::GUI* Application::CreateGUI() {
+        return new mygui::GUI(m_system);
+    }
+#endif
+    
     ///
 	void GHL_CALL Application::FillSettings( GHL::Settings* settings ) {
         sb_ensure_main_thread();
@@ -442,6 +461,7 @@ namespace Sandbox {
             }
         }
         
+        luabind::Enum<GHL::SystemCursor>(m_lua->GetVM());
         luabind::ExternClass<Sandbox::Application>(m_lua->GetVM());
         luabind::RawClass<GHL::Settings>(m_lua->GetVM());
         
@@ -503,7 +523,7 @@ namespace Sandbox {
         }
         
         if (!m_gui) {
-            m_gui = new mygui::GUI(m_system);
+            m_gui = CreateGUI();
             m_gui->initialize(m_lua->GetGlobalContext());
             mygui::register_factory();
             RegisterWidgets();
@@ -572,14 +592,18 @@ namespace Sandbox {
         }
         delete m_graphics;
         m_graphics = 0;
+        FreeTypeFont::Release();
+        
         m_sound_mgr->Deinit();
         SB_LOGI( "Application::Unload <<< " );
     }
     
     void Application::DoRestart() {
+        SB_LOGI("DoRestart >>>");
         Unload();
         Logger::StartSession(GetVFS());
         Load();
+        SB_LOGI("DoRestart <<<");
     }
     
     void Application::DoExit() {
@@ -638,6 +662,9 @@ namespace Sandbox {
         float width = twidth / scale;
         float height = theight / scale;
         RenderTargetPtr target = m_resources->CreateRenderTarget(int(width), int(height), scale, false, false);
+        if (!target) {
+            return ImagePtr();
+        }
         m_render->BeginScene(target->GetNative());
         m_graphics->BeginScene(m_render,target);
         DoDrawScreen();
@@ -766,7 +793,7 @@ namespace Sandbox {
         m_batches_rt = m_batches_rt * 0.875f + 0.125f*batches;    /// interpolate 4 frames
     }
 	
-	void Application::DrawDebugInfo() {
+	int Application::DrawDebugInfo() {
 		char buf[128];
 		sb::snprintf(buf,128,"fps:%0.2f",m_fps);
 		m_render->SetProjectionMatrix(Matrix4f::ortho(0.0f,
@@ -790,6 +817,7 @@ namespace Sandbox {
         sb::snprintf(buf,128,"objects:%d",int(meta::object::count()));
         m_render->DebugDrawText( 10, y, buf );
         y += 11;
+        return y;
 	}
     
     void    Application::AddScene( const RTScenePtr& scene ) {
@@ -828,6 +856,26 @@ namespace Sandbox {
         }
     }
     
+    void    Application::SetFullScreen(bool fs) {
+        if (m_system) {
+            m_system->SwitchFullscreen(fs);
+        }
+    }
+    
+    bool    Application::GetFullScreen() const {
+        if (!m_system) {
+            return false;
+        }
+        return m_system->IsFullscreen();
+    }
+    
+    void    Application::SetCursor(GHL::SystemCursor cursor) {
+        if (m_system) {
+            GHL::UInt32 v = cursor;
+            m_system->SetDeviceState(GHL::DEVICE_STATE_SYSTEM_CURSOR, &v);
+        }
+    }
+    
 	void Application::SetClearColor(const Color& c) {
 		m_clear_buffer = true;
 		m_clear_color = c;
@@ -846,30 +894,23 @@ namespace Sandbox {
     }
     
     void Application::SetSoundEnabled( bool e ) {
-        m_sound_enabled = e;
-        if (m_sound) {
-            /// @todo
+        if (m_sound_mgr) {
+            m_sound_mgr->SetSoundEnabled(e);
         }
     }
     
     bool Application::GetSoundEnabled() const {
-        return m_sound_enabled;
+        return m_sound_mgr && m_sound_mgr->GetSoundEnabled();
     }
     
     void Application::SetMusicEnabled( bool e ) {
-        m_music_enabled = e;
-        if (m_sound) {
-            /*
-            if (m_music_enabled)
-                m_sound->Music_Play(true);
-            else
-                m_sound->Music_Stop();
-             */
+        if (m_sound_mgr) {
+            m_sound_mgr->SetMusicEnabled(e);
         }
     }
     
     bool Application::GetMusicEnabled() const {
-        return m_music_enabled;
+        return m_sound_mgr && m_sound_mgr->GetMusicEnabled();
     }
     
     bool Application::RestoreAppProfile() {
@@ -1014,6 +1055,15 @@ namespace Sandbox {
 #endif
                 OnMouseUp(event->data.mouse_release.button, event->data.mouse_release.x, event->data.mouse_release.y);
                 break;
+            case GHL::EVENT_TYPE_WHEEL:
+#ifdef SB_USE_MYGUI
+                if (MyGUI::InputManager::getInstancePtr()) {
+                    if (MyGUI::InputManager::getInstance().injectWheel(event->data.wheel.delta)) {
+                        
+                    }
+                }
+#endif
+                break;
             case GHL::EVENT_TYPE_APP_STARTED:
                 OnAppStarted();
                 break;
@@ -1058,6 +1108,9 @@ namespace Sandbox {
                     SB_LOGI("store url: " << m_url);
                 }
                 break;
+            case GHL::EVENT_TYPE_FULLSCREEN_CHANGED:
+                OnFullScreenChanged();
+                break;
             default:
                 break;
         }
@@ -1093,7 +1146,7 @@ namespace Sandbox {
         TransformMouse(x,y,fx,fy);
 #ifdef SB_USE_MYGUI
         if (MyGUI::InputManager::getInstancePtr())
-        if (MyGUI::InputManager::getInstance().injectMouseMove(fx, fy, 0)||
+        if (MyGUI::InputManager::getInstance().injectMouseMove(fx, fy)||
             MyGUI::InputManager::getInstance().isModalAny())
             return;
 #endif
@@ -1176,6 +1229,21 @@ namespace Sandbox {
             }
         }
         m_need_resize = false;
+    }
+    
+    void Application::OnFullScreenChanged() {
+#ifdef SB_USE_MYGUI
+        if (MyGUI::InputManager::getInstancePtr())
+            MyGUI::InputManager::getInstance().resetMouseCaptureWidget();
+#endif
+        if (m_lua) {
+            LuaContextPtr ctx = m_lua->GetGlobalContext();
+            if (ctx) {
+                if (m_lua->GetGlobalContext()->GetValue<bool>("application.onFullScreenChanged")) {
+                    m_lua->GetGlobalContext()->GetValue<LuaContextPtr>("application")->call("onFullScreenChanged");
+                }
+            }
+        }
     }
     
     void Application::TrimMemory() {

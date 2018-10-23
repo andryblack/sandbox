@@ -58,14 +58,32 @@ namespace Sandbox {
         GetTransformImpl(tr);
         return tr;
     }
+    Transform2d SceneObject::GetTransformTo(const SceneObject* root) const {
+        Transform2d tr;
+        GetTransformToImpl(root,tr);
+        return tr;
+    }
     void SceneObject::GetTransformImpl(Transform2d& v) const {
         if (m_parent) {
             m_parent->GetTransformImpl(v);
         }
     }
+    void SceneObject::GetTransformToImpl(const SceneObject* root,Transform2d& tr) const {
+        if (this == root) {
+            return;
+        }
+        if (m_parent) {
+            m_parent->GetTransformToImpl(root,tr);
+        }
+    }
     
     Vector2f SceneObject::LocalToGlobal(const Vector2f& v) const {
         Transform2d tr = GetTransform();
+        return tr.transform(v);
+    }
+    
+    Vector2f SceneObject::LocalTo(const SceneObject* root,const Vector2f& v) const {
+        Transform2d tr = GetTransformTo(root);
         return tr.transform(v);
     }
     
@@ -90,6 +108,12 @@ namespace Sandbox {
     void SceneObjectWithPosition::GetTransformImpl(Transform2d& tr) const {
         SceneObject::GetTransformImpl(tr);
         tr.translate(m_pos);
+    }
+    
+    void SceneObjectWithPosition::GetTransformToImpl(const SceneObject* root, Transform2d& tr) const {
+        SceneObject::GetTransformToImpl(root,tr);
+        if (root != this)
+            tr.translate(m_pos);
     }
     
     

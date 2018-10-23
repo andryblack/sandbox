@@ -45,6 +45,10 @@ solution( ProjectName )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 		android_packageversion( AndroidConfig.versioncode or 1)
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
+
+		local firebase_version = AndroidConfig.firebase_version 
+		local play_version = AndroidConfig.play_version or '15.0.0'
+
 		if AndroidConfig.manifest then
 			android_manifest(path.getabsolute(path.join(_WORKING_DIR,AndroidConfig.manifest)))
 		end
@@ -54,11 +58,11 @@ solution( ProjectName )
 		
 		if use.AndroidGooglePlayService or use.IAP then
 			
-			android_dependencies('com.google.android.gms:play-services-base:10.2.1')
+			android_dependencies('com.google.android.gms:play-services-base:' .. play_version)
 			if use.AndroidGooglePlayService then
-				android_dependencies('com.google.android.gms:play-services-auth:10.2.1')
-				android_dependencies('com.google.android.gms:play-services-games:10.2.1')
-				android_dependencies('com.android.support:support-v4:23.1.1')
+				android_dependencies('com.google.android.gms:play-services-auth:' .. play_version)
+				android_dependencies('com.google.android.gms:play-services-games:' .. play_version)
+				android_dependencies('com.android.support:support-v4:27.0.2')
 			end
 			
 			android_metadata {
@@ -69,8 +73,8 @@ solution( ProjectName )
 
 		if use.AndroidPN then
 			android_module{fcm=true}
-			android_dependencies('com.google.firebase:firebase-core:10.2.1')
-			android_dependencies('com.google.firebase:firebase-messaging:10.2.1')
+			android_dependencies('com.google.firebase:firebase-core:' .. ((firebase_version and firebase_version.core) or '16.0.1'))
+			android_dependencies('com.google.firebase:firebase-messaging:' .. ((firebase_version and firebase_version.messaging) or '17.1.0'))
 
 			android_service {
 				{
@@ -91,6 +95,7 @@ solution( ProjectName )
 			android_aidl(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib','aidl')))
 		end
 		if use.AndroidGooglePlayService then
+			android_module{gps=true}
 			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','gps_sandbox_lib','src')))
 		end
 		if AndroidConfig.permissions then
@@ -124,7 +129,8 @@ solution( ProjectName )
 		gccprefix ( flascc_sdk_dir .. '/usr/bin/' )
 		buildoptions {'-Wno-write-strings', '-Wno-trigraphs' }
 	elseif platform_id == 'emscripten' then
-		buildoptions { '-s NO_EXIT_RUNTIME=1' }
+		buildoptions { '-s NO_EXIT_RUNTIME=1','-s STRICT=1','-s USE_WEBGL2=1'}
+		linkoptions{ '-s STRICT=1', '-s USE_WEBGL2=1' }
 	elseif platform_id ~= 'windows' then
 		table.insert(hide_options,'-fvisibility=hidden')
 	end
@@ -382,6 +388,8 @@ solution( ProjectName )
 			'GHL'
 		} )
 
+		links(ghl_links)
+
 		if use.MyGUI then
 			links { 'MyGUI' }
 			includedirs { sandbox_dir .. '/external/MyGUI/MyGUIEngine/include' }
@@ -445,6 +453,7 @@ solution( ProjectName )
 			links {
 				'atomic',
 				'android',
+				'jnigraphics',
 				'log',
 				'EGL',
 				'OpenSLES',
@@ -453,13 +462,8 @@ solution( ProjectName )
 			}
 			
 		elseif os.is('emscripten') then
-			
 			links {
-				'SDL'
-			}
-			linkoptions  {
-				'-s USE_SDL=2',
-				'-s FULL_ES2=1'
+				'gl.js','egl.js','idbstore.js','idbfs.js'
 			}
 		end
 

@@ -23,7 +23,7 @@ namespace Sandbox {
         public:
             explicit GUI(GHL::System* system);
             
-            void initialize(const LuaContextPtr& ctx);
+            virtual void initialize(const LuaContextPtr& ctx);
             
             void showKeyboard(MyGUI::Widget* widget);
             
@@ -31,11 +31,13 @@ namespace Sandbox {
                 return static_cast<GUI*>(MyGUI::Gui::getInstancePtr());
             }
             GHL::System* getSystem() { return m_system; }
+            void setCursor(GHL::SystemCursor cursor);
             
             EventHandle_GHLEventPtr eventGHLEvent;
         protected:
-            void get_mygui_localization(const MyGUI::UString & key,MyGUI::UString& value);
+            virtual void get_mygui_localization(const MyGUI::UString & key,MyGUI::UString& value);
             void mygui_change_key_focus( MyGUI::Widget* w );
+            void mygui_change_mouse_focus( MyGUI::Widget* w);
             void mygui_clipboard_changed( const std::string& type, const std::string& text );
             void mygui_clipboard_requested( const std::string& type, std::string& text  );
         private:

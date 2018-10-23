@@ -50,6 +50,7 @@ namespace Sandbox {
                 }
                 lua_State* th = lua_tothread(L, -1);
 
+                lua_State* prev_terminate = g_terminate_thread;
                 g_terminate_thread = th;
                 
                 int status = lua_status(th);
@@ -69,7 +70,7 @@ namespace Sandbox {
                 int res = lua_resume(th,0, 1);
                 m_time = 0.0f;
                 m_pause = 0.0f;
-                g_terminate_thread = 0;
+                g_terminate_thread = prev_terminate;
                 
                 if (res==LUA_YIELD) {
                     int new_top = lua_gettop(th);

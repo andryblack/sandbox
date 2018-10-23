@@ -11,6 +11,9 @@
 #define SB_TRANSFORM2D_H
 
 #include "sb_matrix2.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 namespace Sandbox {
 	
@@ -56,8 +59,13 @@ namespace Sandbox {
         /// rotate, radians
         Transform2d& rotate(float _a) {
             float a = _a;
+#ifdef __EMSCRIPTEN__
+            float c,s;
+            EM_ASM({HEAPF32[$1>>2]=Math_sin($0);HEAPF32[$2>>2]=Math_cos($0);},a,&s,&c);
+#else
             float c = ::cosf(a);
             float s = ::sinf(a);
+#endif
             m*=Matrix2f(c,s,-s,c);
             return *this;
         }

@@ -13,7 +13,7 @@ namespace Sandbox {
         
         MYGUI_IMPL_TYPE_NAME(TextInput)
                 
-        TextInput::TextInput() :  m_client(0) ,m_placeholder_widget(0){
+        TextInput::TextInput() :  m_client(0) ,m_placeholder_widget(0), m_maxt_text_length(0){
         }
         
         TextInput::~TextInput() {
@@ -28,6 +28,7 @@ namespace Sandbox {
                 emitAccept();
             } else if (e->type == GHL::EVENT_TYPE_TEXT_INPUT_TEXT_CHANGED) {
                 setCaption(e->data.text_input_text_changed.text);
+                emitChanged();
             } else if (e->type == GHL::EVENT_TYPE_TEXT_INPUT_CLOSED) {
                 MyGUI::InputManager::getInstance().resetKeyFocusWidget();
             }
@@ -36,6 +37,9 @@ namespace Sandbox {
         
         void TextInput::emitAccept() {
             eventEditAccept(this);
+        }
+        void TextInput::emitChanged() {
+            eventEditTextChange(this);
         }
         
         void TextInput::setPlaceholder(const sb::string& text) {
@@ -59,7 +63,13 @@ namespace Sandbox {
         
         /** Set widget caption */
         void TextInput::setCaption(const MyGUI::UString& _value) {
-            m_client->setCaption(_value);
+            if (m_maxt_text_length != 0) {
+                MyGUI::UString text = _value;
+                MyGUI::TextIterator::cutMaxLength(text,m_maxt_text_length);
+                m_client->setCaption(text);
+            } else {
+                m_client->setCaption(_value);
+            }
             if (!_value.empty() && m_placeholder_widget) {
                 m_placeholder_widget->setVisible(false);
             }
@@ -79,11 +89,22 @@ namespace Sandbox {
         void TextInput::setPropertyOverride(const std::string& _key, const std::string& _value) {
             if (_key=="Placeholder") {
                 setPlaceholder(_value);
+            } else if (_key=="MaxTextLength") {
+                setMaxTextLength(MyGUI::utility::parseValue<size_t>(_value));
             } else {
                 Base::setPropertyOverride(_key, _value);
                 return;
             }
             eventChangeProperty(this, _key, _value);
+        }
+        
+        
+        void TextInput::setMaxTextLength(size_t _value) {
+            m_maxt_text_length = _value;
+        }
+       
+        size_t TextInput::getMaxTextLength() const {
+            return m_maxt_text_length;
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Sandbox {
         public:
             
             void emitAccept();
+            void emitChanged();
             
             /*events:*/
             /** Event : Enter pressed (Ctrl+enter in multiline mode).\n
@@ -48,6 +49,10 @@ namespace Sandbox {
             /** Get widget caption */
             virtual const MyGUI::UString& getCaption() const;
             
+            //! Sets the max amount of text allowed in the edit field.
+            void setMaxTextLength(size_t _value);
+            //! Gets the max amount of text allowed in the edit field.
+            size_t getMaxTextLength() const;
             
         public:
             TextInput();
@@ -57,7 +62,7 @@ namespace Sandbox {
             virtual void initialiseOverride();
             void setPropertyOverride(const std::string& _key, const std::string& _value);
             void onEvent(GHL::Event* e);
-          
+            size_t m_maxt_text_length;
             
         };
     }

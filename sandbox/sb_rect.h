@@ -35,6 +35,11 @@ namespace Sandbox {
             (pos.x<(x+w)) && (pos.y<(y+h));
         }
         
+        bool Contains(const Point<T>& pos) const {
+            return (pos.x>=x) && (pos.y>=y) &&
+                (pos.x<(x+w)) && (pos.y<(y+h));
+        }
+        
         Point<T> GetTopLeft() const {
             return Point<T>( x,y );
         }

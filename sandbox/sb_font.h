@@ -68,64 +68,54 @@ namespace Sandbox {
         Sandbox::Color  m_color;
     };
     typedef sb::intrusive_ptr<FontPass> FontPassPtr;
-    
+     
 	class Font : public meta::object {
         SB_META_OBJECT
 	public:
         
                 
-		explicit Font(const FontDataPtr& main_data);
+		explicit Font(const FontDataProviderPtr& data);
 		virtual ~Font();
 		
-        virtual float Draw(Graphics& g,
+        float Draw(Graphics& g,
                            const DrawAttributes* attributes,
                            const Vector2f& pos,const char* text,FontAlign align) const;
-        virtual void Draw(Graphics& g,
+        void Draw(Graphics& g,
                            const DrawAttributes* attributes,
                           const TextData& data) const;
-        virtual void DrawCropped(Graphics& g,
+        void DrawCropped(Graphics& g,
                                  const DrawAttributes* attributes,
                                  const Rectf& rect,
                                  const TextData& data ) const;
-		virtual float GetTextWidth(const char* text) const;
+        float GetTextWidth(const char* text) const;
         bool MovePosition(Vector2f& pos,UTF32Char prev,UTF32Char next) const;
         
         /// font size (font units)
-        float   GetSize() const { return m_size; }
+        float   GetSize() const { return m_data_provider->GetSize(); }
         /// font 'x' height
-        float   GetXHeight() const { return m_xheight; }
+        float   GetXHeight() const { return m_data_provider->GetXHeight(); }
         /// font height (px)
-        float   GetHeight() const { return m_height; }
+        float   GetHeight() const { return m_data_provider->GetHeight(); }
         /// font baseline (px) 
-        float   GetBaseline() const { return m_baseline; }
+        float   GetBaseline() const { return m_data_provider->GetBaseline(); }
         
-        virtual void AllocateSymbols( const char* text ) {}
-        
-        virtual const FontData::Glypth* GetGlyph(GHL::UInt32 code) const {
-            return m_data ? m_data->get_glypth(code) : 0;
+        void AllocateSymbols( const char* text ) {
+            m_data_provider->AllocateSymbols(text);
         }
         
-        virtual bool HasGlyph(GHL::UInt32 code) const {
-            return m_data ? m_data->has_glypth(code) : 0;
-        }
         
         void ClearPasses();
         void AddPass( const FontPassPtr& pass );
         
-        const FontDataPtr GetMainData() const { return m_data; }
+        bool HasGlyph(UTF32Char ch) const { return m_data_provider->HasGlyph(ch); }
+        const FontData::Glypth* GetGlyph(UTF32Char ch) const { return m_data_provider->GetGlyph(ch);}
     protected:
         
-        void    set_height(float height) { m_height = height; }
-        void    set_size(float size) { m_size = size; }
-        void    set_baseline(float baseline) { m_baseline = baseline; }
-        void    set_x_height(float h) {m_xheight = h;}
         
-        FontDataPtr    m_data;
+        
+        FontDataProviderPtr m_data_provider;
 	private:
-        float   m_size;
-        float   m_height;
-        float   m_xheight;
-        float   m_baseline;
+        
         typedef sb::vector<FontPassPtr> FontPassList;
         FontPassList m_passes;
     };

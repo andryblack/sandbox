@@ -38,14 +38,21 @@ namespace Sandbox {
             
             void setTexture(const std::string& filename );
             
+            
         private:
             ImagePtr    m_image;
         };
         
         class ImageWidget : public ImageWidgetBase {
             MYGUI_RTTI_DERIVED( ImageWidget )
+        protected:
+            TexturePtr  m_mask;
         public:
             virtual void setImage(const ImagePtr& img);
+            void setMaskTexture( const TexturePtr& tex );
+            
+            virtual void DrawContent(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update);
+            
         };
     }
 }

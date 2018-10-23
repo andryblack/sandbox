@@ -44,6 +44,7 @@ public:
     }
     
     virtual void nativeOnActivityDestroyed(JNIEnv *env, jobject thiz, jobject activity) {
+        m_application = 0;
         if (m_SBFirebaseInstanceIDService) {
             env->DeleteGlobalRef(m_SBFirebaseInstanceIDService);
             m_SBFirebaseInstanceIDService = 0;
@@ -117,7 +118,7 @@ public:
                     .Key("status").PutString("success")
                     .Key("token").PutString(token.c_str())
                 .EndObject();
-            m_application->OnExtensionResponse("PNGetToken", json.End().c_str());
+            AddPendingResponse("PNGetToken", json.End().c_str());
     	}
     }
     

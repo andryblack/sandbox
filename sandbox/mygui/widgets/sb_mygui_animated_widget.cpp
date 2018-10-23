@@ -20,7 +20,6 @@ namespace Sandbox {
         MYGUI_IMPL_TYPE_NAME(AnimatedWidget)
         
         AnimatedWidget::AnimatedWidget()  {
-            m_thread.reset(new ThreadsMgr());
             setUserString("animated", "true");
         }
         
@@ -41,6 +40,24 @@ namespace Sandbox {
             return m_color;
         }
         
+        const ThreadsMgrPtr& AnimatedWidget::GetThread() const {
+            if (!m_thread) {
+                m_thread.reset(new ThreadsMgr());
+                MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate(
+                                                                                const_cast<AnimatedWidget*>(this), &AnimatedWidget::Update );
+            }
+            return m_thread;
+        }
+        
+        void AnimatedWidget::setNeedUpdate(bool need) {
+            if (need) {
+                GetThread();
+            } else if (m_thread) {
+                MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &AnimatedWidget::Update );
+                m_thread.reset();
+            }
+        }
+        
         void AnimatedWidget::SetOrigin(const Sandbox::Vector2f &o) {
             m_origin = o;
             if (m_transform) {
@@ -49,12 +66,10 @@ namespace Sandbox {
         }
         void AnimatedWidget::initialiseOverride() {
             Base::initialiseOverride();
-            MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate( this, &AnimatedWidget::Update );
         }
         
         void AnimatedWidget::shutdownOverride() {
             Base::shutdownOverride();
-            MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate( this, &AnimatedWidget::Update );
         }
         
         void AnimatedWidget::detachFromLayer() {

@@ -12,7 +12,7 @@
 #include "sb_threads_mgr.h"
 //#include "sb_event.h"
 #include "sb_signal.h"
-
+#include "sb_lua.h"
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::Thread)
 SB_META_METHOD(Update)
@@ -69,6 +69,8 @@ namespace Sandbox {
 					m_ref.GetObject(L);
 					sb_assert(lua_isfunction(L,-1));
                     luabind::stack<EventPtr>::push(L, e);
+                    lua_State* prev_thread = g_terminate_thread;
+                    g_terminate_thread = 0;
 					int res = lua_pcall(L, 1, 0, -3);
 					if (res) {
 						LogError(LuaEventModule) << " Failed script event emmit  " << res;
@@ -77,6 +79,7 @@ namespace Sandbox {
                         return;
 					}
                     lua_pop(L, 1);
+                    g_terminate_thread = prev_thread;
 				} else {
 					LogError(LuaEventModule) <<" call emmit on released script" ;
 				}

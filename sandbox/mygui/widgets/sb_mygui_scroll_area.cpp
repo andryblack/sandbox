@@ -16,6 +16,7 @@
 
 #include "sb_log.h"
 #include "sb_mygui_cached_widget.h"
+#include "../sb_mygui_gui.h"
 
 namespace Sandbox {
     
@@ -26,6 +27,8 @@ namespace Sandbox {
         ScrollArea::ScrollArea() {
             m_manual_scroll = true;
             m_small_scroll_enabled = false;
+            m_wheel_scroll_speed = 5.0f;
+            m_scroll_cursor = GHL::SYSTEM_CURSOR_MOVE;
         }
         
         ScrollArea::~ScrollArea() {
@@ -57,6 +60,8 @@ namespace Sandbox {
                 setSmallScrollEnabled(MyGUI::utility::parseValue<bool>(_value));
             else if (_key == "ScrollStartLength")
                 SetScrollStartLength(MyGUI::utility::parseFloat(MyGUI::LanguageManager::getInstance().replaceTags(_value)));
+            else if (_key == "WheelScrollSpeed")
+                setWheelScrollSpeed(MyGUI::utility::parseFloat(MyGUI::LanguageManager::getInstance().replaceTags(_value)));
             else
             {
                 Base::setPropertyOverride(_key, _value);
@@ -79,6 +84,10 @@ namespace Sandbox {
             if (mHScroll) {
                 mHScroll->setEnabled(s);
             }
+        }
+        
+        void ScrollArea::setWheelScrollSpeed(float v) {
+            m_wheel_scroll_speed = v;
         }
         
         
@@ -106,6 +115,16 @@ namespace Sandbox {
             MyGUI::ScrollView::notifyScrollChangePosition(_sender, _position);
             SetOffset(Vector2f(-getViewOffset().left,-getViewOffset().top));
             OnScrollMove();
+        }
+        
+        void ScrollArea::notifyMouseWheel(MyGUI::Widget* _sender, float _rel) {
+            if (!m_manual_scroll)
+                return;
+            Vector2f pos(getWidth()/2,getHeight()/2);
+            Scroll::ScrollBegin(pos);
+            pos += Vector2f(0,_rel * m_wheel_scroll_speed);
+            Scroll::ScrollMove(pos);
+            Scroll::ScrollEnd(pos);
         }
         
         void ScrollArea::cancelScroll() {
@@ -155,6 +174,7 @@ namespace Sandbox {
                 return;
             if (_id == MyGUI::MouseButton::Left) {
                 Scroll::ScrollEnd(Vector2f(x,y));
+                GUI::getInstancePtr()->setCursor(GHL::SYSTEM_CURSOR_DEFAULT);
             }
         }
         
@@ -240,6 +260,7 @@ namespace Sandbox {
         void ScrollArea::OnScrollBegin() {
             MyGUI::InputManager::getInstance().setMouseFocusWidget(this);
             scrollBegin(this, getViewOffset());
+            GUI::getInstancePtr()->setCursor(m_scroll_cursor);
         }
         
         void ScrollArea::OnScrollEnd() {

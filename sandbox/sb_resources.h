@@ -21,6 +21,8 @@
 #include <ghl_image.h>
 #include <ghl_render.h>
 
+#include "sb_texture_pool.h"
+
 namespace GHL {
 	struct VFS;
 	struct Render;
@@ -64,6 +66,7 @@ namespace Sandbox {
 		GHL::DataStream* OpenFile(const char* fn);
         GHL::DataStream* OpenFileVariant(const char* fn,bool& variant);
         GHL::WriteStream* OpenWrite(const char* fn,bool remove);
+        void RemoveFile(const char* fn);
         
         ImagePtr CreateImageFromData( const GHL::Data* data );
 		
@@ -92,7 +95,7 @@ namespace Sandbox {
                                  float scale,
                                  GHL::TextureFormat fmt);
         
-        BitmaskPtr LoadBitmask( const sb::string& filename );
+        virtual BitmaskPtr LoadBitmask( const sb::string& filename );
         
         size_t  GetLiveTicks() const { return m_live_ticks; }
         
@@ -108,7 +111,9 @@ namespace Sandbox {
         void    ProcessMemoryMgmt();
         
         const sb::string& GetCachePath() const { return m_cache_path; }
-
+    
+        TexturePoolPtr GetDefaultTexturePool();
+    
     protected:
         virtual GHL::Image* ImageFromData( const GHL::Data* data );
         virtual GHL::Image* ImageFromStream( GHL::DataStream* ds );
@@ -138,6 +143,8 @@ namespace Sandbox {
         typedef sb::weak_ptr<BackgroundData> BackgroundDataCachePtr;
         typedef sb::map<sb::string, BackgroundDataCachePtr> BackgroundsDataCache;
         BackgroundsDataCache m_backgrounds_cache;
+        
+        TexturePoolPtr m_default_pool;
         
         size_t    m_live_ticks;
         size_t    m_memory_limit;

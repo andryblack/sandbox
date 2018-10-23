@@ -240,7 +240,7 @@ function ndk.getModuleName(prj, cfg)
 end
 
 -- Extract list of dependencies the given kind
-function ndk.getDependentModules(prj, cfg, kind)
+function ndk.getDependentModules(prj, cfg, kind )
 	local names = {}
 	for _,d in ipairs(project.getdependencies(prj)) do
 		if d.kind == kind then
@@ -250,6 +250,23 @@ function ndk.getDependentModules(prj, cfg, kind)
 	return names 
 end
 
+function ndk.getDependentModulesRecursive( prj, cfg , collected)
+	local res = collected or {}
+	for _,d in ipairs(project.getdependencies(prj)) do
+		ndk.getDependentModulesRecursive(d,cfg,res)
+		local has = false
+		for _,i in ipairs(res) do
+			if i == d then
+				has = true
+				break
+			end
+		end
+		if not has then
+			table.insert(res,d)
+		end
+	end
+	return res
+end
 
 
 
@@ -282,6 +299,10 @@ function ndk.generateMakefile(prj,cfg,main)
 	ndk.writeStrings('LOCAL_CFLAGS', '-D', cfg.defines)
 	ndk.writeStrings('LOCAL_CFLAGS', '', cfg.buildoptions,'+=')
 	ndk.writeStrings('LOCAL_CPP_FEATURES', '', ndk.getCppFeatures(cfg))
+
+	if prj.android_ndk_arm_mode then
+		_p('LOCAL_ARM_MODE := arm ')
+	end
 
 	-- Join linker options with linked libraries to get single table
 	local link_options = cfg.linkoptions
@@ -329,14 +350,16 @@ function ndk.generateMakefile(prj,cfg,main)
 		_p('include $(BUILD_SHARED_LIBRARY)')
 	end
 	_p('')
-	_p('# Project dependencies')
-	ndk.writeDependencies(local_path, cfg, project.getdependencies(prj))
-	_p('')
-	if cfg.kind == premake.WINDOWEDAPP and prj.android_ndk_modules then
-		for _,v in ipairs(prj.android_ndk_modules) do
-			_x('$(call import-module,%s)',v)
+	if cfg.kind ~= premake.STATICLIB then
+		_p('# Project dependencies')
+		ndk.writeDependencies(local_path, cfg, ndk.getDependentModulesRecursive(prj,cfg))
+		_p('')
+		if  prj.android_ndk_modules then
+			for _,v in ipairs(prj.android_ndk_modules) do
+				_x('$(call import-module,%s)',v)
+			end
+			
 		end
-		
 	end
 end
 

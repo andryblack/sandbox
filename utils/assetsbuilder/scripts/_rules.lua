@@ -25,10 +25,16 @@ function dest_files_mt:__ipairs()
 	return ipairs(self._)
 end
 
+local function remove_dest_file( t, n )
+	t._[n]=nil
+	_M.all_dest_files[n]=nil
+end
+
 function _M.init_rules(rules) 
 	rules.copy_files = {}
 	rules.compile_files = {}
-	rules.dest_files = setmetatable({_={}},dest_files_mt)
+	rules.dest_files = setmetatable({_={},remove=remove_dest_file},dest_files_mt)
+
 	rules.call_functions = {}
 	rules.encode_sounds = {}
 end
@@ -68,28 +74,37 @@ local action_copy_files = {
 	name = 'copy_files',
 	on_file = default_action_on_file
 }
-
+_M.action_copy_files = action_copy_files
 
 local action_compile_files = {
 	name = 'compile_files',
 	on_file = default_action_on_file
 }
+_M.action_compile_files = action_compile_files
 local action_convert_to_jpeg = {
 	name = 'convert_to_jpeg',
 	file_remap = function(f) return path.replaceextension(f,'jpg') end,
 	on_file = default_action_on_file
 }
+_M.action_convert_to_jpeg = action_convert_to_jpeg
 local action_encode_sounds = {
 	name = 'encode_sounds',
 	file_remap = function(f) return path.replaceextension(f,'ogg') end,
-	on_file = default_action_on_file
 }
+_M.action_encode_sounds = action_encode_sounds
+function action_encode_sounds:on_file( src, dst )
+	local df = path.replaceextension(dst,'ogg')
+	local v = {dst=df,src=src,force_mono=self.force_mono}
+	assert(get_rules()[self.name])[src]=v
+	assert(not get_rules().dest_files[df],'conflict rules for file ' .. df)
+	get_rules().dest_files[df]=v
+end
 local action_premultiply_images = {
 	name = 'premultiply_images',
 	file_remap = function(f) return path.replaceextension(f,_images.image_file_format.ext) end,
 	on_file = default_action_on_file
 }
-
+_M.action_premultiply_images = action_premultiply_images
 
 local function process_files_pattern( pattern , action )
 	if type(pattern) ~= 'string' then
@@ -158,6 +173,13 @@ function _M.assets_rules.compile_files( file_or_filelist )
 	else
 		error('compile_files table or string expected got ' .. type(file_or_filelist))
 	end
+end
+
+function _M.assets_rules.set_encode_sounds_force_mono( force )
+	action_encode_sounds.force_mono = force
+end
+function _M.assets_rules.set_encode_sounds_bps( bps )
+	application.sounds_encode_bps = bps
 end
 
 function _M.assets_rules.encode_sounds( file_or_filelist )
@@ -303,10 +325,11 @@ local function compile_files( files )
 end
 
 local function encode_sounds( files )
-	for src,dst in pairs(files) do
-		if dst then
-			if not update_only or os.check_file_new(path.join(src_path,src),path.join(application.dst_path,dst)) then
-				if not application:encode_sound(src,dst) then
+	for src,v in pairs(files) do
+		if v then
+			if not update_only or os.check_file_new(path.join(src_path,src),
+				path.join(application.dst_path,v.dst)) then
+				if not application:encode_sound(src,v.dst,v.force_mono) then
 					error('failed encode sound ' .. src .. '->' .. dst)
 				end
 			end
@@ -354,7 +377,7 @@ function _M.chek_files(  )
 		end
 	end
 	if next(_M.all_dest_files) then
-		for k,v in pairs(all_dest_files) do
+		for k,v in pairs(_M.all_dest_files) do
 			log.error("not produced declared file:",k)
 		end
 		error('not all files produced')

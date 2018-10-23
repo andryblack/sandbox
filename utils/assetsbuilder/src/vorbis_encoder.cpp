@@ -6,9 +6,10 @@
 // based on https://svn.xiph.org/trunk/vorbis/examples/encoder_example.c
 
 #include "vorbis_encoder.h"
+#include "application.h"
 #include <stdlib.h>
 
-VorbisEncoder::VorbisEncoder() {
+VorbisEncoder::VorbisEncoder(Application* app,bool stereo) : m_app(app),m_stereo(stereo) {
     
 }
 
@@ -36,6 +37,13 @@ static float convert_sample8_m(const GHL::Byte* data,int /*ch*/,int s) {
 }
 typedef float(*convert_sample_t)(const GHL::Byte* data,int ch,int s);
 
+static void _v_writestring(oggpack_buffer *o,const char *s, int bytes){
+    
+    while(bytes--){
+        oggpack_write(o,*s++,8);
+    }
+}
+
 bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,int serial) {
     
     bool eos = false;
@@ -52,7 +60,7 @@ bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,
      Encoding using an average bitrate mode (ABR).
      example: 44kHz stereo coupled, average 128kbps VBR
     */
-    int ret = vorbis_encode_init(&m_vi,channels,decoder->GetFrequency(),-1,128000,-1);
+    int ret = vorbis_encode_init(&m_vi,m_stereo?channels:1,decoder->GetFrequency(),-1,m_app->get_sounds_encode_bps(),-1);
     if (ret != 0) {
         return false;
     }
@@ -82,6 +90,43 @@ bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,
         vorbis_analysis_headerout(&m_vd,&m_vc,&header,&header_comm,&header_code);
         ogg_stream_packetin(&m_os,&header); /* automatically placed in its own
                                            page */
+        
+        const char* override_encoder_comment = m_app->get_vorbis_encoder_comment();
+        if (override_encoder_comment) {
+            oggpack_buffer opb;
+            oggpack_writeinit(&opb);
+            
+            ogg_int32_t bytes = ::strlen(override_encoder_comment);
+            
+            /* preamble */
+            oggpack_write(&opb,0x03,8);
+            _v_writestring(&opb,"vorbis", 6);
+            
+            /* vendor */
+            oggpack_write(&opb,bytes,32);
+            _v_writestring(&opb,override_encoder_comment, bytes);
+            
+            /* comments */
+            
+            oggpack_write(&opb,m_vc.comments,32);
+            if(m_vc.comments){
+                int i;
+                for(i=0;i<m_vc.comments;i++){
+                    if(m_vc.user_comments[i]){
+                        oggpack_write(&opb,m_vc.comment_lengths[i],32);
+                        _v_writestring(&opb,m_vc.user_comments[i], m_vc.comment_lengths[i]);
+                    }else{
+                        oggpack_write(&opb,0,32);
+                    }
+                }
+            }
+            oggpack_write(&opb,1,1);
+            
+            header_comm.packet = static_cast<unsigned char*>(::malloc(oggpack_bytes(&opb)));
+            header_comm.bytes = oggpack_bytes(&opb);
+            memcpy(header_comm.packet,opb.buffer,oggpack_bytes(&opb));
+        }
+        
         ogg_stream_packetin(&m_os,&header_comm);
         ogg_stream_packetin(&m_os,&header_code);
         
@@ -95,6 +140,9 @@ bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,
             output->Write(reinterpret_cast<const GHL::Byte*>(m_og.body), m_og.body_len);
         }
         
+        if (override_encoder_comment) {
+            ::free(header_comm.packet);
+        }
     }
     
     convert_sample_t convert_sample = 0;
@@ -133,9 +181,20 @@ bool VorbisEncoder::convert(GHL::SoundDecoder* decoder,GHL::WriteStream* output,
             /* expose the buffer to submit data */
             float **buffer=vorbis_analysis_buffer(&m_vd,READ_SAMPLES);
             /* uninterleave samples */
-            for (int ch=0;ch<channels;++ch) {
+            if (!m_stereo) {
                 for (GHL::UInt32 s=0;s<samples;++s) {
-                    buffer[ch][s]=convert_sample(samples_buffer,ch,s);
+                    float d = 0.0f;
+                    for (int ch=0;ch<channels;++ch) {
+                        d+=convert_sample(samples_buffer,ch,s);
+                    }
+                    d = d / channels;
+                    buffer[0][s]=d;
+                }
+            } else {
+                for (int ch=0;ch<channels;++ch) {
+                    for (GHL::UInt32 s=0;s<samples;++s) {
+                        buffer[ch][s]=convert_sample(samples_buffer,ch,s);
+                    }
                 }
             }
             /* tell the library how much we actually submitted */

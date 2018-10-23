@@ -23,10 +23,14 @@ namespace Sandbox {
             case GHL::IMAGE_FORMAT_RGBA:
                 bpp = 4;
                 break;
+            case GHL::IMAGE_FORMAT_GRAY:
+                bpp = 1;
+                break;
             default:
                 return;
                 break;
         }
+        size_t alpha_offset = bpp - 1;
         size_t line_size = m_width * bpp;
         for (size_t y=0;y<m_height;++y) {
             size_t x = 0;
@@ -35,7 +39,7 @@ namespace Sandbox {
                 store_t s = 0;
                 for (size_t i=0;i<bits_count;++i) {
                     if (x<m_width) {
-                        if (line[3]>m_threshold) {
+                        if (line[alpha_offset]>m_threshold) {
                             s = s | (1<<i);
                         }
                     }

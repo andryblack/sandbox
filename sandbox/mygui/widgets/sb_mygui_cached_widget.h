@@ -83,6 +83,7 @@ namespace Sandbox {
             void recursiveRenderChilds(MyGUI::Widget* ch);
         private:
             RenderTargetImpl*        m_target;
+            void releaseTarget();
             
             ReplacedLayer*      m_replaced_layer;
             void frameEntered(float dt);

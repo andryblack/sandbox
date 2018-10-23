@@ -10,7 +10,6 @@
 
 #include <image/jpeg_image_decoder.h>
 
-#include "spine_convert.h"
 #include "vorbis_encoder.h"
 
 extern "C" {
@@ -155,22 +154,14 @@ SB_META_BEGIN_KLASS_BIND(Application)
 SB_META_METHOD(check_texture)
 SB_META_METHOD(load_texture)
 SB_META_METHOD(store_texture)
-SB_META_METHOD(convert_spine)
-SB_META_METHOD(open_spine)
 SB_META_METHOD(write_text_file)
 SB_META_METHOD(encode_sound)
 SB_META_METHOD(wait_tasks)
+SB_META_PROPERTY_RW(png_encode_settings, get_png_encode_settings, set_png_encode_settings)
+SB_META_PROPERTY_RW(jpeg_encode_settings, get_jpeg_encode_settings, set_jpeg_encode_settings)
 SB_META_PROPERTY_RW(dst_path,get_dst_path,set_dst_path)
 SB_META_PROPERTY_RW(options,get_options,set_options)
-SB_META_END_KLASS_BIND()
-
-SB_META_BEGIN_KLASS_BIND(SkeletonConvert)
-SB_META_METHOD(RenameAnimation)
-SB_META_END_KLASS_BIND()
-
-SB_META_BEGIN_KLASS_BIND(SpineConvert)
-SB_META_METHOD(Load)
-SB_META_METHOD(Export)
+SB_META_PROPERTY_RW(sounds_encode_bps, get_sounds_encode_bps, set_sounds_encode_bps)
 SB_META_END_KLASS_BIND()
 
 SB_META_DECLARE_OBJECT(Texture, Sandbox::meta::object)
@@ -195,6 +186,8 @@ SB_META_CONSTRUCTOR((int,int))
 SB_META_METHOD(PremultiplyAlpha)
 SB_META_METHOD(Grayscale)
 SB_META_METHOD(Place)
+SB_META_METHOD(PlaceRotated)
+SB_META_METHOD(PlaceUnrotated)
 SB_META_METHOD(SetAlpha)
 SB_META_METHOD(SetImageFileFormatPNG)
 SB_META_METHOD(SetImageFileFormatJPEG)
@@ -221,6 +214,9 @@ Application::Application() : m_lua(0),m_vfs(0),m_update_only(false) {
     m_image_decoder = GHL_CreateImageDecoder();
     m_tasks = 0;
     
+    m_png_encode_settings = 0;
+    m_jpeg_encode_settings = 0;
+    m_sound_encode_bps = 128000;
 
 #if defined( GHL_PLATFORM_MAC )
     m_platform = "osx";
@@ -262,8 +258,6 @@ void Application::Bind(lua_State* L) {
     Sandbox::luabind::Class<TextureData>(L);
     Sandbox::luabind::ExternClass<FileProvider>(L);
     Sandbox::luabind::ExternClass<Application>(L);
-    Sandbox::luabind::ExternClass<SkeletonConvert>(L);
-    Sandbox::luabind::ExternClass<SpineConvert>(L);
     Sandbox::register_json(L);
     Sandbox::register_utils(L);
     Sandbox::register_math(L);
@@ -388,13 +382,29 @@ TexturePtr Application::check_texture( const sb::string& file ) {
 TextureDataPtr Application::load_texture( const sb::string& file ) {
     GHL::DataStream* ds = m_vfs->OpenFile(append_path(m_src_dir, file).c_str());
     if (!ds) return TextureDataPtr();
+    GHL::ImageInfo info;
+    m_image_decoder->GetFileInfo(ds, &info);
+    ds->Seek(0, GHL::F_SEEK_BEGIN);
     GHL::Image* img = m_image_decoder->Decode(ds);
     if (!img) {
         ds->Release();
         return TextureDataPtr();
     }
     ds->Release();
-    return TextureDataPtr(new TextureData(img));
+    TextureData* td = new TextureData(img);
+    if (info.file_format == GHL::IMAGE_FILE_FORMAT_JPEG) {
+        td->SetImageFileFormatJPEG();
+    }
+    return TextureDataPtr(td);
+}
+
+void Application::set_png_encode_settings(GHL::Int32 settings) {
+    m_png_encode_settings = settings;
+    m_image_decoder->SetEncodeSettings(GHL::IMAGE_FILE_FORMAT_PNG, settings);
+}
+void Application::set_jpeg_encode_settings(GHL::Int32 settings) {
+    m_jpeg_encode_settings = settings;
+    m_image_decoder->SetEncodeSettings(GHL::IMAGE_FILE_FORMAT_JPEG, settings);
 }
 
 TextureDataPtr Application::decode_texture( const GHL::Data* data ) {
@@ -416,8 +426,7 @@ const GHL::Data* Application::encode_texture(const TextureDataPtr &texture) {
         return encode_etc1(m_tasks,texture->GetSubImage(),true);
     }
     return m_image_decoder->Encode(texture->GetSubImage(),
-                                   texture->GetImageFileFormat(),
-                                   texture->GetEncodeSettings());
+                                   texture->GetImageFileFormat());
 }
 
 bool Application::store_texture( const sb::string& file , const TextureDataPtr& data ) {
@@ -484,10 +493,15 @@ bool Application::rebuild_image( const sb::string& src, const sb::string& dst ) 
 class VorbisEncoderTask : public Task {
 private:
     Application* m_app;
+    bool m_stereo;
     sb::string m_src;
     sb::string m_dst;
 public:
-    VorbisEncoderTask(Application* app,const sb::string& src_file,const sb::string& dst_file) : m_app(app),
+    VorbisEncoderTask(Application* app,
+                      const sb::string& src_file,
+                      const sb::string& dst_file,
+                      bool stereo) : m_app(app),
+        m_stereo(stereo),
         m_src(src_file),m_dst(dst_file) {}
     virtual bool RunImpl() {
         GHL::DataStream* src_ds = m_app->OpenFile(m_src.c_str());
@@ -495,23 +509,21 @@ public:
             Sandbox::LogError() << "failed openng " << m_src;
             return false;
         }
-        GHL::SoundDecoder* decoder = GHL_CreateSoundDecoder(src_ds);
+        GHL::SoundDecoder* decoder = m_app->create_sound_decoder(src_ds);
+        src_ds->Release();
         if (!decoder) {
-            src_ds->Release();
             Sandbox::LogError() << "failed decode " << m_src;
             return false;
         }
-        VorbisEncoder en;
+        VorbisEncoder en(m_app,m_stereo);
         GHL::WriteStream* dst_ds = m_app->OpenDestFile(m_dst.c_str());
         if (!dst_ds) {
             decoder->Release();
-            src_ds->Release();
             Sandbox::LogError() << "failed open dst " << m_dst;
             return false;
         }
         bool res = en.convert(decoder, dst_ds,Sandbox::MD5Hash(m_src.c_str()));
         decoder->Release();
-        src_ds->Release();
         dst_ds->Flush();
         dst_ds->Close();
         dst_ds->Release();
@@ -519,55 +531,41 @@ public:
     }
 };
 
-bool Application::encode_sound( const sb::string& src, const sb::string& dst ) {
+bool Application::encode_sound( const sb::string& src, const sb::string& dst , bool force_mono) {
     if (m_tasks) {
-        m_tasks->AddTask(TaskPtr(new VorbisEncoderTask(this,src,dst)));
+        m_tasks->AddTask(TaskPtr(new VorbisEncoderTask(this,src,dst,!force_mono)));
         return true;
     }
-    VorbisEncoder en;
+    VorbisEncoder en(this,!force_mono);
     GHL::DataStream* src_ds = m_vfs->OpenFile(append_path(m_src_dir, src).c_str());
     if (!src_ds) {
         Sandbox::LogError() << "failed openng " << src;
         return false;
     }
-    GHL::SoundDecoder* decoder = GHL_CreateSoundDecoder(src_ds);
+    GHL::SoundDecoder* decoder = create_sound_decoder(src_ds);
+    src_ds->Release();
     if (!decoder) {
-        src_ds->Release();
         Sandbox::LogError() << "failed decode " << src;
         return false;
     }
     GHL::WriteStream* dst_ds = OpenDestFile(dst.c_str());
     if (!dst_ds) {
         decoder->Release();
-        src_ds->Release();
         Sandbox::LogError() << "failed open dst " << dst;
         return false;
     }
     bool res = en.convert(decoder, dst_ds,Sandbox::MD5Hash(src.c_str()));
     decoder->Release();
-    src_ds->Release();
     dst_ds->Flush();
     dst_ds->Close();
     dst_ds->Release();
     return res;
 }
 
-bool Application::convert_spine(const sb::string& atlas, const sb::string& skelet, const sb::string& outfile) {
-    SpineConvert convert;
-    if (!convert.Load(atlas.c_str(), skelet.c_str(), this))
-        return false;
-    convert.Export(outfile.c_str(),this);
-
-    return true;
+GHL::SoundDecoder* Application::create_sound_decoder(GHL::DataStream* ds) {
+    return GHL_CreateSoundDecoder(ds);
 }
 
-sb::intrusive_ptr<SpineConvert> Application::open_spine(const sb::string& atlas,
-                                           const sb::string& skelet ) {
-    sb::intrusive_ptr<SpineConvert> res(new SpineConvert);
-    if (!res->Load(atlas.c_str(), skelet.c_str(), this))
-        return sb::intrusive_ptr<SpineConvert>();
-    return res;
-}
 
 bool Application::wait_tasks() {
     if (!m_tasks) return true;

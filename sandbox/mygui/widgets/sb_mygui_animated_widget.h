@@ -32,7 +32,7 @@ namespace Sandbox {
             
             const TransformModificatorPtr& GetTransform() const;
             const ColorModificatorPtr& GetColor() const;
-            const ThreadsMgrPtr& GetThread() const { return m_thread; }
+            const ThreadsMgrPtr& GetThread() const;
             
             void SetOrigin(const Vector2f& o);
             const Vector2f& GetOrigin() const { return m_origin; }
@@ -40,6 +40,8 @@ namespace Sandbox {
             virtual bool renderNodeToTarget(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update);
             virtual void DrawContent(MyGUI::IRenderTarget* rt,MyGUI::LayerNode* node,bool update);
             
+            bool getNeedUpdate() const { return m_thread; }
+            void setNeedUpdate(bool need);
         protected:
             void initialiseOverride();
             void shutdownOverride();
@@ -50,7 +52,7 @@ namespace Sandbox {
             
             mutable TransformModificatorPtr     m_transform;
             mutable ColorModificatorPtr         m_color;
-            ThreadsMgrPtr               m_thread;
+            mutable ThreadsMgrPtr               m_thread;
             Vector2f            m_origin;
         };
         

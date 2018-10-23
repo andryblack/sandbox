@@ -61,7 +61,9 @@ namespace Sandbox {
             TextureImpl* getTexture() { return m_texture; }
             
             void SetRT( const RenderTargetPtr& rt );
-            RenderTargetImpl( Graphics* graphics, Resources* resources , RenderTargetPtr rt);
+            RenderTargetImpl( Graphics* graphics, Resources* resources);
+            RenderTargetImpl( Graphics* graphics, Resources* resources ,
+                             RenderTargetPtr rt, const MyGUI::IntSize& rt_size);
             ~RenderTargetImpl();
             
             const MyGUI::IntSize& getSize() const { return m_rendertarget_size; }

@@ -40,8 +40,7 @@ public class GPSHelper
 	// Are we currently resolving a connection failure?
   	private boolean m_resolving_connection_failure = false;
   	private boolean m_signin_called = false;
-  	private boolean m_first_login_flow = true;
-
+  	
 	public  GPSHelper(Activity activity) {
         m_activity = activity;
         m_google_api_client = new GoogleApiClient.Builder(m_activity)
@@ -79,6 +78,7 @@ public class GPSHelper
 			return true;
 		}
 		m_signin_called = use_ui;
+		Log.i(TAG,"sign_in, use_ui: " + use_ui);
 		m_google_api_client.connect();
 		return true;
 	}
@@ -202,9 +202,8 @@ public class GPSHelper
 			return;
 		}
 
-		if (m_signin_called || m_first_login_flow) {
+		if (m_signin_called ) {
 			m_signin_called = false;
-			m_first_login_flow = false;
 			m_resolving_connection_failure = resolveConnectionFailure(
 				connectionResult, RC_SIGN_IN);
 		} else {
