@@ -66,7 +66,7 @@ public class IAPHelper implements PurchasesUpdatedListener {
    
     private final Map<String,Purchase> m_purchase_map = new HashMap<>();
     private final Map<String,SkuDetails> m_products_map = new HashMap<>();
-    private Set<String> m_tokens_to_be_consumed;
+    private final Set<String> m_tokens_to_be_consumed = new HashSet<>();
     private String m_pending_purchase_sku;
 
 
@@ -364,9 +364,7 @@ public class IAPHelper implements PurchasesUpdatedListener {
         // If we've already scheduled to consume this token - no action is needed (this could happen
         // if you received the token when querying purchases inside onReceive() and later from
         // onActivityResult()
-        if (m_tokens_to_be_consumed == null) {
-            m_tokens_to_be_consumed = new HashSet<>();
-        } else if (m_tokens_to_be_consumed.contains(purchaseToken)) {
+        if (m_tokens_to_be_consumed.contains(purchaseToken)) {
             Log.i(TAG, "Token was already scheduled to be consumed - skipping...");
             return;
         }
@@ -402,8 +400,10 @@ public class IAPHelper implements PurchasesUpdatedListener {
         } catch (JSONException e) {
            Log.e(TAG,e.toString());
         }
-        m_tokens_to_be_consumed.add(purchaseToken);
-        m_purchase_map.remove(purchaseToken);
+        if (purchaseToken != null) {
+	        m_tokens_to_be_consumed.add(purchaseToken);
+	        m_purchase_map.remove(purchaseToken);
+	    }
         nativeProcessResponse(m_native_object,"iap_confirm_subscription",obj.toString());
     }
 
@@ -489,7 +489,7 @@ public class IAPHelper implements PurchasesUpdatedListener {
 
         Log.d(TAG, "Got a verified purchase: " + purchase);
         String purchaseToken = purchase.getPurchaseToken();
-        if (m_tokens_to_be_consumed!=null && m_tokens_to_be_consumed.contains(purchaseToken)) {
+        if (m_tokens_to_be_consumed.contains(purchaseToken)) {
             Log.i(TAG, "Already consumed");
         } else {
             m_purchase_map.put(purchaseToken,purchase);
