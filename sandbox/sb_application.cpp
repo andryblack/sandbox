@@ -509,6 +509,11 @@ namespace Sandbox {
         
         CreateLua();
         
+        if (m_need_restart) {
+            SB_LOGI("Need restart after lua created, skip load");
+            return true;
+        }
+        
         LuaContextPtr ctx = m_lua->GetGlobalContext();
         
         ctx->SetValue("application.resources", m_resources);
@@ -695,6 +700,7 @@ namespace Sandbox {
         if (m_need_restart) {
             m_need_restart = false;
             DoRestart();
+            return true;
         }
         GHL::UInt32 width = m_render->GetWidth();
         GHL::UInt32 height = m_render->GetHeight();
