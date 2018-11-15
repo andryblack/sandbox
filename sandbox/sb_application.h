@@ -76,7 +76,7 @@ namespace Sandbox {
         float GetDrawHeight() const { return m_draw_height; }
         float GetFPS() const { return m_fps; }
         
-        bool StoreProfileFile( const char* filename , const GHL::Data* data );
+        virtual bool StoreProfileFile( const char* filename , const GHL::Data* data );
         GHL::Data* LoadProfileFile( const char* filename );
         
         ImagePtr RenderScreen();
