@@ -15,13 +15,15 @@ SB_META_DECLARE_OBJECT(Sandbox::PermanentThreadsMgr, Sandbox::ThreadsMgr)
 
 namespace Sandbox {
 
-    ThreadsMgr::ThreadsMgr() : m_drop_empty(true),m_speed(1.0f) {
+    ThreadsMgr::ThreadsMgr() : m_drop_empty(true),m_speed(1.0f),m_lock_update(false) {
 	}
 	
 	ThreadsMgr::~ThreadsMgr() {
 	}
 	
 	bool ThreadsMgr::Update(float dt) {
+        sb_assert(!m_lock_update);
+        m_lock_update = true;
 		for (size_t i=0;i<m_removed_threads.size();i++) {
 			std::vector<ThreadPtr>::iterator it = std::find(m_threads.begin(),m_threads.end(),m_removed_threads[i]);
 			if (it!=m_threads.end())
@@ -42,6 +44,13 @@ namespace Sandbox {
 			else
 				i++;
 		}
+        for (size_t i=0;i<m_removed_threads.size();i++) {
+            std::vector<ThreadPtr>::iterator it = std::find(m_threads.begin(),m_threads.end(),m_removed_threads[i]);
+            if (it!=m_threads.end())
+                m_threads.erase(it);
+        }
+        m_removed_threads.clear();
+        m_lock_update = false;
 		return m_threads.empty() && m_removed_threads.empty() && m_added_threads.empty() && m_drop_empty;
 	}
 	
@@ -61,6 +70,13 @@ namespace Sandbox {
 		std::vector<ThreadPtr>::iterator it = std::find(m_added_threads.begin(),m_added_threads.end(),t);
 		if (it!=m_added_threads.end())
 			m_added_threads.erase(it);
+        if (!m_lock_update) {
+            it = std::find(m_threads.begin(),m_threads.end(),t);
+            if (it != m_threads.end()) {
+                m_threads.erase(it);
+            }
+            return;
+        }
 		it = std::find(m_removed_threads.begin(),m_removed_threads.end(),t);
 		if (it==m_removed_threads.end())
 			m_removed_threads.push_back(t);
@@ -68,6 +84,14 @@ namespace Sandbox {
 	}
 	void ThreadsMgr::Clear() {
 		m_added_threads.clear();
+        if (!m_lock_update) {
+            for (std::vector<ThreadPtr>::iterator it = m_threads.begin();it!=m_threads.end();++it) {
+                (*it)->Clear();
+            }
+            m_threads.clear();
+            m_removed_threads.clear();
+            return;
+        }
 		for (size_t i=0;i<m_threads.size();i++) {
 			std::vector<ThreadPtr>::iterator it = std::find(m_removed_threads.begin(),m_removed_threads.end(),m_threads[i]);
             if (it==m_removed_threads.end()) {

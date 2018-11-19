@@ -26,6 +26,7 @@ namespace Sandbox {
         public:
             
             void emitAccept();
+            void emitChanged();
             
             /*events:*/
             /** Event : Enter pressed (Ctrl+enter in multiline mode).\n

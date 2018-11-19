@@ -8,6 +8,7 @@
 @interface gc_manager : NSObject <GKGameCenterControllerDelegate> {
 @public
     Sandbox::Application* m_application;
+    bool m_nees_subscibe;
 }
 @end
 
@@ -16,11 +17,7 @@
 -(id)init:(Sandbox::Application*) app {
     if (self = [super init]) {
         m_application = app;
-        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc addObserver: self
-               selector:@selector(gameCenterAuthenticationChanged:)
-                   name:GKPlayerAuthenticationDidChangeNotificationName
-                 object:nil];
+        m_nees_subscibe = true;
     }
     return self;
 }
@@ -87,6 +84,15 @@
         else
         {
             [self disableGameCenter: error];
+        }
+        
+        if (m_nees_subscibe) {
+            m_nees_subscibe = false;
+            NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+            [nc addObserver: self
+                   selector:@selector(gameCenterAuthenticationChanged:)
+                       name:GKPlayerAuthenticationDidChangeNotificationName
+                     object:nil];
         }
     };
 }

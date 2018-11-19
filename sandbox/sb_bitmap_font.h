@@ -18,7 +18,7 @@ namespace Sandbox {
     
     
     
-    class BitmapFont : public Font {
+    class BitmapFont : public FontDataProvider {
         SB_META_OBJECT
     public:
         BitmapFont();

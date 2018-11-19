@@ -48,6 +48,9 @@ namespace Sandbox {
         void    SetFrameInterval(int interval);
         void    SetResizeableWindow(bool v);
         void    SetScreenKeepOn(bool o);
+        void    SetCursor(GHL::SystemCursor cursor);
+        void    SetFullScreen(bool fs);
+        bool    GetFullScreen() const;
         
         GHL::System* GetSystem() const { return m_system;}
         
@@ -81,6 +84,7 @@ namespace Sandbox {
         virtual void ReportAppError(const char* reason) {}
         Network* GetNetwork();
         GHL::VFS* GetVFS() const { return m_vfs;}
+        Resources* GetResources() const { return m_resources;}
         
     protected:
 		Application();
@@ -95,6 +99,9 @@ namespace Sandbox {
 		void SetResourcesBasePath( const char* path ) {
 			m_resources_base_path = path;
 		}
+        void SetSystemLanguage(const char* lang) {
+            m_system_language = lang;
+        }
         /// bind Lua modules
 		virtual void BindModules( LuaVM* );
 		virtual void OnLoaded() {}
@@ -103,11 +110,12 @@ namespace Sandbox {
 		
 		GHL::Render* GetRender() const { return m_render;}
         GHL::ImageDecoder* GetImageDecoder() const { return m_image_decoder; }
+        GHL::Sound* GetSound() const { return m_sound; }
 		LuaVM* GetLua() const { return m_lua;}
 		ThreadsMgr* GetThreads() const { return m_main_thread;}
-		Resources* GetResources() const { return m_resources;}
         Graphics* GetGraphics() const { return m_graphics; }
         Scene* GetScene() const { return m_main_scene; }
+        SoundManager* GetSoundManager() const { return m_sound_mgr; }
 		
 		void SetClearColor(const Color& c);
         void SetClearDepth(float d);
@@ -141,9 +149,13 @@ namespace Sandbox {
         virtual void TrimMemory();
         
         virtual void OnSystemSet();
+        virtual void OnFullScreenChanged();
         
         virtual Resources* CreateResourcesManager();
         virtual Network* CreateNetwork();
+#ifdef SB_USE_MYGUI
+        virtual mygui::GUI* CreateGUI();
+#endif
         virtual void InitResources();
         virtual void ReleaseResources();
         
@@ -162,6 +174,8 @@ namespace Sandbox {
         virtual void OnLuaCreated() {}
         // called before lua destroyed
         virtual void OnLuaDestroy() {}
+        
+        virtual int DrawDebugInfo();
     private:
 		GHL::System*	m_system;
 		GHL::VFS*		m_vfs;
@@ -180,7 +194,7 @@ namespace Sandbox {
 		GHL::UInt32		m_frames_time;
 		float			m_fps;
         bool            m_draw_debug_info;
-		void DrawDebugInfo();
+		
 		ThreadsMgr*		m_main_thread;
 		Scene*			m_main_scene;
         sb::list<RTScenePtr>    m_rt_scenes;
@@ -195,9 +209,6 @@ namespace Sandbox {
         
         float       m_batches;
         float       m_batches_rt;
-        
-        bool    m_sound_enabled;
-        bool    m_music_enabled;
         
         sb::string  m_title;
         sb::string  m_system_language;

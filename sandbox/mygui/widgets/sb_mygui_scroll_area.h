@@ -33,6 +33,8 @@ namespace Sandbox {
             
             void setManualScroll(bool s);
             bool manualScroll() const { return m_manual_scroll; }
+            void setWheelScrollSpeed(float v);
+            float getWheelScrollSpeed() const { return m_wheel_scroll_speed; }
             
             void setScrollPos(const MyGUI::IntPoint& p);
             void setScrollPosF(const Sandbox::Vector2f& p);
@@ -59,6 +61,7 @@ namespace Sandbox {
             void frameEntered(float dt);
             virtual void updateScrollBars();
             virtual void notifyScrollChangePosition(MyGUI::ScrollBar* _sender, size_t _position);
+            virtual void notifyMouseWheel(MyGUI::Widget* _sender, float _rel);
             
             virtual Vector2f GetOffset() const;
             virtual void SetOffset(const Vector2f& offset);
@@ -79,6 +82,8 @@ namespace Sandbox {
             Sandbox::Vector2f   m_real_offset;
             bool    m_manual_scroll;
             bool    m_small_scroll_enabled;
+            float m_wheel_scroll_speed;
+            GHL::SystemCursor   m_scroll_cursor;
         };
         
         

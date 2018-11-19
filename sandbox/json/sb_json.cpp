@@ -32,15 +32,7 @@ namespace Sandbox {
             int count;
         };
         sb::vector<state_t> state;
-        void on_pre_value() {
-            if (!state.empty()) {
-                if (state.back().type == state_t::array) {
-                    ++state.back().count;
-                    lua_pushinteger(L, state.back().count);
-                    ++stack_depth;
-                }
-            }
-        }
+        
         void on_value(bool pop = false) {
             if (pop) {
                 sb_assert(!state.empty());
@@ -50,13 +42,12 @@ namespace Sandbox {
                 if (state.back().type == state_t::map) {
                     sb_assert(lua_istable(L, -3));
                     sb_assert(lua_isstring(L, -2));
-                    lua_settable(L, -3);
+                    lua_rawset(L, -3);
                     stack_depth-=2;
                 } else if (state.back().type == state_t::array) {
-                    sb_assert(lua_istable(L, -3));
-                    sb_assert(lua_isnumber(L, -2));
-                    lua_settable(L, -3);
-                    stack_depth-=2;
+                    sb_assert(lua_istable(L, -2));
+                    lua_rawseti(L, -2, ++state.back().count);
+                    stack_depth-=1;
                 }
             }
             
@@ -65,7 +56,6 @@ namespace Sandbox {
     
     static int yajl_parse_null(void * ctx) {
         parse_context* c = static_cast<parse_context*>(ctx);
-        c->on_pre_value();
         lua_pushnil(c->L);
         ++c->stack_depth;
         c->on_value();
@@ -73,7 +63,6 @@ namespace Sandbox {
     }
     static int yajl_parse_boolean(void * ctx, int boolVal) {
         parse_context* c = static_cast<parse_context*>(ctx);
-        c->on_pre_value();
         lua_pushboolean(c->L, boolVal);
         ++c->stack_depth;
         c->on_value();
@@ -81,7 +70,6 @@ namespace Sandbox {
     }
     static int yajl_parse_integer(void * ctx, long long integerVal) {
         parse_context* c = static_cast<parse_context*>(ctx);
-        c->on_pre_value();
         lua_pushnumber(c->L, integerVal);
         ++c->stack_depth;
         c->on_value();
@@ -89,7 +77,6 @@ namespace Sandbox {
     }
     static int yajl_parse_double(void * ctx, double doubleVal) {
         parse_context* c = static_cast<parse_context*>(ctx);
-        c->on_pre_value();
         lua_pushnumber(c->L, doubleVal);
         ++c->stack_depth;
         c->on_value();
@@ -101,7 +88,6 @@ namespace Sandbox {
     static int yajl_parse_string(void * ctx, const unsigned char * stringVal,
                                  size_t stringLen) {
         parse_context* c = static_cast<parse_context*>(ctx);
-        c->on_pre_value();
         lua_pushlstring(c->L, reinterpret_cast<const char*>(stringVal),stringLen);
         ++c->stack_depth;
         c->on_value();
@@ -110,7 +96,6 @@ namespace Sandbox {
     
     static int yajl_parse_start_map(void * ctx) {
         parse_context* c = static_cast<parse_context*>(ctx);
-        c->on_pre_value();
         if (!lua_checkstack(c->L, 4)) {
             return 0;
         }
@@ -139,7 +124,6 @@ namespace Sandbox {
     
     static int yajl_parse_start_array(void * ctx) {
         parse_context* c = static_cast<parse_context*>(ctx);
-        c->on_pre_value();
         if (!lua_checkstack(c->L, 4)) {
             return 0;
         }
@@ -319,8 +303,8 @@ namespace Sandbox {
         } else if (type == LUA_TBOOLEAN) {
             yajl_gen_bool(g, lua_toboolean(L, indx));
         } else if (type == LUA_TNUMBER) {
-            lua_Integer i = lua_tointeger(L, indx);
             lua_Number n = lua_tonumber(L, indx);
+            long long int i = (long long int)(n);
             if ( lua_Number(i) == n ) {
                 yajl_gen_integer(g, i);
             } else {
@@ -1064,7 +1048,7 @@ namespace Sandbox {
             return 1;
         }
         static int yajl_parse_integer(void * ctx, long long integerVal) {
-            static_cast<Ctx*>(ctx)->traverser->OnInteger(int(integerVal));
+            static_cast<Ctx*>(ctx)->traverser->OnInteger(integerVal);
             return 1;
         }
         static int yajl_parse_double(void * ctx, double doubleVal) {

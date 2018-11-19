@@ -42,7 +42,9 @@ namespace Sandbox {
         
         Vector2f GlobalToLocal(const Vector2f& v) const;
         Transform2d GetTransform() const;
+        Transform2d GetTransformTo(const SceneObject* root) const;
         Vector2f LocalToGlobal(const Vector2f& v) const;
+        Vector2f LocalTo(const SceneObject* root,const Vector2f& v) const;
         
         void SetDrawAttributes(const DrawAttributesPtr& attributes) {
             m_draw_attributes = attributes;
@@ -55,6 +57,7 @@ namespace Sandbox {
         Scene*  GetScene() const;
         virtual void GlobalToLocalImpl(Vector2f& v) const;
         virtual void GetTransformImpl(Transform2d& tr) const;
+        virtual void GetTransformToImpl(const SceneObject* root,Transform2d& tr) const;
 	private:
 		void SetParent(Container* parent);
 		Container* m_parent;
@@ -76,6 +79,7 @@ namespace Sandbox {
         Vector2f    m_pos;
         virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
         virtual void GetTransformImpl(Transform2d& tr) const SB_OVERRIDE;
+        virtual void GetTransformToImpl(const SceneObject* root,Transform2d& tr) const SB_OVERRIDE;
     };
     typedef sb::intrusive_ptr<SceneObjectWithPosition> SceneObjectWithPositionPtr;
 }

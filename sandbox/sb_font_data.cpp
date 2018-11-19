@@ -3,6 +3,8 @@
 #include "sb_utf.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::FontData,Sandbox::meta::object)
+SB_META_DECLARE_OBJECT(Sandbox::FontDataProvider,Sandbox::meta::object)
+SB_META_DECLARE_OBJECT(Sandbox::OutlineFontDataProvider,Sandbox::FontDataProvider)
 
 namespace Sandbox {
     
@@ -103,4 +105,68 @@ namespace Sandbox {
         }
     }
     
+    
+    FontDataProvider::FontDataProvider() : m_data(new FontData())
+        , m_size(10.0f),m_height(10.0f),m_xheight(10.0f),m_baseline(0.0f) {
+        
+    }
+    
+    void FontDataProvider::set_data(const FontDataPtr& data) {
+        m_data = data;
+    }
+    
+    void FontDataProvider::AllocateSymbols(const char *text) {
+        const char* str = text;
+        while (*str) {
+            UTF32Char ch = 0;
+            str = get_char(str,ch);
+            if (ch) {
+                FontData::Glypth* gl = m_data->get_glypth_int(ch);
+                if (gl) {
+                    continue;
+                }
+                preallocate_symb(ch);
+            } else {
+                break;
+            }
+        }
+    }
+    
+    bool FontDataProvider::HasGlyph(GHL::UInt32 ch)  {
+        if (m_data->get_glypth(ch)) return true;
+        return preallocate_symb(ch);
+    }
+    const FontData::Glypth* FontDataProvider::GetGlyph(GHL::UInt32 ch) const {
+        return m_data->get_glypth(ch);
+    }
+    
+    void FontDataProvider::AddCharImage(GHL::UInt32 code,const Sandbox::ImagePtr& image,float advance) {
+        SetCharImage(code, image, advance);
+    }
+        
+    
+    void FontDataProvider::SetCharImage(GHL::UInt32 code,const Sandbox::ImagePtr& image,float advance) {
+        FontData::Glypth* g = m_data->get_glypth_int(code);
+        if (!g) g = m_data->add_glypth_int(code);
+        if (image)
+            g->img = *image;
+        g->asc = advance;
+    }
+    
+    OutlineFontDataProvider::OutlineFontDataProvider() {
+        
+    }
+    
+    void OutlineFontDataProvider::set_outline_data(const FontDataPtr &data) {
+        m_outline_data = data;
+    }
+    
+    void OutlineFontDataProvider::SetCharImage(GHL::UInt32 code,const Sandbox::ImagePtr& image,float advance) {
+        FontDataProvider::SetCharImage(code, image, advance);
+        if (m_outline_data) {
+            FontData::Glypth* g = m_outline_data->get_glypth_int(code);
+            if (!g) g = m_outline_data->add_glypth_int(code);
+            g->asc = advance;
+        }
+    }
 }

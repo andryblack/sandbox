@@ -16,6 +16,7 @@ function build.onsolution( sln )
 	local sdk_dir = _OPTIONS['android-sdk-dir']
 	
 
+
 	function gen_local_properies( sln )
 		_p('sdk.dir=' .. sdk_dir)
 	end
@@ -28,6 +29,16 @@ function build.onsolution( sln )
 				build.generate_app_build_gradle(sln,prj)
 			end
 			premake.generate(sln, path.join(prj.shortname or prj.name,'build.gradle'),gen)
+
+			if sln.android_module and
+		    	(sln.android_module.gcm or sln.android_module.fcm or sln.android_module.gps) then
+		    	local file = sln.android_google_services_file or 'google-services.json'
+		    	for cfg in project.eachconfig(prj) do
+		    		os.mkdir(path.join(sln.location,prj.shortname or prj.name,'src',cfg.shortname))
+		    		os.copyfile(file,
+		    			path.join(sln.location,prj.shortname or prj.name,'src',cfg.shortname,'google-services.json'))
+		    	end
+			end
 		end
 	end
 
@@ -60,6 +71,7 @@ function build.buildCmds(cfg, event, prj)
     			end
 				_p("\tcommandLine '" .. cmdline .. "'")
 				_p("\targs " .. table.concat(all_args,',').. "")
+				_p("\toutputs.upToDateWhen { false }")
 			_p('}')
 			if i ~= 1 then
 				_p(crnt_name .. ".dependsOn " .. prev_name)
@@ -73,9 +85,19 @@ function build.buildCmds(cfg, event, prj)
 
 
 	local crnt_name = string.format('%s_cmd_%s',event,cfg.shortname)
-	_p('task %s << {',crnt_name )
-		_p("\tprintln '%s'",msg)
-		
+	_p('task( %s ) {',crnt_name )
+		_p("\t\tprintln 'Task %s'",msg)
+		if event == 'prebuild' then
+			local assets_dirs = {}
+			if cfg.android_assets_path then
+				for _,v in ipairs(cfg.android_assets_path) do
+					local p = '../' .. path.getrelative(prj.solution.location,v)
+					table.insert(assets_dirs,"'" .. p .. "'")
+				end
+			end
+			_x(1,"outputs.dirs(%s)",table.concat(assets_dirs,','))
+			_x(1,"outputs.upToDateWhen { false }")
+		end
 	_p('}')
 
 	if prev_name ~= '' then
@@ -97,23 +119,21 @@ function build.generate_build_gradle(sln)
 
 	_x('buildscript {')
     _x(1,'repositories {')
+    _x(2,'google()')
     _x(2,'jcenter()')
     if sln.android_repository then
     	for _,v in ipairs(sln.android_repository) do
     		_x(2,'%s',v)
     	end
     end
-    	_x(2,'maven {')
-            _x(3,'url "https://maven.google.com"')
-    	_x(2,'}')
     _x(1,'}')
     _x(1,'dependencies {')
-    _x(2,"classpath 'com.android.tools.build:gradle:2.2.3'")
+    _x(2,"classpath 'com.android.tools.build:gradle:3.2.0'")
     if sln.android_module and
-    	(sln.android_module.gcm or sln.android_module.fcm) then
-    	_x(2,"classpath 'com.google.gms:google-services:3.0.0'")
+    	(sln.android_module.gcm or sln.android_module.fcm or sln.android_module.gps) then
+    	_x(2,"classpath 'com.google.gms:google-services:"..(sln.android_google_services_version or '4.0.1').."'")
 	end
-	if sln.android_build_dependencies then
+    if sln.android_build_dependencies then
 		for _,v in ipairs(sln.android_build_dependencies) do
 			_x(2,"classpath '"..v.."'")
 		end
@@ -126,15 +146,14 @@ function build.generate_build_gradle(sln)
  --    }
 	_x('allprojects {')
     _x(1,'repositories {')
+    _x(2,'google()')
     _x(2,'jcenter()')
     if sln.android_repository then
     	for _,v in ipairs(sln.android_repository) do
     		_x(2,'%s',v)
     	end
     end
-    	_x(2,'maven {')
-            _x(3,'url "https://maven.google.com"')
-    	_x(2,'}')
+
     _x(1,'}')
 	_x('}')
 
@@ -172,9 +191,13 @@ function build.generate_app_build_gradle( sln , prj )
 
 	_x('def build_files_location = "%s"' , prj.targetdir)
 
+	if prj.android_custom_build_pre then
+		_x(prj.android_custom_build_pre)
+	end
+
 	_x('android {')
-    _x(1,'compileSdkVersion ' .. prj.android_build_api_level or target_api)
-    _x(1,'buildToolsVersion "23.0.2"')
+    _x(1,'compileSdkVersion ' .. (prj.android_build_api_level or target_api))
+    _x(1,'buildToolsVersion "' .. (prj.android_build_tools_version or '28.0.2') .. '"')
 
     _x(1,'defaultConfig {')
     _x(2,'applicationId "%s"',prj.android_packagename or 'com.sandboxgames.sample')
@@ -234,7 +257,7 @@ function build.generate_app_build_gradle( sln , prj )
     _x(1,'sourceSets {')
     for cfg in project.eachconfig(prj) do
 		_x(2,cfg.shortname .. ' {')
-		_x(3,'jniLibs.srcDirs = ["%s/libs"]',cfg.shortname)
+			_x(3,"jniLibs.srcDirs = ['./%s/libs']",cfg.shortname)
 		_x(2,'}')
 	end
 	_x(1,'}')
@@ -266,7 +289,8 @@ function build.generate_app_build_gradle( sln , prj )
             end
 			_x(3,'sourceSets {')
 				_x(4,'main {')
-					_x(5,"manifest.srcFile '%s/AndroidManifest.xml'",cfg.shortname)
+					_x(5,"jniLibs.srcDirs = ['./%s/libs']",cfg.shortname)
+					_x(5,"manifest.srcFile './%s/AndroidManifest.xml'",cfg.shortname)
 					_x(5,"java.srcDirs = [" .. table.concat(src_dirs,',') .. "]")
 				    _x(5,"resources.srcDirs = ['../src']")
 				    if next(res_dirs) then
@@ -283,8 +307,13 @@ function build.generate_app_build_gradle( sln , prj )
 				    --_x(5,'jniLibs.srcDirs = ["%s/libs"]',cfg.shortname)
 				_x(4,'}')
 			_x(3,'}')
+
+
 		_x(2,'}')
 	end
+
+	local libname = 'lib' .. prj.name .. '.so'
+
 	_x(1,'}')
 
    
@@ -300,41 +329,36 @@ function build.generate_app_build_gradle( sln , prj )
 
 	_x(1,'dependencies {')
 	for _,v in ipairs(prj.android_dependencies) do
-		_x(2,"compile '" .. v .. "'")
+		_x(2,"implementation '" .. v .. "'")
 	end
 	for _,v in ipairs(prj.android_libs) do
 		local ext = path.getextension(v)
 		if ext == '.jar' then
 			local lp = path.getdirectory(v)
 			local ln = path.getname(v)
-			_x(2,"compile files('" .. v .."')")
+			_x(2,"implementation files('" .. v .."')")
 		end
+	end
+	if prj.android_custom_dependencies then
+		_x(2,prj.android_custom_dependencies)
 	end
 	_x(1,'}')
 
 
-
-	_x(1,'applicationVariants.all { variant ->')
-		_x(2,'variant.outputs.each { output ->')
-			_x(3,'output.outputFile = new File(build_files_location, output.outputFile.name)')
-		_x(2,'}')
-	_x(1,'}')
+	-- _x(1,'applicationVariants.all { variant ->')
+	-- 	_x(2,'variant.outputs.all { output ->')
+	-- 		_x(3,'output.outputFileName = output.outputFile.parentFile.toPath().relativize(')
+	-- 			_x(4,'new File(build_files_location,output.outputFile.name).toPath() ).toFile()')
+	-- 	_x(2,'}')
+	-- _x(1,'}')
 
 	_x('}')
 
 
 	if sln.android_module and
-    	(sln.android_module.gcm or sln.android_module.fcm) then
+    	(sln.android_module.gcm or sln.android_module.fcm or sln.android_module.gps) then
 
-    	local file = sln.android_google_services_file or 'google-services.json'
-
-    	_x("task copyGoogleServicesJSON(type: Copy) {")
-    	_x(1,"description = 'Copy "..file.."'")
-    	_x(1,'from "../'..file..'"')
-    	_x(1,'into "."')
-    	_x(1,'rename { String fileName -> "google-services.json" }')
-		_x('}')
-	
+    	
     	_x("apply plugin: 'com.google.gms.google-services'")
 	end
 	
@@ -348,6 +372,8 @@ function build.generate_app_build_gradle( sln , prj )
 		_x('task buildJNI' .. cfg.name .. '(type: Exec) {')
 		_x(1,'commandLine "%s"',path.getabsolute(path.join(ndk_dir,'ndk-build')))
 		_x(1,"args " .. table.concat(all_args,',').. "")
+		_x(1,"outputs.dir '%s'",path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname,'libs')))
+		_x(1,"outputs.upToDateWhen { false }")
 		_x('}')
 	end
 
@@ -355,7 +381,7 @@ function build.generate_app_build_gradle( sln , prj )
 
 	for cfg in project.eachconfig(prj) do
 		for _,abi in ipairs(sln.android_abis) do
-			_x('task copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym(type: Copy) {')
+			_x('task copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym(type: Copy, dependsOn: buildJNI' .. cfg.name .. ') {')
 			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname,'obj','local',abi,libname)) .. "'")
 			_x(1,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname .. '_symbols',abi)) .. "'")
 			_x('}')
@@ -363,7 +389,7 @@ function build.generate_app_build_gradle( sln , prj )
 	end
 	for cfg in project.eachconfig(prj) do
 		for _,abi in ipairs(sln.android_abis) do
-			_x('task copyJNI' .. cfg.name .. make_abi_name(abi).. '(type: Copy) {')
+			_x('task copyJNI' .. cfg.name .. make_abi_name(abi).. '(type: Copy, dependsOn: buildJNI' .. cfg.name .. ') {')
 			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname,'libs',abi,libname)) .. "'")
 			_x(1,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname,abi)) .. "'")
 			_x('}')
@@ -385,12 +411,12 @@ function build.generate_app_build_gradle( sln , prj )
 	
 	
 	_p('afterEvaluate {')
-	for cfg in project.eachconfig(prj) do
-		for _,abi in ipairs(sln.android_abis) do
-			_x(1,'copyJNI' .. cfg.name .. make_abi_name(abi) .. '.dependsOn buildJNI' .. cfg.name)
-			_x(1,'copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym.dependsOn buildJNI' .. cfg.name)
-		end
-	end
+	-- for cfg in project.eachconfig(prj) do
+	-- 	for _,abi in ipairs(sln.android_abis) do
+	-- 		_x(1,'copyJNI' .. cfg.name .. make_abi_name(abi) .. '.dependsOn buildJNI' .. cfg.name)
+	-- 		_x(1,'copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym.dependsOn buildJNI' .. cfg.name)
+	-- 	end
+	-- end
 	if prj.android_build_task then
 		for i,task in ipairs(prj.android_build_task) do
 			if task.dependsOn then
@@ -405,24 +431,46 @@ function build.generate_app_build_gradle( sln , prj )
 
 	_p('tasks.whenTaskAdded { task ->')
 	for cfg in project.eachconfig(prj) do
-		_x(1,"if (task.name == 'generate%sAssets') {",cfg.name)
+		-- _x(1,"if (task.name == 'generate%sAssets') {",cfg.name)
+		-- _x(2,'task.dependsOn ' .. 'prebuild_cmd_' .. cfg.shortname)
+		-- _x(1,'}')
+		-- _x(1,"if (task.name == 'compile%sNdk') {",cfg.name)
 		local abis = {}
 		for _,abi in ipairs(sln.android_abis) do
 			table.insert(abis,'copyJNI' .. cfg.name .. make_abi_name(abi))
 			table.insert(abis,'copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym')
 		end
-		_x(2,'task.dependsOn ' .. 'prebuild_cmd_' .. cfg.shortname .. 
-				', buildJNI' .. cfg.name .. 
-				', ' ..table.concat(abis,', '))
+		-- _x(2,'task.dependsOn buildJNI' .. cfg.name .. 
+		-- 		', ' ..table.concat(abis,', '))
+		-- _x(1,'}')
+
+		-- _x(1,"if (task.name == 'merge%sJniLibFolders') {",cfg.name)
+		-- _x(2,'task.dependsOn buildJNI' .. cfg.name)
+		-- _x(1,'}')
+
+		-- _x(1,"if (task.name == 'merge%sAssets') {",cfg.name)
+		-- _x(2,'task.dependsOn prebuild_cmd_' .. cfg.shortname)
+		-- _x(1,'}')
+
+		_x(1,"if (task.name == 'pre%sBuild') {",cfg.name)
+		_x(2,'task.dependsOn prebuild_cmd_' .. cfg.shortname .. ','.. table.concat(abis,', '))
 		_x(1,'}')
-		if sln.android_module and
-    		(sln.android_module.gcm or sln.android_module.fcm) then
-    		_x(1,"if (task.name == 'process%sGoogleServices') {",cfg.name)
-			_x(2,'task.dependsOn copyGoogleServicesJSON')
-			_x(1,'}')
-    	end
+		
 	end
 	_p('}')
+
+
+	_p('android.applicationVariants.all { variant ->')
+        _x(1,'variant.outputs.all { output ->')
+        	_x(2,'def task = project.tasks.create("copyAndRename${variant.name}Apk", Copy)')
+        	_x(2,'def outputFile = output.outputFile')
+        	_x(2,'task.from(output.outputFile)')
+            _x(2,'task.into(build_files_location)')
+            _x(2,'task.dependsOn variant.packageApplication')
+            _x(2,'variant.assemble.dependsOn task')
+        _x(1,'}')
+    _p('}')
+
 
 	if prj.android_build_gradle then
 		_p(prj.android_build_gradle)

@@ -39,6 +39,7 @@ namespace Sandbox {
 		std::vector<ThreadPtr> m_removed_threads;
         bool    m_drop_empty;
         float   m_speed;
+        bool m_lock_update;
 	};
     
     typedef sb::intrusive_ptr<ThreadsMgr> ThreadsMgrPtr;

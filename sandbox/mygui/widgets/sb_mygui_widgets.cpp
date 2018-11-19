@@ -52,6 +52,7 @@ SB_META_METHOD(setTexture)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::ImageWidget)
+SB_META_METHOD(setMaskTexture)
 SB_META_END_KLASS_BIND()
 
 SB_META_BEGIN_KLASS_BIND(Sandbox::mygui::MaskImageWidget)
@@ -116,6 +117,7 @@ SB_META_PROPERTY_RW(smallScrollEnabled, getSmallScrollEnabled, setSmallScrollEna
 SB_META_PROPERTY_WO(scrollPos, setScrollPos)
 SB_META_PROPERTY_WO(scrollPosF, setScrollPosF)
 SB_META_PROPERTY_RO(scrollActive, scrollActive)
+SB_META_PROPERTY_RW(wheelScroolSpeed, getWheelScrollSpeed, setWheelScrollSpeed)
 SB_META_METHOD(scrollToWidget)
 SB_META_METHOD(isWidgetFullVisible)
 bind(method("scrollBegin", delegate_bind<Sandbox::mygui::ScrollArea,

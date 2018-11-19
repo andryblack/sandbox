@@ -16,6 +16,7 @@
 namespace Sandbox {
 	
     static const char* MODULE = "Sanbox:Graphics";
+    static const size_t VERTEXES_LIMIT = 0x7000;
 	
 	Graphics::Graphics(Resources* res) : m_resources(res){
         (void)MODULE;
@@ -331,6 +332,21 @@ namespace Sandbox {
     
     void Graphics::AppendVertex(const Vector2f& pos, const Vector2f& tex, const Color& clr) {
         GHL::UInt32 hclr = (m_color * clr).hw_premul();
+        AppendVertexRaw(pos, tex, hclr);
+    }
+    
+    void Graphics::AppendImageVertex(const Vector2f& pos, const Vector2f& img) {
+        GHL::UInt32 hclr = m_color.hw_premul();
+        Vector2f tex(img.x * m_itw, img.y * m_ith);
+        AppendVertexRaw(pos, tex, hclr);
+    }
+    
+    void Graphics::AppendImageVertex(const Vector2f& pos, const Vector2f& img, GHL::UInt32 hclr) {
+        Vector2f tex(img.x * m_itw, img.y * m_ith);
+        AppendVertexRaw(pos, tex, hclr);
+    }
+    
+    void Graphics::AppendVertexRaw(const Vector2f& pos, const Vector2f& tex, GHL::UInt32 hclr) {
         if (m_state.calc2_tex) {
             m_indexes.push_back(static_cast<GHL::UInt16>(m_vertexes2tex.size()));
             appendVertex2(pos.x,pos.y,
@@ -338,6 +354,8 @@ namespace Sandbox {
                           tex.y,hclr);
             if ((m_vertexes2tex.size() % 3) == 0) {
                 m_primitives++;
+                if (m_vertexes2tex.size() >= VERTEXES_LIMIT)
+                    CheckFlush(true);
             }
         } else {
             m_indexes.push_back(static_cast<GHL::UInt16>(m_vertexes.size()));
@@ -346,8 +364,10 @@ namespace Sandbox {
                          tex.y,hclr);
             if ((m_vertexes.size() % 3) == 0) {
                 m_primitives++;
+                if (m_vertexes.size() >= VERTEXES_LIMIT)
+                    CheckFlush(true);
             }
-
+            
         }
     }
     
@@ -404,54 +424,59 @@ namespace Sandbox {
 		x-=img.GetHotspot().x*w/img.GetTextureDrawW();
         y-=img.GetHotspot().y*h/img.GetTextureDrawH();
 		
-        CheckFlush(false);
-        
+        CheckFlush((m_state.calc2_tex ? m_vertexes2tex.size() : m_vertexes.size()) >= VERTEXES_LIMIT );
+       
         appendQuad();
 		
 		GHL::UInt32 clr = (m_color).hw_premul();
-		
+        const float tx0 = img.GetTextureX()*m_itw;
+        const float ty0 = img.GetTextureY()*m_ith;
+        const float tx1 = tx0 + img.GetTextureW()*m_itw;
+        const float ty1 = ty0 + img.GetTextureH()*m_ith;
         if (!m_state.calc2_tex)
         {
+            
+        
             if (img.GetRotated()) {
                 appendVertex(x+w,y,
-                             img.GetTextureX()*m_itw,
-                             img.GetTextureY()*m_ith,clr);
+                             tx0,
+                             ty0,clr);
                 appendVertex(x+w,y+h,
-                             img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
-                             img.GetTextureY()*m_ith,clr);
+                             tx1,
+                             ty0,clr);
                 appendVertex(x,y,
-                             img.GetTextureX()*m_itw,
-                             img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+                             tx0,
+                             ty1,clr);
                 appendVertex(x,y+h,
-                             img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
-                             img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+                             tx1,
+                             ty1,clr);
             } else {
                 appendVertex(x,y,
-                                     img.GetTextureX()*m_itw,
-                             img.GetTextureY()*m_ith,clr);
+                             tx0,
+                             ty0,clr);
                 appendVertex(x+w,y,
-                                     img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
-                             img.GetTextureY()*m_ith,clr);
+                             tx1,
+                             ty0,clr);
                 appendVertex(x,y+h,
-                                     img.GetTextureX()*m_itw,
-                             img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+                             tx0,
+                             ty1,clr);
                 appendVertex(x+w,y+h,
-                                     img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
-                             img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+                             tx1,
+                             ty1,clr);
             }
         }  else {
             appendVertex2(x,y,
-                         img.GetTextureX()*m_itw,
-                         img.GetTextureY()*m_ith,clr);
+                         tx0,
+                         ty0,clr);
             appendVertex2(x+w,y,
-                         img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
-                         img.GetTextureY()*m_ith,clr);
+                         tx1,
+                         ty0,clr);
             appendVertex2(x,y+h,
-                         img.GetTextureX()*m_itw,
-                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+                         tx0,
+                         ty1,clr);
             appendVertex2(x+w,y+h,
-                         img.GetTextureX()*m_itw+img.GetTextureW()*m_itw,
-                         img.GetTextureY()*m_ith+img.GetTextureH()*m_ith,clr);
+                         tx1,
+                         ty1,clr);
         }
 	}
     
@@ -475,7 +500,7 @@ namespace Sandbox {
             return;
         BeginDrawImage(img);
         
-        CheckFlush(false);
+        CheckFlush((m_state.calc2_tex ? m_vertexes2tex.size() : m_vertexes.size()) >= VERTEXES_LIMIT );
         
         appendQuad();
         
@@ -528,9 +553,9 @@ namespace Sandbox {
         BeginDrawImage(img);
         const float w = img.GetWidth();
 		const float h = img.GetHeight();
-		x-=img.GetHotspot().x*w/img.GetTextureW();
-        y-=img.GetHotspot().y*h/img.GetTextureH();
-        CheckFlush(false);
+		x-=img.GetHotspot().x*w/img.GetTextureDrawW();
+        y-=img.GetHotspot().y*h/img.GetTextureDrawH();
+        CheckFlush((m_state.calc2_tex ? m_vertexes2tex.size() : m_vertexes.size()) >= VERTEXES_LIMIT );
         
         appendQuad();
 		
@@ -572,10 +597,10 @@ namespace Sandbox {
         BeginDrawImage(img);
 		const float w = img.GetWidth()*scale;
 		const float h = img.GetHeight()*scale;
-		x-=img.GetHotspot().x*w/img.GetTextureW();
-        y-=img.GetHotspot().y*h/img.GetTextureH();
+		x-=img.GetHotspot().x*w/img.GetTextureDrawW();
+        y-=img.GetHotspot().y*h/img.GetTextureDrawH();
         
-        CheckFlush(false);
+        CheckFlush((m_state.calc2_tex ? m_vertexes2tex.size() : m_vertexes.size()) >= VERTEXES_LIMIT );
         
         appendQuad();
 		
@@ -635,7 +660,7 @@ namespace Sandbox {
         sb_assert( (m_render!=0) && "scene not started" );
         BeginDrawImage(img);
         
-        CheckFlush(false);
+        CheckFlush((m_state.calc2_tex ? m_vertexes2tex.size() : m_vertexes.size()) >= VERTEXES_LIMIT );
         
         appendQuad();
         
@@ -916,6 +941,8 @@ namespace Sandbox {
 		m_primitives++;
 		appendVertex(from.x, from.y, 0, 0, clr);
 		appendVertex(to.x,to.y,0,0,clr);
+        if (m_vertexes.size() >= VERTEXES_LIMIT)
+            CheckFlush(true);
 #endif
 	}
 	void Graphics::DrawLine(const Vector2f& from, const Vector2f& to,const Color& clr_) {
@@ -930,6 +957,8 @@ namespace Sandbox {
 		m_primitives++;
 		appendVertex(from.x, from.y, 0, 0, clr);
 		appendVertex(to.x,to.y,0,0,clr);
+        if (m_vertexes.size() >= VERTEXES_LIMIT)
+            CheckFlush(true);
 #endif
 	}
 	
@@ -1264,8 +1293,9 @@ namespace Sandbox {
         return GHL::UInt32((m_render ? m_render->GetHeight() : 0) / draw_scale);
     }
 		
-	void Graphics::BeginScene(GHL::Render* render, const RenderTargetPtr& target) {
+    void Graphics::BeginScene(GHL::Render* render, const RenderTargetPtr& target) {
         sb_assert( (m_render==0) && "scene already started" );
+        sb_assert( render );
 		m_render = render;
         m_render_to_target = target;
 		m_state.blend_mode = BLEND_MODE_COPY;

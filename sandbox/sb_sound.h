@@ -71,7 +71,7 @@ namespace Sandbox {
     
     class MusicInstance : public sb::ref_countered_base_not_copyable {
     public:
-        explicit MusicInstance( GHL::MusicInstance* );
+        explicit MusicInstance(  GHL::MusicInstance* );
         ~MusicInstance();
         
         void Play(bool loop);
@@ -85,10 +85,12 @@ namespace Sandbox {
         bool Update( float dt );
         void SetVolume( float vol );
     private:
+         GHL::MusicInstance* m_music;
+        
         float m_volume;
         float m_fade_volume;
         float m_fade_speed;
-        GHL::MusicInstance* m_music;
+        
     };
     typedef sb::intrusive_ptr<MusicInstance> MusicInstancePtr;
     
@@ -105,6 +107,12 @@ namespace Sandbox {
         float   GetSoundsVolume() const { return m_sounds_volume; }
         void    SetMusicVolume( float v);
         float   GetMusicVolume() const { return m_music_volume; }
+        void    SetSoundEnabled(bool e) { m_sound_enabled = e; }
+        bool    GetSoundEnabled() const { return m_sound_enabled; }
+        void    SetMusicEnabled(bool e) ;
+        bool    GetMusicEnabled() const { return m_music_enabled; }
+        
+        void ClearCache();
         
         void PlayMusic(const char* filename,bool loop);
         void PlayMusicEx(const char* filename,bool loop,float fade_in, float fade_out_current);
@@ -114,6 +122,8 @@ namespace Sandbox {
     private:
         friend class Sound;
         friend class SoundInstance;
+        friend class MusicInstance;
+        
         GHL::Sound* m_sound;
         Resources*  m_resources;
         sb::string  m_sounds_dir;
@@ -127,6 +137,11 @@ namespace Sandbox {
         MusicInstancePtr m_music;
         typedef sb::list<MusicInstancePtr> MusicsList;
         MusicsList  m_fade_outs_musics;
+        
+        GHL::MusicInstance* open_music(const char* fn);
+        sb::string m_last_music;
+        bool    m_sound_enabled;
+        bool    m_music_enabled;
     };
     
 }

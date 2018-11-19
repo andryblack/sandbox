@@ -186,4 +186,10 @@ namespace Sandbox {
             m_transform->Apply(tr);
         }
     }
+    void Container::GetTransformToImpl(const SceneObject* root, Transform2d& tr) const {
+        SceneObject::GetTransformToImpl(root,tr);
+        if (m_transform && (root!=this)) {
+            m_transform->Apply(tr);
+        }
+    }
 }

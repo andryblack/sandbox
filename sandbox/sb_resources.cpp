@@ -64,6 +64,10 @@ namespace Sandbox {
         return m_vfs->OpenFileWrite(filename);
     }
     
+    void Resources::RemoveFile(const char* fn) {
+        m_vfs->DoRemoveFile(fn);
+    }
+    
     GHL::DataStream* Resources::OpenFileVariant(const char* fn,bool& variant) {
         variant = false;
         GHL::DataStream* ds = 0;
@@ -173,10 +177,9 @@ namespace Sandbox {
             LogError(MODULE) << "VFS not initialized";
             return 0;
         }
-		std::string fn = filename;
 		GHL::DataStream* ds = OpenFileVariant(filename,variant);
         if ( !ds ) {
-            LogError(MODULE) <<"failed opening file " << fn;
+            LogError(MODULE) <<"failed opening file " << filename;
             return 0;
         }
 		GHL::Image* img = ImageFromStream(ds);
@@ -323,6 +326,9 @@ namespace Sandbox {
 		GHL::Image* fillData = setData ? 0 : GHL_CreateImage(tw,th,img->GetFormat());
         if (fillData) fillData->Fill(0);
         GHL::Texture* texture = m_render->CreateTexture(tw,th,tfmt,setData ? img : fillData);
+        if (!texture) {
+            return 0;
+        }
 		tfmt = texture->GetFormat();
 		GHL::ImageFormat ifmt;
 		if (tfmt==GHL::TEXTURE_FORMAT_RGB) {
@@ -375,8 +381,10 @@ namespace Sandbox {
             return BitmaskPtr();
         }
         if (img->GetFormat() != GHL::IMAGE_FORMAT_RGBA &&
-            img->GetFormat() != GHL::IMAGE_FORMAT_GRAY)
+            img->GetFormat() != GHL::IMAGE_FORMAT_GRAY) {
+            img->Release();
             return BitmaskPtr();
+        }
         BitmaskPtr res(new Bitmask(img));
         img->Release();
         return res;
@@ -582,7 +590,7 @@ namespace Sandbox {
                 memory_used += t->GetMemoryUsage();
                 if (need_release) {
                     size_t lt = t->GetLiveTicks();
-                    if ( lt && lt < m_live_ticks ) {
+                    if ( (lt && lt < m_live_ticks) || t->unique() ) {
                         
                         size_t released = t->Release();
                         memory_used-=released;
@@ -609,6 +617,7 @@ namespace Sandbox {
     }
     
     void Resources::ReleaseAll() {
+        m_default_pool.reset();
         for (TexturesCacheMap::iterator it = m_textures.begin();it!=m_textures.end();++it) {
             TexturePtr& t = it->second;
             if (t) {
@@ -618,11 +627,11 @@ namespace Sandbox {
         m_textures.clear();
         m_shaders.clear();
         for (sb::map<sb::string,GHL::VertexShader*>::iterator it = m_vshaders.begin();it!=m_vshaders.end();++it) {
-            it->second->Release();
+            if (it->second) it->second->Release();
         }
         m_vshaders.clear();
         for (sb::map<sb::string,GHL::FragmentShader*>::iterator it = m_fshaders.begin();it!=m_fshaders.end();++it) {
-            it->second->Release();
+            if (it->second) it->second->Release();
         }
         m_fshaders.clear();
         m_memory_used = 0;
@@ -635,5 +644,12 @@ namespace Sandbox {
             need_release = m_memory_used - m_memory_limit;
         }
         m_memory_used = FreeMemory(need_release,true);
+    }
+    
+    TexturePoolPtr Resources::GetDefaultTexturePool() {
+        if (!m_default_pool) {
+            m_default_pool.reset( new TexturePool(this) );
+        }
+        return m_default_pool;
     }
 }

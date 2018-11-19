@@ -55,6 +55,12 @@ api.register {
 	kind = "number"
 }
 
+api.register {
+	name = 'android_build_tools_version',
+	scope = 'solution',
+	kind = 'string'
+}
+
 -- Specify android STL support
 api.register {
 	name = "android_stl",
@@ -238,6 +244,13 @@ api.register {
 }
 
 api.register {
+	name = "android_ndk_arm_mode",
+	scope = "project",
+	kind = "boolean",
+}
+
+
+api.register {
 	name = "android_ndk_static_libs",
 	scope = "project",
 	kind = "string",
@@ -273,6 +286,17 @@ api.register {
 }
 
 api.register {
+	name = "android_custom_dependencies",
+	scope = 'project',
+	kind = 'string',
+}
+api.register {
+	name = "android_custom_build_pre",
+	scope = 'project',
+	kind = 'string',
+}
+
+api.register {
 	name = "android_receiver",
 	scope = 'project',
 	kind = 'table',
@@ -301,6 +325,12 @@ api.register {
 
 api.register {
 	name = 'android_google_services_file',
+	scope = 'solution',
+	kind = 'string'
+}
+
+api.register {
+	name = 'android_google_services_version',
 	scope = 'solution',
 	kind = 'string'
 }

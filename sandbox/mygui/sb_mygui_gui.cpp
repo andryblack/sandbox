@@ -26,6 +26,8 @@ namespace Sandbox {
                 MyGUI::newDelegate(this,&GUI::get_mygui_localization);
             mInputManager->eventChangeKeyFocus +=
                 MyGUI::newDelegate(this,&GUI::mygui_change_key_focus);
+            mInputManager->eventChangeMouseFocus +=
+            MyGUI::newDelegate(this,&GUI::mygui_change_mouse_focus);
             mClipboardManager->eventClipboardChanged +=
                 MyGUI::newDelegate(this,&GUI::mygui_clipboard_changed);
             mClipboardManager->eventClipboardRequested +=
@@ -54,6 +56,15 @@ namespace Sandbox {
                 m_system->HideKeyboard();
             }
         }
+        void GUI::mygui_change_mouse_focus( MyGUI::Widget* w) {
+            if (m_ctx) {
+                if (m_ctx->GetValue<bool>("application.onMouseFocusChanged")) {
+                    m_ctx->GetValue<LuaContextPtr>("application")
+                    ->call("onMouseFocusChanged",
+                           static_cast<MyGUI::Widget*>(w));
+                }
+            }
+        }
         void GUI::mygui_clipboard_changed( const std::string& type, const std::string& text ) {
             m_clipboard_text = MyGUI::TextIterator::getOnlyText(MyGUI::UString(text)).asUTF8_c_str();
         }
@@ -66,20 +77,34 @@ namespace Sandbox {
             config.system_input = true;
             config.placeholder = 0;
             config.accept_button = GHL::TIAB_DONE;
+            config.max_length = 0;
+            config.text = 0;
+            config.cursor_position = 0;
             if (widget->getUserString("accept_button")=="send") {
                 config.accept_button = GHL::TIAB_SEND;
             }
             if (widget->isType(MYGUI_RTTI_GET_TYPE(MyGUI::EditBox))) {
+                MyGUI::EditBox* eb = widget->castType<MyGUI::EditBox>();
                 config.system_input = false;
+                config.text = eb->getCaption().c_str();
+                config.max_length = GHL::UInt32(eb->getMaxTextLength());
+                config.cursor_position = GHL::UInt32(eb->getTextCursor());
                 m_system->ShowKeyboard(&config);
             } else if (widget->isType(MYGUI_RTTI_GET_TYPE(TextInput))) {
+                TextInput* ti =widget->castType<TextInput>();
                 config.system_input = true;
-                config.placeholder = widget->castType<TextInput>()->getPlaceholder().c_str();
+                config.placeholder = ti->getPlaceholder().c_str();
+                config.max_length = GHL::UInt32(ti->getMaxTextLength());
                 m_system->ShowKeyboard(&config);
             } else {
                 m_system->HideKeyboard();
             }
             
+        }
+        
+        void GUI::setCursor(GHL::SystemCursor cursor) {
+            GHL::UInt32 v = cursor;
+            m_system->SetDeviceState(GHL::DEVICE_STATE_SYSTEM_CURSOR, &v);
         }
 
     }

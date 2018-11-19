@@ -370,7 +370,8 @@ __modules = {
 	rules = {},
 	apply_rules = {},
 	pre_apply_rules = {},
-	post_apply_rules = {}
+	post_apply_rules = {},
+	begin_apply_rules = {}
 }
 
 
@@ -391,6 +392,9 @@ function register_rule( r )
 	end
 	if r.pre_apply_rules then
 		table.insert(__modules.pre_apply_rules,r.pre_apply_rules)
+	end
+	if r.begin_apply_rules then
+		table.insert(__modules.begin_apply_rules,r.begin_apply_rules)
 	end
 end
 

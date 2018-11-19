@@ -7,6 +7,7 @@
 #include <sb_file_provider.h>
 #include <ghl_vfs.h>
 #include <ghl_image_decoder.h>
+#include <ghl_sound.h>
 #include <meta/sb_meta.h>
 #include "tasks_pool.h"
 #include "texture.h"
@@ -16,8 +17,6 @@ namespace GHL {
     struct Image;
 }
 
-class SkeletonConvert;
-class SpineConvert;
 
 
 
@@ -45,14 +44,9 @@ public:
     bool store_texture( const sb::string& file , const TextureDataPtr& data );
     virtual bool store_file(  const sb::string& file , const GHL::Data* data );
     bool write_text_file( const sb::string& file , const char* data  );
-    sb::intrusive_ptr<SpineConvert> open_spine(const sb::string& atlas,
-                                                const sb::string& skelet );
-    bool convert_spine(const sb::string& atlas,
-                       const sb::string& skelet,
-                       const sb::string& outfolder);
     bool premultiply_image( const sb::string& src, const sb::string& dst );
     bool rebuild_image( const sb::string& src, const sb::string& dst );
-    bool encode_sound( const sb::string& src, const sb::string& dst );
+    bool encode_sound( const sb::string& src, const sb::string& dst , bool force_mono);
     
 	int run();
     
@@ -66,10 +60,23 @@ public:
     sb::string get_src_path(const char* fn) const;
     bool wait_tasks();
     virtual const GHL::Data* encode_texture(const TextureDataPtr& texture);
+    
+    void set_png_encode_settings(GHL::Int32 settings);
+    GHL::Int32 get_png_encode_settings() const { return m_png_encode_settings; }
+    void set_jpeg_encode_settings(GHL::Int32 settings);
+    GHL::Int32 get_jpeg_encode_settings() const { return m_jpeg_encode_settings; }
+
+
+    virtual GHL::SoundDecoder* create_sound_decoder(GHL::DataStream* ds);
+    virtual const char* get_vorbis_encoder_comment() const { return 0; }
+    
+    GHL::UInt32 get_sounds_encode_bps() const { return m_sound_encode_bps;}
+    void set_sounds_encode_bps(GHL::UInt32 bps) { m_sound_encode_bps = bps;}
 protected:
     virtual double GetVersion() const;
     Sandbox::LuaVM* GetLua() { return m_lua; }
     virtual void Bind(lua_State* L);
+    GHL::ImageDecoder* get_image_decoder() { return m_image_decoder; }
 
     virtual sb::string get_output_filename( const char* name );
     
@@ -85,7 +92,9 @@ private:
     sb::string  m_platform;
     bool        m_update_only;
     sb::vector<sb::string> m_arguments;
-    
+    GHL::Int32 m_jpeg_encode_settings;
+    GHL::Int32 m_png_encode_settings;
+    GHL::UInt32 m_sound_encode_bps;
 };
 
 #endif /*APPLICATION_H_INCLUDED*/

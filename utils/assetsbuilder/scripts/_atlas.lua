@@ -4,18 +4,19 @@ local _M = {}
 
 
 local Atlas = {}
-function Atlas.new( w, h )
+function Atlas.new( w, h , allow_rotate )
 	local a = setmetatable({},{__index=Atlas})
-	a:_init( w, h )
+	a:_init( w, h , allow_rotate)
 	return a
 end
-function Atlas:_init( w, h )
+function Atlas:_init( w, h , allow_rotate)
 	self.width = w
 	self.height = h
 	self.start_w = w
 	self.start_h = h
 	self.images = {}
 	self.rects = { {0,0,w,h} }
+	self.allow_rotate = allow_rotate
 end
 function Atlas:add_image( img )
 	table.insert(self.images,img)
@@ -23,43 +24,64 @@ function Atlas:add_image( img )
 end
 function Atlas:find_best( img )
 	local best = nil
+	local rotate = nil
 	for _,r in ipairs(self.rects) do
 		if r[3] >= img.width and r[4] >= img.height then
 			if not best then 
 				best = r
+				rotate = false
 			else
 				if r[3] < best[3] then
 					best = r
+					rotate = false
+				end
+			end
+		end
+		if self.allow_rotate then
+			if r[4] >= img.width and r[3] >= img.height then
+				if not best then 
+					best = r
+					rotate = true
+				else
+					if r[3] < best[3] then
+						best = r
+						rotate = true
+					end
 				end
 			end
 		end
 	end
-	return best
+	return best,rotate
 end
 local not_found_place = {}
 function Atlas:place_image( img )
-	local r = self:find_best( img )
+	local r,rot = self:find_best( img )
 	if r then
 		-- subdiv
+		local width,height = img.width,img.height
+		if rot then
+			width,height = height,width
+		end
 		
-		if (r[3]-img.width) > (r[4]-img.height) then
+		if (r[3]-width) > (r[4]-height) then
 			-- i   i ---
 			--     | 1 
 			-- i---i
 			-- 2   | 
-			table.insert(self.rects,{r[1]+img.width,r[2],r[3]-img.width,r[4]})
-			table.insert(self.rects,{r[1],r[2]+img.height,img.width,r[4]-img.height})
+			table.insert(self.rects,{r[1]+width,r[2],r[3]-width,r[4]})
+			table.insert(self.rects,{r[1],r[2]+height,width,r[4]-height})
 		else
 			-- i   i ---
 			--     | 1 
 			-- i---i ---
 			-- 2    
-			table.insert(self.rects,{r[1]+img.width,r[2],r[3]-img.width,img.height})
-			table.insert(self.rects,{r[1],r[2]+img.height,r[3],r[4]-img.height})
+			table.insert(self.rects,{r[1]+width,r[2],r[3]-width,height})
+			table.insert(self.rects,{r[1],r[2]+height,r[3],r[4]-height})
 		end
 		r[3]=0
 		r[4]=0
-		img.place_to = {r[1],r[2]}
+		img.place_to = {r[1],r[2],rotate=rot}
+		
 	else
 		error(not_found_place)
 	end
@@ -130,11 +152,19 @@ function Atlas:dump(  )
 	print('atlas',self.width,self.height)
 	for _,v in ipairs(self.images) do
 		if v.place_to then
-			print('placed:',v.place_to[1],v.place_to[2],v.width,v.height)
+			print('placed:',v.place_to[1],v.place_to[2],v.width,v.height,v.place_to.rotate)
 		else
 			print('not placed:',v.width,v.height)
 		end
 	end
+end
+
+function Atlas:apply( )
+	local img = TextureData( self.width, self.height )
+	for _,v in ipairs(self.images) do
+		self:place_to_image(img,v)
+	end
+	return img
 end
 
 

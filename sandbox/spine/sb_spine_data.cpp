@@ -27,7 +27,10 @@ extern "C" void _spAtlasPage_createTexture (spAtlasPage* self, const char* path)
 }
 
 extern "C" void _spAtlasPage_disposeTexture (spAtlasPage* self){
-    static_cast<Sandbox::Texture*>(self->rendererObject)->remove_ref();
+    if (self->rendererObject) {
+        static_cast<Sandbox::Texture*>(self->rendererObject)->remove_ref();
+        self->rendererObject = 0;
+    }
 }
 
 extern "C" char* _spUtil_readFile (const char* path, int* length){
@@ -219,4 +222,45 @@ namespace Sandbox {
         spAnimationStateData_setMixByName(m_state, from, to, duration);
     }
     
+    sb::vector<EventPtr> SpineData::GetAnimationEvents(const char* animation) const {
+        sb::vector<EventPtr> res;
+        spAnimation* a = spSkeletonData_findAnimation(m_skeleton, animation);
+        if (a) {
+            for (int i=0;i<a->timelinesCount;++i) {
+                const spTimeline* tl = a->timelines[i];
+                if (tl->type == SP_TIMELINE_EVENT) {
+                    const spEventTimeline* etl = reinterpret_cast<const spEventTimeline*>(tl);
+                    for (int j=0;j<etl->framesCount;++j) {
+                        const spEvent* ed = etl->events[j];
+                        if (ed && ed->data) {
+                            const EventPtr& e = GetEvent(ed->data);
+                            if (e) {
+                                if (std::find(res.begin(),res.end(),e)==res.end())
+                                    res.push_back(e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return res;
+    }
+    
+    void SpineData::PreloadTextures(Resources* resources) {
+        for (int slot_index=0;slot_index<m_skeleton->slotsCount;++slot_index) {
+            const spSlotData* slot = m_skeleton->slots[slot_index];
+            if (slot->attachmentName) {
+                spAttachment* attachment = spSkin_getAttachment(m_skeleton->defaultSkin, slot_index, slot->attachmentName);
+                if (attachment && attachment->type == SP_ATTACHMENT_REGION) {
+                    SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
+                    if (ra->image) {
+                        TexturePtr t = ra->image->GetTexture();
+                        if (t) {
+                            t->Present(resources);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

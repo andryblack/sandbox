@@ -15,19 +15,27 @@ namespace Sandbox {
     
     namespace mygui {
         
+        static const size_t BUFFER_SIZE = 1024;
+        
         class DataStream : public MyGUI::IDataStream {
         private:
             GHL::DataStream* m_ds;
+            GHL::Byte   m_buffer[BUFFER_SIZE];
+            size_t  m_buffer_size;
+            size_t  m_buffer_offset;
             size_t  m_size;
+            bool    m_eof;
         public:
-            explicit DataStream(GHL::DataStream* ds) : m_ds(ds),m_size(0) {
+            explicit DataStream(GHL::DataStream* ds) : m_ds(ds),m_size(0),m_buffer_size(0),m_buffer_offset(0),m_eof(false) {
                 
             }
             ~DataStream() {
                 m_ds->Release();
             }
             
-            virtual bool eof() { return m_ds->Eof(); }
+            virtual bool eof() {
+                return m_eof && m_buffer_size == 0;
+            }
             virtual size_t size() {
                 if (!m_size) {
                     GHL::UInt32 pos = m_ds->Tell();
@@ -47,7 +55,29 @@ namespace Sandbox {
                 }
             }
             virtual size_t read(void* _buf, size_t _count) {
-                return m_ds->Read(reinterpret_cast<GHL::Byte*>(_buf), GHL::UInt32(_count));
+                if (m_buffer_size == 0) {
+                    m_buffer_offset = 0;
+                    m_buffer_size = m_ds->Read(m_buffer, BUFFER_SIZE);
+                    m_eof = m_ds->Eof();
+                }
+                GHL::Byte* out = static_cast<GHL::Byte*>(_buf);
+                size_t readed = 0;
+                if (m_buffer_size) {
+                    size_t copy = (m_buffer_size < _count) ? m_buffer_size : _count;
+                    if (copy) {
+                        memcpy(out, &m_buffer[m_buffer_offset], GHL::UInt32(copy));
+                    }
+                    m_buffer_offset += copy;
+                    m_buffer_size -= copy;
+                    out += copy;
+                    _count -= copy;
+                    readed += copy;
+                }
+                if (_count) {
+                    readed += m_ds->Read(out, GHL::UInt32(_count));
+                    m_eof = m_ds->Eof();
+                }
+                return readed;
             }
         };
      

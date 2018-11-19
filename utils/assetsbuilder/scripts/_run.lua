@@ -29,6 +29,8 @@ local sandbox = {
 	os = wrap(os),
 	path = wrap(path),
 	string = wrap(string),
+	tostring = tostring,
+	tonumber = tonumber,
 	table = wrap(table),
 	print = print,
 	error = error,
@@ -124,6 +126,9 @@ end
 
 for _,rules in ipairs(__all_rules) do
 	print('apply rules',rules._name)
+	for _,a in ipairs(__modules.begin_apply_rules) do
+		a(rules)
+	end
 	apply_rules(rules)
 end
 

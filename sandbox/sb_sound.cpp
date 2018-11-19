@@ -15,6 +15,7 @@
 namespace Sandbox {
     
     static const char* MODULE = "Sandbox:Sound";
+    static const float SILENCE = 0.05f;
     
     Sound::Sound( SoundManager* mgr, GHL::SoundEffect* eff ) : m_mgr(mgr),m_effect(eff) {
         
@@ -99,7 +100,8 @@ namespace Sandbox {
     }
     
     
-    MusicInstance::MusicInstance( GHL::MusicInstance* mus) : m_music(mus),
+    MusicInstance::MusicInstance(  GHL::MusicInstance* mus) :
+    m_music(mus),
     m_volume(1.0f),
     m_fade_volume(1.0f),
     m_fade_speed(0.0f) {
@@ -158,7 +160,7 @@ namespace Sandbox {
             }
             if (m_music) m_music->SetVolume(m_volume * m_fade_volume);
         }
-        return false;
+        return (m_volume * m_fade_volume) <= SILENCE;
     }
     void MusicInstance::SetVolume( float vol ) {
         m_volume = vol;
@@ -168,12 +170,15 @@ namespace Sandbox {
     
     void    Sound::Play() {
         if (!m_effect) return;
-        m_mgr->m_sound->PlayEffect(m_effect,m_mgr->m_sounds_volume,0.0f,0);
+        if (m_mgr->m_sounds_volume > SILENCE && m_mgr->m_sound_enabled)
+            m_mgr->m_sound->PlayEffect(m_effect,m_mgr->m_sounds_volume,0.0f,0);
     }
 
     void    Sound::PlayEx(float vol,float pan) {
         if (!m_effect) return;
-        m_mgr->m_sound->PlayEffect(m_effect,m_mgr->m_sounds_volume*vol,pan*100.0f,0);
+        vol *= m_mgr->m_sounds_volume;
+        if (vol > SILENCE)
+            m_mgr->m_sound->PlayEffect(m_effect,vol,pan*100.0f,0);
     }
     
     void Sound::Release() {
@@ -190,19 +195,25 @@ namespace Sandbox {
             initialVol = 0;
         }
         initialVol *= m_mgr->m_sounds_volume;
-        GHL::SoundInstance* instance = 0;
-        m_mgr->m_sound->PlayEffect(m_effect,initialVol,pan*100.0f,&instance);
-        SoundInstancePtr res(new SoundInstance(SoundPtr(this),instance,initialVol));
-        if (fadeIn!=0.0f) {
-            res->FadeIn(vol*m_mgr->m_sounds_volume, fadeIn);
-            m_mgr->m_fade_ins.push_back(res);
+        vol *= m_mgr->m_sounds_volume;
+        if (vol > SILENCE && m_mgr->m_sound_enabled) {
+            GHL::SoundInstance* instance = 0;
+            m_mgr->m_sound->PlayEffect(m_effect,initialVol,pan*100.0f,&instance);
+            SoundInstancePtr res(new SoundInstance(SoundPtr(this),instance,initialVol));
+            if (fadeIn!=0.0f) {
+                res->FadeIn(vol, fadeIn);
+                m_mgr->m_fade_ins.push_back(res);
+            }
+            return res;
         }
-        return res;
+        return SoundInstancePtr(new SoundInstance(SoundPtr(this),static_cast<GHL::SoundInstance*>(0),0.0f));
     }
     
     SoundManager::SoundManager( ) : m_sound(0),m_resources(0) {
         m_sounds_volume = 70.0f;
         m_music_volume = 70.0f;
+        m_sound_enabled = true;
+        m_music_enabled = true;
     }
     
     SoundManager::~SoundManager() {
@@ -214,16 +225,20 @@ namespace Sandbox {
     }
     
     void SoundManager::Deinit() {
-        for (SoundsMap::iterator it = m_sounds.begin();it!=m_sounds.end();++it) {
-            it->second->Release();
-        }
-        m_sounds.clear();
+        ClearCache();
         m_fade_ins.clear();
         m_fade_outs.clear();
         m_music.reset();
         m_fade_outs_musics.clear();
         m_sound = 0;
         m_resources = 0;
+    }
+    
+    void SoundManager::ClearCache() {
+        for (SoundsMap::iterator it = m_sounds.begin();it!=m_sounds.end();++it) {
+            it->second->Release();
+        }
+        m_sounds.clear();
     }
     
     void    SoundManager::SetSoundsDir(const char* dir) {
@@ -237,6 +252,24 @@ namespace Sandbox {
         m_music_volume = v;
         if (m_music) {
             m_music->SetVolume(m_music_volume);
+        } else if (m_music_volume > SILENCE && m_music_enabled) {
+            if (!m_last_music.empty()) {
+                PlayMusicEx(m_last_music.c_str(), true, 0.0f,0.0f);
+            }
+        }
+    }
+    
+    void SoundManager::SetMusicEnabled(bool e) {
+        if (e != m_music_enabled) {
+            m_music_enabled = e;
+            if (e) {
+                if (!m_last_music.empty() && (m_music_volume > SILENCE)) {
+                    PlayMusicEx(m_last_music.c_str(), true, 0.0f,0.0f);
+                }
+            } else if (m_music) {
+                m_music->Stop();
+                m_music.reset();
+            }
         }
     }
     
@@ -341,22 +374,41 @@ namespace Sandbox {
             }
             m_music.reset();
         }
-        sb::string fullname = m_sounds_dir + filename;
-        GHL::DataStream* ds = m_resources->OpenFile(fullname.c_str());
-        if (!ds) {
-            return;
+        if (m_music_volume <= SILENCE || !m_music_enabled) {
+            
+        } else {
+            GHL::MusicInstance* music = open_music(filename);
+            if (music) {
+                m_music.reset( new MusicInstance(music) );
+            }
         }
-        GHL::MusicInstance* music = m_sound->OpenMusic(ds);
-        ds->Release();
-        if (music) {
-            m_music.reset( new MusicInstance(music) );
+       
+        if (m_music) {
             m_music->SetVolume(m_music_volume);
             if (fade_in > 0.0f) {
                 m_music->FadeIn(fade_in);
             }
             m_music->Play(loop);
         }
+        if (loop) {
+            m_last_music = filename;
+        } else {
+            m_last_music.clear();
+        }
     }
     
+    GHL::MusicInstance* SoundManager::open_music(const char* filename) {
+        sb::string fullname = m_sounds_dir + filename;
+        GHL::DataStream* ds = m_resources->OpenFile(fullname.c_str());
+        if (!ds) {
+            return 0;
+        }
+        GHL::MusicInstance* music = m_sound->OpenMusic(ds);
+        if (!music) {
+            SB_LOGD("failed open music " << filename);
+        }
+        ds->Release();
+        return music;
+    }
 }
 

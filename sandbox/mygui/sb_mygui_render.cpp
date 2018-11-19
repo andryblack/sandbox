@@ -30,12 +30,16 @@ namespace Sandbox {
     namespace mygui {
         
         
-                
-        RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res,RenderTargetPtr rt) : m_graphics(g),m_resources(res),m_target(rt),m_texture(0) {
+        
+        RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res) : m_graphics(g),m_resources(res),m_texture(0) {
+            
+        }
+        
+        RenderTargetImpl::RenderTargetImpl(Graphics* g,Resources* res,RenderTargetPtr rt, const MyGUI::IntSize& rt_size) : m_graphics(g),m_resources(res),m_target(rt),m_texture(0) {
+             m_rendertarget_size = rt_size;
             if (m_target) {
                 m_target->GetTexture()->SetFiltered(true);
-                m_rendertarget_size.width = m_target->GetWidth();
-                m_rendertarget_size.height = m_target->GetHeight();
+               
                 m_texture = new TextureImpl("",m_target->GetTexture());
                 begin();
                 end();
@@ -49,8 +53,8 @@ namespace Sandbox {
             RenderTargetPtr prev = m_target;
             float full_scale = m_resources->GetScale() * scale;
             if (m_target ) {
-                if (m_target->GetWidth() >= size.width &&
-                    m_target->GetHeight() >= size.height)
+                if (m_rendertarget_size.width >= size.width &&
+                    m_rendertarget_size.height >= size.height)
                     return;
             }
             m_target = m_resources->CreateRenderTarget(size.width, size.height,
@@ -137,7 +141,7 @@ namespace Sandbox {
         
         
         
-        RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res,RenderTargetPtr()) , m_scale(1.0f) {
+        RenderManager::RenderManager( Graphics* graphics, Resources* res ) : RenderTargetImpl(graphics,res) , m_scale(1.0f) {
             m_graphics = graphics;
         }
         
@@ -247,14 +251,19 @@ namespace Sandbox {
                                                                     m_scale*m_resources->GetScale(),
                                                                      true, false);
             if (!target) return 0;
-            RenderTargetImpl* impl = new RenderTargetImpl(m_graphics,m_resources,target);
+            RenderTargetImpl* impl = new RenderTargetImpl(m_graphics,
+                                                          m_resources,
+                                                          target,
+                                                          size);
             return impl;
         }
         
         RenderTargetImpl* RenderManager::wrapTarget(const RenderTargetPtr& target ) {
             if (!target)
                 return 0;
-            return new RenderTargetImpl(m_graphics,m_resources,target);
+            MyGUI::IntSize size(target->GetWidth(),target->GetHeight());
+            return new RenderTargetImpl(m_graphics,m_resources,
+                                        target, size);
         }
                 
         const MyGUI::IntSize& RenderManager::getViewSize() const {

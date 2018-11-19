@@ -56,22 +56,24 @@ namespace Sandbox {
 
     class GHLLogger : public GHL::Logger {
         GHL::WriteStream*   m_file;
+        char m_buf[128];
+        bool m_disabled;
     public:
-        GHLLogger() : m_file(0) {}
+        GHLLogger() : m_file(0),m_disabled(false) {}
         ~GHLLogger() {
             close();
         }
         virtual bool GHL_CALL AddMessage( GHL::LogLevel level, const char* message ) {
             bool res = false;
             if (m_file) {
-                char buf[128] = {0};
-                format_ts(buf, sizeof(buf), false);
-                size_t pos = strlen(buf);
-                buf[pos] = '|';++pos;
-                buf[pos] = level_descr[level];++pos;
-                buf[pos] = ':';++pos;
-                buf[pos] = 0;
-                m_file->Write(reinterpret_cast<const GHL::Byte*>(buf), GHL::UInt32(pos));
+                m_buf[0] = 0;
+                format_ts(m_buf, sizeof(m_buf), false);
+                size_t pos = strlen(m_buf);
+                m_buf[pos] = '|';++pos;
+                m_buf[pos] = level_descr[level];++pos;
+                m_buf[pos] = ':';++pos;
+                m_buf[pos] = 0;
+                m_file->Write(reinterpret_cast<const GHL::Byte*>(m_buf), GHL::UInt32(pos));
                 m_file->Write(reinterpret_cast<const GHL::Byte*>(message), GHL::UInt32(::strlen(message)));
                 m_file->Write(rn, sizeof(rn));
                 if (level <= GHL::LOG_LEVEL_FATAL) {
@@ -92,13 +94,17 @@ namespace Sandbox {
                 m_file = 0;
             }
         }
+        void disable() {
+            m_disabled = true;
+        }
         
         bool open(GHL::VFS* vfs,const char* file) {
             close();
+            m_disabled = false;
             m_file = vfs->OpenFileWrite(file);
             return m_file!=0;
         }
-        bool opened() const { return m_file!=0; }
+        bool opened() const { return m_file!=0 && !m_disabled; }
         
         void flush() {
             if (opened()) {
@@ -145,6 +151,9 @@ namespace Sandbox {
     
     void Logger::flush() {
         file_logger.flush();
+    }
+    void Logger::stop() {
+        file_logger.disable();
     }
     
     sb::string Logger::GetCurrentPath() {

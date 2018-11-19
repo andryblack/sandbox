@@ -40,6 +40,9 @@ public:
     explicit TextureSubData(GHL::Image* img,const Sandbox::Recti& rect);
     ~TextureSubData();
     const GHL::Image* GetSubImage();
+    GHL::Image* GetSubImageRotated();
+    GHL::Image* GetSubImageUnrotated();
+    
     const Sandbox::Recti& GetRect() const { return m_rect; }
     TextureSubDataPtr Extract( const Sandbox::Recti& rect );
     sb::string GetMD5() const;
@@ -56,32 +59,32 @@ typedef sb::intrusive_ptr<TextureData> TextureDataPtr;
 class TextureData : public TextureSubData {
     SB_META_OBJECT
 private:
-    
     GHL::ImageFileFormat m_image_file_format;
-    GHL::Int32 m_encode_settings;
 public:
     explicit TextureData( GHL::UInt32 w, GHL::UInt32 h );
     explicit TextureData( GHL::Image* img );
     ~TextureData();
     void PremultiplyAlpha();
-    bool Grayscale();
-
+    bool Grayscale();    
     
     void Place( GHL::UInt32 x, GHL::UInt32 y,
                const TextureSubDataPtr& img );
+    void PlaceRotated( GHL::UInt32 x, GHL::UInt32 y,
+                      const TextureSubDataPtr& img );
+    void PlaceUnrotated( GHL::UInt32 x, GHL::UInt32 y,
+                      const TextureSubDataPtr& img );
     
     bool SetAlpha( const sb::intrusive_ptr<TextureData>& alpha_tex );
      
     TextureDataPtr ExtractSubData(int x,int y,int w,int h);
     
     GHL::ImageFileFormat GetImageFileFormat() const { return m_image_file_format; }
-    void SetImageFileFormatPNG(int settings);
-    void SetImageFileFormatJPEG(int settings);
+    void SetImageFileFormatPNG();
+    void SetImageFileFormatJPEG();
     void SetImageFileFormatETC1();
     bool IsJPEG() const { return m_image_file_format == GHL::IMAGE_FILE_FORMAT_JPEG; }
+
     bool HasBits(int treshold);
-    
-    GHL::Int32 GetEncodeSettings() const { return m_encode_settings; };
 };
 
 

@@ -9,11 +9,11 @@
 #include "sb_bitmap_font.h"
 #include "sb_graphics.h"
 
-SB_META_DECLARE_OBJECT(Sandbox::BitmapFont,Sandbox::Font)
+SB_META_DECLARE_OBJECT(Sandbox::BitmapFont,Sandbox::FontDataProvider)
 
 namespace Sandbox {
     
-    BitmapFont::BitmapFont() : Font(FontDataPtr(new FontData())) {
+    BitmapFont::BitmapFont() : FontDataProvider() {
        
     }
     

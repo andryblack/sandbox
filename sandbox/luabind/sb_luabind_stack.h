@@ -54,10 +54,11 @@ namespace Sandbox {
                 raw_ptr,
                 shared_ptr,
                 intrusive_ptr
-            } type;
-            bool    is_const;
+            } type:8;
+            bool    is_const:8;
             void    (*destructor)(data_holder* data);
         };
+        GHL_STATIC_ASSERT(sizeof(data_holder)==(sizeof(void*)*3));
         
         template <class T>
         struct destructor_helper {
@@ -78,10 +79,11 @@ namespace Sandbox {
         template <class T>
         inline T* get_ptr( const meta::type_info* from, void* data ) {
             const meta::type_info* to = meta::type<T>::info();
-            if ( from == to ) return reinterpret_cast<T*>(data);
-            if (from->parent.info) {
-                T* r = get_ptr<T>(from->parent.info, from->parent.downcast(data) );
-                if ( r ) return r;
+            while (true) {
+                if ( from == to ) return static_cast<T*>(data);
+                if (!from->parent.info) break;
+                data = from->parent.downcast(data);
+                from = from->parent.info;
             }
             return 0;
         }

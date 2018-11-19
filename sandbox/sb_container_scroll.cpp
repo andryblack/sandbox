@@ -39,6 +39,15 @@ namespace Sandbox {
             GetTransformM()->Apply(tr);
         }
     }
+    void ContainerScroll::GetTransformToImpl(const SceneObject* root,Transform2d& tr) const {
+        SceneObject::GetTransformToImpl(root,tr);
+        if (root != this) {
+            tr.translate(-m_offset);
+            if (GetTransformM()) {
+                GetTransformM()->Apply(tr);
+            }
+        }
+    }
 }
 
 

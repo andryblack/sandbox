@@ -4,7 +4,12 @@
 namespace Sandbox {
     
     static void SpineImageAttachment_dispose(spAttachment* a) {
-        delete static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment, a));
+        spRegionAttachment* region = SUB_CAST(spRegionAttachment, a);
+        if (region->path) {
+            FREE(region->path);
+        }
+        _spAttachment_deinit(a);
+        delete static_cast<SpineImageAttachment*>(region);
     }
     
     SpineImageAttachment::SpineImageAttachment(const char* name) {
@@ -17,6 +22,8 @@ namespace Sandbox {
         this->rotation = 0;
         this->width = 0;
         this->height = 0;
+        this->path = 0;
+        SUPER(this)->attachmentLoader = 0;
         _spAttachment_init(SUPER(this), name, SP_ATTACHMENT_REGION, SpineImageAttachment_dispose);
     }
     
