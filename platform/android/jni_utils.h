@@ -36,7 +36,15 @@ namespace jni {
         explicit jni_string(jobject obj, JNIEnv* env) : jstr((jstring)obj),env(env){
         }
         ~jni_string() {
-            env->DeleteLocalRef( jstr );
+            if (jstr) {
+                env->DeleteLocalRef( jstr );
+            }
+        }
+        void assign(const char* str) {
+            if (jstr) {
+                env->DeleteLocalRef(jstr);
+            }
+            jstr = convert_utf8(env,str);
         }
         static jstring convert_utf8(JNIEnv* env,const char* str);
         static std::string extract( const jstring jstr , JNIEnv* env ) {

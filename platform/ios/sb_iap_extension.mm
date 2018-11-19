@@ -62,6 +62,14 @@ static const char* MODULE = "iap";
 }
 
 -(NSString*) performPayment:(NSString*) productIdentifier status:(NSString**) status {
+    sb::string user_id;
+    if ([productIdentifier characterAtIndex:0]=='{') {
+        sb::map<sb::string, sb::string> purchase_data;
+        if (Sandbox::json_parse_object(productIdentifier.UTF8String, purchase_data)) {
+            productIdentifier = [NSString stringWithUTF8String:purchase_data["product_id"].c_str()];
+            user_id = purchase_data["user_id"];
+        }
+    }
     for (SKPaymentTransaction *transaction in [[SKPaymentQueue defaultQueue] transactions]) {
         if ([transaction.payment.productIdentifier isEqualToString:productIdentifier]) {
             if (transaction.transactionState == SKPaymentTransactionStatePurchased) {
@@ -82,6 +90,10 @@ static const char* MODULE = "iap";
     }
     SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:product];
     payment.quantity = 1;
+    if (!user_id.empty()) {
+        payment.applicationUsername = [NSString stringWithUTF8String:user_id.c_str()];
+    }
+    //payment.simulatesAskToBuyInSandbox = YES;
     [[SKPaymentQueue defaultQueue] addPayment:payment];
     return [NSString stringWithFormat:@"%p",payment];
 }

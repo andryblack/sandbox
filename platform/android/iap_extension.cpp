@@ -25,8 +25,8 @@ void IAPExtension::set_helper_class(const char* str) {
 }
 void IAPExtension::release_object(JNIEnv* env) {
 	if (m_helper_objl) {
-		if (m_helper_dispose) {
-			env->CallVoidMethod(m_helper_objl,m_helper_dispose);
+		if (m_helper_destroy) {
+			env->CallVoidMethod(m_helper_objl,m_helper_destroy);
 		}
 		env->DeleteGlobalRef(m_helper_objl);
 		m_helper_objl = 0;
@@ -44,24 +44,24 @@ void IAPExtension::resolve_methods(JNIEnv *env) {
     m_helper_ctr = env->GetMethodID(IAPHelper.clazz,"<init>","(Lcom/sandbox/Activity;J)V");
 	jni::check_exception(env);
 	sb_assert(m_helper_ctr);
-	m_helper_dispose = env->GetMethodID(IAPHelper.clazz,"dispose","()V");
+	m_helper_destroy = env->GetMethodID(IAPHelper.clazz,"destroy","()V");
 	jni::check_exception(env);
-	sb_assert(m_helper_dispose);
+	sb_assert(m_helper_destroy);
 	m_helper_init = env->GetMethodID(IAPHelper.clazz,"iap_init","(Ljava/lang/String;)Z");
 	jni::check_exception(env);
 	sb_assert(m_helper_init);
-	m_helper_get_products_info = env->GetMethodID(IAPHelper.clazz,"iap_get_products_info","(Ljava/lang/String;)Z");
+	m_helper_get_items_info = env->GetMethodID(IAPHelper.clazz,"iap_get_items_info","(Ljava/lang/String;)Z");
 	jni::check_exception(env);
-	sb_assert(m_helper_get_products_info);
+	sb_assert(m_helper_get_items_info);
+	m_helper_get_subscriptions_info = env->GetMethodID(IAPHelper.clazz,"iap_get_subscriptions_info","(Ljava/lang/String;)Z");
+	jni::check_exception(env);
+	sb_assert(m_helper_get_subscriptions_info);
 	m_helper_setup_done = env->GetMethodID(IAPHelper.clazz,"is_setup_done","()Z");
 	jni::check_exception(env);
     sb_assert(m_helper_setup_done);
-    m_helper_purchase = env->GetMethodID(IAPHelper.clazz,"iap_purchase","(Ljava/lang/String;Ljava/lang/String;)Z");
+    m_helper_purchase = env->GetMethodID(IAPHelper.clazz,"iap_purchase","(Ljava/lang/String;)Z");
 	jni::check_exception(env);
     sb_assert(m_helper_purchase);
-    m_helper_process_result = env->GetMethodID(IAPHelper.clazz,"handleActivityResult","(IILandroid/content/Intent;)Z");
-	jni::check_exception(env);
-    sb_assert(m_helper_process_result);
     m_helper_restore_payments = env->GetMethodID(IAPHelper.clazz,"iap_restore_payments","()Z");
 	jni::check_exception(env);
     sb_assert(m_helper_restore_payments);
@@ -69,6 +69,9 @@ void IAPExtension::resolve_methods(JNIEnv *env) {
     m_helper_confirm_transaction = env->GetMethodID(IAPHelper.clazz,"iap_confirm_transaction","(Ljava/lang/String;)Z");
 	jni::check_exception(env);
     sb_assert(m_helper_confirm_transaction);
+    m_helper_confirm_subscription = env->GetMethodID(IAPHelper.clazz,"iap_confirm_subscription","(Ljava/lang/String;)Z");
+    jni::check_exception(env);
+    sb_assert(m_helper_confirm_subscription);
 }
     
 void IAPExtension::OnAppStarted(Sandbox::Application* app) {
@@ -99,7 +102,19 @@ void IAPExtension::OnAppStopped(Sandbox::Application* app) {
         if (m_helper_objl && m_activity && m_activity->env) {
         	JNIEnv* env = m_activity->env;
 			jni::jni_string key(args,env);
-			if (env->CallBooleanMethod(m_helper_objl,m_helper_get_products_info,key.jstr)) {
+			if (env->CallBooleanMethod(m_helper_objl,m_helper_get_items_info,key.jstr)) {
+				res = "pending";
+			} else {
+				res = "failed";
+			}
+			return true;
+        }
+    }
+    if (::strcmp("iap_get_subscriptions_info",method)==0) {
+        if (m_helper_objl && m_activity && m_activity->env) {
+        	JNIEnv* env = m_activity->env;
+			jni::jni_string key(args,env);
+			if (env->CallBooleanMethod(m_helper_objl,m_helper_get_subscriptions_info,key.jstr)) {
 				res = "pending";
 			} else {
 				res = "failed";
@@ -110,13 +125,13 @@ void IAPExtension::OnAppStopped(Sandbox::Application* app) {
     if (::strcmp("iap_purchase",method)==0) {
         if (m_helper_objl && m_activity && m_activity->env) {
         	JNIEnv* env = m_activity->env;
-			jni::jni_string key(args,env);
-			jni::jni_string data("",env);
-			if (env->CallBooleanMethod(m_helper_objl,m_helper_purchase,key.jstr,data.jstr)) {
-				res = "pending";
-			} else {
-				res = "failed";
-			}
+        	jni::jni_string  jargs(args,env);
+        	if (env->CallBooleanMethod(m_helper_objl,m_helper_purchase,jargs.jstr)) {
+        		res = "pending";
+        	} else {
+        		res = "failed";
+        	}
+			
 			return true;
         }
     }
@@ -130,6 +145,18 @@ void IAPExtension::OnAppStopped(Sandbox::Application* app) {
 				res = "failed";
 			}
 			return true;
+        }
+    }
+    if (::strcmp("iap_confirm_subscription",method)==0) {
+        if (m_helper_objl && m_activity && m_activity->env) {
+            JNIEnv* env = m_activity->env;
+            jni::jni_string key(args,env);
+            if (env->CallBooleanMethod(m_helper_objl,m_helper_confirm_subscription,key.jstr)) {
+                res = "pending";
+            } else {
+                res = "failed";
+            }
+            return true;
         }
     }
     if (::strcmp("iap_restore_payments",method)==0) {
@@ -202,12 +229,6 @@ void IAPExtension::nativeOnActivityStopped(
                                     jint request_code,
                                     jint result_code,
                                     jobject data) {
-	if (m_helper_objl) {
-		return env->CallBooleanMethod(m_helper_objl,
-            m_helper_process_result,
-            request_code,
-            result_code,data);
-	}
 	return false;
 }
 

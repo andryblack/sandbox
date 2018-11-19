@@ -59,6 +59,11 @@ solution( ProjectName )
 		if use.AndroidGooglePlayService or use.IAP then
 			
 			android_dependencies('com.google.android.gms:play-services-base:' .. play_version)
+		
+			if use.IAP then
+				android_dependencies('com.android.billingclient:billing:1.1')
+			end
+		
 			if use.AndroidGooglePlayService then
 				android_dependencies('com.google.android.gms:play-services-auth:' .. play_version)
 				android_dependencies('com.google.android.gms:play-services-games:' .. play_version)
@@ -92,7 +97,6 @@ solution( ProjectName )
 		end
 		if use.IAP then
 			android_libs(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib','src')))
-			android_aidl(path.getabsolute(path.join(sandbox_dir,'platform/android/libs','iap_sandbox_lib','aidl')))
 		end
 		if use.AndroidGooglePlayService then
 			android_module{gps=true}
@@ -100,9 +104,6 @@ solution( ProjectName )
 		end
 		if AndroidConfig.permissions then
 			android_permissions( AndroidConfig.permissions )
-		end
-		if use.IAP then
-			android_permissions( 'com.android.vending.BILLING' )
 		end
 	end
 
