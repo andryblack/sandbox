@@ -384,6 +384,9 @@ namespace Sandbox {
                 if ( holder->type==data_holder::intrusive_ptr ) {
                     T* ptr = get_ptr<T>(holder->info,*reinterpret_cast<void**>( holder+1));
                     return sb::intrusive_ptr<T>(ptr);
+                } else if ( holder->type==data_holder::raw_ptr ) {
+                    T* ptr = get_ptr<T>(holder->info, *reinterpret_cast<void**>(holder+1));
+                    return sb::intrusive_ptr<T>(ptr);
                 }
             } else if ( lua_isnil(L, idx) ) {
                 return sb::intrusive_ptr<T>();
