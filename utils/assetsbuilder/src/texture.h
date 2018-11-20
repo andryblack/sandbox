@@ -36,6 +36,8 @@ private:
     Sandbox::Recti m_rect;
 protected:
     GHL::Image* GetImage() { return m_data; }
+    const GHL::Image* GetImage() const { return m_data; }
+    void SetImage(GHL::Image* img);
 public:
     explicit TextureSubData(GHL::Image* img,const Sandbox::Recti& rect);
     ~TextureSubData();
@@ -66,7 +68,8 @@ public:
     ~TextureData();
     void PremultiplyAlpha();
     bool Grayscale();    
-    
+    void Convert(GHL::ImageFormat fmt);
+    void Invert();
     void Place( GHL::UInt32 x, GHL::UInt32 y,
                const TextureSubDataPtr& img );
     void PlaceRotated( GHL::UInt32 x, GHL::UInt32 y,
@@ -78,6 +81,7 @@ public:
      
     TextureDataPtr ExtractSubData(int x,int y,int w,int h);
     
+    GHL::ImageFormat GetFormat() const;
     GHL::ImageFileFormat GetImageFileFormat() const { return m_image_file_format; }
     void SetImageFileFormatPNG();
     void SetImageFileFormatJPEG();
