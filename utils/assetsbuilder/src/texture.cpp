@@ -130,6 +130,12 @@ TextureSubData::~TextureSubData() {
     }
 }
 
+void TextureSubData::SetImage(GHL::Image* img) {
+    Free();
+    m_data = img;
+    m_data->AddRef();
+}
+
 void TextureSubData::Free() {
     if (m_data) {
         m_data->Release();
@@ -226,6 +232,36 @@ bool TextureData::Grayscale() {
     return false;
 }
 
+void TextureData::Convert(GHL::ImageFormat fmt) {
+    sb_assert(GetImage());
+    GetImage()->Convert(fmt);
+}
+void TextureData::Invert() {
+    if (!GetImage()) return;
+    if (GetFormat()!=GHL::IMAGE_FORMAT_GRAY) {
+        /// @todo
+        return;
+    }
+    GHL::UInt32 w = GetImage()->GetWidth();
+    GHL::UInt32 h = GetImage()->GetHeight();
+    GHL::Data* new_data = GHL_CreateData(w*h);
+    GHL::Byte* dst = new_data->GetDataPtr();
+    const GHL::Byte* src = GetImage()->GetData()->GetData();
+    for (GHL::UInt32 i=0;i<w*h;++i) {
+        *dst = 0xff - *src;
+        ++dst;++src;
+    }
+    GHL::Image* new_img = GHL_CreateImageWithData(w, h, GHL::IMAGE_FORMAT_GRAY,new_data);
+    new_data->Release();
+    SetImage(new_img);
+    new_img->Release();
+}
+GHL::ImageFormat TextureData::GetFormat() const {
+    if (GetImage()) {
+        return GetImage()->GetFormat();
+    }
+    return GHL::IMAGE_FORMAT_UNKNOWN;
+}
 void TextureData::Place( GHL::UInt32 x, GHL::UInt32 y, const TextureSubDataPtr& img ) {
     sb_assert(img);
     GetImage()->Draw(x, y, img->GetSubImage());
