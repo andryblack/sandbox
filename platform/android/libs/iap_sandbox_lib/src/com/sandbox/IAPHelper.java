@@ -434,7 +434,7 @@ public class IAPHelper implements PurchasesUpdatedListener {
             return;
         }
 
-        Log.d(TAG, "Query inventory was successful.");
+        Log.d(TAG, "Query purchases was successful.");
 
         // Update the UI and purchases inventory with new list of purchases
         m_purchase_map.clear();
