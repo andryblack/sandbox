@@ -150,9 +150,24 @@ namespace Sandbox {
             Color c = g.GetColor();
             g.SetColor(c * Color(1.0f,1.0f,1.0f,mAlpha));
             Transform2d tr = g.GetTransform();
+#ifdef _DEBUG_TEXT_ALIGN_
+            Image img;
+            img.SetSize(mCoord.width, mCoord.height);
+            g.DrawImage(img, 0, Vector2f(
+                                         mCroppedParent->getAbsoluteLeft() + mCoord.left,
+                                         mCroppedParent->getAbsoluteTop() + mCoord.top),
+                        Color(1.0,0.5,0.5,0.8));
+            img.SetSize(textViewData.size.w, textViewData.size.h);
+            g.DrawImage(img, 0, Vector2f(
+                                         mCroppedParent->getAbsoluteLeft() + mCoord.left -mViewOffset.left,
+                                         mCroppedParent->getAbsoluteTop() + mCoord.top -mViewOffset.top),
+                        Color(0.5,0.5,1.0,0.8));
+#endif
             g.SetTransform(tr.translated(mCroppedParent->getAbsoluteLeft()-mViewOffset.left + mCoord.left,
                                          mCroppedParent->getAbsoluteTop() -mViewOffset.top + mCoord.top )
                            .scale(scale));
+            
+
             mFont->Draw(g, &m_attributes,  textViewData);
             g.SetColor(c);
             g.SetTransform(tr);

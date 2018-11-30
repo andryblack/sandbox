@@ -80,6 +80,11 @@ namespace Sandbox {
                 } else {
                     const FontData::Glypth* gl = m_data->get_glypth(symbol->data.symbol.code);
                     if (gl && gl->img.GetTexture()) {
+#ifdef _DEBUG_TEXT_ALIGN_
+                        Image img2 = gl->img;
+                        img2.SetTexture(TexturePtr());
+                        g.DrawImage(img2, 0, pos, Color(0.8,1.0,0.8,0.5));
+#endif
                         g.DrawImage(gl->img, attributes, pos);
                     }
                     pos.x+=symbol->data.symbol.offset;

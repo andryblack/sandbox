@@ -10,6 +10,8 @@
 #include "sb_size.h"
 #include "sb_utf.h"
 
+//#define _DEBUG_TEXT_ALIGN_
+
 namespace Sandbox {
     
     class Font;

@@ -249,10 +249,10 @@ namespace Sandbox {
                     }
                 }
                 int add_asc = max_asc-int(font->GetHeight()-font->GetBaseline());
-                //int add_desc = max_desc - m_font->GetBaseline();
+                int add_desc = max_desc - font->GetBaseline();
                 line->offset.y += add_asc;
-                move_down += add_asc;
-                size.h += add_asc;
+                move_down += add_asc + add_desc;
+                size.h += add_asc + add_desc;
             }
             line->width = width;
             set_max(size.w, float(int(ceil(line->width))));
