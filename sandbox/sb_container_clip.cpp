@@ -4,7 +4,7 @@ SB_META_DECLARE_OBJECT(Sandbox::ContainerClip, Sandbox::Container)
 
 namespace Sandbox {
     
-    ContainerClip::ContainerClip() {
+    ContainerClip::ContainerClip() : m_rect(0,0,1,1) {
         
     }
     
