@@ -32,7 +32,7 @@ namespace Sandbox {
 	
 	Resources::Resources(GHL::VFS* vfs) :
 		m_vfs(vfs),m_render(0),m_image(0) {
-			
+        m_live_ticks = 1;
         m_memory_limit = 20 * 1024 * 1024;
         m_memory_used = 0;
         m_scale = 1.0f;
@@ -42,6 +42,7 @@ namespace Sandbox {
         m_render = render;
         m_image = image;
         m_cache_path = m_vfs->GetDir(GHL::DIR_TYPE_CACHE);
+        m_live_ticks = 1;
     }
 	Resources::~Resources() {
 		

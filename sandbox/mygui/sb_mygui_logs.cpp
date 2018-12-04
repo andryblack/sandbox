@@ -16,6 +16,7 @@ namespace Sandbox {
         
         static GHL::LogLevel convert( const MyGUI::LogLevel& level ) {
             switch (level.getValue()) {
+                case MyGUI::LogLevel::Verbose:  return GHL::LOG_LEVEL_VERBOSE;
                 case MyGUI::LogLevel::Info:     return GHL::LOG_LEVEL_INFO;
                 case MyGUI::LogLevel::Warning:  return GHL::LOG_LEVEL_WARNING;
                 case MyGUI::LogLevel::Error:    return GHL::LOG_LEVEL_ERROR;
