@@ -254,14 +254,6 @@ function build.generate_app_build_gradle( sln , prj )
 		end
     _x(1,'}')
 
-    _x(1,'sourceSets {')
-    for cfg in project.eachconfig(prj) do
-		_x(2,cfg.shortname .. ' {')
-			_x(3,"jniLibs.srcDirs = ['./%s/libs']",cfg.shortname)
-		_x(2,'}')
-	end
-	_x(1,'}')
-
 	_x(1,'buildTypes {')
 	for cfg in project.eachconfig(prj) do
 
@@ -392,6 +384,7 @@ function build.generate_app_build_gradle( sln , prj )
 			_x('task copyJNI' .. cfg.name .. make_abi_name(abi).. '(type: Copy, dependsOn: buildJNI' .. cfg.name .. ') {')
 			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname,'libs',abi,libname)) .. "'")
 			_x(1,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname,abi)) .. "'")
+			_x(1,"outputs.upToDateWhen { false }")
 			_x('}')
 		end
 	end
