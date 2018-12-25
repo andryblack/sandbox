@@ -254,18 +254,59 @@ function build.generate_app_build_gradle( sln , prj )
 		end
     _x(1,'}')
 
+    _x(1,'sourceSets {')
+    	_x(2,'main {')
+
+    		_x(3,"manifest.srcFile './AndroidManifest.xml'")
+		
+	    	_x(3,"java.srcDirs = [" .. table.concat(src_dirs,',') .. "]")
+		    _x(3,"resources.srcDirs = ['../src']")
+		    if next(res_dirs) then
+		    	_x(3,"res.srcDirs = [" .. table.concat(res_dirs,',') .. "]")
+		    else
+		    	_x(3,"res.srcDirs = []")
+			end
+		    if next(aidl_dirs) then
+				_x(3,"aidl.srcDirs = [" .. table.concat(aidl_dirs,',') .. "]")
+			else
+				_x(3,"aidl.srcDirs = []")
+			end
+		
+    		_x(3,"jniLibs.srcDirs = []")
+			_x(3,"jni.srcDirs = []")
+			_x(3,"assets.srcDirs = []")
+			_x(3,"renderscript.srcDirs = []")
+		_x(2,'}')
+		for cfg in project.eachconfig(prj) do
+			local assets_dirs = {}
+			if cfg.android_assets_path then
+				for _,v in ipairs(cfg.android_assets_path) do
+					local p = '../' .. path.getrelative(sln.location,v)
+					table.insert(assets_dirs,"'" .. p .. "'")
+				end
+			end
+
+			_x(2,cfg.shortname ..' {')
+				_x(3,"jniLibs.srcDirs = ['./%s/libs']",cfg.shortname)
+				if next(assets_dirs) then
+			    	_x(3,'assets.srcDirs = [' .. table.concat(assets_dirs,',') .. "]")
+			    else
+			    	_x(3,"assets.srcDirs = []")
+			    end
+			    _x(3,"java.srcDirs = []")
+			    _x(3,"jni.srcDirs = []")
+			    _x(3,"renderscript.srcDirs = []")
+			    _x(3,"resources.srcDirs = []")
+			    _x(3,"res.srcDirs = []")
+			    _x(3,"aidl.srcDirs = []")
+			    --_x(5,'jniLibs.srcDirs = ["%s/libs"]',cfg.shortname)
+			_x(2,'}')
+		end
+		
+	_x(1,'}')
+
 	_x(1,'buildTypes {')
 	for cfg in project.eachconfig(prj) do
-
-		local assets_dirs = {}
-		if cfg.android_assets_path then
-			for _,v in ipairs(cfg.android_assets_path) do
-				local p = '../' .. path.getrelative(sln.location,v)
-				table.insert(assets_dirs,"'" .. p .. "'")
-			end
-		end
-			
-
 
 		_x(2,cfg.shortname .. ' {')
 			if cfg.android_key_store  then
@@ -279,26 +320,7 @@ function build.generate_app_build_gradle( sln , prj )
             	_x(3,'minifyEnabled false')
             	--_x(3,"proguardFile getDefaultProguardFile('proguard-android.txt')")
             end
-			_x(3,'sourceSets {')
-				_x(4,'main {')
-					_x(5,"jniLibs.srcDirs = ['./%s/libs']",cfg.shortname)
-					_x(5,"manifest.srcFile './%s/AndroidManifest.xml'",cfg.shortname)
-					_x(5,"java.srcDirs = [" .. table.concat(src_dirs,',') .. "]")
-				    _x(5,"resources.srcDirs = ['../src']")
-				    if next(res_dirs) then
-				    	_x(5,"res.srcDirs = [" .. table.concat(res_dirs,',') .. "]")
-					end
-				    if next(aidl_dirs) then
-    					_x(5,"aidl.srcDirs = [" .. table.concat(aidl_dirs,',') .. "]")
-    				end
-				    if next(assets_dirs) then
-				    	_x(5,'assets.srcDirs = [' .. table.concat(assets_dirs,',') .. "]")
-				    else
-				    	_x(5,"assets.srcDirs = []")
-				    end
-				    --_x(5,'jniLibs.srcDirs = ["%s/libs"]',cfg.shortname)
-				_x(4,'}')
-			_x(3,'}')
+			
 
 
 		_x(2,'}')
