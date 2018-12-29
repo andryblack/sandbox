@@ -19,7 +19,7 @@ SB_META_DECLARE_OBJECT(Sandbox::Shader, void)
 
 SB_META_DECLARE_OBJECT_T(Sandbox,ShaderVec2Uniform, ShaderUniform)
 SB_META_DECLARE_OBJECT_T(Sandbox,ShaderVec3Uniform, ShaderUniform)
-SB_META_DECLARE_OBJECT_T(Sandbox,ShaderColorUniform, ShaderUniform)
+SB_META_DECLARE_OBJECT(Sandbox::ShaderColorUniform, Sandbox::ShaderUniform)
 
 
 namespace Sandbox {
@@ -63,9 +63,9 @@ namespace Sandbox {
     void ShaderMat4Uniform::DoSet() {
         if (m_uniform) m_uniform->SetValueMatrix(m_value.matrix);
     }
-    template <>
+   
     void ShaderColorUniform::DoSet() {
-        if (m_uniform) m_uniform->SetValueFloat4(m_value.r,m_value.g,m_value.b,m_value.a);
+        if (m_uniform) m_uniform->SetValueFloat4(m_color.r,m_color.g,m_color.b,m_color.a);
     }
     
     GHL::ShaderUniform* Shader::GetRawUniform(const char* name) {

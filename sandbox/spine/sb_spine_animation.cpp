@@ -376,12 +376,13 @@ namespace Sandbox {
         gclr.g*=skeleton->g;
         gclr.b*=skeleton->b;
         gclr.a*=skeleton->a;
+        spBlendMode bmode = static_cast<spBlendMode>(-1);
         for (int i = 0; i < skeleton->slotsCount; ++i) {
-            spSlot* slot = skeleton->drawOrder[i];
+            const spSlot* slot = skeleton->drawOrder[i];
             if (!slot)
                 continue;
-            spBone* bone = slot->bone;
-            spAttachment* attachment = slot->attachment;
+            const spBone* bone = slot->bone;
+            const spAttachment* attachment = slot->attachment;
             ContainerTransformPtr object_attachement;
             {
                 AttachementMap::const_iterator it = m_attachements.find(slot->data);
@@ -393,20 +394,22 @@ namespace Sandbox {
                 attachment = 0;
             }
             if (!attachment && !object_attachement) continue;
-            
-            switch (slot->data->blendMode) {
-                case SP_BLEND_MODE_ADDITIVE:
-                    gr.SetBlendMode(BLEND_MODE_ADDITIVE);
-                    break;
-                case SP_BLEND_MODE_MULTIPLY:
-                    gr.SetBlendMode(BLEND_MODE_MULTIPLY);
-                    break;
-                case SP_BLEND_MODE_SCREEN:
-                    gr.SetBlendMode(BLEND_MODE_SCREEN);
-                    break;
-                default:
-                    gr.SetBlendMode(BLEND_MODE_ALPHABLEND);
-                    break;
+            if (bmode != slot->data->blendMode) {
+                switch (slot->data->blendMode) {
+                    case SP_BLEND_MODE_ADDITIVE:
+                        gr.SetBlendMode(BLEND_MODE_ADDITIVE);
+                        break;
+                    case SP_BLEND_MODE_MULTIPLY:
+                        gr.SetBlendMode(BLEND_MODE_MULTIPLY);
+                        break;
+                    case SP_BLEND_MODE_SCREEN:
+                        gr.SetBlendMode(BLEND_MODE_SCREEN);
+                        break;
+                    default:
+                        gr.SetBlendMode(BLEND_MODE_ALPHABLEND);
+                        break;
+                }
+                bmode = slot->data->blendMode;
             }
             
             Sandbox::Color c(slot->r,slot->g,slot->b,slot->a);
@@ -426,7 +429,7 @@ namespace Sandbox {
             if (attachment)
             {
                 
-                SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
+                const SpineImageAttachment* ra = static_cast<const SpineImageAttachment*>(SUB_CAST(const spRegionAttachment,attachment));
                 if (ra->image) {
                     gr.SetTransform(gstr * (tr*ra->tr));
                     const DrawAttributesPtr& attr = m_animation->m_data->GetSlotAttribute(slot->data);

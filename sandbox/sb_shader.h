@@ -77,7 +77,18 @@ namespace Sandbox {
     };
     typedef sb::intrusive_ptr<ShaderMat4Uniform> ShaderMat4UniformPtr;
     
-    typedef ShaderUniformVec<Color> ShaderColorUniform;
+    class ShaderColorUniform : public ShaderUniform {
+        SB_META_OBJECT
+    public:
+        explicit ShaderColorUniform(GHL::ShaderUniform* uniform) : ShaderUniform(uniform) {}
+        virtual void DoSet() SB_OVERRIDE;
+        void SetValue(const Color& v) { m_color = v;}
+        const Color& GetValue() const { return m_color; }
+        void SetAlpha(float a) { m_color.a = a;}
+        float GetAlpha() const { return m_color.a;}
+    private:
+        Color m_color;
+    };
     typedef sb::intrusive_ptr<ShaderColorUniform> ShaderColorUniformPtr;
     
 	class Shader : public sb::ref_countered_base_not_copyable {
