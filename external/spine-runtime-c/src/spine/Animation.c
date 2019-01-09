@@ -87,7 +87,8 @@ void spAnimation_mix (const spAnimation* self, spSkeleton* skeleton, float lastT
 int spAnimation_has_timeline(const spAnimation* self, const spTimeline* tl) {
     int i, n = self->timelinesCount;
     for (i = 0; i < n; ++i) {
-        if (spTimeline_compare(self->timelines[i], tl)) {
+        const spTimeline* tl1 = self->timelines[i];
+        if (tl1->type==tl->type && spTimeline_compare(tl1, tl)) {
             return 1;
         }
     }
@@ -501,7 +502,7 @@ void _spColorTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, f
 		a = prevFrameA + (self->frames[frameIndex + COLOR_FRAME_A] - prevFrameA) * percent;
 	}
 	slot = skeleton->slots[self->slotIndex];
-	if (alpha < 1) {
+	if (alpha < 1.0f) {
 		slot->r += (r - slot->r) * alpha;
 		slot->g += (g - slot->g) * alpha;
 		slot->b += (b - slot->b) * alpha;
@@ -811,7 +812,7 @@ void _spFFDTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, flo
 	if (time >= self->frames[self->framesCount - 1]) {
 		/* Time is after last frame. */
 		const float* lastVertices = self->frameVertices[self->framesCount - 1];
-		if (alpha < 1) {
+		if (alpha < 1.0f) {
 			for (i = 0; i < vertexCount; ++i)
 				slot->attachmentVertices[i] += (lastVertices[i] - slot->attachmentVertices[i]) * alpha;
 		} else
@@ -828,7 +829,7 @@ void _spFFDTimeline_apply (const spTimeline* timeline, spSkeleton* skeleton, flo
 	prevVertices = self->frameVertices[frameIndex - 1];
 	nextVertices = self->frameVertices[frameIndex];
 
-	if (alpha < 1) {
+	if (alpha < 1.0f) {
 		for (i = 0; i < vertexCount; ++i) {
 			float prev = prevVertices[i];
 			slot->attachmentVertices[i] += (prev + (nextVertices[i] - prev) * percent - slot->attachmentVertices[i]) * alpha;
