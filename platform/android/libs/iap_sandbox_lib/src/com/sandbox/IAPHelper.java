@@ -148,6 +148,8 @@ public class IAPHelper implements PurchasesUpdatedListener {
     private String getTransaction(Purchase purchase) throws JSONException {
         JSONObject obj = new JSONObject();
         obj.put("product_id",purchase.getSku());
+        obj.put("id",purchase.getOrderId());
+        obj.put("at",purchase.getPurchaseTime()/1000);
         obj.put("ticket",purchase.getOriginalJson());
         obj.put("signature",purchase.getSignature());
         return obj.toString();

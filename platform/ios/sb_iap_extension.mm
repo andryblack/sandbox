@@ -206,11 +206,18 @@ static const char* MODULE = "iap";
 }
 
 - (NSString*) encodeTransaction:(SKPaymentTransaction*) transaction receipt:(NSData*) receipt{
+    NSNumber* at = nil;
+    if (transaction.transactionDate) {
+        time_t unixTime = (time_t) [transaction.transactionDate timeIntervalSince1970];
+        at = [NSNumber numberWithUnsignedLong:unixTime];
+    }
     NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
      transaction.transactionIdentifier,@"id",
+     at,@"at",
      transaction.payment.productIdentifier,@"product_id",
      [receipt base64EncodedStringWithOptions:0],@"receipt",
                           nil];
+    
     NSData* json_encoded = [NSJSONSerialization dataWithJSONObject:dict options:0 error:nil];
     return [[[NSString alloc] initWithData:json_encoded encoding:NSUTF8StringEncoding] autorelease];
 }
