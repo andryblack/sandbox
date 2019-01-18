@@ -273,6 +273,7 @@ solution( ProjectName )
 	   			sandbox_dir .. '/sandbox/freetype/**.h',
 	   			sandbox_dir .. '/sandbox/freetype/**.cpp',
 	   		}
+	   		defines 'SB_USE_FREETYPE'
 		end
 
 		sysincludedirs {

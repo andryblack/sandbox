@@ -49,7 +49,9 @@
 #include "sb_data.h"
 
 #include "sb_particles.h"
+#ifdef SB_USE_FREETYPE
 #include "freetype/sb_freetype_font.h"
+#endif
 
 SB_META_DECLARE_KLASS(GHL::Settings, void)
 SB_META_BEGIN_KLASS_BIND(GHL::Settings)
@@ -245,7 +247,9 @@ namespace Sandbox {
         if (m_resources) {
             m_resources->ReleaseAll();
         }
+#ifdef SB_USE_FREETYPE
         FreeTypeFont::Release();
+#endif
         
 #ifdef SB_USE_NETWORK
         delete  m_network;
@@ -597,8 +601,9 @@ namespace Sandbox {
         }
         delete m_graphics;
         m_graphics = 0;
+#ifdef SB_USE_FREETYPE
         FreeTypeFont::Release();
-        
+#endif
         m_sound_mgr->Deinit();
         SB_LOGI( "Application::Unload <<< " );
     }
