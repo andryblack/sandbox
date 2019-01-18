@@ -906,7 +906,7 @@ namespace Sandbox {
                 m_ctx->call_self("OnEndArray");
             }
         }
-        virtual void OnKey(const sb::string& v) SB_OVERRIDE {
+        virtual void OnKey(const InplaceString& v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnKey")) {
                 m_ctx->call_self("OnKey",v);
             }
@@ -921,7 +921,7 @@ namespace Sandbox {
                 m_ctx->call_self("OnBool",v);
             }
         }
-        virtual void OnString(const sb::string& v) SB_OVERRIDE {
+        virtual void OnString(const InplaceString& v) SB_OVERRIDE {
             if (m_ctx->GetValue<bool>("OnString")) {
                 m_ctx->call_self("OnString",v);
             }
@@ -1009,14 +1009,14 @@ namespace Sandbox {
     }
     
     void JsonTraverser::BeginObject() {
-        OnBeginObject();
         m_stack.push_back('o');
+        OnBeginObject();
     }
     void JsonTraverser::EndObject() {
         if (!m_stack.empty()) {
             sb_assert(m_stack.back()=='o');
-            m_stack.pop_back();
             OnEndObject();
+            m_stack.pop_back();
         } else {
             sb_assert(false);
         }
@@ -1028,57 +1028,59 @@ namespace Sandbox {
     void JsonTraverser::EndArray() {
         if (!m_stack.empty()) {
             sb_assert(m_stack.back() == 'a');
-            m_stack.pop_back();
             OnEndArray();
+            m_stack.pop_back();
         } else {
             sb_assert(false);
         }
     }
     
     
-    struct JsonTraverser::Ctx {
+    struct JsonTraverseBase::Ctx {
         yajl_callbacks cb;
-        JsonTraverser* traverser;
+        JsonTraverseBase* self;
         static int yajl_parse_null(void * ctx) {
-            static_cast<Ctx*>(ctx)->traverser->OnNull();
+            static_cast<Ctx*>(ctx)->self->OnNull();
             return 1;
         }
         static int yajl_parse_boolean(void * ctx, int boolVal) {
-            static_cast<Ctx*>(ctx)->traverser->OnBool(boolVal!=0);
+            static_cast<Ctx*>(ctx)->self->OnBool(boolVal!=0);
             return 1;
         }
         static int yajl_parse_integer(void * ctx, long long integerVal) {
-            static_cast<Ctx*>(ctx)->traverser->OnInteger(integerVal);
+            static_cast<Ctx*>(ctx)->self->OnInteger(integerVal);
             return 1;
         }
         static int yajl_parse_double(void * ctx, double doubleVal) {
-            static_cast<Ctx*>(ctx)->traverser->OnNumber(doubleVal);
+            static_cast<Ctx*>(ctx)->self->OnNumber(doubleVal);
             return 1;
         }
         static int yajl_parse_string(void * ctx, const unsigned char * stringVal,
                                      size_t stringLen) {
-            static_cast<Ctx*>(ctx)->traverser->OnString(sb::string(reinterpret_cast<const char*>(stringVal),stringLen));
+            const char* sval = reinterpret_cast<const char*>(stringVal);
+            static_cast<Ctx*>(ctx)->self->OnString(InplaceString(sval,sval+stringLen));
             return 1;
         }
         static int yajl_parse_start_map(void * ctx) {
-            static_cast<Ctx*>(ctx)->traverser->BeginObject();
+            static_cast<Ctx*>(ctx)->self->BeginObject();
             return 1;
         }
         static int yajl_parse_map_key(void * ctx, const unsigned char * key,
                                       size_t stringLen) {
-            static_cast<Ctx*>(ctx)->traverser->OnKey(sb::string(reinterpret_cast<const char*>(key),stringLen));
+            const char* skey = reinterpret_cast<const char*>(key);
+            static_cast<Ctx*>(ctx)->self->OnKey(InplaceString(skey,skey+stringLen));
             return 1;
         }
         static int yajl_parse_end_map(void * ctx) {
-            static_cast<Ctx*>(ctx)->traverser->EndObject();
+            static_cast<Ctx*>(ctx)->self->EndObject();
             return 1;
         }
         static int yajl_parse_start_array(void * ctx) {
-            static_cast<Ctx*>(ctx)->traverser->BeginArray();
+            static_cast<Ctx*>(ctx)->self->BeginArray();
             return 1;
         }
         static int yajl_parse_end_array(void * ctx) {
-            static_cast<Ctx*>(ctx)->traverser->EndArray();
+            static_cast<Ctx*>(ctx)->self->EndArray();
             return 1;
         }
         
@@ -1097,9 +1099,9 @@ namespace Sandbox {
         }
     };
     
-    bool JsonTraverser::TraverseStream( GHL::DataStream* ds ) {
+    bool JsonTraverseBase::TraverseStream( GHL::DataStream* ds ) {
         Ctx ctx;
-        ctx.traverser = this;
+        ctx.self = this;
         yajl_handle h = yajl_alloc(&ctx.cb, 0, &ctx);
         unsigned char buffer[1024];
         yajl_status s = yajl_status_ok;
@@ -1119,9 +1121,9 @@ namespace Sandbox {
         return s == yajl_status_ok;
     }
 
-    bool JsonTraverser::TraverseString( const char* ds ) {
+    bool JsonTraverseBase::TraverseString( const char* ds ) {
         Ctx ctx;
-        ctx.traverser = this;
+        ctx.self = this;
         yajl_handle h = yajl_alloc(&ctx.cb, 0, &ctx);
         yajl_status s = yajl_status_ok;
         s = yajl_parse(h,reinterpret_cast<const unsigned char*>(ds),::strlen(ds));

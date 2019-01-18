@@ -6,6 +6,7 @@
 #include <sbstd/sb_vector.h>
 
 #include "sb_lua_context.h"
+#include "sb_inplace_string.h"
 
 namespace GHL {
     struct Data;
@@ -85,40 +86,56 @@ namespace Sandbox {
         const sb::string& End() const { return m_out_data; }
     };
     
-    class JsonTraverser {
+    class JsonTraverseBase {
+    protected:
+        sb::string m_error;
+        struct Ctx;
+        virtual void BeginObject() { OnBeginObject(); }
+        virtual void EndObject() { OnEndObject(); }
+        virtual void BeginArray() { OnBeginArray(); }
+        virtual void EndArray() { OnEndArray(); }
+    public:
+        virtual ~JsonTraverseBase() {}
+        
+        virtual void OnBeginObject() {}
+        virtual void OnEndObject() {}
+        virtual void OnBeginArray() {}
+        virtual void OnEndArray() {}
+        virtual void OnKey(const InplaceString& str) {
+            OnKey(str.str());
+        }
+        virtual void OnKey(const sb::string& v) {}
+        virtual void OnNull() {}
+        virtual void OnBool(bool v) {}
+        virtual void OnString(const InplaceString& str) {
+            OnString(str.str());
+        }
+        virtual void OnString(const sb::string& v) {}
+        virtual void OnInteger(long long v) {}
+        virtual void OnNumber(double v) {}
+        
+        bool TraverseStream( GHL::DataStream* ds );
+        bool TraverseString( const char* ds );
+        
+        const sb::string& GetError() const { return m_error; }
+    };
+    class JsonTraverser : public JsonTraverseBase {
     private:
         sb::vector<char> m_stack;
-        sb::string m_error;
+        
         
         void BeginObject();
         void EndObject();
         void BeginArray();
         void EndArray();
         
-        struct Ctx;
     protected:
-        size_t GetDepth() const;
         bool IsObject() const;
         bool IsArray() const;
     public:
         JsonTraverser();
         
-        virtual void OnBeginObject() {}
-        virtual void OnEndObject() {}
-        virtual void OnBeginArray() {}
-        virtual void OnEndArray() {}
-        virtual void OnKey(const sb::string& v) {}
-        virtual void OnNull() {}
-        virtual void OnBool(bool v) {}
-        virtual void OnString(const sb::string& v) {}
-        virtual void OnInteger(long long v) {}
-        virtual void OnNumber(double v) {}
-        
-        
-        bool TraverseStream( GHL::DataStream* ds );
-        bool TraverseString( const char* ds );
-        
-        const sb::string& GetError() const { return m_error; }
+        size_t GetDepth() const;
     };
     
     

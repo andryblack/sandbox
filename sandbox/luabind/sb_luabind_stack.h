@@ -24,6 +24,7 @@ extern "C" {
 }
 
 #include "sb_luabind_metatable.h"
+#include "sb_inplace_string.h"
 #include <exception>
 
 namespace Sandbox {
@@ -549,6 +550,16 @@ namespace Sandbox {
         
         template <>
         struct stack<const sb::string&> : stack<sb::string> {};
+        
+        template <>
+        struct stack<InplaceString> {
+            static void push( lua_State* L, const InplaceString& val ) {
+                lua_pushlstring(L, val.begin(), val.length());
+            }
+        };
+        
+        template <>
+        struct stack<const InplaceString&> : stack<InplaceString> {};
     
         template <class T>
         struct stack<const T&> {
