@@ -5,6 +5,7 @@ extern "C" {
 }
 
 #include <utils/sb_hex.h>
+#include <sb_color.h>
 
 #include "texture.h"
 
@@ -22,7 +23,9 @@ const GHL::Image* TextureSubData::GetSubImage() {
         GHL::UInt32(m_rect.h) == m_data->GetHeight()) {
         return m_data;
     }
-    m_data = m_data->SubImage(m_rect.x, m_rect.y, m_rect.w, m_rect.h);
+    GHL::Image* sub = m_data->SubImage(m_rect.x, m_rect.y, m_rect.w, m_rect.h);
+    m_data->Release();
+    m_data = sub;
     m_rect.x = 0;
     m_rect.y = 0;
     return  m_data;
@@ -265,6 +268,44 @@ GHL::ImageFormat TextureData::GetFormat() const {
 void TextureData::Place( GHL::UInt32 x, GHL::UInt32 y, const TextureSubDataPtr& img ) {
     sb_assert(img);
     GetImage()->Draw(x, y, img->GetSubImage());
+}
+void TextureData::Blend( GHL::UInt32 x, GHL::UInt32 y,
+               const TextureSubDataPtr& img ) {
+    GetImage()->Convert(GHL::IMAGE_FORMAT_RGBA);
+    const GHL::Image* img_src = img->GetSubImage();
+    
+    GHL::UInt32 w = img_src->GetWidth();
+    GHL::UInt32 h = img_src->GetHeight();
+    if ((x + w) > width()) {
+        w = width() - x;
+    }
+    if ((y + h) > height()) {
+        h = height() - y;
+    }
+
+    GHL::Byte* dst = GetImage()->GetData()->GetDataPtr();
+    dst += y * 4 * width() + x * 4;
+
+    const GHL::Byte* src = img_src->GetData()->GetData();
+    for (GHL::UInt32 yy=0;yy<h;++yy) {
+
+        GHL::UInt32* vdst = reinterpret_cast<GHL::UInt32*>(dst);
+        const GHL::UInt32* vsrc = reinterpret_cast<const GHL::UInt32*>(src);
+        for (GHL::UInt32 xx=0;xx<w;++xx) {
+            Sandbox::Color csrc(*vsrc);
+            Sandbox::Color cdst(*vdst);
+
+            cdst = cdst*(1.0f-csrc.a)+csrc;
+            *vdst = cdst.hw();
+
+            ++vsrc;
+            ++vdst;
+        }
+
+        dst += 4 * width();
+        src += 4 * img_src->GetWidth();
+    }
+
 }
 void TextureData::PlaceRotated( GHL::UInt32 x, GHL::UInt32 y,
                   const TextureSubDataPtr& img ) {

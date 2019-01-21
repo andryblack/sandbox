@@ -72,6 +72,8 @@ public:
     void Invert();
     void Place( GHL::UInt32 x, GHL::UInt32 y,
                const TextureSubDataPtr& img );
+    void Blend( GHL::UInt32 x, GHL::UInt32 y,
+               const TextureSubDataPtr& img );
     void PlaceRotated( GHL::UInt32 x, GHL::UInt32 y,
                       const TextureSubDataPtr& img );
     void PlaceUnrotated( GHL::UInt32 x, GHL::UInt32 y,
