@@ -3,6 +3,7 @@ project 'yajl'
    		kind 'StaticLib'
    		configure_lib_targetdir()
    		targetname ('yajl-' .. platform_dir)
+   		buildoptions{'-O3'}
    		local yajl_files = {
 			'yajl.c', 'yajl_alloc.c', 'yajl_buf.c', 'yajl_encode.c', 'yajl_gen.c', 'yajl_lex.c', 'yajl_parser.c',
 			'yajl_tree.c', 

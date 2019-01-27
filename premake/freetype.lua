@@ -3,6 +3,7 @@ project 'freetype'
 		kind 'StaticLib'
 	configure_lib_targetdir()
 	targetname ('freetype-' .. platform_dir)
+	buildoptions{'-O3'}
 
 	local freetype_files = {
 		'autofit/autofit.c',

@@ -7,6 +7,7 @@ project 'spine-runtime'
 	configure_lib_targetdir()
 
 	targetname ('spine-runtime-' .. platform_dir)
+	buildoptions{'-O3'}
 
 	local srcfiles = {
 		'src/spine/*.c',

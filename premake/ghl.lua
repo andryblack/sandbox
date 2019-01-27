@@ -14,9 +14,7 @@ project 'GHL-zlib'
 		kind 'StaticLib'
 		configure_lib_targetdir()
 		targetname ('GHL-zlib-' .. platform_dir)
-		if not os.is('macosx') then
-			buildoptions{'-O3'}
-		end
+		buildoptions{'-O3'}
 		
 		local zlib_files = { 'inffixed.h', 'inftrees.c', 'inftrees.h', 'adler32.c', 'crc32.c', 'crc32.h', 'crypt.h',
 							 'deflate.c', 'deflate.h', 'inffast.c', 'inffast.h', 'inflate.c', 'inflate.h', 'ioapi.h',
@@ -37,6 +35,7 @@ local ghl_sysincludes = {}
 			kind 'StaticLib'
 			configure_lib_targetdir()
 			targetname ('GHL-jpeg-' .. platform_dir)
+			buildoptions{'-O3'}
 
 			local jpeg_files = {
 				'jaricom.c', 'jcapimin.c', 'jcapistd.c', 'jcarith.c', 'jccoefct.c','jccolor.c',
