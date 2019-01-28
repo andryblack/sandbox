@@ -19,6 +19,8 @@ elif [[ "$PLATFORM" == "MINGW64"* ]]; then
 	PLATFORM="windows"
 elif [[ "$PLATFORM" == "Darwin" ]]; then
 	PLATFORM="osx"
+elif [[ "$PLATFORM" == "Linux" ]]; then
+	PLATFORM="linux"
 fi
 
 echo "platform: $PLATFORM"

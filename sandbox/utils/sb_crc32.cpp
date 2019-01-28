@@ -1,5 +1,6 @@
 #include "sb_crc32.h"
 #include <ghl_data.h>
+#include <cstring>
 
 namespace Sandbox {
     
