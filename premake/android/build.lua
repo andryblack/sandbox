@@ -205,6 +205,7 @@ function build.generate_app_build_gradle( sln , prj )
     _x(2,'targetSdkVersion ' .. target_api)
     _x(2,'versionCode ' .. prj.android_packageversion or 1)
     _x(2,'versionName "%s"', prj.android_packageversionname or '1.0')
+    _x(2,'multiDexEnabled ' .. tostring(prj.android_multidexenabled or false))
     _x(1,'}')
 
     local src_dirs = {"'../src'"}

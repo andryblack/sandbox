@@ -40,11 +40,13 @@ solution( ProjectName )
 		android_api_level(AndroidConfig.api_level or 9)
 		android_target_api_level(AndroidConfig.target_api_level or 14)
 		android_build_api_level(AndroidConfig.build_api_level or AndroidConfig.target_api_level or 14)
+		android_build_tools_version(AndroidConfig.build_tools_version or '28.0.2')
 		android_packagename( AndroidConfig.package or 'com.sandbox.example')
 		android_toolchain( AndroidConfig.toolchain or '4.9' )
 		android_screenorientation( AndroidConfig.screenorientation or 'landscape' )
 		android_packageversion( AndroidConfig.versioncode or 1)
 		android_packageversionname( AndroidConfig.versionname or "1.0" )
+		android_multidexenabled( AndroidConfig.multidex_enabled or false )
 
 		local firebase_version = AndroidConfig.firebase_version 
 		local play_version = AndroidConfig.play_version or '15.0.0'

@@ -106,6 +106,12 @@ api.register {
 }
 
 api.register {
+	name = "android_multidexenabled",
+	scope = "project",
+	kind = "boolean"
+}
+
+api.register {
 	name = "android_repository",
 	scope = "solution",
 	kind = "string",
