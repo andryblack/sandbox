@@ -465,7 +465,7 @@ solution( ProjectName )
 			
 		elseif os.is('emscripten') then
 			links {
-				'gl.js','egl.js','idbstore.js','idbfs.js'
+				'gl.js','idbstore.js','idbfs.js'
 			}
 		end
 
