@@ -271,9 +271,6 @@ public class IAPHelper implements PurchasesUpdatedListener {
         executeServiceRequest(purchaseFlowRequest);
     }
 
-    // if (m_native_object != 0)
-    //             nativeProcessResponse(m_native_object,"iap_init","{\"disconnected\":true}");
-
 
     protected void on_query_products(@SkuType final String itemType, final List<String> skuList) {
         // Creating a runnable from the request to use it inside our connection retry policy below
@@ -545,10 +542,12 @@ public class IAPHelper implements PurchasesUpdatedListener {
 
 
     private void startServiceConnection(final Runnable executeOnSuccess) {
+        Log.i(TAG,"startServiceConnection");
         m_client.startConnection(new BillingClientStateListener() {
             @Override
             public void onBillingSetupFinished(@BillingResponse int billingResponseCode) {
                 Log.d(TAG, "Setup finished. Response code: " + billingResponseCode);
+                Log.i(TAG, "isReady: " + m_client.isReady());
 
                 if (billingResponseCode == BillingResponse.OK) {
                     m_is_service_connected = true;
@@ -560,7 +559,9 @@ public class IAPHelper implements PurchasesUpdatedListener {
 
             @Override
             public void onBillingServiceDisconnected() {
+                Log.i(TAG,"onBillingServiceDisconnected");
                 m_is_service_connected = false;
+                nativeProcessResponse(m_native_object,"iap_init","{\"disconnected\":true}");
             }
         });
     }

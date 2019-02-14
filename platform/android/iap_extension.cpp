@@ -241,9 +241,9 @@ void JNICALL Java_com_sandbox_IAPHelper_nativeProcessResponse(
                                                                  jlong object,
                                                                  jobject method,
                                                                  jobject data) {
-    SB_LOGI("IAPHelper::nativeProcessResponse");
     sb::string str_method = jni::extract_jni_string(env,(jstring)method);
     sb::string str_data = jni::extract_jni_string(env,(jstring)data);
+    SB_LOGI("IAPHelper::nativeProcessResponse " << str_method);
     static_cast<IAPExtension*>(init_iap_extension())->processResponse(str_method,str_data);
 }
 
