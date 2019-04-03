@@ -12,6 +12,9 @@ else
 	assert(os.mkdir(application.dst_path))
 end
 
+print('src_path:',src_path)
+print('dst_path:',dst_path)
+
 local function wrap( t )
 	if t then
 		return setmetatable({},
@@ -110,7 +113,7 @@ end
 function get_current_path()
 	return __current_path
 end
-data = load_sandbox('assets.lua',sandbox,data)
+data = load_sandbox(run_options['assets'] or 'assets.lua',sandbox,data)
 
 print('rules ready, apply it')
 
