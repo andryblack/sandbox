@@ -50,6 +50,13 @@ solution( ProjectName )
 
 		local firebase_version = AndroidConfig.firebase_version 
 		local play_version = AndroidConfig.play_version or '15.0.0'
+		local default_play_version
+		if type(play_version) == 'table' then
+			default_play_version = play_version.base or '15.0.0'
+		else
+			default_play_version = play_version
+			play_version = {}
+		end
 
 		if AndroidConfig.manifest then
 			android_manifest(path.getabsolute(path.join(_WORKING_DIR,AndroidConfig.manifest)))
@@ -60,15 +67,15 @@ solution( ProjectName )
 		
 		if use.AndroidGooglePlayService or use.IAP then
 			
-			android_dependencies('com.google.android.gms:play-services-base:' .. play_version)
+			android_dependencies('com.google.android.gms:play-services-base:' .. play_version.base or default_play_version)
 		
 			if use.IAP then
 				android_dependencies('com.android.billingclient:billing:1.1')
 			end
 		
 			if use.AndroidGooglePlayService then
-				android_dependencies('com.google.android.gms:play-services-auth:' .. play_version)
-				android_dependencies('com.google.android.gms:play-services-games:' .. play_version)
+				android_dependencies('com.google.android.gms:play-services-auth:' .. play_version.auth or default_play_version)
+				android_dependencies('com.google.android.gms:play-services-games:' .. play_version.games or default_play_version)
 				android_dependencies('com.android.support:support-v4:27.0.2')
 			end
 			
