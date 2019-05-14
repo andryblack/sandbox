@@ -1198,6 +1198,7 @@ namespace Sandbox {
         }
 #endif
         StoreAppProfile();
+        Logger::flush();
 	}
 	///
 	void Application::OnActivated() {
