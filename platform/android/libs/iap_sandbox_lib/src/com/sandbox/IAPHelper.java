@@ -64,9 +64,9 @@ public class IAPHelper implements PurchasesUpdatedListener {
     private BillingClient m_client;
     private boolean m_is_service_connected;
    
-    private final Map<String,Purchase> m_purchase_map = new HashMap<>();
-    private final Map<String,SkuDetails> m_products_map = new HashMap<>();
-    private final Set<String> m_tokens_to_be_consumed = new HashSet<>();
+    private final Map<String,Purchase> m_purchase_map = new HashMap<String,Purchase>();
+    private final Map<String,SkuDetails> m_products_map = new HashMap<String,SkuDetails>();
+    private final Set<String> m_tokens_to_be_consumed = new HashSet<String>();
     private String m_pending_purchase_sku;
 
 
@@ -437,8 +437,10 @@ public class IAPHelper implements PurchasesUpdatedListener {
 
         // Update the UI and purchases inventory with new list of purchases
         m_purchase_map.clear();
-        for (Purchase purchase : result.getPurchasesList()) {
-            handlePurchase(purchase);
+        if (result.getPurchasesList() != null) {
+            for (Purchase purchase : result.getPurchasesList()) {
+                handlePurchase(purchase);
+            }
         }
         onPurchasesUpdated();
     }
@@ -447,33 +449,40 @@ public class IAPHelper implements PurchasesUpdatedListener {
         Runnable queryToExecute = new Runnable() {
             @Override
             public void run() {
-                long time = System.currentTimeMillis();
-                PurchasesResult purchasesResult = m_client.queryPurchases(SkuType.INAPP);
-                Log.i(TAG, "Querying purchases elapsed time: " + (System.currentTimeMillis() - time)
-                        + "ms");
-                // If there are subscriptions supported, we add subscription rows as well
-                if (is_subscriptions_supported()) {
-                    PurchasesResult subscriptionResult
-                            = m_client.queryPurchases(SkuType.SUBS);
-                    Log.i(TAG, "Querying purchases and subscriptions elapsed time: "
-                            + (System.currentTimeMillis() - time) + "ms");
-                    Log.i(TAG, "Querying subscriptions result code: "
-                            + subscriptionResult.getResponseCode()
-                            + " res: " + subscriptionResult.getPurchasesList().size());
+                try {
+                    long time = System.currentTimeMillis();
+                    PurchasesResult purchasesResult = m_client.queryPurchases(SkuType.INAPP);
+                    Log.i(TAG, "Querying purchases elapsed time: " + (System.currentTimeMillis() - time)
+                            + "ms");
+                    // If there are subscriptions supported, we add subscription rows as well
+                    if (is_subscriptions_supported()) {
+                        PurchasesResult subscriptionResult
+                                = m_client.queryPurchases(SkuType.SUBS);
+                        Log.i(TAG, "Querying purchases and subscriptions elapsed time: "
+                                + (System.currentTimeMillis() - time) + "ms");
+                        Log.i(TAG, "Querying subscriptions result code: "
+                                + subscriptionResult.getResponseCode() );
 
-                    if (subscriptionResult.getResponseCode() == BillingResponse.OK) {
-                        purchasesResult.getPurchasesList().addAll(
-                                subscriptionResult.getPurchasesList());
+                        if (subscriptionResult.getResponseCode() == BillingResponse.OK) {
+                            if (subscriptionResult.getPurchasesList() != null &&
+                                purchasesResult.getPurchasesList() != null) {
+                                purchasesResult.getPurchasesList().addAll(
+                                    subscriptionResult.getPurchasesList());
+                            }
+                        } else {
+                            Log.e(TAG, "Got an error response trying to query subscription purchases");
+                        }
+                    } else if (purchasesResult.getResponseCode() == BillingResponse.OK) {
+                        Log.i(TAG, "Skipped subscription purchases query since they are not supported");
                     } else {
-                        Log.e(TAG, "Got an error response trying to query subscription purchases");
+                        Log.w(TAG, "queryPurchases() got an error response code: "
+                                + purchasesResult.getResponseCode());
                     }
-                } else if (purchasesResult.getResponseCode() == BillingResponse.OK) {
-                    Log.i(TAG, "Skipped subscription purchases query since they are not supported");
-                } else {
-                    Log.w(TAG, "queryPurchases() got an error response code: "
-                            + purchasesResult.getResponseCode());
+                    onQueryPurchasesFinished(purchasesResult);
+                } catch (Exception e) {
+                    Log.e( TAG, "queryPurchases " + e.toString());
                 }
-                onQueryPurchasesFinished(purchasesResult);
+                
             }
         };
 
