@@ -122,7 +122,11 @@ namespace Sandbox {
                 return;
             Vector2f pos(getWidth()/2,getHeight()/2);
             Scroll::ScrollBegin(pos);
-            pos += Vector2f(0,_rel * m_wheel_scroll_speed);
+            if (GetVEnabled()) {
+                pos += Vector2f(0,_rel * m_wheel_scroll_speed);
+            } else if (GetHEnabled()) {
+                pos += Vector2f(_rel * m_wheel_scroll_speed,0);
+            }
             Scroll::ScrollMove(pos);
             Scroll::ScrollEnd(pos);
         }
