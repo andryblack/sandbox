@@ -278,6 +278,7 @@ function ndk.generateMakefile(prj,cfg,main)
 	-- This is $(LOCAL_PATH) in the makefile. We need to be relative to this in most cases.
 	local local_path = ndk.getMakefilePath(prj,cfg,main)
 
+	local sln = prj.solution
 
 	-- We include dependencies using the relative local path, but internal paths
 	-- (to files, etc.) are expanded to get rid of the very long path recursion.
@@ -335,12 +336,43 @@ function ndk.generateMakefile(prj,cfg,main)
 	_p('# Source files')
 	-- Filter out header files
 	local files = {}
-	for _,f in ipairs(cfg.files) do
-		if path.iscppfile(f) or path.iscfile(f) then
-			table.insert(files, f)
+	local arch_files = {}
+	for _,abi in ipairs(premake.modules.android.abis) do
+		arch_files[abi] = {}
+	end
+
+	local tr = project.getsourcetree(prj)
+	premake.tree.traverse(tr, {
+			onleaf = function(node, depth)
+				
+				if path.iscppfile(node.abspath) then
+					local notall = false
+					if node.flags then
+						
+						for abi,list in pairs(arch_files) do
+							if node.flags['abi-' .. abi] then
+								table.insert(list,node.abspath)
+								notall = true
+							end
+						end
+					end
+					if not notall then
+						table.insert(files, node.abspath)
+					end
+				end
+			end
+		})
+
+	ndk.writeRelativePaths('LOCAL_SRC_FILES', local_path, files, false)
+
+	for _,abi in ipairs(sln.android_abis) do
+		if next(arch_files[abi]) then
+			_x('ifeq ($(TARGET_ARCH_ABI),%s)',abi)
+			ndk.writeRelativePaths('LOCAL_SRC_FILES', local_path, arch_files[abi], false, '+=')
+			_p('endif')
 		end
 	end
-	ndk.writeRelativePaths('LOCAL_SRC_FILES', local_path, files, false)
+
 	_p('')
 	
 	_p('# Build instructions')

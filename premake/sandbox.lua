@@ -455,7 +455,6 @@ solution( ProjectName )
 		elseif os.is('android') then
 			files { sandbox_dir .. '/platform/android/main.cpp' }
 			links {
-				'atomic',
 				'android',
 				'jnigraphics',
 				'log',

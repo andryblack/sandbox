@@ -9,6 +9,13 @@ local make      = premake.make
 local project   = premake.project
 local solution  = premake.solution
 
+android.abis = {
+	"armeabi",
+	"armeabi-v7a",
+	'arm64-v8a',
+	"mips",
+	"x86"
+}
 --
 -- Register Android configuration options with Premake.
 --
@@ -19,13 +26,7 @@ api.register {
 	scope = "solution",
 	kind = "string",
 	list = "true",
-	allowed = {
-		"all",
-		"armeabi",
-		"armeabi-v7a",
-		"mips",
-		"x86"
-	}
+	allowed = table.join({'all'},android.abis)
 }
 
 api.register {
@@ -360,6 +361,12 @@ android.manifest = require 'manifest'
 local manifest = android.manifest
 android.build = require 'build'
 local build = android.build
+
+local add_flags = {}
+for _,v in ipairs(android.abis) do
+	table.insert(add_flags,'abi-' .. v)
+end
+api.addAllowed('flags',add_flags)
 
 -- Register the action with Premake.
 newaction {
