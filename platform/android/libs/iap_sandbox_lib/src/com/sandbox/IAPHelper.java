@@ -556,13 +556,17 @@ public class IAPHelper implements PurchasesUpdatedListener {
             @Override
             public void onBillingSetupFinished(@BillingResponse int billingResponseCode) {
                 Log.d(TAG, "Setup finished. Response code: " + billingResponseCode);
-                Log.i(TAG, "isReady: " + m_client.isReady());
+                if (m_client != null) {
+                    Log.i(TAG, "isReady: " + m_client.isReady());
 
-                if (billingResponseCode == BillingResponse.OK) {
-                    m_is_service_connected = true;
-                    if (executeOnSuccess != null) {
-                        executeOnSuccess.run();
+                    if (billingResponseCode == BillingResponse.OK) {
+                        m_is_service_connected = true;
+                        if (executeOnSuccess != null) {
+                            executeOnSuccess.run();
+                        }
                     }
+                } else {
+                    Log.i(TAG, "client destroyed");
                 }
             }
 
