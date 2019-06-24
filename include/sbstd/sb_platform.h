@@ -6,16 +6,30 @@
 
 #if defined( _MSC_VER )
 #define SB_COMPILER_MSVC
-#define SB_BEGIN_PACKED __pragma(pack(push,1))
-#define SB_END_PACKED __pragma(pack(pop))
 #endif
 
-#if defined( __GNUC__ )
+#if defined(__clang__)
+#define SB_COMPILER_CLANG
+#endif
+
+#if defined(__MINGW32__) || defined(__MINGW64__)
+#define SB_COMPILER_MINGW
+#endif
+#if defined(__GNUC__)
 #define SB_COMPILER_GCC
 #endif
 
-#ifdef SB_COMPILER_GCC
+#if defined(SB_COMPILER_MINGW)
+/* https://gcc.gnu.org/bugzilla/show_bug.cgi?id=52991 */
+#define SB_BEGIN_PACKED _Pragma("pack(push,1)")
+#define SB_END_PACKED _Pragma("pack(pop)")
+#elif defined(SB_COMPILER_GCC) || defined(SB_COMPILER_CLANG)
 #define SB_ATTRIBUTE_PACKED __attribute__(( packed ))
+#elif defined(SB_COMPILER_MSVC)
+#define SB_BEGIN_PACKED __pragma(pack(push,1))
+#define SB_END_PACKED __pragma(pack(pop))
+#else
+#error("unknown compiler");
 #endif
 
 #ifndef SB_ATTRIBUTE_PACKED

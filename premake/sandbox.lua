@@ -445,11 +445,11 @@ solution( ProjectName )
 		elseif os.istarget('windows') then
 			
 			links {
-				'OpenGL32',
-				'WinMM',
+				'opengl32',
+				'winmm',
 			}
 			if use_network then
-				links { 'Winhttp', }
+				links { 'winhttp', }
 			end
 		elseif os.istarget('android') then
 			files { sandbox_dir .. '/platform/android/main.cpp' }
