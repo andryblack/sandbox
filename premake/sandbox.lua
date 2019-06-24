@@ -25,14 +25,14 @@ swf_size = SwfSize or { Width = 800, Height = 600}
 
 solution( ProjectName )
 
-	if os.is('emscripten') then
+	if os.istarget('emscripten') then
 		toolset 'emcc'
 	end
 
 	configurations { 'Debug', 'Release' }
 
-	if os.is('android') then
-		android_abis(AndroidConfig.abi or {'armeabi'})
+	if os.istarget('android') then
+		android_buildabis(AndroidConfig.abi or {'armeabi'})
 		android_stl(AndroidConfig.stl or 'gnustl_static')
 		android_activity(AndroidConfig.activity or 'com.sandboxgames.Activity')
 		android_libs(path.getabsolute(path.join(sandbox_dir,'GHL/src/android_ghl','src')))
@@ -117,7 +117,7 @@ solution( ProjectName )
 	local os_map = { 
 		macosx = 'osx' 
 	}
-	local platform_id = os.get()
+	local platform_id = os.target()
 
 
 	if platform_id == 'flash' then
@@ -138,7 +138,6 @@ solution( ProjectName )
 		table.insert(hide_options,'-fvisibility=hidden')
 	end
 
-
 	if platform_id == 'ios' then
 		defines { 'GHL_PLATFORM_IOS' }
 		xcodebuildsettings { 
@@ -152,7 +151,7 @@ solution( ProjectName )
 	elseif platform_id == 'macosx' then
 		buildoptions{'-Wno-undefined-var-template'}
 	elseif platform_id == 'windows' then
-		flags{ 'StaticRuntime' }
+		staticruntime "On"
 	end
 
 	if solution_config then
@@ -165,7 +164,7 @@ solution( ProjectName )
 
 	configuration "Debug"
          defines { "DEBUG" }
-         flags { "Symbols" }
+         symbols "On"
     if platform_id == 'flash' then
     	buildoptions { '-g' }
     end
@@ -178,7 +177,7 @@ solution( ProjectName )
     elseif platform_id == 'emscripten' then
     	buildoptions { '-O2' }
     else
-    	flags { "OptimizeSpeed" }    
+    	optimize "Speed"
    	end
 
 	configuration {}
@@ -205,7 +204,7 @@ solution( ProjectName )
 		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir .. '/' .. 'release')
 		configuration {}
 
-		if os.is('ios') then
+		if os.istarget('ios') then
 			xcodebuildsettings {
 				SKIP_INSTALL='YES',
 			}
@@ -330,7 +329,7 @@ solution( ProjectName )
 			defines 'SB_USE_NETWORK'
 		end
 
-		if os.is('ios') then
+		if os.istarget('ios') then
 			includedirs { sandbox_dir .. '/platform/ios' }
 			files { sandbox_dir .. '/platform/ios/sb_ios_extension.*',
 					sandbox_dir .. '/platform/ios/main.*',}
@@ -343,15 +342,15 @@ solution( ProjectName )
 			if UseModules.iOSPN then
 				files { sandbox_dir .. '/platform/ios/pn_extension.*',}
 			end
-		elseif os.is('macosx') then
+		elseif os.istarget('macosx') then
 			files { sandbox_dir .. '/platform/osx/main.mm',
 					sandbox_dir .. '/platform/osx/*.cpp',
 					sandbox_dir .. '/platform/osx/*.h' }
-		elseif os.is('flash') then
+		elseif os.istarget('flash') then
 			files { sandbox_dir .. '/platform/flash/*.cpp' }
-		elseif os.is('windows') then
+		elseif os.istarget('windows') then
 			files { sandbox_dir .. '/platform/windows/*.cpp' }
-		elseif os.is('android') then
+		elseif os.istarget('android') then
 			files { sandbox_dir .. '/platform/android/sb_android_extension.cpp' }
 			files { sandbox_dir .. '/platform/android/jni_utils.cpp' }
 			if use.AndroidGooglePlayService  then
@@ -363,7 +362,7 @@ solution( ProjectName )
 			if use.AndroidPN then
 				files { sandbox_dir .. '/platform/android/pn_extension.*',}
 			end
-		elseif os.is( 'emscripten' ) then
+		elseif os.istarget( 'emscripten' ) then
 			files { sandbox_dir .. '/platform/emscripten/*.cpp' }
 		end
 
@@ -412,7 +411,7 @@ solution( ProjectName )
 				sandbox_dir .. '/external/spine-runtime-c/include',
 			}
 		end
-		if os.is('ios') then
+		if os.istarget('ios') then
 			xcodebuildsettings {
 				INSTALL_PATH='/Applications'
 			}
@@ -431,28 +430,28 @@ solution( ProjectName )
 					'GameKit.framework'
 				}
 			end
-		elseif os.is('macosx') then
+		elseif os.istarget('macosx') then
 			links { 
 				'OpenGL.framework', 
 				'OpenAL.framework',
 				'Cocoa.framework',
 				'AudioToolbox.framework' }
 
-		elseif os.is('flash') then
+		elseif os.istarget('flash') then
 			links {
 				'AS3++',
 				'Flash++'
 			}
-		elseif os.is('windows') then
+		elseif os.istarget('windows') then
 			
 			links {
 				'OpenGL32',
-				'WinMM'
+				'WinMM',
 			}
 			if use_network then
 				links { 'Winhttp', }
 			end
-		elseif os.is('android') then
+		elseif os.istarget('android') then
 			files { sandbox_dir .. '/platform/android/main.cpp' }
 			links {
 				'android',
@@ -464,7 +463,7 @@ solution( ProjectName )
 				'GLESv2'
 			}
 			
-		elseif os.is('emscripten') then
+		elseif os.istarget('emscripten') then
 			links {
 				'gl.js','idbstore.js','idbfs.js'
 			}
@@ -544,12 +543,12 @@ solution( ProjectName )
 		linkoptions( hide_options )
 
 		configuration "Release"
-			if os.is('flash') then
+			if os.istarget('flash') then
 				linkoptions  {
 					'-O4'
 				}
 			end
-			if os.is('android') then
+			if os.istarget('android') then
 				android_key_store(path.getabsolute(path.join(_WORKING_DIR,AndroidConfig.keystore)))
 				android_key_alias(AndroidConfig.keyalias)
 			end
@@ -557,7 +556,7 @@ solution( ProjectName )
 		
 		configuration "Debug"
    			defines 'SB_DEBUG'
-   			if os.is('flash') then
+   			if os.istarget('flash') then
 				linkoptions  {
 					'-g'
 				}

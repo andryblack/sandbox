@@ -1,7 +1,7 @@
 local utils = require 'utils'
 
 if not platform_dir then
-	platform_dir = os.get()
+	platform_dir = os.target()
 end
 
 local append_path = utils.append_path
@@ -27,7 +27,7 @@ local ghl_defines = {}
 local ghl_sysincludes = {}
 
 
-		if (os.is('ios') or os.is('macosx')) and not ghl_disable_media  then
+		if (os.istarget('ios') or os.istarget('macosx')) and not ghl_disable_media  then
 			ghl_disable_jpeg = true
 		end
 		if not ghl_disable_jpeg then
@@ -119,7 +119,7 @@ project 'GHL-tremor'
 		configure_lib_targetdir()
 		targetname ('GHL-tremor-' .. platform_dir)
 		buildoptions{'-O3'}
-		if os.is('android') then
+		if os.istarget('android') then
 			android_ndk_arm_mode(true)
 		end
 		
@@ -189,7 +189,7 @@ project 'GHL'
 		local use_openal = false
 		local use_opengl = false
 		
-		if os.is('ios') or os.is('macosx') then
+		if os.istarget('ios') or os.istarget('macosx') then
 			if not ghl_disable_media then
 				if ghl_use_avaudioengine then
 					defines 'GHL_USE_AVAUDIOENGINE'
@@ -201,19 +201,19 @@ project 'GHL'
 			use_opengl = not ghl_disable_media
 		end
 
-		if os.is('windows') then
+		if os.istarget('windows') then
 			use_opengl = not ghl_disable_media
 		end
 
-		if os.is('android') then
+		if os.istarget('android') then
 			use_opengl = not ghl_disable_media
 		end
 
-		if os.is('emscripten') then
+		if os.istarget('emscripten') then
 			use_opengl = true
 		end
 
-		local use_opengles = use_opengl and ( os.is('ios') or os.is('android') or os.is('emscripten') )
+		local use_opengles = use_opengl and ( os.istarget('ios') or os.istarget('android') or os.istarget('emscripten') )
 
 		if use_openal then
 			files {
@@ -238,7 +238,7 @@ project 'GHL'
 					ghl_src .. 'render/opengl/gles2_api.*',
 					ghl_src .. 'render/opengl/render_opengles.*',
 				}
-				if os.is('emscripten') then
+				if os.istarget('emscripten') then
 					files {
 						ghl_src .. 'render/opengl/render_webgl.*',
 					}
@@ -255,7 +255,7 @@ project 'GHL'
 		
 		if build_cli_tools then
 			defines{ 'GHL_BUILD_TOOLS' }
-			if os.is('windows') then
+			if os.istarget('windows') then
 				files { ghl_src .. 'vfs/vfs_win32.*', }
 			else
 				files { ghl_src .. 'vfs/vfs_posix.*', 
@@ -263,16 +263,16 @@ project 'GHL'
 				}
 			end
 		else
-			if os.is('macosx') or os.is('ios') then	
+			if os.istarget('macosx') or os.istarget('ios') then	
 				files { ghl_src .. 'vfs/vfs_cocoa.*',
 						ghl_src .. 'vfs/posix_stream.*', }
-			elseif os.is('windows') then
+			elseif os.istarget('windows') then
 				files { ghl_src .. 'vfs/vfs_win32.*', }
-			elseif os.is('android') then
+			elseif os.istarget('android') then
 				files { ghl_src .. 'vfs/vfs_posix.*',
 					ghl_src .. 'vfs/posix_stream.*',
 					ghl_src .. 'vfs/vfs_android.*',}
-			elseif os.is('emscripten') then
+			elseif os.istarget('emscripten') then
 				files { ghl_src .. 'vfs/vfs_emscripten.*',
 					ghl_src .. 'vfs/vfs_posix.*',
 					ghl_src .. 'vfs/posix_stream.*',
@@ -284,7 +284,7 @@ project 'GHL'
 		end
 
 		if not ghl_disable_media then
-			if os.is('macosx') then	
+			if os.istarget('macosx') then	
 				files { 
 					ghl_src .. 'winlib/winlib_cocoa.*',
 					ghl_src .. 'winlib/winlib_cocoa_time.*',
@@ -296,7 +296,7 @@ project 'GHL'
 						ghl_src .. 'net/cocoa/ghl_net_cocoa.mm'
 					}
 				end
-			elseif os.is('ios') then
+			elseif os.istarget('ios') then
 				defines 'GHL_PLATFORM_IOS'
 				files {
 					ghl_src .. 'winlib/winlib_cocoatouch.*',
@@ -312,7 +312,7 @@ project 'GHL'
 						ghl_src .. 'net/cocoa/ghl_net_cocoa.mm'
 					}
 				end
-			elseif os.is('flash') then
+			elseif os.istarget('flash') then
 				--defines 'GHL_PLATFORM_FLASH'
 				files {
 					ghl_src .. 'winlib/winlib_flash.*',
@@ -325,7 +325,7 @@ project 'GHL'
 						ghl_src .. 'net/flash/ghl_net_flash.cpp'
 					}
 				end
-			elseif os.is('windows') then
+			elseif os.istarget('windows') then
 				--defines 'GHL_PLATFORM_FLASH'
 				files {
 					ghl_src .. 'winlib/winlib_win32.*',
@@ -337,7 +337,7 @@ project 'GHL'
 						ghl_src .. 'net/win32/ghl_net_win32.cpp'
 					}
 				end
-			elseif os.is('android') then
+			elseif os.istarget('android') then
 				--defines 'GHL_PLATFORM_FLASH'
 				files {
 					ghl_src .. 'winlib/winlib_android.*',
@@ -350,7 +350,7 @@ project 'GHL'
 						ghl_src .. 'net/android/ghl_net_android.cpp'
 					}
 				end
-			elseif os.is('emscripten') then
+			elseif os.istarget('emscripten') then
 				defines 'GHL_NO_ES1'
 				files {
 					ghl_src .. 'winlib/winlib_emscripten.*',

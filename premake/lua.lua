@@ -2,13 +2,7 @@
 local utils = require 'utils'
 
 if not platform_dir then
-	platform_dir = os.get()
-end
-
-if not configure_lib_targetdir then
-	function configure_lib_targetdir(  )
-		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir )
-	end
+	platform_dir = os.target()
 end
 
 local lua_root = external_module_lua or (sandbox_dir .. '/external/lua/')
@@ -19,9 +13,9 @@ project 'lua'
 		targetname ('lua-' .. platform_dir)
 
 		if build_cli_tools then
-			if os.is('macosx') then
+			if os.istarget('macosx') then
 				defines{ 'LUA_USE_MACOSX' }
-			elseif os.is('linux') then
+			elseif os.istarget('linux') then
 				defines{ 'LUA_USE_LINUX' }
 			end
 		end

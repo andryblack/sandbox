@@ -29,7 +29,7 @@ newoption {
 
 -- android
 table.insert(premake.option.get('os').allowed,{'android',"Google android"})
-include( 'android/android.lua' )
+include( 'sbandroid/android.lua' )
 
 
 -- emscripten

@@ -1,12 +1,13 @@
 local build = {}
 local project   = premake.project
 local config    = premake.config
-local make      = premake.make
 local solution 	= premake.solution
 local fileconfig = premake.fileconfig
-local ndk       = premake.modules.android.ndk
+local ndk       = premake.modules.sbandroid.ndk
 
 function build.onsolution( sln )
+
+
 	premake.escaper(nil)
 
 	premake.generate(sln, 'build.gradle', build.generate_build_gradle)
@@ -395,7 +396,7 @@ function build.generate_app_build_gradle( sln , prj )
 	local libname = 'lib' .. prj.name .. '.so'
 
 	for cfg in project.eachconfig(prj) do
-		for _,abi in ipairs(sln.android_abis) do
+		for _,abi in ipairs(sln.android_buildabis) do
 			_x('task copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym(type: Copy, dependsOn: buildJNI' .. cfg.name .. ') {')
 			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname,'obj','local',abi,libname)) .. "'")
 			_x(1,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname .. '_symbols',abi)) .. "'")
@@ -403,7 +404,7 @@ function build.generate_app_build_gradle( sln , prj )
 		end
 	end
 	for cfg in project.eachconfig(prj) do
-		for _,abi in ipairs(sln.android_abis) do
+		for _,abi in ipairs(sln.android_buildabis) do
 			_x('task copyJNI' .. cfg.name .. make_abi_name(abi).. '(type: Copy, dependsOn: buildJNI' .. cfg.name .. ') {')
 			_x(1,'from ' .. "'" .. path.getabsolute(path.join(sln.location,prj.shortname or prj.name,cfg.shortname,'libs',abi,libname)) .. "'")
 			_x(1,'into ' .. "'" .. path.getabsolute(path.join(prj.targetdir,cfg.shortname,abi)) .. "'")
@@ -452,7 +453,7 @@ function build.generate_app_build_gradle( sln , prj )
 		-- _x(1,'}')
 		-- _x(1,"if (task.name == 'compile%sNdk') {",cfg.name)
 		local abis = {}
-		for _,abi in ipairs(sln.android_abis) do
+		for _,abi in ipairs(sln.android_buildabis) do
 			table.insert(abis,'copyJNI' .. cfg.name .. make_abi_name(abi))
 			table.insert(abis,'copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym')
 		end

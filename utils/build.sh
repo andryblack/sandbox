@@ -39,7 +39,7 @@ mkdir -p $BIN/$PLATFORM
 BOOTSTRAPPREMAKE=$BIN/$PLATFORM/premake5$EXE
 
 if [ ! -f "$BOOTSTRAPPREMAKE" ]; then
-	BOOTSTRAPPREMAKE=$BIN/$PLATFORM/premake4$EXE
+	BOOTSTRAPPREMAKE=$BIN/$PLATFORM/premake5$EXE
 fi
 
 if [ ! -f "$BOOTSTRAPPREMAKE" ]; then
@@ -47,11 +47,11 @@ if [ ! -f "$BOOTSTRAPPREMAKE" ]; then
 	if [[ "$PLATFORM" == "osx" ]]; then
 		BOOTSTRAPPREMAKE=$BIN/$PLATFORM/premake5
 		echo "try get it"
-		cd $BIN/$PLATFORM && curl -L "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha8/premake-5.0.0-alpha8-macosx.tar.gz" | tar xz 
+		cd $BIN/$PLATFORM && curl -L "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-macosx.tar.gz" | tar xz 
 	elif [[ "$PLATFORM" != "windows" ]]; then
 		BOOTSTRAPPREMAKE=$BIN/$PLATFORM/premake5
 		echo "try get it"
-		cd $BIN/$PLATFORM && wget -O - "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha8/premake-5.0.0-alpha8-linux.tar.gz" | tar xz 
+		cd $BIN/$PLATFORM && wget -O - "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-linux.tar.gz" | tar xz 
 	fi
 	exit 1
 fi
@@ -64,7 +64,7 @@ rm -rf Makefile
 rm -Rf obj
 $BOOTSTRAPPREMAKE clean
 $BOOTSTRAPPREMAKE embed || exit 1
-$BOOTSTRAPPREMAKE --no-curl $TARGET || exit 1
+$BOOTSTRAPPREMAKE --no-curl --no-luasocket $TARGET || exit 1
 $MAKE config=release -j8 || exit 1
 cp $UTILS/premake5/bin/release/* $BIN/$PLATFORM
 PREMAKE5=$BIN/$PLATFORM/premake5$EXE
@@ -73,7 +73,7 @@ cd $UTILS
 echo "rebuild assetsbuilder"
 cd $UTILS/assetsbuilder
 rm -rf Makefile obj *.make
-$PREMAKE5 --scripts=$ROOT/premake $TARGET || exit 1
+$PREMAKE5 --scripts=$ROOT/premake $TARGET --to=. || exit 1
 $MAKE config=release -j8 || exit 1
 cp $UTILS/assetsbuilder/bin/release/* $BIN/$PLATFORM
 cd $UTILS

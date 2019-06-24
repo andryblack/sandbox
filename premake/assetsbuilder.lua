@@ -1,6 +1,11 @@
 ---
 
 
+if not configure_lib_targetdir then
+	function configure_lib_targetdir(  )
+		targetdir (_WORKING_DIR .. '/lib/' .. platform_dir )
+	end
+end
 	
 --
 -- Register supporting actions and options.
@@ -20,7 +25,9 @@
 		}
 
 
-		flags       { "No64BitChecks", "ExtraWarnings", "StaticRuntime" }
+		flags       { "No64BitChecks" }
+		warnings "Extra"
+		staticruntime "On"
 
 		if data and data.flags then
 			flags(data.flags)
@@ -33,14 +40,14 @@
 		configuration "Debug"
 			targetdir   "bin/debug"
 			defines     { "_DEBUG" , "SB_DEBUG" }
-			flags       { "Symbols" }
+			symbols "On"
 
 		configuration "Release"
 			targetdir   "bin/release"
 			defines     "NDEBUG"
 			defines 	"SB_SILENT"
 			defines 	"GHL_SILENT"
-			flags       { "OptimizeSize" }
+			optimize "Size"
 
 		configuration "vs*"
 			defines     { "_CRT_SECURE_NO_WARNINGS" }

@@ -12,7 +12,13 @@ project 'yajl'
 				sandbox_dir .. '/include',
 		}
 		os.mkdir(path.getabsolute(sandbox_dir..'/include/yajl'))
-		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api') .. '/*.h',
+		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api/yajl_common.h'),
+			path.getabsolute(sandbox_dir..'/include/yajl/'))
+		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api/yajl_gen.h'),
+			path.getabsolute(sandbox_dir..'/include/yajl/'))
+		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api/yajl_parse.h'),
+			path.getabsolute(sandbox_dir..'/include/yajl/'))
+		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api/yajl_tree.h'),
 			path.getabsolute(sandbox_dir..'/include/yajl/'))
 		
 		files(utils.append_path(sandbox_dir .. '/external/yajl/src/',yajl_files))

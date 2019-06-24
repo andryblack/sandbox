@@ -7,9 +7,9 @@
 local ndk       = {}
 local project   = premake.project
 local config    = premake.config
-local make      = premake.make
 local solution 	= premake.solution
 local fileconfig = premake.fileconfig
+local make      = premake.make
 
 -- Constants
 ndk.ANDROID     = 'android'
@@ -45,6 +45,8 @@ function ndk.isValidProject(prj)
 end
 
 function ndk.onsolution( sln )
+	local make      = premake.make
+
 	premake.escaper(make.esc)
 	
 	local project_name = sln.shortname or sln.name
@@ -190,7 +192,8 @@ end
 
 -- Write a list of relative paths following the tag, e.g. for source files, includes, ..
 function ndk.writeRelativePaths(tag, location, paths, local_path, op)
-		
+	local make      = premake.make
+
 	-- Remap paths relative to project and escape them
 	for i,p in ipairs(paths) do
 		paths[i] = make.esc(path.getrelative(location, p))
@@ -337,7 +340,7 @@ function ndk.generateMakefile(prj,cfg,main)
 	-- Filter out header files
 	local files = {}
 	local arch_files = {}
-	for _,abi in ipairs(premake.modules.android.abis) do
+	for _,abi in ipairs(premake.modules.sbandroid.abis) do
 		arch_files[abi] = {}
 	end
 
@@ -365,7 +368,7 @@ function ndk.generateMakefile(prj,cfg,main)
 
 	ndk.writeRelativePaths('LOCAL_SRC_FILES', local_path, files, false)
 
-	for _,abi in ipairs(sln.android_abis) do
+	for _,abi in ipairs(sln.android_buildabis) do
 		if next(arch_files[abi]) then
 			_x('ifeq ($(TARGET_ARCH_ABI),%s)',abi)
 			ndk.writeRelativePaths('LOCAL_SRC_FILES', local_path, arch_files[abi], false, '+=')

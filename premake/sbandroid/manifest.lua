@@ -4,7 +4,7 @@
 -- Copyright (c) 2014 Will Vale and the Premake project
 --
 
-local ndk       = premake.modules.android.ndk
+local ndk       = premake.modules.sbandroid.ndk
 local project   = premake.project
 local config    = premake.config
 local solution 	= premake.solution

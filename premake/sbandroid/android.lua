@@ -1,11 +1,10 @@
-premake.modules.android = {}
+premake.modules.sbandroid = {}
 
-local android = premake.modules.android
+local android = premake.modules.sbandroid
 
 -- Shortcuts
 local api       = premake.api
 local config    = premake.config
-local make      = premake.make
 local project   = premake.project
 local solution  = premake.solution
 
@@ -22,7 +21,7 @@ android.abis = {
 
 -- Specify android ABIs
 api.register {
-	name = "android_abis",
+	name = "android_buildabis",
 	scope = "solution",
 	kind = "string",
 	list = "true",
