@@ -61,6 +61,12 @@ api.register {
 	kind = 'string'
 }
 
+api.register {
+	name = 'android_plugin_version',
+	scope = 'solution',
+	kind = 'string'
+}
+
 -- Specify android STL support
 api.register {
 	name = "android_stl",

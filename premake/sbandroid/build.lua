@@ -129,7 +129,7 @@ function build.generate_build_gradle(sln)
     end
     _x(1,'}')
     _x(1,'dependencies {')
-    _x(2,"classpath 'com.android.tools.build:gradle:3.2.0'")
+    _x(2,"classpath 'com.android.tools.build:gradle:"..(sln.android_plugin_version or '3.2.0') .. "'")
     if sln.android_module and
     	(sln.android_module.gcm or sln.android_module.fcm or sln.android_module.gps) then
     	_x(2,"classpath 'com.google.gms:google-services:"..(sln.android_google_services_version or '4.0.1').."'")
@@ -142,9 +142,6 @@ function build.generate_build_gradle(sln)
     _x(1,'}')
 	_x('}')
 	
-	-- dependencies {
- --        classpath 'com.android.tools.build:gradle-experimental:0.7.0'
- --    }
 	_x('allprojects {')
     _x(1,'repositories {')
     _x(2,'google()')
@@ -429,7 +426,7 @@ function build.generate_app_build_gradle( sln , prj )
 	
 	_p('afterEvaluate {')
 	-- for cfg in project.eachconfig(prj) do
-	-- 	for _,abi in ipairs(sln.android_abis) do
+	-- 	for _,abi in ipairs(sln.android_buildabis) do
 	-- 		_x(1,'copyJNI' .. cfg.name .. make_abi_name(abi) .. '.dependsOn buildJNI' .. cfg.name)
 	-- 		_x(1,'copyJNI' .. cfg.name .. make_abi_name(abi) .. 'sym.dependsOn buildJNI' .. cfg.name)
 	-- 	end

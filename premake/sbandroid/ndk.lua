@@ -150,8 +150,8 @@ function ndk.generateAppMakefile(sln, cfg)
 	if sln.android_api_level then
 		_p('APP_PLATFORM := android-%d', sln.android_api_level)
 	end
-	if sln.android_abis then
-		_p('APP_ABI := %s', table.concat(sln.android_abis, ' '))
+	if sln.android_buildabis then
+		_p('APP_ABI := %s', table.concat(sln.android_buildabis, ' '))
 	end
 	if type(sln.android_stl) == 'string' then
 		_p('APP_STL := %s', sln.android_stl)

@@ -12,7 +12,24 @@ local fileconfig = premake.fileconfig
 
 local manifest = {}
 
+local function get_field( field, data  )
+  local l,o = string.match(field,'^(.-)%.(.+)')
+  while l and o do
+    data = data[l]
+    if not data then
+      return nil
+    end
+    field = o
+    l,o = string.match(field,'^(.-)%.(.+)')
+  end
+  return data[field]
+end
 
+local function expand_tokens( value, tokens )
+	return value:gsub("%%{(.-)}", function(token)
+		return assert(get_field(token,tokens),'unexpected token: ' .. tostring(token))
+	end)
+end
 
 function manifest.onsolution( sln )
 	premake.escaper(nil)
@@ -47,11 +64,10 @@ function manifest.generateManifest(sln,prj)
 		local manifest_data = mainfest_file:read('*a')
 		mainfest_file:close()
 
-		local detoken = premake.detoken
-
-		local manifest_out = detoken.expand(manifest_data, {
+		local manifest_out = expand_tokens(manifest_data,{
 			prj = prj, sln = sln
 		})
+
 		_p(manifest_out)
 		return
 	end
