@@ -7,9 +7,6 @@
 [submodule "GHL"]
 	path = GHL
 	url = git@github.com:andryblack/GHL.git
-[submodule "utils/glsl2agal"]
-	path = utils/glsl2agal
-	url = git@github.com:andryblack/glsl2agal.git
 [submodule "yajl"]
 	path = external/yajl
 	url = git@github.com:lloyd/yajl.git

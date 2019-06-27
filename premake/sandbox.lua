@@ -10,9 +10,6 @@ if SandboxRoot then
 	sandbox_dir = _WORKING_DIR .. '/' .. SandboxRoot
 end
 
-flex_sdk_dir = nil
-flascc_sdk_dir = nil
-
 if not AndroidConfig then
 	AndroidConfig = {}
 end
@@ -21,7 +18,6 @@ end
 
 use_network = use.Network
 
-swf_size = SwfSize or { Width = 800, Height = 600}
 
 solution( ProjectName )
 
@@ -120,18 +116,7 @@ solution( ProjectName )
 	local platform_id = os.target()
 
 
-	if platform_id == 'flash' then
-		flex_sdk_dir = _OPTIONS['flex-sdk-dir']
-		flascc_sdk_dir = _OPTIONS['flascc-sdk-dir']
-		if flex_sdk_dir == nil then
-			error('must specify flex sdk dir')
-		end
-		if flascc_sdk_dir == nil then
-			error('must specify crossbridge sdk dir')
-		end
-		gccprefix ( flascc_sdk_dir .. '/usr/bin/' )
-		buildoptions {'-Wno-write-strings', '-Wno-trigraphs' }
-	elseif platform_id == 'emscripten' then
+	if platform_id == 'emscripten' then
 		buildoptions { '-s NO_EXIT_RUNTIME=1','-s STRICT=1','-s USE_WEBGL2=1'}
 		linkoptions{ '-s STRICT=1', '-s USE_WEBGL2=1' }
 	elseif platform_id ~= 'windows' then
@@ -165,16 +150,10 @@ solution( ProjectName )
 	configuration "Debug"
          defines { "DEBUG" }
          symbols "On"
-    if platform_id == 'flash' then
-    	buildoptions { '-g' }
-    end
-
  
     configuration "Release"
          defines { "NDEBUG" }
-    if platform_id == 'flash' then
-    	buildoptions { '-O4' }
-    elseif platform_id == 'emscripten' then
+    if platform_id == 'emscripten' then
     	buildoptions { '-O2' }
     else
     	optimize "Speed"
@@ -346,8 +325,6 @@ solution( ProjectName )
 			files { sandbox_dir .. '/platform/osx/main.mm',
 					sandbox_dir .. '/platform/osx/*.cpp',
 					sandbox_dir .. '/platform/osx/*.h' }
-		elseif os.istarget('flash') then
-			files { sandbox_dir .. '/platform/flash/*.cpp' }
 		elseif os.istarget('windows') then
 			files { sandbox_dir .. '/platform/windows/*.cpp' }
 		elseif os.istarget('android') then
@@ -437,11 +414,6 @@ solution( ProjectName )
 				'Cocoa.framework',
 				'AudioToolbox.framework' }
 
-		elseif os.istarget('flash') then
-			links {
-				'AS3++',
-				'Flash++'
-			}
 		elseif os.istarget('windows') then
 			
 			links {
@@ -470,65 +442,6 @@ solution( ProjectName )
 		end
 
 
-		-- files {
-		-- 	_WORKING_DIR .. '/src/**.h',
-		-- 	_WORKING_DIR .. '/src/**.cpp'
-		-- }
-
-		-- resourcefolders {
-		-- 	_WORKING_DIR .. '/data'
-		-- }
-
-		-- if os.is('macosx') then
-		-- 	files { 
-		-- 		_WORKING_DIR .. '/projects/osx/main.mm',
-		-- 		_WORKING_DIR .. '/projects/osx/' .. ProjectName .. '_Mac-Info.plist'
-		-- 	}
-		-- 	prebuildcommands { "touch " .. path.getabsolute( _WORKING_DIR .. '/data') }
-		-- elseif os.is('ios') then
-		-- 	files { 
-		-- 		_WORKING_DIR .. '/projects/ios/main.mm',
-		-- 		_WORKING_DIR .. '/projects/ios/'..ProjectName..'_iOS-Info.plist',
-		-- 		_WORKING_DIR .. '/projects/ios/Default@2x.png',
-		-- 		_WORKING_DIR .. '/projects/ios/Default-568h@2x.png',
-		-- 	}
-		-- 	prebuildcommands { "touch " .. path.getabsolute(_WORKING_DIR .. '/data') }
-		-- elseif os.is('flash') then
-		-- 	targetextension( '.swf' )
-		-- 	files { 
-		-- 		_WORKING_DIR .. '/projects/flash/main.cpp',
-		-- 	}
-		-- 	prelinkcommands { 
-		-- 		'rm -f ' .. path.getabsolute( _WORKING_DIR .. '/bin' ) .. '/flash/' .. ProjectName .. '.swf',
-		-- 		flascc_sdk_dir .. '/usr/bin/genfs --type=embed ' .. path.getabsolute('data') .. ' ' .. path.getabsolute(_WORKING_DIR ..'/build/' .. platform_dir .. '/data') ,
-		-- 		[[java $(JVMARGS) -jar ]] .. flascc_sdk_dir .. [[/usr/lib/asc2.jar -merge -md \
-		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/builtin.abc \
-		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/playerglobal.abc \
-		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/BinaryData.abc \
-		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/ISpecialFile.abc \
-		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/IBackingStore.abc \
-		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/IVFS.abc \
-		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/InMemoryBackingStore.abc \
-		-- 			-import ]]..flascc_sdk_dir..[[/usr/lib/PlayerKernel.abc \
-		-- 			 ]]..flascc_sdk_dir..[[/usr/share/LSOBackingStore.as \
-		-- 			 ]]..path.getabsolute( _WORKING_DIR .. '/' .. ghl_src ) .. [[/flash/Console.as \
-		-- 			 ]]..path.getabsolute('build/' .. platform_dir .. '/data')..[[*.as -outdir ]]..path.getabsolute(_WORKING_DIR .. '/build/' .. platform_dir )..[[ -out Console
-		-- 		]]
-		-- 	}
-
-
-		-- 	linkoptions  {
-		-- 			'-jvmopt="-Xmx4096M"',
-		-- 			'-emit-swf',
-		-- 			'-swf-size=1024x768',
-		-- 			'-flto-api=exports.txt',
-		-- 			flascc_sdk_dir .. '/usr/lib/AlcVFSZip.abc',
-		-- 			'-symbol-abc=' .. path.getabsolute(_WORKING_DIR .. '/build') .. '/' .. platform_dir .. '/Console.abc'
-		-- 		}
-			
-			
-		-- end
-
 		sysincludedirs {
 			sandbox_dir .. '/GHL/include',
 			sandbox_dir .. '/include',
@@ -543,11 +456,6 @@ solution( ProjectName )
 		linkoptions( hide_options )
 
 		configuration "Release"
-			if os.istarget('flash') then
-				linkoptions  {
-					'-O4'
-				}
-			end
 			if os.istarget('android') then
 				android_key_store(path.getabsolute(path.join(_WORKING_DIR,AndroidConfig.keystore)))
 				android_key_alias(AndroidConfig.keyalias)
@@ -556,9 +464,5 @@ solution( ProjectName )
 		
 		configuration "Debug"
    			defines 'SB_DEBUG'
-   			if os.istarget('flash') then
-				linkoptions  {
-					'-g'
-				}
-			end
+  
 		configuration {}
