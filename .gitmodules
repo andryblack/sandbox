@@ -1,24 +1,24 @@
 [submodule "chipmunk"]
 	path = external/chipmunk
-	url = git@github.com:slembcke/Chipmunk-Physics.git
+	url = git://github.com/slembcke/Chipmunk-Physics.git
 [submodule "freetype"]
 	path = external/freetype
 	url = git://git.sv.gnu.org/freetype/freetype2.git
 [submodule "GHL"]
 	path = GHL
-	url = git@github.com:andryblack/GHL.git
+	url = git://github.com/andryblack/GHL.git
 [submodule "yajl"]
 	path = external/yajl
-	url = git@github.com:lloyd/yajl.git
+	url = git://github.com/lloyd/yajl.git
 [submodule "utils/premake5"]
 	path = utils/premake5
-	url = git@github.com:andryblack/premake-core.git
+	url = git://github.com/andryblack/premake-core.git
 [submodule "pugixml"]
 	path = external/pugixml
-	url = git@github.com:zeux/pugixml.git
+	url = git://github.com/zeux/pugixml.git
 [submodule "MyGUI"]
 	path = external/MyGUI
-	url = git@github.com:andryblack/mygui-1.git
+	url = git://github.com/andryblack/mygui-1.git
 [submodule "tlsf"]
 	path = external/tlsf
-	url = git@github.com:andryblack/tlsf-1.git
+	url = git://github.com/andryblack/tlsf-1.git
