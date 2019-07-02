@@ -9,8 +9,9 @@
 
 	local corePath = _SCRIPT_DIR
 
-	sandbox_dir = path.join(_SCRIPT_DIR,'../..')
-
+	print('_SCRIPT_DIR',_SCRIPT_DIR)
+	sandbox_dir = path.getabsolute(path.join(_SCRIPT_DIR,'../..'))
+	print('sandbox_dir',sandbox_dir)
 
 	build_cli_tools = true
 

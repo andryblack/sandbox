@@ -56,7 +56,7 @@ end
 			defines	{"_CRT_SECURE_NO_DEPRECATE" }
 
 		configuration "windows"
-			links { "ole32" }
+			links { "ole32","version" }
 
 		configuration "linux or bsd or hurd"
 			links       { "m" }

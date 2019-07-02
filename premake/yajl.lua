@@ -11,15 +11,15 @@ project 'yajl'
 		sysincludedirs {
 				sandbox_dir .. '/include',
 		}
-		os.mkdir(path.getabsolute(sandbox_dir..'/include/yajl'))
-		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api/yajl_common.h'),
-			path.getabsolute(sandbox_dir..'/include/yajl/'))
-		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api/yajl_gen.h'),
-			path.getabsolute(sandbox_dir..'/include/yajl/'))
-		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api/yajl_parse.h'),
-			path.getabsolute(sandbox_dir..'/include/yajl/'))
-		os.copyfile(path.getabsolute(sandbox_dir..'/external/yajl/src/api/yajl_tree.h'),
-			path.getabsolute(sandbox_dir..'/include/yajl/'))
+		local dst_dir = path.getabsolute(path.join(sandbox_dir,'include/yajl'))
+		os.mkdir(path.getabsolute(path.join(sandbox_dir,'include/yajl')))
+		local src_dir = path.getabsolute(path.join(sandbox_dir,'external/yajl/src/api'))
+		local incfiles = {
+			'yajl_common.h','yajl_gen.h','yajl_parse.h','yajl_tree.h'
+		}
+		for _,f in ipairs(incfiles) do
+			assert(os.copyfile(path.join(src_dir,f),path.join(dst_dir,f)))
+		end
 		
 		files(utils.append_path(sandbox_dir .. '/external/yajl/src/',yajl_files))
 

@@ -32,11 +32,12 @@ project 'lua'
 		end
 
 
-		os.mkdir(path.getabsolute(sandbox_dir..'/include/lua'))
-		os.copyfile(path.getabsolute(lua_root .. 'src/lua.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
-		os.copyfile(path.getabsolute(lua_root .. 'src/lualib.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
-		os.copyfile(path.getabsolute(lua_root .. 'src/lauxlib.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
-		os.copyfile(path.getabsolute(lua_root .. 'src/luaconf.h'),path.getabsolute(sandbox_dir..'/include/lua/'))
+		local src_dir = path.getabsolute(path.join(lua_root,'src'))
+		local dst_dir = path.getabsolute(path.join(sandbox_dir,'include/lua'))
+		os.mkdir(dst_dir)
+		for _,f in ipairs{'lua.h','lualib.h','lauxlib.h','lauxlib.h','luaconf.h'} do
+			assert(os.copyfile(path.join(src_dir,f),path.join(dst_dir,f)))
+		end
 		
 		files(utils.append_path(lua_root .. 'src/',lua_files))
 		files{ lua_root .. 'src/*.h' }
