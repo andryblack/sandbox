@@ -32,9 +32,14 @@ namespace Sandbox {
             m = Matrix2f::identity();
             v = Vector2f(0.0f,0.0f);
         }
-		void inverse() {
-            m.inverse();
-            v = - (m * v);
+        bool inverse() {
+            float det = m.get_determinant();
+            if (det != 0.0f) {
+                m.inverse(det);
+                v = - (m * v);
+                return true;
+            }
+            return false;
         }
         Transform2d inverted() const {
             Transform2d tr(*this);

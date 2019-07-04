@@ -313,10 +313,11 @@ namespace Sandbox {
         SpineImageAttachment* ra = static_cast<SpineImageAttachment*>(SUB_CAST(spRegionAttachment,attachment));
         if (ra->image) {
             tr = tr * ra->tr;
-            tr.inverse();
-            Vector2f hit = tr.transform(pos);
-            if (ra->image->CheckBit(hit.x, hit.y,resources))
-                return true;
+            if (tr.inverse()) {
+                Vector2f hit = tr.transform(pos);
+                if (ra->image->CheckBit(hit.x, hit.y,resources))
+                    return true;
+            }
         }
 
         return false;

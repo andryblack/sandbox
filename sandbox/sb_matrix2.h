@@ -56,9 +56,12 @@ namespace Sandbox {
         Matrix2f &subtract(const Matrix2f &m) {
             return *this = *this - m;
         }
-       
-        Matrix2f &inverse() {
-            float det = matrix[0*2+0]*matrix[1*2+1] - matrix[0*2+1]*matrix[1*2+0];
+
+        float get_determinant() const {
+            return matrix[0*2+0]*matrix[1*2+1] - matrix[0*2+1]*matrix[1*2+0];
+        }
+
+        Matrix2f &inverse(float det) {
             std::swap(matrix[0*2+0],matrix[1*2+1]);
             float idet = 1.0f / det;
             matrix[0*2+0]*=idet;
@@ -68,6 +71,10 @@ namespace Sandbox {
             return *this;
         }
 
+        Matrix2f &inverse() {
+            float det = get_determinant();
+            return inverse(det);
+        }
    
         Matrix2f &operator =(const Matrix2f &copy) { 
             matrix[0*2+0]=copy.matrix[0*2+0];
@@ -77,7 +84,7 @@ namespace Sandbox {
             return *this; 
         }
 
-      
+
         Matrix2f operator *(const Matrix2f &m) const { 
             return Matrix2f( 
                 matrix[0*2+0]*m.matrix[0*2+0]+matrix[1*2+0]*m.matrix[0*2+1],
