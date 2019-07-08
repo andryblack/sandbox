@@ -176,7 +176,7 @@ namespace Sandbox {
         }
         
         unsigned long stack<unsigned long>::get( lua_State* L, int idx ) {
-            return (unsigned long)lua_tonumber(L, idx);
+            return static_cast<unsigned long>(static_cast<long>(lua_tonumber(L, idx)));
         }
         
         void stack<unsigned short>::push( lua_State* L, unsigned short val) {
@@ -215,7 +215,7 @@ namespace Sandbox {
             lua_pushnumber(L, val);
         }
         unsigned long long stack<unsigned long long>::get( lua_State* L, int idx ) {
-            return (unsigned long long)lua_tonumber(L, idx);
+            return static_cast<unsigned long long>(static_cast<long long>(lua_tonumber(L, idx)));
         }
         
         
