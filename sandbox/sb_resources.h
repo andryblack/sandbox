@@ -110,6 +110,8 @@ namespace Sandbox {
         float GetScale() const { return m_scale; }
         void    ProcessMemoryMgmt();
         
+        
+        bool PreloadTexture(const char* filename, bool need_premultiply);
         const sb::string& GetCachePath() const { return m_cache_path; }
     
         TexturePoolPtr GetDefaultTexturePool();

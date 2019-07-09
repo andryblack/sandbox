@@ -61,7 +61,7 @@ namespace Sandbox {
         size_t GetMemoryUsage() const;
         void SetName(const sb::string& n) { m_file = n; }
         const sb::string& GetName() const { return m_file; }
-        
+        bool Preload(Resources* resources);
         void SetTextureSize(GHL::UInt32 tw,GHL::UInt32 th);
 	};
 	typedef sb::intrusive_ptr<Texture> TexturePtr;

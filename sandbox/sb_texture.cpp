@@ -43,6 +43,9 @@ namespace Sandbox {
     }
     
     
+    bool Texture::Preload(Resources* resources) {
+        return Present(resources);
+    }
     
     GHL::Texture* Texture::Present(Resources* resources) {
         if (!m_texture) {

@@ -358,7 +358,7 @@ namespace Sandbox {
         return texture;
     }
     GHL::Texture* Resources::ManagedLoadTexture( const sb::string& filename , bool& variant, bool premultiply ) {
-        //LogDebug() << "load texture " << filename;
+        SB_LOGD("ManagedLoadTexture: " << filename);
         GHL::Image* img = LoadImage(filename.c_str(),variant);
 		if (!img) {
 			return 0;
@@ -592,7 +592,7 @@ namespace Sandbox {
                 if (need_release) {
                     size_t lt = t->GetLiveTicks();
                     if ( (lt && lt < m_live_ticks) || t->unique() ) {
-                        
+                        SB_LOGD("FreeMemory release texture: " << it->first << " " << (t->unique() ? "free" : "old") );
                         size_t released = t->Release();
                         memory_used-=released;
                         if (released>need_release) {
@@ -652,5 +652,14 @@ namespace Sandbox {
             m_default_pool.reset( new TexturePool(this) );
         }
         return m_default_pool;
+    }
+    
+    bool Resources::PreloadTexture(const char* filename, bool need_premultiply) {
+        TexturePtr tex = GetTexture(filename, need_premultiply);
+        if (tex) {
+            tex->Present(this);
+            return true;
+        }
+        return false;
     }
 }

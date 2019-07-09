@@ -288,6 +288,7 @@ namespace Sandbox {
     
     void LuaVM::Destroy() {
         if (m_L) {
+            SB_LOGI("Destroy");
             luabind::Deinitialize(m_L);
             if (g_terminate_context == m_L) {
                 g_terminate_context = 0;
