@@ -24,7 +24,7 @@ namespace sb {
         
         
         template <class T> struct destroyer {
-            void operator () (const T *d) {
+            void operator () (const T *d) const {
                 delete d;
             }
         };

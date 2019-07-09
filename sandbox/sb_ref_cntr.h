@@ -6,12 +6,13 @@
 //  Copyright (c) 2012 Andrey Kunitsyn. All rights reserved.
 //
 
-#ifndef backgammon_osx_sb_ref_cntr_h
-#define backgammon_osx_sb_ref_cntr_h
+#ifndef SB_REF_COUNTER_H_INCLUDED
+#define SB_REF_COUNTER_H_INCLUDED
 
 #include <sbstd/sb_assert.h>
-#include <ghl_api.h>
+#include <ghl_ref_counter.h>
 #include "meta/sb_meta.h"
+#include <sbstd/sb_unique_ptr.h>
 
 namespace Sandbox {
     
@@ -56,8 +57,20 @@ namespace Sandbox {
             remove_ref();
         }
     };
+    
+    struct GHLRefCounterDeleter {
+        void operator () ( const GHL::RefCounter* o ) const {
+            o->Release();
+        }
+    };
 
+    template <class T>
+    class GHLObjectPtr : public sb::unique_ptr<T, GHLRefCounterDeleter> {
+    public:
+        GHLObjectPtr() {}
+        explicit GHLObjectPtr(T* v) : sb::unique_ptr<T, GHLRefCounterDeleter>(v) {}
+    };
     
 }
 
-#endif
+#endif /*SB_REF_COUNTER_H_INCLUDED*/
