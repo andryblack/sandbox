@@ -1067,13 +1067,7 @@ namespace Sandbox {
                 OnMouseUp(event->data.mouse_release.button, event->data.mouse_release.x, event->data.mouse_release.y);
                 break;
             case GHL::EVENT_TYPE_WHEEL:
-#ifdef SB_USE_MYGUI
-                if (MyGUI::InputManager::getInstancePtr()) {
-                    if (MyGUI::InputManager::getInstance().injectWheel(event->data.wheel.delta)) {
-                        
-                    }
-                }
-#endif
+                OnMouseWheel(event->data.wheel.delta);
                 break;
             case GHL::EVENT_TYPE_APP_STARTED:
                 OnAppStarted();
@@ -1177,6 +1171,21 @@ namespace Sandbox {
 #endif
         if (m_mouse_ctx) {
             m_mouse_ctx->call_self("onUp",key,fx,fy);
+        }
+    }
+    ///
+    void Application::OnMouseWheel(float delta) {
+#ifdef SB_USE_MYGUI
+        if (MyGUI::InputManager::getInstancePtr()) {
+            if (MyGUI::InputManager::getInstance().injectWheel(delta)) {
+                return;
+            }
+            if (MyGUI::InputManager::getInstance().isModalAny())
+                return;
+        }
+#endif
+        if (m_mouse_ctx && m_mouse_ctx->GetValue<bool>("onWheel")) {
+            m_mouse_ctx->call_self("onWheel",delta);
         }
     }
 	///

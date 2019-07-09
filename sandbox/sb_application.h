@@ -136,6 +136,8 @@ namespace Sandbox {
         ///
         virtual void OnMouseUp( GHL::MouseButton btn, GHL::Int32 x, GHL::Int32 y) ;
         ///
+        virtual void OnMouseWheel( float delta );
+        ///
         virtual void OnDeactivated() ;
         ///
         

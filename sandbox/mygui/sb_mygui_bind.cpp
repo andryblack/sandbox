@@ -354,6 +354,11 @@ bind(method("eventMouseMove", delegate_bind<MyGUI::Widget,
             MyGUI::EventHandle_WidgetFloatFloat,
             &MyGUI::WidgetInput::eventMouseMove>::lua_func));
 
+bind(method("eventMouseWheel", delegate_bind<MyGUI::Widget,
+            MyGUI::WidgetInput,
+            MyGUI::EventHandle_WidgetFloat,
+            &MyGUI::WidgetInput::eventMouseWheel>::lua_func));
+
 bind(method("eventKeySetFocus", delegate_bind<MyGUI::Widget,
             MyGUI::WidgetInput,
             MyGUI::EventHandle_WidgetWidget,
