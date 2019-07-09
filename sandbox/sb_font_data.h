@@ -104,7 +104,7 @@ namespace Sandbox {
         explicit OutlineFontDataProvider();
     public:
         const FontDataPtr& GetOutlineData() const { return m_outline_data; }
-        virtual void SetCharImage(UTF32Char code,const Sandbox::ImagePtr& image,float advance);
+        virtual void SetCharImage(UTF32Char code,const Sandbox::ImagePtr& image,float advance) SB_OVERRIDE;
         void set_outline_data(const FontDataPtr& data);
     };
 }

@@ -63,8 +63,8 @@ namespace Sandbox {
         void ReleaseAll();
 		
 		void SetBasePath(const char* path);
-		GHL::DataStream* OpenFile(const char* fn);
-        GHL::DataStream* OpenFileVariant(const char* fn,bool& variant);
+		GHL::DataStream* OpenFile(const char* fn) SB_OVERRIDE;
+        GHL::DataStream* OpenFileVariant(const char* fn,bool& variant) SB_OVERRIDE;
         GHL::WriteStream* OpenWrite(const char* fn,bool remove);
         void RemoveFile(const char* fn);
         
