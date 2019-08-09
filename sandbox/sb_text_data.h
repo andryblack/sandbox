@@ -26,6 +26,7 @@ namespace Sandbox {
             SYMB_SPACE = 0x0020,
             SYMB_NBSP = 0x00A0,
             SYMB_NEL = 0x0085,
+            SYMB_ZWSP = 0x200B
         };
         
         enum SymbolType {

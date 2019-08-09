@@ -303,6 +303,9 @@ namespace Sandbox {
         gl = m_data->add_glypth_int('\n');
         gl->asc = 0.0f;
         m_impl->put_image(gl, img);
+        gl = m_data->add_glypth_int(0x200B);
+        gl->asc = 0.0f;
+        m_impl->put_image(gl, img);
     }
     
     

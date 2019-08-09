@@ -144,11 +144,7 @@ namespace Sandbox {
             if (!info)
                 continue;
             
-            if (SYMB_SPACE == character)
-            {
-                roll_back.set(line_info.data.size(), text, count, width);
-            }
-            else if (SYMB_TAB == character)
+            if (SYMB_SPACE == character || SYMB_TAB == character || SYMB_ZWSP == character)
             {
                 roll_back.set(line_info.data.size(), text, count, width);
             }
