@@ -11,9 +11,6 @@
 #define SB_TRANSFORM2D_H
 
 #include "sb_matrix2.h"
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
 
 namespace Sandbox {
 	
@@ -62,29 +59,28 @@ namespace Sandbox {
 			return Transform2d(*this).translate(pos);
 		}
         /// rotate, radians
-        Transform2d& rotate(float _a) {
-            float a = _a;
-#ifdef __EMSCRIPTEN__
-            float c,s;
-            EM_ASM({HEAPF32[$1>>2]=Math_sin($0);HEAPF32[$2>>2]=Math_cos($0);},a,&s,&c);
-#else
-            float c = ::cosf(a);
-            float s = ::sinf(a);
-#endif
-            m*=Matrix2f(c,s,-s,c);
+        Transform2d& rotate(float a) {
+            float s,c;
+            sincosf(a,s,c);
+            m.rotate(s,c);
+            return *this;
+        }
+        Transform2d& rotate_scale(float a,float sx, float sy) {
+            float s,c;
+            sincosf(a,s,c);
+            m.rotate_scale(s,c,sx,sy);
             return *this;
         }
         Transform2d& rotate(const Vector2f& dir) {
             float c = dir.x;
             float s = -dir.y;
-            m*=Matrix2f(c,s,-s,c);
+            m.rotate(s,c);
             return *this;
         }
         // screw, radians
-        Transform2d& screw_x(float _a) {
-            float a = _a;
-            float c = ::cosf(a);
-            float s = ::sinf(a);
+        Transform2d& screw_x(float a) {
+            float s,c;
+            sincosf(a,s,c);
             m*=Matrix2f(c,0,-s,1);
             return *this;
         }
@@ -97,15 +93,15 @@ namespace Sandbox {
             return Transform2d(*this).rotate(dir);
         }
         Transform2d& scale(float s) {
-            m*=Matrix2f(s,0,0,s);
+            m.scale(s,s);
             return *this;
         }
         Transform2d& scale(float sx,float sy) {
-            m*=Matrix2f(sx,0,0,sy);
+            m.scale(sx,sy);
             return *this;
         }
         Transform2d& scale(const Vector2f& s) {
-            m*=Matrix2f(s.x,0,0,s.y);
+            m.scale(s.x,s.y);
             return *this;
         }
         Transform2d scaled(float sx,float sy) const {
@@ -113,17 +109,17 @@ namespace Sandbox {
             tr.scale(sx,sy);
             return tr;
         }
-		
+        
         Vector2f transform(const Vector2f& vert) const {
             return v + (m * vert);
         }
 		inline void transform(float x,float y,float& ox,float& oy) const {
-			ox = v.x+m.matrix[0*2+0]*x + m.matrix[1*2+0]*y;
-			oy = v.y+m.matrix[0*2+1]*x + m.matrix[1*2+1]*y;
+			ox = v.x+m.comp.a*x + m.comp.c*y;
+			oy = v.y+m.comp.b*x + m.comp.d*y;
 		}
         inline Vector2f transform(float x,float y) const {
-            return Vector2f(    v.x+m.matrix[0*2+0]*x + m.matrix[1*2+0]*y,
-                                v.y+m.matrix[0*2+1]*x + m.matrix[1*2+1]*y);
+            return Vector2f(    v.x+m.comp.a*x + m.comp.c*y,
+                                v.y+m.comp.b*x + m.comp.d*y);
         }
         Transform2d operator * (const Transform2d& tr) const {
             Transform2d res = *this;
@@ -137,6 +133,9 @@ namespace Sandbox {
         }
     };
 	
+    
+    
+    
 }
 
 #endif // SB_TRANSFORM2D_H

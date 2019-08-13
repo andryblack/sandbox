@@ -13,7 +13,7 @@ namespace Sandbox {
 
     struct Vector4f;
 
-    struct Matrix2f;
+    union Matrix2f;
 
     struct Matrix3f;
 

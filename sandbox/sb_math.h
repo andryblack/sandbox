@@ -8,6 +8,10 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 namespace Sandbox {
 	
 	
@@ -50,6 +54,21 @@ namespace Sandbox {
     struct Vector2f;
     Vector2f intersect_lines(const Vector2f& a1, const Vector2f& a2, const Vector2f& b1, const Vector2f& b2);
     bool intersect(const Vector2f& a1, const Vector2f& a2, const Vector2f& b1, const Vector2f& b2, Vector2f& res);
+    
+    static inline void sincosf(float a,float& s,float& c) {
+        
+#if defined( __EMSCRIPTEN__ )
+        EM_ASM({HEAPF32[$1>>2]=Math_sin($0);HEAPF32[$2>>2]=Math_cos($0);},a,&s,&c);
+#elif defined(__APPLE__)
+        __sincosf(a,&s,&c);
+#elif defined(__clang__)
+        c = __builtin_cosf(a);
+        s = __builtin_sinf(a);
+#else
+        c = ::cosf(a);
+        s = ::sinf(a);
+#endif
+    }
 }
 
 #endif /*SB_MATH_H*/
