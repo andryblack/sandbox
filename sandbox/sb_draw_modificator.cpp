@@ -10,7 +10,7 @@
 #include "sb_graphics.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::ColorModificator, meta::object)
-SB_META_DECLARE_OBJECT(Sandbox::TransformModificator, meta::object)
+SB_META_DECLARE_OBJECT(Sandbox::TransformModificator, Sandbox::TransformComponents)
 
 namespace Sandbox {
     
@@ -20,7 +20,7 @@ namespace Sandbox {
         g.SetColor(g.GetColor()*m_color);
     }
    
-    TransformModificator::TransformModificator() : m_scale_x(1.0f),m_scale_y(1.0f),m_angle(0.0f),m_screw_x(0.0f) {
+    TransformModificator::TransformModificator() : m_screw_x(0.0f) {
     }
     
     void TransformModificator::Apply(Graphics &g) const {
@@ -29,12 +29,16 @@ namespace Sandbox {
         g.SetTransform(tr);
     }
     void TransformModificator::Apply(Transform2d& tr) const {
-        tr.translate(m_origin);
-        tr.translate(m_translate);
+        tr.translate(m_origin + m_translate);
         if (m_screw_x != 0.0f)
             tr.screw_x(m_screw_x);
-        tr.rotate(m_angle).scale(m_scale_x,m_scale_y);
+        tr.rotate_scale(m_angle,m_scale.x,m_scale.y);
         tr.translate(-m_origin);
+    }
+    Transform2d TransformModificator::GetTransform() const {
+        Transform2d res;
+        Apply(res);
+        return res;
     }
     void TransformModificator::UnTransform(Vector2f& v) const {
         Transform2d tr;

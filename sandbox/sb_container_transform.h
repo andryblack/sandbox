@@ -8,11 +8,11 @@
 #ifndef SB_CONTAINER_TRANSFORM_H
 #define SB_CONTAINER_TRANSFORM_H
 
-#include "sb_container.h"
+#include "sb_container_base.h"
 
 namespace Sandbox {
     
-    class ContainerTransformBase : public Container {
+    class ContainerTransformBase : public ContainerBase {
         SB_META_OBJECT
     public:
         virtual void DrawChilds(Graphics& g) const SB_OVERRIDE;
@@ -20,6 +20,7 @@ namespace Sandbox {
         virtual void GetTransformToImpl(const SceneObject* root,Transform2d& tr) const SB_OVERRIDE;
         virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
         virtual const Transform2d& GetTransformM() const = 0;
+        virtual void DrawTransformed(Graphics& g) const;
     };
     typedef sb::intrusive_ptr<ContainerTransformBase> ContainerTransformBasePtr;
     
@@ -39,7 +40,7 @@ namespace Sandbox {
     class ContainerTransformCopy : public ContainerTransformBase {
         SB_META_OBJECT
     public:
-        ContainerTransformCopy(const ContainerTransformBasePtr& tr);
+        explicit ContainerTransformCopy(const ContainerTransformBasePtr& tr);
         virtual const Transform2d& GetTransformM() const SB_OVERRIDE;
     private:
         ContainerTransformBasePtr m_copy;

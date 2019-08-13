@@ -2,7 +2,7 @@
 #include "sb_graphics.h"
 #include <sbstd/sb_assert.h>
 
-SB_META_DECLARE_OBJECT(Sandbox::ContainerTransformBase, Sandbox::Container)
+SB_META_DECLARE_OBJECT(Sandbox::ContainerTransformBase, Sandbox::ContainerBase)
 SB_META_DECLARE_OBJECT(Sandbox::ContainerTransform, Sandbox::ContainerTransformBase)
 SB_META_DECLARE_OBJECT(Sandbox::ContainerTransformCopy, Sandbox::ContainerTransformBase)
 
@@ -12,17 +12,21 @@ namespace Sandbox {
     void ContainerTransformBase::DrawChilds(Graphics& g) const {
         Transform2d tr = g.GetTransform();
         g.SetTransform(tr * GetTransformM());
-        Container::DrawChilds(g);
+        DrawTransformed(g);
         g.SetTransform(tr);
+    }
+    
+    void ContainerTransformBase::DrawTransformed(Graphics& g) const {
+        ContainerBase::DrawChilds(g);
     }
  
     void ContainerTransformBase::GetTransformImpl(Transform2d& tr) const {
-        Container::GetTransformImpl(tr);
+        ContainerBase::GetTransformImpl(tr);
         tr = tr * GetTransformM();
     }
     
     void ContainerTransformBase::GetTransformToImpl(const SceneObject* root,Transform2d& tr) const {
-        Container::GetTransformToImpl(root,tr);
+        ContainerBase::GetTransformToImpl(root,tr);
         if (root != this) {
             tr = tr * GetTransformM();
         }
@@ -32,9 +36,6 @@ namespace Sandbox {
         SceneObject::GlobalToLocalImpl(v);
         Transform2d tr = GetTransformM().inverted();
         v = tr.transform(v);
-        if (Container::GetTransformM()) {
-            Container::GetTransformM()->UnTransform(v);
-        }
     }
     
     ContainerTransform::ContainerTransform() {

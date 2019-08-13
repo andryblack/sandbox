@@ -12,6 +12,7 @@
 #include "meta/sb_meta.h"
 #include <sbstd/sb_vector.h>
 #include "sb_color.h"
+#include "sb_transform_components.h"
 #include "sb_transform2d.h"
 
 namespace Sandbox {
@@ -22,7 +23,7 @@ namespace Sandbox {
     
     class ColorModificator : public meta::object {
         SB_META_OBJECT
-    private:
+    protected:
         Color   m_color;
     public:
         
@@ -35,42 +36,27 @@ namespace Sandbox {
     };
     typedef sb::intrusive_ptr<ColorModificator> ColorModificatorPtr;
     
-    class TransformModificator : public meta::object {
+    class TransformModificator : public TransformComponents {
         SB_META_OBJECT
-    private:
-        Vector2f	m_translate;
-		float		m_scale_x;
-		float		m_scale_y;
-		float		m_angle;
+    protected:
         float       m_screw_x;
         Vector2f    m_origin;
     public:
         TransformModificator();
         
-        void SetTranslate(const Vector2f& tr) { m_translate = tr; }
-		const Vector2f& GetTranslate() const { return m_translate;}
         void SetOrigin(const Vector2f& tr) { m_origin = tr; }
         const Vector2f& GetOrigin() const { return m_origin;}
         
-        void SetTranslateX(float x) { m_translate.x = x; }
-        float GetTranslateX() const { return m_translate.x;}
-        void SetTranslateY(float y) { m_translate.y = y; }
-        float GetTranslateY() const { return m_translate.y;}
-		void SetScale(float s) { m_scale_x = m_scale_y = s;}
-        float GetScale() const { return (m_scale_x + m_scale_y)*0.5f; }
-		void SetScaleX(float s) { m_scale_x = s;}
-		float GetScaleX() const { return m_scale_x;}
-		void SetScaleY(float s) { m_scale_y = s;}
-		float GetScaleY() const { return m_scale_y;}
-		void SetAngle(float a) { m_angle = a;}
-		float GetAngle() const { return m_angle;}
         void SetScrewX(float a) { m_screw_x = a;}
         float GetScrewX() const { return m_screw_x;}
+        
 
         void UnTransform(Vector2f& v) const;
         void Transform(Vector2f& v) const;
         void Apply(Graphics& g) const;
         void Apply(Transform2d& tr) const;
+        
+        Transform2d GetTransform() const;
     };
     typedef sb::intrusive_ptr<TransformModificator> TransformModificatorPtr;
 }

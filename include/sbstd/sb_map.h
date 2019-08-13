@@ -11,10 +11,12 @@
 
 
 #include <map>
-
+#include <utility>
 
 namespace sb {
     using std::map;
+    using std::pair;
+    using std::make_pair;
 }
 
 

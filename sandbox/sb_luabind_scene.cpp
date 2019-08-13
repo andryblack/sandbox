@@ -150,12 +150,16 @@ SB_META_PROPERTY_RW_DEF(A)
 SB_META_PROPERTY_RW_DEF(B)
 SB_META_END_KLASS_BIND()
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::Container)
+SB_META_BEGIN_KLASS_BIND(Sandbox::ContainerBase)
 SB_META_CONSTRUCTOR(())
 SB_META_METHOD(Reserve)
 SB_META_METHOD(AddObject)
 SB_META_METHOD(RemoveObject)
 SB_META_METHOD(Clear)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::Container)
+SB_META_CONSTRUCTOR(())
 SB_META_METHOD(GetTransformModificator)
 SB_META_METHOD(SetTransformModificator)
 SB_META_METHOD(GetColorModificator)
@@ -230,7 +234,7 @@ SB_META_PROPERTY_RW_DEF(Fade)
 SB_META_PROPERTY_RO(Active, IsActive)
 SB_META_END_KLASS_BIND()
 
-SB_META_BEGIN_KLASS_BIND(Sandbox::TransformModificator)
+SB_META_BEGIN_KLASS_BIND(Sandbox::TransformComponents)
 SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(Translate,GetTranslate,SetTranslate)
 SB_META_PROPERTY_RW(TranslateX,GetTranslateX,SetTranslateX)
@@ -239,6 +243,10 @@ SB_META_PROPERTY_RW(Scale,GetScale,SetScale)
 SB_META_PROPERTY_RW(ScaleX,GetScaleX,SetScaleX)
 SB_META_PROPERTY_RW(ScaleY,GetScaleY,SetScaleY)
 SB_META_PROPERTY_RW(Angle,GetAngle,SetAngle)
+SB_META_END_KLASS_BIND()
+
+SB_META_BEGIN_KLASS_BIND(Sandbox::TransformModificator)
+SB_META_CONSTRUCTOR(())
 SB_META_PROPERTY_RW(ScrewX,GetScrewX,SetScrewX)
 SB_META_PROPERTY_RW_DEF(Origin)
 SB_META_METHOD(UnTransform)
@@ -316,12 +324,14 @@ namespace Sandbox {
         luabind::Class<TextBox>(lua);
         luabind::Class<CircleObject>(lua);
         luabind::Class<LineObject>(lua);
+        luabind::Class<ContainerBase>(lua);
         luabind::Class<Container>(lua);
         luabind::Enum<BlendMode>(lua);
         luabind::Enum<MaskMode>(lua);
         luabind::Class<ContainerBlend>(lua);
         luabind::Class<ContainerClip>(lua);
         luabind::Class<ContainerMask>(lua);
+        luabind::Class<TransformComponents>(lua);
         luabind::Class<TransformModificator>(lua);
         luabind::Class<ColorModificator>(lua);
         luabind::Class<ContainerVisible>(lua);

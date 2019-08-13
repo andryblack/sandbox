@@ -10,26 +10,20 @@
 #ifndef SB_CONTAINER_H
 #define SB_CONTAINER_H
 
-#include "sb_scene_object.h"
+#include "sb_container_base.h"
 #include "sb_draw_modificator.h"
 #include <sbstd/sb_vector.h>
 
 namespace Sandbox {
 
-	class Container : public SceneObject {
+	class Container : public ContainerBase {
 	    SB_META_OBJECT
     public:
     	Container();
 		~Container();
 		
-		void Reserve(size_t size);
 		virtual void Draw(Graphics& g) const SB_OVERRIDE;
-		void AddObject(const SceneObjectPtr& o);
-		void RemoveObject(const SceneObjectPtr& obj);
-		void Clear();
-        
-        void Update( float dt ) SB_OVERRIDE;
-        
+		
         void SetTransformModificator(const TransformModificatorPtr& ptr);
         TransformModificatorPtr GetTransformModificator();
         
@@ -51,19 +45,14 @@ namespace Sandbox {
         void SetColor(const Color& c);
         const Color& GetColor() const;
         
-        void SortByOrder();
     protected:
-    	void UpdateChilds( float dt );
-		sb::vector<SceneObjectPtr> m_objects;
-        virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
+    	virtual void GlobalToLocalImpl(Vector2f& v) const SB_OVERRIDE;
         virtual void GetTransformImpl(Transform2d& tr) const SB_OVERRIDE;
         virtual void GetTransformToImpl(const SceneObject* root,Transform2d& tr) const SB_OVERRIDE;
-        virtual void DrawChilds( Graphics& g ) const;
         const TransformModificatorPtr& GetTransformM() const { return m_transform; }
         const ColorModificatorPtr GetColorM() const { return m_color; }
         void DrawImpl( Graphics& g ) const;
     private:
-        friend class SceneObject;
         TransformModificatorPtr     m_transform;
         ColorModificatorPtr         m_color;
 	};

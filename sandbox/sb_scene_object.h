@@ -17,7 +17,7 @@
 namespace Sandbox {
 	
 	class Graphics;
-	class Container;
+	class ContainerBase;
     class Scene;
     class DrawAttributes;
     
@@ -51,16 +51,16 @@ namespace Sandbox {
         }
         const DrawAttributesPtr& GetDrawAttributes() const { return m_draw_attributes; }
         void RemoveFromScene();
-        Container* GetParent() const { return m_parent;}
+        ContainerBase* GetParent() const { return m_parent;}
     protected:
-		friend class Container;
+		friend class ContainerBase;
         Scene*  GetScene() const;
         virtual void GlobalToLocalImpl(Vector2f& v) const;
         virtual void GetTransformImpl(Transform2d& tr) const;
         virtual void GetTransformToImpl(const SceneObject* root,Transform2d& tr) const;
 	private:
-		void SetParent(Container* parent);
-		Container* m_parent;
+		void SetParent(ContainerBase* parent);
+		ContainerBase* m_parent;
 		bool	m_visible;
         float   m_order;
         DrawAttributesPtr m_draw_attributes;

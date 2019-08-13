@@ -424,7 +424,22 @@ namespace Sandbox {
                 }
             }
         };
-        
+        template <class T,class U>
+        struct stack<sb::map<const char*,T,U> > {
+            static void push( lua_State* L, const sb::map<const char*,T,U>& val ) {
+                lua_createtable(L, 0, int(val.size()) );
+                for (typename sb::map<const char*,T,U>::const_iterator it=val.begin();it!=val.end();++it) {
+                    stack<T>::push( L,it->second );
+                    lua_setfield(L, -2, it->first);
+                }
+            }
+        };
+        template <class T,class U>
+        struct stack<const sb::map<const char*,T,U>& > {
+            static void push( lua_State* L, const sb::map<const char*,T,U>& val ) {
+                stack<sb::map<const char*,T,U> >::push(L,val);
+            }
+        };
         template <class T>
         struct stack<const sb::map<sb::string,T>& > {
             static void push( lua_State* L, const sb::map<sb::string,T>& val ) {

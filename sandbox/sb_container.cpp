@@ -11,7 +11,7 @@
 #include "sb_graphics.h"
 #include <algorithm>
 
-SB_META_DECLARE_OBJECT(Sandbox::Container, Sandbox::SceneObject)
+SB_META_DECLARE_OBJECT(Sandbox::Container, Sandbox::ContainerBase)
 
 namespace Sandbox {
 
@@ -20,58 +20,9 @@ namespace Sandbox {
 	}
 	
 	Container::~Container() {
-		for (std::vector<SceneObjectPtr>::iterator i = m_objects.begin();i!=m_objects.end();i++) {
-			(*i)->SetParent(0);
-		}
-	}
-	void Container::Reserve(size_t size) {
-		m_objects.reserve(size);
-	}
-	void Container::AddObject(const SceneObjectPtr& o) {
-		sb_assert(o && "null object");
-		if (Container* c=o->GetParent()) {
-			c->RemoveObject(o);
-		}
-		o->SetParent(this);
-        float order = o->GetOrder();
-        for (std::vector<SceneObjectPtr>::iterator it = m_objects.begin();it!=m_objects.end();++it) {
-            if ((*it)->GetOrder() > order ) {
-                m_objects.insert(it, o);
-                return;
-            }
-        }
-		m_objects.push_back(o);
-	}
-    
-    static bool sort_by_order_pred( const SceneObjectPtr& a, const SceneObjectPtr& b) {
-        return a->GetOrder() < b->GetOrder();
-    }
-    
-    void Container::SortByOrder() {
-        std::sort(m_objects.begin(), m_objects.end(), sort_by_order_pred);
-    }
-    
-	void Container::RemoveObject(const SceneObjectPtr& obj) {
-		sb_assert( obj && "null object");
-		std::vector<SceneObjectPtr>::iterator i = std::find(m_objects.begin(),m_objects.end(),obj);
-		if (i!=m_objects.end()) {
-			(*i)->SetParent(0);
-			m_objects.erase(i);
-		}
-	}
-	void Container::Clear() {
-		for (size_t i=0;i<m_objects.size();i++) {
-			m_objects[i]->SetParent(0);
-		}
-		m_objects.clear();
 	}
 	
-    void Container::DrawChilds( Graphics& g ) const {
-        for (std::vector<SceneObjectPtr>::const_iterator i = m_objects.begin();i!=m_objects.end();++i) {
-            if ((*i)->GetVisible()) (*i)->Draw(g);
-        }
-    }
-	void Container::DrawImpl(Graphics& g) const {
+    void Container::DrawImpl(Graphics& g) const {
         
         
         Transform2d tr = g.GetTransform();
@@ -96,19 +47,6 @@ namespace Sandbox {
     void Container::Draw(Sandbox::Graphics &g) const {
         if (m_objects.empty()) return;
         DrawImpl(g);
-    }
-    
-    
-    void Container::Update( float dt ) {
-        UpdateChilds(dt);
-    }
-    
-    void Container::UpdateChilds( float dt ) {
-        /// copy, for allow scene modifications
-        std::vector<SceneObjectPtr> childs = m_objects;
-        for (std::vector<SceneObjectPtr>::reverse_iterator i = childs.rbegin();i!=childs.rend();++i) {
-			if ((*i)->GetVisible()) (*i)->Update(dt);
-		}
     }
     
     

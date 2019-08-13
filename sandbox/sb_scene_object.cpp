@@ -10,7 +10,7 @@
 
 #include "sb_scene_object.h"
 #include <sbstd/sb_assert.h>
-#include "sb_container.h"
+#include "sb_container_base.h"
 #include "sb_scene.h"
 
 SB_META_DECLARE_OBJECT(Sandbox::DrawAttributes,Sandbox::meta::object)
@@ -27,12 +27,12 @@ namespace Sandbox {
 		sb_assert(m_parent==0);
 	}
 	
-	void SceneObject::SetParent(Container* parent) {
+	void SceneObject::SetParent(ContainerBase* parent) {
 		m_parent = parent;
 	}
     
     Scene* SceneObject::GetScene() const {
-        Container* c = GetParent();
+        ContainerBase* c = GetParent();
         while (c) {
             Scene* s = meta::sb_dynamic_cast<Scene>(c);
             if (s) return s;
@@ -42,7 +42,7 @@ namespace Sandbox {
     }
     
     void SceneObject::RemoveFromScene() {
-        Container* c = GetParent();
+        ContainerBase* c = GetParent();
         if (c) {
             c->RemoveObject(SceneObjectPtr(this));
         }
