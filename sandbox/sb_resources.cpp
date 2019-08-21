@@ -29,6 +29,14 @@ namespace Sandbox {
 
     static const char* MODULE = "Sandbox:Resources";
 	
+    static bool is_absolute_fn( const char* path ) {
+#ifdef GHL_PLATFORM_WIN
+        if (path && (*path>='A') && (*path<='Z') && path[1] && (path[1]==':')) {
+            return true;
+        }
+#endif
+        return path && *path == '/';
+    }
 	
 	Resources::Resources(GHL::VFS* vfs) :
 		m_vfs(vfs),m_render(0),m_image(0) {
@@ -54,7 +62,7 @@ namespace Sandbox {
 
 	GHL::DataStream* Resources::OpenFile(const char* filename) {
         if (!filename) return 0;
-        sb::string fn = (filename[0] == '/') ? sb::string(filename) : (m_base_path + filename);
+        sb::string fn = is_absolute_fn(filename) ? sb::string(filename) : (m_base_path + filename);
         return m_vfs->OpenFile(fn.c_str());
 	}
     
