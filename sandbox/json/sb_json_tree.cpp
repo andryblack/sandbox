@@ -246,7 +246,7 @@ namespace Sandbox {
     void JsonDocument::OnKey(const InplaceString& str) {
         sb_assert(m_tree.top().object);
         sb_assert(!m_tree.top().key);
-        m_tree.top().key = internal::json_alloc<char>(str.length());
+        m_tree.top().key = internal::json_alloc<char>(str.length()+1);
         strncpy(m_tree.top().key, str.begin(),str.length());
         m_tree.top().key[str.length()]=0;
     }
