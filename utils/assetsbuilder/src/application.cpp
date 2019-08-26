@@ -187,6 +187,7 @@ SB_META_METHOD(PremultiplyAlpha)
 SB_META_METHOD(Grayscale)
 SB_META_METHOD(Place)
 SB_META_METHOD(Blend)
+SB_META_METHOD(Rotate)
 SB_META_METHOD(PlaceRotated)
 SB_META_METHOD(PlaceUnrotated)
 SB_META_METHOD(SetAlpha)
@@ -579,7 +580,7 @@ bool Application::wait_tasks() {
     return true;
 }
 
-int Application::run() {
+int Application::run(const sb::string& run_script) {
     Sandbox::Logger::SetPlatformLogEnabled(true);
     Bind(m_lua->GetVM());
 
@@ -593,7 +594,7 @@ int Application::run() {
     m_lua->GetGlobalContext()->SetValue("src_path",m_src_dir);
     m_lua->GetGlobalContext()->SetValue("dst_path",m_dst_dir);
     
-    if (!m_lua->DoFile("_init.lua")) {
+    if (!m_lua->DoFile(run_script.empty() ? "_init.lua" : run_script.c_str())) {
         Sandbox::LogError() << "failed exec init script, check script paths";
         return 1;
     }

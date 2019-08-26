@@ -314,6 +314,13 @@ void TextureData::PlaceRotated( GHL::UInt32 x, GHL::UInt32 y,
     GetImage()->Draw(x, y, i);
     i->Release();
 }
+void TextureData::Rotate( bool ccw ) {
+    sb_assert(img);
+    if (ccw) 
+        GetImage()->RotateCW();
+    else
+        GetImage()->RotateCCW();
+}
 void TextureData::PlaceUnrotated( GHL::UInt32 x, GHL::UInt32 y,
                     const TextureSubDataPtr& img ) {
     GHL::Image* i = img->GetSubImageUnrotated();

@@ -70,6 +70,7 @@ public:
     bool Grayscale();    
     void Convert(GHL::ImageFormat fmt);
     void Invert();
+    void Rotate(bool ccw);
     void Place( GHL::UInt32 x, GHL::UInt32 y,
                const TextureSubDataPtr& img );
     void Blend( GHL::UInt32 x, GHL::UInt32 y,

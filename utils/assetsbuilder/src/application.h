@@ -48,7 +48,7 @@ public:
     bool rebuild_image( const sb::string& src, const sb::string& dst );
     bool encode_sound( const sb::string& src, const sb::string& dst , bool force_mono);
     
-	int run();
+	int run(const sb::string& run_script);
     
     bool strip_jpeg(const sb::string& src, const sb::string& dst);
     

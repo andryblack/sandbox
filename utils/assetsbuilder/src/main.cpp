@@ -16,13 +16,14 @@ static int usage(const char* path) {
 	std::cout << "  --dst=DST             required  destination dir" << std::endl;
 	std::cout << "  --update              optional	update only" << std::endl;
 	std::cout << "  --platform=PLATFORM   optional  destination platform" << std::endl;
+	std::cout << "  --run=PATH   		  optional  run only script" << std::endl;
 	std::cout << "  --help                          show this information" << std::endl;
 	std::cout << "platforms:" << std::endl;
 	std::cout << "  osx       Apple Mac OS X" << std::endl;
 	std::cout << "  ios       Apple iOS" << std::endl;
 	std::cout << "  android   Google Android" << std::endl;
 	std::cout << "  windows   Microsoft Windows" << std::endl;
-	std::cout << "  flash     Adobe Flash" << std::endl;
+	std::cout << "  emscripten     WASM" << std::endl;
 	return 0;
 }
 
@@ -68,7 +69,8 @@ int main(int argc, char** argv) {
 	sb::vector<sb::string> other_options;
     int threads = 0;
     int quality = 0;
-    
+    sb::string run_script;
+
 	for(int i=1;i<argc;++i) {
 		if (::strcmp(argv[i],"--help")==0) {
 			return usage(argv[0]);
@@ -85,6 +87,8 @@ int main(int argc, char** argv) {
 			dst_dir = get_argument(arg);
 		} else if (strncmp(opt+2,"platform",8)==0) {
 			platform = get_argument(arg);
+		} else if (strncmp(opt+2,"run",3)==0) {
+			run_script = get_argument(arg);
 		} else if (strcmp(opt+2,"update")==0) {
 			update_only = true;
         } else if (strncmp(opt+2,"threads",7)==0) {
@@ -101,19 +105,27 @@ int main(int argc, char** argv) {
 			other_options.push_back(opt+2);
 		}
 	}
+	if (!run_script.empty()) {
+		if (src_dir.empty()) {
+			src_dir = "./";
+		}
+		if (dst_dir.empty()) {
+			dst_dir = "./";
+		}
+	}
 	if (src_dir.empty()) {
 		return error("src option required");
 	}
 	if (!is_dir(src_dir)) {
 		return error(std::string("invalid src path: ") + src_dir);
 	}
-	if (dst_dir.empty()) {
+	if (dst_dir.empty() && run_script.empty()) {
 		return error("dst option required");
 	}
 //	if (!is_dir(dst_dir)) {
 //		return error(std::string("invalid dst path: ") + dst_dir);
 //	}
-	if (scripts_dir.empty()) {
+	if (scripts_dir.empty() && run_script.empty()) {
 		return error("scripts option required");
 	}
     for (sb::vector<sb::string>::const_iterator it = scripts_dir.begin();it!=scripts_dir.end();++it) {
@@ -129,7 +141,7 @@ int main(int argc, char** argv) {
 	app->set_platform(platform);
     app->set_threads(threads);
     app->set_quality(quality);
-	int result = app->run();
+	int result = app->run(run_script);
     delete app;
     return result;
 }
